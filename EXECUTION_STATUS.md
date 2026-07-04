@@ -48,6 +48,7 @@ Date: 2026-07-04
   - locale, SEO, Hermes, translation, lead, and migration contracts
   - normalized migration record builder in `production/scripts/build-migration-records.mjs`
   - structured SQLite migration database builder in `migration/build_migration_db.py`
+  - metadata/media review dashboard in `production/data/migration-review-dashboard.json`
   - launch-gate checks for row counts, domains, statuses, redirect review rows, and homepage redirects
 - Added executable legacy route map:
   - 165 listing URLs mapped to locale-prefixed production routes

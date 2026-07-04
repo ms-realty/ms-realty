@@ -29,3 +29,4 @@ This writes:
 
 - `production/data/migration.sqlite`
 - `production/data/migration-db-summary.json`
+- `production/data/migration-review-dashboard.json`

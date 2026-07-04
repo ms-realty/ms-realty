@@ -40,8 +40,10 @@ Implemented now:
   - `migration/build_migration_db.py`
   - `production/data/migration.sqlite`
   - `production/data/migration-db-summary.json`
+  - `production/data/migration-review-dashboard.json`
   - imports URL, metadata, media, and redirect CSV rows into indexed SQLite tables
   - exposes `migration_url_review` and `media_by_page` review views
+  - reports metadata gaps, media reconciliation, and redirect safety for reviewers
 - Search fixture builder for Typesense and Meilisearch:
   - `search/build_search_indexes.py`
   - `search/data/listings.json`
@@ -494,8 +496,10 @@ Build:
   `production/data/migration.sqlite`.
 - Add reviewer UI for URL classification.
 - Add redirect-map editor.
-- Add metadata gap dashboard.
-- Add media inventory reconciliation.
+- Add metadata gap dashboard. Current local proof:
+  `production/data/migration-review-dashboard.json`.
+- Add media inventory reconciliation. Current local proof:
+  `production/data/migration-review-dashboard.json`.
 - Add Search Console, Yandex Webmaster, backlink, and analytics joins.
 
 Done when:
