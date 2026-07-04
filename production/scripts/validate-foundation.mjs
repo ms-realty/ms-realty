@@ -72,6 +72,19 @@ if (routeMap.summary.byTargetLocale.ru !== 52) throw new Error("Legacy route map
 if (routeMap.summary.homepageTargets !== 0) throw new Error("Legacy route map must not target homepages");
 if (routeMap.summary.deployable !== 0) throw new Error("Legacy route map must stay review-gated");
 
+const reviewQueue = JSON.parse(fs.readFileSync(fromRoot("production", "data", "migration-review-queue.json"), "utf8"));
+if (
+  reviewQueue.summary.total !== 457 ||
+  reviewQueue.summary.ruRows !== 179 ||
+  reviewQueue.summary.nonListingUnmapped !== 292 ||
+  reviewQueue.summary.deployableRows !== 0
+) {
+  throw new Error("Migration review queue must cover every URL without making review-gated rows deployable");
+}
+if (reviewQueue.summary.byOwner.ru_preservation_editor !== 179) {
+  throw new Error("Migration review queue must keep RU preservation first-class");
+}
+
 const deployableRedirects = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8"));
 const redirectSummary = assertDeployableRedirects(deployableRedirects.redirects);
 if (redirectSummary.total !== 2) throw new Error("Deployable redirect smoke must include exactly two reviewed listings");

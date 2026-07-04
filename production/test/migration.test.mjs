@@ -10,6 +10,7 @@ import {
   normalizeMigrationRecords,
   summarizeMigrationRecords,
 } from "../lib/migration.mjs";
+import { assertMigrationReviewQueue, buildMigrationReviewQueue } from "../lib/migration-review.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { loadListings } from "../lib/content.mjs";
@@ -72,6 +73,32 @@ test("generated legacy route map file is valid when present", () => {
   assert.equal(data.summary.total, 457);
   assert.equal(data.summary.mappedListings, 165);
   assert.equal(data.routes.length, 457);
+});
+
+test("migration review queue assigns owners without making rows deployable", () => {
+  const records = normalizeMigrationRecords(loadCrawlArtifact());
+  const routeMap = buildLegacyRouteMap(loadLocaleRegistry(), records, loadListings());
+  const queue = buildMigrationReviewQueue(records, routeMap);
+  const summary = assertMigrationReviewQueue(queue);
+
+  assert.equal(summary.total, 457);
+  assert.equal(summary.ruRows, 179);
+  assert.equal(summary.nonListingUnmapped, 292);
+  assert.equal(summary.listingRedirectReviews, 165);
+  assert.equal(summary.byOwner.ru_preservation_editor, 179);
+  assert.equal(summary.byOwner.broker_listing_reviewer, 113);
+  assert.equal(summary.byOwner.seo_taxonomy_editor, 97);
+  assert.equal(summary.byOwner.content_editor, 68);
+  assert.ok(queue.rows.every((row) => row.deployable === false));
+  assert.ok(queue.rows.some((row) => row.url_type === "taxonomy" && row.action_required === "map_or_rebuild_taxonomy_landing"));
+});
+
+test("generated migration review queue file is valid when present", () => {
+  const file = fromRoot("production", "data", "migration-review-queue.json");
+  if (!fs.existsSync(file)) return;
+  const queue = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(assertMigrationReviewQueue(queue).total, 457);
+  assert.equal(queue.rows.length, 457);
 });
 
 test("generated localized sitemap file is approved-translation gated when present", () => {

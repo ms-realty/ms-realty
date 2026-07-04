@@ -16,6 +16,7 @@ What it proves now:
 - Search import payloads validate locally for Typesense and Meilisearch.
 - Normalized migration records from the crawl CSVs with launch-gate checks.
 - Legacy route map for reviewed listing redirects and unmapped review queues.
+- Migration review queue with BG/RU admin owners for every crawled URL.
 - Separate reviewed redirect approval ledger and deployable 301 export.
 - Localized sitemap fixture gated by approved translation records.
 - Generated `sitemap.xml` and `robots.txt` from approved localized sitemap entries.
@@ -56,6 +57,7 @@ Generated production data:
 
 - `production/data/migration-records.json`
 - `production/data/legacy-route-map.json`
+- `production/data/migration-review-queue.json`
 - `production/data/redirect-approvals.jsonl`
 - `production/data/deployable-redirects.json`
 - `production/data/localized-sitemap.json`

@@ -53,6 +53,11 @@ Date: 2026-07-04
   - 52 Russian listings mapped under `/ru/`
   - pages, posts, and taxonomy URLs left review-gated
   - zero homepage/search fallback redirects
+- Added migration review queue:
+  - 457 crawled URLs assigned to review owners
+  - 179 `.ru` rows owned by `ru_preservation_editor`
+  - 292 non-listing rows remain unmapped until editorial review
+  - zero review-queue rows are deployable
 - Added reviewed deployable redirect export:
   - `production/data/redirect-approvals.jsonl` records explicit reviewer approvals
   - `production/data/deployable-redirects.json` exports only approved same-content 301s
@@ -191,6 +196,7 @@ python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.p
 python3 locales/validate_locale_registry.py
 npm run migration:build
 npm run routes:build
+npm run migration:review
 npm run redirects:build
 npm run sitemap:build
 npm run seo:build

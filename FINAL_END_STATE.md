@@ -72,6 +72,10 @@ Implemented now:
 - Broker viewing/task contract:
   - `POST /api/admin/viewings`
   - booked viewings require known CRM leads and create open follow-up tasks
+- Migration review queue:
+  - every crawled URL has a review owner, admin locale, action, and priority
+  - `.ru` preservation rows are kept in a dedicated review lane
+  - non-listing pages, posts, and taxonomy URLs stay unmapped until editorial review
 - Saved search/alert contract:
   - `POST /api/saved-searches`
   - saved searches persist search criteria, match count, and an open alert task
