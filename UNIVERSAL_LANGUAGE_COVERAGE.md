@@ -41,6 +41,9 @@ Source of truth:
   translation documents included only when indexable.
 - `POST /api/admin/locales` adds new website locales as non-indexable drafts
   while keeping admin CMS/CRM languages limited to BG, RU, and EN.
+- Runtime listing routes resolve approved translation-ledger rows, so newly
+  added public locales can publish locale-prefixed listing pages without code
+  changes.
 - `prototypes/crm-lead-intake/lead-intake-demo.json` includes Greek and Hebrew
   website leads routed into the BG/RU/EN admin workflow.
 - `qa/mobile_elderly_static_check.py` validates the locale registry and screen

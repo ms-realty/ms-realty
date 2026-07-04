@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
   assertRuntimeSmoke,
@@ -46,6 +46,33 @@ test("runtime overlays stale translation ledger rows before public rendering", (
   assert.equal(stale.indexable, false);
   assert.equal(stale.metadata.robots, "noindex,follow");
   assert.equal(stale.hreflang.some((link) => link.hreflang === "el"), false);
+});
+
+test("runtime resolves admin-added approved locale listing routes from translation ledger", () => {
+  const { registry: updated } = addLocaleToRegistry(registry, {
+    code: "es",
+    native_name: "Español",
+    admin_name: "Spanish",
+    public_enabled: true,
+    indexable: true,
+    route_segments: { listing: "propiedades", search: "buscar" },
+  });
+  const page = renderRuntimePath(updated, seed, "/es/propiedades/MS-CRAWL-0001", [
+    {
+      id: "translation-listing-MS-CRAWL-0001-es",
+      object_type: "listing",
+      object_id: "MS-CRAWL-0001",
+      target_locale: "es",
+      status: "published",
+      human_approved: true,
+      public_indexable: true,
+    },
+  ]);
+
+  assert.equal(page.status, 200);
+  assert.equal(page.locale, "es");
+  assert.equal(page.indexable, true);
+  assert.equal(page.hreflang.some((link) => link.hreflang === "es"), true);
 });
 
 test("runtime search uses CMS seed listings and keeps mobile-first contract", () => {

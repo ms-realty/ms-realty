@@ -69,6 +69,9 @@ Date: 2026-07-04
   - `POST /api/admin/locales` adds a website locale without changing BG/RU/EN admin languages
   - new locales are non-public and non-indexable by default
   - `production/data/admin-locale-registry-smoke.json` proves the deterministic Spanish smoke row
+- Added dynamic locale listing route resolution:
+  - translation ledger rows now participate in public listing route matching
+  - a newly added public locale can draft, approve, publish, and serve a locale-prefixed listing without seed-code changes
 - Added authenticated CMS translation review endpoints:
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability

@@ -56,13 +56,22 @@ export function mergeRuntimeTranslations(record, translationTasks = []) {
   return [...byLocale.values()];
 }
 
-export function resolveRuntimePath(registry, seed, pathname) {
+function translationPathMatches(registry, record, translation, normalized) {
+  try {
+    return listingPath(registry, translation.locale, record.id) === normalized;
+  } catch {
+    return false;
+  }
+}
+
+export function resolveRuntimePath(registry, seed, pathname, translationTasks = []) {
   const normalized = pathname.replace(/\/$/, "");
   for (const record of listingRecords(seed)) {
+    const translations = mergeRuntimeTranslations(record, translationTasks);
     const matchedLocale =
       record.routing?.target_path === normalized
         ? record.routing.target_locale
-        : record.translations.find((translation) => listingPath(registry, translation.locale, record.id) === normalized)?.locale;
+        : translations.find((translation) => translationPathMatches(registry, record, translation, normalized))?.locale;
     if (!matchedLocale) continue;
     return {
       type: "listing",
@@ -81,7 +90,7 @@ export function resolveRuntimePath(registry, seed, pathname) {
 }
 
 export function renderRuntimePath(registry, seed, pathname, translationTasks = []) {
-  const resolved = resolveRuntimePath(registry, seed, pathname);
+  const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks);
   if (resolved.type === "listing") {
     return renderListingPage({
       registry,

@@ -34,6 +34,7 @@ What it proves now:
 - Search API overlays translation ledger state before card display/indexability.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
+- Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.

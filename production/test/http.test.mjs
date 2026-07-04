@@ -281,6 +281,60 @@ test("HTTP admin can add a non-indexable website locale without changing admin l
   assert.equal(stored.locales.some((locale) => locale.code === "es"), true);
 });
 
+test("HTTP admin can publish an approved translation for a newly added public locale", async () => {
+  const localeRegistryPath = tempRegistry();
+  const translationLedgerPath = tempTranslations();
+  const app = createHttpApp({ registry: loadLocaleRegistry(localeRegistryPath), localeRegistryPath, translationLedgerPath });
+
+  await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/locales",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      code: "es",
+      native_name: "Español",
+      admin_name: "Spanish",
+      public_enabled: true,
+      indexable: true,
+      route_segments: { listing: "propiedades", search: "buscar" },
+    },
+  });
+  const draft = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/translations/draft",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      objectType: "listing",
+      objectId: "MS-CRAWL-0001",
+      sourceLocale: "bg",
+      targetLocale: "es",
+      sourceContent: {
+        title: "Reviewed listing title",
+        description: "Reviewed listing description for Sandanski.",
+      },
+      propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+    },
+  });
+  const publish = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/translations/publish",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      taskId: draft.body.id,
+      reviewer: "translator_es",
+      approvedAt: "2026-07-05T00:00:00Z",
+    },
+  });
+  const page = await dispatchHttp(app, { url: "/es/propiedades/MS-CRAWL-0001" });
+
+  assert.equal(draft.status, 201);
+  assert.equal(publish.status, 201);
+  assert.equal(page.status, 200);
+  assert.equal(page.body.locale, "es");
+  assert.equal(page.body.indexable, true);
+  assert.equal(page.body.hreflang.some((link) => link.hreflang === "es"), true);
+});
+
 test("generated HTTP smoke file is valid when present", () => {
   const file = fromRoot("production", "data", "http-smoke.json");
   if (!fs.existsSync(file)) return;

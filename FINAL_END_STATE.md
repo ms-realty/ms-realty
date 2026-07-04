@@ -61,6 +61,8 @@ Implemented now:
   - `POST /api/admin/locales`
   - new website locales stay non-public and non-indexable by default
   - admin CRM/CMS languages remain BG, RU, and EN
+- Dynamic locale publishing contract:
+  - newly added public locales can draft, approve, publish, and serve a locale-prefixed listing from the translation ledger
 - Mobile and elderly-user QA gate:
   - `qa/mobile_elderly_static_check.py`
   - `qa/mobile-elderly-accessibility.md`
