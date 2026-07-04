@@ -1,0 +1,31 @@
+<!-- @dsCard group="Colors" viewport="720x150" name="Listing status pairs" subtitle="Monochrome: buy / rent / new are charcoal tiers — only Reduced carries the red." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .ramp{display:flex;gap:8px}
+  .sw{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .sw i{display:block;height:60px;border-radius:10px;border:1px solid rgba(22,19,14,.07)}
+  .sw b{font:600 12px var(--font-mono);color:var(--text-strong)}
+  .sw em{font:400 10px var(--font-mono);color:var(--text-muted);font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pills{display:flex;flex-wrap:wrap;gap:10px}
+  .pill{font:600 12px var(--font-sans);letter-spacing:.12em;text-transform:uppercase;padding:8px 14px;border-radius:999px}
+  .note{margin-top:12px;font:400 11px var(--font-mono);color:var(--text-muted)}</style>
+</head>
+<body>
+<div class="pad"><div class="pills">
+    <span class="pill" style="color:var(--for-sale-fg);background:var(--for-sale-bg)">For sale</span>
+    <span class="pill" style="color:var(--for-rent-fg);background:var(--for-rent-bg)">For rent</span>
+    <span class="pill" style="color:var(--new-fg);background:var(--new-bg)">New</span>
+    <span class="pill" style="color:var(--reduced-fg);background:var(--reduced-bg)">Reduced</span>
+    <span class="pill" style="color:var(--ink-800);background:var(--ink-100)">Featured</span>
+    <span class="pill" style="color:var(--stone-700);background:var(--stone-200)">Sold</span>
+  </div><div class="note">charcoal tiers · red reserved for Reduced only · --{status}-fg on --{status}-bg</div></div>
+</body>
+</html>

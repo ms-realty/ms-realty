@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Презентация за клиент" description="Branded 16:9 client deck: cover, agency intro, featured property, curated selection, buying process, next steps." -->
+<helmet>
+<script src="./ds-base.js"></script>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <section data-label="Корица" data-screen-label="01 — Корица" class="mk-photo mk-photo--sea mk-photo--flat" style="position:relative;font-family:var(--font-sans);color:#fff;overflow:hidden">
+    <div style="position:absolute;inset:0;background:linear-gradient(200deg,rgba(14,14,14,0.18) 0%,rgba(14,14,14,0.62) 78%,rgba(14,14,14,0.78) 100%)"></div>
+    <div style="position:absolute;top:72px;left:96px"><x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Logo" variant="reversed" height="56" hint-size="110px,56px"></x-import></div>
+    <div style="position:absolute;left:96px;right:96px;bottom:96px;display:flex;flex-direction:column;gap:28px">
+      <div style="font-size:22px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.85)">Персонална селекция имоти</div>
+      <h1 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:112px;line-height:1.04;letter-spacing:-0.02em;max-width:14ch">Вашият дом на Черно море.</h1>
+      <div style="display:flex;align-items:baseline;gap:20px;font-size:26px;color:rgba(255,255,255,0.88)">
+        <span>Подготвено за сем. Ван дер Берг</span>
+        <span style="opacity:0.55">·</span>
+        <span>юли 2026</span>
+        <span style="opacity:0.55">·</span>
+        <span style="font-family:var(--font-mono);font-size:22px">BG · EN · NL</span>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Кои сме ние" data-screen-label="02 — Кои сме ние" style="background:var(--canvas);font-family:var(--font-sans);color:var(--text-body);display:grid;grid-template-columns:1fr 1fr;gap:96px;align-items:center;padding:0 120px">
+    <div style="display:flex;flex-direction:column;gap:32px">
+      <div style="font-size:20px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted)">MS Realty</div>
+      <h2 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:72px;line-height:1.08;letter-spacing:-0.018em;color:var(--text-strong)">Местни брокери. Вашият език.</h2>
+      <p style="margin:0;font-size:28px;line-height:1.55;color:var(--text-body);max-width:44ch">Помагаме на купувачи от цяла Европа да намерят дом в България — от Сандански и Банско до южното Черноморие. Водим целия процес: оглед, договор, нотариус, след-продажбена грижа.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:44px 40px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:76px;line-height:1;color:var(--text-strong)">16</div>
+        <div style="font-size:24px;color:var(--text-muted)">години на пазара</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:44px 40px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:76px;line-height:1;color:var(--text-strong)">5</div>
+        <div style="font-size:24px;color:var(--text-muted)">езика в екипа</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:44px 40px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:76px;line-height:1;color:var(--text-strong)">3</div>
+        <div style="font-size:24px;color:var(--text-muted)">офиса в България</div>
+      </div>
+      <div style="background:var(--ink-900);border:1px solid var(--ink-950);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:44px 40px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:76px;line-height:1;color:#fff">400+</div>
+        <div style="font-size:24px;color:rgba(255,255,255,0.65)">завършени сделки</div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Имот на фокус" data-screen-label="03 — Имот на фокус" style="background:var(--surface);font-family:var(--font-sans);color:var(--text-body);display:grid;grid-template-columns:56% 44%">
+    <div class="mk-photo mk-photo--sea" style="position:relative">
+      <span style="position:absolute;left:40px;top:40px;display:inline-flex;align-items:center;height:44px;padding:0 22px;border-radius:999px;background:var(--ink-900);color:#fff;font-size:20px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase">Продажба</span>
+      <span style="position:absolute;left:40px;bottom:40px;font-family:var(--font-mono);font-size:22px;color:rgba(255,255,255,0.92)">MS-2214 · 24 снимки</span>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:36px;padding:0 110px 0 88px">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div style="font-size:20px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted)">Имот на фокус</div>
+        <h2 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:60px;line-height:1.1;letter-spacing:-0.018em;color:var(--text-strong)">Двустаен с изглед море, Marina Cape</h2>
+        <div style="font-size:26px;color:var(--text-muted)">Свети Влас · 8 минути пеша до плажа</div>
+      </div>
+      <div style="font-family:var(--font-display);font-weight:600;font-size:84px;line-height:1;color:var(--price)">€245,000</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;height:52px;padding:0 24px;border-radius:999px;border:1px solid var(--border-strong);font-family:var(--font-mono);font-size:24px;color:var(--text-strong)">2 спални</span>
+        <span style="display:inline-flex;align-items:center;height:52px;padding:0 24px;border-radius:999px;border:1px solid var(--border-strong);font-family:var(--font-mono);font-size:24px;color:var(--text-strong)">1 баня</span>
+        <span style="display:inline-flex;align-items:center;height:52px;padding:0 24px;border-radius:999px;border:1px solid var(--border-strong);font-family:var(--font-mono);font-size:24px;color:var(--text-strong)">68 m²</span>
+        <span style="display:inline-flex;align-items:center;height:52px;padding:0 24px;border-radius:999px;border:1px solid var(--border-strong);font-family:var(--font-mono);font-size:24px;color:var(--text-strong)">етаж 4 / 8</span>
+      </div>
+      <p style="margin:0;font-size:26px;line-height:1.55;color:var(--text-body);max-width:42ch">Южно изложение към марината, обзаведен, с покрит паркинг. Комплекс с басейн и целогодишна поддръжка — готов за нанасяне или отдаване под наем.</p>
+    </div>
+  </section>
+
+  <section data-label="Селекция" data-screen-label="04 — Селекция" style="background:var(--canvas);font-family:var(--font-sans);color:var(--text-body);display:flex;flex-direction:column;justify-content:center;gap:56px;padding:0 120px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:32px">
+      <h2 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:64px;letter-spacing:-0.018em;color:var(--text-strong)">Подбрани за вас</h2>
+      <span style="font-size:24px;color:var(--text-muted)">още 9 съвпадения в портфолиото</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:36px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden;display:flex;flex-direction:column">
+        <div class="mk-photo mk-photo--sand" style="height:280px"></div>
+        <div style="padding:32px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:var(--font-display);font-weight:600;font-size:32px;color:var(--text-strong)">Къща с двор</div>
+          <div style="font-size:23px;color:var(--text-muted)">Сандански · Струмска долина</div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-top:10px">
+            <span style="font-family:var(--font-display);font-weight:600;font-size:38px;color:var(--price)">€189,000</span>
+            <span style="font-family:var(--font-mono);font-size:21px;color:var(--text-muted)">142 m² · 3 сп.</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden;display:flex;flex-direction:column">
+        <div class="mk-photo mk-photo--pine" style="height:280px"></div>
+        <div style="padding:32px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:var(--font-display);font-weight:600;font-size:32px;color:var(--text-strong)">Шале до лифта</div>
+          <div style="font-size:23px;color:var(--text-muted)">Банско · Пирин</div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-top:10px">
+            <span style="font-family:var(--font-display);font-weight:600;font-size:38px;color:var(--price)">€232,000</span>
+            <span style="font-family:var(--font-mono);font-size:21px;color:var(--text-muted)">118 m² · 3 сп.</span>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden;display:flex;flex-direction:column">
+        <div class="mk-photo mk-photo--sunset" style="height:280px"></div>
+        <div style="padding:32px 34px;display:flex;flex-direction:column;gap:12px">
+          <div style="font-family:var(--font-display);font-weight:600;font-size:32px;color:var(--text-strong)">Студио на първа линия</div>
+          <div style="font-size:23px;color:var(--text-muted)">Несебър · южен плаж</div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-top:10px">
+            <span style="font-family:var(--font-display);font-weight:600;font-size:38px;color:var(--price)">€96,500</span>
+            <span style="font-family:var(--font-mono);font-size:21px;color:var(--text-muted)">44 m² · студио</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Процес" data-screen-label="05 — Процес" style="background:var(--surface);font-family:var(--font-sans);color:var(--text-body);display:flex;flex-direction:column;justify-content:center;gap:72px;padding:0 120px">
+    <div style="display:flex;flex-direction:column;gap:20px;max-width:60ch">
+      <div style="font-size:20px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-muted)">Как протича покупката</div>
+      <h2 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:64px;letter-spacing:-0.018em;color:var(--text-strong)">Четири стъпки, един екип.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:48px">
+      <div style="display:flex;flex-direction:column;gap:20px;padding-top:28px;border-top:3px solid var(--ink-800)">
+        <div style="font-family:var(--font-mono);font-size:22px;color:var(--text-muted)">01</div>
+        <div style="font-family:var(--font-display);font-weight:600;font-size:36px;color:var(--text-strong)">Оглед</div>
+        <p style="margin:0;font-size:24px;line-height:1.5;color:var(--text-body)">На място или по видео — с брокер на вашия език.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;padding-top:28px;border-top:3px solid var(--stone-300)">
+        <div style="font-family:var(--font-mono);font-size:22px;color:var(--text-muted)">02</div>
+        <div style="font-family:var(--font-display);font-weight:600;font-size:36px;color:var(--text-strong)">Резервация</div>
+        <p style="margin:0;font-size:24px;line-height:1.5;color:var(--text-body)">Депозит сваля имота от пазара, цената се фиксира.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;padding-top:28px;border-top:3px solid var(--stone-300)">
+        <div style="font-family:var(--font-mono);font-size:22px;color:var(--text-muted)">03</div>
+        <div style="font-family:var(--font-display);font-weight:600;font-size:36px;color:var(--text-strong)">Договор</div>
+        <p style="margin:0;font-size:24px;line-height:1.5;color:var(--text-body)">Предварителен договор и правна проверка от наш юрист.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:20px;padding-top:28px;border-top:3px solid var(--stone-300)">
+        <div style="font-family:var(--font-mono);font-size:22px;color:var(--text-muted)">04</div>
+        <div style="font-family:var(--font-display);font-weight:600;font-size:36px;color:var(--text-strong)">Нотариален акт</div>
+        <p style="margin:0;font-size:24px;line-height:1.5;color:var(--text-body)">Финализиране при нотариус — ключовете са ваши.</p>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Следваща стъпка" data-screen-label="06 — Следваща стъпка" style="background:var(--ink-900);font-family:var(--font-sans);color:var(--stone-50);display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:96px;padding:0 120px">
+    <div style="display:flex;flex-direction:column;gap:36px">
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Logo" variant="reversed" height="48" hint-size="94px,48px"></x-import>
+      <h2 style="margin:0;font-family:var(--font-display);font-weight:600;font-size:84px;line-height:1.08;letter-spacing:-0.02em;color:#fff;max-width:14ch">Следваща стъпка — оглед на място.</h2>
+      <p style="margin:0;font-size:28px;line-height:1.55;color:rgba(255,255,255,0.72);max-width:44ch">Кажете кои от имотите искате да видите и ние подреждаме маршрута — включително трансфер от летището.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:40px;background:rgba(255,255,255,0.05);border:1px solid var(--border-inverse);border-radius:var(--radius-xl);padding:64px">
+      <div style="display:flex;align-items:center;gap:24px">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:88px;height:88px;border-radius:999px;background:var(--stone-200);color:var(--stone-700);font-weight:600;font-size:32px;flex:none">МС</span>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-family:var(--font-display);font-weight:600;font-size:34px;color:#fff">Мария Стоянова</div>
+          <div style="font-size:24px;color:rgba(255,255,255,0.65)">Старши брокер · Свети Влас · BG EN RU</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:var(--font-display);font-weight:600;font-size:52px;color:#fff">+359 88 421 7788</div>
+        <div style="font-size:26px;color:rgba(255,255,255,0.65)">maria@makler-realty.com · Пон–Съб 9:00–18:00</div>
+      </div>
+      <div style="display:flex;gap:18px">
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Button" variant="accent" size="lg" icon-start="calendar" hint-size="220px,52px">Запази оглед</x-import>
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Button" variant="secondary" size="lg" icon-start="mail" hint-size="220px,52px">Пиши ни</x-import>
+      </div>
+    </div>
+  </section>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>

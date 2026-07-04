@@ -1,0 +1,36 @@
+<!-- @dsCard group="Colors" viewport="700x210" name="Text" subtitle="Ink hierarchy on light + inverse." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .ramp{display:flex;gap:8px}
+  .sw{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .sw i{display:block;height:60px;border-radius:10px;border:1px solid rgba(22,19,14,.07)}
+  .sw b{font:600 12px var(--font-mono);color:var(--text-strong)}
+  .sw em{font:400 10px var(--font-mono);color:var(--text-muted);font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tx{padding:4px 0;display:flex;align-items:baseline;gap:12px}
+  .tx span{font-size:20px;font-weight:500}
+  .tx code{font:400 10px var(--font-mono);color:var(--text-subtle)}
+  .inv{margin-top:14px;background:var(--surface-inverse);border-radius:12px;padding:14px 16px;display:flex;gap:20px;align-items:baseline}
+  .inv span{font-size:16px}</style>
+</head>
+<body>
+<div class="pad">
+    <div class="tx"><span style="color:var(--text-strong)">Strong heading ink</span><code>--text-strong</code></div>
+    <div class="tx"><span style="color:var(--text-body)">Body paragraph ink</span><code>--text-body</code></div>
+    <div class="tx"><span style="color:var(--text-muted)">Muted caption / meta</span><code>--text-muted</code></div>
+    <div class="tx"><span style="color:var(--text-subtle)">Subtle placeholder</span><code>--text-subtle</code></div>
+    <div class="inv">
+      <span style="color:var(--text-on-dark)">On dark</span>
+      <span style="color:var(--stone-300)">On-dark detail</span>
+      <code style="color:rgba(255,255,255,.45)">--text-on-dark</code>
+    </div>
+  </div>
+</body>
+</html>

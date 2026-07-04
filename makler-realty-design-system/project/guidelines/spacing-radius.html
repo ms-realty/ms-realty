@@ -1,0 +1,27 @@
+<!-- @dsCard group="Spacing" viewport="700x170" name="Corner radii" subtitle="Soft but architectural — controls 8, cards 14." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .ramp{display:flex;gap:8px}
+  .sw{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .sw i{display:block;height:60px;border-radius:10px;border:1px solid rgba(22,19,14,.07)}
+  .sw b{font:600 12px var(--font-mono);color:var(--text-strong)}
+  .sw em{font:400 10px var(--font-mono);color:var(--text-muted);font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rad{display:flex;gap:14px;align-items:flex-end}
+  .rad div{display:flex;flex-direction:column;gap:8px;align-items:center}
+  .rad i{width:74px;height:60px;background:var(--brand-subtle);border:1.5px solid var(--border-strong)}
+  .rad code{font:400 10px var(--font-mono);color:var(--text-muted)}</style>
+</head>
+<body>
+<div class="pad"><div class="rad">
+    <div><i style="border-radius:var(--radius-xs)"></i><code>xs · 4</code></div><div><i style="border-radius:var(--radius-sm)"></i><code>sm · 6</code></div><div><i style="border-radius:var(--radius-md)"></i><code>md · 8</code></div><div><i style="border-radius:var(--radius-lg)"></i><code>lg · 14</code></div><div><i style="border-radius:var(--radius-xl)"></i><code>xl · 20</code></div><div><i style="border-radius:var(--radius-2xl)"></i><code>2xl · 28</code></div>
+  </div></div>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Начална страница" description="Брандирана начална страница на MS Realty: закачен хедър, крайбрежен герой с търсачката за имоти и решетка с избрани оферти." -->
+<helmet>
+<script src="./ds-base.js"></script>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);font-family:var(--font-sans);color:var(--text-body)">
+
+  <header style="position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:28px;height:72px;padding:0 40px;background:rgba(255,255,255,0.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)">
+    <a href="#" style="display:inline-flex;align-items:center" aria-label="MS Realty — home"><x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Logo" height="40" hint-size="78px,40px"></x-import></a>
+    <nav style="display:flex;gap:6px;margin-left:8px">
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Купува</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Под наем</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Курорти</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Контакти</a>
+    </nav>
+    <div style="margin-left:auto">
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Button" variant="accent" size="sm" icon-start="phone" hint-size="150px,34px">Обади се на брокер</x-import>
+    </div>
+  </header>
+
+  <section style="position:relative;min-height:540px;display:flex;align-items:center;background-image:radial-gradient(115% 80% at 80% 14%, rgba(255,246,220,0.5), transparent 46%), var(--photo-sea);background-size:cover;background-position:center">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg, rgba(7,20,19,0.62) 0%, rgba(7,20,19,0.28) 46%, rgba(7,20,19,0) 74%)"></div>
+    <div style="position:relative;z-index:2;width:100%;max-width:1440px;margin:0 auto;padding:0 40px">
+      <div style="max-width:640px;color:#fff;margin-bottom:26px">
+        <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--stone-200);margin-bottom:16px">България и съседна Гърция</span>
+        <h1 style="font-family:var(--font-display);font-weight:600;font-size:64px;line-height:1.04;letter-spacing:-0.015em;color:#fff;margin:0 0 16px">Намерете своя дом край морето.</h1>
+        <p style="font-size:22px;line-height:1.5;color:rgba(255,255,255,0.9);margin:0">Имоти за продажба и под наем по Черноморието, в Пирин планина и в съседна Гърция.</p>
+      </div>
+      <div style="max-width:940px">
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.SearchBar" size="lg" on-search="{{ onSearch }}" hint-size="100%,150px"></x-import>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1440px;margin:0 auto;padding:80px 40px">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:28px">
+      <div>
+        <h2 style="font-family:var(--font-display);font-weight:600;font-size:36px;letter-spacing:-0.015em;color:var(--text-strong);margin:0">Избрани имоти</h2>
+        <p style="color:var(--text-muted);margin:6px 0 0;font-size:16px">Подбрани имоти, нови на пазара тази седмица.</p>
+      </div>
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Button" variant="secondary" icon-end="arrow-right" hint-size="170px,42px">Виж всички обяви</x-import>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.PropertyCard" dc-props="{{ card0 }}" hint-size="100%,420px"></x-import>
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.PropertyCard" dc-props="{{ card1 }}" hint-size="100%,420px"></x-import>
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.PropertyCard" dc-props="{{ card2 }}" hint-size="100%,420px"></x-import>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      onSearch: () => {},
+      card0: {
+        tone: 'sea',
+        badges: [{ variant: 'for-sale', label: 'Продажба' }, { variant: 'new', label: 'Ново' }],
+        price: '€245,000', title: 'Двустаен с изглед море, Marina Cape', location: 'Свети Влас, Бургас',
+        beds: 2, baths: 1, area: 68, photos: 24, reference: 'MK-2043',
+      },
+      card1: {
+        tone: 'sunset',
+        badges: [{ variant: 'for-sale', label: 'Продажба' }, { variant: 'featured', label: 'Топ оферта' }],
+        price: '€420,000', title: 'Неокласическа къща в стария град', location: 'Нафплио, Арголида',
+        beds: 3, baths: 2, area: 160, photos: 31, reference: 'MK-3051',
+      },
+      card2: {
+        tone: 'pine',
+        badges: [{ variant: 'for-sale', label: 'Продажба' }, { variant: 'reduced', label: 'Намалена' }],
+        price: '€89,500', title: 'Апартамент в ски комплекс', location: 'Банско, Благоевград',
+        beds: 2, baths: 2, area: 95, photos: 18, reference: 'MK-0975',
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>

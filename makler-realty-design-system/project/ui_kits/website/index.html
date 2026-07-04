@@ -1,0 +1,69 @@
+<!-- @dsCard group="Website" viewport="1280x820" name="MS Realty — website" subtitle="Interactive: home → search → listing → book a viewing" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS Realty</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  html, body { margin: 0; background: var(--surface); }
+  #root { min-height: 100vh; display: flex; flex-direction: column; }
+  #root > main { flex: 1 0 auto; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="data.js"></script>
+<script type="text/babel" src="SiteChrome.jsx"></script>
+<script type="text/babel" src="HomePage.jsx"></script>
+<script type="text/babel" src="SearchResults.jsx"></script>
+<script type="text/babel" src="ListingDetail.jsx"></script>
+<script type="text/babel" src="ContactPanel.jsx"></script>
+<script type="text/babel">
+  const { LISTINGS, money } = window.MK_DATA;
+
+  function App() {
+    const [route, setRoute] = React.useState('home');   // home | results | resorts | detail | contact
+    const [listingId, setListingId] = React.useState(LISTINGS[0].id);
+    const [query, setQuery] = React.useState(null);
+    const [contact, setContact] = React.useState(false);
+
+    const listing = LISTINGS.find(l => l.id === listingId) || LISTINGS[0];
+
+    const go = (r) => { setRoute(r === 'resorts' ? 'results' : r); window.scrollTo(0, 0); };
+    const openListing = (id) => { setListingId(id); setRoute('detail'); window.scrollTo(0, 0); };
+    const search = (q) => { setQuery(q); setRoute('results'); window.scrollTo(0, 0); };
+
+    let screen;
+    if (route === 'detail') {
+      screen = <window.ListingDetail listing={listing} onNavigate={go} onOpenListing={openListing} onBook={() => setContact(true)} />;
+    } else if (route === 'results') {
+      screen = <window.SearchResults query={query} onNavigate={go} onOpenListing={openListing} />;
+    } else if (route === 'contact') {
+      screen = <window.ContactPage />;
+    } else {
+      screen = <window.HomePage onNavigate={go} onOpenListing={openListing} onSearch={search} />;
+    }
+
+    return (
+      <>
+        <window.Header onNavigate={go} active={route} />
+        {screen}
+        <window.Footer onNavigate={go} />
+        <window.ContactPanel open={contact} onClose={() => setContact(false)}
+          listing={route === 'detail' ? listing : null} money={money} />
+      </>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

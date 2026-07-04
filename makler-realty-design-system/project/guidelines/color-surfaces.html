@@ -1,0 +1,30 @@
+<!-- @dsCard group="Colors" viewport="700x170" name="Surfaces" subtitle="Backgrounds & panels, light to inverse." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .ramp{display:flex;gap:8px}
+  .sw{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .sw i{display:block;height:60px;border-radius:10px;border:1px solid rgba(22,19,14,.07)}
+  .sw b{font:600 12px var(--font-mono);color:var(--text-strong)}
+  .sw em{font:400 10px var(--font-mono);color:var(--text-muted);font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tiles{display:flex;gap:12px}
+  .tile{flex:1;height:96px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:flex-end;padding:10px 12px}
+  .tile b{font:600 11px var(--font-mono)}
+  .tile em{font-style:normal;font:400 10px var(--font-mono);opacity:.7;margin-left:6px}</style>
+</head>
+<body>
+<div class="pad"><div class="tiles">
+    <div class="tile" style="background:var(--canvas)"><b>--canvas</b></div>
+    <div class="tile" style="background:var(--surface)"><b>--surface</b></div>
+    <div class="tile" style="background:var(--surface-sunken)"><b>--surface-sunken</b></div>
+    <div class="tile" style="background:var(--surface-inverse);border-color:transparent;color:var(--text-on-dark)"><b>--surface-inverse</b></div>
+  </div></div>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!-- @dsCard group="CRM" viewport="1360x860" name="MS Realty — Agent CRM" subtitle="Back office: dashboard, leads pipeline, lead detail, contacts, listings, calendar, reports" -->
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS Realty — CRM</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  html, body { margin: 0; background: var(--canvas); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="crm-data.js"></script>
+<script type="text/babel" src="CrmKit.jsx"></script>
+<script type="text/babel" src="Dashboard.jsx"></script>
+<script type="text/babel" src="Pipeline.jsx"></script>
+<script type="text/babel" src="Messages.jsx"></script>
+<script type="text/babel" src="LeadDetail.jsx"></script>
+<script type="text/babel" src="Contacts.jsx"></script>
+<script type="text/babel" src="Listings.jsx"></script>
+<script type="text/babel" src="Calendar.jsx"></script>
+<script type="text/babel" src="Reports.jsx"></script>
+<script type="text/babel">
+  const { Sidebar, Topbar } = window;
+
+  const TOP = {
+    dashboard: { title: 'Табло', subtitle: 'Преглед на деня' },
+    pipeline:  { title: 'Лийдове', subtitle: 'Фуния на продажбите' },
+    messages:  { title: 'Съобщения', subtitle: 'Обединен инбокс' },
+    contacts:  { title: 'Контакти', subtitle: 'Директория' },
+    listings:  { title: 'Имоти', subtitle: 'Портфолио' },
+    calendar:  { title: 'Огледи', subtitle: 'Седмичен график' },
+    reports:   { title: 'Справки', subtitle: 'Анализ' },
+    leaddetail:{ title: 'Лийд', subtitle: 'Детайли' },
+  };
+
+  function App() {
+    const [route, setRoute] = React.useState('dashboard');
+    const [lead, setLead] = React.useState(null);
+
+    const go = (r) => { setRoute(r); };
+    const openLead = (l) => { setLead(l); setRoute('leaddetail'); };
+    const backToPipeline = () => setRoute('pipeline');
+
+    // sidebar highlights pipeline while viewing a lead
+    const navRoute = route === 'leaddetail' ? 'pipeline' : route;
+    const top = TOP[route] || TOP.dashboard;
+
+    let screen;
+    if (route === 'dashboard')      screen = <window.Dashboard onOpenLead={openLead} onNavigate={go} />;
+    else if (route === 'pipeline')  screen = <window.Pipeline onOpenLead={openLead} />;
+    else if (route === 'messages')  screen = <window.Messages onOpenLead={openLead} />;
+    else if (route === 'leaddetail')screen = <window.LeadDetail lead={lead} onBack={backToPipeline} onOpenListing={go} />;
+    else if (route === 'contacts')  screen = <window.Contacts />;
+    else if (route === 'listings')  screen = <window.Listings />;
+    else if (route === 'calendar')  screen = <window.Calendar />;
+    else if (route === 'reports')   screen = <window.Reports />;
+
+    return (
+      <div className="crm-app">
+        <Sidebar route={navRoute} onNavigate={go} />
+        <div className="crm-main">
+          <Topbar title={top.title} subtitle={top.subtitle} />
+          {screen}
+        </div>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

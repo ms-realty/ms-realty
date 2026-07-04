@@ -1,0 +1,47 @@
+/* ============================================================
+   MS Realty — Imagery / Photo treatment
+   ------------------------------------------------------------
+   NO licensed photography was provided. `.mk-photo` is a
+   documented placeholder treatment: warm coastal-light gradient
+   "tones" that stand in for real property/resort photography and
+   read as intentional Mediterranean imagery.
+
+   PRODUCTION: pass a real image URL — an inline
+   `background-image: url(...)` overrides the tone gradient, so
+   `<div class="mk-photo mk-photo--sea" style="background-image:url(...)">`
+   upgrades to a real photo with the gradient as the loading fallback.
+   ============================================================ */
+
+:root {
+  --photo-sea:    linear-gradient(180deg, #cfeaf0 0%, #a9d8de 30%, #8fcbcf 46%, #2f8f92 50%, #237e82 66%, #1a666b 84%, #144f54 100%); /* @kind other */
+  --photo-sky:    linear-gradient(180deg, #d9edf3 0%, #bcdfec 40%, #d2e1e6 78%, #ecdfc9 100%); /* @kind other */
+  --photo-sand:   linear-gradient(155deg, #f6ecd8 0%, #ecd8b4 40%, #d9bd90 72%, #c6a877 100%); /* @kind other */
+  --photo-sunset: linear-gradient(200deg, #f6ddb4 0%, #e7a76f 34%, #cf6f42 62%, #a34e2c 100%); /* @kind other */
+  --photo-pine:   linear-gradient(180deg, #cfe3e6 0%, #a9c9bd 34%, #6f9c7f 60%, #3f6b52 84%, #2c503e 100%); /* @kind other */
+  --photo-night:  linear-gradient(180deg, #12484a 0%, #0d2f30 55%, #071b1c 100%); /* @kind other */
+}
+
+.mk-photo {
+  position: relative;
+  background-color: var(--stone-200);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+/* sun glow + landscape tone (used as the low layer; a real background-image
+   set inline sits above these because it is the `background` shorthand target) */
+.mk-photo--sea    { background-image: radial-gradient(115% 80% at 80% 14%, rgba(255,246,220,0.55), transparent 46%), var(--photo-sea); }
+.mk-photo--sky    { background-image: radial-gradient(100% 90% at 22% 2%, rgba(255,250,235,0.7), transparent 55%), var(--photo-sky); }
+.mk-photo--sand   { background-image: radial-gradient(90% 82% at 78% 16%, rgba(255,247,226,0.75), transparent 55%), var(--photo-sand); }
+.mk-photo--sunset { background-image: radial-gradient(95% 90% at 70% 84%, rgba(255,216,150,0.6), transparent 55%), var(--photo-sunset); }
+.mk-photo--pine   { background-image: radial-gradient(100% 78% at 26% 8%, rgba(238,246,224,0.6), transparent 50%), var(--photo-pine); }
+.mk-photo--night  { background-image: radial-gradient(90% 70% at 76% 22%, rgba(120,185,185,0.35), transparent 55%), var(--photo-night); }
+
+/* soft bottom vignette so overlaid white text/controls always read */
+.mk-photo::after {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, transparent 52%, rgba(22,19,14,0.20) 100%);
+}
+.mk-photo--flat::after { display: none; }

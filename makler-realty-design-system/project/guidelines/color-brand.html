@@ -1,0 +1,36 @@
+<!-- @dsCard group="Colors" viewport="700x160" name="Brand & functional aliases" subtitle="Semantic hooks used in components." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .ramp{display:flex;gap:8px}
+  .sw{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .sw i{display:block;height:60px;border-radius:10px;border:1px solid rgba(22,19,14,.07)}
+  .sw b{font:600 12px var(--font-mono);color:var(--text-strong)}
+  .sw em{font:400 10px var(--font-mono);color:var(--text-muted);font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{display:flex;flex-direction:column;gap:6px;width:calc(20% - 7px)}
+  .chip i{height:44px;border-radius:9px;border:1px solid rgba(22,19,14,.07)}
+  .chip b{font:600 10px var(--font-mono);color:var(--text-strong);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>
+</head>
+<body>
+<div class="pad"><div class="chips">
+    <div class="chip"><i style="background:var(--brand)"></i><b>--brand</b></div>
+    <div class="chip"><i style="background:var(--brand-hover)"></i><b>--brand-hover</b></div>
+    <div class="chip"><i style="background:var(--accent)"></i><b>--accent</b></div>
+    <div class="chip"><i style="background:var(--accent-hover)"></i><b>--accent-hover</b></div>
+    <div class="chip"><i style="background:var(--price)"></i><b>--price</b></div>
+    <div class="chip"><i style="background:var(--rating)"></i><b>--rating</b></div>
+    <div class="chip"><i style="background:var(--text-link)"></i><b>--text-link</b></div>
+    <div class="chip"><i style="background:var(--brand-subtle)"></i><b>--brand-subtle</b></div>
+    <div class="chip"><i style="background:var(--accent-subtle)"></i><b>--accent-subtle</b></div>
+    <div class="chip"><i style="background:var(--border);"></i><b>--border</b></div>
+  </div></div>
+</body>
+</html>

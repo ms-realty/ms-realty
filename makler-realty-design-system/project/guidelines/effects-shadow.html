@@ -1,0 +1,28 @@
+<!-- @dsCard group="Effects" viewport="700x180" name="Elevation" subtitle="Warm-tinted shadows (stone-950, not black)." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .ramp{display:flex;gap:8px}
+  .sw{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .sw i{display:block;height:60px;border-radius:10px;border:1px solid rgba(22,19,14,.07)}
+  .sw b{font:600 12px var(--font-mono);color:var(--text-strong)}
+  .sw em{font:400 10px var(--font-mono);color:var(--text-muted);font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body{background:var(--canvas)}
+  .el{display:flex;gap:20px;align-items:center;justify-content:center;padding:26px 24px}
+  .el div{flex:1;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .el i{width:100%;height:64px;background:#fff;border-radius:12px}
+  .el code{font:400 10px var(--font-mono);color:var(--text-muted)}</style>
+</head>
+<body>
+<div class="el">
+    <div><i style="box-shadow:var(--shadow-xs)"></i><code>xs</code></div><div><i style="box-shadow:var(--shadow-sm)"></i><code>sm</code></div><div><i style="box-shadow:var(--shadow-md)"></i><code>md</code></div><div><i style="box-shadow:var(--shadow-lg)"></i><code>lg</code></div><div><i style="box-shadow:var(--shadow-xl)"></i><code>xl</code></div>
+  </div>
+</body>
+</html>

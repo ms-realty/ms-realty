@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Резултати от търсене" description="Резултати от търсене: закачена търсачка, страничен филтър (сделка / цена / спални / тип / екстри), редове с обяви и странициране." -->
+<helmet>
+<script src="./ds-base.js"></script>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);font-family:var(--font-sans);color:var(--text-body)">
+
+  <header style="display:flex;align-items:center;gap:28px;height:72px;padding:0 40px;background:var(--surface);border-bottom:1px solid var(--border)">
+    <a href="#" style="display:inline-flex;align-items:center" aria-label="MS Realty — home"><x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Logo" height="40" hint-size="78px,40px"></x-import></a>
+    <nav style="display:flex;gap:6px;margin-left:8px">
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--brand);text-decoration:none;padding:9px 12px;border-radius:6px">Купува</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Под наем</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Курорти</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Контакти</a>
+    </nav>
+    <div style="margin-left:auto">
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Button" variant="accent" size="sm" icon-start="phone" hint-size="150px,34px">Обади се на брокер</x-import>
+    </div>
+  </header>
+
+  <div style="position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow-xs)">
+    <div style="max-width:1440px;margin:0 auto;padding:14px 40px">
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.SearchBar" size="md" hint-size="100%,120px"></x-import>
+    </div>
+  </div>
+
+  <div style="max-width:1440px;margin:0 auto;padding:24px 40px 64px;display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:start">
+
+    <aside style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:20px;box-shadow:var(--shadow-xs)">
+      <h3 style="font-family:var(--font-sans);font-size:16px;font-weight:600;color:var(--text-strong);margin:0 0 4px">Филтри</h3>
+
+      <div style="padding:16px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:11px">Сделка</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Radio" name="deal" label="Продажба" default-checked="{{ true }}" hint-size="140px,24px"></x-import>
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Radio" name="deal" label="Под наем" hint-size="140px,24px"></x-import>
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Radio" name="deal" label="Ново строителство" hint-size="160px,24px"></x-import>
+        </div>
+      </div>
+
+      <div style="padding:16px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:11px">Ценови диапазон (€)</div>
+        <div style="display:flex;gap:10px">
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Select" size="sm" options="{{ minPrices }}" hint-size="120px,36px"></x-import>
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Select" size="sm" options="{{ maxPrices }}" hint-size="120px,36px"></x-import>
+        </div>
+      </div>
+
+      <div style="padding:16px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:11px">Спални</div>
+        <div style="display:flex;gap:6px">
+          <button style="flex:1;height:38px;border:1px solid var(--border-strong);background:var(--surface);border-radius:6px;font:inherit;font-size:13px;font-weight:500;color:var(--text-body);cursor:pointer">Всички</button>
+          <button style="flex:1;height:38px;border:1px solid var(--border-strong);background:var(--surface);border-radius:6px;font:inherit;font-size:13px;font-weight:500;color:var(--text-body);cursor:pointer">1</button>
+          <button style="flex:1;height:38px;border:1px solid var(--brand);background:var(--brand);border-radius:6px;font:inherit;font-size:13px;font-weight:600;color:#fff;cursor:pointer">2</button>
+          <button style="flex:1;height:38px;border:1px solid var(--border-strong);background:var(--surface);border-radius:6px;font:inherit;font-size:13px;font-weight:500;color:var(--text-body);cursor:pointer">3</button>
+          <button style="flex:1;height:38px;border:1px solid var(--border-strong);background:var(--surface);border-radius:6px;font:inherit;font-size:13px;font-weight:500;color:var(--text-body);cursor:pointer">4+</button>
+        </div>
+      </div>
+
+      <div style="padding:16px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:11px">Тип имот</div>
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Select" size="sm" icon-start="house" options="{{ types }}" hint-size="100%,36px"></x-import>
+      </div>
+
+      <div style="padding:16px 0">
+        <div style="font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:11px">Задължително</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Checkbox" label="Изглед море" default-checked="{{ true }}" hint-size="120px,24px"></x-import>
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Checkbox" label="Басейн" hint-size="120px,24px"></x-import>
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Checkbox" label="Обзаведен" default-checked="{{ true }}" hint-size="120px,24px"></x-import>
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Checkbox" label="Паркинг" hint-size="120px,24px"></x-import>
+        </div>
+      </div>
+
+      <div style="padding-top:16px">
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Button" variant="primary" full-width="{{ true }}" hint-size="100%,42px">Приложи филтрите</x-import>
+      </div>
+    </aside>
+
+    <section>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px">
+        <h1 style="font-family:var(--font-display);font-weight:600;font-size:28px;letter-spacing:-0.015em;color:var(--text-strong);margin:0">Имоти за продажба<span style="display:block;font-family:var(--font-sans);font-size:13px;font-weight:400;color:var(--text-muted);letter-spacing:0;margin-top:3px">216 имота близо до Черноморието</span></h1>
+        <div style="display:flex;align-items:center;gap:12px;flex:none">
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Select" size="sm" options="{{ sorts }}" hint-size="180px,36px"></x-import>
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.IconButton" icon="map" label="Карта" variant="outline" hint-size="42px,42px"></x-import>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 20px">
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Tag" variant="outline" hint-size="100px,32px">Изглед море</x-import>
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Tag" variant="outline" hint-size="100px,32px">Обзаведен</x-import>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <sc-for list="{{ rows }}" as="row" hint-placeholder-count="4">
+          <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.PropertyCard" dc-props="{{ row }}" hint-size="100%,200px"></x-import>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;justify-content:center;margin-top:34px">
+        <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Pagination" page="{{ page }}" total-pages="{{ totalPages }}" hint-size="360px,42px"></x-import>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      minPrices: ['Без мин.', '25,000', '50,000', '100,000', '200,000'],
+      maxPrices: ['Без макс.', '100,000', '250,000', '500,000', '1,000,000'],
+      types: ['Всички', 'Апартамент', 'Къща', 'Вила', 'Студио', 'Парцел'],
+      sorts: ['Най-подходящи', 'Най-нови', 'Цена: ниска към висока', 'Цена: висока към ниска'],
+      page: 1,
+      totalPages: 18,
+      rows: [
+        { orientation: 'horizontal', tone: 'sea', badges: [{ variant: 'for-sale', label: 'Продажба' }, { variant: 'new', label: 'Ново' }], price: '€245,000', title: 'Двустаен с изглед море, Marina Cape', location: 'Свети Влас, Бургас', beds: 2, baths: 1, area: 68, photos: 24, reference: 'MK-2043' },
+        { orientation: 'horizontal', tone: 'sea', badges: [{ variant: 'for-sale', label: 'Продажба' }], price: '€680,000', title: 'Вила с басейн и изглед море', location: 'Свети Влас, Бургас', beds: 4, baths: 3, area: 240, photos: 42, reference: 'MK-2088' },
+        { orientation: 'horizontal', tone: 'sky', badges: [{ variant: 'for-sale', label: 'Продажба' }], price: '€52,000', title: 'Студио до плажа', location: 'Слънчев бряг, Бургас', beds: 1, baths: 1, area: 38, photos: 12, reference: 'MK-1180' },
+        { orientation: 'horizontal', tone: 'sand', badges: [{ variant: 'for-sale', label: 'Продажба' }, { variant: 'new', label: 'Ново' }], price: '€128,000', title: 'Апартамент в спа комплекс', location: 'Сандански, Благоевград', beds: 2, baths: 1, area: 80, photos: 20, reference: 'MK-2231' },
+        { orientation: 'horizontal', tone: 'pine', badges: [{ variant: 'for-sale', label: 'Продажба' }, { variant: 'reduced', label: 'Намалена' }], price: '€89,500', title: 'Апартамент в ски комплекс', location: 'Банско, Благоевград', beds: 2, baths: 2, area: 95, photos: 18, reference: 'MK-0975' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!-- @dsCard group="Components" viewport="700x430" name="People" subtitle="Avatar circles, AgentCard contact panels" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; }
+  .wrap { padding: 22px 24px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+  .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div id="root" class="wrap"></div>
+<script type="text/babel">
+  const { Avatar, AvatarGroup, AgentCard } = window.MaklerRealtyDesignSystem_9b7f1e;
+  function Demo() {
+    return (
+      <>
+        <AgentCard
+          name="Мария Стоянова"
+          role="Старши брокер"
+          office="Свети Влас"
+          phone="+359 88 421 7788"
+          langs={['BG','EN','RU']}
+          callLabel="Обади се"
+          messageLabel="Изпрати съобщение"
+          onCall={()=>{}}
+          onMessage={()=>{}}
+        />
+        <div className="stack">
+          <span className="lbl">Avatar</span>
+          <div className="row">
+            <Avatar name="Мария Стоянова" size={44} />
+            <Avatar name="Peter de Vries" tone="ink" size={44} />
+            <Avatar name="Елена Георгиева" solid tone="ink" size={44} />
+            <AvatarGroup>
+              <Avatar name="Мария Стоянова" size={32} />
+              <Avatar name="Петър Илиев" size={32} tone="ink" />
+              <Avatar name="Елена Георгиева" size={32} />
+            </AvatarGroup>
+          </div>
+          <span className="lbl" style={{marginTop:6}}>AgentCard · layout="row"</span>
+          <AgentCard layout="row" name="Петър Илиев" role="Брокер" office="Банско"
+            langs={['BG','EN','DE']} callLabel="Обади се" onCall={()=>{}} />
+          <AgentCard layout="row" name="Елена Георгиева" role="Брокер" office="Сандански"
+            langs={['BG','EN','NL']} callLabel="Обади се" onCall={()=>{}} />
+        </div>
+      </>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>

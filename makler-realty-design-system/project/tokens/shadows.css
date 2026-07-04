@@ -1,0 +1,36 @@
+/* ============================================================
+   MS Realty — Elevation
+   Soft, warm-tinted shadows (based on stone-950, not pure black)
+   so cards feel like objects resting on sunlit paper, not
+   floating in a cold void. Low spread, generous blur.
+   ============================================================ */
+
+:root {
+  --shadow-xs:
+    0 1px 2px rgba(22, 19, 14, 0.06);
+  --shadow-sm:
+    0 1px 2px rgba(22, 19, 14, 0.06),
+    0 2px 6px rgba(22, 19, 14, 0.06);
+  --shadow-md:
+    0 2px 4px rgba(22, 19, 14, 0.05),
+    0 6px 16px rgba(22, 19, 14, 0.08);
+  --shadow-lg:
+    0 6px 10px rgba(22, 19, 14, 0.06),
+    0 16px 32px rgba(22, 19, 14, 0.12);
+  --shadow-xl:
+    0 12px 20px rgba(22, 19, 14, 0.08),
+    0 28px 56px rgba(22, 19, 14, 0.16);
+
+  /* Focus ring (paired with the color-token --ring) */
+  --shadow-focus:        0 0 0 3px var(--ring);
+  --shadow-focus-accent: 0 0 0 3px var(--ring-accent);
+
+  /* Inset for pressed / sunken controls */
+  --shadow-inset: inset 0 1px 2px rgba(22, 19, 14, 0.08);
+
+  /* Semantic */
+  --shadow-card:       var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-lg);
+  --shadow-popover:    var(--shadow-lg);
+  --shadow-modal:      var(--shadow-xl);
+}

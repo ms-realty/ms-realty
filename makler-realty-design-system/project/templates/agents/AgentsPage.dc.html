@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="Екип и офиси" description="Team page: agent grid with languages, the we-speak-your-language band, and the three offices." -->
+<helmet>
+<script src="./ds-base.js"></script>
+</helmet>
+<div style="min-height:100vh;background:var(--canvas);font-family:var(--font-sans);color:var(--text-body)">
+
+  <header style="display:flex;align-items:center;gap:28px;height:72px;padding:0 40px;background:var(--surface);border-bottom:1px solid var(--border)">
+    <a href="#" style="display:inline-flex;align-items:center" aria-label="MS Realty — home"><x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Logo" height="40" hint-size="78px,40px"></x-import></a>
+    <nav style="display:flex;gap:6px;margin-left:8px">
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Купува</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Под наем</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--text-body);text-decoration:none;padding:9px 12px;border-radius:6px">Курорти</a>
+      <a href="#" style="font-size:15px;font-weight:500;color:var(--brand);text-decoration:none;padding:9px 12px;border-radius:6px">Екип</a>
+    </nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.LangSwitcher" value="{{ lang }}" on-change="{{ setLang }}" hint-size="86px,36px"></x-import>
+      <x-import component-from-global-scope="MaklerRealtyDesignSystem_9b7f1e.Button" variant="accent" size="sm" icon-start="phone" hint-size="150px,34px">Обади се на брокер</x-import>
+    </div>
+  </header>
+
+  <div style="max-width:1440px;margin:0 auto;padding:56px 40px 72px">
+    <div style="max-width:62ch;margin-bottom:44px">
+      <div style="font-size:12px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Екипът</div>
+      <h1 style="font-family:var(--font-display);font-weight:600;font-size:48px;line-height:1.1;letter-spacing:-0.015em;color:var(--text-strong);margin:0">Хората зад MS Realty</h1>
+      <p style="color:var(--text-muted);font-size:18px;margin:12px 0 0">Местни брокери, които познават всяка улица — и говорят вашия език. Изберете човек, не само имот.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden">
+        <div class="mk-photo mk-photo--sea" style="height:240px"></div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <h3 style="font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text-strong);margin:0">Мария Стоянова</h3>
+            <div style="font-size:14px;color:var(--text-muted);margin-top:3px">Старши брокер · Свети Влас</div>
+          </div>
+          <div style="display:flex;gap:5px"><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">BG</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">EN</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">RU</span></div>
+          <div style="font-size:14px;color:var(--text-body)">+359 88 421 7788</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden">
+        <div class="mk-photo mk-photo--pine" style="height:240px"></div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <h3 style="font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text-strong);margin:0">Петър Илиев</h3>
+            <div style="font-size:14px;color:var(--text-muted);margin-top:3px">Брокер · Банско</div>
+          </div>
+          <div style="display:flex;gap:5px"><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">BG</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">EN</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">DE</span></div>
+          <div style="font-size:14px;color:var(--text-body)">+359 88 903 1140</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden">
+        <div class="mk-photo mk-photo--sand" style="height:240px"></div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <h3 style="font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text-strong);margin:0">Елена Георгиева</h3>
+            <div style="font-size:14px;color:var(--text-muted);margin-top:3px">Брокер · Сандански</div>
+          </div>
+          <div style="display:flex;gap:5px"><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">BG</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">EN</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">NL</span></div>
+          <div style="font-size:14px;color:var(--text-body)">+359 88 660 2093</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden">
+        <div class="mk-photo mk-photo--sky" style="height:240px"></div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <h3 style="font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text-strong);margin:0">Стефан Димитров</h3>
+            <div style="font-size:14px;color:var(--text-muted);margin-top:3px">Брокер · Свети Влас</div>
+          </div>
+          <div style="display:flex;gap:5px"><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">BG</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">EN</span></div>
+          <div style="font-size:14px;color:var(--text-body)">+359 88 512 4471</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden">
+        <div class="mk-photo mk-photo--sunset" style="height:240px"></div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <h3 style="font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text-strong);margin:0">Анна Кръстева</h3>
+            <div style="font-size:14px;color:var(--text-muted);margin-top:3px">Брокер · Сандански</div>
+          </div>
+          <div style="display:flex;gap:5px"><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">BG</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">DE</span></div>
+          <div style="font-size:14px;color:var(--text-body)">+359 89 774 2050</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);overflow:hidden">
+        <div class="mk-photo mk-photo--night" style="height:240px"></div>
+        <div style="padding:20px 22px;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <h3 style="font-family:var(--font-display);font-weight:600;font-size:20px;color:var(--text-strong);margin:0">Георги Тодоров</h3>
+            <div style="font-size:14px;color:var(--text-muted);margin-top:3px">Брокер · Банско</div>
+          </div>
+          <div style="display:flex;gap:5px"><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">BG</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">EN</span><span style="display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 6px;border-radius:4px;background:var(--stone-200);color:var(--stone-700);font-size:10px;font-weight:700;letter-spacing:0.05em">RU</span></div>
+          <div style="font-size:14px;color:var(--text-body)">+359 88 337 6614</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--ink-900);color:var(--stone-50)">
+    <div style="max-width:1440px;margin:0 auto;padding:56px 40px;display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap">
+      <div style="max-width:52ch">
+        <h2 style="font-family:var(--font-display);font-weight:600;font-size:32px;letter-spacing:-0.015em;color:#fff;margin:0">Говорим вашия език.</h2>
+        <p style="font-size:16px;color:rgba(255,255,255,0.68);margin:10px 0 0">Оглед, договор и нотариус — без нищо изгубено в превода.</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--border-inverse);font-size:14px;font-weight:600;color:#fff">Български</span>
+        <span style="display:inline-flex;align-items:center;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--border-inverse);font-size:14px;font-weight:600;color:#fff">English</span>
+        <span style="display:inline-flex;align-items:center;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--border-inverse);font-size:14px;font-weight:600;color:#fff">Deutsch</span>
+        <span style="display:inline-flex;align-items:center;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--border-inverse);font-size:14px;font-weight:600;color:#fff">Nederlands</span>
+        <span style="display:inline-flex;align-items:center;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--border-inverse);font-size:14px;font-weight:600;color:#fff">Русский</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1440px;margin:0 auto;padding:56px 40px 72px">
+    <h2 style="font-family:var(--font-display);font-weight:600;font-size:28px;letter-spacing:-0.015em;color:var(--text-strong);margin:0 0 24px">Трите офиса</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div class="mk-photo mk-photo--sea mk-photo--flat" style="width:64px;height:64px;border-radius:12px;flex:none"></div>
+        <div>
+          <div style="font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--text-strong)">Свети Влас</div>
+          <div style="font-size:14px;color:var(--text-muted);margin-top:4px">Морски квартал 8256 · +359 88 421 7788<br>Пон–Съб · 9:00–18:00</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div class="mk-photo mk-photo--sand mk-photo--flat" style="width:64px;height:64px;border-radius:12px;flex:none"></div>
+        <div>
+          <div style="font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--text-strong)">Сандански</div>
+          <div style="font-size:14px;color:var(--text-muted);margin-top:4px">ул. Македония 21, 2800 · +359 88 660 2093<br>Пон–Пет · 9:00–17:30</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div class="mk-photo mk-photo--pine mk-photo--flat" style="width:64px;height:64px;border-radius:12px;flex:none"></div>
+        <div>
+          <div style="font-family:var(--font-display);font-weight:600;font-size:17px;color:var(--text-strong)">Банско</div>
+          <div style="font-size:14px;color:var(--text-muted);margin-top:4px">ул. Пирин 4, 2770 · +359 88 903 1140<br>Зимен сезон · всеки ден</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { lang: 'BG' };
+  renderVals() {
+    return {
+      lang: this.state.lang,
+      setLang: (code) => this.setState({ lang: code }),
+    };
+  }
+}
+</script>
+</body>
+</html>

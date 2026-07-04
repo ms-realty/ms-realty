@@ -1,0 +1,40 @@
+<!-- @dsCard group="Spacing" viewport="700x300" name="Layout & containers" subtitle="Centred containers to 1440, fluid gutter, section rhythm." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .frame{position:relative;background:var(--canvas);border:1px solid var(--border);border-radius:10px;padding:12px 0;display:flex;flex-direction:column;gap:7px}
+  .cbar{position:relative;margin:0 auto;height:26px;border-radius:6px;background:var(--brand-subtle);border:1px solid var(--ink-200);display:flex;align-items:center;justify-content:center}
+  .cbar code{font:500 10px var(--font-mono);color:var(--ink-700);white-space:nowrap}
+  .gut{position:absolute;inset:0;pointer-events:none}
+  .gut::before,.gut::after{content:"";position:absolute;top:12px;bottom:12px;width:7%;background:repeating-linear-gradient(-45deg,var(--brick-100) 0 4px,transparent 4px 8px);opacity:.9}
+  .gut::before{left:0;border-radius:10px 0 0 10px}
+  .gut::after{right:0;border-radius:0 10px 10px 0}
+  .note{font-size:12px;line-height:1.5;color:var(--text-muted);max-width:62ch}
+  .note b{color:var(--text-strong);font-weight:600}
+  .rhythm{display:flex;align-items:center;gap:10px}
+  .rhythm i{height:9px;border-radius:3px;background:var(--stone-200);flex:1}
+  .rhythm code{font:400 10px var(--font-mono);color:var(--text-muted);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="pad">
+  <span class="lbl">Containers — centred, fluid gutter</span>
+  <div class="frame">
+    <span class="gut"></span>
+    <div class="cbar" style="width:86%"><code>--container-2xl · 1440 — full-bleed marketing</code></div>
+    <div class="cbar" style="width:76%"><code>--container-xl · 1280 — search + content</code></div>
+    <div class="cbar" style="width:64%"><code>--container-lg · 1080 — listing body</code></div>
+    <div class="cbar" style="width:49%"><code>--container-md · 820 — prose</code></div>
+  </div>
+  <div class="rhythm"><code>--section-y</code><i></i><code>clamp(3.5rem → 7rem) between page sections</code></div>
+  <p class="note"><b>Gutter</b> is <code style="font-family:var(--font-mono)">--gutter</code> — clamp(1.25rem, 4vw, 4rem) each side (striped red above). Content never touches the viewport edge. Cards inside grids gap on the 4px scale: 16 in dense grids, 24 between property cards, 44 between columns.</p>
+</div>
+</body>
+</html>

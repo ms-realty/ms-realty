@@ -1,0 +1,28 @@
+<!-- @dsCard group="Brand" viewport="720x210" name="Logo — brand mark" subtitle="The real MS Realty mark, embedded via the Logo component. Red MS + charcoal REALTY." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:22px 24px;display:flex;flex-direction:column;gap:12px}
+  .row{display:flex;gap:12px}
+  .panel{flex:1;display:flex;align-items:center;justify-content:center;height:96px;border-radius:14px;border:1px solid var(--border)}
+  .panel--light{background:var(--canvas)}
+  .panel--dark{background:var(--surface-inverse);border-color:var(--border-inverse)}
+  .panel img{height:48px;width:auto;display:block}
+  .note{font:400 11px var(--font-mono);color:var(--text-muted)}
+  .note b{color:var(--text-strong);font-weight:600}</style>
+</head>
+<body>
+<div class="pad">
+    <div class="row">
+      <div class="panel panel--light"><img src="../assets/logo-ms-realty.png" alt="MS Realty"></div>
+      <div class="panel panel--dark"><img src="../assets/logo-ms-realty-reversed.png" alt="MS Realty"></div>
+    </div>
+    <div class="note"><b>&lt;Logo variant="default" /&gt;</b> on light · <b>variant="reversed"</b> on dark · embedded data-URI (172×88, offline &amp; export-safe)</div>
+  </div>
+</body>
+</html>

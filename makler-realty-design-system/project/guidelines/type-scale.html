@@ -1,0 +1,27 @@
+<!-- @dsCard group="Type" viewport="700x250" name="UI type scale" subtitle="Fixed --text-* sizes, 11 → 48px." -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../styles.css">
+<style>*,*::before,*::after{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-sans);color:var(--text-body);background:#fff;-webkit-font-smoothing:antialiased}
+  .pad{padding:20px 24px}
+  .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+  .ramp{display:flex;gap:8px}
+  .sw{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .sw i{display:block;height:60px;border-radius:10px;border:1px solid rgba(22,19,14,.07)}
+  .sw b{font:600 12px var(--font-mono);color:var(--text-strong)}
+  .sw em{font:400 10px var(--font-mono);color:var(--text-muted);font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rows{columns:2;column-gap:40px}
+  .r{display:flex;align-items:baseline;gap:12px;padding:5px 0;break-inside:avoid}
+  .r span{color:var(--text-strong);font-weight:500;flex:none;width:150px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .r code{font:400 10px var(--font-mono);color:var(--text-muted)}</style>
+</head>
+<body>
+<div class="pad"><div class="rows">
+    <div class="r"><span style="font-size:11px">Aa Виж</span><code>--text-2xs · 11px</code></div><div class="r"><span style="font-size:12px">Aa Виж</span><code>--text-xs · 12px</code></div><div class="r"><span style="font-size:13px">Aa Виж</span><code>--text-sm · 13px</code></div><div class="r"><span style="font-size:15px">Aa Виж</span><code>--text-base · 15px</code></div><div class="r"><span style="font-size:16px">Aa Виж</span><code>--text-md · 16px</code></div><div class="r"><span style="font-size:18px">Aa Виж</span><code>--text-lg · 18px</code></div><div class="r"><span style="font-size:22px">Aa Виж</span><code>--text-xl · 22px</code></div><div class="r"><span style="font-size:26px">Aa Виж</span><code>--text-2xl · 28px</code></div><div class="r"><span style="font-size:26px">Aa Виж</span><code>--text-3xl · 36px</code></div><div class="r"><span style="font-size:26px">Aa Виж</span><code>--text-4xl · 48px</code></div>
+  </div></div>
+</body>
+</html>

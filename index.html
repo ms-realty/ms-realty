@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Real estate in Bulgaria: homes, apartments, villas, land, and commercial property around Sandanski, Bansko, and nearby resorts."
+    >
+    <title>Makler Realty | Real estate in Bulgaria</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Makler Realty home">
+        <span class="brand-mark">M</span>
+        <span>
+          <strong>Makler Realty</strong>
+          <small>Properties in the land of Spartacus</small>
+        </span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#listings">Listings</a>
+        <a href="#resorts">Resorts</a>
+        <a href="#contact">Contacts</a>
+      </nav>
+      <a class="header-phone" href="tel:+359879696870">+359 879 69 68 70</a>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="location">Sandanski, Bansko, Sunny Beach, Greece</p>
+          <h1 id="hero-title">Real estate in Bulgaria</h1>
+          <p>
+            Apartments, houses, villas, land, and commercial property curated
+            from Makler Realty's current public inventory.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#listings">Browse properties</a>
+            <a class="button secondary" href="tel:+359879696870">Call the office</a>
+          </div>
+        </div>
+        <figure class="hero-media">
+          <img
+            src="https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg"
+            alt="Aerial view of property near Sandanski"
+          >
+          <figcaption>
+            Featured inventory includes apartments, villas, industrial buildings, and land.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="search-panel" aria-label="Property search">
+        <label>
+          <span>Search</span>
+          <input id="search" type="search" placeholder="Sandanski, villa, apartment...">
+        </label>
+        <label>
+          <span>Category</span>
+          <select id="category">
+            <option value="all">All categories</option>
+            <option>Apartment</option>
+            <option>House</option>
+            <option>Villa</option>
+            <option>Land</option>
+            <option>Commercial</option>
+          </select>
+        </label>
+        <label>
+          <span>Offer</span>
+          <select id="offer">
+            <option value="all">Rent and sale</option>
+            <option value="sale">For sale</option>
+            <option value="rent">For rent</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="section-heading" aria-labelledby="listings-title">
+        <div>
+          <h2 id="listings-title">Current listings</h2>
+          <p id="result-count">11 properties</p>
+        </div>
+        <a href="https://makler-realty.com/en/" target="_blank" rel="noreferrer">View source site</a>
+      </section>
+
+      <section id="listings" class="listing-grid" aria-live="polite"></section>
+
+      <section id="resorts" class="resorts" aria-labelledby="resorts-title">
+        <div>
+          <h2 id="resorts-title">Browse by resort</h2>
+          <p>Shortcuts from the source site for buyers comparing Bulgaria and northern Greece.</p>
+        </div>
+        <div class="resort-list">
+          <a href="https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d0%b1%d0%b0%d0%bd%d1%81%d0%ba%d0%be/" target="_blank" rel="noreferrer">Bansko</a>
+          <a href="https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/" target="_blank" rel="noreferrer">Sandanski</a>
+          <a href="https://makler-realty.com/en/resort/%d0%bd%d0%b5%d0%b4%d0%b2%d0%b8%d0%b6%d0%b8%d0%bc%d0%be%d1%81%d1%82%d1%8c-%d1%81%d0%b2%d1%8f%d1%82%d0%be%d0%b9-%d0%b2%d0%bb%d0%b0%d1%81/" target="_blank" rel="noreferrer">St Vlas</a>
+          <a href="https://makler-realty.com/en/resort/nafplio/" target="_blank" rel="noreferrer">Nafplio</a>
+        </div>
+      </section>
+    </main>
+
+    <footer id="contact" class="site-footer">
+      <div>
+        <strong>Office in Bulgaria</strong>
+        <a href="tel:+359879696870">+359 879 69 68 70</a>
+      </div>
+      <div>
+        <strong>Languages</strong>
+        <span>Bulgarian · English · Deutsch · Nederlands · Russian</span>
+      </div>
+      <p>Source content captured from makler-realty.com.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

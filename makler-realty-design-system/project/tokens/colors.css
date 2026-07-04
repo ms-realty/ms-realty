@@ -1,0 +1,152 @@
+/* ============================================================
+   MS Realty — Color System
+   ------------------------------------------------------------
+   Anchored on the brand's OFFICIAL palette (the mark = red "MS"
+   + charcoal "REAL·TY" + grey "makler real estate"):
+
+     · Jasper       #DB3E3E  — the identity RED   → --brick-500
+     · Apple Valley #ED8484  — the light red tint → --brick-300
+     · Bauhaus      #3F3F3F  — the charcoal        → --ink-600
+
+   Built into a MONOCHROME CHARCOAL system: charcoal (Ink) carries
+   almost everything and RED is held back as rare punctuation.
+
+     · Ink    — near-neutral charcoal (the "REAL·TY" wordmark). The
+                BRAND workhorse AND the functional colour: header,
+                buttons, footer/bands, prices, links, rating stars,
+                and the buy / rent / new status chips.
+     · Brick  — the logo RED (pure-hue, G=B, like Jasper). The LONE
+                accent, reserved for just TWO jobs: the single
+                highest-intent CTA (call / book) and the "reduced" flag.
+     · Stone  — warm limestone & sand neutrals (canvas, text, borders).
+                The warmth that keeps the charcoal from reading cold.
+     · Sea    — deep marine green-blue. RESERVED / optional — retired
+                from default use in the monochrome push (ramp kept).
+     · Sun    — warm ochre gold. RESERVED / optional — retired too.
+
+   Error-red (--danger) is deliberately shifted COOLER than the
+   brand Brick so an alert never reads like the primary action.
+
+   Always reach for the SEMANTIC ALIASES below in components
+   (--brand, --accent, --price, --border …), not the raw ramps.
+   ============================================================ */
+
+:root {
+  /* ---- Stone (warm neutral) ---- */
+  --stone-50:  #FAF7F1;
+  --stone-100: #F2ECE1;
+  --stone-200: #E6DCCB;
+  --stone-300: #D3C4AC;
+  --stone-400: #B7A585;
+  --stone-500: #948263;
+  --stone-600: #73644A;
+  --stone-700: #574B38;
+  --stone-800: #3A3227;
+  --stone-900: #241F18;
+  --stone-950: #16130E;
+
+  /* ---- Ink (brand — near-neutral charcoal; 600 = official "Bauhaus" #3F3F3F) ---- */
+  --ink-50:  #F4F4F3;
+  --ink-100: #E6E6E5;
+  --ink-200: #C9C9C7;
+  --ink-300: #A6A6A4;
+  --ink-400: #7A7A78;
+  --ink-500: #545453;
+  --ink-600: #3F3F3F;   /* ← Bauhaus (official brand charcoal) */
+  --ink-700: #2E2E2E;   /* ≈ the logo's "REAL·TY" wordmark */
+  --ink-800: #222222;
+  --ink-900: #181818;
+  --ink-950: #0E0E0E;
+
+  /* ---- Brick (accent — the logo RED, pure-hue; 500 = "Jasper", 300 = "Apple Valley") ---- */
+  --brick-50:  #FCEBEB;
+  --brick-100: #F9D4D4;
+  --brick-200: #F3ADAD;
+  --brick-300: #ED8484;   /* ← Apple Valley (official light red) */
+  --brick-400: #E45D5D;
+  --brick-500: #DB3E3E;   /* ← Jasper (official brand red — the "MS" monogram) */
+  --brick-600: #C42D2D;   /* CTA on white (white text ≈ 5.6:1) */
+  --brick-700: #A32323;
+  --brick-800: #7F1B1B;
+  --brick-900: #571212;
+
+  /* ---- Sea (supporting coastal accent + "for sale" status) ---- */
+  --sea-50:  #ECF3F2;
+  --sea-100: #D2E3E1;
+  --sea-200: #A6C7C4;
+  --sea-300: #71A29E;
+  --sea-400: #467D79;
+  --sea-500: #2C615E;
+  --sea-600: #204B49;
+  --sea-700: #183B39;
+  --sea-800: #122C2B;
+  --sea-900: #0D2120;
+  --sea-950: #071413;
+
+  /* ---- Sun (ochre gold) ---- */
+  --sun-100: #FBEECF;
+  --sun-300: #F0CE7A;
+  --sun-400: #E6B048;
+  --sun-500: #D2952A;
+  --sun-600: #AE7420;
+
+  /* ---- Semantic hues ---- */
+  --success-50:  #E7F3EC;
+  --success-500: #2F7D57;
+  --success-600: #256345;
+  --warning-50:  #FBF1DD;
+  --warning-500: #C08422;
+  --warning-600: #9A6A1B;
+  --danger-50:   #F9E7EA;
+  --danger-500:  #C42E44;   /* error red — cooler crimson lean, kept distinct from the pure brand Brick */
+  --danger-600:  #9E2334;
+
+  /* ============================================================
+     SEMANTIC ALIASES  (use these in components, not the ramps)
+     ============================================================ */
+
+  /* Surfaces / backgrounds */
+  --canvas:          var(--stone-50);   /* page background            */
+  --surface:         #FFFFFF;           /* cards, panels              */
+  --surface-sunken:  var(--stone-100);  /* wells, inset areas         */
+  --surface-hover:   var(--stone-100);  /* row / list hover           */
+  --surface-inverse: var(--ink-900);    /* dark sections, footers     */
+  --overlay:         rgba(14, 14, 14, 0.55); /* modal scrim           */
+
+  /* Text */
+  --text-strong:  var(--stone-900);   /* headings                     */
+  --text-body:    var(--stone-800);   /* paragraph body               */
+  --text-muted:   var(--stone-500);   /* captions, meta               */
+  --text-subtle:  var(--stone-400);   /* placeholders, disabled       */
+  --text-on-dark: var(--stone-50);    /* text on inverse surfaces     */
+  --text-on-brand:  #FFFFFF;
+  --text-on-accent: #FFFFFF;
+  --text-link:    var(--ink-800);     /* inline prose links — charcoal, underlined (monochrome) */
+
+  /* Borders / dividers */
+  --border:        var(--stone-200);
+  --border-strong: var(--stone-300);
+  --border-inverse: rgba(255, 255, 255, 0.16);
+
+  /* Brand (Ink / charcoal) + accent (Brick / Jasper red) */
+  --brand:         var(--ink-800);
+  --brand-hover:   var(--ink-900);
+  --brand-active:  var(--ink-950);
+  --brand-subtle:  var(--ink-50);
+  --accent:        var(--brick-600);
+  --accent-hover:  var(--brick-700);
+  --accent-active: var(--brick-800);
+  --accent-subtle: var(--brick-50);
+
+  /* Functional */
+  --price:       var(--ink-900);   /* listing prices — strong charcoal */
+  --rating:      var(--ink-700);   /* star fill — charcoal (monochrome) */
+  --ring:        rgba(219, 62, 62, 0.45);  /* focus ring — Jasper red (visible on white + on charcoal brand controls) */
+  --ring-accent: rgba(34, 34, 34, 0.45);   /* focus ring on RED accent controls — charcoal halo */
+
+  /* Status text/bg pairs */
+  --for-sale-fg: var(--ink-800);     --for-sale-bg: var(--ink-100);   /* charcoal, strong — on the market to buy */
+  --for-rent-fg: var(--ink-600);     --for-rent-bg: var(--ink-50);    /* charcoal, quiet  — available to rent    */
+  --new-fg:      var(--stone-700);   --new-bg:      var(--stone-200); /* warm taupe       — new listing          */
+  --reduced-fg:  var(--brick-700);   --reduced-bg:  var(--brick-50);  /* RED (the lone accent) — price reduced   */
+}

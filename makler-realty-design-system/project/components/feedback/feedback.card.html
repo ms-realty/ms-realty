@@ -1,0 +1,59 @@
+<!-- @dsCard group="Components" viewport="700x540" name="Feedback" subtitle="Alert notices, EmptyState, Skeleton loading" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  body { margin: 0; }
+  .wrap { padding: 22px 24px; display: grid; grid-template-columns: 1fr 300px; gap: 24px; align-items: start; }
+  .stack { display: flex; flex-direction: column; gap: 10px; }
+  .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+  .well { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); }
+</style>
+</head>
+<body>
+<div id="root" class="wrap"></div>
+<script type="text/babel">
+  const { Alert, EmptyState, Skeleton, Button } = window.MaklerRealtyDesignSystem_9b7f1e;
+  function Demo() {
+    return (
+      <>
+        <div className="stack">
+          <span className="lbl">Alert</span>
+          <Alert variant="success" title="Запитването е изпратено">Брокер, който говори вашия език, ще отговори до един работен ден.</Alert>
+          <Alert variant="info" icon="bell">3 нови имота отговарят на запазеното ви търсене.</Alert>
+          <Alert variant="warning" title="Огледът не е потвърден" onDismiss={()=>{}}>Собственикът още не е потвърдил събота.</Alert>
+          <Alert variant="danger" title="Съобщението не е изпратено" actions={<button className="mk-alert__link">Опитай отново</button>}>Проверете имейл адреса.</Alert>
+          <span className="lbl" style={{marginTop:8}}>Skeleton</span>
+          <div style={{display:'flex',gap:14,alignItems:'flex-start'}}>
+            <Skeleton variant="photo" width={132} height={88} />
+            <div style={{flex:1,display:'flex',flexDirection:'column',gap:8,paddingTop:4}}>
+              <Skeleton variant="text" width="45%" height={13} />
+              <Skeleton variant="text" lines={2} height={10} />
+            </div>
+            <Skeleton variant="circle" width={40} />
+          </div>
+        </div>
+        <div className="stack">
+          <span className="lbl">EmptyState</span>
+          <div className="well">
+            <EmptyState size="sm" icon="search-x" title="Няма съвпадения"
+              actions={<Button size="sm" variant="secondary" iconStart="rotate-ccw">Изчисти филтрите</Button>}>
+              Разширете ценовия диапазон или премахнете удобство.
+            </EmptyState>
+          </div>
+        </div>
+      </>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>
