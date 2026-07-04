@@ -23,6 +23,7 @@ What it proves now:
 - Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
 - Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
+- Live Node HTTP server smoke fixture on an ephemeral local port.
 
 Run:
 
@@ -40,6 +41,7 @@ Generated production data:
 - `production/data/admin-fixtures.json`
 - `production/data/runtime-smoke.json`
 - `production/data/http-smoke.json`
+- `production/data/node-server-smoke.json`
 
 The next production slice can consume these contracts from a Next.js App Router
 public app and Payload CMS collections without re-deciding URL, locale, AI, or

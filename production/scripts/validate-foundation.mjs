@@ -124,4 +124,10 @@ if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") 
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
 
+const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
+if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !== "rtl") {
+  throw new Error("Node server smoke must serve Hebrew listing as RTL 200");
+}
+if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
+
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

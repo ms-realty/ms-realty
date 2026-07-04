@@ -13,7 +13,8 @@
     "admin:build": "node production/scripts/build-admin-fixtures.mjs",
     "runtime:build": "node production/scripts/build-runtime-smoke.mjs",
     "http:build": "node production/scripts/build-http-smoke.mjs",
-    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run migration:build && npm run routes:build && npm run sitemap:build && npm run cms:build && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
+    "server:smoke": "node production/scripts/smoke-node-server.mjs",
+    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run migration:build && npm run routes:build && npm run sitemap:build && npm run cms:build && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run server:smoke && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
     "check": "npm run test && npm run validate"
   },
   "engines": {

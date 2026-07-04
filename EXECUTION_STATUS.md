@@ -69,6 +69,11 @@ Date: 2026-07-04
   - `GET /api/search?locale=he&q=Sandanski`
   - `GET /fr/`
   - `POST /api/leads`
+- Added live Node server smoke fixture:
+  - starts a stdlib HTTP server on an ephemeral local port
+  - fetches Hebrew listing and Hebrew search endpoints
+  - posts a valid Hebrew buyer lead
+  - rejects an unknown buyer listing reference
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`
@@ -117,6 +122,7 @@ npm run public:build
 npm run admin:build
 npm run runtime:build
 npm run http:build
+npm run server:smoke
 npm run test
 npm run validate
 python3 qa/mobile_elderly_static_check.py
