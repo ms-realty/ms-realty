@@ -2,9 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
 import { fromRoot } from "./paths.mjs";
+import { listingPath } from "./seo.mjs";
 
 export const DEFAULT_ARTIFACT_DIR = fromRoot("migration", "artifacts", "20260704-211155");
 export const DEFAULT_OUTPUT = fromRoot("production", "data", "migration-records.json");
+export const DEFAULT_ROUTE_MAP_OUTPUT = fromRoot("production", "data", "legacy-route-map.json");
 export const DEFAULT_ARTIFACT_ID = "20260704-211155";
 
 function readCsv(filePath) {
@@ -134,5 +136,90 @@ export function writeMigrationRecords(records, outPath = DEFAULT_OUTPUT) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   const summary = assertMigrationLaunchGate(records);
   fs.writeFileSync(outPath, `${JSON.stringify({ artifact_id: DEFAULT_ARTIFACT_ID, summary, records }, null, 2)}\n`);
+  return { outPath, summary };
+}
+
+export function buildLegacyRouteMap(registry, records, listings) {
+  const listingsByUrl = new Map(listings.map((listing) => [listing.url, listing]));
+
+  return records.map((record) => {
+    const listing = listingsByUrl.get(record.old_url);
+    if (record.url_type === "listing" && listing) {
+      return {
+        old_url: record.old_url,
+        source_domain: record.source_domain,
+        url_type: record.url_type,
+        current_status: record.status,
+        target_locale: listing.locale,
+        target_path: listingPath(registry, listing.locale, listing.id),
+        planned_status: 301,
+        deployable: false,
+        review_required: true,
+        review_state: record.review_state,
+        reason: "Listing matched crawl fixture; approve same-content route before enabling one-hop redirect.",
+      };
+    }
+
+    return {
+      old_url: record.old_url,
+      source_domain: record.source_domain,
+      url_type: record.url_type,
+      current_status: record.status,
+      target_locale: null,
+      target_path: null,
+      planned_status: null,
+      deployable: false,
+      review_required: true,
+      review_state: record.review_state,
+      reason: `${record.url_type} mapping requires editorial review; no homepage or search fallback generated.`,
+    };
+  });
+}
+
+export function summarizeLegacyRouteMap(routeMap) {
+  const summary = {
+    total: routeMap.length,
+    byDomain: {},
+    mappedListings: 0,
+    unmappedByType: {},
+    byTargetLocale: {},
+    homepageTargets: 0,
+    deployable: 0,
+    reviewRequired: 0,
+  };
+
+  for (const row of routeMap) {
+    summary.byDomain[row.source_domain] = (summary.byDomain[row.source_domain] || 0) + 1;
+    if (row.target_path) {
+      if (row.url_type === "listing") summary.mappedListings += 1;
+      summary.byTargetLocale[row.target_locale] = (summary.byTargetLocale[row.target_locale] || 0) + 1;
+      if (row.target_path === "/" || /^\/[a-z]{2}(?:-[A-Z]{2})?\/?$/.test(row.target_path)) {
+        summary.homepageTargets += 1;
+      }
+    } else {
+      summary.unmappedByType[row.url_type] = (summary.unmappedByType[row.url_type] || 0) + 1;
+    }
+    if (row.deployable) summary.deployable += 1;
+    if (row.review_required) summary.reviewRequired += 1;
+  }
+
+  return summary;
+}
+
+export function assertLegacyRouteMap(routeMap) {
+  const summary = summarizeLegacyRouteMap(routeMap);
+  if (summary.total !== 457) throw new Error(`Expected 457 route rows, got ${summary.total}`);
+  if (summary.mappedListings !== 165) throw new Error(`Expected 165 listing route mappings, got ${summary.mappedListings}`);
+  if (summary.byTargetLocale.bg !== 113) throw new Error("Expected 113 BG listing mappings");
+  if (summary.byTargetLocale.ru !== 52) throw new Error("Expected 52 RU listing mappings");
+  if (summary.homepageTargets !== 0) throw new Error("Homepage targets are not allowed in legacy route map");
+  if (summary.deployable !== 0) throw new Error("Route mappings must stay non-deployable until reviewed");
+  return summary;
+}
+
+export function writeLegacyRouteMap(routeMap, outPath = DEFAULT_ROUTE_MAP_OUTPUT) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  const summary = assertLegacyRouteMap(routeMap);
+  fs.writeFileSync(outPath, `${JSON.stringify({ artifact_id: DEFAULT_ARTIFACT_ID, summary, routes: routeMap }, null, 2)}\n`);
   return { outPath, summary };
 }

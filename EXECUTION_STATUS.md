@@ -45,6 +45,11 @@ Date: 2026-07-04
   - locale, SEO, Hermes, translation, lead, and migration contracts
   - normalized migration record builder in `production/scripts/build-migration-records.mjs`
   - launch-gate checks for row counts, domains, statuses, redirect review rows, and homepage redirects
+- Added executable legacy route map:
+  - 165 listing URLs mapped to locale-prefixed production routes
+  - 52 Russian listings mapped under `/ru/`
+  - pages, posts, and taxonomy URLs left review-gated
+  - zero homepage/search fallback redirects
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`
@@ -86,6 +91,7 @@ python3 search/build_search_indexes.py
 python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
 python3 locales/validate_locale_registry.py
 npm run migration:build
+npm run routes:build
 npm run public:build
 npm run admin:build
 npm run test

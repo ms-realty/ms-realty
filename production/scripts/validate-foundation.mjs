@@ -55,6 +55,12 @@ for (const field of ["locale", "locale_prefix", "locale_is_indexable", "translat
 const migration = JSON.parse(fs.readFileSync(fromRoot("production", "data", "migration-records.json"), "utf8"));
 assertMigrationLaunchGate(migration.records);
 
+const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8"));
+if (routeMap.summary.mappedListings !== 165) throw new Error("Legacy route map must include 165 listing mappings");
+if (routeMap.summary.byTargetLocale.ru !== 52) throw new Error("Legacy route map must preserve 52 RU listings");
+if (routeMap.summary.homepageTargets !== 0) throw new Error("Legacy route map must not target homepages");
+if (routeMap.summary.deployable !== 0) throw new Error("Legacy route map must stay review-gated");
+
 const publicFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "public-fixtures.json"), "utf8"));
 if (publicFixtures.listing_he.dir !== "rtl") throw new Error("Hebrew public fixture must render RTL");
 if (publicFixtures.listing_el.path !== `/el/akinita/${publicFixtures.source_listing_id}`) {
