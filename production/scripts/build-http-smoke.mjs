@@ -105,6 +105,8 @@ const smoke = {
   listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
   searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
+  location: await dispatchHttp(app, { url: "/he/locations/sandanski" }),
+  locationHtml: await dispatchHttp(app, { url: "/he/locations/sandanski?format=html" }),
   searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
   fallback: await dispatchHttp(app, { url: "/fr/" }),
   languageRequest: await dispatchHttp(app, {

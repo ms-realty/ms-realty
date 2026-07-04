@@ -99,20 +99,25 @@ const redirectApprovals = fs
 if (redirectApprovals.length !== 2) throw new Error("Redirect approval ledger must contain two reviewed rows");
 
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
-if (sitemap.summary.listing_entries !== 167 || sitemap.summary.seller_pages !== 7) {
-  throw new Error("Localized sitemap must include approved listing entries plus public seller pages");
+if (sitemap.summary.listing_entries !== 167 || sitemap.summary.location_pages !== 6 || sitemap.summary.seller_pages !== 7) {
+  throw new Error("Localized sitemap must include approved listing, location, and seller pages");
 }
-if (sitemap.summary.byLocale.bg !== 114 || sitemap.summary.byLocale.ru !== 53) {
+if (sitemap.summary.byLocale.bg !== 116 || sitemap.summary.byLocale.ru !== 55) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 2 || sitemap.summary.byLocale.he !== 2) {
+if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 3) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
 
 const sitemapXml = fs.readFileSync(fromRoot("production", "data", "sitemap.xml"), "utf8");
 const robotsTxt = fs.readFileSync(fromRoot("production", "data", "robots.txt"), "utf8");
-if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001") || !sitemapXml.includes("/he/sell") || sitemapXml.includes("/fr/")) {
+if (
+  !sitemapXml.includes("/he/properties/MS-CRAWL-0001") ||
+  !sitemapXml.includes("/he/locations/sandanski") ||
+  !sitemapXml.includes("/he/sell") ||
+  sitemapXml.includes("/fr/")
+) {
   throw new Error("Sitemap XML must include approved Hebrew and exclude French");
 }
 if (!robotsTxt.includes("Sitemap:")) throw new Error("Robots must include sitemap URL");

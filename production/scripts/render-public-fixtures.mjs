@@ -6,6 +6,7 @@ import {
   renderAdminShell,
   renderLanguageFallback,
   renderListingPage,
+  renderLocationPage,
   renderSearchPage,
   renderSellerPage,
 } from "../lib/public-site.mjs";
@@ -24,6 +25,7 @@ const fixtures = {
   listing_fr_fallback: renderListingPage({ registry, listing, localeCode: "fr" }),
   fallback_fr: renderLanguageFallback({ registry, requestedLocale: "fr" }),
   search_he: renderSearchPage({ registry, localeCode: "he", listings, query: "Sandanski" }),
+  location_he: renderLocationPage({ registry, localeCode: "he", location: "Sandanski", listings }),
   seller_he: renderSellerPage({ registry, localeCode: "he" }),
   admin_ru: renderAdminShell({ registry, requestedLocale: "ru" }),
   admin_el_fallback: renderAdminShell({ registry, requestedLocale: "el" }),

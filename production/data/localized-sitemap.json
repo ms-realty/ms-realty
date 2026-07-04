@@ -3,13 +3,14 @@
   "summary": {
     "listings": 165,
     "listing_entries": 167,
+    "location_pages": 6,
     "seller_pages": 7,
-    "entries": 174,
+    "entries": 180,
     "byLocale": {
-      "bg": 114,
-      "el": 2,
-      "he": 2,
-      "ru": 53,
+      "bg": 116,
+      "el": 3,
+      "he": 3,
+      "ru": 55,
       "en": 1,
       "de": 1,
       "nl": 1
@@ -2334,6 +2335,158 @@
         {
           "hreflang": "ru",
           "href": "/ru/properties/MS-CRAWL-0165"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "bg",
+      "location": "Sandanski",
+      "loc": "/bg/lokacii/sandanski",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/sandanski"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/topothesies/sandanski"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/locations/sandanski"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/sandanski"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/sandanski"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "el",
+      "location": "Sandanski",
+      "loc": "/el/topothesies/sandanski",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/sandanski"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/topothesies/sandanski"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/locations/sandanski"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/sandanski"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/sandanski"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "he",
+      "location": "Sandanski",
+      "loc": "/he/locations/sandanski",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/sandanski"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/topothesies/sandanski"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/locations/sandanski"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/sandanski"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/sandanski"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "ru",
+      "location": "Sandanski",
+      "loc": "/ru/locations/sandanski",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/sandanski"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/topothesies/sandanski"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/locations/sandanski"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/sandanski"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/sandanski"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "bg",
+      "location": "Petrich",
+      "loc": "/bg/lokacii/petrich",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/petrich"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/petrich"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/petrich"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "ru",
+      "location": "Petrich",
+      "loc": "/ru/locations/petrich",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/petrich"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/locations/petrich"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/petrich"
         }
       ]
     },

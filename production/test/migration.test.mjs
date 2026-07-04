@@ -107,11 +107,13 @@ test("generated localized sitemap file is approved-translation gated when presen
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(data.summary.listings, 165);
   assert.equal(data.summary.listing_entries, 167);
+  assert.equal(data.summary.location_pages, 6);
   assert.equal(data.summary.seller_pages, 7);
-  assert.equal(data.summary.byLocale.bg, 114);
-  assert.equal(data.summary.byLocale.ru, 53);
-  assert.equal(data.summary.byLocale.el, 2);
-  assert.equal(data.summary.byLocale.he, 2);
+  assert.equal(data.summary.byLocale.bg, 116);
+  assert.equal(data.summary.byLocale.ru, 55);
+  assert.equal(data.summary.byLocale.el, 3);
+  assert.equal(data.summary.byLocale.he, 3);
   assert.equal(data.summary.byLocale.fr, undefined);
+  assert.equal(data.entries.some((entry) => entry.loc === "/he/locations/sandanski" && entry.type === "location"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/sell" && entry.type === "seller"), true);
 });

@@ -3,15 +3,18 @@ import path from "node:path";
 import { approvedTranslationRecordsForListing, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
-import { sitemapEntriesForListing, sitemapEntriesForSeller } from "../lib/seo.mjs";
+import { sitemapEntriesForListing, sitemapEntriesForLocations, sitemapEntriesForSeller } from "../lib/seo.mjs";
 
 const registry = loadLocaleRegistry();
 const listings = loadListings();
 const listingEntries = listings.flatMap((listing) =>
   sitemapEntriesForListing(registry, listing.id, approvedTranslationRecordsForListing(registry, listing)),
 );
+const locationEntries = sitemapEntriesForLocations(registry, listings, (listing) =>
+  approvedTranslationRecordsForListing(registry, listing),
+);
 const sellerEntries = sitemapEntriesForSeller(registry);
-const entries = [...listingEntries, ...sellerEntries];
+const entries = [...listingEntries, ...locationEntries, ...sellerEntries];
 const byLocale = {};
 for (const entry of entries) byLocale[entry.locale] = (byLocale[entry.locale] || 0) + 1;
 
@@ -25,6 +28,7 @@ fs.writeFileSync(
       summary: {
         listings: listings.length,
         listing_entries: listingEntries.length,
+        location_pages: locationEntries.length,
         seller_pages: sellerEntries.length,
         entries: entries.length,
         byLocale,

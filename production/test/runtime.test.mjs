@@ -39,6 +39,9 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(seller.kind, "seller");
   assert.equal(seller.path, "/he/sell");
   assert.equal(seller.body.valuation.payload.leadType, "seller");
+  assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").kind, "location");
+  assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length, 1);
+  assert.equal(renderRuntimePath(registry, seed, "/he/locations/petrich").status, 404);
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
@@ -88,7 +91,7 @@ test("runtime resolves admin-added approved locale listing routes from translati
     indexable: true,
     route_segments: { listing: "propiedades", search: "buscar", seller: "vender" },
   });
-  const page = renderRuntimePath(updated, seed, "/es/propiedades/MS-CRAWL-0001", [
+  const translationTasks = [
     {
       id: "translation-listing-MS-CRAWL-0001-es",
       object_type: "listing",
@@ -98,13 +101,15 @@ test("runtime resolves admin-added approved locale listing routes from translati
       human_approved: true,
       public_indexable: true,
     },
-  ]);
+  ];
+  const page = renderRuntimePath(updated, seed, "/es/propiedades/MS-CRAWL-0001", translationTasks);
 
   assert.equal(page.status, 200);
   assert.equal(page.locale, "es");
   assert.equal(page.indexable, true);
   assert.equal(page.hreflang.some((link) => link.hreflang === "es"), true);
   assert.equal(renderRuntimePath(updated, seed, "/es/vender").locale, "es");
+  assert.equal(renderRuntimePath(updated, seed, "/es/locations/sandanski", translationTasks).status, 200);
 });
 
 test("runtime search uses CMS seed listings and keeps mobile-first contract", () => {

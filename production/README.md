@@ -24,6 +24,7 @@ What it proves now:
 - Moderated public media contract that separates imported gallery photos from review-gated floor-plan/video/tour assets.
 - Draft Photo Sphere Viewer 360 tour fields with required gallery fallback policy.
 - Public route fixtures for locale-prefixed listing/search/fallback routes.
+- Crawlable location pages generated from reviewed listing inventory.
 - Admin CRM/CMS shell language availability in BG, RU, and EN.
 - Website route coverage for Greek and Hebrew, including Hebrew RTL metadata.
 - Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
@@ -37,6 +38,7 @@ What it proves now:
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
 - Runtime search query/facet filtering before pagination, with total match counts.
+- Runtime location routes expose only locale-indexable listing cards and return noindex/404 for empty locale-location pairs.
 - Listing conversion actions for inquiry, callback, viewing request, save, share, and print/PDF, with direct broker contact channels review-gated.
 - Broker contact approval ledger that enables direct phone, WhatsApp, and Viber links only after review.
 - Lead contact preference validation and persistence for phone, Viber, WhatsApp, and email.
@@ -46,6 +48,7 @@ What it proves now:
 - Authenticated admin locale creation for non-indexable website locales.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
+- Served sitemap XML includes approved location pages without unapproved French routes.
 - Append-only lead ledger for persisted buyer inquiry, viewing request, and seller valuation smoke rows, including source classification.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.

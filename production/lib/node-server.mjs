@@ -76,6 +76,14 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must expose approved direct contact links");
   }
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
+  if (
+    smoke.location.status !== 200 ||
+    smoke.location.body.kind !== "location" ||
+    smoke.location.body.body.location !== "Sandanski" ||
+    smoke.location.body.cards.some((card) => card.translation_indexable !== true)
+  ) {
+    throw new Error("Server must serve reviewed location inventory pages");
+  }
   if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable language request");
   }
@@ -130,6 +138,9 @@ export function assertServerSmoke(smoke) {
   }
   if (smoke.searchHtml?.status !== 200 || !smoke.searchHtml.body.includes("data-kind=\"search\"")) {
     throw new Error("Server must serve rendered search HTML");
+  }
+  if (smoke.locationHtml?.status !== 200 || !smoke.locationHtml.body.includes("data-kind=\"location\"")) {
+    throw new Error("Server must serve rendered location HTML");
   }
   if (
     smoke.sellerPage?.status !== 200 ||

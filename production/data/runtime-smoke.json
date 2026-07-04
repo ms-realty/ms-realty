@@ -699,6 +699,68 @@
       }
     }
   },
+  "location_he": {
+    "kind": "location",
+    "status": 200,
+    "requested_locale": "he",
+    "locale": "he",
+    "lang": "he",
+    "dir": "rtl",
+    "path": "/he/locations/sandanski",
+    "canonical": "/he/locations/sandanski",
+    "indexable": true,
+    "metadata": {
+      "title": "MS Realty properties in Sandanski",
+      "description": "Reviewed MS Realty property inventory for Sandanski.",
+      "robots": "index,follow"
+    },
+    "hreflang": [
+      {
+        "hreflang": "bg",
+        "href": "/bg/lokacii/sandanski"
+      },
+      {
+        "hreflang": "ru",
+        "href": "/ru/locations/sandanski"
+      },
+      {
+        "hreflang": "el",
+        "href": "/el/topothesies/sandanski"
+      },
+      {
+        "hreflang": "he",
+        "href": "/he/locations/sandanski"
+      },
+      {
+        "hreflang": "x-default",
+        "href": "/bg/lokacii/sandanski"
+      }
+    ],
+    "body": {
+      "h1": "Properties in Sandanski",
+      "location": "Sandanski",
+      "listing_count": 1
+    },
+    "cards": [
+      {
+        "id": "MS-CRAWL-0001",
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "path": "/he/properties/MS-CRAWL-0001",
+        "translation_display": "reviewed_translation",
+        "translation_locale": "he",
+        "translation_status": "approved",
+        "translation_indexable": true,
+        "translation_human_approved": true,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "property",
+        "offer_type": "rent",
+        "bedrooms": null,
+        "price_eur": null,
+        "image_count": 35
+      }
+    ]
+  },
   "fallback_fr": {
     "kind": "language_fallback",
     "status": 200,

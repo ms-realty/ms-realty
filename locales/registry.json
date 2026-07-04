@@ -19,6 +19,7 @@
       "route_segments": {
         "listing": "imoti",
         "search": "tarsene",
+        "location": "lokacii",
         "seller": "prodai"
       }
     },
@@ -35,6 +36,7 @@
       "route_segments": {
         "listing": "properties",
         "search": "search",
+        "location": "locations",
         "seller": "sell"
       }
     },
@@ -51,6 +53,7 @@
       "route_segments": {
         "listing": "immobilien",
         "search": "suche",
+        "location": "orte",
         "seller": "verkaufen"
       }
     },
@@ -67,6 +70,7 @@
       "route_segments": {
         "listing": "vastgoed",
         "search": "zoeken",
+        "location": "locaties",
         "seller": "verkopen"
       }
     },
@@ -83,6 +87,7 @@
       "route_segments": {
         "listing": "properties",
         "search": "search",
+        "location": "locations",
         "seller": "sell"
       }
     },
@@ -99,6 +104,7 @@
       "route_segments": {
         "listing": "akinita",
         "search": "anazitisi",
+        "location": "topothesies",
         "seller": "polisi"
       }
     },
@@ -115,6 +121,7 @@
       "route_segments": {
         "listing": "properties",
         "search": "search",
+        "location": "locations",
         "seller": "sell"
       }
     },
@@ -131,6 +138,7 @@
       "route_segments": {
         "listing": "properties",
         "search": "recherche",
+        "location": "lieux",
         "seller": "vendre"
       }
     }

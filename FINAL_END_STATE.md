@@ -86,6 +86,10 @@ Implemented now:
   - newly added public locales can draft, approve, publish, and serve a locale-prefixed listing from the translation ledger
   - served sitemap XML includes those approved dynamic locale routes
   - search API cards reflect the same reviewed dynamic locale translation state
+- Location page contract:
+  - real listing locations generate crawlable locale-prefixed pages only when that locale has indexable inventory there
+  - Hebrew Sandanski is served at `/he/locations/sandanski`
+  - empty locale-location pairs stay noindex/404 instead of becoming thin localized pages
 - Runtime search filter contract:
   - query and core facets are applied before pagination
   - result payloads expose total matches separately from returned cards

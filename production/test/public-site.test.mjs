@@ -7,6 +7,7 @@ import {
   renderAdminShell,
   renderLanguageFallback,
   renderListingPage,
+  renderLocationPage,
   renderSearchPage,
   renderSellerPage,
 } from "../lib/public-site.mjs";
@@ -115,6 +116,23 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_type, "apartment");
+});
+
+test("location page exposes only indexable locale inventory", () => {
+  const he = renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" });
+  const missing = renderLocationPage({ registry, listings, localeCode: "he", location: "Petrich" });
+
+  assert.equal(he.status, 200);
+  assert.equal(he.path, "/he/locations/sandanski");
+  assert.equal(he.dir, "rtl");
+  assert.equal(he.indexable, true);
+  assert.equal(he.cards.length, 1);
+  assert.equal(he.cards[0].id, "MS-CRAWL-0001");
+  assert.equal(he.cards[0].translation_indexable, true);
+  assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
+  assert.equal(missing.status, 404);
+  assert.equal(missing.indexable, false);
+  assert.equal(missing.metadata.robots, "noindex,follow");
 });
 
 test("seller valuation page is locale-prefixed and posts seller leads", () => {

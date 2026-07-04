@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { addLocaleToRegistry, loadLocaleRegistry, assertLocaleRegistry, resolvePublicLocale } from "../lib/locales.mjs";
-import { listingPath, sellerPath, hreflangForListing, sitemapEntriesForListing } from "../lib/seo.mjs";
+import { listingPath, locationPath, sellerPath, hreflangForListing, sitemapEntriesForListing } from "../lib/seo.mjs";
 import { approveHumanTranslation, contentHash, markStaleWhenSourceChanges } from "../lib/translations.mjs";
 import { assertHermesActionAllowed, translationPrompt } from "../lib/hermes.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
@@ -18,6 +18,7 @@ test("locale registry supports dynamic approved website languages and admin lang
 test("locale routes and hreflang only include human-approved translations", () => {
   assert.equal(listingPath(registry, "el", "ms-987"), "/el/akinita/ms-987");
   assert.equal(listingPath(registry, "he", "ms-987"), "/he/properties/ms-987");
+  assert.equal(locationPath(registry, "he", "Sandanski"), "/he/locations/sandanski");
   assert.equal(sellerPath(registry, "he"), "/he/sell");
 
   const links = hreflangForListing(registry, "ms-987", [
@@ -65,6 +66,7 @@ test("admin-added locales are valid but not public indexable by default", () => 
   assert.equal(locale.public_enabled, false);
   assert.equal(locale.indexable, false);
   assert.equal(locale.route_segments.seller, "sell");
+  assert.equal(locale.route_segments.location, "locations");
   assert.deepEqual(updated.admin_locales, ["bg", "ru", "en"]);
   assert.equal(resolvePublicLocale(updated, "es").locale.code, "en");
 });

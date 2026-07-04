@@ -78,6 +78,20 @@ function renderSearch(page) {
 </main>`;
 }
 
+function renderLocation(page) {
+  const cards = page.cards
+    .map(
+      (card) =>
+        `<article><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2><p>${escapeHtml(card.property_type)}</p></article>`,
+    )
+    .join("");
+  return `
+<main data-kind="location" data-location="${escapeHtml(page.body.location)}" data-total-matches="${escapeHtml(page.body.listing_count)}">
+  <h1>${escapeHtml(page.body.h1)}</h1>
+  <section aria-label="Location listings">${cards}</section>
+</main>`;
+}
+
 function renderSeller(page) {
   return `
 <main data-kind="seller">
@@ -106,6 +120,7 @@ function renderFallback(page) {
 function renderBody(page) {
   if (page.kind === "listing") return renderListing(page);
   if (page.kind === "search") return renderSearch(page);
+  if (page.kind === "location") return renderLocation(page);
   if (page.kind === "seller") return renderSeller(page);
   if (page.kind === "language_fallback") return renderFallback(page);
   return `<main data-kind="not-found"><h1>Not found</h1></main>`;

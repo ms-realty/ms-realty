@@ -380,6 +380,14 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must filter search before paginating cards");
   }
   if (
+    smoke.location.status !== 200 ||
+    smoke.location.body.kind !== "location" ||
+    smoke.location.body.body.location !== "Sandanski" ||
+    smoke.location.body.cards.some((card) => card.translation_indexable !== true)
+  ) {
+    throw new Error("HTTP smoke must serve reviewed location inventory pages");
+  }
+  if (
     smoke.searchFiltered.status !== 200 ||
     smoke.searchFiltered.body.search.filters.property_type !== "apartment" ||
     !smoke.searchFiltered.body.cards.every((card) => card.property_type === "apartment")
@@ -469,6 +477,9 @@ export function assertHttpSmoke(smoke) {
     !smoke.searchHtml.body.includes("data-total-matches=")
   ) {
     throw new Error("HTTP smoke must serve rendered search HTML");
+  }
+  if (smoke.locationHtml?.status !== 200 || !smoke.locationHtml.body.includes("data-kind=\"location\"")) {
+    throw new Error("HTTP smoke must serve rendered location HTML");
   }
   if (
     smoke.sellerPage?.status !== 200 ||

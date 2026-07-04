@@ -790,6 +790,50 @@
     <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/properties/MS-CRAWL-0165" />
   </url>
   <url>
+    <loc>https://makler-realty.com/bg/lokacii/sandanski</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/el/topothesies/sandanski</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/he/locations/sandanski</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/ru/locations/sandanski</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/sandanski" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/topothesies/sandanski" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/sandanski" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/bg/lokacii/petrich</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/petrich" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/petrich" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/petrich" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/ru/locations/petrich</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/petrich" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/petrich" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/petrich" />
+  </url>
+  <url>
     <loc>https://makler-realty.com/bg/prodai</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
     <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />

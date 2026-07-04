@@ -12,6 +12,21 @@ export function sellerPath(registry, localeCode) {
   return `/${locale.code}/${locale.route_segments.seller}`;
 }
 
+export function locationSlug(location) {
+  return (
+    String(location || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "location"
+  );
+}
+
+export function locationPath(registry, localeCode, location) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/${locale.route_segments.location || "locations"}/${locationSlug(location)}`;
+}
+
 export function hreflangForSeller(registry) {
   return [
     ...publicIndexableLocales(registry).map((locale) => ({
@@ -53,6 +68,16 @@ export function hreflangForListing(registry, listingId, translations) {
   return links;
 }
 
+export function hreflangForLocation(registry, location, locales) {
+  const links = locales.map((locale) => ({
+    hreflang: locale,
+    href: locationPath(registry, locale, location),
+  }));
+  const fallback = locales.includes(registry.source_locale) ? registry.source_locale : locales[0];
+  if (fallback) links.push({ hreflang: "x-default", href: locationPath(registry, fallback, location) });
+  return links;
+}
+
 export function sitemapEntriesForListing(registry, listingId, translations) {
   const hreflang = hreflangForListing(registry, listingId, translations);
   return translations.filter((translation) => isTranslationIndexable(registry, translation)).map((translation) => ({
@@ -61,6 +86,36 @@ export function sitemapEntriesForListing(registry, listingId, translations) {
     loc: listingPath(registry, translation.locale, listingId),
     hreflang,
   }));
+}
+
+function listingLocation(listing) {
+  return String(listing.location || listing.facts?.location || "").trim();
+}
+
+export function sitemapEntriesForLocations(registry, listings, translationsForListing) {
+  const byLocation = new Map();
+  for (const listing of listings) {
+    const location = listingLocation(listing);
+    if (!location) continue;
+    for (const translation of translationsForListing(listing)) {
+      if (!isTranslationIndexable(registry, translation)) continue;
+      const locales = byLocation.get(location) || new Set();
+      locales.add(translation.locale);
+      byLocation.set(location, locales);
+    }
+  }
+
+  return [...byLocation.entries()].flatMap(([location, locales]) => {
+    const localeCodes = [...locales].sort();
+    const hreflang = hreflangForLocation(registry, location, localeCodes);
+    return localeCodes.map((locale) => ({
+      type: "location",
+      locale,
+      location,
+      loc: locationPath(registry, locale, location),
+      hreflang,
+    }));
+  });
 }
 
 export function sitemapEntriesForSeller(registry) {

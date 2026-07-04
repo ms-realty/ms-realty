@@ -128,6 +128,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
     searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
+    location: await dispatchHttp(app, { url: "/he/locations/sandanski" }),
+    locationHtml: await dispatchHttp(app, { url: "/he/locations/sandanski?format=html" }),
     searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
     fallback: await dispatchHttp(app, { url: "/fr/" }),
     languageRequest: await dispatchHttp(app, {
@@ -292,6 +294,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
   assert.equal(smoke.search.body.cards.length > 0, true);
+  assert.equal(smoke.location.body.cards.length, 1);
+  assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
   assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");

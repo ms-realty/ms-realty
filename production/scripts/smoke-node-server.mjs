@@ -87,6 +87,10 @@ try {
     searchHtml: await textFetch(baseUrl, "/he/search?q=Sandanski", {
       headers: { accept: "text/html" },
     }),
+    location: await jsonFetch(baseUrl, "/he/locations/sandanski"),
+    locationHtml: await textFetch(baseUrl, "/he/locations/sandanski", {
+      headers: { accept: "text/html" },
+    }),
     languageRequest: await jsonFetch(baseUrl, "/api/language-requests", {
       method: "POST",
       body: JSON.stringify({

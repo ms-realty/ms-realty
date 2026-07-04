@@ -3,8 +3,8 @@ import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
 import { fromRoot } from "./paths.mjs";
-import { renderLanguageFallback, renderListingPage, renderSearchPage, renderSellerPage } from "./public-site.mjs";
-import { listingPath, sellerPath } from "./seo.mjs";
+import { renderLanguageFallback, renderListingPage, renderLocationPage, renderSearchPage, renderSellerPage } from "./public-site.mjs";
+import { locationPath, listingPath, sellerPath } from "./seo.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 
 export const DEFAULT_CMS_SEED_PATH = fromRoot("production", "data", "cms-seed.json");
@@ -68,6 +68,10 @@ function translationPathMatches(registry, record, translation, normalized) {
   }
 }
 
+function locationNames(seed) {
+  return [...new Set(listingRecords(seed).map((record) => String(record.facts.location || "").trim()).filter(Boolean))];
+}
+
 export function resolveRuntimePath(registry, seed, pathname, translationTasks = []) {
   const normalized = pathname.replace(/\/$/, "");
   for (const record of listingRecords(seed)) {
@@ -94,6 +98,11 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   });
   if (sellerLocale) return { type: "seller", localeCode: sellerLocale.code };
 
+  for (const locale of registry.locales) {
+    const location = locationNames(seed).find((candidate) => locationPath(registry, locale.code, candidate) === normalized);
+    if (location) return { type: "location", localeCode: locale.code, location };
+  }
+
   const localeMatch = normalized.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)\/?$/);
   if (localeMatch) {
     return { type: "language_fallback", localeCode: localeMatch[1] };
@@ -118,6 +127,17 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   }
   if (resolved.type === "seller") {
     return renderSellerPage({ registry, localeCode: resolved.localeCode });
+  }
+  if (resolved.type === "location") {
+    return renderLocationPage({
+      registry,
+      localeCode: resolved.localeCode,
+      location: resolved.location,
+      listings: listingRecords(seed).map((record) => ({
+        ...listingFromCmsRecord(record),
+        translations: mergeRuntimeTranslations(record, translationTasks),
+      })),
+    });
   }
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
@@ -149,6 +169,7 @@ export function buildRuntimeSmoke(registry, seed) {
     listing_he: renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"),
     listing_ru: renderRuntimePath(registry, seed, ruListing.routing.target_path),
     seller_he: renderRuntimePath(registry, seed, "/he/sell"),
+    location_he: renderRuntimePath(registry, seed, "/he/locations/sandanski"),
     fallback_fr: renderRuntimePath(registry, seed, "/fr/"),
     search_he: searchRuntimeListings(registry, seed, { localeCode: "he", query: "Sandanski" }),
     lead_he: submitRuntimeLead(registry, seed, {
@@ -196,6 +217,12 @@ export function assertRuntimeSmoke(smoke) {
   if (smoke.fallback_fr.indexable !== false) throw new Error("Runtime French fallback must not be indexable");
   if (smoke.seller_he.status !== 200 || smoke.seller_he.body.valuation.payload.source !== "website_seller_valuation") {
     throw new Error("Runtime seller page must expose seller valuation lead action");
+  }
+  if (smoke.location_he.status !== 200 || smoke.location_he.kind !== "location" || smoke.location_he.body.location !== "Sandanski") {
+    throw new Error("Runtime location page must render reviewed Sandanski inventory");
+  }
+  if (!smoke.location_he.cards.length || smoke.location_he.cards.some((card) => card.translation_indexable !== true)) {
+    throw new Error("Runtime location page must only expose indexable locale cards");
   }
   if (smoke.search_he.mobile_policy.list_first_mobile !== true) throw new Error("Runtime search must preserve mobile policy");
   if (smoke.lead_he.admin_locale !== "en" || smoke.lead_he.hermes_reply_draft.can_send_without_approval !== false) {

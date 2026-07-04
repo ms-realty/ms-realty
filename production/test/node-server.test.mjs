@@ -120,6 +120,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         searchHtml: await textFetch(baseUrl, "/he/search?q=Sandanski", {
           headers: { accept: "text/html" },
         }),
+        location: await jsonFetch(baseUrl, "/he/locations/sandanski"),
+        locationHtml: await textFetch(baseUrl, "/he/locations/sandanski", {
+          headers: { accept: "text/html" },
+        }),
         languageRequest: await jsonFetch(baseUrl, "/api/language-requests", {
           method: "POST",
           body: JSON.stringify({
@@ -273,6 +277,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertServerSmoke(smoke), true);
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
       assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
+      assert.equal(smoke.location.body.cards.length, 1);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
       assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
       assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);

@@ -1,5 +1,13 @@
 import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } from "./locales.mjs";
-import { hreflangForListing, hreflangForSeller, isTranslationIndexable, listingPath, sellerPath } from "./seo.mjs";
+import {
+  hreflangForListing,
+  hreflangForLocation,
+  hreflangForSeller,
+  isTranslationIndexable,
+  listingPath,
+  locationPath,
+  sellerPath,
+} from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { publicTour } from "./tours.mjs";
@@ -193,6 +201,34 @@ function searchTranslationState(registry, listing, locale) {
     indexable,
     display,
   };
+}
+
+function listingCard(registry, listing, locale) {
+  const view = listingToPublicViewModel(listing);
+  const state = searchTranslationState(registry, listing, locale);
+  const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
+  const copy = localizedCopy(copyLocale, view);
+  return {
+    id: listing.id,
+    title: copy.title,
+    path: listingPath(registry, locale.code, listing.id),
+    translation_display: state.display,
+    translation_locale: state.translation?.locale || locale.code,
+    translation_status: state.translation?.status || "missing",
+    translation_indexable: state.indexable,
+    translation_human_approved: state.translation?.human_approved === true,
+    source_locale: listing.locale,
+    location: view.location,
+    property_type: view.property_type,
+    offer_type: view.offer_type,
+    bedrooms: view.bedrooms,
+    price_eur: view.price_eur,
+    image_count: Number(listing.image_count || 0),
+  };
+}
+
+function indexableListingForLocale(registry, listing, locale) {
+  return searchTranslationState(registry, listing, locale).indexable;
 }
 
 function norm(value) {
@@ -395,29 +431,7 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
   const matchedListings = (localeMatches.length ? localeMatches : fallbackMatches).filter((listing) =>
     matchesSearch(listingToPublicViewModel(listing), query, filters),
   );
-  const cards = matchedListings.slice(0, 12).map((listing) => {
-    const view = listingToPublicViewModel(listing);
-    const state = searchTranslationState(registry, listing, locale);
-    const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
-    const copy = localizedCopy(copyLocale, view);
-    return {
-      id: listing.id,
-      title: copy.title,
-      path: listingPath(registry, locale.code, listing.id),
-      translation_display: state.display,
-      translation_locale: state.translation?.locale || locale.code,
-      translation_status: state.translation?.status || "missing",
-      translation_indexable: state.indexable,
-      translation_human_approved: state.translation?.human_approved === true,
-      source_locale: listing.locale,
-      location: view.location,
-      property_type: view.property_type,
-      offer_type: view.offer_type,
-      bedrooms: view.bedrooms,
-      price_eur: view.price_eur,
-      image_count: Number(listing.image_count || 0),
-    };
-  });
+  const cards = matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale));
 
   return {
     kind: "search",
@@ -457,6 +471,49 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       },
     },
     cards,
+  };
+}
+
+export function renderLocationPage({ registry, localeCode, location, listings }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const matchedListings = listings.filter((listing) => {
+    const view = listingToPublicViewModel(listing);
+    return norm(view.location) === norm(location) && indexableListingForLocale(registry, listing, locale);
+  });
+  const path = locationPath(registry, locale.code, location);
+  const indexable = resolved.available && matchedListings.length > 0;
+  const locales = publicIndexableLocales(registry)
+    .filter((candidate) =>
+      listings.some((listing) => {
+        const view = listingToPublicViewModel(listing);
+        return norm(view.location) === norm(location) && indexableListingForLocale(registry, listing, candidate);
+      }),
+    )
+    .map((candidate) => candidate.code);
+
+  return {
+    kind: "location",
+    status: indexable ? 200 : 404,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable,
+    metadata: {
+      title: `MS Realty properties in ${location}`,
+      description: `Reviewed MS Realty property inventory for ${location}.`,
+      robots: indexable ? "index,follow" : "noindex,follow",
+    },
+    hreflang: indexable ? hreflangForLocation(registry, location, locales) : [],
+    body: {
+      h1: `Properties in ${location}`,
+      location,
+      listing_count: matchedListings.length,
+    },
+    cards: matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale)),
   };
 }
 

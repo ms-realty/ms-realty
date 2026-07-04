@@ -91,6 +91,7 @@ export function addLocaleToRegistry(registry, input) {
     route_segments: {
       listing: input.route_segments?.listing || "properties",
       search: input.route_segments?.search || "search",
+      location: input.route_segments?.location || "locations",
       seller: input.route_segments?.seller || "sell",
     },
   };

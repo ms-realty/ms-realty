@@ -79,6 +79,10 @@ Date: 2026-07-04
   - a newly added public locale can draft, approve, publish, and serve a locale-prefixed listing without seed-code changes
   - served `/sitemap.xml` includes approved dynamic locale translations from the review ledger
   - `/api/search` returns reviewed translation cards for those admin-added approved locales
+- Added crawlable location route resolution:
+  - source listing locations generate locale-prefixed location pages only when that locale has at least one indexable listing in the location
+  - Hebrew Sandanski route `/he/locations/sandanski` serves reviewed inventory and HTML
+  - empty locale-location pairs return noindex/404 instead of creating thin localized pages
 - Added runtime search filtering:
   - text query and location/property type/offer type/price/bedroom filters apply before card pagination
   - search responses expose `total_matches` and `returned`
@@ -109,6 +113,7 @@ Date: 2026-07-04
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations
+  - approved location pages included for real inventory locations
   - public seller valuation pages included for each indexable website locale
   - unapproved French excluded
 - Added generated SEO files:
