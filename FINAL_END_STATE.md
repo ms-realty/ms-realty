@@ -55,6 +55,10 @@ Implemented now:
   - Property editor.
 - 360 tour CMS field contract:
   - `prototypes/360-tour-cms/README.md`
+- Executable 360 tour CMS/public contract:
+  - CMS seed has draft `photo-sphere-viewer` tour fields for every listing
+  - public listing pages keep tours unavailable until panorama and caption review
+  - fallback galleries remain available without WebGL
 - CRM lead-intake examples:
   - `prototypes/crm-lead-intake/lead-intake-demo.json`
 - Admin locale creation contract:

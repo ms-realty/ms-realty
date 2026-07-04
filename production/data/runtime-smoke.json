@@ -65,6 +65,40 @@
         "price_eur": null,
         "image_count": 35
       },
+      "media": {
+        "gallery_count": 35,
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "needs_panorama_upload",
+          "fallback_gallery": [
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+              "alt": "Property photo"
+            }
+          ]
+        }
+      },
       "ctas": {
         "inquiry": "פנייה",
         "seller_valuation": "הערכת מוכר"
@@ -129,6 +163,40 @@
         "bedrooms": null,
         "price_eur": null,
         "image_count": 33
+      },
+      "media": {
+        "gallery_count": 33,
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "needs_panorama_upload",
+          "fallback_gallery": [
+            {
+              "url": "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.ru/wp-content/uploads/2013/06/-e1466494223645.jpg",
+              "alt": "Property photo"
+            },
+            {
+              "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg",
+              "alt": "Апартаменты в Парк отеле Пирин — г.Сандански"
+            },
+            {
+              "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-1-72x72.jpg",
+              "alt": "Property photo"
+            }
+          ]
+        }
       },
       "ctas": {
         "inquiry": "Запрос",

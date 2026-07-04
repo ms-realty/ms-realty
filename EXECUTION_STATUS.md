@@ -96,6 +96,8 @@ Date: 2026-07-04
 - Added canonical CMS seed fixture:
   - 165 listing records composed from crawl/search evidence
   - 4,978 listing media rows attached
+  - draft Photo Sphere Viewer 360 tour fields attached with gallery fallback
+  - no unreviewed crawl media is published as a public 360 panorama
   - migration and route review state carried into each listing
   - approved translations included without unapproved French drafts
 - Added runtime smoke fixture:
@@ -103,6 +105,7 @@ Date: 2026-07-04
   - runs Hebrew mobile-first search from CMS seed
   - keeps French fallback non-indexable
   - accepts a Hebrew buyer lead into the EN admin queue with broker approval required
+  - exposes a draft 360 tour field with non-WebGL fallback gallery on listing pages
 - Added HTTP JSON adapter smoke fixture:
   - `GET /he/properties/MS-CRAWL-0001`
   - `GET /api/search?locale=he&q=Sandanski`

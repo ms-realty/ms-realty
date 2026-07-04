@@ -82,6 +82,8 @@ export function listingToPublicViewModel(listing) {
     bedrooms: snapshot.bedrooms,
     price_eur: snapshot.price_eur,
     image_count: snapshot.image_count,
+    media: listing.media || [],
+    tour: listing.tour || null,
     word_count: snapshot.word_count,
     schema_present: Boolean(listing.schema_present),
   };

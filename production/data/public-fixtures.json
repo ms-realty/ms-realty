@@ -66,6 +66,15 @@
         "price_eur": null,
         "image_count": 35
       },
+      "media": {
+        "gallery_count": 0,
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "missing",
+          "fallback_gallery": []
+        }
+      },
       "ctas": {
         "inquiry": "Запитване",
         "seller_valuation": "Оценка за продавач"
@@ -142,6 +151,15 @@
         "bedrooms": null,
         "price_eur": null,
         "image_count": 35
+      },
+      "media": {
+        "gallery_count": 0,
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "missing",
+          "fallback_gallery": []
+        }
       },
       "ctas": {
         "inquiry": "Ερώτηση",
@@ -220,6 +238,15 @@
         "price_eur": null,
         "image_count": 35
       },
+      "media": {
+        "gallery_count": 0,
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "missing",
+          "fallback_gallery": []
+        }
+      },
       "ctas": {
         "inquiry": "פנייה",
         "seller_valuation": "הערכת מוכר"
@@ -279,6 +306,15 @@
         "bedrooms": null,
         "price_eur": null,
         "image_count": 35
+      },
+      "media": {
+        "gallery_count": 0,
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "missing",
+          "fallback_gallery": []
+        }
       },
       "ctas": {
         "inquiry": "Inquiry",

@@ -1,6 +1,7 @@
 import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } from "./locales.mjs";
 import { hreflangForListing, isTranslationIndexable, listingPath } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+import { publicTour } from "./tours.mjs";
 
 const ACTION_LABELS = {
   bg: { inquiry: "Запитване", valuation: "Оценка за продавач" },
@@ -148,6 +149,10 @@ export function renderListingPage({ registry, listing, localeCode, translations 
         bedrooms: view.bedrooms,
         price_eur: view.price_eur,
         image_count: view.image_count,
+      },
+      media: {
+        gallery_count: view.media.length,
+        tour: publicTour(view.tour),
       },
       ctas: {
         inquiry: labels.inquiry,

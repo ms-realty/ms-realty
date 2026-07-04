@@ -34,6 +34,8 @@ export function listingFromCmsRecord(record) {
     bedrooms: record.facts.bedrooms,
     price_eur: record.facts.price_eur,
     image_count: record.facts.image_count,
+    media: record.media || [],
+    tour: record.tour || null,
     word_count: record.facts.word_count,
     schema_present: record.seo.schema_present,
   };

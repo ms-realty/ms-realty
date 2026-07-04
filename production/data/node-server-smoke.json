@@ -75,6 +75,40 @@
           "price_eur": null,
           "image_count": 35
         },
+        "media": {
+          "gallery_count": 35,
+          "tour": {
+            "available": false,
+            "provider": "photo-sphere-viewer",
+            "review_status": "needs_panorama_upload",
+            "fallback_gallery": [
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+                "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+                "alt": "Property photo"
+              }
+            ]
+          }
+        },
         "ctas": {
           "inquiry": "פנייה",
           "seller_valuation": "הערכת מוכר"
@@ -1042,6 +1076,40 @@
           "bedrooms": null,
           "price_eur": null,
           "image_count": 35
+        },
+        "media": {
+          "gallery_count": 35,
+          "tour": {
+            "available": false,
+            "provider": "photo-sphere-viewer",
+            "review_status": "needs_panorama_upload",
+            "fallback_gallery": [
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+                "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+                "alt": "Property photo"
+              }
+            ]
+          }
         },
         "ctas": {
           "inquiry": "Ερώτηση",

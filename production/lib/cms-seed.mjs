@@ -5,6 +5,7 @@ import { approvedTranslationRecordsForListing, listingSourceSnapshot } from "./c
 import { getLocale } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { isTranslationIndexable } from "./seo.mjs";
+import { createTourField } from "./tours.mjs";
 
 export const DEFAULT_MEDIA_INVENTORY_PATH = fromRoot("migration", "artifacts", "20260704-211155", "media-inventory.csv");
 export const DEFAULT_CMS_SEED_OUTPUT = fromRoot("production", "data", "cms-seed.json");
@@ -63,6 +64,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       };
     });
 
+    const media = (mediaByUrl.get(listing.url) || []).map(mediaEntry);
+
     return {
       id: listing.id,
       collection: "listings",
@@ -78,7 +81,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
         schema_present: Boolean(listing.schema_present),
       },
       translations,
-      media: (mediaByUrl.get(listing.url) || []).map(mediaEntry),
+      media,
+      tour: createTourField({ listingId: listing.id, media }),
       migration: migration
         ? {
             record_id: migration.id,
@@ -101,6 +105,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
   const translationRows = records.flatMap((record) => record.translations);
   const mediaAssets = records.reduce((total, record) => total + record.media.length, 0);
   const mediaWithAlt = records.reduce((total, record) => total + record.media.filter((media) => media.alt).length, 0);
+  const tourFields = records.filter((record) => record.tour).length;
+  const publicTours = records.filter((record) => record.tour?.is_public).length;
 
   return {
     artifact_id: "cms-seed-20260704",
@@ -110,6 +116,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       translationLocales: countBy(translationRows, (translation) => translation.locale),
       mediaAssets,
       mediaWithAlt,
+      tourFields,
+      publicTours,
       missingMigrationRecords: records.filter((record) => !record.migration).length,
       missingRouteRows: records.filter((record) => !record.routing).length,
       reviewRequiredRoutes: records.filter((record) => record.routing?.review_required).length,
@@ -128,6 +136,8 @@ export function assertCmsSeed(seed) {
   }
   if (seed.summary.translationLocales.fr) throw new Error("French CMS translations must not be seeded before approval");
   if (seed.summary.mediaAssets !== 4978) throw new Error(`Expected 4978 listing media rows, got ${seed.summary.mediaAssets}`);
+  if (seed.summary.tourFields !== 165) throw new Error("Expected one draft 360 tour field per CMS listing");
+  if (seed.summary.publicTours !== 0) throw new Error("Crawl seed must not publish unreviewed 360 tours");
   if (seed.summary.missingMigrationRecords !== 0) throw new Error("Every CMS listing needs a migration record");
   if (seed.summary.missingRouteRows !== 0) throw new Error("Every CMS listing needs a route row");
   if (seed.summary.deployableRoutes !== 0) throw new Error("CMS seed routes must stay review-gated");

@@ -20,11 +20,16 @@ test("CMS seed composes listing, migration, route, translation, and media data",
 
   assert.equal(summary.listings, 165);
   assert.equal(summary.mediaAssets, 4978);
+  assert.equal(summary.tourFields, 165);
+  assert.equal(summary.publicTours, 0);
   assert.equal(fixtureListing.translations.some((translation) => translation.locale === "he" && translation.public_indexable), true);
   assert.equal(fixtureListing.translations.some((translation) => translation.locale === "fr"), false);
   assert.equal(fixtureListing.routing.deployable, false);
   assert.equal(fixtureListing.routing.review_required, true);
   assert.ok(fixtureListing.media.length > 0);
+  assert.equal(fixtureListing.tour.provider, "photo-sphere-viewer");
+  assert.equal(fixtureListing.tour.is_public, false);
+  assert.ok(fixtureListing.tour.fallback_gallery.length > 0);
   assert.ok(ruListing.routing.target_path.startsWith("/ru/"));
 });
 

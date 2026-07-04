@@ -23,6 +23,9 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.status, 200);
   assert.equal(he.dir, "rtl");
   assert.equal(he.indexable, true);
+  assert.equal(he.body.media.tour.provider, "photo-sphere-viewer");
+  assert.equal(he.body.media.tour.available, false);
+  assert.ok(he.body.media.tour.fallback_gallery.length > 0);
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
