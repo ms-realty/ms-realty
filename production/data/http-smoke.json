@@ -1,0 +1,296 @@
+{
+  "fixture_id": "http-smoke-20260704",
+  "listing": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "listing",
+      "status": 200,
+      "requested_locale": "he",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "path": "/he/properties/MS-CRAWL-0001",
+      "canonical": "/he/properties/MS-CRAWL-0001",
+      "indexable": true,
+      "fallback": {
+        "active": false,
+        "requested_locale": "he",
+        "resolved_locale": "he"
+      },
+      "metadata": {
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+        "robots": "index,follow"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/akinita/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/properties/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        }
+      ],
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "@id": "/he/properties/MS-CRAWL-0001#listing",
+        "url": "/he/properties/MS-CRAWL-0001",
+        "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+        "image_count": 35,
+        "areaServed": "Sandanski"
+      },
+      "translation": {
+        "locale": "he",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "translator_he"
+      },
+      "body": {
+        "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "facts": {
+          "id": "MS-CRAWL-0001",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 35
+        },
+        "ctas": {
+          "inquiry": "פנייה",
+          "seller_valuation": "הערכת מוכר"
+        },
+        "source": {
+          "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
+          "source_domain": "makler-realty.com",
+          "source_locale": "bg",
+          "source_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+        }
+      }
+    }
+  },
+  "search": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "search",
+      "status": 200,
+      "requested_locale": "he",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "path": "/he/search",
+      "canonical": "/he/search",
+      "indexable": true,
+      "metadata": {
+        "title": "MS Realty property search",
+        "description": "Locale-scoped property search backed by reviewed MS Realty inventory.",
+        "robots": "index,follow"
+      },
+      "mobile_policy": {
+        "list_first_mobile": true,
+        "sticky_contact_actions": true,
+        "minimum_tap_target_px": 44
+      },
+      "search": {
+        "engines": [
+          "typesense",
+          "meilisearch"
+        ],
+        "query": "Sandanski",
+        "filters": {
+          "locale": "he",
+          "public_enabled": true,
+          "indexable": true
+        },
+        "fallback": {
+          "enabled": true,
+          "locale": "en",
+          "label": "fallback_source_locale"
+        }
+      },
+      "cards": [
+        {
+          "id": "MS-CRAWL-0001",
+          "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0001",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 35
+        },
+        {
+          "id": "MS-CRAWL-0002",
+          "title": "נכס MS Realty MS-CRAWL-0002 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0002",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 20
+        },
+        {
+          "id": "MS-CRAWL-0003",
+          "title": "נכס MS Realty MS-CRAWL-0003 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0003",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 32
+        },
+        {
+          "id": "MS-CRAWL-0004",
+          "title": "נכס MS Realty MS-CRAWL-0004 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0004",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 26
+        },
+        {
+          "id": "MS-CRAWL-0005",
+          "title": "נכס MS Realty MS-CRAWL-0005 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0005",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 26
+        },
+        {
+          "id": "MS-CRAWL-0006",
+          "title": "נכס MS Realty MS-CRAWL-0006 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0006",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 18
+        },
+        {
+          "id": "MS-CRAWL-0007",
+          "title": "נכס MS Realty MS-CRAWL-0007 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0007",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 24
+        },
+        {
+          "id": "MS-CRAWL-0008",
+          "title": "נכס MS Realty MS-CRAWL-0008 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0008",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 35
+        },
+        {
+          "id": "MS-CRAWL-0009",
+          "title": "נכס MS Realty MS-CRAWL-0009 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0009",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 26
+        },
+        {
+          "id": "MS-CRAWL-0010",
+          "title": "נכס MS Realty MS-CRAWL-0010 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0010",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 34
+        },
+        {
+          "id": "MS-CRAWL-0011",
+          "title": "נכס MS Realty MS-CRAWL-0011 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0011",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 38
+        },
+        {
+          "id": "MS-CRAWL-0012",
+          "title": "נכס MS Realty MS-CRAWL-0012 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0012",
+          "translation_display": "fallback_source_locale",
+          "source_locale": "bg",
+          "image_count": 19
+        }
+      ]
+    }
+  },
+  "fallback": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "language_fallback",
+      "status": 200,
+      "requested_locale": "fr",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "path": "/en/",
+      "canonical": "/en/",
+      "indexable": false,
+      "metadata": {
+        "title": "MS Realty language request",
+        "description": "Fallback route for languages that are not yet reviewed and approved for indexing.",
+        "robots": "noindex,follow"
+      },
+      "request_language_available": true,
+      "hermes_chat_available": true,
+      "public_translation_available": false
+    }
+  },
+  "lead": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "id": "inbox-http-lead-he-0001",
+      "lead": {
+        "id": "http-lead-he-0001",
+        "source": "website_listing_detail",
+        "leadType": "buyer",
+        "listingReference": "MS-CRAWL-0001",
+        "contact": {
+          "name": "Noa Levi"
+        },
+        "message": "Interested in this property.",
+        "language": {
+          "language": "he",
+          "direction": "rtl",
+          "adminLocale": "en",
+          "requiresTranslation": true
+        },
+        "status": "draft",
+        "requiresBrokerApproval": true,
+        "hermesDraftAllowed": true
+      },
+      "original_language": "he",
+      "original_direction": "rtl",
+      "admin_locale": "en",
+      "requires_translation": true,
+      "message_original": "Interested in this property.",
+      "hermes_reply_draft": {
+        "status": "draft",
+        "language": "he",
+        "broker_approval_required": true,
+        "can_send_without_approval": false
+      },
+      "views": {
+        "show_original_available": true,
+        "translated_draft_available": true
+      }
+    }
+  }
+}

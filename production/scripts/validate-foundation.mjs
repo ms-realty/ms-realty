@@ -116,4 +116,12 @@ if (runtimeSmoke.listing_he.dir !== "rtl" || runtimeSmoke.listing_he.status !== 
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
 
+const httpSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "http-smoke.json"), "utf8"));
+if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
+  throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
+}
+if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
+  throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
+}
+
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

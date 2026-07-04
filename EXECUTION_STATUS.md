@@ -64,6 +64,11 @@ Date: 2026-07-04
   - runs Hebrew mobile-first search from CMS seed
   - keeps French fallback non-indexable
   - accepts a Hebrew buyer lead into the EN admin queue with broker approval required
+- Added HTTP JSON adapter smoke fixture:
+  - `GET /he/properties/MS-CRAWL-0001`
+  - `GET /api/search?locale=he&q=Sandanski`
+  - `GET /fr/`
+  - `POST /api/leads`
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`
@@ -111,6 +116,7 @@ npm run cms:build
 npm run public:build
 npm run admin:build
 npm run runtime:build
+npm run http:build
 npm run test
 npm run validate
 python3 qa/mobile_elderly_static_check.py

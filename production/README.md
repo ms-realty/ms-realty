@@ -22,6 +22,7 @@ What it proves now:
 - Website route coverage for Greek and Hebrew, including Hebrew RTL metadata.
 - Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
 - Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
+- HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 
 Run:
 
@@ -38,6 +39,7 @@ Generated production data:
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`
 - `production/data/runtime-smoke.json`
+- `production/data/http-smoke.json`
 
 The next production slice can consume these contracts from a Next.js App Router
 public app and Payload CMS collections without re-deciding URL, locale, AI, or
