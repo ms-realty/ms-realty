@@ -163,6 +163,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     },
   });
   smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
+  smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
   smoke.admin = await dispatchHttp(app, {
     url: "/api/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },

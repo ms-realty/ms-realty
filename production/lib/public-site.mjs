@@ -68,6 +68,26 @@ function translationFor(translations, localeCode) {
   return translations.find((translation) => translation.locale === localeCode) || null;
 }
 
+function translationsForSearchListing(registry, listing) {
+  return listing.translations || approvedTranslationRecordsForListing(registry, listing);
+}
+
+function searchTranslationState(registry, listing, locale) {
+  const translation = translationFor(translationsForSearchListing(registry, listing), locale.code);
+  const indexable = translation ? isTranslationIndexable(registry, translation) : false;
+  const display = indexable
+    ? "reviewed_translation"
+    : translation?.status === "stale"
+      ? "stale_translation_fallback"
+      : "fallback_source_locale";
+
+  return {
+    translation,
+    indexable,
+    display,
+  };
+}
+
 export function renderListingPage({ registry, listing, localeCode, translations }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -152,12 +172,18 @@ export function renderSearchPage({ registry, localeCode, listings, query = "" })
   );
   const cards = (localeMatches.length ? localeMatches : fallbackMatches).slice(0, 12).map((listing) => {
     const view = listingToPublicViewModel(listing);
-    const copy = localizedCopy(locale.code, view);
+    const state = searchTranslationState(registry, listing, locale);
+    const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
+    const copy = localizedCopy(copyLocale, view);
     return {
       id: listing.id,
       title: copy.title,
       path: listingPath(registry, locale.code, listing.id),
-      translation_display: listing.locale === locale.code ? "reviewed_translation" : "fallback_source_locale",
+      translation_display: state.display,
+      translation_locale: state.translation?.locale || locale.code,
+      translation_status: state.translation?.status || "missing",
+      translation_indexable: state.indexable,
+      translation_human_approved: state.translation?.human_approved === true,
       source_locale: listing.locale,
       image_count: Number(listing.image_count || 0),
     };

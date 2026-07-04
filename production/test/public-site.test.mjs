@@ -62,6 +62,8 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.search.filters.locale, "he");
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
+  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
+  assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
 });
 
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {

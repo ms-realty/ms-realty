@@ -153,6 +153,7 @@ try {
     }),
   });
   smoke.staleListing = await jsonFetch(baseUrl, "/el/akinita/MS-CRAWL-0001");
+  smoke.staleSearch = await jsonFetch(baseUrl, "/api/search?locale=el&q=Sandanski");
   smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
     headers: { authorization: "Bearer local-admin-smoke" },
   });

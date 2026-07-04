@@ -136,6 +136,9 @@ if (runtimeSmoke.listing_he.dir !== "rtl" || runtimeSmoke.listing_he.status !== 
 }
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
+if (runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001")?.translation_display !== "reviewed_translation") {
+  throw new Error("Runtime smoke search must show reviewed Hebrew translation state");
+}
 
 const httpSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "http-smoke.json"), "utf8"));
 if (httpSmoke.legacyRedirect.status !== 301 || httpSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
@@ -158,6 +161,14 @@ if (httpSmoke.listingEdit.status !== 201 || httpSmoke.listingEdit.body.edit.stal
 }
 if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== false) {
   throw new Error("HTTP smoke must noindex stale public translation");
+}
+const httpStaleSearchCard = httpSmoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
+if (
+  httpSmoke.staleSearch.status !== 200 ||
+  httpStaleSearchCard?.translation_display !== "stale_translation_fallback" ||
+  httpStaleSearchCard?.translation_indexable !== false
+) {
+  throw new Error("HTTP smoke must mark stale search cards as fallback");
 }
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
@@ -207,6 +218,14 @@ if (nodeServerSmoke.listingEdit.status !== 201 || nodeServerSmoke.listingEdit.bo
 }
 if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== false) {
   throw new Error("Node server smoke must noindex stale public translation");
+}
+const nodeStaleSearchCard = nodeServerSmoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
+if (
+  nodeServerSmoke.staleSearch.status !== 200 ||
+  nodeStaleSearchCard?.translation_display !== "stale_translation_fallback" ||
+  nodeStaleSearchCard?.translation_indexable !== false
+) {
+  throw new Error("Node server smoke must mark stale search cards as fallback");
 }
 if (nodeServerSmoke.translationLedger.rows !== 3) {
   throw new Error("Node server smoke must persist draft, published, and stale translation rows");

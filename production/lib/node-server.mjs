@@ -79,6 +79,14 @@ export function assertServerSmoke(smoke) {
   if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== false) {
     throw new Error("Server must noindex stale public translation");
   }
+  const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
+  if (
+    smoke.staleSearch.status !== 200 ||
+    staleSearchCard?.translation_display !== "stale_translation_fallback" ||
+    staleSearchCard?.translation_indexable !== false
+  ) {
+    throw new Error("Server must mark stale search cards as fallback");
+  }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("Server must accept seller valuation lead");

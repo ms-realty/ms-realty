@@ -71,7 +71,14 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/search") {
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
-      return json(200, searchRuntimeListings(registry, seed, { localeCode, query }));
+      return json(
+        200,
+        searchRuntimeListings(registry, seed, {
+          localeCode,
+          query,
+          translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+        }),
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
@@ -217,6 +224,14 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== false) {
     throw new Error("HTTP smoke must noindex stale public translation");
+  }
+  const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
+  if (
+    smoke.staleSearch.status !== 200 ||
+    staleSearchCard?.translation_display !== "stale_translation_fallback" ||
+    staleSearchCard?.translation_indexable !== false
+  ) {
+    throw new Error("HTTP smoke must mark stale search cards as fallback");
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");

@@ -30,6 +30,7 @@ What it proves now:
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
+- Search API overlays translation ledger state before card display/indexability.
 - Language request intake for unavailable public locales.
 - Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.

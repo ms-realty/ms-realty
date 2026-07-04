@@ -56,6 +56,31 @@ test("runtime search uses CMS seed listings and keeps mobile-first contract", ()
   assert.equal(search.mobile_policy.list_first_mobile, true);
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
+  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
+});
+
+test("runtime search overlays stale translation ledger rows before card rendering", () => {
+  const search = searchRuntimeListings(registry, seed, {
+    localeCode: "el",
+    query: "Sandanski",
+    translationTasks: [
+      {
+        id: "translation-listing-MS-CRAWL-0001-el",
+        object_type: "listing",
+        object_id: "MS-CRAWL-0001",
+        target_locale: "el",
+        status: "stale",
+        human_approved: true,
+        public_indexable: false,
+      },
+    ],
+  });
+  const card = search.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
+
+  assert.equal(search.status, 200);
+  assert.equal(card.translation_display, "stale_translation_fallback");
+  assert.equal(card.translation_status, "stale");
+  assert.equal(card.translation_indexable, false);
 });
 
 test("runtime lead intake stores language and keeps Hermes reply review-gated", () => {
