@@ -37,6 +37,18 @@ const smoke = {
       message: "Interested in this property.",
     },
   }),
+  sellerLead: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/leads",
+    body: {
+      id: "http-lead-seller-el-0001",
+      source: "website_seller_valuation",
+      leadType: "seller",
+      language: "el",
+      contact: { name: "Nikos Papadopoulos" },
+      message: "I want a valuation for my property.",
+    },
+  }),
   admin: null,
   adminUnauthorized: null,
 };

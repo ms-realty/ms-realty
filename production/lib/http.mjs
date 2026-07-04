@@ -105,12 +105,16 @@ export function assertHttpSmoke(smoke) {
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") {
     throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
   }
+  if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
+    throw new Error("HTTP smoke must accept seller valuation lead");
+  }
   if (smoke.fallback.status !== 200 || smoke.fallback.body.indexable !== false) {
     throw new Error("HTTP smoke must serve non-indexable fallback");
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
+  if (smoke.admin.body.leads.length < 2) throw new Error("HTTP smoke must show buyer and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
     throw new Error("HTTP smoke must queue broker-approved replies");

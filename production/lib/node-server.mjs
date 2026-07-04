@@ -59,10 +59,14 @@ export function assertServerSmoke(smoke) {
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") throw new Error("Server must serve Hebrew listing");
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
+  if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
+    throw new Error("Server must accept seller valuation lead");
+  }
   if (smoke.badLead.status !== 400) throw new Error("Server must reject unknown buyer listing");
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("Server must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
+  if (smoke.admin.body.leads.length < 2) throw new Error("Server must show buyer and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated admin leads");
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
     throw new Error("Server must queue broker-approved replies");

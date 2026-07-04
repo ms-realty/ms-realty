@@ -1,1 +1,2 @@
 {"received_at":"2026-07-04T00:00:00Z","id":"inbox-http-lead-he-0001","lead_id":"http-lead-he-0001","lead_type":"buyer","listing_reference":"MS-CRAWL-0001","original_language":"he","admin_locale":"en","broker_approval_required":true}
+{"received_at":"2026-07-04T00:00:00Z","id":"inbox-http-lead-seller-el-0001","lead_id":"http-lead-seller-el-0001","lead_type":"seller","listing_reference":null,"original_language":"el","admin_locale":"en","broker_approval_required":true}

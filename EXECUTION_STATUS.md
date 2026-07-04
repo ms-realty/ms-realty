@@ -79,7 +79,7 @@ Date: 2026-07-04
   - posts a valid Hebrew buyer lead
   - rejects an unknown buyer listing reference
 - Added append-only CRM lead ledger:
-  - persists accepted HTTP lead intake as JSONL
+  - persists accepted HTTP buyer and seller lead intake as JSONL
   - stores original language, admin queue locale, listing reference, and broker approval gate
   - keeps smoke artifact deterministic
 - Added gated admin lead inbox endpoint:

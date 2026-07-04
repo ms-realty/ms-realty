@@ -40,6 +40,17 @@ try {
         contact: { name: "Noa Levi" },
       }),
     }),
+    sellerLead: await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      body: JSON.stringify({
+        id: "server-lead-seller-el-0001",
+        source: "website_seller_valuation",
+        leadType: "seller",
+        language: "el",
+        contact: { name: "Nikos Papadopoulos" },
+        message: "I want a valuation for my property.",
+      }),
+    }),
     badLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       body: JSON.stringify({

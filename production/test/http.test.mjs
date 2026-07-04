@@ -46,6 +46,18 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         message: "Interested in this property.",
       },
     }),
+    sellerLead: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        id: "http-seller-lead-test",
+        source: "website_seller_valuation",
+        leadType: "seller",
+        language: "el",
+        contact: { name: "Nikos Papadopoulos" },
+        message: "I want a valuation for my property.",
+      },
+    }),
     admin: await dispatchHttp(app, {
       url: "/api/admin/leads?locale=ru",
       headers: { authorization: "Bearer local-admin-smoke" },
@@ -75,7 +87,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
-  assert.equal(smoke.admin.body.leads.length, 1);
+  assert.equal(smoke.admin.body.leads.length, 2);
+  assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
 });
 

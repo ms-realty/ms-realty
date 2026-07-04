@@ -317,6 +317,59 @@
       }
     }
   },
+  "sellerLead": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "id": "inbox-http-lead-seller-el-0001",
+      "lead": {
+        "id": "http-lead-seller-el-0001",
+        "source": "website_seller_valuation",
+        "leadType": "seller",
+        "listingReference": null,
+        "contact": {
+          "name": "Nikos Papadopoulos"
+        },
+        "message": "I want a valuation for my property.",
+        "language": {
+          "language": "el",
+          "direction": "ltr",
+          "adminLocale": "en",
+          "requiresTranslation": true
+        },
+        "status": "draft",
+        "requiresBrokerApproval": true,
+        "hermesDraftAllowed": true
+      },
+      "original_language": "el",
+      "original_direction": "ltr",
+      "admin_locale": "en",
+      "requires_translation": true,
+      "message_original": "I want a valuation for my property.",
+      "hermes_reply_draft": {
+        "status": "draft",
+        "language": "el",
+        "broker_approval_required": true,
+        "can_send_without_approval": false
+      },
+      "views": {
+        "show_original_available": true,
+        "translated_draft_available": true
+      },
+      "ledger": {
+        "received_at": "2026-07-04T00:00:00Z",
+        "id": "inbox-http-lead-seller-el-0001",
+        "lead_id": "http-lead-seller-el-0001",
+        "lead_type": "seller",
+        "listing_reference": null,
+        "original_language": "el",
+        "admin_locale": "en",
+        "broker_approval_required": true
+      }
+    }
+  },
   "admin": {
     "status": 200,
     "headers": {
@@ -355,6 +408,16 @@
           "lead_type": "buyer",
           "listing_reference": "MS-CRAWL-0001",
           "original_language": "he",
+          "admin_locale": "en",
+          "broker_approval_required": true
+        },
+        {
+          "received_at": "2026-07-04T00:00:00Z",
+          "id": "inbox-http-lead-seller-el-0001",
+          "lead_id": "http-lead-seller-el-0001",
+          "lead_type": "seller",
+          "listing_reference": null,
+          "original_language": "el",
           "admin_locale": "en",
           "broker_approval_required": true
         }
@@ -401,7 +464,7 @@
   },
   "leadLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/lead-ledger.jsonl",
-    "rows": 1
+    "rows": 2
   },
   "replyOutbox": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/reply-outbox.jsonl",

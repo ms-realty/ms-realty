@@ -46,6 +46,17 @@ test("Node server serves live listing, search, and lead endpoints", async () => 
           contact: { name: "Noa Levi" },
         }),
       }),
+      sellerLead: await jsonFetch(baseUrl, "/api/leads", {
+        method: "POST",
+        body: JSON.stringify({
+          id: "node-server-seller-lead-test",
+          source: "website_seller_valuation",
+          leadType: "seller",
+          language: "el",
+          contact: { name: "Nikos Papadopoulos" },
+          message: "I want a valuation for my property.",
+        }),
+      }),
       badLead: await jsonFetch(baseUrl, "/api/leads", {
         method: "POST",
         body: JSON.stringify({

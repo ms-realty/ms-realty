@@ -130,7 +130,10 @@ if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
-if (httpSmoke.leadLedger.rows !== 1) throw new Error("HTTP smoke must persist one lead ledger row");
+if (httpSmoke.leadLedger.rows !== 2) throw new Error("HTTP smoke must persist buyer and seller lead rows");
+if (httpSmoke.sellerLead.status !== 201 || httpSmoke.sellerLead.body.lead.leadType !== "seller") {
+  throw new Error("HTTP smoke must accept seller valuation lead");
+}
 if (httpSmoke.sitemap.status !== 200 || httpSmoke.sitemap.body.includes("/fr/")) {
   throw new Error("HTTP smoke must serve approved sitemap");
 }
@@ -148,7 +151,7 @@ if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !
   throw new Error("Node server smoke must serve Hebrew listing as RTL 200");
 }
 if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
-if (nodeServerSmoke.leadLedger.rows !== 1) throw new Error("Node server smoke must persist one lead ledger row");
+if (nodeServerSmoke.leadLedger.rows !== 2) throw new Error("Node server smoke must persist buyer and seller lead rows");
 if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
   throw new Error("Node server smoke must serve robots");
 }
@@ -160,7 +163,7 @@ if (nodeServerSmoke.reply.status !== 201 || nodeServerSmoke.reply.body.status !=
 }
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (leadLedger.length !== 1) throw new Error("Lead ledger artifact must contain one deterministic smoke row");
+if (leadLedger.length !== 2) throw new Error("Lead ledger artifact must contain buyer and seller smoke rows");
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contain one deterministic smoke row");
 

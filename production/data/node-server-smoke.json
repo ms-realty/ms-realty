@@ -1,6 +1,6 @@
 {
   "fixture_id": "node-server-smoke-20260704",
-  "baseUrl": "http://127.0.0.1:54644",
+  "baseUrl": "http://127.0.0.1:54874",
   "listing": {
     "status": 200,
     "body": {
@@ -278,6 +278,56 @@
       }
     }
   },
+  "sellerLead": {
+    "status": 201,
+    "body": {
+      "id": "inbox-server-lead-seller-el-0001",
+      "lead": {
+        "id": "server-lead-seller-el-0001",
+        "source": "website_seller_valuation",
+        "leadType": "seller",
+        "listingReference": null,
+        "contact": {
+          "name": "Nikos Papadopoulos"
+        },
+        "message": "I want a valuation for my property.",
+        "language": {
+          "language": "el",
+          "direction": "ltr",
+          "adminLocale": "en",
+          "requiresTranslation": true
+        },
+        "status": "draft",
+        "requiresBrokerApproval": true,
+        "hermesDraftAllowed": true
+      },
+      "original_language": "el",
+      "original_direction": "ltr",
+      "admin_locale": "en",
+      "requires_translation": true,
+      "message_original": "I want a valuation for my property.",
+      "hermes_reply_draft": {
+        "status": "draft",
+        "language": "el",
+        "broker_approval_required": true,
+        "can_send_without_approval": false
+      },
+      "views": {
+        "show_original_available": true,
+        "translated_draft_available": true
+      },
+      "ledger": {
+        "received_at": "2026-07-04T00:00:00Z",
+        "id": "inbox-server-lead-seller-el-0001",
+        "lead_id": "server-lead-seller-el-0001",
+        "lead_type": "seller",
+        "listing_reference": null,
+        "original_language": "el",
+        "admin_locale": "en",
+        "broker_approval_required": true
+      }
+    }
+  },
   "badLead": {
     "status": 400,
     "body": {
@@ -322,6 +372,16 @@
           "original_language": "he",
           "admin_locale": "en",
           "broker_approval_required": true
+        },
+        {
+          "received_at": "2026-07-04T00:00:00Z",
+          "id": "inbox-server-lead-seller-el-0001",
+          "lead_id": "server-lead-seller-el-0001",
+          "lead_type": "seller",
+          "listing_reference": null,
+          "original_language": "el",
+          "admin_locale": "en",
+          "broker_approval_required": true
         }
       ],
       "replies": []
@@ -356,7 +416,7 @@
     }
   },
   "leadLedger": {
-    "rows": 1
+    "rows": 2
   },
   "replyOutbox": {
     "rows": 1
