@@ -46,6 +46,10 @@ test("Node server serves live listing, search, and lead endpoints", async () => 
           contact: { name: "Noa Levi" },
         }),
       }),
+      admin: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
+        headers: { authorization: "Bearer local-admin-smoke" },
+      }),
+      adminUnauthorized: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru"),
     };
     assert.equal(assertServerSmoke(smoke), true);
     assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);

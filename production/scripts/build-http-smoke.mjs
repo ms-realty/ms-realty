@@ -25,7 +25,14 @@ const smoke = {
       message: "Interested in this property.",
     },
   }),
+  admin: null,
+  adminUnauthorized: null,
 };
+smoke.admin = await dispatchHttp(app, {
+  url: "/api/admin/leads?locale=ru",
+  headers: { authorization: "Bearer local-admin-smoke" },
+});
+smoke.adminUnauthorized = await dispatchHttp(app, { url: "/api/admin/leads?locale=ru" });
 
 assertHttpSmoke(smoke);
 const ledger = readLeadLedger(DEFAULT_LEAD_LEDGER_PATH);

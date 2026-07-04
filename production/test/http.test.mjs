@@ -33,6 +33,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         message: "Interested in this property.",
       },
     }),
+    admin: await dispatchHttp(app, {
+      url: "/api/admin/leads?locale=ru",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    adminUnauthorized: await dispatchHttp(app, { url: "/api/admin/leads?locale=ru" }),
   };
 
   assert.equal(assertHttpSmoke(smoke), true);
@@ -40,6 +45,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
+  assert.equal(smoke.admin.body.leads.length, 1);
+  assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

@@ -82,6 +82,10 @@ Date: 2026-07-04
   - persists accepted HTTP lead intake as JSONL
   - stores original language, admin queue locale, listing reference, and broker approval gate
   - keeps smoke artifact deterministic
+- Added gated admin lead inbox endpoint:
+  - `GET /api/admin/leads?locale=ru` reads the persisted ledger
+  - unauthorized requests return `401`
+  - admin workspace still exposes only BG, RU, and EN
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`

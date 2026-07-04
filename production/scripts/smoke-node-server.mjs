@@ -40,6 +40,10 @@ try {
         contact: { name: "Noa Levi" },
       }),
     }),
+    admin: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    adminUnauthorized: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru"),
   };
   assertServerSmoke(smoke);
   const ledger = readLeadLedger(leadLedgerPath);

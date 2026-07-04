@@ -1,7 +1,8 @@
 import { loadLocaleRegistry } from "./locales.mjs";
-import { appendLead } from "./lead-ledger.mjs";
+import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { loadLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
+import { renderAdminWorkspace } from "./admin-workflows.mjs";
 
 function response(status, body, contentType) {
   return {
@@ -18,6 +19,7 @@ function json(status, body) {
 export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsSeed(), leadLedgerPath = null, receivedAt } = {}) {
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
+    const auth = request.headers?.authorization || request.headers?.Authorization || "";
 
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       return response(200, renderSitemapXml(loadLocalizedSitemap()), "application/xml; charset=utf-8");
@@ -31,6 +33,17 @@ export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsS
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
       return json(200, searchRuntimeListings(registry, seed, { localeCode, query }));
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/leads") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      const requestedLocale = url.searchParams.get("locale") || "en";
+      return json(200, {
+        workspace: renderAdminWorkspace({ registry, requestedLocale }),
+        leads: readLeadLedger(leadLedgerPath || undefined),
+      });
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
@@ -51,8 +64,8 @@ export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsS
   };
 }
 
-export async function dispatchHttp(app, { method = "GET", url, body } = {}) {
-  return app({ method, url, body: body ? JSON.stringify(body) : "" });
+export async function dispatchHttp(app, { method = "GET", url, body, headers } = {}) {
+  return app({ method, url, headers, body: body ? JSON.stringify(body) : "" });
 }
 
 export function assertHttpSmoke(smoke) {
@@ -70,5 +83,7 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");
+  if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
+  if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");
   return true;
 }

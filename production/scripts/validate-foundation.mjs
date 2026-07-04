@@ -134,6 +134,10 @@ if (httpSmoke.leadLedger.rows !== 1) throw new Error("HTTP smoke must persist on
 if (httpSmoke.sitemap.status !== 200 || httpSmoke.sitemap.body.includes("/fr/")) {
   throw new Error("HTTP smoke must serve approved sitemap");
 }
+if (httpSmoke.admin.status !== 200 || httpSmoke.admin.body.workspace.locale !== "ru") {
+  throw new Error("HTTP smoke must serve RU admin lead inbox");
+}
+if (httpSmoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin lead inbox");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !== "rtl") {
@@ -143,6 +147,9 @@ if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke m
 if (nodeServerSmoke.leadLedger.rows !== 1) throw new Error("Node server smoke must persist one lead ledger row");
 if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
   throw new Error("Node server smoke must serve robots");
+}
+if (nodeServerSmoke.admin.status !== 200 || nodeServerSmoke.admin.body.workspace.locale !== "ru") {
+  throw new Error("Node server smoke must serve RU admin lead inbox");
 }
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);

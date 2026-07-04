@@ -1,6 +1,6 @@
 {
   "fixture_id": "node-server-smoke-20260704",
-  "baseUrl": "http://127.0.0.1:53783",
+  "baseUrl": "http://127.0.0.1:54064",
   "listing": {
     "status": 200,
     "body": {
@@ -283,6 +283,53 @@
     "body": {
       "kind": "bad_request",
       "message": "Buyer lead requires a known listingReference"
+    }
+  },
+  "admin": {
+    "status": 200,
+    "body": {
+      "workspace": {
+        "kind": "admin_workspace",
+        "requested_locale": "ru",
+        "locale": "ru",
+        "lang": "ru",
+        "dir": "ltr",
+        "interface_locales": [
+          "bg",
+          "ru",
+          "en"
+        ],
+        "modules": [
+          {
+            "id": "crm",
+            "label": "CRM",
+            "primary_view": "Входящие заявки"
+          },
+          {
+            "id": "cms",
+            "label": "CMS",
+            "primary_view": "Переводы на проверку"
+          }
+        ]
+      },
+      "leads": [
+        {
+          "received_at": "2026-07-04T00:00:00Z",
+          "id": "inbox-server-lead-he-0001",
+          "lead_id": "server-lead-he-0001",
+          "lead_type": "buyer",
+          "listing_reference": "MS-CRAWL-0001",
+          "original_language": "he",
+          "admin_locale": "en",
+          "broker_approval_required": true
+        }
+      ]
+    }
+  },
+  "adminUnauthorized": {
+    "status": 401,
+    "body": {
+      "kind": "unauthorized"
     }
   },
   "leadLedger": {

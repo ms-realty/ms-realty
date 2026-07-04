@@ -26,6 +26,7 @@ What it proves now:
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Append-only lead ledger for persisted CRM intake smoke rows.
+- Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 
 Run:
 

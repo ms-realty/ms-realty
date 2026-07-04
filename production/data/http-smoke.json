@@ -317,6 +317,59 @@
       }
     }
   },
+  "admin": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "workspace": {
+        "kind": "admin_workspace",
+        "requested_locale": "ru",
+        "locale": "ru",
+        "lang": "ru",
+        "dir": "ltr",
+        "interface_locales": [
+          "bg",
+          "ru",
+          "en"
+        ],
+        "modules": [
+          {
+            "id": "crm",
+            "label": "CRM",
+            "primary_view": "Входящие заявки"
+          },
+          {
+            "id": "cms",
+            "label": "CMS",
+            "primary_view": "Переводы на проверку"
+          }
+        ]
+      },
+      "leads": [
+        {
+          "received_at": "2026-07-04T00:00:00Z",
+          "id": "inbox-http-lead-he-0001",
+          "lead_id": "http-lead-he-0001",
+          "lead_type": "buyer",
+          "listing_reference": "MS-CRAWL-0001",
+          "original_language": "he",
+          "admin_locale": "en",
+          "broker_approval_required": true
+        }
+      ]
+    }
+  },
+  "adminUnauthorized": {
+    "status": 401,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "unauthorized"
+    }
+  },
   "leadLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/lead-ledger.jsonl",
     "rows": 1
