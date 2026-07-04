@@ -94,6 +94,9 @@ export function assertServerSmoke(smoke) {
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("Server must accept seller valuation lead");
   }
+  if (smoke.sellerLead.body.sellerPipeline?.stage !== "valuation_requested") {
+    throw new Error("Server must create seller valuation pipeline row");
+  }
   if (smoke.badLead.status !== 400) throw new Error("Server must reject unknown buyer listing");
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("Server must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");

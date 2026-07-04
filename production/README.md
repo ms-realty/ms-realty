@@ -42,6 +42,7 @@ What it proves now:
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
 - Broker-booked viewing ledger with open follow-up tasks from existing CRM leads.
 - Saved-search ledger with open alert tasks from public search criteria.
+- Seller valuation pipeline ledger with callback/appraisal tasks from seller leads.
 
 Run:
 
@@ -69,6 +70,7 @@ Generated production data:
 - `production/data/reply-outbox.jsonl`
 - `production/data/viewings.jsonl`
 - `production/data/saved-searches.jsonl`
+- `production/data/seller-pipeline.jsonl`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/listing-edits.jsonl`

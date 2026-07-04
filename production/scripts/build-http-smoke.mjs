@@ -38,6 +38,12 @@ import {
   readSavedSearches,
   resetSavedSearches,
 } from "../lib/saved-searches.mjs";
+import {
+  assertSellerPipeline,
+  DEFAULT_SELLER_PIPELINE_PATH,
+  readSellerPipeline,
+  resetSellerPipeline,
+} from "../lib/seller-pipeline.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -48,6 +54,7 @@ resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
 resetListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
 resetViewingLedger(DEFAULT_VIEWING_LEDGER_PATH);
 resetSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
+resetSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -58,6 +65,7 @@ const app = createHttpApp({
   listingEditLedgerPath: DEFAULT_LISTING_EDIT_LEDGER_PATH,
   viewingLedgerPath: DEFAULT_VIEWING_LEDGER_PATH,
   savedSearchLedgerPath: DEFAULT_SAVED_SEARCH_LEDGER_PATH,
+  sellerPipelinePath: DEFAULT_SELLER_PIPELINE_PATH,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
@@ -65,6 +73,7 @@ const app = createHttpApp({
   reviewedAt: "2026-07-04T00:05:00Z",
   bookedAt: "2026-07-04T00:06:00Z",
   savedAt: "2026-07-04T00:07:00Z",
+  sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 const smoke = {
@@ -241,6 +250,9 @@ smoke.viewingLedger = { path: DEFAULT_VIEWING_LEDGER_PATH, rows: viewings.length
 const savedSearches = readSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
 assertSavedSearches(savedSearches);
 smoke.savedSearchLedger = { path: DEFAULT_SAVED_SEARCH_LEDGER_PATH, rows: savedSearches.length };
+const sellerPipeline = readSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
+assertSellerPipeline(sellerPipeline);
+smoke.sellerPipelineLedger = { path: DEFAULT_SELLER_PIPELINE_PATH, rows: sellerPipeline.length };
 smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");

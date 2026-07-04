@@ -408,7 +408,8 @@
         "original_language": "he",
         "admin_locale": "en",
         "broker_approval_required": true
-      }
+      },
+      "sellerPipeline": null
     }
   },
   "sellerLead": {
@@ -458,6 +459,30 @@
         "original_language": "el",
         "admin_locale": "en",
         "broker_approval_required": true
+      },
+      "sellerPipeline": {
+        "created_at": "2026-07-04T00:08:00Z",
+        "id": "seller-pipeline-server-lead-seller-el-0001",
+        "lead_id": "server-lead-seller-el-0001",
+        "source": "website_seller_valuation",
+        "contact_name": "Nikos Papadopoulos",
+        "original_language": "el",
+        "admin_locale": "en",
+        "stage": "valuation_requested",
+        "status": "open",
+        "owner": "broker_en",
+        "checklist": {
+          "callback": "open",
+          "appraisal": "open",
+          "mandate": "not_started",
+          "draft_listing": "not_started"
+        },
+        "next_task": {
+          "id": "seller-callback-server-lead-seller-el-0001",
+          "kind": "seller_callback",
+          "owner": "broker_en",
+          "status": "open"
+        }
       }
     }
   },
@@ -654,6 +679,32 @@
             "id": "alert-he-1783123620000",
             "status": "open",
             "owner": "broker_en"
+          }
+        }
+      ],
+      "sellerPipeline": [
+        {
+          "created_at": "2026-07-04T00:08:00Z",
+          "id": "seller-pipeline-server-lead-seller-el-0001",
+          "lead_id": "server-lead-seller-el-0001",
+          "source": "website_seller_valuation",
+          "contact_name": "Nikos Papadopoulos",
+          "original_language": "el",
+          "admin_locale": "en",
+          "stage": "valuation_requested",
+          "status": "open",
+          "owner": "broker_en",
+          "checklist": {
+            "callback": "open",
+            "appraisal": "open",
+            "mandate": "not_started",
+            "draft_listing": "not_started"
+          },
+          "next_task": {
+            "id": "seller-callback-server-lead-seller-el-0001",
+            "kind": "seller_callback",
+            "owner": "broker_en",
+            "status": "open"
           }
         }
       ]
@@ -1211,6 +1262,9 @@
     "rows": 1
   },
   "savedSearchLedger": {
+    "rows": 1
+  },
+  "sellerPipelineLedger": {
     "rows": 1
   }
 }

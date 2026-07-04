@@ -15,6 +15,7 @@ import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } 
 import { appendListingEdit, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { appendViewing, readViewings } from "./viewing-ledger.mjs";
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
+import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 
 function response(status, body, contentType, headers = {}) {
   return {
@@ -39,6 +40,7 @@ export function createHttpApp({
   listingEditLedgerPath = null,
   viewingLedgerPath = null,
   savedSearchLedgerPath = null,
+  sellerPipelinePath = null,
   localeRegistryPath = null,
   receivedAt,
   requestedAt,
@@ -46,6 +48,7 @@ export function createHttpApp({
   reviewedAt,
   bookedAt,
   savedAt,
+  sellerPipelineCreatedAt,
 } = {}) {
   let activeRegistry = registry;
   return async function handle(request) {
@@ -107,6 +110,7 @@ export function createHttpApp({
         listingEdits: readListingEdits(listingEditLedgerPath || undefined),
         viewings: readViewings(viewingLedgerPath || undefined),
         savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
+        sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
       });
     }
 
@@ -226,7 +230,13 @@ export function createHttpApp({
         const input = JSON.parse(request.body || "{}");
         const lead = submitRuntimeLead(activeRegistry, seed, input);
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
-        return json(201, { ...lead, ledger });
+        const sellerPipeline =
+          sellerPipelinePath && lead.lead?.leadType === "seller"
+            ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: sellerPipelineCreatedAt }), {
+                filePath: sellerPipelinePath,
+              })
+            : null;
+        return json(201, { ...lead, ledger, sellerPipeline });
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }
@@ -285,6 +295,9 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("HTTP smoke must accept seller valuation lead");
+  }
+  if (smoke.sellerLead.body.sellerPipeline?.stage !== "valuation_requested") {
+    throw new Error("HTTP smoke must create seller valuation pipeline row");
   }
   if (smoke.fallback.status !== 200 || smoke.fallback.body.indexable !== false) {
     throw new Error("HTTP smoke must serve non-indexable fallback");

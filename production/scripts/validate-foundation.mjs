@@ -201,6 +201,9 @@ if (httpSmoke.leadLedger.rows !== 2) throw new Error("HTTP smoke must persist bu
 if (httpSmoke.sellerLead.status !== 201 || httpSmoke.sellerLead.body.lead.leadType !== "seller") {
   throw new Error("HTTP smoke must accept seller valuation lead");
 }
+if (httpSmoke.sellerLead.body.sellerPipeline?.stage !== "valuation_requested") {
+  throw new Error("HTTP smoke must create seller valuation pipeline row");
+}
 if (httpSmoke.sitemap.status !== 200 || httpSmoke.sitemap.body.includes("/fr/")) {
   throw new Error("HTTP smoke must serve approved sitemap");
 }
@@ -217,6 +220,7 @@ if (httpSmoke.viewing.status !== 201 || httpSmoke.viewing.body.follow_up_task?.s
 }
 if (httpSmoke.viewingLedger.rows !== 1) throw new Error("HTTP smoke must persist one viewing row");
 if (httpSmoke.savedSearchLedger.rows !== 1) throw new Error("HTTP smoke must persist one saved search row");
+if (httpSmoke.sellerPipelineLedger.rows !== 1) throw new Error("HTTP smoke must persist one seller pipeline row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
 if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, published, and stale translation rows");
 if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
@@ -230,6 +234,12 @@ if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !
 }
 if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
 if (nodeServerSmoke.leadLedger.rows !== 2) throw new Error("Node server smoke must persist buyer and seller lead rows");
+if (nodeServerSmoke.sellerLead.status !== 201 || nodeServerSmoke.sellerLead.body.lead.leadType !== "seller") {
+  throw new Error("Node server smoke must accept seller valuation lead");
+}
+if (nodeServerSmoke.sellerLead.body.sellerPipeline?.stage !== "valuation_requested") {
+  throw new Error("Node server smoke must create seller valuation pipeline row");
+}
 if (nodeServerSmoke.languageRequest.status !== 201 || nodeServerSmoke.languageRequest.body.requested_locale !== "fr") {
   throw new Error("Node server smoke must accept French language request");
 }
@@ -279,6 +289,7 @@ if (nodeServerSmoke.viewing.status !== 201 || nodeServerSmoke.viewing.body.follo
 }
 if (nodeServerSmoke.viewingLedger.rows !== 1) throw new Error("Node server smoke must persist one viewing row");
 if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server smoke must persist one saved search row");
+if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node server smoke must persist one seller pipeline row");
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 2) throw new Error("Lead ledger artifact must contain buyer and seller smoke rows");
@@ -294,5 +305,7 @@ const viewings = fs.readFileSync(fromRoot("production", "data", "viewings.jsonl"
 if (viewings.length !== 1) throw new Error("Viewing artifact must contain one deterministic smoke row");
 const savedSearches = fs.readFileSync(fromRoot("production", "data", "saved-searches.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (savedSearches.length !== 1) throw new Error("Saved search artifact must contain one deterministic smoke row");
+const sellerPipeline = fs.readFileSync(fromRoot("production", "data", "seller-pipeline.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (sellerPipeline.length !== 1) throw new Error("Seller pipeline artifact must contain one deterministic smoke row");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

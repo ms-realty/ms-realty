@@ -10,6 +10,7 @@ import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger 
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
+import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -21,6 +22,7 @@ async function withServer(fn) {
   const listingEditLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-listing-edits-`)}/edits.jsonl`;
   const viewingLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewings-`)}/viewings.jsonl`;
   const savedSearchLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-saved-searches-`)}/saved-searches.jsonl`;
+  const sellerPipelinePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-seller-pipeline-`)}/seller-pipeline.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
@@ -28,6 +30,7 @@ async function withServer(fn) {
   resetListingEdits(listingEditLedgerPath);
   resetViewingLedger(viewingLedgerPath);
   resetSavedSearches(savedSearchLedgerPath);
+  resetSellerPipeline(sellerPipelinePath);
   const server = createNodeServer(
     createHttpApp({
       leadLedgerPath,
@@ -37,12 +40,14 @@ async function withServer(fn) {
       listingEditLedgerPath,
       viewingLedgerPath,
       savedSearchLedgerPath,
+      sellerPipelinePath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
       editedAt: "2026-07-04T00:03:00Z",
       reviewedAt: "2026-07-04T00:05:00Z",
       bookedAt: "2026-07-04T00:06:00Z",
       savedAt: "2026-07-04T00:07:00Z",
+      sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
     }),
   );
   const address = await listen(server);
@@ -56,6 +61,7 @@ async function withServer(fn) {
       listingEditLedgerPath,
       viewingLedgerPath,
       savedSearchLedgerPath,
+      sellerPipelinePath,
     );
   } finally {
     await close(server);
@@ -77,6 +83,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       listingEditLedgerPath,
       viewingLedgerPath,
       savedSearchLedgerPath,
+      sellerPipelinePath,
     ) => {
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
@@ -229,6 +236,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
+      assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
     },
   );

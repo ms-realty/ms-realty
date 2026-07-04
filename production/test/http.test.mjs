@@ -10,6 +10,7 @@ import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger 
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
+import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -55,6 +56,12 @@ function tempSavedSearches() {
   return file;
 }
 
+function tempSellerPipeline() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seller-pipeline-`)}/seller-pipeline.jsonl`;
+  resetSellerPipeline(file);
+  return file;
+}
+
 function tempRegistry() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
   fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
@@ -73,6 +80,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const listingEditLedgerPath = tempListingEdits();
   const viewingLedgerPath = tempViewings();
   const savedSearchLedgerPath = tempSavedSearches();
+  const sellerPipelinePath = tempSellerPipeline();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
@@ -81,12 +89,14 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     listingEditLedgerPath,
     viewingLedgerPath,
     savedSearchLedgerPath,
+    sellerPipelinePath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
     savedAt: "2026-07-04T00:07:00Z",
+    sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
   });
   const redirect = deployableRedirect();
   const smoke = {
@@ -246,10 +256,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
   assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
   assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
+  assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 2);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.admin.body.savedSearches.length, 1);
+  assert.equal(smoke.admin.body.sellerPipeline.length, 1);
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
   assert.equal(smoke.admin.body.listingEdits.length, 1);
   assert.equal(smoke.admin.body.viewings.length, 1);

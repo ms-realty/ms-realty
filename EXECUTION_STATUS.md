@@ -136,6 +136,11 @@ Date: 2026-07-04
   - current match count is calculated from the runtime search renderer
   - persisted rows create open alert tasks for broker follow-up
   - authenticated admin inbox returns persisted saved searches
+- Added seller valuation pipeline intake:
+  - seller leads from `POST /api/leads` create a seller pipeline row
+  - persisted seller rows start at `valuation_requested`
+  - callback and appraisal checklist items are opened for broker follow-up
+  - authenticated admin inbox returns persisted seller pipeline rows
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`

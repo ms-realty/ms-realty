@@ -9,6 +9,7 @@ import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger 
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
+import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -19,6 +20,7 @@ const translationLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "m
 const listingEditLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-listing-edits-")), "edits.jsonl");
 const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewings-")), "viewings.jsonl");
 const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-saved-searches-")), "saved-searches.jsonl");
+const sellerPipelinePath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-seller-pipeline-")), "seller-pipeline.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
@@ -26,6 +28,7 @@ resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
+resetSellerPipeline(sellerPipelinePath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
@@ -35,12 +38,14 @@ const server = createNodeServer(
     listingEditLedgerPath,
     viewingLedgerPath,
     savedSearchLedgerPath,
+    sellerPipelinePath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
     savedAt: "2026-07-04T00:07:00Z",
+    sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
   }),
 );
 const address = await listen(server);
@@ -218,6 +223,9 @@ try {
   const savedSearches = readSavedSearches(savedSearchLedgerPath);
   assertSavedSearches(savedSearches);
   smoke.savedSearchLedger = { rows: savedSearches.length };
+  const sellerPipeline = readSellerPipeline(sellerPipelinePath);
+  assertSellerPipeline(sellerPipeline);
+  smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);
