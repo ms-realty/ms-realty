@@ -63,6 +63,12 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must serve approved legacy redirect");
   }
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") throw new Error("Server must serve Hebrew listing");
+  if (
+    smoke.listing.body.body.actions?.primary?.find((action) => action.id === "callback")?.payload.source !==
+    "website_callback_request"
+  ) {
+    throw new Error("Server must expose listing callback action");
+  }
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
   if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable language request");

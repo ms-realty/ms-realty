@@ -5,13 +5,69 @@ import { publicMediaLibrary } from "./media.mjs";
 import { publicTour } from "./tours.mjs";
 
 const ACTION_LABELS = {
-  bg: { inquiry: "Запитване", valuation: "Оценка за продавач" },
-  en: { inquiry: "Inquiry", valuation: "Seller valuation" },
-  de: { inquiry: "Anfrage", valuation: "Verkaufsbewertung" },
-  nl: { inquiry: "Aanvraag", valuation: "Verkoopwaardering" },
-  ru: { inquiry: "Запрос", valuation: "Оценка для продавца" },
-  el: { inquiry: "Ερώτηση", valuation: "Εκτίμηση πωλητή" },
-  he: { inquiry: "פנייה", valuation: "הערכת מוכר" },
+  bg: {
+    inquiry: "Запитване",
+    valuation: "Оценка за продавач",
+    callback: "Обратно обаждане",
+    phone: "Телефон",
+    save: "Запази",
+    share: "Сподели",
+    print: "Печат/PDF",
+  },
+  en: {
+    inquiry: "Inquiry",
+    valuation: "Seller valuation",
+    callback: "Callback",
+    phone: "Phone",
+    save: "Save",
+    share: "Share",
+    print: "Print/PDF",
+  },
+  de: {
+    inquiry: "Anfrage",
+    valuation: "Verkaufsbewertung",
+    callback: "Rückruf",
+    phone: "Telefon",
+    save: "Speichern",
+    share: "Teilen",
+    print: "Drucken/PDF",
+  },
+  nl: {
+    inquiry: "Aanvraag",
+    valuation: "Verkoopwaardering",
+    callback: "Terugbellen",
+    phone: "Telefoon",
+    save: "Bewaren",
+    share: "Delen",
+    print: "Print/PDF",
+  },
+  ru: {
+    inquiry: "Запрос",
+    valuation: "Оценка для продавца",
+    callback: "Обратный звонок",
+    phone: "Телефон",
+    save: "Сохранить",
+    share: "Поделиться",
+    print: "Печать/PDF",
+  },
+  el: {
+    inquiry: "Ερώτηση",
+    valuation: "Εκτίμηση πωλητή",
+    callback: "Επανάκληση",
+    phone: "Τηλέφωνο",
+    save: "Αποθήκευση",
+    share: "Κοινή χρήση",
+    print: "Εκτύπωση/PDF",
+  },
+  he: {
+    inquiry: "פנייה",
+    valuation: "הערכת מוכר",
+    callback: "שיחה חוזרת",
+    phone: "טלפון",
+    save: "שמירה",
+    share: "שיתוף",
+    print: "הדפסה/PDF",
+  },
 };
 
 const PUBLIC_COPY = {
@@ -123,6 +179,68 @@ function matchesSearch(view, query, filters = {}) {
   return true;
 }
 
+function contactChannelLabel(channel, labels) {
+  if (channel === "phone") return labels.phone;
+  if (channel === "whatsapp") return "WhatsApp";
+  return "Viber";
+}
+
+function listingActions(locale, view, path, labels) {
+  const leadPayload = { leadType: "buyer", language: locale.code, listingReference: view.id };
+  return {
+    sticky_mobile: true,
+    minimum_tap_target_px: 44,
+    primary: [
+      {
+        id: "inquiry",
+        label: labels.inquiry,
+        kind: "lead",
+        method: "POST",
+        endpoint: "/api/leads",
+        payload: { ...leadPayload, source: "website_listing_detail" },
+      },
+      {
+        id: "callback",
+        label: labels.callback,
+        kind: "lead",
+        method: "POST",
+        endpoint: "/api/leads",
+        payload: {
+          ...leadPayload,
+          source: "website_callback_request",
+          contact_preference: "phone",
+        },
+      },
+    ],
+    direct_contact: {
+      review_status: "needs_broker_contact_review",
+      channels: ["phone", "whatsapp", "viber"].map((channel) => ({
+        id: channel,
+        label: contactChannelLabel(channel, labels),
+        enabled: false,
+        href: null,
+      })),
+    },
+    secondary: [
+      {
+        id: "save",
+        label: labels.save,
+        kind: "client_saved_listing",
+        storage_key: "ms-realty:saved-listings",
+        listing_id: view.id,
+      },
+      { id: "share_family", label: labels.share, kind: "share", url: path },
+      {
+        id: "print",
+        label: labels.print,
+        kind: "print",
+        url: `${path}?print=1`,
+        pdf_status: "needs_pdf_renderer",
+      },
+    ],
+  };
+}
+
 export function renderListingPage({ registry, listing, localeCode, translations }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -193,6 +311,7 @@ export function renderListingPage({ registry, listing, localeCode, translations 
         inquiry: labels.inquiry,
         seller_valuation: labels.valuation,
       },
+      actions: listingActions(locale, view, path, labels),
       source: {
         old_url: view.source_url,
         source_domain: view.source_domain,

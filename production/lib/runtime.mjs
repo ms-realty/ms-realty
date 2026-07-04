@@ -152,6 +152,12 @@ export function assertRuntimeSmoke(smoke) {
   if (smoke.listing_he.status !== 200 || smoke.listing_he.dir !== "rtl") {
     throw new Error("Runtime Hebrew listing must render as RTL 200");
   }
+  if (
+    smoke.listing_he.body.actions?.primary?.find((action) => action.id === "callback")?.payload.source !==
+    "website_callback_request"
+  ) {
+    throw new Error("Runtime smoke must expose listing callback action");
+  }
   if (smoke.listing_ru.status !== 200 || !smoke.listing_ru.path.startsWith("/ru/")) {
     throw new Error("Runtime Russian listing route missing");
   }

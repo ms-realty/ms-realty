@@ -90,6 +90,10 @@ Implemented now:
   - query and core facets are applied before pagination
   - result payloads expose total matches separately from returned cards
   - saved-search alerts use the full filtered match count
+- Listing conversion/share contract:
+  - listing pages expose sticky mobile inquiry and callback actions through the lead intake endpoint
+  - save, family-share, and print/PDF intents are part of the public payload
+  - phone, WhatsApp, and Viber actions remain review-gated until broker contact data is approved
 - Mobile and elderly-user QA gate:
   - `qa/mobile_elderly_static_check.py`
   - `qa/mobile-elderly-accessibility.md`

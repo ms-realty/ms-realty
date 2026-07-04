@@ -24,6 +24,10 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   assert.equal(he.path, `/he/properties/${listing.id}`);
   assert.equal(he.dir, "rtl");
   assert.equal(he.indexable, true);
+  assert.equal(he.body.actions.sticky_mobile, true);
+  assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.contact_preference, "phone");
+  assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
+  assert.ok(he.body.actions.secondary.find((action) => action.id === "print").url.endsWith("?print=1"));
 });
 
 test("listing SEO includes approved hreflang and excludes unavailable draft locales", () => {

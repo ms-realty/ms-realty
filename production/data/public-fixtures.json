@@ -89,6 +89,84 @@
         "inquiry": "Запитване",
         "seller_valuation": "Оценка за продавач"
       },
+      "actions": {
+        "sticky_mobile": true,
+        "minimum_tap_target_px": 44,
+        "primary": [
+          {
+            "id": "inquiry",
+            "label": "Запитване",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "bg",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_listing_detail"
+            }
+          },
+          {
+            "id": "callback",
+            "label": "Обратно обаждане",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "bg",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          }
+        ],
+        "direct_contact": {
+          "review_status": "needs_broker_contact_review",
+          "channels": [
+            {
+              "id": "phone",
+              "label": "Телефон",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "whatsapp",
+              "label": "WhatsApp",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "viber",
+              "label": "Viber",
+              "enabled": false,
+              "href": null
+            }
+          ]
+        },
+        "secondary": [
+          {
+            "id": "save",
+            "label": "Запази",
+            "kind": "client_saved_listing",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          },
+          {
+            "id": "share_family",
+            "label": "Сподели",
+            "kind": "share",
+            "url": "/bg/imoti/MS-CRAWL-0001"
+          },
+          {
+            "id": "print",
+            "label": "Печат/PDF",
+            "kind": "print",
+            "url": "/bg/imoti/MS-CRAWL-0001?print=1",
+            "pdf_status": "needs_pdf_renderer"
+          }
+        ]
+      },
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
         "source_domain": "makler-realty.com",
@@ -184,6 +262,84 @@
       "ctas": {
         "inquiry": "Ερώτηση",
         "seller_valuation": "Εκτίμηση πωλητή"
+      },
+      "actions": {
+        "sticky_mobile": true,
+        "minimum_tap_target_px": 44,
+        "primary": [
+          {
+            "id": "inquiry",
+            "label": "Ερώτηση",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "el",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_listing_detail"
+            }
+          },
+          {
+            "id": "callback",
+            "label": "Επανάκληση",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "el",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          }
+        ],
+        "direct_contact": {
+          "review_status": "needs_broker_contact_review",
+          "channels": [
+            {
+              "id": "phone",
+              "label": "Τηλέφωνο",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "whatsapp",
+              "label": "WhatsApp",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "viber",
+              "label": "Viber",
+              "enabled": false,
+              "href": null
+            }
+          ]
+        },
+        "secondary": [
+          {
+            "id": "save",
+            "label": "Αποθήκευση",
+            "kind": "client_saved_listing",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          },
+          {
+            "id": "share_family",
+            "label": "Κοινή χρήση",
+            "kind": "share",
+            "url": "/el/akinita/MS-CRAWL-0001"
+          },
+          {
+            "id": "print",
+            "label": "Εκτύπωση/PDF",
+            "kind": "print",
+            "url": "/el/akinita/MS-CRAWL-0001?print=1",
+            "pdf_status": "needs_pdf_renderer"
+          }
+        ]
       },
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
@@ -281,6 +437,84 @@
         "inquiry": "פנייה",
         "seller_valuation": "הערכת מוכר"
       },
+      "actions": {
+        "sticky_mobile": true,
+        "minimum_tap_target_px": 44,
+        "primary": [
+          {
+            "id": "inquiry",
+            "label": "פנייה",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_listing_detail"
+            }
+          },
+          {
+            "id": "callback",
+            "label": "שיחה חוזרת",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          }
+        ],
+        "direct_contact": {
+          "review_status": "needs_broker_contact_review",
+          "channels": [
+            {
+              "id": "phone",
+              "label": "טלפון",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "whatsapp",
+              "label": "WhatsApp",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "viber",
+              "label": "Viber",
+              "enabled": false,
+              "href": null
+            }
+          ]
+        },
+        "secondary": [
+          {
+            "id": "save",
+            "label": "שמירה",
+            "kind": "client_saved_listing",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          },
+          {
+            "id": "share_family",
+            "label": "שיתוף",
+            "kind": "share",
+            "url": "/he/properties/MS-CRAWL-0001"
+          },
+          {
+            "id": "print",
+            "label": "הדפסה/PDF",
+            "kind": "print",
+            "url": "/he/properties/MS-CRAWL-0001?print=1",
+            "pdf_status": "needs_pdf_renderer"
+          }
+        ]
+      },
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
         "source_domain": "makler-realty.com",
@@ -359,6 +593,84 @@
       "ctas": {
         "inquiry": "Inquiry",
         "seller_valuation": "Seller valuation"
+      },
+      "actions": {
+        "sticky_mobile": true,
+        "minimum_tap_target_px": 44,
+        "primary": [
+          {
+            "id": "inquiry",
+            "label": "Inquiry",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "en",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_listing_detail"
+            }
+          },
+          {
+            "id": "callback",
+            "label": "Callback",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "en",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          }
+        ],
+        "direct_contact": {
+          "review_status": "needs_broker_contact_review",
+          "channels": [
+            {
+              "id": "phone",
+              "label": "Phone",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "whatsapp",
+              "label": "WhatsApp",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "viber",
+              "label": "Viber",
+              "enabled": false,
+              "href": null
+            }
+          ]
+        },
+        "secondary": [
+          {
+            "id": "save",
+            "label": "Save",
+            "kind": "client_saved_listing",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          },
+          {
+            "id": "share_family",
+            "label": "Share",
+            "kind": "share",
+            "url": "/en/properties/MS-CRAWL-0001"
+          },
+          {
+            "id": "print",
+            "label": "Print/PDF",
+            "kind": "print",
+            "url": "/en/properties/MS-CRAWL-0001?print=1",
+            "pdf_status": "needs_pdf_renderer"
+          }
+        ]
       },
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",

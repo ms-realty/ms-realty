@@ -305,6 +305,13 @@ export function assertHttpSmoke(smoke) {
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") {
     throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
   }
+  if (
+    smoke.listing.body.body.actions?.primary?.find((action) => action.id === "callback")?.payload.source !==
+      "website_callback_request" ||
+    smoke.listing.body.body.actions?.direct_contact?.review_status !== "needs_broker_contact_review"
+  ) {
+    throw new Error("HTTP smoke must expose listing conversion actions without inventing broker contact data");
+  }
   if (smoke.search.status !== 200 || smoke.search.body.mobile_policy.list_first_mobile !== true) {
     throw new Error("HTTP smoke must serve mobile-first search");
   }

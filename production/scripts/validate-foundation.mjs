@@ -170,6 +170,13 @@ if (runtimeSmoke.listing_he.body.media.tour.provider !== "photo-sphere-viewer" |
 if (runtimeSmoke.listing_he.body.media.gallery_count <= 0 || runtimeSmoke.listing_he.body.media.videos.length !== 0) {
   throw new Error("Runtime smoke must expose reviewed photo gallery without unreviewed videos");
 }
+if (
+  runtimeSmoke.listing_he.body.actions?.primary?.find((action) => action.id === "callback")?.payload.source !==
+    "website_callback_request" ||
+  runtimeSmoke.listing_he.body.actions?.direct_contact?.review_status !== "needs_broker_contact_review"
+) {
+  throw new Error("Runtime smoke must expose conversion actions without unreviewed broker contact data");
+}
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
 if (runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001")?.translation_display !== "reviewed_translation") {
@@ -185,6 +192,9 @@ if (httpSmoke.legacyRedirect.status !== 301 || httpSmoke.legacyRedirect.headers.
 }
 if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
   throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
+}
+if (httpSmoke.listing.body.body.actions?.secondary?.find((action) => action.id === "print")?.pdf_status !== "needs_pdf_renderer") {
+  throw new Error("HTTP smoke must expose print/PDF action contract");
 }
 if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.requested_locale !== "fr") {
   throw new Error("HTTP smoke must accept French language request");
