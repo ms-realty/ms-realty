@@ -175,7 +175,7 @@ export function createHttpApp({
 
     if (request.method !== "GET") return json(405, { kind: "method_not_allowed" });
 
-    const rendered = renderRuntimePath(registry, seed, url.pathname);
+    const rendered = renderRuntimePath(registry, seed, url.pathname, readTranslationLedger(translationLedgerPath || undefined));
     return json(rendered.status || 200, rendered);
   };
 }
@@ -214,6 +214,9 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.listingEdit.status !== 201 || smoke.listingEdit.body.edit.stale_translation_count < 1) {
     throw new Error("HTTP smoke must stale dependent translations after listing edit");
+  }
+  if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== false) {
+    throw new Error("HTTP smoke must noindex stale public translation");
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");

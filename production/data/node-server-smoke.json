@@ -776,6 +776,69 @@
       ]
     }
   },
+  "staleListing": {
+    "status": 200,
+    "body": {
+      "kind": "listing",
+      "status": 200,
+      "requested_locale": "el",
+      "locale": "el",
+      "lang": "el",
+      "dir": "ltr",
+      "path": "/el/akinita/MS-CRAWL-0001",
+      "canonical": "/el/akinita/MS-CRAWL-0001",
+      "indexable": false,
+      "fallback": {
+        "active": false,
+        "requested_locale": "el",
+        "resolved_locale": "el"
+      },
+      "metadata": {
+        "title": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
+        "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
+        "robots": "noindex,follow"
+      },
+      "hreflang": [],
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "@id": "/el/akinita/MS-CRAWL-0001#listing",
+        "url": "/el/akinita/MS-CRAWL-0001",
+        "name": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
+        "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
+        "image_count": 35,
+        "areaServed": "Sandanski"
+      },
+      "translation": {
+        "locale": "el",
+        "status": "stale",
+        "human_approved": true,
+        "reviewer": "translator_el"
+      },
+      "body": {
+        "h1": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
+        "facts": {
+          "id": "MS-CRAWL-0001",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 35
+        },
+        "ctas": {
+          "inquiry": "Ερώτηση",
+          "seller_valuation": "Εκτίμηση πωλητή"
+        },
+        "source": {
+          "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
+          "source_domain": "makler-realty.com",
+          "source_locale": "bg",
+          "source_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+        }
+      }
+    }
+  },
   "leadLedger": {
     "rows": 2
   },

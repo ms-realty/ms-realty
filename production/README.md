@@ -25,6 +25,7 @@ What it proves now:
 - Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
 - Authenticated admin translation draft and human-approved publish endpoints.
 - Authenticated listing edit endpoint that marks dependent translations stale.
+- Public listing routes overlay translation ledger state before indexability.
 - Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.

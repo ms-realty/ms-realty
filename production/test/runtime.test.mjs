@@ -28,6 +28,26 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(missing.status, 404);
 });
 
+test("runtime overlays stale translation ledger rows before public rendering", () => {
+  const stale = renderRuntimePath(registry, seed, "/el/akinita/MS-CRAWL-0001", [
+    {
+      id: "translation-listing-MS-CRAWL-0001-el",
+      object_type: "listing",
+      object_id: "MS-CRAWL-0001",
+      target_locale: "el",
+      status: "stale",
+      human_approved: true,
+      public_indexable: false,
+    },
+  ]);
+
+  assert.equal(stale.status, 200);
+  assert.equal(stale.locale, "el");
+  assert.equal(stale.indexable, false);
+  assert.equal(stale.metadata.robots, "noindex,follow");
+  assert.equal(stale.hreflang.some((link) => link.hreflang === "el"), false);
+});
+
 test("runtime search uses CMS seed listings and keeps mobile-first contract", () => {
   const search = searchRuntimeListings(registry, seed, { localeCode: "he", query: "Sandanski" });
 

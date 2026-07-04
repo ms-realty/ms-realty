@@ -4,6 +4,7 @@ import { createCrmInboxItem } from "./admin-workflows.mjs";
 import { fromRoot } from "./paths.mjs";
 import { renderLanguageFallback, renderListingPage, renderSearchPage } from "./public-site.mjs";
 import { listingPath } from "./seo.mjs";
+import { latestTranslationTasks } from "./translation-ledger.mjs";
 
 export const DEFAULT_CMS_SEED_PATH = fromRoot("production", "data", "cms-seed.json");
 
@@ -42,6 +43,19 @@ function listingRecords(seed) {
   return seed.records.filter((record) => record.collection === "listings");
 }
 
+function translationLocale(translation) {
+  return translation.locale || translation.target_locale;
+}
+
+export function mergeRuntimeTranslations(record, translationTasks = []) {
+  const byLocale = new Map(record.translations.map((translation) => [translation.locale, translation]));
+  for (const task of latestTranslationTasks(translationTasks)) {
+    if (task.object_type !== "listing" || task.object_id !== record.id) continue;
+    byLocale.set(translationLocale(task), { ...task, locale: translationLocale(task) });
+  }
+  return [...byLocale.values()];
+}
+
 export function resolveRuntimePath(registry, seed, pathname) {
   const normalized = pathname.replace(/\/$/, "");
   for (const record of listingRecords(seed)) {
@@ -66,14 +80,14 @@ export function resolveRuntimePath(registry, seed, pathname) {
   return { type: "not_found", status: 404 };
 }
 
-export function renderRuntimePath(registry, seed, pathname) {
+export function renderRuntimePath(registry, seed, pathname, translationTasks = []) {
   const resolved = resolveRuntimePath(registry, seed, pathname);
   if (resolved.type === "listing") {
     return renderListingPage({
       registry,
       listing: resolved.listing,
       localeCode: resolved.localeCode,
-      translations: resolved.record.translations,
+      translations: mergeRuntimeTranslations(resolved.record, translationTasks),
     });
   }
   if (resolved.type === "language_fallback") {

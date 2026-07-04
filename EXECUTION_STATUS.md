@@ -70,6 +70,9 @@ Date: 2026-07-04
   - `POST /api/admin/listings/edit` stores reviewed source edits
   - dependent translations are marked stale and non-indexable after source changes
   - `production/data/listing-edits.jsonl` stores the deterministic property editor smoke row
+- Added stale-aware public listing rendering:
+  - served listing routes overlay latest translation review ledger rows
+  - stale Greek listing smoke returns `noindex,follow`
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations

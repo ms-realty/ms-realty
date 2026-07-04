@@ -162,6 +162,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       patch: { description: "Updated approved source description." },
     },
   });
+  smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
   smoke.admin = await dispatchHttp(app, {
     url: "/api/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -177,6 +178,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
   assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
   assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
+  assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 2);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);

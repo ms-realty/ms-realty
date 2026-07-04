@@ -76,6 +76,9 @@ export function assertServerSmoke(smoke) {
   if (smoke.listingEdit.status !== 201 || smoke.listingEdit.body.edit.stale_translation_count < 1) {
     throw new Error("Server must stale dependent translations after listing edit");
   }
+  if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== false) {
+    throw new Error("Server must noindex stale public translation");
+  }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("Server must accept seller valuation lead");

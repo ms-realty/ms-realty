@@ -152,6 +152,7 @@ try {
       patch: { description: "Updated approved source description." },
     }),
   });
+  smoke.staleListing = await jsonFetch(baseUrl, "/el/akinita/MS-CRAWL-0001");
   smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
     headers: { authorization: "Bearer local-admin-smoke" },
   });

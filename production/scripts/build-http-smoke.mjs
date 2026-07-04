@@ -151,6 +151,7 @@ smoke.listingEdit = await dispatchHttp(app, {
     patch: { description: "Updated approved source description." },
   },
 });
+smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
 smoke.admin = await dispatchHttp(app, {
   url: "/api/admin/leads?locale=ru",
   headers: { authorization: "Bearer local-admin-smoke" },

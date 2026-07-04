@@ -156,6 +156,9 @@ if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.
 if (httpSmoke.listingEdit.status !== 201 || httpSmoke.listingEdit.body.edit.stale_translation_count < 1) {
   throw new Error("HTTP smoke must stale dependent translations after listing edit");
 }
+if (httpSmoke.staleListing.status !== 200 || httpSmoke.staleListing.body.indexable !== false) {
+  throw new Error("HTTP smoke must noindex stale public translation");
+}
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
@@ -201,6 +204,9 @@ if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.transla
 }
 if (nodeServerSmoke.listingEdit.status !== 201 || nodeServerSmoke.listingEdit.body.edit.stale_translation_count < 1) {
   throw new Error("Node server smoke must stale dependent translations after listing edit");
+}
+if (nodeServerSmoke.staleListing.status !== 200 || nodeServerSmoke.staleListing.body.indexable !== false) {
+  throw new Error("Node server smoke must noindex stale public translation");
 }
 if (nodeServerSmoke.translationLedger.rows !== 3) {
   throw new Error("Node server smoke must persist draft, published, and stale translation rows");
