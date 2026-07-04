@@ -41,6 +41,10 @@ Date: 2026-07-04
   - seeded public website locales BG, EN, DE, NL, RU, EL, HE
   - admin CMS/CRM locales BG, RU, EN
   - Hebrew RTL validation and Greek website coverage
+- Added executable production foundation:
+  - locale, SEO, Hermes, translation, lead, and migration contracts
+  - normalized migration record builder in `production/scripts/build-migration-records.mjs`
+  - launch-gate checks for row counts, domains, statuses, redirect review rows, and homepage redirects
 
 ## Crawl Counts
 
@@ -68,5 +72,8 @@ Date: 2026-07-04
 python3 search/build_search_indexes.py
 python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
 python3 locales/validate_locale_registry.py
+npm run migration:build
+npm run test
+npm run validate
 python3 qa/mobile_elderly_static_check.py
 ```

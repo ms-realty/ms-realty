@@ -13,6 +13,7 @@ What it proves now:
 - Translation stale-state rules.
 - CRM lead language routing into BG/RU/EN admin queues.
 - Search fixtures carry locale/indexability metadata.
+- Normalized migration records from the crawl CSVs with launch-gate checks.
 
 Run:
 

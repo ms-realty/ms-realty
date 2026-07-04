@@ -3,6 +3,7 @@ import { loadLocaleRegistry, assertLocaleRegistry, publicIndexableLocales } from
 import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
+import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -50,5 +51,8 @@ if (!listings.length) throw new Error("Search listing fixture is empty");
 for (const field of ["locale", "locale_prefix", "locale_is_indexable", "translation_status"]) {
   if (!(field in listings[0])) throw new Error(`Search fixture missing ${field}`);
 }
+
+const migration = JSON.parse(fs.readFileSync(fromRoot("production", "data", "migration-records.json"), "utf8"));
+assertMigrationLaunchGate(migration.records);
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, and search contracts");
