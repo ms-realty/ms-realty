@@ -101,5 +101,9 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must queue broker-approved replies");
   }
   if (smoke.replyUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated replies");
+  if (smoke.viewing.status !== 201 || smoke.viewing.body.follow_up_task?.status !== "open") {
+    throw new Error("Server must book viewing follow-up tasks");
+  }
+  if (smoke.viewingUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated viewings");
   return true;
 }

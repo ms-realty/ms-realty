@@ -26,6 +26,12 @@ import {
   readReplyOutbox,
   resetReplyOutbox,
 } from "../lib/lead-replies.mjs";
+import {
+  assertViewingLedger,
+  DEFAULT_VIEWING_LEDGER_PATH,
+  readViewings,
+  resetViewingLedger,
+} from "../lib/viewing-ledger.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -34,6 +40,7 @@ resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
 resetListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
+resetViewingLedger(DEFAULT_VIEWING_LEDGER_PATH);
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -42,11 +49,13 @@ const app = createHttpApp({
   languageRequestPath: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
   translationLedgerPath: DEFAULT_TRANSLATION_LEDGER_PATH,
   listingEditLedgerPath: DEFAULT_LISTING_EDIT_LEDGER_PATH,
+  viewingLedgerPath: DEFAULT_VIEWING_LEDGER_PATH,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
   editedAt: "2026-07-04T00:03:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
+  bookedAt: "2026-07-04T00:06:00Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 const smoke = {
@@ -119,6 +128,22 @@ smoke.replyUnauthorized = await dispatchHttp(app, {
   url: "/api/admin/replies",
   body: { leadId: "http-lead-he-0001", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
 });
+smoke.viewing = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/viewings",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    id: "viewing-http-lead-he-0001",
+    leadId: "http-lead-he-0001",
+    startsAt: "2026-07-06T10:00:00Z",
+    broker: "broker_ru",
+  },
+});
+smoke.viewingUnauthorized = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/viewings",
+  body: { leadId: "http-lead-he-0001", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
+});
 smoke.translationDraft = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/translations/draft",
@@ -190,6 +215,9 @@ smoke.translationLedger = { path: DEFAULT_TRANSLATION_LEDGER_PATH, rows: transla
 const listingEdits = readListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
 assertListingEdits(listingEdits);
 smoke.listingEditLedger = { path: DEFAULT_LISTING_EDIT_LEDGER_PATH, rows: listingEdits.length };
+const viewings = readViewings(DEFAULT_VIEWING_LEDGER_PATH);
+assertViewingLedger(viewings);
+smoke.viewingLedger = { path: DEFAULT_VIEWING_LEDGER_PATH, rows: viewings.length };
 smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");

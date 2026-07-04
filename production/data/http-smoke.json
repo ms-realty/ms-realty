@@ -610,6 +610,26 @@
             "he"
           ]
         }
+      ],
+      "viewings": [
+        {
+          "id": "viewing-http-lead-he-0001",
+          "lead_id": "http-lead-he-0001",
+          "listing_reference": "MS-CRAWL-0001",
+          "original_language": "he",
+          "admin_locale": "en",
+          "broker": "broker_ru",
+          "starts_at": "2026-07-06T10:00:00Z",
+          "booked_at": "2026-07-04T00:06:00Z",
+          "channel": "property_viewing",
+          "status": "booked",
+          "follow_up_task": {
+            "id": "task-http-lead-he-0001",
+            "owner": "broker_ru",
+            "status": "open",
+            "due_at": "2026-07-06T10:00:00Z"
+          }
+        }
       ]
     }
   },
@@ -642,6 +662,39 @@
     }
   },
   "replyUnauthorized": {
+    "status": 401,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "unauthorized"
+    }
+  },
+  "viewing": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "id": "viewing-http-lead-he-0001",
+      "lead_id": "http-lead-he-0001",
+      "listing_reference": "MS-CRAWL-0001",
+      "original_language": "he",
+      "admin_locale": "en",
+      "broker": "broker_ru",
+      "starts_at": "2026-07-06T10:00:00Z",
+      "booked_at": "2026-07-04T00:06:00Z",
+      "channel": "property_viewing",
+      "status": "booked",
+      "follow_up_task": {
+        "id": "task-http-lead-he-0001",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T10:00:00Z"
+      }
+    }
+  },
+  "viewingUnauthorized": {
     "status": 401,
     "headers": {
       "content-type": "application/json; charset=utf-8"
@@ -1223,6 +1276,10 @@
   },
   "listingEditLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/listing-edits.jsonl",
+    "rows": 1
+  },
+  "viewingLedger": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/viewings.jsonl",
     "rows": 1
   },
   "localeRegistry": {

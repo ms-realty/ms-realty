@@ -126,6 +126,11 @@ Date: 2026-07-04
   - verifies the lead exists in the ledger
   - requires reviewer and explicit broker approval
   - queues replies for manual send instead of auto-sending
+- Added broker viewing/task booking:
+  - `POST /api/admin/viewings` requires admin bearer token
+  - verifies the lead exists in the CRM ledger
+  - persists a booked viewing row with an open follow-up task
+  - authenticated admin inbox returns persisted viewing rows
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`

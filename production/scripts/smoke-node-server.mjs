@@ -7,6 +7,7 @@ import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } f
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
+import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -15,11 +16,13 @@ const replyOutboxPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-real
 const languageRequestPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-language-")), "requests.jsonl");
 const translationLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-translations-")), "translations.jsonl");
 const listingEditLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-listing-edits-")), "edits.jsonl");
+const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewings-")), "viewings.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
 resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
+resetViewingLedger(viewingLedgerPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
@@ -27,10 +30,12 @@ const server = createNodeServer(
     languageRequestPath,
     translationLedgerPath,
     listingEditLedgerPath,
+    viewingLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
+    bookedAt: "2026-07-04T00:06:00Z",
   }),
 );
 const address = await listen(server);
@@ -118,6 +123,24 @@ try {
         approved: true,
       }),
     }),
+    viewing: await jsonFetch(baseUrl, "/api/admin/viewings", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        id: "viewing-server-lead-he-0001",
+        leadId: "server-lead-he-0001",
+        startsAt: "2026-07-06T10:00:00Z",
+        broker: "broker_ru",
+      }),
+    }),
+    viewingUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings", {
+      method: "POST",
+      body: JSON.stringify({
+        leadId: "server-lead-he-0001",
+        startsAt: "2026-07-06T10:00:00Z",
+        broker: "broker_ru",
+      }),
+    }),
   };
   smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
     method: "POST",
@@ -174,6 +197,9 @@ try {
   const listingEdits = readListingEdits(listingEditLedgerPath);
   assertListingEdits(listingEdits);
   smoke.listingEditLedger = { rows: listingEdits.length };
+  const viewings = readViewings(viewingLedgerPath);
+  assertViewingLedger(viewings);
+  smoke.viewingLedger = { rows: viewings.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);

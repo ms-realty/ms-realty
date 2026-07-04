@@ -8,6 +8,7 @@ import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } f
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
+import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -41,6 +42,12 @@ function tempListingEdits() {
   return file;
 }
 
+function tempViewings() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewings-`)}/viewings.jsonl`;
+  resetViewingLedger(file);
+  return file;
+}
+
 function tempRegistry() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
   fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
@@ -57,16 +64,19 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const languageRequestPath = tempLanguageRequests();
   const translationLedgerPath = tempTranslations();
   const listingEditLedgerPath = tempListingEdits();
+  const viewingLedgerPath = tempViewings();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
     languageRequestPath,
     translationLedgerPath,
     listingEditLedgerPath,
+    viewingLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
+    bookedAt: "2026-07-04T00:06:00Z",
   });
   const redirect = deployableRedirect();
   const smoke = {
@@ -131,6 +141,21 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       method: "POST",
       url: "/api/admin/replies",
       body: { leadId: "http-lead-test", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
+    }),
+    viewing: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/viewings",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        leadId: "http-lead-test",
+        startsAt: "2026-07-06T10:00:00Z",
+        broker: "broker_ru",
+      },
+    }),
+    viewingUnauthorized: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/viewings",
+      body: { leadId: "http-lead-test", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
     }),
   };
   smoke.translationDraft = await dispatchHttp(app, {
@@ -198,11 +223,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
   assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
   assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
+  assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 2);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
   assert.equal(smoke.admin.body.listingEdits.length, 1);
+  assert.equal(smoke.admin.body.viewings.length, 1);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
 });

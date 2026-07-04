@@ -13,6 +13,7 @@ import { loadDeployableRedirects } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
 import { appendListingEdit, createListingEdit, readListingEdits } from "./listing-edits.mjs";
+import { appendViewing, readViewings } from "./viewing-ledger.mjs";
 
 function response(status, body, contentType, headers = {}) {
   return {
@@ -35,11 +36,13 @@ export function createHttpApp({
   languageRequestPath = null,
   translationLedgerPath = null,
   listingEditLedgerPath = null,
+  viewingLedgerPath = null,
   localeRegistryPath = null,
   receivedAt,
   requestedAt,
   editedAt,
   reviewedAt,
+  bookedAt,
 } = {}) {
   let activeRegistry = registry;
   return async function handle(request) {
@@ -99,6 +102,7 @@ export function createHttpApp({
         languageRequests: readLanguageRequests(languageRequestPath || undefined),
         translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
         listingEdits: readListingEdits(listingEditLedgerPath || undefined),
+        viewings: readViewings(viewingLedgerPath || undefined),
       });
     }
 
@@ -188,6 +192,24 @@ export function createHttpApp({
           appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
             filePath: replyOutboxPath || undefined,
             reviewedAt,
+          }),
+        );
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const input = JSON.parse(request.body || "{}");
+        return json(
+          201,
+          appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
+            filePath: viewingLedgerPath || undefined,
+            bookedAt,
           }),
         );
       } catch (error) {
@@ -290,5 +312,9 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must queue broker-approved replies");
   }
   if (smoke.replyUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated replies");
+  if (smoke.viewing.status !== 201 || smoke.viewing.body.follow_up_task?.status !== "open") {
+    throw new Error("HTTP smoke must book viewing follow-up tasks");
+  }
+  if (smoke.viewingUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated viewings");
   return true;
 }

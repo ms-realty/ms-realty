@@ -61,6 +61,9 @@ Implemented now:
   - `POST /api/admin/locales`
   - new website locales stay non-public and non-indexable by default
   - admin CRM/CMS languages remain BG, RU, and EN
+- Broker viewing/task contract:
+  - `POST /api/admin/viewings`
+  - booked viewings require known CRM leads and create open follow-up tasks
 - Dynamic locale publishing contract:
   - newly added public locales can draft, approve, publish, and serve a locale-prefixed listing from the translation ledger
   - served sitemap XML includes those approved dynamic locale routes

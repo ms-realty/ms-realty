@@ -40,6 +40,7 @@ What it proves now:
 - Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
+- Broker-booked viewing ledger with open follow-up tasks from existing CRM leads.
 
 Run:
 
@@ -65,6 +66,7 @@ Generated production data:
 - `production/data/node-server-smoke.json`
 - `production/data/lead-ledger.jsonl`
 - `production/data/reply-outbox.jsonl`
+- `production/data/viewings.jsonl`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/listing-edits.jsonl`

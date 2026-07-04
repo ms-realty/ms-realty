@@ -209,6 +209,10 @@ if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_fo
   throw new Error("HTTP smoke must queue broker-approved reply");
 }
 if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist one reply outbox row");
+if (httpSmoke.viewing.status !== 201 || httpSmoke.viewing.body.follow_up_task?.status !== "open") {
+  throw new Error("HTTP smoke must book one viewing with follow-up task");
+}
+if (httpSmoke.viewingLedger.rows !== 1) throw new Error("HTTP smoke must persist one viewing row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
 if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, published, and stale translation rows");
 if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
@@ -263,6 +267,10 @@ if (nodeServerSmoke.admin.status !== 200 || nodeServerSmoke.admin.body.workspace
 if (nodeServerSmoke.reply.status !== 201 || nodeServerSmoke.reply.body.status !== "queued_for_manual_send") {
   throw new Error("Node server smoke must queue broker-approved reply");
 }
+if (nodeServerSmoke.viewing.status !== 201 || nodeServerSmoke.viewing.body.follow_up_task?.status !== "open") {
+  throw new Error("Node server smoke must book one viewing with follow-up task");
+}
+if (nodeServerSmoke.viewingLedger.rows !== 1) throw new Error("Node server smoke must persist one viewing row");
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 2) throw new Error("Lead ledger artifact must contain buyer and seller smoke rows");
@@ -274,5 +282,7 @@ const translationTasks = fs.readFileSync(fromRoot("production", "data", "transla
 if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");
 const listingEdits = fs.readFileSync(fromRoot("production", "data", "listing-edits.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (listingEdits.length !== 1) throw new Error("Listing edit artifact must contain one deterministic smoke row");
+const viewings = fs.readFileSync(fromRoot("production", "data", "viewings.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (viewings.length !== 1) throw new Error("Viewing artifact must contain one deterministic smoke row");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");
