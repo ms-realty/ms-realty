@@ -1,6 +1,6 @@
 {
   "fixture_id": "node-server-smoke-20260704",
-  "baseUrl": "http://127.0.0.1:54064",
+  "baseUrl": "http://127.0.0.1:54644",
   "listing": {
     "status": 200,
     "body": {
@@ -323,7 +323,8 @@
           "admin_locale": "en",
           "broker_approval_required": true
         }
-      ]
+      ],
+      "replies": []
     }
   },
   "adminUnauthorized": {
@@ -332,7 +333,32 @@
       "kind": "unauthorized"
     }
   },
+  "reply": {
+    "status": 201,
+    "body": {
+      "id": "reply-server-lead-he-0001",
+      "lead_id": "server-lead-he-0001",
+      "listing_reference": "MS-CRAWL-0001",
+      "original_language": "he",
+      "reply_language": "he",
+      "reviewed_reply": "Reviewed reply approved by broker.",
+      "reviewer": "broker_ru",
+      "reviewed_at": "2026-07-04T00:05:00Z",
+      "status": "queued_for_manual_send",
+      "broker_approved": true,
+      "hermes_draft_used": true
+    }
+  },
+  "replyUnauthorized": {
+    "status": 401,
+    "body": {
+      "kind": "unauthorized"
+    }
+  },
   "leadLedger": {
+    "rows": 1
+  },
+  "replyOutbox": {
     "rows": 1
   }
 }

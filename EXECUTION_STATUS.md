@@ -86,6 +86,11 @@ Date: 2026-07-04
   - `GET /api/admin/leads?locale=ru` reads the persisted ledger
   - unauthorized requests return `401`
   - admin workspace still exposes only BG, RU, and EN
+- Added broker-approved reply outbox:
+  - `POST /api/admin/replies` requires admin bearer token
+  - verifies the lead exists in the ledger
+  - requires reviewer and explicit broker approval
+  - queues replies for manual send instead of auto-sending
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`

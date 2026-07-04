@@ -27,6 +27,7 @@ What it proves now:
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Append-only lead ledger for persisted CRM intake smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
+- Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
 
 Run:
 
@@ -48,6 +49,7 @@ Generated production data:
 - `production/data/http-smoke.json`
 - `production/data/node-server-smoke.json`
 - `production/data/lead-ledger.jsonl`
+- `production/data/reply-outbox.jsonl`
 
 The next production slice can consume these contracts from a Next.js App Router
 public app and Payload CMS collections without re-deciding URL, locale, AI, or

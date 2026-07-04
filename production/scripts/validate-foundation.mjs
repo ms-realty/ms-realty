@@ -138,6 +138,10 @@ if (httpSmoke.admin.status !== 200 || httpSmoke.admin.body.workspace.locale !== 
   throw new Error("HTTP smoke must serve RU admin lead inbox");
 }
 if (httpSmoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin lead inbox");
+if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_for_manual_send") {
+  throw new Error("HTTP smoke must queue broker-approved reply");
+}
+if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist one reply outbox row");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !== "rtl") {
@@ -151,8 +155,13 @@ if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includ
 if (nodeServerSmoke.admin.status !== 200 || nodeServerSmoke.admin.body.workspace.locale !== "ru") {
   throw new Error("Node server smoke must serve RU admin lead inbox");
 }
+if (nodeServerSmoke.reply.status !== 201 || nodeServerSmoke.reply.body.status !== "queued_for_manual_send") {
+  throw new Error("Node server smoke must queue broker-approved reply");
+}
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 1) throw new Error("Lead ledger artifact must contain one deterministic smoke row");
+const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contain one deterministic smoke row");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

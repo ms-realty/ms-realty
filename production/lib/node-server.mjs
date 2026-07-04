@@ -64,5 +64,9 @@ export function assertServerSmoke(smoke) {
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated admin leads");
+  if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
+    throw new Error("Server must queue broker-approved replies");
+  }
+  if (smoke.replyUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated replies");
   return true;
 }

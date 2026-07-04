@@ -1,5 +1,6 @@
 import { loadLocaleRegistry } from "./locales.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
+import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { loadLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
@@ -16,7 +17,14 @@ function json(status, body) {
   return response(status, body, "application/json; charset=utf-8");
 }
 
-export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsSeed(), leadLedgerPath = null, receivedAt } = {}) {
+export function createHttpApp({
+  registry = loadLocaleRegistry(),
+  seed = loadCmsSeed(),
+  leadLedgerPath = null,
+  replyOutboxPath = null,
+  receivedAt,
+  reviewedAt,
+} = {}) {
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
@@ -43,7 +51,26 @@ export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsS
       return json(200, {
         workspace: renderAdminWorkspace({ registry, requestedLocale }),
         leads: readLeadLedger(leadLedgerPath || undefined),
+        replies: readReplyOutbox(replyOutboxPath || undefined),
       });
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/replies") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const input = JSON.parse(request.body || "{}");
+        return json(
+          201,
+          appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
+            filePath: replyOutboxPath || undefined,
+            reviewedAt,
+          }),
+        );
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
@@ -85,5 +112,9 @@ export function assertHttpSmoke(smoke) {
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");
+  if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
+    throw new Error("HTTP smoke must queue broker-approved replies");
+  }
+  if (smoke.replyUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated replies");
   return true;
 }

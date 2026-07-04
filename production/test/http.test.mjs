@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function tempLedger() {
@@ -12,9 +13,21 @@ function tempLedger() {
   return file;
 }
 
+function tempOutbox() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-replies-`)}/replies.jsonl`;
+  resetReplyOutbox(file);
+  return file;
+}
+
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();
-  const app = createHttpApp({ leadLedgerPath, receivedAt: "2026-07-04T00:00:00Z" });
+  const replyOutboxPath = tempOutbox();
+  const app = createHttpApp({
+    leadLedgerPath,
+    replyOutboxPath,
+    receivedAt: "2026-07-04T00:00:00Z",
+    reviewedAt: "2026-07-04T00:05:00Z",
+  });
   const smoke = {
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
@@ -38,6 +51,22 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       headers: { authorization: "Bearer local-admin-smoke" },
     }),
     adminUnauthorized: await dispatchHttp(app, { url: "/api/admin/leads?locale=ru" }),
+    reply: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/replies",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        leadId: "http-lead-test",
+        reviewedReply: "Reviewed reply approved by broker.",
+        reviewer: "broker_ru",
+        approved: true,
+      },
+    }),
+    replyUnauthorized: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/replies",
+      body: { leadId: "http-lead-test", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
+    }),
   };
 
   assert.equal(assertHttpSmoke(smoke), true);
@@ -45,6 +74,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
+  assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(smoke.admin.body.leads.length, 1);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
 });

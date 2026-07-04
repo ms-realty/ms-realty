@@ -358,7 +358,8 @@
           "admin_locale": "en",
           "broker_approval_required": true
         }
-      ]
+      ],
+      "replies": []
     }
   },
   "adminUnauthorized": {
@@ -370,8 +371,40 @@
       "kind": "unauthorized"
     }
   },
+  "reply": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "id": "reply-http-lead-he-0001",
+      "lead_id": "http-lead-he-0001",
+      "listing_reference": "MS-CRAWL-0001",
+      "original_language": "he",
+      "reply_language": "he",
+      "reviewed_reply": "Reviewed reply approved by broker.",
+      "reviewer": "broker_ru",
+      "reviewed_at": "2026-07-04T00:05:00Z",
+      "status": "queued_for_manual_send",
+      "broker_approved": true,
+      "hermes_draft_used": true
+    }
+  },
+  "replyUnauthorized": {
+    "status": 401,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "unauthorized"
+    }
+  },
   "leadLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/lead-ledger.jsonl",
+    "rows": 1
+  },
+  "replyOutbox": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/reply-outbox.jsonl",
     "rows": 1
   }
 }
