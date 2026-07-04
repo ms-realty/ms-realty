@@ -59,6 +59,11 @@ Date: 2026-07-04
   - 4,978 listing media rows attached
   - migration and route review state carried into each listing
   - approved translations included without unapproved French drafts
+- Added runtime smoke fixture:
+  - resolves Hebrew and Russian locale-prefixed listing routes from CMS seed
+  - runs Hebrew mobile-first search from CMS seed
+  - keeps French fallback non-indexable
+  - accepts a Hebrew buyer lead into the EN admin queue with broker approval required
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`
@@ -105,6 +110,7 @@ npm run sitemap:build
 npm run cms:build
 npm run public:build
 npm run admin:build
+npm run runtime:build
 npm run test
 npm run validate
 python3 qa/mobile_elderly_static_check.py

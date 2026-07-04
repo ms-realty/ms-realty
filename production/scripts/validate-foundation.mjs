@@ -109,4 +109,11 @@ if (adminFixtures.crm_inbox.buyer_he.admin_locale !== "en" || adminFixtures.crm_
   throw new Error("Greek and Hebrew CRM work must route to EN admin queue");
 }
 
+const runtimeSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "runtime-smoke.json"), "utf8"));
+if (runtimeSmoke.listing_he.dir !== "rtl" || runtimeSmoke.listing_he.status !== 200) {
+  throw new Error("Runtime smoke must render Hebrew listing as RTL 200");
+}
+if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
+if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
+
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");
