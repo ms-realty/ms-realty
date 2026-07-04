@@ -85,6 +85,10 @@ Implemented now:
   - every crawled URL has a review owner, admin locale, action, and priority
   - `.ru` preservation rows are kept in a dedicated review lane
   - non-listing pages, posts, and taxonomy URLs stay unmapped until editorial review
+- Migration review workbench:
+  - `GET /admin/migration/review` renders metadata/media gaps, mapped listing rows, existing approvals, and deployable preview counts
+  - only mapped listing rows are shown as approvable 301 candidates
+  - form submissions post to the reviewed redirect approval endpoint and still require authenticated admin access
 - Saved search/alert contract:
   - `POST /api/saved-searches`
   - saved searches persist search criteria, match count, and an open alert task

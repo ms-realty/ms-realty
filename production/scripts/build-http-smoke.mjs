@@ -204,6 +204,10 @@ smoke.adminMigrationReview = await dispatchHttp(app, {
   url: "/api/admin/migration/review?locale=bg",
   headers: { authorization: "Bearer local-admin-smoke" },
 });
+smoke.adminMigrationReviewHtml = await dispatchHttp(app, {
+  url: "/admin/migration/review?locale=bg",
+  headers: { authorization: "Bearer local-admin-smoke" },
+});
 smoke.adminUnauthorized = await dispatchHttp(app, { url: "/api/admin/leads?locale=ru" });
 smoke.reply = await dispatchHttp(app, {
   method: "POST",

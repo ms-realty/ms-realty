@@ -67,7 +67,9 @@ Date: 2026-07-04
   - legacy route map remains fully non-deployable until each row is reviewed
 - Added authenticated migration review workbench contract:
   - `GET /api/admin/migration/review` exposes the metadata/media dashboard, route review sample, existing redirect approvals, and deployable preview
+  - `GET /admin/migration/review` renders the same review data as an admin-only HTML workbench
   - `POST /api/admin/redirect-approvals` appends reviewed same-content approvals without changing live redirects directly
+  - redirect approvals accept JSON and form-encoded admin submissions
 - Added runtime serving for reviewed legacy redirects:
   - HTTP and live Node server smokes return `301 Location: /bg/imoti/MS-CRAWL-0001`
   - mapped but unapproved listing rows do not redirect

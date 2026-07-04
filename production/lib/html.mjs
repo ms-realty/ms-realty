@@ -195,6 +195,60 @@ function renderFallback(page) {
 </main>`;
 }
 
+function renderAdminMigrationReview(page) {
+  const gaps = page.dashboard.metadata_gaps || {};
+  const metrics = [
+    ["URLs", page.routeMap.total],
+    ["Review required", page.routeMap.reviewRequired],
+    ["Mapped listings", page.routeMap.mappedListings],
+    ["Deployable preview", page.deployablePreview.length],
+    ["Missing descriptions", gaps.missing_description],
+    ["Media rows", page.dashboard.media_reconciliation?.media_rows],
+  ]
+    .map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`)
+    .join("");
+  const rows = (page.routeMap.approvableSample || [])
+    .map(
+      (route) => `
+      <tr data-approvable-listing="true">
+        <td><code>${escapeHtml(route.old_url)}</code></td>
+        <td><code>${escapeHtml(route.target_path)}</code></td>
+        <td>${escapeHtml(route.target_locale)}</td>
+        <td>
+          <form method="post" action="/api/admin/redirect-approvals">
+            <input type="hidden" name="oldUrl" value="${escapeHtml(route.old_url)}">
+            <input type="hidden" name="equivalentContent" value="true">
+            <label>Reviewer <input name="reviewer" required autocomplete="name"></label>
+            <label>Reason <input name="reason" value="Reviewed same-content route mapping."></label>
+            <button type="submit">Approve 301</button>
+          </form>
+        </td>
+      </tr>`,
+    )
+    .join("");
+  const approvals = page.redirectApprovals
+    .map((approval) => `<li><code>${escapeHtml(approval.old_url)}</code> -> <code>${escapeHtml(approval.target_path)}</code></li>`)
+    .join("");
+  return `
+<main data-kind="admin-migration-review" data-admin-locale="${escapeHtml(page.workspace.locale)}" data-review-required="${escapeHtml(
+    page.routeMap.reviewRequired,
+  )}">
+  <h1>Migration review</h1>
+  <dl>${metrics}</dl>
+  <section aria-label="Approvable listing redirects">
+    <h2>Approvable listing redirects</h2>
+    <table>
+      <thead><tr><th>Old URL</th><th>Target</th><th>Locale</th><th>Approval</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </section>
+  <section aria-label="Approved redirects">
+    <h2>Approved redirects</h2>
+    <ul>${approvals}</ul>
+  </section>
+</main>`;
+}
+
 function renderBody(page, options = {}) {
   if (page.kind === "home") return renderHome(page);
   if (page.kind === "listing" && options.print) return renderListingPrint(page);
@@ -204,6 +258,7 @@ function renderBody(page, options = {}) {
   if (page.kind === "seller") return renderSeller(page);
   if (page.kind === "contact") return renderContact(page);
   if (page.kind === "language_fallback") return renderFallback(page);
+  if (page.kind === "admin_migration_review") return renderAdminMigrationReview(page);
   return `<main data-kind="not-found"><h1>Not found</h1></main>`;
 }
 

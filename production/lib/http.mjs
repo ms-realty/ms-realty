@@ -78,6 +78,58 @@ function searchFiltersFromParams(params) {
   return searchFiltersFromObject(Object.fromEntries(params));
 }
 
+function parseBody(request) {
+  const contentType = request.headers?.["content-type"] || request.headers?.["Content-Type"] || "";
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    return Object.fromEntries(new URLSearchParams(request.body || ""));
+  }
+  return JSON.parse(request.body || "{}");
+}
+
+function redirectApprovalInput(request) {
+  const input = parseBody(request);
+  return {
+    ...input,
+    equivalentContent:
+      input.equivalentContent === true ||
+      input.equivalentContent === "true" ||
+      input.equivalentContent === "on" ||
+      input.equivalentContent === "1",
+  };
+}
+
+function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const reviewRequired = routes.filter((route) => route.review_required);
+  const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
+  return {
+    kind: "admin_migration_review",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/migration/review",
+    canonical: "/admin/migration/review",
+    indexable: false,
+    metadata: {
+      title: "MS Realty migration review",
+      description: "Admin-only crawl metadata, media, and reviewed redirect approval workbench.",
+      robots: "noindex,nofollow",
+    },
+    workspace,
+    dashboard,
+    routeMap: {
+      total: routes.length,
+      reviewRequired: reviewRequired.length,
+      mappedListings: mappedListings.length,
+      pendingSample: reviewRequired.slice(0, 20),
+      approvableSample: mappedListings.filter((route) => route.review_required && route.planned_status === 301).slice(0, 20),
+    },
+    redirectApprovals: approvals,
+    deployablePreview: buildDeployableRedirects(routes, approvals),
+  };
+}
+
 export function createHttpApp({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
@@ -211,24 +263,29 @@ export function createHttpApp({
       });
     }
 
+    if (request.method === "GET" && url.pathname === "/admin/migration/review") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      const payload = renderMigrationReviewPayload(
+        activeRegistry,
+        url.searchParams.get("locale") || "en",
+        migrationReviewDashboard,
+        routeMap,
+        readRedirectApprovals(redirectApprovalPath || undefined),
+      );
+      return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+    }
+
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
       if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
         return json(401, { kind: "unauthorized" });
       }
       const requestedLocale = url.searchParams.get("locale") || "en";
       const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
-      return json(200, {
-        workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
-        dashboard: migrationReviewDashboard,
-        routeMap: {
-          total: routeMap.length,
-          reviewRequired: routeMap.filter((route) => route.review_required).length,
-          mappedListings: routeMap.filter((route) => route.url_type === "listing" && route.target_path).length,
-          pendingSample: routeMap.filter((route) => route.review_required).slice(0, 20),
-        },
-        redirectApprovals: approvals,
-        deployablePreview: buildDeployableRedirects(routeMap, approvals),
-      });
+      const payload = renderMigrationReviewPayload(activeRegistry, requestedLocale, migrationReviewDashboard, routeMap, approvals);
+      if (wantsHtml(request, url)) return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      return json(200, payload);
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
@@ -236,7 +293,7 @@ export function createHttpApp({
         return json(401, { kind: "unauthorized" });
       }
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = redirectApprovalInput(request);
         const approval = appendRedirectApproval(routeMap, input, {
           filePath: redirectApprovalPath || undefined,
           approvedAt: reviewedAt,
@@ -423,7 +480,7 @@ export function createHttpApp({
 }
 
 export async function dispatchHttp(app, { method = "GET", url, body, headers } = {}) {
-  return app({ method, url, headers, body: body ? JSON.stringify(body) : "" });
+  return app({ method, url, headers, body: typeof body === "string" ? body : body ? JSON.stringify(body) : "" });
 }
 
 export function assertHttpSmoke(smoke) {
@@ -623,9 +680,18 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.workspace.locale !== "bg" ||
     smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows !== 11859 ||
     smoke.adminMigrationReview.body.routeMap.total !== 457 ||
-    smoke.adminMigrationReview.body.routeMap.mappedListings !== 165
+    smoke.adminMigrationReview.body.routeMap.mappedListings !== 165 ||
+    smoke.adminMigrationReview.body.routeMap.approvableSample?.length < 1
   ) {
     throw new Error("HTTP smoke must serve admin migration review workbench contract");
+  }
+  if (
+    smoke.adminMigrationReviewHtml?.status !== 200 ||
+    smoke.adminMigrationReviewHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"")
+  ) {
+    throw new Error("HTTP smoke must serve admin migration review HTML");
   }
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {

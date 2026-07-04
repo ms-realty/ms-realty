@@ -21,6 +21,7 @@ What it proves now:
 - Migration review queue with BG/RU admin owners for every crawled URL.
 - Separate reviewed redirect approval ledger and deployable 301 export.
 - Authenticated admin migration review endpoint for the dashboard, route worklist, and redirect approval preview.
+- Authenticated admin migration review HTML workbench for mapped listing approvals.
 - Authenticated redirect approval endpoint that appends reviewed same-content mappings without changing live redirects.
 - Localized sitemap fixture gated by approved translation records.
 - Generated `sitemap.xml` and `robots.txt` from approved localized sitemap entries.
