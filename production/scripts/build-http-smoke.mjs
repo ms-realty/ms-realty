@@ -9,6 +9,12 @@ import {
   resetLanguageRequests,
 } from "../lib/language-requests.mjs";
 import {
+  assertTranslationLedger,
+  DEFAULT_TRANSLATION_LEDGER_PATH,
+  readTranslationLedger,
+  resetTranslationLedger,
+} from "../lib/translation-ledger.mjs";
+import {
   assertReplyOutbox,
   DEFAULT_REPLY_OUTBOX_PATH,
   readReplyOutbox,
@@ -19,10 +25,12 @@ import { fromRoot } from "../lib/paths.mjs";
 resetLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
 resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
+resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
 const app = createHttpApp({
   leadLedgerPath: DEFAULT_LEAD_LEDGER_PATH,
   replyOutboxPath: DEFAULT_REPLY_OUTBOX_PATH,
   languageRequestPath: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
+  translationLedgerPath: DEFAULT_TRANSLATION_LEDGER_PATH,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
@@ -98,6 +106,36 @@ smoke.replyUnauthorized = await dispatchHttp(app, {
   url: "/api/admin/replies",
   body: { leadId: "http-lead-he-0001", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
 });
+smoke.translationDraft = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/translations/draft",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    objectType: "listing",
+    objectId: "MS-CRAWL-0001",
+    sourceLocale: "bg",
+    targetLocale: "el",
+    sourceContent: {
+      title: "Reviewed listing title",
+      description: "Reviewed listing description for Sandanski.",
+    },
+    propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+  },
+});
+smoke.translationPublish = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/translations/publish",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    taskId: smoke.translationDraft.body.id,
+    reviewer: "translator_el",
+    approvedAt: "2026-07-04T00:02:00Z",
+  },
+});
+smoke.admin = await dispatchHttp(app, {
+  url: "/api/admin/leads?locale=ru",
+  headers: { authorization: "Bearer local-admin-smoke" },
+});
 
 assertHttpSmoke(smoke);
 const ledger = readLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
@@ -109,6 +147,9 @@ smoke.replyOutbox = { path: DEFAULT_REPLY_OUTBOX_PATH, rows: outbox.length };
 const languageRequests = readLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 assertLanguageRequests(languageRequests);
 smoke.languageRequestLedger = { path: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, rows: languageRequests.length };
+const translations = readTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
+assertTranslationLedger(translations);
+smoke.translationLedger = { path: DEFAULT_TRANSLATION_LEDGER_PATH, rows: translations.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");
 fs.mkdirSync(path.dirname(outPath), { recursive: true });

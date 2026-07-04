@@ -467,7 +467,21 @@
           "broker_approval_required": true
         }
       ],
-      "replies": [],
+      "replies": [
+        {
+          "id": "reply-http-lead-he-0001",
+          "lead_id": "http-lead-he-0001",
+          "listing_reference": "MS-CRAWL-0001",
+          "original_language": "he",
+          "reply_language": "he",
+          "reviewed_reply": "Reviewed reply approved by broker.",
+          "reviewer": "broker_ru",
+          "reviewed_at": "2026-07-04T00:05:00Z",
+          "status": "queued_for_manual_send",
+          "broker_approved": true,
+          "hermes_draft_used": true
+        }
+      ],
       "languageRequests": [
         {
           "requested_at": "2026-07-04T00:01:00Z",
@@ -482,6 +496,49 @@
             "name": "Claire Martin"
           },
           "message": "Please notify me when French property pages are reviewed."
+        }
+      ],
+      "translationTasks": [
+        {
+          "id": "translation-listing-MS-CRAWL-0001-el",
+          "object_type": "listing",
+          "object_id": "MS-CRAWL-0001",
+          "source_locale": "bg",
+          "target_locale": "el",
+          "target_direction": "ltr",
+          "status": "published",
+          "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+          "draft_hash": "06b0b66ccd1010889caefe8b529abbbfa7e0e6b447be922380c97fc61a06a113",
+          "provider_mode": "hermes_draft",
+          "reviewer_role": "translator_el",
+          "public_indexable": true,
+          "requires_human_approval": true,
+          "hermes": {
+            "prompt": {
+              "role": "translation_draft",
+              "sourceLocale": "bg",
+              "targetLocale": "el",
+              "sourceText": "Reviewed listing title\nReviewed listing description for Sandanski.",
+              "propertyFacts": {
+                "id": "MS-CRAWL-0001",
+                "location": "Sandanski"
+              },
+              "glossary": {},
+              "rules": [
+                "Draft only; never publish.",
+                "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+                "Do not describe Sandanski as a sea destination.",
+                "Legal, tax, financing, and valuation claims require approved CMS source content.",
+                "Return SEO title and meta description drafts within normal search-result lengths."
+              ]
+            },
+            "can_publish": false,
+            "can_mark_indexable": false
+          },
+          "reviewer": "translator_el",
+          "approved_at": "2026-07-04T00:02:00Z",
+          "human_approved": true,
+          "published": true
         }
       ]
     }
@@ -523,6 +580,96 @@
       "kind": "unauthorized"
     }
   },
+  "translationDraft": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "id": "translation-listing-MS-CRAWL-0001-el",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "target_locale": "el",
+      "target_direction": "ltr",
+      "status": "hermes_drafted",
+      "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+      "draft_hash": "06b0b66ccd1010889caefe8b529abbbfa7e0e6b447be922380c97fc61a06a113",
+      "provider_mode": "hermes_draft",
+      "reviewer_role": "translator_el",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "hermes": {
+        "prompt": {
+          "role": "translation_draft",
+          "sourceLocale": "bg",
+          "targetLocale": "el",
+          "sourceText": "Reviewed listing title\nReviewed listing description for Sandanski.",
+          "propertyFacts": {
+            "id": "MS-CRAWL-0001",
+            "location": "Sandanski"
+          },
+          "glossary": {},
+          "rules": [
+            "Draft only; never publish.",
+            "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+            "Do not describe Sandanski as a sea destination.",
+            "Legal, tax, financing, and valuation claims require approved CMS source content.",
+            "Return SEO title and meta description drafts within normal search-result lengths."
+          ]
+        },
+        "can_publish": false,
+        "can_mark_indexable": false
+      }
+    }
+  },
+  "translationPublish": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "id": "translation-listing-MS-CRAWL-0001-el",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "target_locale": "el",
+      "target_direction": "ltr",
+      "status": "published",
+      "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+      "draft_hash": "06b0b66ccd1010889caefe8b529abbbfa7e0e6b447be922380c97fc61a06a113",
+      "provider_mode": "hermes_draft",
+      "reviewer_role": "translator_el",
+      "public_indexable": true,
+      "requires_human_approval": true,
+      "hermes": {
+        "prompt": {
+          "role": "translation_draft",
+          "sourceLocale": "bg",
+          "targetLocale": "el",
+          "sourceText": "Reviewed listing title\nReviewed listing description for Sandanski.",
+          "propertyFacts": {
+            "id": "MS-CRAWL-0001",
+            "location": "Sandanski"
+          },
+          "glossary": {},
+          "rules": [
+            "Draft only; never publish.",
+            "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+            "Do not describe Sandanski as a sea destination.",
+            "Legal, tax, financing, and valuation claims require approved CMS source content.",
+            "Return SEO title and meta description drafts within normal search-result lengths."
+          ]
+        },
+        "can_publish": false,
+        "can_mark_indexable": false
+      },
+      "reviewer": "translator_el",
+      "approved_at": "2026-07-04T00:02:00Z",
+      "human_approved": true,
+      "published": true
+    }
+  },
   "leadLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/lead-ledger.jsonl",
     "rows": 2
@@ -534,5 +681,9 @@
   "languageRequestLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/language-requests.jsonl",
     "rows": 1
+  },
+  "translationLedger": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/translation-tasks.jsonl",
+    "rows": 2
   }
 }

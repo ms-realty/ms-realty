@@ -147,6 +147,12 @@ if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
 if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.requested_locale !== "fr") {
   throw new Error("HTTP smoke must accept French language request");
 }
+if (httpSmoke.translationDraft.status !== 201 || httpSmoke.translationDraft.body.public_indexable !== false) {
+  throw new Error("HTTP smoke must store non-indexable Hermes translation draft");
+}
+if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.body.public_indexable !== true) {
+  throw new Error("HTTP smoke must publish human-approved translation");
+}
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
@@ -166,6 +172,7 @@ if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_fo
 }
 if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist one reply outbox row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
+if (httpSmoke.translationLedger.rows !== 2) throw new Error("HTTP smoke must persist draft and published translation rows");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.legacyRedirect.status !== 301 || nodeServerSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
@@ -181,6 +188,15 @@ if (nodeServerSmoke.languageRequest.status !== 201 || nodeServerSmoke.languageRe
 }
 if (nodeServerSmoke.languageRequestLedger.rows !== 1) {
   throw new Error("Node server smoke must persist one language request row");
+}
+if (nodeServerSmoke.translationDraft.status !== 201 || nodeServerSmoke.translationDraft.body.public_indexable !== false) {
+  throw new Error("Node server smoke must store non-indexable Hermes translation draft");
+}
+if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.translationPublish.body.public_indexable !== true) {
+  throw new Error("Node server smoke must publish human-approved translation");
+}
+if (nodeServerSmoke.translationLedger.rows !== 2) {
+  throw new Error("Node server smoke must persist draft and published translation rows");
 }
 if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
   throw new Error("Node server smoke must serve robots");
@@ -198,5 +214,7 @@ const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox
 if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contain one deterministic smoke row");
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
+const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (translationTasks.length !== 2) throw new Error("Translation task artifact must contain draft and published smoke rows");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

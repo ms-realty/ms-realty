@@ -67,6 +67,12 @@ export function assertServerSmoke(smoke) {
   if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable language request");
   }
+  if (smoke.translationDraft.status !== 201 || smoke.translationDraft.body.public_indexable !== false) {
+    throw new Error("Server must store non-indexable Hermes translation draft");
+  }
+  if (smoke.translationPublish.status !== 201 || smoke.translationPublish.body.public_indexable !== true) {
+    throw new Error("Server must publish only human-approved translation");
+  }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("Server must accept seller valuation lead");

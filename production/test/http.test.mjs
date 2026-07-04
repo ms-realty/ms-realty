@@ -6,6 +6,7 @@ import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
+import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function tempLedger() {
@@ -26,6 +27,12 @@ function tempLanguageRequests() {
   return file;
 }
 
+function tempTranslations() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-translations-`)}/translations.jsonl`;
+  resetTranslationLedger(file);
+  return file;
+}
+
 function deployableRedirect() {
   return JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 }
@@ -34,10 +41,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const leadLedgerPath = tempLedger();
   const replyOutboxPath = tempOutbox();
   const languageRequestPath = tempLanguageRequests();
+  const translationLedgerPath = tempTranslations();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
     languageRequestPath,
+    translationLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
@@ -107,6 +116,36 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       body: { leadId: "http-lead-test", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
     }),
   };
+  smoke.translationDraft = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/translations/draft",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      objectType: "listing",
+      objectId: "MS-CRAWL-0001",
+      sourceLocale: "bg",
+      targetLocale: "el",
+      sourceContent: {
+        title: "Reviewed listing title",
+        description: "Reviewed listing description for Sandanski.",
+      },
+      propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+    },
+  });
+  smoke.translationPublish = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/translations/publish",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      taskId: smoke.translationDraft.body.id,
+      reviewer: "translator_el",
+      approvedAt: "2026-07-04T00:02:00Z",
+    },
+  });
+  smoke.admin = await dispatchHttp(app, {
+    url: "/api/admin/leads?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
@@ -116,8 +155,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
+  assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
   assert.equal(smoke.admin.body.leads.length, 2);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
+  assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "published"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
 });

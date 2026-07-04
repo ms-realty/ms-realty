@@ -62,6 +62,10 @@ Date: 2026-07-04
   - `POST /api/language-requests` stores non-indexable requests
   - French fallback users route into the EN admin queue
   - authenticated admin inbox includes language requests next to leads and replies
+- Added authenticated CMS translation review endpoints:
+  - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
+  - `POST /api/admin/translations/publish` requires reviewer approval before indexability
+  - `production/data/translation-tasks.jsonl` stores draft and published review rows
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations

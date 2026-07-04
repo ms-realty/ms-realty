@@ -6,6 +6,7 @@ import { createHttpApp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
+import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -13,14 +14,17 @@ async function withServer(fn) {
   const leadLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-`)}/leads.jsonl`;
   const replyOutboxPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-replies-`)}/replies.jsonl`;
   const languageRequestPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-language-`)}/requests.jsonl`;
+  const translationLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-translations-`)}/translations.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
+  resetTranslationLedger(translationLedgerPath);
   const server = createNodeServer(
     createHttpApp({
       leadLedgerPath,
       replyOutboxPath,
       languageRequestPath,
+      translationLedgerPath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
       reviewedAt: "2026-07-04T00:05:00Z",
@@ -28,7 +32,7 @@ async function withServer(fn) {
   );
   const address = await listen(server);
   try {
-    return await fn(`http://${address.address}:${address.port}`, leadLedgerPath, replyOutboxPath, languageRequestPath);
+    return await fn(`http://${address.address}:${address.port}`, leadLedgerPath, replyOutboxPath, languageRequestPath, translationLedgerPath);
   } finally {
     await close(server);
   }
@@ -39,7 +43,7 @@ function deployableRedirect() {
 }
 
 test("Node server serves live listing, search, and lead endpoints", async () => {
-  await withServer(async (baseUrl, leadLedgerPath, replyOutboxPath, languageRequestPath) => {
+  await withServer(async (baseUrl, leadLedgerPath, replyOutboxPath, languageRequestPath, translationLedgerPath) => {
     const redirect = deployableRedirect();
     const oldUrl = new URL(redirect.old_url);
     const smoke = {
@@ -117,11 +121,39 @@ test("Node server serves live listing, search, and lead endpoints", async () => 
         }),
       }),
     };
+    smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        objectType: "listing",
+        objectId: "MS-CRAWL-0001",
+        sourceLocale: "bg",
+        targetLocale: "el",
+        sourceContent: {
+          title: "Reviewed listing title",
+          description: "Reviewed listing description for Sandanski.",
+        },
+        propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+      }),
+    });
+    smoke.translationPublish = await jsonFetch(baseUrl, "/api/admin/translations/publish", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        taskId: smoke.translationDraft.body.id,
+        reviewer: "translator_el",
+        approvedAt: "2026-07-04T00:02:00Z",
+      }),
+    });
+    smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
     assert.equal(assertServerSmoke(smoke), true);
     assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
     assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
     assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
     assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
+    assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
   });
 });
 

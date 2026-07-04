@@ -5,20 +5,24 @@ import { createHttpApp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
+import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const leadLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-leads-")), "leads.jsonl");
 const replyOutboxPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-replies-")), "replies.jsonl");
 const languageRequestPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-language-")), "requests.jsonl");
+const translationLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-translations-")), "translations.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
+resetTranslationLedger(translationLedgerPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
     languageRequestPath,
+    translationLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
@@ -110,6 +114,33 @@ try {
       }),
     }),
   };
+  smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
+    method: "POST",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: JSON.stringify({
+      objectType: "listing",
+      objectId: "MS-CRAWL-0001",
+      sourceLocale: "bg",
+      targetLocale: "el",
+      sourceContent: {
+        title: "Reviewed listing title",
+        description: "Reviewed listing description for Sandanski.",
+      },
+      propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+    }),
+  });
+  smoke.translationPublish = await jsonFetch(baseUrl, "/api/admin/translations/publish", {
+    method: "POST",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: JSON.stringify({
+      taskId: smoke.translationDraft.body.id,
+      reviewer: "translator_el",
+      approvedAt: "2026-07-04T00:02:00Z",
+    }),
+  });
+  smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   smoke.legacyRedirect.headers = { location: smoke.legacyRedirect.headers.location };
   assertServerSmoke(smoke);
   const ledger = readLeadLedger(leadLedgerPath);
@@ -121,6 +152,9 @@ try {
   const languageRequests = readLanguageRequests(languageRequestPath);
   assertLanguageRequests(languageRequests);
   smoke.languageRequestLedger = { rows: languageRequests.length };
+  const translations = readTranslationLedger(translationLedgerPath);
+  assertTranslationLedger(translations);
+  smoke.translationLedger = { rows: translations.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);
