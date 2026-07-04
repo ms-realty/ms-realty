@@ -1,0 +1,258 @@
+import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } from "./locales.mjs";
+import { hreflangForListing, isTranslationIndexable, listingPath } from "./seo.mjs";
+import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+
+const ACTION_LABELS = {
+  bg: { inquiry: "Запитване", valuation: "Оценка за продавач" },
+  en: { inquiry: "Inquiry", valuation: "Seller valuation" },
+  de: { inquiry: "Anfrage", valuation: "Verkaufsbewertung" },
+  nl: { inquiry: "Aanvraag", valuation: "Verkoopwaardering" },
+  ru: { inquiry: "Запрос", valuation: "Оценка для продавца" },
+  el: { inquiry: "Ερώτηση", valuation: "Εκτίμηση πωλητή" },
+  he: { inquiry: "פנייה", valuation: "הערכת מוכר" },
+};
+
+const PUBLIC_COPY = {
+  en: {
+    title: (view) => `MS Realty property ${view.id} in ${view.location || "Sandanski"}`,
+    description: (view) => `Reviewed MS Realty property facts for ${view.location || "Sandanski"}.`,
+  },
+  de: {
+    title: (view) => `MS Realty Immobilie ${view.id} in ${view.location || "Sandanski"}`,
+    description: (view) => `Geprüfte MS Realty Immobiliendaten für ${view.location || "Sandanski"}.`,
+  },
+  nl: {
+    title: (view) => `MS Realty vastgoed ${view.id} in ${view.location || "Sandanski"}`,
+    description: (view) => `Goedgekeurde MS Realty vastgoedgegevens voor ${view.location || "Sandanski"}.`,
+  },
+  ru: {
+    title: (view) => `Объект MS Realty ${view.id} в ${view.location || "Sandanski"}`,
+    description: (view) => `Проверенные данные объекта MS Realty для ${view.location || "Sandanski"}.`,
+  },
+  el: {
+    title: (view) => `Ακίνητο MS Realty ${view.id} στο ${view.location || "Sandanski"}`,
+    description: (view) => `Ελεγμένα στοιχεία ακινήτου MS Realty για το ${view.location || "Sandanski"}.`,
+  },
+  he: {
+    title: (view) => `נכס MS Realty ${view.id} ב-${view.location || "Sandanski"}`,
+    description: (view) => `פרטי נכס מאושרים של MS Realty עבור ${view.location || "Sandanski"}.`,
+  },
+};
+
+function labelsFor(localeCode) {
+  return ACTION_LABELS[localeCode] || ACTION_LABELS.en;
+}
+
+function descriptionFor(listing) {
+  return listing.description || listing.h1 || listing.title || `MS Realty listing ${listing.id}`;
+}
+
+function localizedCopy(localeCode, view) {
+  const template = PUBLIC_COPY[localeCode];
+  if (!template || localeCode === view.source_locale) {
+    return {
+      title: view.title,
+      h1: view.h1,
+      description: descriptionFor(view),
+    };
+  }
+  const title = template.title(view);
+  return {
+    title,
+    h1: title,
+    description: template.description(view),
+  };
+}
+
+function translationFor(translations, localeCode) {
+  return translations.find((translation) => translation.locale === localeCode) || null;
+}
+
+export function renderListingPage({ registry, listing, localeCode, translations }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const view = listingToPublicViewModel(listing);
+  const allTranslations = translations || approvedTranslationRecordsForListing(registry, listing);
+  const translation = translationFor(allTranslations, locale.code);
+  const translationIndexable = translation ? isTranslationIndexable(registry, translation) : false;
+  const indexable = resolved.available && translationIndexable;
+  const path = listingPath(registry, locale.code, listing.id);
+  const hreflang = indexable ? hreflangForListing(registry, listing.id, allTranslations) : [];
+  const labels = labelsFor(locale.code);
+  const copy = localizedCopy(locale.code, view);
+
+  return {
+    kind: "listing",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable,
+    fallback: {
+      active: !resolved.available,
+      requested_locale: localeCode,
+      resolved_locale: locale.code,
+    },
+    metadata: {
+      title: copy.title,
+      description: copy.description,
+      robots: indexable ? "index,follow" : "noindex,follow",
+    },
+    hreflang,
+    schema: {
+      "@context": "https://schema.org",
+      "@type": "RealEstateListing",
+      "@id": `${path}#listing`,
+      url: path,
+      name: copy.title,
+      description: copy.description,
+      image_count: view.image_count,
+      areaServed: view.location,
+    },
+    translation: {
+      locale: translation?.locale || locale.code,
+      status: translation?.status || "missing",
+      human_approved: translation?.human_approved === true,
+      reviewer: translation?.reviewer || null,
+    },
+    body: {
+      h1: copy.h1,
+      facts: {
+        id: view.id,
+        location: view.location,
+        property_type: view.property_type,
+        offer_type: view.offer_type,
+        bedrooms: view.bedrooms,
+        price_eur: view.price_eur,
+        image_count: view.image_count,
+      },
+      ctas: {
+        inquiry: labels.inquiry,
+        seller_valuation: labels.valuation,
+      },
+      source: {
+        old_url: view.source_url,
+        source_domain: view.source_domain,
+        source_locale: view.source_locale,
+        source_title: view.title,
+      },
+    },
+  };
+}
+
+export function renderSearchPage({ registry, localeCode, listings, query = "" }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const localeMatches = listings.filter((listing) => listing.locale === locale.code);
+  const fallbackMatches = listings.filter(
+    (listing) => listing.locale === (locale.fallback_locale || registry.source_locale) || listing.locale === registry.source_locale,
+  );
+  const cards = (localeMatches.length ? localeMatches : fallbackMatches).slice(0, 12).map((listing) => {
+    const view = listingToPublicViewModel(listing);
+    const copy = localizedCopy(locale.code, view);
+    return {
+      id: listing.id,
+      title: copy.title,
+      path: listingPath(registry, locale.code, listing.id),
+      translation_display: listing.locale === locale.code ? "reviewed_translation" : "fallback_source_locale",
+      source_locale: listing.locale,
+      image_count: Number(listing.image_count || 0),
+    };
+  });
+
+  return {
+    kind: "search",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path: `/${locale.code}/${locale.route_segments.search}`,
+    canonical: `/${locale.code}/${locale.route_segments.search}`,
+    indexable: resolved.available,
+    metadata: {
+      title: "MS Realty property search",
+      description: "Locale-scoped property search backed by reviewed MS Realty inventory.",
+      robots: resolved.available ? "index,follow" : "noindex,follow",
+    },
+    mobile_policy: {
+      list_first_mobile: true,
+      sticky_contact_actions: true,
+      minimum_tap_target_px: 44,
+    },
+    search: {
+      engines: ["typesense", "meilisearch"],
+      query,
+      filters: {
+        locale: locale.code,
+        public_enabled: true,
+        indexable: true,
+      },
+      fallback: {
+        enabled: true,
+        locale: locale.fallback_locale || registry.source_locale,
+        label: "fallback_source_locale",
+      },
+    },
+    cards,
+  };
+}
+
+export function renderLanguageFallback({ registry, requestedLocale }) {
+  const resolved = resolvePublicLocale(registry, requestedLocale);
+  return {
+    kind: "language_fallback",
+    status: 200,
+    requested_locale: requestedLocale,
+    locale: resolved.locale.code,
+    lang: resolved.locale.code,
+    dir: resolved.locale.direction,
+    path: `/${resolved.locale.code}/`,
+    canonical: `/${resolved.locale.code}/`,
+    indexable: false,
+    metadata: {
+      title: "MS Realty language request",
+      description: "Fallback route for languages that are not yet reviewed and approved for indexing.",
+      robots: "noindex,follow",
+    },
+    request_language_available: true,
+    hermes_chat_available: true,
+    public_translation_available: resolved.available,
+  };
+}
+
+export function renderAdminShell({ registry, requestedLocale = "en" }) {
+  const allowed = adminLocales(registry);
+  const selectedCode = allowed.includes(requestedLocale) ? requestedLocale : "en";
+  const selected = getLocale(registry, selectedCode);
+
+  return {
+    kind: "admin_shell",
+    status: 200,
+    requested_locale: requestedLocale,
+    locale: selected.code,
+    lang: selected.code,
+    dir: selected.direction,
+    path: "/admin",
+    modules: ["crm", "cms"],
+    interface_locales: allowed.map((code) => {
+      const locale = getLocale(registry, code);
+      return {
+        code: locale.code,
+        native_name: locale.native_name,
+        admin_name: locale.admin_name,
+        direction: locale.direction,
+      };
+    }),
+    website_locales: publicIndexableLocales(registry).map((locale) => locale.code),
+    language_policy: {
+      lead_language: "dynamic_bcp47",
+      broker_assignment_uses_language_skills: true,
+      hermes_reply_drafts_require_broker_approval: true,
+      cms_translations_require_human_approval_before_indexing: true,
+    },
+  };
+}

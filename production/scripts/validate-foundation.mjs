@@ -55,4 +55,18 @@ for (const field of ["locale", "locale_prefix", "locale_is_indexable", "translat
 const migration = JSON.parse(fs.readFileSync(fromRoot("production", "data", "migration-records.json"), "utf8"));
 assertMigrationLaunchGate(migration.records);
 
-console.log("PASS: production foundation locale, SEO, Hermes, lead, and search contracts");
+const publicFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "public-fixtures.json"), "utf8"));
+if (publicFixtures.listing_he.dir !== "rtl") throw new Error("Hebrew public fixture must render RTL");
+if (publicFixtures.listing_el.path !== `/el/akinita/${publicFixtures.source_listing_id}`) {
+  throw new Error("Greek listing fixture route missing");
+}
+if (publicFixtures.listing_fr_fallback.indexable !== false) throw new Error("French fallback listing must not be indexable");
+if (publicFixtures.fallback_fr.indexable !== false) throw new Error("French language fallback must not be indexable");
+if (JSON.stringify(publicFixtures).match(/Sandanski sea|sea destination|Сандански море/i)) {
+  throw new Error("Public fixtures must not introduce Sandanski sea framing");
+}
+if (JSON.stringify(publicFixtures.admin_ru.interface_locales.map((locale) => locale.code)) !== JSON.stringify(["bg", "ru", "en"])) {
+  throw new Error("Admin fixture must expose only BG, RU, EN interface locales");
+}
+
+console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

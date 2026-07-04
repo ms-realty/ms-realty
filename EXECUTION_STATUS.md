@@ -45,6 +45,13 @@ Date: 2026-07-04
   - locale, SEO, Hermes, translation, lead, and migration contracts
   - normalized migration record builder in `production/scripts/build-migration-records.mjs`
   - launch-gate checks for row counts, domains, statuses, redirect review rows, and homepage redirects
+- Added executable public route fixtures:
+  - BG listing route `/bg/imoti/{id}`
+  - Greek website route `/el/akinita/{id}`
+  - Hebrew website route `/he/properties/{id}` with RTL metadata
+  - French fallback/request flow without indexability
+  - Hebrew mobile search backed by Typesense/Meilisearch fixtures
+  - Admin CRM/CMS shell limited to BG, RU, and EN interface locales
 
 ## Crawl Counts
 
@@ -73,6 +80,7 @@ python3 search/build_search_indexes.py
 python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
 python3 locales/validate_locale_registry.py
 npm run migration:build
+npm run public:build
 npm run test
 npm run validate
 python3 qa/mobile_elderly_static_check.py
