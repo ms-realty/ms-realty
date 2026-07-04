@@ -1,0 +1,14 @@
+{
+  "name": "ms-realty-production",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test production/test/*.test.mjs",
+    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
+    "check": "npm run test && npm run validate"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

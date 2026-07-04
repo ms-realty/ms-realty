@@ -15,7 +15,11 @@
       "indexable": true,
       "fallback_locale": null,
       "translation_provider_mode": "human",
-      "reviewer_role": "editor_bg"
+      "reviewer_role": "editor_bg",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene"
+      }
     },
     {
       "code": "en",
@@ -26,7 +30,11 @@
       "indexable": true,
       "fallback_locale": "bg",
       "translation_provider_mode": "human",
-      "reviewer_role": "editor_en"
+      "reviewer_role": "editor_en",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search"
+      }
     },
     {
       "code": "de",
@@ -37,7 +45,11 @@
       "indexable": true,
       "fallback_locale": "en",
       "translation_provider_mode": "hermes_draft",
-      "reviewer_role": "translator_de"
+      "reviewer_role": "translator_de",
+      "route_segments": {
+        "listing": "immobilien",
+        "search": "suche"
+      }
     },
     {
       "code": "nl",
@@ -48,7 +60,11 @@
       "indexable": true,
       "fallback_locale": "en",
       "translation_provider_mode": "hermes_draft",
-      "reviewer_role": "translator_nl"
+      "reviewer_role": "translator_nl",
+      "route_segments": {
+        "listing": "vastgoed",
+        "search": "zoeken"
+      }
     },
     {
       "code": "ru",
@@ -59,7 +75,11 @@
       "indexable": true,
       "fallback_locale": "bg",
       "translation_provider_mode": "human",
-      "reviewer_role": "editor_ru"
+      "reviewer_role": "editor_ru",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search"
+      }
     },
     {
       "code": "el",
@@ -70,7 +90,11 @@
       "indexable": true,
       "fallback_locale": "en",
       "translation_provider_mode": "hermes_draft",
-      "reviewer_role": "translator_el"
+      "reviewer_role": "translator_el",
+      "route_segments": {
+        "listing": "akinita",
+        "search": "anazitisi"
+      }
     },
     {
       "code": "he",
@@ -81,7 +105,11 @@
       "indexable": true,
       "fallback_locale": "en",
       "translation_provider_mode": "hermes_draft",
-      "reviewer_role": "translator_he"
+      "reviewer_role": "translator_he",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search"
+      }
     },
     {
       "code": "fr",
@@ -92,7 +120,11 @@
       "indexable": false,
       "fallback_locale": "en",
       "translation_provider_mode": "hermes_draft",
-      "reviewer_role": "translator_fr"
+      "reviewer_role": "translator_fr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "recherche"
+      }
     }
   ]
 }

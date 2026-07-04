@@ -50,6 +50,9 @@ def main() -> int:
             fail(f"{code} fallback does not exist: {fallback}")
         if locale.get("translation_provider_mode") not in {"human", "hermes_draft", "external_import"}:
             fail(f"invalid provider mode for {code}")
+        segments = locale.get("route_segments") or {}
+        if not segments.get("listing") or not segments.get("search"):
+            fail(f"missing route segments for {code}")
 
     if by_code["he"].get("direction") != "rtl":
         fail("Hebrew must be RTL")
