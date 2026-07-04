@@ -65,6 +65,9 @@ Date: 2026-07-04
   - `production/data/deployable-redirects.json` exports only approved same-content 301s
   - smoke export includes one BG listing and one RU listing
   - legacy route map remains fully non-deployable until each row is reviewed
+- Added authenticated migration review workbench contract:
+  - `GET /api/admin/migration/review` exposes the metadata/media dashboard, route review sample, existing redirect approvals, and deployable preview
+  - `POST /api/admin/redirect-approvals` appends reviewed same-content approvals without changing live redirects directly
 - Added runtime serving for reviewed legacy redirects:
   - HTTP and live Node server smokes return `301 Location: /bg/imoti/MS-CRAWL-0001`
   - mapped but unapproved listing rows do not redirect

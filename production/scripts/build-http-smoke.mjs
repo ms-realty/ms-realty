@@ -193,10 +193,15 @@ const smoke = {
     },
   }),
   admin: null,
+  adminMigrationReview: null,
   adminUnauthorized: null,
 };
 smoke.admin = await dispatchHttp(app, {
   url: "/api/admin/leads?locale=ru",
+  headers: { authorization: "Bearer local-admin-smoke" },
+});
+smoke.adminMigrationReview = await dispatchHttp(app, {
+  url: "/api/admin/migration/review?locale=bg",
   headers: { authorization: "Bearer local-admin-smoke" },
 });
 smoke.adminUnauthorized = await dispatchHttp(app, { url: "/api/admin/leads?locale=ru" });

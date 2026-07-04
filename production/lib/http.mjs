@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { addLocaleToRegistry, loadLocaleRegistry, writeLocaleRegistry } from "./locales.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
@@ -11,13 +12,19 @@ import {
   publishApprovedTranslation,
   renderAdminWorkspace,
 } from "./admin-workflows.mjs";
-import { loadDeployableRedirects } from "./redirect-approvals.mjs";
+import {
+  appendRedirectApproval,
+  buildDeployableRedirects,
+  loadDeployableRedirects,
+  readRedirectApprovals,
+} from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
 import { appendListingEdit, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
+import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
   return {
@@ -50,6 +57,14 @@ function publicResponse(request, url, rendered) {
 
 const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min"];
 
+function loadLegacyRouteMap(filePath = fromRoot("production", "data", "legacy-route-map.json")) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8")).routes || [];
+}
+
+function loadMigrationReviewDashboard(filePath = fromRoot("production", "data", "migration-review-dashboard.json")) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
 function searchFiltersFromObject(input = {}) {
   const filters = {};
   for (const field of SEARCH_FILTER_FIELDS) {
@@ -67,6 +82,8 @@ export function createHttpApp({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
   redirects = loadDeployableRedirects(),
+  routeMap = loadLegacyRouteMap(),
+  migrationReviewDashboard = loadMigrationReviewDashboard(),
   leadLedgerPath = null,
   replyOutboxPath = null,
   languageRequestPath = null,
@@ -76,6 +93,7 @@ export function createHttpApp({
   savedSearchLedgerPath = null,
   sellerPipelinePath = null,
   brokerContactLedgerPath = null,
+  redirectApprovalPath = null,
   localeRegistryPath = null,
   receivedAt,
   requestedAt,
@@ -191,6 +209,46 @@ export function createHttpApp({
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
         locales: activeRegistry.locales,
       });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      const requestedLocale = url.searchParams.get("locale") || "en";
+      const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
+      return json(200, {
+        workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
+        dashboard: migrationReviewDashboard,
+        routeMap: {
+          total: routeMap.length,
+          reviewRequired: routeMap.filter((route) => route.review_required).length,
+          mappedListings: routeMap.filter((route) => route.url_type === "listing" && route.target_path).length,
+          pendingSample: routeMap.filter((route) => route.review_required).slice(0, 20),
+        },
+        redirectApprovals: approvals,
+        deployablePreview: buildDeployableRedirects(routeMap, approvals),
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const input = JSON.parse(request.body || "{}");
+        const approval = appendRedirectApproval(routeMap, input, {
+          filePath: redirectApprovalPath || undefined,
+          approvedAt: reviewedAt,
+        });
+        const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
+        return json(201, {
+          approval,
+          deployablePreview: buildDeployableRedirects(routeMap, approvals),
+        });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
@@ -560,6 +618,15 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
   if (smoke.admin.body.leads.length < 4) throw new Error("HTTP smoke must show buyer, viewing, contact, and seller leads");
+  if (
+    smoke.adminMigrationReview?.status !== 200 ||
+    smoke.adminMigrationReview.body.workspace.locale !== "bg" ||
+    smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows !== 11859 ||
+    smoke.adminMigrationReview.body.routeMap.total !== 457 ||
+    smoke.adminMigrationReview.body.routeMap.mappedListings !== 165
+  ) {
+    throw new Error("HTTP smoke must serve admin migration review workbench contract");
+  }
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
     throw new Error("HTTP smoke must queue broker-approved replies");

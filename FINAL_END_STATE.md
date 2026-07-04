@@ -494,8 +494,10 @@ Build:
 
 - Import crawl CSVs into a structured migration database. Current local proof:
   `production/data/migration.sqlite`.
-- Add reviewer UI for URL classification.
-- Add redirect-map editor.
+- Add reviewer UI for URL classification. Current local proof:
+  `GET /api/admin/migration/review`.
+- Add redirect-map editor. Current local proof:
+  `POST /api/admin/redirect-approvals`.
 - Add metadata gap dashboard. Current local proof:
   `production/data/migration-review-dashboard.json`.
 - Add media inventory reconciliation. Current local proof:

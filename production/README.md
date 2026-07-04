@@ -20,6 +20,8 @@ What it proves now:
 - Legacy route map for reviewed listing redirects and unmapped review queues.
 - Migration review queue with BG/RU admin owners for every crawled URL.
 - Separate reviewed redirect approval ledger and deployable 301 export.
+- Authenticated admin migration review endpoint for the dashboard, route worklist, and redirect approval preview.
+- Authenticated redirect approval endpoint that appends reviewed same-content mappings without changing live redirects.
 - Localized sitemap fixture gated by approved translation records.
 - Generated `sitemap.xml` and `robots.txt` from approved localized sitemap entries.
 - Canonical CMS seed records composed from crawl, route, translation, and media evidence.

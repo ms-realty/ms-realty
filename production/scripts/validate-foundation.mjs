@@ -382,6 +382,15 @@ if (httpSmoke.sitemap.status !== 200 || httpSmoke.sitemap.body.includes("/fr/"))
 if (httpSmoke.admin.status !== 200 || httpSmoke.admin.body.workspace.locale !== "ru") {
   throw new Error("HTTP smoke must serve RU admin lead inbox");
 }
+if (
+  httpSmoke.adminMigrationReview.status !== 200 ||
+  httpSmoke.adminMigrationReview.body.workspace.locale !== "bg" ||
+  httpSmoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows !== 11859 ||
+  httpSmoke.adminMigrationReview.body.routeMap.total !== 457 ||
+  httpSmoke.adminMigrationReview.body.routeMap.mappedListings !== 165
+) {
+  throw new Error("HTTP smoke must expose admin migration review workbench");
+}
 if (httpSmoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin lead inbox");
 if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_for_manual_send") {
   throw new Error("HTTP smoke must queue broker-approved reply");

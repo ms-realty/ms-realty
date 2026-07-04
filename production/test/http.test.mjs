@@ -69,6 +69,10 @@ function tempBrokerContacts() {
   return file;
 }
 
+function tempRedirectApprovals() {
+  return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-redirect-approvals-`)}/redirect-approvals.jsonl`;
+}
+
 function tempRegistry() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
   fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
@@ -219,6 +223,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       url: "/api/admin/leads?locale=ru",
       headers: { authorization: "Bearer local-admin-smoke" },
     }),
+    adminMigrationReview: await dispatchHttp(app, {
+      url: "/api/admin/migration/review?locale=bg",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    adminMigrationReviewUnauthorized: await dispatchHttp(app, { url: "/api/admin/migration/review?locale=bg" }),
     adminUnauthorized: await dispatchHttp(app, { url: "/api/admin/leads?locale=ru" }),
     reply: await dispatchHttp(app, {
       method: "POST",
@@ -311,6 +320,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  smoke.adminMigrationReview = await dispatchHttp(app, {
+    url: "/api/admin/migration/review?locale=bg",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
@@ -347,12 +360,72 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
   assert.equal(smoke.admin.body.listingEdits.length, 1);
   assert.equal(smoke.admin.body.viewings.length, 1);
+  assert.equal(smoke.adminMigrationReview.body.workspace.locale, "bg");
+  assert.equal(smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows, 11859);
+  assert.equal(smoke.adminMigrationReview.body.routeMap.total, 457);
+  assert.equal(smoke.adminMigrationReview.body.routeMap.mappedListings, 165);
+  assert.equal(smoke.adminMigrationReviewUnauthorized.status, 401);
   assert.equal(smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR"), true);
   assert.equal(smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.source === "website_viewing_request"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.source === "website_contact_callback"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
+});
+
+test("HTTP admin can append reviewed redirect approvals without broad homepage mappings", async () => {
+  const redirectApprovalPath = tempRedirectApprovals();
+  const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
+  const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
+  const app = createHttpApp({ routeMap, redirectApprovalPath, reviewedAt: "2026-07-05T00:00:00Z" });
+
+  const approved = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      oldUrl: listing.old_url,
+      equivalentContent: true,
+      reviewer: "editor_bg",
+      reason: "Reviewed listing parity in migration workbench.",
+    },
+  });
+  const rejected = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      oldUrl: taxonomy.old_url,
+      equivalentContent: true,
+      reviewer: "editor_bg",
+    },
+  });
+  const unauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals",
+    body: {
+      oldUrl: listing.old_url,
+      equivalentContent: true,
+      reviewer: "editor_bg",
+    },
+  });
+  const review = await dispatchHttp(app, {
+    url: "/api/admin/migration/review?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+
+  assert.equal(approved.status, 201);
+  assert.equal(approved.body.approval.old_url, listing.old_url);
+  assert.equal(approved.body.approval.deployable, true);
+  assert.equal(approved.body.deployablePreview.length, 1);
+  assert.equal(approved.body.deployablePreview[0].target_path, listing.target_path);
+  assert.equal(rejected.status, 400);
+  assert.match(rejected.body.message, /Only mapped 301 routes/);
+  assert.equal(unauthorized.status, 401);
+  assert.equal(review.body.workspace.locale, "ru");
+  assert.equal(review.body.redirectApprovals.length, 1);
+  assert.equal(review.body.deployablePreview.length, 1);
 });
 
 test("HTTP app rejects invalid language requests", async () => {
