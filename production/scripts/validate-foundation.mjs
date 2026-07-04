@@ -4,6 +4,7 @@ import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
+import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -60,6 +61,19 @@ if (routeMap.summary.mappedListings !== 165) throw new Error("Legacy route map m
 if (routeMap.summary.byTargetLocale.ru !== 52) throw new Error("Legacy route map must preserve 52 RU listings");
 if (routeMap.summary.homepageTargets !== 0) throw new Error("Legacy route map must not target homepages");
 if (routeMap.summary.deployable !== 0) throw new Error("Legacy route map must stay review-gated");
+
+const deployableRedirects = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8"));
+const redirectSummary = assertDeployableRedirects(deployableRedirects.redirects);
+if (redirectSummary.total !== 2) throw new Error("Deployable redirect smoke must include exactly two reviewed listings");
+if (redirectSummary.byTargetLocale.bg !== 1 || redirectSummary.byTargetLocale.ru !== 1) {
+  throw new Error("Deployable redirect smoke must include one BG and one RU route");
+}
+const redirectApprovals = fs
+  .readFileSync(fromRoot("production", "data", "redirect-approvals.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean);
+if (redirectApprovals.length !== 2) throw new Error("Redirect approval ledger must contain two reviewed rows");
 
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
 if (sitemap.summary.byLocale.bg !== 113 || sitemap.summary.byLocale.ru !== 52) {

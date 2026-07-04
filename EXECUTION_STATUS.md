@@ -50,6 +50,11 @@ Date: 2026-07-04
   - 52 Russian listings mapped under `/ru/`
   - pages, posts, and taxonomy URLs left review-gated
   - zero homepage/search fallback redirects
+- Added reviewed deployable redirect export:
+  - `production/data/redirect-approvals.jsonl` records explicit reviewer approvals
+  - `production/data/deployable-redirects.json` exports only approved same-content 301s
+  - smoke export includes one BG listing and one RU listing
+  - legacy route map remains fully non-deployable until each row is reviewed
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations
@@ -133,6 +138,7 @@ python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.p
 python3 locales/validate_locale_registry.py
 npm run migration:build
 npm run routes:build
+npm run redirects:build
 npm run sitemap:build
 npm run seo:build
 npm run cms:build

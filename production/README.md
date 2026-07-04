@@ -15,6 +15,7 @@ What it proves now:
 - Search fixtures carry locale/indexability metadata.
 - Normalized migration records from the crawl CSVs with launch-gate checks.
 - Legacy route map for reviewed listing redirects and unmapped review queues.
+- Separate reviewed redirect approval ledger and deployable 301 export.
 - Localized sitemap fixture gated by approved translation records.
 - Generated `sitemap.xml` and `robots.txt` from approved localized sitemap entries.
 - Canonical CMS seed records composed from crawl, route, translation, and media evidence.
@@ -39,6 +40,8 @@ Generated production data:
 
 - `production/data/migration-records.json`
 - `production/data/legacy-route-map.json`
+- `production/data/redirect-approvals.jsonl`
+- `production/data/deployable-redirects.json`
 - `production/data/localized-sitemap.json`
 - `production/data/sitemap.xml`
 - `production/data/robots.txt`

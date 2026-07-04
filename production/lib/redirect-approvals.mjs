@@ -1,0 +1,126 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fromRoot } from "./paths.mjs";
+
+export const DEFAULT_REDIRECT_APPROVALS_PATH = fromRoot("production", "data", "redirect-approvals.jsonl");
+export const DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT = fromRoot("production", "data", "deployable-redirects.json");
+
+function routeByOldUrl(routeMap, oldUrl) {
+  return routeMap.find((route) => route.old_url === oldUrl);
+}
+
+function isHomepagePath(targetPath) {
+  return targetPath === "/" || /^\/[a-z]{2}(?:-[A-Z]{2})?\/?$/.test(targetPath || "");
+}
+
+function normalizeApproval(route, input, approvedAt) {
+  if (!route) throw new Error("Redirect approval requires a known oldUrl");
+  if (!route.target_path || route.planned_status !== 301) {
+    throw new Error("Only mapped 301 routes can be approved for redirect export");
+  }
+  if (isHomepagePath(route.target_path)) {
+    throw new Error("Homepage redirect targets cannot be approved");
+  }
+  if (input.equivalentContent !== true) {
+    throw new Error("Redirect approval requires equivalentContent true");
+  }
+  if (!input.reviewer) throw new Error("Redirect approval requires a reviewer");
+
+  return {
+    old_url: route.old_url,
+    source_domain: route.source_domain,
+    url_type: route.url_type,
+    target_locale: route.target_locale,
+    target_path: route.target_path,
+    planned_status: 301,
+    reviewer: input.reviewer,
+    approved_at: approvedAt,
+    equivalent_content: true,
+    deployable: true,
+    reason: input.reason || "Reviewed same-content route mapping.",
+  };
+}
+
+export function resetRedirectApprovals(filePath = DEFAULT_REDIRECT_APPROVALS_PATH) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, "");
+}
+
+export function appendRedirectApproval(
+  routeMap,
+  input,
+  { filePath = DEFAULT_REDIRECT_APPROVALS_PATH, approvedAt = new Date().toISOString() } = {},
+) {
+  const approval = normalizeApproval(routeByOldUrl(routeMap, input.oldUrl), input, approvedAt);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.appendFileSync(filePath, `${JSON.stringify(approval)}\n`);
+  return approval;
+}
+
+export function readRedirectApprovals(filePath = DEFAULT_REDIRECT_APPROVALS_PATH) {
+  if (!fs.existsSync(filePath)) return [];
+  return fs
+    .readFileSync(filePath, "utf8")
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+}
+
+export function buildDeployableRedirects(routeMap, approvals) {
+  const routes = new Map(routeMap.map((route) => [route.old_url, route]));
+  return approvals
+    .map((approval) => {
+      const route = routes.get(approval.old_url);
+      if (!route || route.target_path !== approval.target_path || route.planned_status !== 301) return null;
+      if (approval.equivalent_content !== true || approval.deployable !== true) return null;
+      return {
+        old_url: approval.old_url,
+        target_path: approval.target_path,
+        status: 301,
+        source_domain: approval.source_domain,
+        target_locale: approval.target_locale,
+        reviewer: approval.reviewer,
+        approved_at: approval.approved_at,
+      };
+    })
+    .filter(Boolean);
+}
+
+export function summarizeDeployableRedirects(rows) {
+  const summary = {
+    total: rows.length,
+    bySourceDomain: {},
+    byTargetLocale: {},
+    homepageTargets: 0,
+    duplicateOldUrls: 0,
+  };
+  const seen = new Set();
+
+  for (const row of rows) {
+    summary.bySourceDomain[row.source_domain] = (summary.bySourceDomain[row.source_domain] || 0) + 1;
+    summary.byTargetLocale[row.target_locale] = (summary.byTargetLocale[row.target_locale] || 0) + 1;
+    if (isHomepagePath(row.target_path)) summary.homepageTargets += 1;
+    if (seen.has(row.old_url)) summary.duplicateOldUrls += 1;
+    seen.add(row.old_url);
+  }
+
+  return summary;
+}
+
+export function assertDeployableRedirects(rows) {
+  const summary = summarizeDeployableRedirects(rows);
+  if (summary.total < 1) throw new Error("At least one reviewed redirect is required for export smoke");
+  if (summary.homepageTargets !== 0) throw new Error("Deployable redirects must not target homepages");
+  if (summary.duplicateOldUrls !== 0) throw new Error("Deployable redirects must not duplicate old URLs");
+  if (rows.some((row) => row.status !== 301 || !row.target_path)) {
+    throw new Error("Deployable redirects must be complete 301 rows");
+  }
+  return summary;
+}
+
+export function writeDeployableRedirects(rows, outPath = DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  const summary = assertDeployableRedirects(rows);
+  fs.writeFileSync(outPath, `${JSON.stringify({ summary, redirects: rows }, null, 2)}\n`);
+  return { outPath, summary };
+}
