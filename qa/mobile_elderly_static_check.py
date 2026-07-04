@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import sys
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCREEN = ROOT / "makler-realty-design-system" / "project" / "ui_kits" / "remaining" / "index.html"
 ARTIFACT = ROOT / "migration" / "artifacts" / "20260704-211155"
+LOCALE_REGISTRY = ROOT / "locales" / "registry.json"
 
 
 def fail(message: str) -> None:
@@ -29,10 +31,33 @@ def count_csv(path: Path) -> int:
         return sum(1 for _ in csv.DictReader(handle))
 
 
+def validate_locales() -> None:
+    data = json.loads(LOCALE_REGISTRY.read_text(encoding="utf-8"))
+    locales = {locale["code"]: locale for locale in data.get("locales", [])}
+    required_public = {"bg", "en", "de", "nl", "ru", "el", "he"}
+    if data.get("policy") != "dynamic_approved":
+        fail("Locale policy must be dynamic_approved")
+    if data.get("url_strategy") != "locale_prefix":
+        fail("Locale URL strategy must be locale_prefix")
+    if data.get("admin_locales") != ["bg", "ru", "en"]:
+        fail("Admin CMS/CRM locales must be bg, ru, en")
+    if not required_public.issubset(locales):
+        fail(f"Missing required public locales: {sorted(required_public - set(locales))}")
+    for code in required_public:
+        locale = locales[code]
+        if not (locale.get("public_enabled") and locale.get("indexable")):
+            fail(f"{code} must be public and indexable")
+    if locales["he"].get("direction") != "rtl":
+        fail("Hebrew must be RTL")
+    if locales["el"].get("direction") != "ltr":
+        fail("Greek must be LTR")
+
+
 def main() -> int:
     if not SCREEN.exists():
         fail(f"Missing screen pack: {SCREEN}")
 
+    validate_locales()
     html = SCREEN.read_text(encoding="utf-8")
     required_markers = {
         "viewport": '<meta name="viewport"',
@@ -48,7 +73,12 @@ def main() -> int:
         "photo sphere viewer field": "Photo Sphere Viewer",
         "psv mount": "psv-editor-preview",
         "accessible caption field": "Accessibility caption",
-        "language coverage": "BG · EN · DE · NL · RU",
+        "dynamic locale coverage": "Dynamic approved locales",
+        "admin locale coverage": "Admin BG · RU · EN",
+        "Greek website locale": "Ελληνικά",
+        "Hebrew Israel website locale": "Hebrew (Israel)",
+        "Hebrew RTL route": "/he/properties/ms-987",
+        "locale request fallback": "+ request",
         "no homepage redirect assertion": "No homepage redirect assumption",
     }
     for label, marker in required_markers.items():
@@ -70,6 +100,7 @@ def main() -> int:
         fail(f"Media inventory looks too small: {media_rows}")
 
     print("PASS: mobile/elderly static QA markers present")
+    print("PASS: dynamic approved locale registry includes public Greek/Hebrew and admin bg/ru/en")
     print(f"PASS: crawl rows url={url_rows} metadata={meta_rows} media={media_rows} redirect={redirect_rows}")
     return 0
 

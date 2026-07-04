@@ -9,6 +9,10 @@
   "filterableAttributes": [
     "domain",
     "language",
+    "locale",
+    "locale_prefix",
+    "locale_is_indexable",
+    "translation_status",
     "location",
     "property_type",
     "offer_type",

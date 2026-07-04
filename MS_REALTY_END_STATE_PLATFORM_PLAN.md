@@ -11,7 +11,8 @@ combines:
 
 - Public property marketplace.
 - Agency website and local authority content hub.
-- CMS for listings, guides, SEO pages, media, translations, and agents.
+- CMS for listings, guides, SEO pages, media, dynamic locale registry,
+  translations, and agents.
 - CRM for buyer, seller, renter, landlord, investor, and foreign-buyer leads.
 - Broker workspace for daily operations.
 - AI assistant layer for matching, translation, listing quality, lead scoring,
@@ -170,7 +171,8 @@ Each listing needs:
 - Property matching against buyer criteria.
 - Similar-listing recommendations.
 - Listing description draft from structured facts.
-- Translation draft across Bulgarian, English, German, Dutch, Russian.
+- Translation draft across any admin-added locale, seeded with Bulgarian,
+  English, German, Dutch, Russian, Greek, and Hebrew for Israel.
 - Listing quality checker: missing price, weak title, no location, poor photos,
   duplicate text, missing alt text.
 - Follow-up draft generation.
@@ -189,7 +191,8 @@ Each listing needs:
 ### AI Guardrails
 
 - AI never publishes listings without human approval.
-- AI-generated translations are marked pending review.
+- AI-generated translations are marked pending review and cannot become public
+  or indexable without human approval.
 - Legal, tax, and financing answers must cite approved content and route to
   human consultation.
 - All AI actions are logged.
@@ -204,6 +207,8 @@ Each listing needs:
 - Slug changed -> automatic 301.
 - New listing published -> sitemap update -> internal linking suggestions.
 - Missing translation -> task for translator/editor.
+- New public locale -> Hermes draft queue -> human review -> locale-prefixed
+  indexable page only after approval.
 - Stale listing -> broker verification task.
 - New seller valuation request -> seller pipeline and callback task.
 - Post-viewing -> automated feedback request.

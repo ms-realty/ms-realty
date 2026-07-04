@@ -20,6 +20,7 @@ from urllib.parse import unquote, urlparse
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARTIFACT = ROOT / "migration" / "artifacts" / "20260704-211155"
 OUT_DIR = ROOT / "search" / "data"
+LOCALE_REGISTRY = ROOT / "locales" / "registry.json"
 
 
 LOCATION_PATTERNS = [
@@ -61,15 +62,26 @@ def infer_property_type(text: str) -> str:
     return "property"
 
 
-def infer_language(domain: str, url: str) -> str:
+def load_locale_registry(path: Path = LOCALE_REGISTRY) -> dict[str, object]:
+    with path.open(encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def public_indexable_locales(registry: dict[str, object]) -> set[str]:
+    return {
+        str(locale["code"])
+        for locale in registry.get("locales", [])
+        if locale.get("public_enabled") and locale.get("indexable")
+    }
+
+
+def infer_language(domain: str, url: str, registry: dict[str, object] | None = None) -> str:
     if domain.endswith(".ru"):
         return "ru"
-    if "/en/" in url:
-        return "en"
-    if "/de/" in url:
-        return "de"
-    if "/nl/" in url:
-        return "nl"
+    codes = [str(locale["code"]) for locale in (registry or {}).get("locales", [])]
+    for code in sorted(codes, key=len, reverse=True):
+        if f"/{code}/" in url:
+            return code
     return "bg"
 
 
@@ -95,7 +107,7 @@ def extract_reference(url: str, fallback: int) -> str:
     return f"MS-CRAWL-{fallback:04d}"
 
 
-def load_listing_docs(artifact_dir: Path) -> list[dict[str, object]]:
+def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[dict[str, object]]:
     metadata_path = artifact_dir / "metadata-inventory.csv"
     if not metadata_path.exists():
         raise FileNotFoundError(f"Missing metadata export: {metadata_path}")
@@ -103,6 +115,7 @@ def load_listing_docs(artifact_dir: Path) -> list[dict[str, object]]:
     csv.field_size_limit(sys.maxsize)
     docs: list[dict[str, object]] = []
     seen_urls: set[str] = set()
+    indexable_locales = public_indexable_locales(registry)
 
     with metadata_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
@@ -120,6 +133,8 @@ def load_listing_docs(artifact_dir: Path) -> list[dict[str, object]]:
             h1 = textish(row.get("h1"))
             domain = textish(row.get("source_domain"))
             combined = " ".join([title, description, h1, url])
+            locale = infer_language(domain, url, registry)
+            locale_is_indexable = locale in indexable_locales
 
             docs.append(
                 {
@@ -127,7 +142,11 @@ def load_listing_docs(artifact_dir: Path) -> list[dict[str, object]]:
                     "url": url,
                     "canonical": textish(row.get("canonical")),
                     "domain": domain,
-                    "language": infer_language(domain, url),
+                    "language": locale,
+                    "locale": locale,
+                    "locale_prefix": f"/{locale}/",
+                    "locale_is_indexable": locale_is_indexable,
+                    "translation_status": "published" if locale_is_indexable else "fallback",
                     "title": title,
                     "description": description,
                     "h1": h1,
@@ -165,6 +184,10 @@ def write_typesense_schema(path: Path) -> None:
             {"name": "url", "type": "string"},
             {"name": "domain", "type": "string", "facet": True},
             {"name": "language", "type": "string", "facet": True},
+            {"name": "locale", "type": "string", "facet": True},
+            {"name": "locale_prefix", "type": "string", "facet": True},
+            {"name": "locale_is_indexable", "type": "bool", "facet": True},
+            {"name": "translation_status", "type": "string", "facet": True},
             {"name": "title", "type": "string"},
             {"name": "description", "type": "string", "optional": True},
             {"name": "location", "type": "string", "facet": True, "optional": True},
@@ -183,7 +206,18 @@ def write_typesense_schema(path: Path) -> None:
 def write_meili_settings(path: Path) -> None:
     settings = {
         "searchableAttributes": ["title", "description", "h1", "search_text", "location"],
-        "filterableAttributes": ["domain", "language", "location", "property_type", "offer_type", "bedrooms"],
+        "filterableAttributes": [
+            "domain",
+            "language",
+            "locale",
+            "locale_prefix",
+            "locale_is_indexable",
+            "translation_status",
+            "location",
+            "property_type",
+            "offer_type",
+            "bedrooms",
+        ],
         "sortableAttributes": ["image_count", "word_count"],
         "displayedAttributes": ["*"],
         "rankingRules": ["words", "typo", "proximity", "attribute", "sort", "exactness"],
@@ -197,7 +231,8 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, default=OUT_DIR)
     args = parser.parse_args()
 
-    docs = load_listing_docs(args.artifact_dir)
+    registry = load_locale_registry()
+    docs = load_listing_docs(args.artifact_dir, registry)
     if not docs:
         raise SystemExit(f"No listing records found in {args.artifact_dir}")
 
@@ -213,6 +248,9 @@ def main() -> int:
         "listing_count": len(docs),
         "domains": sorted({str(doc["domain"]) for doc in docs}),
         "languages": sorted({str(doc["language"]) for doc in docs}),
+        "admin_locales": registry.get("admin_locales", []),
+        "public_indexable_locales": sorted(public_indexable_locales(registry)),
+        "url_strategy": registry.get("url_strategy"),
         "locations": sorted({str(doc["location"]) for doc in docs if doc["location"]}),
     }
     write_json(args.out_dir / "search-fixture-summary.json", summary)

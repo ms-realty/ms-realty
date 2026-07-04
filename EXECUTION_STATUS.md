@@ -36,6 +36,11 @@ Date: 2026-07-04
 - Added mobile/elderly accessibility QA:
   - `qa/mobile_elderly_static_check.py`
   - `qa/mobile-elderly-accessibility.md`
+- Added universal language coverage contract:
+  - dynamic approved public locale registry in `locales/registry.json`
+  - seeded public website locales BG, EN, DE, NL, RU, EL, HE
+  - admin CMS/CRM locales BG, RU, EN
+  - Hebrew RTL validation and Greek website coverage
 
 ## Crawl Counts
 
@@ -55,11 +60,13 @@ Date: 2026-07-04
 - No bulk homepage/search-page redirect assumptions were generated.
 - Sandanski is not described as a sea destination.
 - Public brand copy uses MS Realty while existing internal Makler namespaces stay compatible with the current design-system bundle.
+- Language coverage is registry-driven; Hermes drafts translations, humans approve indexable pages.
 
 ## Validation
 
 ```bash
 python3 search/build_search_indexes.py
-python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py qa/mobile_elderly_static_check.py
+python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
+python3 locales/validate_locale_registry.py
 python3 qa/mobile_elderly_static_check.py
 ```

@@ -20,6 +20,9 @@ Pass for the current local prototype slice.
 - Seller intake is short, phone-first, and does not publish a property without broker review.
 - Broker inbox exposes source, channel, stage, and next action without hiding the callback task.
 - Property editor separates core listing, SEO/translation readiness, and the 360 tour field.
+- Dynamic approved locales are registry-driven instead of fixed to five chips.
+- Website locales include Greek and Hebrew for Israel; Hebrew is marked RTL.
+- Admin CMS/CRM locale coverage is BG, RU, and EN.
 - Photo Sphere Viewer is represented by a CMS mount target, panorama URL, hotspot readiness, and required accessibility caption.
 - Sandanski copy is residential/spa-oriented; no sea-resort framing is introduced.
 - Redirect safety is preserved: the editor screen explicitly rejects homepage redirect assumptions.
@@ -36,6 +39,7 @@ Expected:
 
 ```text
 PASS: mobile/elderly static QA markers present
+PASS: dynamic approved locale registry includes public Greek/Hebrew and admin bg/ru/en
 PASS: crawl rows url=457 metadata=457 media=11859 redirect=457
 ```
 

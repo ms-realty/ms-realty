@@ -9,6 +9,21 @@
     "bg",
     "ru"
   ],
+  "admin_locales": [
+    "bg",
+    "ru",
+    "en"
+  ],
+  "public_indexable_locales": [
+    "bg",
+    "de",
+    "el",
+    "en",
+    "he",
+    "nl",
+    "ru"
+  ],
+  "url_strategy": "locale_prefix",
   "locations": [
     "Petrich",
     "Sandanski"

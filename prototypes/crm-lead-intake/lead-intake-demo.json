@@ -5,6 +5,8 @@
       "id": "lead-listing-inquiry-ms-987",
       "source": "website_listing_detail",
       "language": "bg",
+      "language_source": "locale_registry",
+      "admin_supported_locales": ["bg", "ru", "en"],
       "lead_type": "buyer",
       "pipeline_stage": "new_inquiry",
       "listing_reference": "ms-987",
@@ -28,6 +30,8 @@
       "id": "lead-seller-valuation-sandanski",
       "source": "sell_your_property_form",
       "language": "bg",
+      "language_source": "locale_registry",
+      "admin_supported_locales": ["bg", "ru", "en"],
       "lead_type": "seller",
       "pipeline_stage": "valuation_requested",
       "property": {
@@ -50,6 +54,53 @@
         "schedule_valuation_call",
         "create_property_draft",
         "assign_listing_editor"
+      ]
+    },
+    {
+      "id": "lead-greek-buyer-ms-987",
+      "source": "website_listing_detail",
+      "language": "el",
+      "language_source": "locale_registry",
+      "lead_type": "buyer",
+      "pipeline_stage": "new_inquiry",
+      "listing_reference": "ms-987",
+      "contact": {
+        "name": "Nikos Papadopoulos",
+        "phone": "+30 69 0000 0000",
+        "email": "nikos@example.test",
+        "preferred_channel": "phone"
+      },
+      "message": "Θέλω περισσότερες πληροφορίες και επίσκεψη το Σαββατοκύριακο.",
+      "crm_actions": [
+        "create_or_match_contact_by_phone",
+        "store_original_language",
+        "create_hermes_reply_draft",
+        "route_to_bg_ru_en_admin_queue",
+        "require_broker_approval_before_send"
+      ]
+    },
+    {
+      "id": "lead-hebrew-buyer-ms-987",
+      "source": "website_listing_detail",
+      "language": "he",
+      "language_direction": "rtl",
+      "language_source": "locale_registry",
+      "lead_type": "buyer",
+      "pipeline_stage": "new_inquiry",
+      "listing_reference": "ms-987",
+      "contact": {
+        "name": "Noa Levi",
+        "phone": "+972 50 000 0000",
+        "email": "noa@example.test",
+        "preferred_channel": "whatsapp"
+      },
+      "message": "אני רוצה פרטים על הדירה ותיאום שיחה.",
+      "crm_actions": [
+        "create_or_match_contact_by_phone",
+        "store_rtl_original_message",
+        "create_hermes_reply_draft",
+        "route_to_bg_ru_en_admin_queue",
+        "require_broker_approval_before_send"
       ]
     }
   ]

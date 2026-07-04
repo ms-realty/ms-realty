@@ -1,0 +1,98 @@
+{
+  "policy": "dynamic_approved",
+  "source_locale": "bg",
+  "url_strategy": "locale_prefix",
+  "x_default": "/bg/",
+  "admin_locales": ["bg", "ru", "en"],
+  "initial_public_locales": ["bg", "en", "de", "nl", "ru", "el", "he"],
+  "locales": [
+    {
+      "code": "bg",
+      "native_name": "Български",
+      "admin_name": "Bulgarian",
+      "direction": "ltr",
+      "public_enabled": true,
+      "indexable": true,
+      "fallback_locale": null,
+      "translation_provider_mode": "human",
+      "reviewer_role": "editor_bg"
+    },
+    {
+      "code": "en",
+      "native_name": "English",
+      "admin_name": "English",
+      "direction": "ltr",
+      "public_enabled": true,
+      "indexable": true,
+      "fallback_locale": "bg",
+      "translation_provider_mode": "human",
+      "reviewer_role": "editor_en"
+    },
+    {
+      "code": "de",
+      "native_name": "Deutsch",
+      "admin_name": "German",
+      "direction": "ltr",
+      "public_enabled": true,
+      "indexable": true,
+      "fallback_locale": "en",
+      "translation_provider_mode": "hermes_draft",
+      "reviewer_role": "translator_de"
+    },
+    {
+      "code": "nl",
+      "native_name": "Nederlands",
+      "admin_name": "Dutch",
+      "direction": "ltr",
+      "public_enabled": true,
+      "indexable": true,
+      "fallback_locale": "en",
+      "translation_provider_mode": "hermes_draft",
+      "reviewer_role": "translator_nl"
+    },
+    {
+      "code": "ru",
+      "native_name": "Русский",
+      "admin_name": "Russian",
+      "direction": "ltr",
+      "public_enabled": true,
+      "indexable": true,
+      "fallback_locale": "bg",
+      "translation_provider_mode": "human",
+      "reviewer_role": "editor_ru"
+    },
+    {
+      "code": "el",
+      "native_name": "Ελληνικά",
+      "admin_name": "Greek",
+      "direction": "ltr",
+      "public_enabled": true,
+      "indexable": true,
+      "fallback_locale": "en",
+      "translation_provider_mode": "hermes_draft",
+      "reviewer_role": "translator_el"
+    },
+    {
+      "code": "he",
+      "native_name": "עברית",
+      "admin_name": "Hebrew (Israel)",
+      "direction": "rtl",
+      "public_enabled": true,
+      "indexable": true,
+      "fallback_locale": "en",
+      "translation_provider_mode": "hermes_draft",
+      "reviewer_role": "translator_he"
+    },
+    {
+      "code": "fr",
+      "native_name": "Français",
+      "admin_name": "French",
+      "direction": "ltr",
+      "public_enabled": false,
+      "indexable": false,
+      "fallback_locale": "en",
+      "translation_provider_mode": "hermes_draft",
+      "reviewer_role": "translator_fr"
+    }
+  ]
+}

@@ -26,9 +26,9 @@ blocks:
   property videos.
 - Automation: application-owned queues for critical workflows; n8n only for
   non-critical internal automations behind strict access controls.
-- AI: model-agnostic assistant layer for matching, translation, lead scoring,
-  listing quality, tours/media metadata, seller valuation support, and broker
-  productivity.
+- AI: Hermes Agent layer for matching, dynamic approved translation, lead
+  scoring, listing quality, tours/media metadata, seller valuation support, and
+  broker productivity.
 
 The target product should be simpler than enterprise CRM software, but much
 more complete than a property website.
@@ -91,7 +91,8 @@ Sources: [Payload](https://payloadcms.com/),
 ### Search
 
 Use instant faceted search with typo tolerance. Real-estate users misspell
-locations and switch between Bulgarian, Russian, English, German, and Dutch.
+locations and switch between Bulgarian, Russian, English, German, Dutch, Greek,
+Hebrew, and future approved languages.
 
 - Typesense: strong for search-as-you-type, faceted navigation, geo search.
 - Meilisearch: strong for typo tolerance, faceting, hybrid semantic/full-text
@@ -252,7 +253,9 @@ prefer calling instead of completing long forms.
 - No modal traps.
 - Forms are short, one question per row, with autofill.
 - Phone number always visible and tap-to-call.
-- Bulgarian-first language behavior, with EN/BG/DE/NL/RU clearly available.
+- Bulgarian-first source behavior with a dynamic approved locale registry.
+  Initial website locales are BG/EN/DE/NL/RU plus Greek and Hebrew; admin
+  CMS/CRM is BG/RU/EN.
 - Low-bandwidth image mode and lazy media.
 - "Call me back" flow for users who do not want typing.
 
@@ -376,7 +379,8 @@ Sources: [Google site moves](https://developers.google.com/search/docs/crawling-
 Recommended default:
 
 - Next.js public app, server-rendered/static where possible.
-- Payload CMS/admin for listings, pages, media, translations, redirects, users.
+- Payload CMS/admin for listings, pages, media, dynamic locales, translations,
+  redirects, users.
 - PostgreSQL for canonical data.
 - Typesense or Meilisearch for property search.
 - MapLibre GL JS for maps.
@@ -384,8 +388,8 @@ Recommended default:
 - Queue workers for alerts, sitemap generation, imports, media processing, AI.
 - CRM module inside the same admin app, inspired by Twenty/Frappe/EspoCRM.
 - Optional n8n for private internal workflow experiments.
-- AI layer with swappable model provider, retrieval over approved CMS content,
-  and full audit logs.
+- Hermes Agent layer with hosted provider support, retrieval over approved CMS
+  content, translation drafts, and full audit logs.
 
 Do not choose the stack before running a small migration/search spike with real
 Makler data. The product should be selected by migration risk and editor/broker

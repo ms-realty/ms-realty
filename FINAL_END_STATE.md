@@ -76,7 +76,9 @@ The final product will include:
 - Public property marketplace.
 - Server-rendered listing pages.
 - Migration-preserving URL and redirect layer.
-- Multilingual content model for BG, EN, DE, NL, and RU.
+- Dynamic approved multilingual content model with BG as the source locale.
+- Seeded public website locales: BG, EN, DE, NL, RU, EL, and HE.
+- Admin CMS/CRM locales: BG, RU, and EN.
 - Dedicated Russian-site preservation or an explicit reviewed consolidation.
 - Faceted search powered by real listing data.
 - Listing media pipeline for photos, video, floor plans, and 360 tours.
@@ -95,6 +97,8 @@ The final product will include:
 - No bulk homepage redirects.
 - `.ru` remains first-class Russian coverage unless a separate business
   decision says otherwise.
+- Public localized URLs use locale prefixes and become indexable only after
+  human approval.
 - Sandanski must not be described as a sea destination.
 - AI never publishes content, legal guidance, translations, valuations, or
   listing changes without broker/editor approval.
@@ -118,6 +122,8 @@ Recommended implementation stack:
   of truth.
 - AI: model-agnostic assistant layer with retrieval over approved CMS content,
   audit logs, and human approval.
+- Locale registry: admin-managed dynamic locales, Hermes translation drafts,
+  human approval, and RTL support before Hebrew/other RTL launch.
 
 ## Public Website
 
@@ -150,6 +156,11 @@ The public site will implement:
   - Canonical and hreflang controls.
 - Foreign-buyer guides grounded in approved CMS content.
 - Contact and callback flows.
+- Dynamic language selector:
+  - Approved public locales are shown as indexable options.
+  - Unavailable languages fall back to the best approved locale and can be
+    requested through Hermes chat.
+  - Hebrew/Israel and Greek are seeded public website locales.
 
 ## Migration And SEO
 
@@ -204,6 +215,7 @@ The CMS will implement:
 - Videos.
 - Floor plans.
 - Redirects.
+- Locale registry.
 - Translations.
 - SEO metadata.
 - Structured data fields.
@@ -218,7 +230,10 @@ The property editor will include:
 - Location and approximate-location privacy controls.
 - Availability workflow.
 - Verification/updated-date workflow.
-- Translation tabs for BG, EN, DE, NL, RU.
+- Translation tabs from the locale registry.
+- Admin CMS/CRM interface available in BG, RU, and EN.
+- Translation states per locale: missing, Hermes drafted, human edited,
+  approved, published, and stale.
 - SEO panel with metadata and schema readiness.
 - Media manager for photos, video, floor plans, and 360 tours.
 - Listing quality checklist.
@@ -242,6 +257,8 @@ Required behavior:
 - New-match and price-change alerts.
 - Similar listings.
 - Search analytics for zero-result queries and popular filters.
+- Locale-scoped queries, reviewed-translation/fallback markers, and RTL-safe
+  result cards.
 
 Typesense and Meilisearch remain valid candidates. The final choice should be
 made only after live import/query testing with the migrated listing corpus.
@@ -335,6 +352,7 @@ Allowed AI features:
 - Broker lead summaries.
 - Next-best-action drafts.
 - Translation drafts and QA.
+- Dynamic locale translation drafts for any admin-added locale.
 - Listing description drafts from structured facts.
 - Listing readiness scoring.
 - Missing metadata warnings.
@@ -356,6 +374,7 @@ Automation will handle:
 Guardrails:
 
 - Human approval required before publication or customer-visible AI action.
+- Hermes translation drafts cannot publish or mark pages indexable.
 - Approved CMS content required for legal/tax/process answers.
 - Audit log for every AI action.
 - Sensitive data controls before external model calls.
@@ -379,6 +398,7 @@ The production UI will preserve the QA rules proven in the local prototype:
 - Clear focus states and keyboard navigation.
 - Browser zoom testing at 125%, 150%, and 200%.
 - VoiceOver focus-order testing before visual polish.
+- `lang` and `dir` attributes per page, including RTL QA for Hebrew.
 
 ## Implementation Phases
 
@@ -437,6 +457,7 @@ Build:
 - Property editor.
 - Media manager.
 - Translation workflow.
+- Dynamic locale registry with BG/RU/EN admin UI.
 - Lead inbox.
 - Buyer/seller pipelines.
 - Viewing/calendar/task workflow.

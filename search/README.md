@@ -4,6 +4,11 @@ This prototype turns the crawl inventory into import-ready fixtures for both
 Typesense and Meilisearch. It uses real listing URLs and metadata from the
 versioned crawl artifact, without another public-site crawl.
 
+The fixtures read `locales/registry.json` so each listing carries locale,
+locale prefix, indexability, and translation-status fields. The current public
+website seed locales are BG, EN, DE, NL, RU, EL, and HE; admin CMS/CRM locales
+are BG, RU, and EN.
+
 ## Build Fixtures
 
 ```bash
@@ -18,6 +23,13 @@ Generated files:
 - `search/data/meilisearch-settings.json` - Meilisearch index settings.
 - `search/data/meilisearch-listings.ndjson` - Meilisearch NDJSON import body.
 - `search/data/search-fixture-summary.json` - corpus counts and inferred facets.
+
+Locale fields in each listing:
+
+- `locale` / `language` - detected source locale.
+- `locale_prefix` - production URL prefix candidate.
+- `locale_is_indexable` - true only for approved public locales.
+- `translation_status` - `published` for approved source rows, otherwise fallback.
 
 ## Typesense Smoke
 

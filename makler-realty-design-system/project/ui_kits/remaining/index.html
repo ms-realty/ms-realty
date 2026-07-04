@@ -415,6 +415,37 @@
         background: #fff5e8;
       }
 
+      .locale-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .locale-card {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        padding: 12px;
+        min-height: 108px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .locale-card[dir="rtl"] {
+        text-align: right;
+      }
+
+      .locale-card.disabled {
+        opacity: 0.72;
+        background: #f6f1e9;
+      }
+
+      .locale-code {
+        font-weight: 900;
+        color: var(--accent-strong);
+      }
+
       .form-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -549,6 +580,20 @@
       const stock = crm.STOCK || [];
       const agents = website.AGENTS || [];
       const money = website.money || ((value) => `€${value}`);
+      const localeRegistry = [
+        { code: "bg", label: "BG", native: "Български", admin: "Bulgarian", dir: "ltr", public: true, indexable: true, adminUi: true, route: "/bg/imoti/ms-987", status: "published" },
+        { code: "en", label: "EN", native: "English", admin: "English", dir: "ltr", public: true, indexable: true, adminUi: true, route: "/en/properties/ms-987", status: "published" },
+        { code: "de", label: "DE", native: "Deutsch", admin: "German", dir: "ltr", public: true, indexable: true, adminUi: false, route: "/de/immobilien/ms-987", status: "reviewed" },
+        { code: "nl", label: "NL", native: "Nederlands", admin: "Dutch", dir: "ltr", public: true, indexable: true, adminUi: false, route: "/nl/vastgoed/ms-987", status: "reviewed" },
+        { code: "ru", label: "RU", native: "Русский", admin: "Russian", dir: "ltr", public: true, indexable: true, adminUi: true, route: "/ru/properties/ms-987", status: "published" },
+        { code: "el", label: "EL", native: "Ελληνικά", admin: "Greek", dir: "ltr", public: true, indexable: true, adminUi: false, route: "/el/akinita/ms-987", status: "reviewed" },
+        { code: "he", label: "HE", native: "עברית", admin: "Hebrew (Israel)", dir: "rtl", public: true, indexable: true, adminUi: false, route: "/he/properties/ms-987", status: "reviewed" },
+        { code: "fr", label: "FR", native: "Français", admin: "French", dir: "ltr", public: false, indexable: false, adminUi: false, route: "/fr/properties/ms-987", status: "request only" },
+      ];
+      const publicLocales = localeRegistry.filter((locale) => locale.public && locale.indexable);
+      const adminLocales = localeRegistry.filter((locale) => locale.adminUi);
+      const localeChipLine = publicLocales.map((locale) => locale.label).join(" · ");
+      const adminLocaleLine = adminLocales.map((locale) => locale.label).join(" · ");
       const Icon = ({ name, size = 18 }) => {
         const icons = window.lucide || {};
         const Component = icons[name];
@@ -579,7 +624,7 @@
               <div className="brand-mark" aria-hidden="true">MS</div>
               <div>
                 <div>{title}</div>
-                <div className="fineprint">BG · EN · DE · NL · RU</div>
+                <div className="fineprint">{localeChipLine} · approved locales</div>
               </div>
             </div>
             <button className="icon-button" aria-label="Open screen actions">
@@ -624,6 +669,16 @@
                     <button className="chip-button">€40k-€120k</button>
                     <button className="chip-button">Оглед днес</button>
                   </div>
+                  <div className="chips" aria-label="Website language switcher">
+                    {publicLocales.map((locale) => (
+                      <button className="chip-button" key={locale.code} dir={locale.dir}>
+                        {locale.label} {locale.native}
+                      </button>
+                    ))}
+                    <button className="chip-button" aria-label="Request another language">
+                      + request
+                    </button>
+                  </div>
                 </div>
                 <div className="result-list" aria-label="Search results">
                   {primaryListings.map((listing) => <ListingRow key={listing.id} listing={listing} />)}
@@ -639,6 +694,7 @@
               title="Mobile search"
               bullets={[
                 "Search starts with location, offer type, and a short horizontal filter row instead of a dense desktop sidebar.",
+                "Public language selection comes from approved locales, with Greek and Hebrew seeded for the website.",
                 "Cards keep direct broker contact visible for older buyers who prefer phone/Viber over account flows.",
                 "Sandanski is treated as a spa and residential market, not a sea resort.",
               ]}
@@ -670,7 +726,7 @@
                 <div className="spec-grid" style={{ marginTop: 14 }}>
                   <div className="spec"><strong>Ready status</strong><br /><span className="meta">Documents checked</span></div>
                   <div className="spec"><strong>Viewing</strong><br /><span className="meta">Today or weekend</span></div>
-                  <div className="spec"><strong>Language</strong><br /><span className="meta">BG / EN / RU</span></div>
+                  <div className="spec"><strong>Language</strong><br /><span className="meta">{localeChipLine}</span></div>
                   <div className="spec"><strong>Tour</strong><br /><span className="meta">360 field ready</span></div>
                 </div>
                 <div className="panel" style={{ marginTop: 14 }}>
@@ -767,7 +823,8 @@
                 </div>
                 <div className="pill-row">
                   <span className="pill urgent">3 same-day callbacks</span>
-                  <span className="pill">BG · EN · RU</span>
+                  <span className="pill" data-qa="Admin BG · RU · EN">Admin {adminLocaleLine}</span>
+                  <span className="pill">Lead languages dynamic</span>
                 </div>
               </div>
               <div className="board-body">
@@ -839,10 +896,11 @@
               <div className="board-toolbar">
                 <div>
                   <h2 style={{ margin: 0 }}>Property editor</h2>
-                  <div className="meta">Draft listing, media, translations, SEO, and 360 tour fields</div>
+                  <div className="meta">Draft listing, dynamic locales, translations, SEO, and 360 tour fields</div>
                 </div>
                 <div className="pill-row">
-                  <span className="pill urgent">Missing RU description</span>
+                  <span className="pill urgent">HE RTL review pending</span>
+                  <span className="pill" data-qa="Admin BG · RU · EN">Admin {adminLocaleLine}</span>
                   <span className="pill">SEO draft</span>
                 </div>
               </div>
@@ -862,7 +920,7 @@
                         </select>
                       </div>
                       <div className="field full">
-                        <label>Title BG</label>
+                        <label>Source title (BG)</label>
                         <input value="Двустаен апартамент в Сандански" readOnly />
                       </div>
                       <div className="field">
@@ -880,7 +938,7 @@
                     </div>
                     <div className="check-list">
                       <div className="check-row"><span className="status-dot"></span><span>Canonical URL mapped</span><span className="meta">SEO</span></div>
-                      <div className="check-row"><span className="status-dot todo"></span><span>RU translation missing</span><span className="meta">Locale</span></div>
+                      <div className="check-row"><span className="status-dot todo"></span><span>Hermes draft needs human approval</span><span className="meta">Locale</span></div>
                       <div className="check-row"><span className="status-dot"></span><span>No homepage redirect assumption</span><span className="meta">Migration</span></div>
                     </div>
                   </section>
@@ -915,6 +973,27 @@
                     </div>
                   </section>
                 </div>
+                <section className="editor-panel" style={{ marginTop: 14 }}>
+                  <h3>Dynamic approved locales</h3>
+                  <p className="meta">
+                    Website locales are registry-managed and locale-prefixed. Admin CMS/CRM is limited to BG, RU, and EN.
+                  </p>
+                  <div className="locale-grid" aria-label="Locale registry preview">
+                    {localeRegistry.map((locale) => (
+                      <article
+                        className={`locale-card ${locale.public && locale.indexable ? "" : "disabled"}`}
+                        key={locale.code}
+                        dir={locale.dir}
+                      >
+                        <div className="locale-code">{locale.label} · {locale.code}</div>
+                        <strong>{locale.native}</strong>
+                        <span className="meta">{locale.admin}</span>
+                        <span className="meta">{locale.route}</span>
+                        <span className="pill">{locale.status}</span>
+                      </article>
+                    ))}
+                  </div>
+                </section>
               </div>
             </div>
           </div>

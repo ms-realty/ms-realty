@@ -20,6 +20,26 @@
       "facet": true
     },
     {
+      "name": "locale",
+      "type": "string",
+      "facet": true
+    },
+    {
+      "name": "locale_prefix",
+      "type": "string",
+      "facet": true
+    },
+    {
+      "name": "locale_is_indexable",
+      "type": "bool",
+      "facet": true
+    },
+    {
+      "name": "translation_status",
+      "type": "string",
+      "facet": true
+    },
+    {
       "name": "title",
       "type": "string"
     },
