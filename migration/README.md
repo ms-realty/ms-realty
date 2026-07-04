@@ -18,3 +18,14 @@ The script writes a versioned run under `migration/artifacts/` with:
 If `CONTEXT_DEV_API_KEY` is set, sitemap discovery uses Context.dev's
 `/web/scrape/sitemap` endpoint. Page metadata crawling still uses the stdlib
 HTML crawler by default to avoid spending one API credit per page.
+
+Build the local structured migration database from the crawl CSVs:
+
+```bash
+python3 migration/build_migration_db.py
+```
+
+This writes:
+
+- `production/data/migration.sqlite`
+- `production/data/migration-db-summary.json`

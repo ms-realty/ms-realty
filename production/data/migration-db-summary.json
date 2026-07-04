@@ -1,0 +1,27 @@
+{
+  "artifact_id": "20260704-211155",
+  "db_path": "/Users/ivan/Code/MS-Realty/production/data/migration.sqlite",
+  "tables": {
+    "url_inventory": 457,
+    "metadata_inventory": 457,
+    "media_inventory": 11859,
+    "redirect_map_draft": 457
+  },
+  "url_domains": {
+    "makler-realty.com": 278,
+    "makler-realty.ru": 179
+  },
+  "url_types": {
+    "listing": 165,
+    "page": 104,
+    "post": 42,
+    "taxonomy": 146
+  },
+  "status_codes": {
+    "200": 457
+  },
+  "joined_url_metadata_rows": 457,
+  "joined_url_redirect_rows": 457,
+  "media_pages": 457,
+  "homepage_redirect_targets": 0
+}

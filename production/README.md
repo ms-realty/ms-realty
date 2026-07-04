@@ -15,6 +15,7 @@ What it proves now:
 - Search fixtures carry locale/indexability metadata and approved translation documents.
 - Search import payloads validate locally for Typesense and Meilisearch.
 - Normalized migration records from the crawl CSVs with launch-gate checks.
+- Structured SQLite migration database imported from the crawl CSVs.
 - Legacy route map for reviewed listing redirects and unmapped review queues.
 - Migration review queue with BG/RU admin owners for every crawled URL.
 - Separate reviewed redirect approval ledger and deployable 301 export.
@@ -69,6 +70,8 @@ npm run check
 Generated production data:
 
 - `production/data/migration-records.json`
+- `production/data/migration.sqlite`
+- `production/data/migration-db-summary.json`
 - `production/data/legacy-route-map.json`
 - `production/data/migration-review-queue.json`
 - `production/data/redirect-approvals.jsonl`

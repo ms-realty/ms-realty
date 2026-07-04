@@ -51,6 +51,19 @@ test("generated migration data file is valid when present", () => {
   assert.equal(data.records.length, 457);
 });
 
+test("generated migration SQLite summary is valid when present", () => {
+  const file = fromRoot("production", "data", "migration-db-summary.json");
+  if (!fs.existsSync(file)) return;
+  const data = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(data.tables.url_inventory, 457);
+  assert.equal(data.tables.metadata_inventory, 457);
+  assert.equal(data.tables.media_inventory, 11859);
+  assert.equal(data.tables.redirect_map_draft, 457);
+  assert.equal(data.joined_url_metadata_rows, 457);
+  assert.equal(data.joined_url_redirect_rows, 457);
+  assert.equal(data.homepage_redirect_targets, 0);
+});
+
 test("legacy route map only creates reviewed listing mappings and no broad fallbacks", () => {
   const records = normalizeMigrationRecords(loadCrawlArtifact());
   const routeMap = buildLegacyRouteMap(loadLocaleRegistry(), records, loadListings());

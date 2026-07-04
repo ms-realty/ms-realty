@@ -47,6 +47,7 @@ Date: 2026-07-04
 - Added executable production foundation:
   - locale, SEO, Hermes, translation, lead, and migration contracts
   - normalized migration record builder in `production/scripts/build-migration-records.mjs`
+  - structured SQLite migration database builder in `migration/build_migration_db.py`
   - launch-gate checks for row counts, domains, statuses, redirect review rows, and homepage redirects
 - Added executable legacy route map:
   - 165 listing URLs mapped to locale-prefixed production routes
@@ -240,9 +241,10 @@ Date: 2026-07-04
 ```bash
 python3 search/build_search_indexes.py
 python3 search/validate_search_imports.py
-python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py search/validate_search_imports.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
+python3 -m py_compile migration/crawl_inventory.py migration/build_migration_db.py search/build_search_indexes.py search/validate_search_imports.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
 python3 locales/validate_locale_registry.py
 npm run migration:build
+python3 migration/build_migration_db.py
 npm run routes:build
 npm run migration:review
 npm run redirects:build

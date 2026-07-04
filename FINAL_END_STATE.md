@@ -36,6 +36,12 @@ Implemented now:
   - 11,859 media rows.
   - 0 fetch failures.
   - 0 homepage redirect-map targets.
+- Structured migration database:
+  - `migration/build_migration_db.py`
+  - `production/data/migration.sqlite`
+  - `production/data/migration-db-summary.json`
+  - imports URL, metadata, media, and redirect CSV rows into indexed SQLite tables
+  - exposes `migration_url_review` and `media_by_page` review views
 - Search fixture builder for Typesense and Meilisearch:
   - `search/build_search_indexes.py`
   - `search/data/listings.json`
@@ -484,7 +490,8 @@ Delivered:
 
 Build:
 
-- Import crawl CSVs into a structured migration database.
+- Import crawl CSVs into a structured migration database. Current local proof:
+  `production/data/migration.sqlite`.
 - Add reviewer UI for URL classification.
 - Add redirect-map editor.
 - Add metadata gap dashboard.
