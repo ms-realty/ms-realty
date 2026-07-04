@@ -79,6 +79,10 @@ Date: 2026-07-04
   - a newly added public locale can draft, approve, publish, and serve a locale-prefixed listing without seed-code changes
   - served `/sitemap.xml` includes approved dynamic locale translations from the review ledger
   - `/api/search` returns reviewed translation cards for those admin-added approved locales
+- Added locale homepage route resolution:
+  - approved locale roots like `/he/` serve a real homepage with search, seller, location, and featured listing paths
+  - disabled locale roots like `/fr/` stay in the non-indexable fallback/request flow
+  - homepage routes are included in hreflang and sitemap output
 - Added crawlable location route resolution:
   - source listing locations generate locale-prefixed location pages only when that locale has at least one indexable listing in the location
   - Hebrew Sandanski route `/he/locations/sandanski` serves reviewed inventory and HTML
@@ -111,6 +115,7 @@ Date: 2026-07-04
   - served listing routes overlay latest translation review ledger rows
   - stale Greek listing smoke returns `noindex,follow`
 - Added approved-translation-gated localized sitemap fixture:
+  - approved locale homepages included for public website locales
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations
   - approved location pages included for real inventory locations
@@ -143,6 +148,7 @@ Date: 2026-07-04
   - `GET /fr/`
   - `POST /api/leads`
 - Added server-rendered HTML adapter:
+  - `GET /he/` serves a Hebrew RTL homepage with search and seller paths
   - `GET /he/properties/MS-CRAWL-0001` serves listing HTML when `Accept: text/html` or `?format=html` is present
   - `GET /he/search?q=Sandanski` serves locale-scoped search HTML
   - `GET /he/sell` serves a Hebrew RTL seller valuation page backed by `POST /api/leads`

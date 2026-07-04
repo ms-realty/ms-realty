@@ -5,6 +5,7 @@ import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   renderAdminShell,
+  renderHomePage,
   renderLanguageFallback,
   renderListingPage,
   renderLocationPage,
@@ -116,6 +117,20 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_type, "apartment");
+});
+
+test("home page exposes search, seller, location, and featured listing paths", () => {
+  const he = renderHomePage({ registry, listings, localeCode: "he" });
+
+  assert.equal(he.status, 200);
+  assert.equal(he.path, "/he/");
+  assert.equal(he.dir, "rtl");
+  assert.equal(he.indexable, true);
+  assert.equal(he.body.search.path, "/he/search");
+  assert.equal(he.body.seller.path, "/he/sell");
+  assert.equal(he.body.locations.some((location) => location.path === "/he/locations/sandanski"), true);
+  assert.ok(he.cards.length > 0);
+  assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
 });
 
 test("location page exposes only indexable locale inventory", () => {

@@ -3,7 +3,7 @@ import path from "node:path";
 import { approvedTranslationRecordsForListing, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
-import { sitemapEntriesForListing, sitemapEntriesForLocations, sitemapEntriesForSeller } from "../lib/seo.mjs";
+import { sitemapEntriesForHome, sitemapEntriesForListing, sitemapEntriesForLocations, sitemapEntriesForSeller } from "../lib/seo.mjs";
 
 const registry = loadLocaleRegistry();
 const listings = loadListings();
@@ -14,7 +14,8 @@ const locationEntries = sitemapEntriesForLocations(registry, listings, (listing)
   approvedTranslationRecordsForListing(registry, listing),
 );
 const sellerEntries = sitemapEntriesForSeller(registry);
-const entries = [...listingEntries, ...locationEntries, ...sellerEntries];
+const homeEntries = sitemapEntriesForHome(registry);
+const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries];
 const byLocale = {};
 for (const entry of entries) byLocale[entry.locale] = (byLocale[entry.locale] || 0) + 1;
 
@@ -27,6 +28,7 @@ fs.writeFileSync(
       artifact_id: "localized-sitemap-20260704",
       summary: {
         listings: listings.length,
+        home_pages: homeEntries.length,
         listing_entries: listingEntries.length,
         location_pages: locationEntries.length,
         seller_pages: sellerEntries.length,

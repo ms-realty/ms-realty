@@ -63,6 +63,29 @@ function renderListing(page) {
 </main>`;
 }
 
+function renderHome(page) {
+  const locations = (page.body.locations || [])
+    .map((location) => `<a href="${escapeHtml(location.path)}">${escapeHtml(location.location)}</a>`)
+    .join("");
+  const cards = page.cards
+    .map(
+      (card) =>
+        `<article><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2><p>${escapeHtml(card.location)}</p></article>`,
+    )
+    .join("");
+  return `
+<main data-kind="home">
+  <h1>${escapeHtml(page.body.h1)}</h1>
+  <form action="${escapeHtml(page.body.search.path)}" method="get" role="search">
+    <input name="${escapeHtml(page.body.search.query_param)}" type="search" autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+  <a href="${escapeHtml(page.body.seller.path)}" data-action="seller">${escapeHtml(page.body.seller.label)}</a>
+  <nav aria-label="Locations">${locations}</nav>
+  <section aria-label="Featured listings">${cards}</section>
+</main>`;
+}
+
 function renderSearch(page) {
   const cards = page.cards
     .map(
@@ -118,6 +141,7 @@ function renderFallback(page) {
 }
 
 function renderBody(page) {
+  if (page.kind === "home") return renderHome(page);
   if (page.kind === "listing") return renderListing(page);
   if (page.kind === "search") return renderSearch(page);
   if (page.kind === "location") return renderLocation(page);

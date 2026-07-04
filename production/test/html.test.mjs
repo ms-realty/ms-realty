@@ -6,6 +6,7 @@ import { assertHtmlPage, renderHtmlPage } from "../lib/html.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   renderLanguageFallback,
+  renderHomePage,
   renderListingPage,
   renderLocationPage,
   renderSearchPage,
@@ -17,6 +18,7 @@ const listings = loadListings();
 const listing = findListingById(listings, "MS-CRAWL-0001");
 
 test("HTML renderer emits SEO-safe listing, search, and fallback documents", () => {
+  const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));
   const approvedListingHtml = renderHtmlPage(
     renderListingPage({
@@ -37,6 +39,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   const sellerHtml = renderHtmlPage(renderSellerPage({ registry, localeCode: "he" }));
   const fallbackHtml = renderHtmlPage(renderLanguageFallback({ registry, requestedLocale: "fr" }));
 
+  assert.equal(assertHtmlPage(homeHtml, { lang: "he", dir: "rtl", kind: "home" }), true);
+  assert.match(homeHtml, /role="search"/);
+  assert.match(homeHtml, /data-action="seller"/);
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
   assert.match(listingHtml, /application\/ld\+json/);
   assert.match(listingHtml, /hreflang="el"/);

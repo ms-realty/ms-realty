@@ -12,6 +12,11 @@ export function sellerPath(registry, localeCode) {
   return `/${locale.code}/${locale.route_segments.seller}`;
 }
 
+export function homePath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/`;
+}
+
 export function locationSlug(location) {
   return (
     String(location || "")
@@ -34,6 +39,16 @@ export function hreflangForSeller(registry) {
       href: sellerPath(registry, locale.code),
     })),
     { hreflang: "x-default", href: sellerPath(registry, registry.source_locale) },
+  ];
+}
+
+export function hreflangForHome(registry) {
+  return [
+    ...publicIndexableLocales(registry).map((locale) => ({
+      hreflang: locale.code,
+      href: homePath(registry, locale.code),
+    })),
+    { hreflang: "x-default", href: homePath(registry, registry.source_locale) },
   ];
 }
 
@@ -84,6 +99,16 @@ export function sitemapEntriesForListing(registry, listingId, translations) {
     type: "listing",
     locale: translation.locale,
     loc: listingPath(registry, translation.locale, listingId),
+    hreflang,
+  }));
+}
+
+export function sitemapEntriesForHome(registry) {
+  const hreflang = hreflangForHome(registry);
+  return publicIndexableLocales(registry).map((locale) => ({
+    type: "home",
+    locale: locale.code,
+    loc: homePath(registry, locale.code),
     hreflang,
   }));
 }

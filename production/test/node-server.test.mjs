@@ -99,6 +99,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           redirect: "manual",
           captureHeaders: true,
         }),
+        home: await jsonFetch(baseUrl, "/he/"),
+        homeHtml: await textFetch(baseUrl, "/he/", {
+          headers: { accept: "text/html" },
+        }),
         listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
         listingHtml: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001", {
           headers: { accept: "text/html" },
@@ -276,6 +280,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       });
       assert.equal(assertServerSmoke(smoke), true);
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
+      assert.equal(smoke.home.body.body.search.path, "/he/search");
       assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
       assert.equal(smoke.location.body.cards.length, 1);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");

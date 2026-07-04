@@ -1,6 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://makler-realty.com/bg/</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/en/</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/de/</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/nl/</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/ru/</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/el/</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/he/</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/" />
+  </url>
+  <url>
     <loc>https://makler-realty.com/bg/imoti/MS-CRAWL-0001</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/imoti/MS-CRAWL-0001" />
     <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/akinita/MS-CRAWL-0001" />

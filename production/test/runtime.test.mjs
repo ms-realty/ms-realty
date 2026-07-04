@@ -18,6 +18,7 @@ const seed = loadCmsSeed();
 
 test("runtime resolves locale-prefixed listing and fallback routes from CMS seed", () => {
   const he = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001");
+  const home = renderRuntimePath(registry, seed, "/he/");
   const seller = renderRuntimePath(registry, seed, "/he/sell");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
@@ -36,6 +37,9 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.source, "website_viewing_request");
   assert.equal(he.body.actions.secondary.find((action) => action.id === "share_family").url, he.path);
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
+  assert.equal(home.kind, "home");
+  assert.equal(home.body.search.path, "/he/search");
+  assert.equal(home.body.seller.path, "/he/sell");
   assert.equal(seller.kind, "seller");
   assert.equal(seller.path, "/he/sell");
   assert.equal(seller.body.valuation.payload.leadType, "seller");
@@ -108,6 +112,7 @@ test("runtime resolves admin-added approved locale listing routes from translati
   assert.equal(page.locale, "es");
   assert.equal(page.indexable, true);
   assert.equal(page.hreflang.some((link) => link.hreflang === "es"), true);
+  assert.equal(renderRuntimePath(updated, seed, "/es/", translationTasks).kind, "home");
   assert.equal(renderRuntimePath(updated, seed, "/es/vender").locale, "es");
   assert.equal(renderRuntimePath(updated, seed, "/es/locations/sandanski", translationTasks).status, 200);
 });

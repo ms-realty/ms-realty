@@ -4,6 +4,7 @@ import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   renderAdminShell,
+  renderHomePage,
   renderLanguageFallback,
   renderListingPage,
   renderLocationPage,
@@ -19,6 +20,7 @@ const listing = findListingById(listings, "MS-CRAWL-0001");
 const fixtures = {
   fixture_id: "public-route-fixtures-20260704",
   source_listing_id: listing.id,
+  home_he: renderHomePage({ registry, localeCode: "he", listings }),
   listing_bg: renderListingPage({ registry, listing, localeCode: "bg" }),
   listing_el: renderListingPage({ registry, listing, localeCode: "el" }),
   listing_he: renderListingPage({ registry, listing, localeCode: "he" }),

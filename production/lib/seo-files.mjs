@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fromRoot } from "./paths.mjs";
 import { mergeRuntimeTranslations } from "./runtime.mjs";
-import { sitemapEntriesForListing, sitemapEntriesForLocations, sitemapEntriesForSeller } from "./seo.mjs";
+import { sitemapEntriesForHome, sitemapEntriesForListing, sitemapEntriesForLocations, sitemapEntriesForSeller } from "./seo.mjs";
 
 export const DEFAULT_PUBLIC_ORIGIN = process.env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com";
 export const DEFAULT_LOCALIZED_SITEMAP_PATH = fromRoot("production", "data", "localized-sitemap.json");
@@ -31,11 +31,13 @@ export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = 
     mergeRuntimeTranslations(record, translationTasks),
   );
   const sellerEntries = sitemapEntriesForSeller(registry);
-  const entries = [...listingEntries, ...locationEntries, ...sellerEntries];
+  const homeEntries = sitemapEntriesForHome(registry);
+  const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries];
   return {
     artifact_id: "runtime-localized-sitemap",
     summary: {
       listings: listings.length,
+      home_pages: homeEntries.length,
       listing_entries: listingEntries.length,
       location_pages: locationEntries.length,
       seller_pages: sellerEntries.length,
@@ -81,6 +83,7 @@ export function renderRobotsTxt({ origin = DEFAULT_PUBLIC_ORIGIN } = {}) {
 }
 
 export function assertSeoFiles({ sitemapXml, robotsTxt }) {
+  if (!sitemapXml.includes("/he/</loc>")) throw new Error("Sitemap XML must include approved Hebrew homepage");
   if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001")) throw new Error("Sitemap XML must include approved Hebrew route");
   if (!sitemapXml.includes("/he/locations/sandanski")) throw new Error("Sitemap XML must include approved Hebrew location route");
   if (!sitemapXml.includes("/he/sell")) throw new Error("Sitemap XML must include Hebrew seller route");

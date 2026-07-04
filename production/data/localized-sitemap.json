@@ -2,21 +2,295 @@
   "artifact_id": "localized-sitemap-20260704",
   "summary": {
     "listings": 165,
+    "home_pages": 7,
     "listing_entries": 167,
     "location_pages": 6,
     "seller_pages": 7,
-    "entries": 180,
+    "entries": 187,
     "byLocale": {
-      "bg": 116,
-      "el": 3,
-      "he": 3,
-      "ru": 55,
-      "en": 1,
-      "de": 1,
-      "nl": 1
+      "bg": 117,
+      "en": 2,
+      "de": 2,
+      "nl": 2,
+      "ru": 56,
+      "el": 4,
+      "he": 4
     }
   },
   "entries": [
+    {
+      "type": "home",
+      "locale": "bg",
+      "loc": "/bg/",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/"
+        }
+      ]
+    },
+    {
+      "type": "home",
+      "locale": "en",
+      "loc": "/en/",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/"
+        }
+      ]
+    },
+    {
+      "type": "home",
+      "locale": "de",
+      "loc": "/de/",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/"
+        }
+      ]
+    },
+    {
+      "type": "home",
+      "locale": "nl",
+      "loc": "/nl/",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/"
+        }
+      ]
+    },
+    {
+      "type": "home",
+      "locale": "ru",
+      "loc": "/ru/",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/"
+        }
+      ]
+    },
+    {
+      "type": "home",
+      "locale": "el",
+      "loc": "/el/",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/"
+        }
+      ]
+    },
+    {
+      "type": "home",
+      "locale": "he",
+      "loc": "/he/",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/"
+        }
+      ]
+    },
     {
       "type": "listing",
       "locale": "bg",

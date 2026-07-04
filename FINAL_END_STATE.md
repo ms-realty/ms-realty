@@ -86,6 +86,10 @@ Implemented now:
   - newly added public locales can draft, approve, publish, and serve a locale-prefixed listing from the translation ledger
   - served sitemap XML includes those approved dynamic locale routes
   - search API cards reflect the same reviewed dynamic locale translation state
+- Homepage contract:
+  - approved locale roots serve real homepages with search, seller, location, and featured listing paths
+  - disabled locale roots remain non-indexable fallback/request flows
+  - homepage routes participate in sitemap and hreflang output
 - Location page contract:
   - real listing locations generate crawlable locale-prefixed pages only when that locale has indexable inventory there
   - Hebrew Sandanski is served at `/he/locations/sandanski`

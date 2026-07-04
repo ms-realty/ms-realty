@@ -99,13 +99,18 @@ const redirectApprovals = fs
 if (redirectApprovals.length !== 2) throw new Error("Redirect approval ledger must contain two reviewed rows");
 
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
-if (sitemap.summary.listing_entries !== 167 || sitemap.summary.location_pages !== 6 || sitemap.summary.seller_pages !== 7) {
-  throw new Error("Localized sitemap must include approved listing, location, and seller pages");
+if (
+  sitemap.summary.home_pages !== 7 ||
+  sitemap.summary.listing_entries !== 167 ||
+  sitemap.summary.location_pages !== 6 ||
+  sitemap.summary.seller_pages !== 7
+) {
+  throw new Error("Localized sitemap must include approved home, listing, location, and seller pages");
 }
-if (sitemap.summary.byLocale.bg !== 116 || sitemap.summary.byLocale.ru !== 55) {
+if (sitemap.summary.byLocale.bg !== 117 || sitemap.summary.byLocale.ru !== 56) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 3) {
+if (sitemap.summary.byLocale.el !== 4 || sitemap.summary.byLocale.he !== 4) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
@@ -113,6 +118,7 @@ if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not inc
 const sitemapXml = fs.readFileSync(fromRoot("production", "data", "sitemap.xml"), "utf8");
 const robotsTxt = fs.readFileSync(fromRoot("production", "data", "robots.txt"), "utf8");
 if (
+  !sitemapXml.includes("/he/</loc>") ||
   !sitemapXml.includes("/he/properties/MS-CRAWL-0001") ||
   !sitemapXml.includes("/he/locations/sandanski") ||
   !sitemapXml.includes("/he/sell") ||
@@ -172,6 +178,12 @@ if (adminFixtures.crm_inbox.buyer_he.contact_preference !== "whatsapp") {
 }
 
 const runtimeSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "runtime-smoke.json"), "utf8"));
+if (runtimeSmoke.home_he.kind !== "home" || runtimeSmoke.home_he.body.search.path !== "/he/search") {
+  throw new Error("Runtime smoke must expose Hebrew homepage search");
+}
+if (runtimeSmoke.home_he.body.seller.path !== "/he/sell") {
+  throw new Error("Runtime smoke homepage must expose seller path");
+}
 if (runtimeSmoke.listing_he.dir !== "rtl" || runtimeSmoke.listing_he.status !== 200) {
   throw new Error("Runtime smoke must render Hebrew listing as RTL 200");
 }
@@ -209,6 +221,13 @@ if (runtimeSmoke.search_he.search.total_matches <= runtimeSmoke.search_he.cards.
 const httpSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "http-smoke.json"), "utf8"));
 if (httpSmoke.legacyRedirect.status !== 301 || httpSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
   throw new Error("HTTP smoke must serve approved legacy redirect");
+}
+if (
+  httpSmoke.home.status !== 200 ||
+  httpSmoke.home.body.body.search.path !== "/he/search" ||
+  !httpSmoke.homeHtml.body.includes("data-kind=\"home\"")
+) {
+  throw new Error("HTTP smoke must expose server-rendered Hebrew homepage");
 }
 if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
   throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
@@ -329,6 +348,13 @@ if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must per
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.legacyRedirect.status !== 301 || nodeServerSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
   throw new Error("Node server smoke must serve approved legacy redirect");
+}
+if (
+  nodeServerSmoke.home.status !== 200 ||
+  nodeServerSmoke.home.body.body.search.path !== "/he/search" ||
+  !nodeServerSmoke.homeHtml.body.includes("data-kind=\"home\"")
+) {
+  throw new Error("Node server smoke must expose server-rendered Hebrew homepage");
 }
 if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !== "rtl") {
   throw new Error("Node server smoke must serve Hebrew listing as RTL 200");

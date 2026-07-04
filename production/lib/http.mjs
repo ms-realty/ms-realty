@@ -353,6 +353,14 @@ export function assertHttpSmoke(smoke) {
   if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
     throw new Error("HTTP smoke must serve approved legacy redirect");
   }
+  if (
+    smoke.home.status !== 200 ||
+    smoke.home.body.kind !== "home" ||
+    smoke.home.body.body.search.path !== "/he/search" ||
+    smoke.home.body.body.seller.path !== "/he/sell"
+  ) {
+    throw new Error("HTTP smoke must serve locale homepage with search and seller paths");
+  }
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") {
     throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
   }
@@ -462,6 +470,13 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");
+  if (
+    smoke.homeHtml?.status !== 200 ||
+    !smoke.homeHtml.body.includes("data-kind=\"home\"") ||
+    !smoke.homeHtml.body.includes("role=\"search\"")
+  ) {
+    throw new Error("HTTP smoke must serve rendered homepage HTML");
+  }
   if (
     smoke.listingHtml?.status !== 200 ||
     smoke.listingHtml.headers["content-type"] !== "text/html; charset=utf-8" ||

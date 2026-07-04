@@ -2,7 +2,9 @@ import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } 
 import {
   hreflangForListing,
   hreflangForLocation,
+  hreflangForHome,
   hreflangForSeller,
+  homePath,
   isTranslationIndexable,
   listingPath,
   locationPath,
@@ -150,6 +152,44 @@ const SELLER_COPY = {
   },
 };
 
+const HOME_COPY = {
+  bg: {
+    title: "MS Realty имоти в Югозападна България",
+    h1: "Намерете имот с MS Realty",
+    description: "Търсете проверени имоти, райони и продавачески услуги от MS Realty.",
+  },
+  en: {
+    title: "MS Realty property search",
+    h1: "Find property with MS Realty",
+    description: "Search reviewed listings, locations, and seller services from MS Realty.",
+  },
+  de: {
+    title: "MS Realty Immobiliensuche",
+    h1: "Immobilien mit MS Realty finden",
+    description: "Suchen Sie geprüfte Immobilien, Orte und Verkäuferleistungen von MS Realty.",
+  },
+  nl: {
+    title: "MS Realty vastgoed zoeken",
+    h1: "Vind vastgoed met MS Realty",
+    description: "Zoek beoordeeld vastgoed, locaties en verkoopdiensten van MS Realty.",
+  },
+  ru: {
+    title: "Поиск недвижимости MS Realty",
+    h1: "Найдите недвижимость с MS Realty",
+    description: "Ищите проверенные объекты, локации и услуги для продавцов от MS Realty.",
+  },
+  el: {
+    title: "Αναζήτηση ακινήτων MS Realty",
+    h1: "Βρείτε ακίνητο με τη MS Realty",
+    description: "Αναζητήστε ελεγμένα ακίνητα, τοποθεσίες και υπηρεσίες πωλητών από τη MS Realty.",
+  },
+  he: {
+    title: "חיפוש נכסים MS Realty",
+    h1: "מצאו נכס עם MS Realty",
+    description: "חפשו נכסים, אזורים ושירותי מוכרים מאושרים של MS Realty.",
+  },
+};
+
 function labelsFor(localeCode) {
   return ACTION_LABELS[localeCode] || ACTION_LABELS.en;
 }
@@ -181,6 +221,10 @@ function translationFor(translations, localeCode) {
 
 function sellerCopy(localeCode) {
   return SELLER_COPY[localeCode] || SELLER_COPY.en;
+}
+
+function homeCopy(localeCode) {
+  return HOME_COPY[localeCode] || HOME_COPY.en;
 }
 
 function translationsForSearchListing(registry, listing) {
@@ -229,6 +273,10 @@ function listingCard(registry, listing, locale) {
 
 function indexableListingForLocale(registry, listing, locale) {
   return searchTranslationState(registry, listing, locale).indexable;
+}
+
+function locationNamesFromListings(listings) {
+  return [...new Set(listings.map((listing) => listingToPublicViewModel(listing).location).filter(Boolean))].sort();
 }
 
 function norm(value) {
@@ -471,6 +519,54 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       },
     },
     cards,
+  };
+}
+
+export function renderHomePage({ registry, localeCode, listings }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const path = homePath(registry, locale.code);
+  const copy = homeCopy(locale.code);
+  const search = renderSearchPage({ registry, localeCode: locale.code, listings, query: "" });
+  const locations = locationNamesFromListings(listings)
+    .map((location) => {
+      const page = renderLocationPage({ registry, localeCode: locale.code, location, listings });
+      return page.indexable ? { location, path: page.path, listing_count: page.body.listing_count } : null;
+    })
+    .filter(Boolean);
+
+  return {
+    kind: "home",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: resolved.available,
+    metadata: {
+      title: copy.title,
+      description: copy.description,
+      robots: resolved.available ? "index,follow" : "noindex,follow",
+    },
+    hreflang: resolved.available ? hreflangForHome(registry) : [],
+    body: {
+      h1: copy.h1,
+      intro: copy.description,
+      search: {
+        path: search.path,
+        endpoint: "/api/search",
+        method: "GET",
+        query_param: "q",
+      },
+      seller: {
+        path: sellerPath(registry, locale.code),
+        label: labelsFor(locale.code).valuation,
+      },
+      locations,
+    },
+    cards: search.cards.slice(0, 6),
   };
 }
 

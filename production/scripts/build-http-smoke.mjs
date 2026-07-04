@@ -87,6 +87,8 @@ const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data",
 const smoke = {
   fixture_id: "http-smoke-20260704",
   legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
+  home: await dispatchHttp(app, { url: "/he/" }),
+  homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
   brokerContact: await dispatchHttp(app, {

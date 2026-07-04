@@ -110,6 +110,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const redirect = deployableRedirect();
   const smoke = {
     legacyRedirect: await dispatchHttp(app, { url: redirect.old_url }),
+    home: await dispatchHttp(app, { url: "/he/" }),
+    homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
     brokerContact: await dispatchHttp(app, {
@@ -293,6 +295,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
+  assert.equal(smoke.home.body.body.search.path, "/he/search");
+  assert.equal(smoke.homeHtml.body.includes("data-kind=\"home\""), true);
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(smoke.location.body.cards.length, 1);
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);

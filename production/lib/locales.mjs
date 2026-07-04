@@ -53,12 +53,18 @@ export function assertLocaleRegistry(registry) {
     if (locale.fallback_locale && !registry.locales.some((candidate) => candidate.code === locale.fallback_locale)) {
       throw new Error(`Missing fallback ${locale.fallback_locale} for ${locale.code}`);
     }
-    if (!locale.route_segments?.listing || !locale.route_segments?.search || !locale.route_segments?.seller) {
+    if (
+      !locale.route_segments?.listing ||
+      !locale.route_segments?.search ||
+      !locale.route_segments?.location ||
+      !locale.route_segments?.seller
+    ) {
       throw new Error(`Missing route segments for ${locale.code}`);
     }
     if (
       !ROUTE_SEGMENT.test(locale.route_segments.listing) ||
       !ROUTE_SEGMENT.test(locale.route_segments.search) ||
+      !ROUTE_SEGMENT.test(locale.route_segments.location) ||
       !ROUTE_SEGMENT.test(locale.route_segments.seller)
     ) {
       throw new Error(`Invalid route segment for ${locale.code}`);

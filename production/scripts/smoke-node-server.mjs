@@ -66,6 +66,10 @@ try {
       redirect: "manual",
       captureHeaders: true,
     }),
+    home: await jsonFetch(baseUrl, "/he/"),
+    homeHtml: await textFetch(baseUrl, "/he/", {
+      headers: { accept: "text/html" },
+    }),
     listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
     listingHtml: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001", {
       headers: { accept: "text/html" },
