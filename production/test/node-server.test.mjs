@@ -11,6 +11,7 @@ import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -23,6 +24,7 @@ async function withServer(fn) {
   const viewingLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewings-`)}/viewings.jsonl`;
   const savedSearchLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-saved-searches-`)}/saved-searches.jsonl`;
   const sellerPipelinePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-seller-pipeline-`)}/seller-pipeline.jsonl`;
+  const brokerContactLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-broker-contacts-`)}/broker-contacts.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
@@ -31,6 +33,7 @@ async function withServer(fn) {
   resetViewingLedger(viewingLedgerPath);
   resetSavedSearches(savedSearchLedgerPath);
   resetSellerPipeline(sellerPipelinePath);
+  resetBrokerContacts(brokerContactLedgerPath);
   const server = createNodeServer(
     createHttpApp({
       leadLedgerPath,
@@ -41,6 +44,7 @@ async function withServer(fn) {
       viewingLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
+      brokerContactLedgerPath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
       editedAt: "2026-07-04T00:03:00Z",
@@ -62,6 +66,7 @@ async function withServer(fn) {
       viewingLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
+      brokerContactLedgerPath,
     );
   } finally {
     await close(server);
@@ -84,6 +89,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       viewingLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
+      brokerContactLedgerPath,
     ) => {
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
@@ -94,6 +100,19 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           captureHeaders: true,
         }),
         listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+        brokerContact: await jsonFetch(baseUrl, "/api/admin/broker-contacts", {
+          method: "POST",
+          headers: { authorization: "Bearer local-admin-smoke" },
+          body: JSON.stringify({
+            id: "node-server-broker-contact-test",
+            listingId: "MS-CRAWL-0001",
+            broker: "broker_ru",
+            phone: "+359880000000",
+            reviewer: "owner",
+            approved: true,
+          }),
+        }),
+        listingAfterBrokerContact: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
         search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
         languageRequest: await jsonFetch(baseUrl, "/api/language-requests", {
           method: "POST",
@@ -230,6 +249,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       });
       assert.equal(assertServerSmoke(smoke), true);
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
+      assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
       assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
       assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
@@ -239,6 +259,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
       assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
+      assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
     },
   );

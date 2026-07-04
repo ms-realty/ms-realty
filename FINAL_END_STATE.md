@@ -94,6 +94,10 @@ Implemented now:
   - listing pages expose sticky mobile inquiry and callback actions through the lead intake endpoint
   - save, family-share, and print/PDF intents are part of the public payload
   - phone, WhatsApp, and Viber actions remain review-gated until broker contact data is approved
+- Broker contact approval contract:
+  - admin-reviewed broker phone data enables direct call, WhatsApp, and Viber listing actions
+  - unapproved contact channels remain disabled in public payloads
+  - approved contact rows are stored in an append-only broker contact ledger
 - Lead contact preference contract:
   - public leads preserve phone, Viber, WhatsApp, or email preference
   - CRM inbox and append-only lead ledger expose the normalized preference for broker follow-up

@@ -256,6 +256,8 @@
         ],
         "direct_contact": {
           "review_status": "needs_broker_contact_review",
+          "broker": null,
+          "reviewer": null,
           "channels": [
             {
               "id": "phone",
@@ -534,6 +536,8 @@
         ],
         "direct_contact": {
           "review_status": "needs_broker_contact_review",
+          "broker": null,
+          "reviewer": null,
           "channels": [
             {
               "id": "phone",

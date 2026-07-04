@@ -91,6 +91,10 @@ Date: 2026-07-04
   - lead intake accepts phone, Viber, WhatsApp, and email preferences
   - CRM inbox and append-only lead ledger store the normalized contact preference
   - invalid contact channels are rejected at the shared lead boundary
+- Added broker contact approval workflow:
+  - `POST /api/admin/broker-contacts` stores reviewer-approved broker phone data
+  - listing pages keep direct phone, WhatsApp, and Viber links disabled until approval exists
+  - approved rows enable `tel:`, WhatsApp, and Viber links on the public listing payload
 - Added authenticated CMS translation review endpoints:
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability

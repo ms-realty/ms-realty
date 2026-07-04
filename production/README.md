@@ -36,6 +36,7 @@ What it proves now:
 - Runtime 301 handling for reviewed legacy redirects only.
 - Runtime search query/facet filtering before pagination, with total match counts.
 - Listing conversion actions for inquiry, callback, save, share, and print/PDF, with direct broker contact channels review-gated.
+- Broker contact approval ledger that enables direct phone, WhatsApp, and Viber links only after review.
 - Lead contact preference validation and persistence for phone, Viber, WhatsApp, and email.
 - Search API overlays translation ledger state before card display/indexability.
 - Search API returns reviewed translation cards for admin-added approved locales.
@@ -78,6 +79,7 @@ Generated production data:
 - `production/data/viewings.jsonl`
 - `production/data/saved-searches.jsonl`
 - `production/data/seller-pipeline.jsonl`
+- `production/data/broker-contacts.jsonl`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/listing-edits.jsonl`

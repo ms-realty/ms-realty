@@ -200,6 +200,13 @@ if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
 if (httpSmoke.listing.body.body.actions?.secondary?.find((action) => action.id === "print")?.pdf_status !== "needs_pdf_renderer") {
   throw new Error("HTTP smoke must expose print/PDF action contract");
 }
+if (
+  httpSmoke.brokerContact.status !== 201 ||
+  httpSmoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status !== "approved_broker_contact" ||
+  httpSmoke.listingAfterBrokerContact.body.body.actions.direct_contact.channels.some((channel) => !channel.enabled || !channel.href)
+) {
+  throw new Error("HTTP smoke must expose approved broker contact links");
+}
 if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.requested_locale !== "fr") {
   throw new Error("HTTP smoke must accept French language request");
 }

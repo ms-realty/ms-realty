@@ -69,6 +69,12 @@ export function assertServerSmoke(smoke) {
   ) {
     throw new Error("Server must expose listing callback action");
   }
+  if (smoke.brokerContact?.status !== 201 || smoke.brokerContact.body.channels?.phone !== "tel:+359880000000") {
+    throw new Error("Server must approve broker contact data");
+  }
+  if (smoke.listingAfterBrokerContact?.body.body.actions.direct_contact.review_status !== "approved_broker_contact") {
+    throw new Error("Server must expose approved direct contact links");
+  }
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
   if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable language request");

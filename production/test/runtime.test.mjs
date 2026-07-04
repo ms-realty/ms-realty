@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
@@ -32,9 +33,25 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.body.actions.primary.find((action) => action.id === "inquiry").endpoint, "/api/leads");
   assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.source, "website_callback_request");
   assert.equal(he.body.actions.secondary.find((action) => action.id === "share_family").url, he.path);
+  assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
+});
+
+test("runtime overlays approved broker contact links on listing routes", () => {
+  const page = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001", [], [
+    createBrokerContact({
+      listingId: "MS-CRAWL-0001",
+      broker: "broker_ru",
+      phone: "+359880000000",
+      reviewer: "owner",
+      approved: true,
+    }),
+  ]);
+
+  assert.equal(page.body.actions.direct_contact.review_status, "approved_broker_contact");
+  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "viber").href, "viber://chat?number=%2B359880000000");
 });
 
 test("runtime overlays stale translation ledger rows before public rendering", () => {

@@ -185,7 +185,7 @@ function contactChannelLabel(channel, labels) {
   return "Viber";
 }
 
-function listingActions(locale, view, path, labels) {
+function listingActions(locale, view, path, labels, brokerContact = null) {
   const leadPayload = { leadType: "buyer", language: locale.code, listingReference: view.id };
   return {
     sticky_mobile: true,
@@ -213,12 +213,14 @@ function listingActions(locale, view, path, labels) {
       },
     ],
     direct_contact: {
-      review_status: "needs_broker_contact_review",
+      review_status: brokerContact ? "approved_broker_contact" : "needs_broker_contact_review",
+      broker: brokerContact?.broker || null,
+      reviewer: brokerContact?.reviewer || null,
       channels: ["phone", "whatsapp", "viber"].map((channel) => ({
         id: channel,
         label: contactChannelLabel(channel, labels),
-        enabled: false,
-        href: null,
+        enabled: Boolean(brokerContact?.channels?.[channel]),
+        href: brokerContact?.channels?.[channel] || null,
       })),
     },
     secondary: [
@@ -241,7 +243,7 @@ function listingActions(locale, view, path, labels) {
   };
 }
 
-export function renderListingPage({ registry, listing, localeCode, translations }) {
+export function renderListingPage({ registry, listing, localeCode, translations, brokerContact = null }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const view = listingToPublicViewModel(listing);
@@ -311,7 +313,7 @@ export function renderListingPage({ registry, listing, localeCode, translations 
         inquiry: labels.inquiry,
         seller_valuation: labels.valuation,
       },
-      actions: listingActions(locale, view, path, labels),
+      actions: listingActions(locale, view, path, labels, brokerContact),
       source: {
         old_url: view.source_url,
         source_domain: view.source_domain,

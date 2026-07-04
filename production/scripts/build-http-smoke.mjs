@@ -44,6 +44,12 @@ import {
   readSellerPipeline,
   resetSellerPipeline,
 } from "../lib/seller-pipeline.mjs";
+import {
+  assertBrokerContacts,
+  DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+  readBrokerContacts,
+  resetBrokerContacts,
+} from "../lib/broker-contacts.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -55,6 +61,7 @@ resetListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
 resetViewingLedger(DEFAULT_VIEWING_LEDGER_PATH);
 resetSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
 resetSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
+resetBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -66,6 +73,7 @@ const app = createHttpApp({
   viewingLedgerPath: DEFAULT_VIEWING_LEDGER_PATH,
   savedSearchLedgerPath: DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   sellerPipelinePath: DEFAULT_SELLER_PIPELINE_PATH,
+  brokerContactLedgerPath: DEFAULT_BROKER_CONTACT_LEDGER_PATH,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
@@ -80,6 +88,20 @@ const smoke = {
   fixture_id: "http-smoke-20260704",
   legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+  brokerContact: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/broker-contacts",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      id: "broker-contact-MS-CRAWL-0001",
+      listingId: "MS-CRAWL-0001",
+      broker: "broker_ru",
+      phone: "+359880000000",
+      reviewer: "owner",
+      approved: true,
+    },
+  }),
+  listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
   searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
   fallback: await dispatchHttp(app, { url: "/fr/" }),
@@ -255,6 +277,9 @@ smoke.savedSearchLedger = { path: DEFAULT_SAVED_SEARCH_LEDGER_PATH, rows: savedS
 const sellerPipeline = readSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
 assertSellerPipeline(sellerPipeline);
 smoke.sellerPipelineLedger = { path: DEFAULT_SELLER_PIPELINE_PATH, rows: sellerPipeline.length };
+const brokerContacts = readBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
+assertBrokerContacts(brokerContacts);
+smoke.brokerContactLedger = { path: DEFAULT_BROKER_CONTACT_LEDGER_PATH, rows: brokerContacts.length };
 smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");

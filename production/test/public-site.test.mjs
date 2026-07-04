@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
@@ -27,7 +28,31 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   assert.equal(he.body.actions.sticky_mobile, true);
   assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.contact_preference, "phone");
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
+  assert.ok(he.body.actions.direct_contact.channels.every((channel) => channel.enabled === false && channel.href === null));
   assert.ok(he.body.actions.secondary.find((action) => action.id === "print").url.endsWith("?print=1"));
+});
+
+test("approved broker contact data enables direct listing contact links", () => {
+  const page = renderListingPage({
+    registry,
+    listing,
+    localeCode: "he",
+    brokerContact: createBrokerContact({
+      listingId: listing.id,
+      broker: "broker_ru",
+      phone: "+359880000000",
+      reviewer: "owner",
+      approved: true,
+    }),
+  });
+
+  assert.equal(page.body.actions.direct_contact.review_status, "approved_broker_contact");
+  assert.equal(page.body.actions.direct_contact.broker, "broker_ru");
+  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "phone").href, "tel:+359880000000");
+  assert.equal(
+    page.body.actions.direct_contact.channels.find((channel) => channel.id === "whatsapp").href,
+    "https://wa.me/359880000000",
+  );
 });
 
 test("listing SEO includes approved hreflang and excludes unavailable draft locales", () => {

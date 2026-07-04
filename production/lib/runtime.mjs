@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -92,7 +93,7 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   return { type: "not_found", status: 404 };
 }
 
-export function renderRuntimePath(registry, seed, pathname, translationTasks = []) {
+export function renderRuntimePath(registry, seed, pathname, translationTasks = [], brokerContacts = []) {
   const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks);
   if (resolved.type === "listing") {
     return renderListingPage({
@@ -100,6 +101,7 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
       listing: resolved.listing,
       localeCode: resolved.localeCode,
       translations: mergeRuntimeTranslations(resolved.record, translationTasks),
+      brokerContact: latestApprovedBrokerContact(brokerContacts, resolved.record.id),
     });
   }
   if (resolved.type === "language_fallback") {

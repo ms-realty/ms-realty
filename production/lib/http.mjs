@@ -1,6 +1,7 @@
 import { addLocaleToRegistry, loadLocaleRegistry, writeLocaleRegistry } from "./locales.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
+import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
@@ -56,6 +57,7 @@ export function createHttpApp({
   viewingLedgerPath = null,
   savedSearchLedgerPath = null,
   sellerPipelinePath = null,
+  brokerContactLedgerPath = null,
   localeRegistryPath = null,
   receivedAt,
   requestedAt,
@@ -127,6 +129,7 @@ export function createHttpApp({
         viewings: readViewings(viewingLedgerPath || undefined),
         savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
         sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
+        brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
       });
     }
 
@@ -241,6 +244,18 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const contact = createBrokerContact(JSON.parse(request.body || "{}"), { reviewedAt });
+        return json(201, appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined }));
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = JSON.parse(request.body || "{}");
@@ -289,7 +304,13 @@ export function createHttpApp({
 
     if (request.method !== "GET") return json(405, { kind: "method_not_allowed" });
 
-    const rendered = renderRuntimePath(activeRegistry, seed, url.pathname, readTranslationLedger(translationLedgerPath || undefined));
+    const rendered = renderRuntimePath(
+      activeRegistry,
+      seed,
+      url.pathname,
+      readTranslationLedger(translationLedgerPath || undefined),
+      readBrokerContacts(brokerContactLedgerPath || undefined),
+    );
     return json(rendered.status || 200, rendered);
   };
 }
@@ -311,6 +332,16 @@ export function assertHttpSmoke(smoke) {
     smoke.listing.body.body.actions?.direct_contact?.review_status !== "needs_broker_contact_review"
   ) {
     throw new Error("HTTP smoke must expose listing conversion actions without inventing broker contact data");
+  }
+  if (smoke.brokerContact?.status !== 201 || smoke.brokerContact.body.channels?.phone !== "tel:+359880000000") {
+    throw new Error("HTTP smoke must approve broker contact data");
+  }
+  if (
+    smoke.listingAfterBrokerContact?.status !== 200 ||
+    smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status !== "approved_broker_contact" ||
+    !smoke.listingAfterBrokerContact.body.body.actions.direct_contact.channels.every((channel) => channel.enabled && channel.href)
+  ) {
+    throw new Error("HTTP smoke must expose approved direct contact links");
   }
   if (smoke.search.status !== 200 || smoke.search.body.mobile_policy.list_first_mobile !== true) {
     throw new Error("HTTP smoke must serve mobile-first search");

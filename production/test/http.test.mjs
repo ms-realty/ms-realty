@@ -11,6 +11,7 @@ import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -62,6 +63,12 @@ function tempSellerPipeline() {
   return file;
 }
 
+function tempBrokerContacts() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-broker-contacts-`)}/broker-contacts.jsonl`;
+  resetBrokerContacts(file);
+  return file;
+}
+
 function tempRegistry() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
   fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
@@ -81,6 +88,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const viewingLedgerPath = tempViewings();
   const savedSearchLedgerPath = tempSavedSearches();
   const sellerPipelinePath = tempSellerPipeline();
+  const brokerContactLedgerPath = tempBrokerContacts();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
@@ -90,6 +98,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     viewingLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
+    brokerContactLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -102,6 +111,20 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const smoke = {
     legacyRedirect: await dispatchHttp(app, { url: redirect.old_url }),
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+    brokerContact: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/broker-contacts",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        id: "broker-contact-test",
+        listingId: "MS-CRAWL-0001",
+        broker: "broker_ru",
+        phone: "+359880000000",
+        reviewer: "owner",
+        approved: true,
+      },
+    }),
+    listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
     searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
     fallback: await dispatchHttp(app, { url: "/fr/" }),
@@ -253,6 +276,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
+  assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
@@ -261,6 +285,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
   assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
+  assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 2);
   assert.equal(smoke.admin.body.languageRequests.length, 1);

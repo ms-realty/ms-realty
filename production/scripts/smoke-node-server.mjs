@@ -10,6 +10,7 @@ import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -21,6 +22,7 @@ const listingEditLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "m
 const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewings-")), "viewings.jsonl");
 const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-saved-searches-")), "saved-searches.jsonl");
 const sellerPipelinePath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-seller-pipeline-")), "seller-pipeline.jsonl");
+const brokerContactLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-broker-contacts-")), "broker-contacts.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
@@ -29,6 +31,7 @@ resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
+resetBrokerContacts(brokerContactLedgerPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
@@ -39,6 +42,7 @@ const server = createNodeServer(
     viewingLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
+    brokerContactLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -63,6 +67,19 @@ try {
       captureHeaders: true,
     }),
     listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+    brokerContact: await jsonFetch(baseUrl, "/api/admin/broker-contacts", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        id: "broker-contact-server-MS-CRAWL-0001",
+        listingId: "MS-CRAWL-0001",
+        broker: "broker_ru",
+        phone: "+359880000000",
+        reviewer: "owner",
+        approved: true,
+      }),
+    }),
+    listingAfterBrokerContact: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
     search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
     languageRequest: await jsonFetch(baseUrl, "/api/language-requests", {
       method: "POST",
@@ -227,6 +244,9 @@ try {
   const sellerPipeline = readSellerPipeline(sellerPipelinePath);
   assertSellerPipeline(sellerPipeline);
   smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
+  const brokerContacts = readBrokerContacts(brokerContactLedgerPath);
+  assertBrokerContacts(brokerContacts);
+  smoke.brokerContactLedger = { rows: brokerContacts.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);
