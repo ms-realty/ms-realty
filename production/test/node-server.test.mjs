@@ -255,6 +255,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             broker: "broker_ru",
           }),
         }),
+        viewingCalendar: await textFetch(baseUrl, "/api/admin/viewings.ics", {
+          headers: { authorization: "Bearer local-admin-smoke" },
+        }),
+        viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics"),
       };
       smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
         method: "POST",
@@ -304,6 +308,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
       assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
       assert.equal(smoke.contactLead.body.lead.leadType, "general");
+      assert.equal(smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR"), true);
+      assert.equal(smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z"), true);
       assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
       assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
       assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);

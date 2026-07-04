@@ -15,7 +15,7 @@ import { loadDeployableRedirects } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
 import { appendListingEdit, createListingEdit, readListingEdits } from "./listing-edits.mjs";
-import { appendViewing, readViewings } from "./viewing-ledger.mjs";
+import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 
@@ -161,6 +161,18 @@ export function createHttpApp({
         sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
         brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
       });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      return response(
+        200,
+        renderViewingCalendar(readViewings(viewingLedgerPath || undefined), { now: bookedAt || receivedAt }),
+        "text/calendar; charset=utf-8",
+        { "content-disposition": "attachment; filename=\"ms-realty-viewings.ics\"" },
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
@@ -540,5 +552,16 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must book viewing follow-up tasks");
   }
   if (smoke.viewingUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated viewings");
+  if (
+    smoke.viewingCalendar?.status !== 200 ||
+    smoke.viewingCalendar.headers["content-type"] !== "text/calendar; charset=utf-8" ||
+    !smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR") ||
+    !smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z")
+  ) {
+    throw new Error("HTTP smoke must export broker viewings as an admin calendar feed");
+  }
+  if (smoke.viewingCalendarUnauthorized?.status !== 401) {
+    throw new Error("HTTP smoke must reject unauthenticated viewing calendar export");
+  }
   return true;
 }

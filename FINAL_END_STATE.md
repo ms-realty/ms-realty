@@ -72,6 +72,7 @@ Implemented now:
 - Broker viewing/task contract:
   - `POST /api/admin/viewings`
   - booked viewings require known CRM leads and create open follow-up tasks
+  - booked viewings export through an admin-gated `.ics` calendar feed
 - Migration review queue:
   - every crawled URL has a review owner, admin locale, action, and priority
   - `.ru` preservation rows are kept in a dedicated review lane

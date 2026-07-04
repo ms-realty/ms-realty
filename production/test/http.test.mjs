@@ -250,6 +250,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       url: "/api/admin/viewings",
       body: { leadId: "http-lead-test", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
     }),
+    viewingCalendar: await dispatchHttp(app, {
+      url: "/api/admin/viewings.ics",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    viewingCalendarUnauthorized: await dispatchHttp(app, { url: "/api/admin/viewings.ics" }),
   };
   smoke.translationDraft = await dispatchHttp(app, {
     method: "POST",
@@ -339,6 +344,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
   assert.equal(smoke.admin.body.listingEdits.length, 1);
   assert.equal(smoke.admin.body.viewings.length, 1);
+  assert.equal(smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR"), true);
+  assert.equal(smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.source === "website_viewing_request"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.source === "website_contact_callback"), true);

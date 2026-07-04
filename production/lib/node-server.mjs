@@ -198,5 +198,15 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must book viewing follow-up tasks");
   }
   if (smoke.viewingUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated viewings");
+  if (
+    smoke.viewingCalendar?.status !== 200 ||
+    !smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR") ||
+    !smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z")
+  ) {
+    throw new Error("Server must export broker viewings as an admin calendar feed");
+  }
+  if (smoke.viewingCalendarUnauthorized?.status !== 401) {
+    throw new Error("Server must reject unauthenticated viewing calendar export");
+  }
   return true;
 }

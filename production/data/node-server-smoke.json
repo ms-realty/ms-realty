@@ -2014,6 +2014,16 @@
       "kind": "unauthorized"
     }
   },
+  "viewingCalendar": {
+    "status": 200,
+    "body": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MS Realty//Viewings//EN\r\nBEGIN:VEVENT\r\nUID:viewing-server-lead-he-0001@ms-realty.local\r\nDTSTAMP:20260704T000600Z\r\nDTSTART:20260706T100000Z\r\nDTEND:20260706T103000Z\r\nSUMMARY:MS Realty viewing MS-CRAWL-0001\r\nDESCRIPTION:Lead server-lead-he-0001\\; broker broker_ru\\; follow-up open\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  },
+  "viewingCalendarUnauthorized": {
+    "status": 401,
+    "body": {
+      "kind": "unauthorized"
+    }
+  },
   "translationDraft": {
     "status": 201,
     "body": {

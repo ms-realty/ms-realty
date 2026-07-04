@@ -226,6 +226,10 @@ try {
         broker: "broker_ru",
       }),
     }),
+    viewingCalendar: await textFetch(baseUrl, "/api/admin/viewings.ics", {
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics"),
   };
   smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
     method: "POST",

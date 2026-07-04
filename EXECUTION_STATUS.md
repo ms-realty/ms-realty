@@ -183,6 +183,7 @@ Date: 2026-07-04
   - `POST /api/admin/viewings` requires admin bearer token
   - verifies the lead exists in the CRM ledger
   - persists a booked viewing row with an open follow-up task
+  - `GET /api/admin/viewings.ics` exports booked viewings as an admin-gated calendar feed
   - authenticated admin inbox returns persisted viewing rows
 - Added saved search and alert intake:
   - `POST /api/saved-searches` stores locale-scoped search criteria

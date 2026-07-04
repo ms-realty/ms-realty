@@ -381,6 +381,13 @@ if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist o
 if (httpSmoke.viewing.status !== 201 || httpSmoke.viewing.body.follow_up_task?.status !== "open") {
   throw new Error("HTTP smoke must book one viewing with follow-up task");
 }
+if (
+  httpSmoke.viewingCalendar.status !== 200 ||
+  !httpSmoke.viewingCalendar.body.includes("BEGIN:VCALENDAR") ||
+  !httpSmoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z")
+) {
+  throw new Error("HTTP smoke must export booked viewings as an admin calendar feed");
+}
 if (httpSmoke.viewingLedger.rows !== 1) throw new Error("HTTP smoke must persist one viewing row");
 if (httpSmoke.savedSearchLedger.rows !== 1) throw new Error("HTTP smoke must persist one saved search row");
 if (httpSmoke.sellerPipelineLedger.rows !== 1) throw new Error("HTTP smoke must persist one seller pipeline row");
@@ -478,6 +485,13 @@ if (nodeServerSmoke.reply.status !== 201 || nodeServerSmoke.reply.body.status !=
 }
 if (nodeServerSmoke.viewing.status !== 201 || nodeServerSmoke.viewing.body.follow_up_task?.status !== "open") {
   throw new Error("Node server smoke must book one viewing with follow-up task");
+}
+if (
+  nodeServerSmoke.viewingCalendar.status !== 200 ||
+  !nodeServerSmoke.viewingCalendar.body.includes("BEGIN:VCALENDAR") ||
+  !nodeServerSmoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z")
+) {
+  throw new Error("Node server smoke must export booked viewings as an admin calendar feed");
 }
 if (nodeServerSmoke.viewingLedger.rows !== 1) throw new Error("Node server smoke must persist one viewing row");
 if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server smoke must persist one saved search row");

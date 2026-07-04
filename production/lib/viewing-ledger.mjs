@@ -58,3 +58,34 @@ export function assertViewingLedger(rows) {
   }
   return true;
 }
+
+function icsDate(value) {
+  return new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+}
+
+function icsText(value) {
+  return String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+
+export function renderViewingCalendar(rows, { now = new Date().toISOString(), durationMinutes = 30 } = {}) {
+  const events = rows.map((row) => {
+    const start = new Date(row.starts_at);
+    const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+    return [
+      "BEGIN:VEVENT",
+      `UID:${icsText(row.id)}@ms-realty.local`,
+      `DTSTAMP:${icsDate(now)}`,
+      `DTSTART:${icsDate(start)}`,
+      `DTEND:${icsDate(end)}`,
+      `SUMMARY:${icsText(`MS Realty viewing ${row.listing_reference || row.lead_id}`)}`,
+      `DESCRIPTION:${icsText(`Lead ${row.lead_id}; broker ${row.broker}; follow-up ${row.follow_up_task?.status || "open"}`)}`,
+      "END:VEVENT",
+    ].join("\r\n");
+  });
+
+  return ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//MS Realty//Viewings//EN", ...events, "END:VCALENDAR", ""].join("\r\n");
+}

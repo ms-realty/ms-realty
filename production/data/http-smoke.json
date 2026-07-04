@@ -2372,6 +2372,23 @@
       "kind": "unauthorized"
     }
   },
+  "viewingCalendar": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/calendar; charset=utf-8",
+      "content-disposition": "attachment; filename=\"ms-realty-viewings.ics\""
+    },
+    "body": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//MS Realty//Viewings//EN\r\nBEGIN:VEVENT\r\nUID:viewing-http-lead-he-0001@ms-realty.local\r\nDTSTAMP:20260704T000600Z\r\nDTSTART:20260706T100000Z\r\nDTEND:20260706T103000Z\r\nSUMMARY:MS Realty viewing MS-CRAWL-0001\r\nDESCRIPTION:Lead http-lead-he-0001\\; broker broker_ru\\; follow-up open\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+  },
+  "viewingCalendarUnauthorized": {
+    "status": 401,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "unauthorized"
+    }
+  },
   "translationDraft": {
     "status": 201,
     "headers": {

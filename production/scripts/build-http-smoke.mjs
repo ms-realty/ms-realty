@@ -234,6 +234,11 @@ smoke.viewingUnauthorized = await dispatchHttp(app, {
   url: "/api/admin/viewings",
   body: { leadId: "http-lead-he-0001", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
 });
+smoke.viewingCalendar = await dispatchHttp(app, {
+  url: "/api/admin/viewings.ics",
+  headers: { authorization: "Bearer local-admin-smoke" },
+});
+smoke.viewingCalendarUnauthorized = await dispatchHttp(app, { url: "/api/admin/viewings.ics" });
 smoke.translationDraft = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/translations/draft",

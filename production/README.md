@@ -55,7 +55,7 @@ What it proves now:
 - Append-only lead ledger for persisted buyer inquiry, viewing request, contact callback, and seller valuation smoke rows, including source classification.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
-- Broker-booked viewing ledger with open follow-up tasks from existing CRM leads.
+- Broker-booked viewing ledger with open follow-up tasks and admin `.ics` calendar export from existing CRM leads.
 - Saved-search ledger with open alert tasks from public search criteria.
 - Seller valuation pipeline ledger with callback/appraisal tasks from seller leads.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
