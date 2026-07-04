@@ -73,6 +73,7 @@ Date: 2026-07-04
   - translation ledger rows now participate in public listing route matching
   - a newly added public locale can draft, approve, publish, and serve a locale-prefixed listing without seed-code changes
   - served `/sitemap.xml` includes approved dynamic locale translations from the review ledger
+  - `/api/search` returns reviewed translation cards for those admin-added approved locales
 - Added authenticated CMS translation review endpoints:
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability

@@ -64,6 +64,7 @@ Implemented now:
 - Dynamic locale publishing contract:
   - newly added public locales can draft, approve, publish, and serve a locale-prefixed listing from the translation ledger
   - served sitemap XML includes those approved dynamic locale routes
+  - search API cards reflect the same reviewed dynamic locale translation state
 - Mobile and elderly-user QA gate:
   - `qa/mobile_elderly_static_check.py`
   - `qa/mobile-elderly-accessibility.md`

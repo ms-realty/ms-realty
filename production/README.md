@@ -32,6 +32,7 @@ What it proves now:
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
 - Search API overlays translation ledger state before card display/indexability.
+- Search API returns reviewed translation cards for admin-added approved locales.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.

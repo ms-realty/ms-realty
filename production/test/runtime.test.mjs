@@ -110,6 +110,39 @@ test("runtime search overlays stale translation ledger rows before card renderin
   assert.equal(card.translation_indexable, false);
 });
 
+test("runtime search shows reviewed cards for admin-added approved locales", () => {
+  const { registry: updated } = addLocaleToRegistry(registry, {
+    code: "es",
+    native_name: "Español",
+    admin_name: "Spanish",
+    public_enabled: true,
+    indexable: true,
+    route_segments: { listing: "propiedades", search: "buscar" },
+  });
+  const search = searchRuntimeListings(updated, seed, {
+    localeCode: "es",
+    query: "Sandanski",
+    translationTasks: [
+      {
+        id: "translation-listing-MS-CRAWL-0001-es",
+        object_type: "listing",
+        object_id: "MS-CRAWL-0001",
+        target_locale: "es",
+        status: "published",
+        human_approved: true,
+        public_indexable: true,
+      },
+    ],
+  });
+  const card = search.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
+
+  assert.equal(search.path, "/es/buscar");
+  assert.equal(search.indexable, true);
+  assert.equal(card.path, "/es/propiedades/MS-CRAWL-0001");
+  assert.equal(card.translation_display, "reviewed_translation");
+  assert.equal(card.translation_indexable, true);
+});
+
 test("runtime lead intake stores language and keeps Hermes reply review-gated", () => {
   const lead = submitRuntimeLead(registry, seed, {
     id: "runtime-lead-test",

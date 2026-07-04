@@ -46,6 +46,9 @@ Source of truth:
   changes.
 - Runtime sitemap rendering also reads the translation ledger, so approved
   dynamic locale pages are discoverable and draft/stale pages are excluded.
+- Runtime search rendering reads the same translation ledger, so admin-added
+  approved locales return reviewed cards while draft/stale rows remain fallback
+  or non-indexable.
 - `prototypes/crm-lead-intake/lead-intake-demo.json` includes Greek and Hebrew
   website leads routed into the BG/RU/EN admin workflow.
 - `qa/mobile_elderly_static_check.py` validates the locale registry and screen
