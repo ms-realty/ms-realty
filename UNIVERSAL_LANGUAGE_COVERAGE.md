@@ -36,8 +36,9 @@ Source of truth:
 - `makler-realty-design-system/project/ui_kits/remaining/index.html` shows the
   dynamic public language selector, locale request fallback, Greek, Hebrew RTL,
   and BG/RU/EN admin language coverage.
-- `search/build_search_indexes.py` adds locale prefix, indexability, and
-  translation-status fields to listing search fixtures.
+- `search/build_search_indexes.py` keeps the 165 source-listing corpus separate
+  from the 167-document search index feed, with approved Greek and Hebrew
+  translation documents included only when indexable.
 - `prototypes/crm-lead-intake/lead-intake-demo.json` includes Greek and Hebrew
   website leads routed into the BG/RU/EN admin workflow.
 - `qa/mobile_elderly_static_check.py` validates the locale registry and screen

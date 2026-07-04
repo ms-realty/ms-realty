@@ -17,19 +17,23 @@ python3 search/build_search_indexes.py
 
 Generated files:
 
-- `search/data/listings.json` - shared listing corpus for UI prototypes.
+- `search/data/listings.json` - 165 source listings used by CMS/import prototypes.
+- `search/data/index-listings.json` - 167 locale-scoped search documents, including approved Greek and Hebrew translations for `MS-CRAWL-0001`.
 - `search/data/typesense-schema.json` - Typesense collection schema.
 - `search/data/typesense-listings.jsonl` - Typesense JSONL import body.
 - `search/data/meilisearch-settings.json` - Meilisearch index settings.
 - `search/data/meilisearch-listings.ndjson` - Meilisearch NDJSON import body.
 - `search/data/search-fixture-summary.json` - corpus counts and inferred facets.
 
-Locale fields in each listing:
+Locale fields in each search index document:
 
-- `locale` / `language` - detected source locale.
+- `locale` / `language` - document locale.
 - `locale_prefix` - production URL prefix candidate.
+- `locale_path` - locale-prefixed production listing path.
 - `locale_is_indexable` - true only for approved public locales.
-- `translation_status` - `published` for approved source rows, otherwise fallback.
+- `translation_status` - `published` for source rows or `approved` for approved translation rows.
+- `translation_indexable` - true only when the locale document can be public/indexed.
+- `search_document_type` - `source` or `approved_translation`.
 
 ## Typesense Smoke
 

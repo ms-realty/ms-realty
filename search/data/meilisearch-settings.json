@@ -7,12 +7,18 @@
     "location"
   ],
   "filterableAttributes": [
+    "source_listing_id",
+    "search_document_type",
     "domain",
     "language",
     "locale",
     "locale_prefix",
+    "locale_path",
     "locale_is_indexable",
     "translation_status",
+    "translation_source_locale",
+    "translation_human_approved",
+    "translation_indexable",
     "location",
     "property_type",
     "offer_type",

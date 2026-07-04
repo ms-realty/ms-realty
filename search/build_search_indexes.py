@@ -43,6 +43,9 @@ TYPE_PATTERNS = [
     ("hotel", re.compile(r"\b(hotel|хотел)\b", re.I)),
 ]
 
+APPROVED_TRANSLATION_SEEDS = {"MS-CRAWL-0001": ["el", "he"]}
+PUBLIC_TRANSLATION_STATES = {"approved", "published"}
+
 
 def textish(value: str | None) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
@@ -75,6 +78,15 @@ def public_indexable_locales(registry: dict[str, object]) -> set[str]:
     }
 
 
+def locales_by_code(registry: dict[str, object]) -> dict[str, dict[str, object]]:
+    return {str(locale["code"]): locale for locale in registry.get("locales", [])}
+
+
+def listing_path(registry: dict[str, object], locale: str, listing_id: str) -> str:
+    locale_row = locales_by_code(registry)[locale]
+    return f"/{locale}/{locale_row['route_segments']['listing']}/{listing_id}"
+
+
 def infer_language(domain: str, url: str, registry: dict[str, object] | None = None) -> str:
     if domain.endswith(".ru"):
         return "ru"
@@ -105,6 +117,66 @@ def extract_reference(url: str, fallback: int) -> str:
     if ref_match:
         return f"MS-{ref_match.group(1)}"
     return f"MS-CRAWL-{fallback:04d}"
+
+
+def translation_indexable(status: str, human_approved: bool, locale: str, registry: dict[str, object]) -> bool:
+    return locale in public_indexable_locales(registry) and status in PUBLIC_TRANSLATION_STATES and human_approved
+
+
+def source_index_doc(doc: dict[str, object], registry: dict[str, object]) -> dict[str, object]:
+    locale = str(doc["locale"])
+    status = str(doc["translation_status"])
+    human_approved = status == "published"
+    listing_id = str(doc["id"])
+    return {
+        **doc,
+        "id": f"{listing_id}:{locale}",
+        "source_listing_id": listing_id,
+        "search_document_type": "source",
+        "locale_path": listing_path(registry, locale, listing_id),
+        "translation_source_locale": locale,
+        "translation_human_approved": human_approved,
+        "translation_indexable": translation_indexable(status, human_approved, locale, registry),
+    }
+
+
+def approved_translation_index_doc(doc: dict[str, object], locale: str, registry: dict[str, object]) -> dict[str, object]:
+    listing_id = str(doc["id"])
+    source_locale = str(doc["locale"])
+    return {
+        **doc,
+        "id": f"{listing_id}:{locale}",
+        "source_listing_id": listing_id,
+        "search_document_type": "approved_translation",
+        "language": locale,
+        "locale": locale,
+        "locale_prefix": f"/{locale}/",
+        "locale_is_indexable": locale in public_indexable_locales(registry),
+        "locale_path": listing_path(registry, locale, listing_id),
+        "translation_status": "approved",
+        "translation_source_locale": source_locale,
+        "translation_human_approved": True,
+        "translation_indexable": translation_indexable("approved", True, locale, registry),
+    }
+
+
+def build_index_docs(source_docs: list[dict[str, object]], registry: dict[str, object]) -> list[dict[str, object]]:
+    index_docs: list[dict[str, object]] = []
+    by_id = {str(doc["id"]): doc for doc in source_docs}
+
+    for doc in source_docs:
+        index_docs.append(source_index_doc(doc, registry))
+
+    for listing_id, locales in APPROVED_TRANSLATION_SEEDS.items():
+        source = by_id.get(listing_id)
+        if not source:
+            continue
+        for locale in locales:
+            if locale not in public_indexable_locales(registry):
+                continue
+            index_docs.append(approved_translation_index_doc(source, locale, registry))
+
+    return index_docs
 
 
 def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[dict[str, object]]:
@@ -181,13 +253,19 @@ def write_typesense_schema(path: Path) -> None:
         "name": "ms_realty_listings",
         "fields": [
             {"name": "id", "type": "string"},
+            {"name": "source_listing_id", "type": "string", "facet": True},
+            {"name": "search_document_type", "type": "string", "facet": True},
             {"name": "url", "type": "string"},
             {"name": "domain", "type": "string", "facet": True},
             {"name": "language", "type": "string", "facet": True},
             {"name": "locale", "type": "string", "facet": True},
             {"name": "locale_prefix", "type": "string", "facet": True},
+            {"name": "locale_path", "type": "string"},
             {"name": "locale_is_indexable", "type": "bool", "facet": True},
             {"name": "translation_status", "type": "string", "facet": True},
+            {"name": "translation_source_locale", "type": "string", "facet": True},
+            {"name": "translation_human_approved", "type": "bool", "facet": True},
+            {"name": "translation_indexable", "type": "bool", "facet": True},
             {"name": "title", "type": "string"},
             {"name": "description", "type": "string", "optional": True},
             {"name": "location", "type": "string", "facet": True, "optional": True},
@@ -207,12 +285,18 @@ def write_meili_settings(path: Path) -> None:
     settings = {
         "searchableAttributes": ["title", "description", "h1", "search_text", "location"],
         "filterableAttributes": [
+            "source_listing_id",
+            "search_document_type",
             "domain",
             "language",
             "locale",
             "locale_prefix",
+            "locale_path",
             "locale_is_indexable",
             "translation_status",
+            "translation_source_locale",
+            "translation_human_approved",
+            "translation_indexable",
             "location",
             "property_type",
             "offer_type",
@@ -232,29 +316,33 @@ def main() -> int:
     args = parser.parse_args()
 
     registry = load_locale_registry()
-    docs = load_listing_docs(args.artifact_dir, registry)
-    if not docs:
+    source_docs = load_listing_docs(args.artifact_dir, registry)
+    if not source_docs:
         raise SystemExit(f"No listing records found in {args.artifact_dir}")
+    index_docs = build_index_docs(source_docs, registry)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    write_json(args.out_dir / "listings.json", docs)
-    write_jsonl(args.out_dir / "typesense-listings.jsonl", docs)
-    write_jsonl(args.out_dir / "meilisearch-listings.ndjson", docs)
+    write_json(args.out_dir / "listings.json", source_docs)
+    write_json(args.out_dir / "index-listings.json", index_docs)
+    write_jsonl(args.out_dir / "typesense-listings.jsonl", index_docs)
+    write_jsonl(args.out_dir / "meilisearch-listings.ndjson", index_docs)
     write_typesense_schema(args.out_dir / "typesense-schema.json")
     write_meili_settings(args.out_dir / "meilisearch-settings.json")
 
     summary = {
         "artifact_dir": str(args.artifact_dir),
-        "listing_count": len(docs),
-        "domains": sorted({str(doc["domain"]) for doc in docs}),
-        "languages": sorted({str(doc["language"]) for doc in docs}),
+        "source_listing_count": len(source_docs),
+        "index_document_count": len(index_docs),
+        "domains": sorted({str(doc["domain"]) for doc in source_docs}),
+        "source_languages": sorted({str(doc["language"]) for doc in source_docs}),
+        "index_languages": sorted({str(doc["language"]) for doc in index_docs}),
         "admin_locales": registry.get("admin_locales", []),
         "public_indexable_locales": sorted(public_indexable_locales(registry)),
         "url_strategy": registry.get("url_strategy"),
-        "locations": sorted({str(doc["location"]) for doc in docs if doc["location"]}),
+        "locations": sorted({str(doc["location"]) for doc in source_docs if doc["location"]}),
     }
     write_json(args.out_dir / "search-fixture-summary.json", summary)
-    print(f"Wrote {len(docs)} listing records to {args.out_dir}")
+    print(f"Wrote {len(source_docs)} source listing records and {len(index_docs)} search index documents to {args.out_dir}")
     return 0
 
 

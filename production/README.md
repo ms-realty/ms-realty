@@ -12,7 +12,7 @@ What it proves now:
 - Hermes Agent draft-only translation guardrails.
 - Translation stale-state rules.
 - CRM lead language routing into BG/RU/EN admin queues.
-- Search fixtures carry locale/indexability metadata.
+- Search fixtures carry locale/indexability metadata and approved translation documents.
 - Normalized migration records from the crawl CSVs with launch-gate checks.
 - Legacy route map for reviewed listing redirects and unmapped review queues.
 - Separate reviewed redirect approval ledger and deployable 301 export.

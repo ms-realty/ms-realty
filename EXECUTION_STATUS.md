@@ -18,10 +18,12 @@ Date: 2026-07-04
 - Added a real-listing search fixture builder for Typesense and Meilisearch:
   - `search/build_search_indexes.py`
   - `search/data/listings.json`
+  - `search/data/index-listings.json`
   - `search/data/typesense-schema.json`
   - `search/data/typesense-listings.jsonl`
   - `search/data/meilisearch-settings.json`
   - `search/data/meilisearch-listings.ndjson`
+  - search imports now include 167 locale-scoped documents: 165 source listings plus approved Greek and Hebrew translation documents for `MS-CRAWL-0001`
 - Added design-system screens in
   `makler-realty-design-system/project/ui_kits/remaining/index.html`:
   - Mobile search.

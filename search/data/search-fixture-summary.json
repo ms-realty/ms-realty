@@ -1,12 +1,19 @@
 {
   "artifact_dir": "/Users/ivan/Code/MS-Realty/migration/artifacts/20260704-211155",
-  "listing_count": 165,
+  "source_listing_count": 165,
+  "index_document_count": 167,
   "domains": [
     "makler-realty.com",
     "makler-realty.ru"
   ],
-  "languages": [
+  "source_languages": [
     "bg",
+    "ru"
+  ],
+  "index_languages": [
+    "bg",
+    "el",
+    "he",
     "ru"
   ],
   "admin_locales": [

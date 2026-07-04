@@ -52,6 +52,16 @@ if (!listings.length) throw new Error("Search listing fixture is empty");
 for (const field of ["locale", "locale_prefix", "locale_is_indexable", "translation_status"]) {
   if (!(field in listings[0])) throw new Error(`Search fixture missing ${field}`);
 }
+const searchIndexDocs = JSON.parse(fs.readFileSync(fromRoot("search", "data", "index-listings.json"), "utf8"));
+if (searchIndexDocs.length !== 167) throw new Error("Search index fixture must include 165 source docs plus Greek/Hebrew approvals");
+const searchIndexLanguages = new Set(searchIndexDocs.map((doc) => doc.locale));
+for (const code of ["bg", "ru", "el", "he"]) {
+  if (!searchIndexLanguages.has(code)) throw new Error(`Search index fixture missing ${code} documents`);
+}
+const hebrewSearchDoc = searchIndexDocs.find((doc) => doc.source_listing_id === "MS-CRAWL-0001" && doc.locale === "he");
+if (hebrewSearchDoc?.search_document_type !== "approved_translation" || hebrewSearchDoc.translation_indexable !== true) {
+  throw new Error("Search index fixture must include approved Hebrew translation document");
+}
 
 const migration = JSON.parse(fs.readFileSync(fromRoot("production", "data", "migration-records.json"), "utf8"));
 assertMigrationLaunchGate(migration.records);

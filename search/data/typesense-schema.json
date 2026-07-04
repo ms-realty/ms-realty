@@ -6,6 +6,16 @@
       "type": "string"
     },
     {
+      "name": "source_listing_id",
+      "type": "string",
+      "facet": true
+    },
+    {
+      "name": "search_document_type",
+      "type": "string",
+      "facet": true
+    },
+    {
       "name": "url",
       "type": "string"
     },
@@ -30,6 +40,10 @@
       "facet": true
     },
     {
+      "name": "locale_path",
+      "type": "string"
+    },
+    {
       "name": "locale_is_indexable",
       "type": "bool",
       "facet": true
@@ -37,6 +51,21 @@
     {
       "name": "translation_status",
       "type": "string",
+      "facet": true
+    },
+    {
+      "name": "translation_source_locale",
+      "type": "string",
+      "facet": true
+    },
+    {
+      "name": "translation_human_approved",
+      "type": "bool",
+      "facet": true
+    },
+    {
+      "name": "translation_indexable",
+      "type": "bool",
       "facet": true
     },
     {
