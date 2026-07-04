@@ -66,6 +66,10 @@ Date: 2026-07-04
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability
   - `production/data/translation-tasks.jsonl` stores draft and published review rows
+- Added authenticated listing edit endpoint:
+  - `POST /api/admin/listings/edit` stores reviewed source edits
+  - dependent translations are marked stale and non-indexable after source changes
+  - `production/data/listing-edits.jsonl` stores the deterministic property editor smoke row
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations

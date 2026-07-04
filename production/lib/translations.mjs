@@ -21,7 +21,7 @@ export function assertTranslationState(state) {
 export function markStaleWhenSourceChanges(sourceHash, translation) {
   assertTranslationState(translation.status);
   if (translation.source_hash !== sourceHash && translation.status !== "missing") {
-    return { ...translation, status: "stale", review_task_required: true };
+    return { ...translation, status: "stale", public_indexable: false, review_task_required: true };
   }
   return translation;
 }

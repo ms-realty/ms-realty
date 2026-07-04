@@ -153,6 +153,9 @@ if (httpSmoke.translationDraft.status !== 201 || httpSmoke.translationDraft.body
 if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("HTTP smoke must publish human-approved translation");
 }
+if (httpSmoke.listingEdit.status !== 201 || httpSmoke.listingEdit.body.edit.stale_translation_count < 1) {
+  throw new Error("HTTP smoke must stale dependent translations after listing edit");
+}
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
@@ -172,7 +175,8 @@ if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_fo
 }
 if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist one reply outbox row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
-if (httpSmoke.translationLedger.rows !== 2) throw new Error("HTTP smoke must persist draft and published translation rows");
+if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, published, and stale translation rows");
+if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.legacyRedirect.status !== 301 || nodeServerSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
@@ -195,8 +199,14 @@ if (nodeServerSmoke.translationDraft.status !== 201 || nodeServerSmoke.translati
 if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("Node server smoke must publish human-approved translation");
 }
-if (nodeServerSmoke.translationLedger.rows !== 2) {
-  throw new Error("Node server smoke must persist draft and published translation rows");
+if (nodeServerSmoke.listingEdit.status !== 201 || nodeServerSmoke.listingEdit.body.edit.stale_translation_count < 1) {
+  throw new Error("Node server smoke must stale dependent translations after listing edit");
+}
+if (nodeServerSmoke.translationLedger.rows !== 3) {
+  throw new Error("Node server smoke must persist draft, published, and stale translation rows");
+}
+if (nodeServerSmoke.listingEditLedger.rows !== 1) {
+  throw new Error("Node server smoke must persist one listing edit row");
 }
 if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
   throw new Error("Node server smoke must serve robots");
@@ -215,6 +225,8 @@ if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contai
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
 const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (translationTasks.length !== 2) throw new Error("Translation task artifact must contain draft and published smoke rows");
+if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");
+const listingEdits = fs.readFileSync(fromRoot("production", "data", "listing-edits.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (listingEdits.length !== 1) throw new Error("Listing edit artifact must contain one deterministic smoke row");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

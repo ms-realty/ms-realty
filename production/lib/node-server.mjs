@@ -73,6 +73,9 @@ export function assertServerSmoke(smoke) {
   if (smoke.translationPublish.status !== 201 || smoke.translationPublish.body.public_indexable !== true) {
     throw new Error("Server must publish only human-approved translation");
   }
+  if (smoke.listingEdit.status !== 201 || smoke.listingEdit.body.edit.stale_translation_count < 1) {
+    throw new Error("Server must stale dependent translations after listing edit");
+  }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("Server must accept seller valuation lead");

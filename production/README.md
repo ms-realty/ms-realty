@@ -24,6 +24,7 @@ What it proves now:
 - Website route coverage for Greek and Hebrew, including Hebrew RTL metadata.
 - Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
 - Authenticated admin translation draft and human-approved publish endpoints.
+- Authenticated listing edit endpoint that marks dependent translations stale.
 - Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
@@ -58,6 +59,7 @@ Generated production data:
 - `production/data/reply-outbox.jsonl`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
+- `production/data/listing-edits.jsonl`
 
 The next production slice can consume these contracts from a Next.js App Router
 public app and Payload CMS collections without re-deciding URL, locale, AI, or

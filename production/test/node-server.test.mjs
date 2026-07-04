@@ -7,6 +7,7 @@ import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-l
 import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
+import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -15,24 +16,35 @@ async function withServer(fn) {
   const replyOutboxPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-replies-`)}/replies.jsonl`;
   const languageRequestPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-language-`)}/requests.jsonl`;
   const translationLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-translations-`)}/translations.jsonl`;
+  const listingEditLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-listing-edits-`)}/edits.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
   resetTranslationLedger(translationLedgerPath);
+  resetListingEdits(listingEditLedgerPath);
   const server = createNodeServer(
     createHttpApp({
       leadLedgerPath,
       replyOutboxPath,
       languageRequestPath,
       translationLedgerPath,
+      listingEditLedgerPath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
+      editedAt: "2026-07-04T00:03:00Z",
       reviewedAt: "2026-07-04T00:05:00Z",
     }),
   );
   const address = await listen(server);
   try {
-    return await fn(`http://${address.address}:${address.port}`, leadLedgerPath, replyOutboxPath, languageRequestPath, translationLedgerPath);
+    return await fn(
+      `http://${address.address}:${address.port}`,
+      leadLedgerPath,
+      replyOutboxPath,
+      languageRequestPath,
+      translationLedgerPath,
+      listingEditLedgerPath,
+    );
   } finally {
     await close(server);
   }
@@ -43,7 +55,7 @@ function deployableRedirect() {
 }
 
 test("Node server serves live listing, search, and lead endpoints", async () => {
-  await withServer(async (baseUrl, leadLedgerPath, replyOutboxPath, languageRequestPath, translationLedgerPath) => {
+  await withServer(async (baseUrl, leadLedgerPath, replyOutboxPath, languageRequestPath, translationLedgerPath, listingEditLedgerPath) => {
     const redirect = deployableRedirect();
     const oldUrl = new URL(redirect.old_url);
     const smoke = {
@@ -145,6 +157,15 @@ test("Node server serves live listing, search, and lead endpoints", async () => 
         approvedAt: "2026-07-04T00:02:00Z",
       }),
     });
+    smoke.listingEdit = await jsonFetch(baseUrl, "/api/admin/listings/edit", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        listingId: "MS-CRAWL-0001",
+        editor: "editor_bg",
+        patch: { description: "Updated approved source description." },
+      }),
+    });
     smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
       headers: { authorization: "Bearer local-admin-smoke" },
     });
@@ -154,6 +175,7 @@ test("Node server serves live listing, search, and lead endpoints", async () => 
     assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
     assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
     assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
+    assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
   });
 });
 

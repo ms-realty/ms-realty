@@ -12,6 +12,7 @@ import {
 import { loadDeployableRedirects } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
+import { appendListingEdit, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 
 function response(status, body, contentType, headers = {}) {
   return {
@@ -33,8 +34,10 @@ export function createHttpApp({
   replyOutboxPath = null,
   languageRequestPath = null,
   translationLedgerPath = null,
+  listingEditLedgerPath = null,
   receivedAt,
   requestedAt,
+  editedAt,
   reviewedAt,
 } = {}) {
   return async function handle(request) {
@@ -82,6 +85,7 @@ export function createHttpApp({
         replies: readReplyOutbox(replyOutboxPath || undefined),
         languageRequests: readLanguageRequests(languageRequestPath || undefined),
         translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+        listingEdits: readListingEdits(listingEditLedgerPath || undefined),
       });
     }
 
@@ -107,6 +111,23 @@ export function createHttpApp({
         if (!task) throw new Error("Known translation task is required");
         const published = publishApprovedTranslation(registry, approveTranslationTask(registry, task, input.reviewer, input.approvedAt));
         return json(201, appendTranslationTask(published, { filePath: translationLedgerPath || undefined }));
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const input = JSON.parse(request.body || "{}");
+        const result = createListingEdit(seed, input, latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)), editedAt);
+        const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
+        const persistedStaleTranslations = result.staleTranslations
+          .filter((translation) => translation.id)
+          .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
+        return json(201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }
@@ -190,6 +211,9 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.translationPublish.status !== 201 || smoke.translationPublish.body.public_indexable !== true) {
     throw new Error("HTTP smoke must publish only human-approved translation");
+  }
+  if (smoke.listingEdit.status !== 201 || smoke.listingEdit.body.edit.stale_translation_count < 1) {
+    throw new Error("HTTP smoke must stale dependent translations after listing edit");
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");

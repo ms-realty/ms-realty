@@ -15,6 +15,12 @@ import {
   resetTranslationLedger,
 } from "../lib/translation-ledger.mjs";
 import {
+  assertListingEdits,
+  DEFAULT_LISTING_EDIT_LEDGER_PATH,
+  readListingEdits,
+  resetListingEdits,
+} from "../lib/listing-edits.mjs";
+import {
   assertReplyOutbox,
   DEFAULT_REPLY_OUTBOX_PATH,
   readReplyOutbox,
@@ -26,13 +32,16 @@ resetLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
 resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
+resetListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
 const app = createHttpApp({
   leadLedgerPath: DEFAULT_LEAD_LEDGER_PATH,
   replyOutboxPath: DEFAULT_REPLY_OUTBOX_PATH,
   languageRequestPath: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
   translationLedgerPath: DEFAULT_TRANSLATION_LEDGER_PATH,
+  listingEditLedgerPath: DEFAULT_LISTING_EDIT_LEDGER_PATH,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
+  editedAt: "2026-07-04T00:03:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
@@ -132,6 +141,16 @@ smoke.translationPublish = await dispatchHttp(app, {
     approvedAt: "2026-07-04T00:02:00Z",
   },
 });
+smoke.listingEdit = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/listings/edit",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    listingId: "MS-CRAWL-0001",
+    editor: "editor_bg",
+    patch: { description: "Updated approved source description." },
+  },
+});
 smoke.admin = await dispatchHttp(app, {
   url: "/api/admin/leads?locale=ru",
   headers: { authorization: "Bearer local-admin-smoke" },
@@ -150,6 +169,9 @@ smoke.languageRequestLedger = { path: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, rows
 const translations = readTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
 assertTranslationLedger(translations);
 smoke.translationLedger = { path: DEFAULT_TRANSLATION_LEDGER_PATH, rows: translations.length };
+const listingEdits = readListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
+assertListingEdits(listingEdits);
+smoke.listingEditLedger = { path: DEFAULT_LISTING_EDIT_LEDGER_PATH, rows: listingEdits.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");
 fs.mkdirSync(path.dirname(outPath), { recursive: true });

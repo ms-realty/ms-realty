@@ -1,0 +1,98 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fromRoot } from "./paths.mjs";
+import { contentHash, markStaleWhenSourceChanges } from "./translations.mjs";
+
+export const DEFAULT_LISTING_EDIT_LEDGER_PATH = fromRoot("production", "data", "listing-edits.jsonl");
+
+const EDITABLE_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type", "bedrooms", "price_eur"]);
+
+export function resetListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, "");
+}
+
+export function readListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
+  if (!fs.existsSync(filePath)) return [];
+  return fs
+    .readFileSync(filePath, "utf8")
+    .trim()
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+}
+
+export function appendListingEdit(edit, { filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH } = {}) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.appendFileSync(filePath, `${JSON.stringify(edit)}\n`);
+  return edit;
+}
+
+function findListing(seed, listingId) {
+  return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
+}
+
+function normalizePatch(patch = {}) {
+  const entries = Object.entries(patch).filter(([field]) => EDITABLE_FACT_FIELDS.has(field));
+  if (!entries.length) throw new Error("Listing edit patch must include editable listing facts");
+  return Object.fromEntries(entries);
+}
+
+export function staleTranslationsForListing(record, sourceHashAfter, translationTasks = []) {
+  const stale = (translation) => {
+    const staleTranslation = markStaleWhenSourceChanges(sourceHashAfter, translation);
+    return staleTranslation.status === "stale"
+      ? {
+          ...staleTranslation,
+          previous_status: translation.status,
+          stale_reason: "source_listing_changed",
+        }
+      : staleTranslation;
+  };
+  const seedTranslations = record.translations
+    .filter((translation) => translation.locale !== record.source_locale)
+    .map(stale);
+  const ledgerTranslations = translationTasks
+    .filter((translation) => translation.object_type === "listing" && translation.object_id === record.id)
+    .filter((translation) => translation.target_locale !== record.source_locale)
+    .map(stale);
+
+  return [...seedTranslations, ...ledgerTranslations]
+    .filter((translation) => translation.status === "stale");
+}
+
+export function createListingEdit(seed, input, translationTasks = [], editedAt = new Date().toISOString()) {
+  const record = findListing(seed, input.listingId);
+  if (!record) throw new Error("Known listingId is required");
+  if (!input.editor) throw new Error("Listing edit requires an editor");
+  const patch = normalizePatch(input.patch);
+  const factsAfter = { ...record.facts, ...patch };
+  const sourceHashBefore = contentHash(record.facts);
+  const sourceHashAfter = contentHash(factsAfter);
+  const staleTranslations = staleTranslationsForListing(record, sourceHashAfter, translationTasks);
+
+  return {
+    edit: {
+      edited_at: editedAt,
+      id: input.id || `listing-edit-${record.id}`,
+      listing_id: record.id,
+      editor: input.editor,
+      source_locale: record.source_locale,
+      patch,
+      source_hash_before: sourceHashBefore,
+      source_hash_after: sourceHashAfter,
+      stale_translation_count: staleTranslations.length,
+      stale_locales: [...new Set(staleTranslations.map((translation) => translation.locale || translation.target_locale))],
+    },
+    staleTranslations,
+  };
+}
+
+export function assertListingEdits(rows) {
+  if (!rows.length) throw new Error("Listing edit ledger must contain at least one row");
+  for (const row of rows) {
+    if (!row.listing_id || !row.editor || !row.source_hash_after) throw new Error("Listing edit row is missing review data");
+    if (row.stale_translation_count < 1) throw new Error("Listing edit must stale at least one dependent translation");
+  }
+  return true;
+}
