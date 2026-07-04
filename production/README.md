@@ -42,7 +42,7 @@ What it proves now:
 - Runtime locale roots serve public homepages for approved locales and keep disabled locales in the fallback/request flow.
 - Runtime search query/facet filtering before pagination, with total match counts.
 - Runtime location routes expose only locale-indexable listing cards and return noindex/404 for empty locale-location pairs.
-- Listing conversion actions for inquiry, callback, viewing request, save, share, and print/PDF, with direct broker contact channels review-gated.
+- Listing conversion actions for inquiry, callback, viewing request, save, share, and browser print-to-PDF, with direct broker contact channels review-gated.
 - Broker contact approval ledger that enables direct phone, WhatsApp, and Viber links only after review.
 - Lead contact preference validation and persistence for phone, Viber, WhatsApp, and email.
 - Search API overlays translation ledger state before card display/indexability.

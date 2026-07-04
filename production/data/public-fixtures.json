@@ -358,7 +358,7 @@
             "label": "Печат/PDF",
             "kind": "print",
             "url": "/bg/imoti/MS-CRAWL-0001?print=1",
-            "pdf_status": "needs_pdf_renderer"
+            "pdf_status": "browser_print_ready"
           }
         ]
       },
@@ -548,7 +548,7 @@
             "label": "Εκτύπωση/PDF",
             "kind": "print",
             "url": "/el/akinita/MS-CRAWL-0001?print=1",
-            "pdf_status": "needs_pdf_renderer"
+            "pdf_status": "browser_print_ready"
           }
         ]
       },
@@ -738,7 +738,7 @@
             "label": "הדפסה/PDF",
             "kind": "print",
             "url": "/he/properties/MS-CRAWL-0001?print=1",
-            "pdf_status": "needs_pdf_renderer"
+            "pdf_status": "browser_print_ready"
           }
         ]
       },
@@ -911,7 +911,7 @@
             "label": "Print/PDF",
             "kind": "print",
             "url": "/en/properties/MS-CRAWL-0001?print=1",
-            "pdf_status": "needs_pdf_renderer"
+            "pdf_status": "browser_print_ready"
           }
         ]
       },

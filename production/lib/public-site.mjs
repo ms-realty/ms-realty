@@ -426,7 +426,7 @@ function listingActions(locale, view, path, labels, brokerContact = null) {
         label: labels.print,
         kind: "print",
         url: `${path}?print=1`,
-        pdf_status: "needs_pdf_renderer",
+        pdf_status: "browser_print_ready",
       },
     ],
   };

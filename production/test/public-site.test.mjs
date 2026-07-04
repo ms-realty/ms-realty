@@ -35,7 +35,16 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.contact_preference, "phone");
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
   assert.ok(he.body.actions.direct_contact.channels.every((channel) => channel.enabled === false && channel.href === null));
-  assert.ok(he.body.actions.secondary.find((action) => action.id === "print").url.endsWith("?print=1"));
+  assert.deepEqual(
+    he.body.actions.secondary.find((action) => action.id === "print"),
+    {
+      id: "print",
+      label: "הדפסה/PDF",
+      kind: "print",
+      url: "/he/properties/MS-CRAWL-0001?print=1",
+      pdf_status: "browser_print_ready",
+    },
+  );
 });
 
 test("approved broker contact data enables direct listing contact links", () => {

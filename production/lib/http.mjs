@@ -36,7 +36,14 @@ function wantsHtml(request, url) {
   return url.searchParams.get("format") === "html" || accept.includes("text/html");
 }
 
+function wantsPrint(url, rendered) {
+  return rendered.kind === "listing" && url.searchParams.get("print") === "1";
+}
+
 function publicResponse(request, url, rendered) {
+  if (wantsPrint(url, rendered)) {
+    return response(rendered.status || 200, renderHtmlPage(rendered, { print: true }), "text/html; charset=utf-8");
+  }
   if (wantsHtml(request, url)) return response(rendered.status || 200, renderHtmlPage(rendered), "text/html; charset=utf-8");
   return json(rendered.status || 200, rendered);
 }
@@ -379,7 +386,8 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.listing.body.body.actions?.primary?.find((action) => action.id === "callback")?.payload.source !==
       "website_callback_request" ||
-    smoke.listing.body.body.actions?.direct_contact?.review_status !== "needs_broker_contact_review"
+    smoke.listing.body.body.actions?.direct_contact?.review_status !== "needs_broker_contact_review" ||
+    smoke.listing.body.body.actions?.secondary?.find((action) => action.id === "print")?.pdf_status !== "browser_print_ready"
   ) {
     throw new Error("HTTP smoke must expose listing conversion actions without inventing broker contact data");
   }
@@ -513,6 +521,15 @@ export function assertHttpSmoke(smoke) {
     smoke.listingHtml.body.includes("tel:+359880000000")
   ) {
     throw new Error("HTTP smoke must serve rendered listing HTML without unapproved direct contact");
+  }
+  if (
+    smoke.listingPrint?.status !== 200 ||
+    smoke.listingPrint.headers["content-type"] !== "text/html; charset=utf-8" ||
+    !smoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
+    !smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
+    smoke.listingPrint.body.includes("tel:+359880000000")
+  ) {
+    throw new Error("HTTP smoke must serve browser-print listing HTML without unapproved direct contact");
   }
   if (
     smoke.searchHtml?.status !== 200 ||

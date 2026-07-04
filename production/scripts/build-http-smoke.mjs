@@ -91,6 +91,7 @@ const smoke = {
   homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
+  listingPrint: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?print=1" }),
   brokerContact: await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/broker-contacts",

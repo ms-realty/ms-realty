@@ -105,7 +105,8 @@ Implemented now:
   - saved-search alerts use the full filtered match count
 - Listing conversion/share contract:
   - listing pages expose sticky mobile inquiry, callback, and viewing request actions through the lead intake endpoint
-  - save, family-share, and print/PDF intents are part of the public payload
+  - save, family-share, and browser-print/PDF-ready intents are part of the public payload
+  - `?print=1` returns a locale-aware listing document ready for browser print-to-PDF
   - phone, WhatsApp, and Viber actions remain review-gated until broker contact data is approved
 - Broker contact approval contract:
   - admin-reviewed broker phone data enables direct call, WhatsApp, and Viber listing actions

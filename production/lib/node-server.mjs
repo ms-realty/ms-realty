@@ -77,6 +77,9 @@ export function assertServerSmoke(smoke) {
   ) {
     throw new Error("Server must expose listing callback action");
   }
+  if (smoke.listing.body.body.actions?.secondary?.find((action) => action.id === "print")?.pdf_status !== "browser_print_ready") {
+    throw new Error("Server must expose browser-print listing action");
+  }
   if (smoke.brokerContact?.status !== 201 || smoke.brokerContact.body.channels?.phone !== "tel:+359880000000") {
     throw new Error("Server must approve broker contact data");
   }
@@ -166,6 +169,14 @@ export function assertServerSmoke(smoke) {
     !smoke.listingHtml.body.includes("data-kind=\"listing\"")
   ) {
     throw new Error("Server must serve rendered listing HTML");
+  }
+  if (
+    smoke.listingPrint?.status !== 200 ||
+    !smoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
+    !smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
+    smoke.listingPrint.body.includes("tel:+359880000000")
+  ) {
+    throw new Error("Server must serve browser-print listing HTML without unapproved direct contact");
   }
   if (smoke.searchHtml?.status !== 200 || !smoke.searchHtml.body.includes("data-kind=\"search\"")) {
     throw new Error("Server must serve rendered search HTML");

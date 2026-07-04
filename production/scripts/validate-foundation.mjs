@@ -260,8 +260,8 @@ if (
 if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
   throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
 }
-if (httpSmoke.listing.body.body.actions?.secondary?.find((action) => action.id === "print")?.pdf_status !== "needs_pdf_renderer") {
-  throw new Error("HTTP smoke must expose print/PDF action contract");
+if (httpSmoke.listing.body.body.actions?.secondary?.find((action) => action.id === "print")?.pdf_status !== "browser_print_ready") {
+  throw new Error("HTTP smoke must expose browser-print action contract");
 }
 if (
   httpSmoke.listingHtml.status !== 200 ||
@@ -270,6 +270,15 @@ if (
   httpSmoke.listingHtml.body.includes("tel:+359880000000")
 ) {
   throw new Error("HTTP smoke must expose SEO-safe listing HTML without unapproved direct contact");
+}
+if (
+  httpSmoke.listingPrint.status !== 200 ||
+  httpSmoke.listingPrint.headers["content-type"] !== "text/html; charset=utf-8" ||
+  !httpSmoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
+  !httpSmoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
+  httpSmoke.listingPrint.body.includes("tel:+359880000000")
+) {
+  throw new Error("HTTP smoke must expose browser-print listing HTML without unapproved direct contact");
 }
 if (httpSmoke.searchHtml.status !== 200 || !httpSmoke.searchHtml.body.includes("data-kind=\"search\"")) {
   throw new Error("HTTP smoke must expose server-rendered search HTML");

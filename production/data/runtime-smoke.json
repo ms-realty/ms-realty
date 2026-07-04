@@ -312,7 +312,7 @@
             "label": "הדפסה/PDF",
             "kind": "print",
             "url": "/he/properties/MS-CRAWL-0001?print=1",
-            "pdf_status": "needs_pdf_renderer"
+            "pdf_status": "browser_print_ready"
           }
         ]
       },
@@ -606,7 +606,7 @@
             "label": "Печать/PDF",
             "kind": "print",
             "url": "/ru/properties/MS-CRAWL-0114?print=1",
-            "pdf_status": "needs_pdf_renderer"
+            "pdf_status": "browser_print_ready"
           }
         ]
       },

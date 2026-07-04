@@ -93,7 +93,8 @@ Date: 2026-07-04
   - saved searches persist the full filtered match count, not just the first page size
 - Added listing conversion/share contract:
   - listing pages expose sticky mobile inquiry, callback, and viewing request actions backed by `POST /api/leads`
-  - save, family-share, and print/PDF intents are present in the public listing payload
+  - save, family-share, and browser-print/PDF-ready intents are present in the public listing payload
+  - `?print=1` serves a locale-aware, SEO-canonical, browser-print listing document
   - direct phone, WhatsApp, and Viber channels stay review-gated until broker contact data is approved
 - Added contact preference preservation:
   - lead intake accepts phone, Viber, WhatsApp, and email preferences

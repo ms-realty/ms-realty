@@ -107,6 +107,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         listingHtml: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001", {
           headers: { accept: "text/html" },
         }),
+        listingPrint: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001?print=1"),
         brokerContact: await jsonFetch(baseUrl, "/api/admin/broker-contacts", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
@@ -301,6 +302,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertServerSmoke(smoke), true);
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
       assert.equal(smoke.home.body.body.search.path, "/he/search");
+      assert.equal(smoke.listingPrint.body.includes("data-kind=\"listing-print\""), true);
+      assert.equal(smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\""), true);
       assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
       assert.equal(smoke.location.body.cards.length, 1);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");

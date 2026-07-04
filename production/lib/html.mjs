@@ -63,6 +63,39 @@ function renderListing(page) {
 </main>`;
 }
 
+function renderListingPrint(page) {
+  const gallery = (page.body.media.gallery || [])
+    .slice(0, 4)
+    .map((image) => `<img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt || page.body.h1)}">`)
+    .join("");
+  const direct = page.body.actions.direct_contact.channels
+    .map((channel) =>
+      channel.enabled
+        ? `<a href="${escapeHtml(channel.href)}">${escapeHtml(channel.label)}</a>`
+        : `<span aria-disabled="true">${escapeHtml(channel.label)}</span>`,
+    )
+    .join("");
+  return `
+<style>
+@media print {
+  a[href]::after { content: " (" attr(href) ")"; font-size: 10pt; }
+  nav, section, dl { break-inside: avoid; }
+  img { max-width: 48%; height: auto; }
+}
+</style>
+<main data-kind="listing-print" data-print-status="browser-pdf-ready" data-review-status="${escapeHtml(
+    page.body.actions.direct_contact.review_status,
+  )}">
+  <h1>${escapeHtml(page.body.h1)}</h1>
+  <p>${escapeHtml(page.metadata.description)}</p>
+  <dl>${renderFacts(page.body.facts)}</dl>
+  <section aria-label="Listing photos">${gallery}</section>
+  <nav aria-label="Broker contact">${direct}</nav>
+  <p><a href="${escapeHtml(page.canonical)}">${escapeHtml(page.canonical)}</a></p>
+  <p>${escapeHtml(page.body.source.source_domain)} ${escapeHtml(page.body.source.old_url)}</p>
+</main>`;
+}
+
 function renderHome(page) {
   const locations = (page.body.locations || [])
     .map((location) => `<a href="${escapeHtml(location.path)}">${escapeHtml(location.location)}</a>`)
@@ -162,8 +195,9 @@ function renderFallback(page) {
 </main>`;
 }
 
-function renderBody(page) {
+function renderBody(page, options = {}) {
   if (page.kind === "home") return renderHome(page);
+  if (page.kind === "listing" && options.print) return renderListingPrint(page);
   if (page.kind === "listing") return renderListing(page);
   if (page.kind === "search") return renderSearch(page);
   if (page.kind === "location") return renderLocation(page);
@@ -173,14 +207,14 @@ function renderBody(page) {
   return `<main data-kind="not-found"><h1>Not found</h1></main>`;
 }
 
-export function renderHtmlPage(page) {
+export function renderHtmlPage(page, options = {}) {
   return `<!doctype html>
 <html lang="${escapeHtml(page.lang || page.locale || "en")}" dir="${escapeHtml(page.dir || "ltr")}">
 <head>
 ${meta(page)}
 </head>
 <body>
-${renderBody(page)}
+${renderBody(page, options)}
 </body>
 </html>`;
 }

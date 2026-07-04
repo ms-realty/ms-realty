@@ -74,6 +74,7 @@ try {
     listingHtml: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001", {
       headers: { accept: "text/html" },
     }),
+    listingPrint: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001?print=1"),
     brokerContact: await jsonFetch(baseUrl, "/api/admin/broker-contacts", {
       method: "POST",
       headers: { authorization: "Bearer local-admin-smoke" },

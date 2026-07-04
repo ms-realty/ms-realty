@@ -21,6 +21,7 @@ const listing = findListingById(listings, "MS-CRAWL-0001");
 test("HTML renderer emits SEO-safe listing, search, and fallback documents", () => {
   const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));
+  const listingPrintHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }), { print: true });
   const approvedListingHtml = renderHtmlPage(
     renderListingPage({
       registry,
@@ -48,6 +49,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /application\/ld\+json/);
   assert.match(listingHtml, /hreflang="el"/);
   assert.doesNotMatch(listingHtml, /tel:\+359880000000/);
+  assert.equal(assertHtmlPage(listingPrintHtml, { lang: "he", dir: "rtl", kind: "listing-print" }), true);
+  assert.match(listingPrintHtml, /data-print-status="browser-pdf-ready"/);
+  assert.doesNotMatch(listingPrintHtml, /tel:\+359880000000/);
   assert.match(approvedListingHtml, /tel:\+359880000000/);
   assert.equal(assertHtmlPage(searchHtml, { lang: "he", dir: "rtl", kind: "search" }), true);
   assert.match(searchHtml, /data-total-matches=/);
