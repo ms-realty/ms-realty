@@ -57,6 +57,10 @@ Implemented now:
   - `prototypes/360-tour-cms/README.md`
 - CRM lead-intake examples:
   - `prototypes/crm-lead-intake/lead-intake-demo.json`
+- Admin locale creation contract:
+  - `POST /api/admin/locales`
+  - new website locales stay non-public and non-indexable by default
+  - admin CRM/CMS languages remain BG, RU, and EN
 - Mobile and elderly-user QA gate:
   - `qa/mobile_elderly_static_check.py`
   - `qa/mobile-elderly-accessibility.md`

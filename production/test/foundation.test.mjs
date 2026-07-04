@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { loadLocaleRegistry, assertLocaleRegistry, resolvePublicLocale } from "../lib/locales.mjs";
+import { addLocaleToRegistry, loadLocaleRegistry, assertLocaleRegistry, resolvePublicLocale } from "../lib/locales.mjs";
 import { listingPath, hreflangForListing, sitemapEntriesForListing } from "../lib/seo.mjs";
 import { approveHumanTranslation, contentHash, markStaleWhenSourceChanges } from "../lib/translations.mjs";
 import { assertHermesActionAllowed, translationPrompt } from "../lib/hermes.mjs";
@@ -50,6 +50,21 @@ test("unavailable language falls back without becoming indexable", () => {
   const resolved = resolvePublicLocale(registry, "fr");
   assert.equal(resolved.available, false);
   assert.equal(resolved.locale.code, "en");
+});
+
+test("admin-added locales are valid but not public indexable by default", () => {
+  const { registry: updated, locale } = addLocaleToRegistry(registry, {
+    code: "es",
+    native_name: "Español",
+    admin_name: "Spanish",
+    route_segments: { listing: "propiedades", search: "buscar" },
+  });
+
+  assert.equal(assertLocaleRegistry(updated), true);
+  assert.equal(locale.public_enabled, false);
+  assert.equal(locale.indexable, false);
+  assert.deepEqual(updated.admin_locales, ["bg", "ru", "en"]);
+  assert.equal(resolvePublicLocale(updated, "es").locale.code, "en");
 });
 
 test("translation workflow marks stale content and human approval explicitly", () => {

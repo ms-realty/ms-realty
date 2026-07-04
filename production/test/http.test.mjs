@@ -8,6 +8,7 @@ import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } f
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function tempLedger() {
@@ -37,6 +38,12 @@ function tempTranslations() {
 function tempListingEdits() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-edits-`)}/edits.jsonl`;
   resetListingEdits(file);
+  return file;
+}
+
+function tempRegistry() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
+  fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
   return file;
 }
 
@@ -164,6 +171,18 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   });
   smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
   smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
+  smoke.localeCreate = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/locales",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      code: "es",
+      native_name: "Español",
+      admin_name: "Spanish",
+      route_segments: { listing: "propiedades", search: "buscar" },
+    },
+  });
+  smoke.localeFallback = await dispatchHttp(app, { url: "/es/" });
   smoke.admin = await dispatchHttp(app, {
     url: "/api/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -226,6 +245,40 @@ test("HTTP app rejects unknown buyer listing references", async () => {
 
   assert.equal(response.status, 400);
   assert.match(response.body.message, /known listingReference/);
+});
+
+test("HTTP admin can add a non-indexable website locale without changing admin languages", async () => {
+  const localeRegistryPath = tempRegistry();
+  const app = createHttpApp({ registry: loadLocaleRegistry(localeRegistryPath), localeRegistryPath });
+
+  const created = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/locales",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      code: "es",
+      native_name: "Español",
+      admin_name: "Spanish",
+      route_segments: { listing: "propiedades", search: "buscar" },
+    },
+  });
+  const listed = await dispatchHttp(app, {
+    url: "/api/admin/locales?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  const fallback = await dispatchHttp(app, { url: "/es/" });
+  const stored = loadLocaleRegistry(localeRegistryPath);
+
+  assert.equal(created.status, 201);
+  assert.equal(created.body.locale.code, "es");
+  assert.equal(created.body.locale.public_enabled, false);
+  assert.equal(created.body.locale.indexable, false);
+  assert.deepEqual(created.body.admin_locales, ["bg", "ru", "en"]);
+  assert.equal(listed.body.workspace.locale, "ru");
+  assert.equal(listed.body.locales.some((locale) => locale.code === "es"), true);
+  assert.equal(fallback.body.locale, "en");
+  assert.equal(fallback.body.indexable, false);
+  assert.equal(stored.locales.some((locale) => locale.code === "es"), true);
 });
 
 test("generated HTTP smoke file is valid when present", () => {

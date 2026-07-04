@@ -26,6 +26,7 @@ import {
   readReplyOutbox,
   resetReplyOutbox,
 } from "../lib/lead-replies.mjs";
+import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 resetLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
@@ -33,12 +34,15 @@ resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
 resetListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
+const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
+fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
   leadLedgerPath: DEFAULT_LEAD_LEDGER_PATH,
   replyOutboxPath: DEFAULT_REPLY_OUTBOX_PATH,
   languageRequestPath: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
   translationLedgerPath: DEFAULT_TRANSLATION_LEDGER_PATH,
   listingEditLedgerPath: DEFAULT_LISTING_EDIT_LEDGER_PATH,
+  localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
   editedAt: "2026-07-04T00:03:00Z",
@@ -153,6 +157,18 @@ smoke.listingEdit = await dispatchHttp(app, {
 });
 smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
 smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
+smoke.localeCreate = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/locales",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    code: "es",
+    native_name: "Español",
+    admin_name: "Spanish",
+    route_segments: { listing: "propiedades", search: "buscar" },
+  },
+});
+smoke.localeFallback = await dispatchHttp(app, { url: "/es/" });
 smoke.admin = await dispatchHttp(app, {
   url: "/api/admin/leads?locale=ru",
   headers: { authorization: "Bearer local-admin-smoke" },
@@ -174,6 +190,7 @@ smoke.translationLedger = { path: DEFAULT_TRANSLATION_LEDGER_PATH, rows: transla
 const listingEdits = readListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
 assertListingEdits(listingEdits);
 smoke.listingEditLedger = { path: DEFAULT_LISTING_EDIT_LEDGER_PATH, rows: listingEdits.length };
+smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");
 fs.mkdirSync(path.dirname(outPath), { recursive: true });

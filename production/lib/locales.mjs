@@ -2,11 +2,17 @@ import fs from "node:fs";
 import { fromRoot } from "./paths.mjs";
 
 const BCP47 = /^[a-z]{2,3}(-[A-Z]{2})?$/;
+const ROUTE_SEGMENT = /^[a-z0-9-]+$/;
 const PROVIDERS = new Set(["human", "hermes_draft", "external_import"]);
 const DIRECTIONS = new Set(["ltr", "rtl"]);
 
 export function loadLocaleRegistry(path = fromRoot("locales", "registry.json")) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
+}
+
+export function writeLocaleRegistry(registry, path = fromRoot("locales", "registry.json")) {
+  fs.writeFileSync(path, `${JSON.stringify(registry, null, 2)}\n`);
+  return registry;
 }
 
 export function localesByCode(registry) {
@@ -50,6 +56,9 @@ export function assertLocaleRegistry(registry) {
     if (!locale.route_segments?.listing || !locale.route_segments?.search) {
       throw new Error(`Missing route segments for ${locale.code}`);
     }
+    if (!ROUTE_SEGMENT.test(locale.route_segments.listing) || !ROUTE_SEGMENT.test(locale.route_segments.search)) {
+      throw new Error(`Invalid route segment for ${locale.code}`);
+    }
   }
 
   for (const code of ["bg", "en", "de", "nl", "ru", "el", "he"]) {
@@ -59,6 +68,30 @@ export function assertLocaleRegistry(registry) {
   if (getLocale(registry, "he").direction !== "rtl") throw new Error("Hebrew must be RTL");
   if (getLocale(registry, "el").direction !== "ltr") throw new Error("Greek must be LTR");
   return true;
+}
+
+export function addLocaleToRegistry(registry, input) {
+  const code = String(input.code || "").trim();
+  if (!BCP47.test(code)) throw new Error("Locale code must be BCP 47, for example es or fr-CA");
+  if (localesByCode(registry).has(code)) throw new Error(`Locale already exists: ${code}`);
+  const locale = {
+    code,
+    native_name: input.native_name || code,
+    admin_name: input.admin_name || input.native_name || code,
+    direction: input.direction || "ltr",
+    public_enabled: input.public_enabled === true,
+    indexable: input.public_enabled === true && input.indexable === true,
+    fallback_locale: input.fallback_locale || "en",
+    translation_provider_mode: input.translation_provider_mode || "hermes_draft",
+    reviewer_role: input.reviewer_role || `translator_${code.toLowerCase().replace("-", "_")}`,
+    route_segments: {
+      listing: input.route_segments?.listing || "properties",
+      search: input.route_segments?.search || "search",
+    },
+  };
+  const next = { ...registry, locales: [...registry.locales, locale] };
+  assertLocaleRegistry(next);
+  return { registry: next, locale };
 }
 
 export function resolvePublicLocale(registry, requestedCode) {

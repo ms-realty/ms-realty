@@ -33,6 +33,7 @@ What it proves now:
 - Runtime 301 handling for reviewed legacy redirects only.
 - Search API overlays translation ledger state before card display/indexability.
 - Language request intake for unavailable public locales.
+- Authenticated admin locale creation for non-indexable website locales.
 - Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
@@ -57,6 +58,7 @@ Generated production data:
 - `production/data/admin-fixtures.json`
 - `production/data/runtime-smoke.json`
 - `production/data/http-smoke.json`
+- `production/data/admin-locale-registry-smoke.json`
 - `production/data/node-server-smoke.json`
 - `production/data/lead-ledger.jsonl`
 - `production/data/reply-outbox.jsonl`

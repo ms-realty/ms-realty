@@ -65,6 +65,10 @@ Date: 2026-07-04
   - `POST /api/language-requests` stores non-indexable requests
   - French fallback users route into the EN admin queue
   - authenticated admin inbox includes language requests next to leads and replies
+- Added authenticated admin locale creation:
+  - `POST /api/admin/locales` adds a website locale without changing BG/RU/EN admin languages
+  - new locales are non-public and non-indexable by default
+  - `production/data/admin-locale-registry-smoke.json` proves the deterministic Spanish smoke row
 - Added authenticated CMS translation review endpoints:
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability

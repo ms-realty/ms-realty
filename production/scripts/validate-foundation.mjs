@@ -160,6 +160,17 @@ if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
 if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.requested_locale !== "fr") {
   throw new Error("HTTP smoke must accept French language request");
 }
+if (
+  httpSmoke.localeCreate.status !== 201 ||
+  httpSmoke.localeCreate.body.locale.code !== "es" ||
+  httpSmoke.localeCreate.body.locale.indexable !== false ||
+  JSON.stringify(httpSmoke.localeCreate.body.admin_locales) !== JSON.stringify(["bg", "ru", "en"])
+) {
+  throw new Error("HTTP smoke must add non-indexable website locale without changing admin locales");
+}
+if (httpSmoke.localeFallback.status !== 200 || httpSmoke.localeFallback.body.locale !== "en") {
+  throw new Error("HTTP smoke must keep newly added locale fallback non-indexable");
+}
 if (httpSmoke.translationDraft.status !== 201 || httpSmoke.translationDraft.body.public_indexable !== false) {
   throw new Error("HTTP smoke must store non-indexable Hermes translation draft");
 }

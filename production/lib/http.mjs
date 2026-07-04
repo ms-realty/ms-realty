@@ -1,4 +1,4 @@
-import { loadLocaleRegistry } from "./locales.mjs";
+import { addLocaleToRegistry, loadLocaleRegistry, writeLocaleRegistry } from "./locales.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
@@ -35,11 +35,13 @@ export function createHttpApp({
   languageRequestPath = null,
   translationLedgerPath = null,
   listingEditLedgerPath = null,
+  localeRegistryPath = null,
   receivedAt,
   requestedAt,
   editedAt,
   reviewedAt,
 } = {}) {
+  let activeRegistry = registry;
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
@@ -73,7 +75,7 @@ export function createHttpApp({
       const query = url.searchParams.get("q") || "";
       return json(
         200,
-        searchRuntimeListings(registry, seed, {
+        searchRuntimeListings(activeRegistry, seed, {
           localeCode,
           query,
           translationTasks: readTranslationLedger(translationLedgerPath || undefined),
@@ -87,7 +89,7 @@ export function createHttpApp({
       }
       const requestedLocale = url.searchParams.get("locale") || "en";
       return json(200, {
-        workspace: renderAdminWorkspace({ registry, requestedLocale }),
+        workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
         leads: readLeadLedger(leadLedgerPath || undefined),
         replies: readReplyOutbox(replyOutboxPath || undefined),
         languageRequests: readLanguageRequests(languageRequestPath || undefined),
@@ -96,12 +98,43 @@ export function createHttpApp({
       });
     }
 
+    if (request.method === "GET" && url.pathname === "/api/admin/locales") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      const requestedLocale = url.searchParams.get("locale") || "en";
+      return json(200, {
+        workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
+        locales: activeRegistry.locales,
+      });
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/locales") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const result = addLocaleToRegistry(activeRegistry, JSON.parse(request.body || "{}"));
+        activeRegistry = result.registry;
+        if (localeRegistryPath) writeLocaleRegistry(activeRegistry, localeRegistryPath);
+        return json(201, {
+          locale: result.locale,
+          admin_locales: activeRegistry.admin_locales,
+          public_indexable_locales: activeRegistry.locales
+            .filter((locale) => locale.public_enabled && locale.indexable)
+            .map((locale) => locale.code),
+        });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
       if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
         return json(401, { kind: "unauthorized" });
       }
       try {
-        const task = createTranslationReviewTask(registry, JSON.parse(request.body || "{}"));
+        const task = createTranslationReviewTask(activeRegistry, JSON.parse(request.body || "{}"));
         return json(201, appendTranslationTask(task, { filePath: translationLedgerPath || undefined }));
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
@@ -116,7 +149,7 @@ export function createHttpApp({
         const input = JSON.parse(request.body || "{}");
         const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
-        const published = publishApprovedTranslation(registry, approveTranslationTask(registry, task, input.reviewer, input.approvedAt));
+        const published = publishApprovedTranslation(activeRegistry, approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt));
         return json(201, appendTranslationTask(published, { filePath: translationLedgerPath || undefined }));
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
@@ -161,7 +194,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = JSON.parse(request.body || "{}");
-        const lead = submitRuntimeLead(registry, seed, input);
+        const lead = submitRuntimeLead(activeRegistry, seed, input);
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         return json(201, { ...lead, ledger });
       } catch (error) {
@@ -172,7 +205,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/language-requests") {
       try {
         const input = JSON.parse(request.body || "{}");
-        const requestRow = createLanguageRequest(registry, input, requestedAt);
+        const requestRow = createLanguageRequest(activeRegistry, input, requestedAt);
         const ledger = languageRequestPath ? appendLanguageRequest(requestRow, { filePath: languageRequestPath }) : null;
         return json(201, { ...requestRow, ledger });
       } catch (error) {
@@ -182,7 +215,7 @@ export function createHttpApp({
 
     if (request.method !== "GET") return json(405, { kind: "method_not_allowed" });
 
-    const rendered = renderRuntimePath(registry, seed, url.pathname, readTranslationLedger(translationLedgerPath || undefined));
+    const rendered = renderRuntimePath(activeRegistry, seed, url.pathname, readTranslationLedger(translationLedgerPath || undefined));
     return json(rendered.status || 200, rendered);
   };
 }
@@ -212,6 +245,17 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
     throw new Error("HTTP smoke must store non-indexable language request");
+  }
+  if (
+    smoke.localeCreate.status !== 201 ||
+    smoke.localeCreate.body.locale.code !== "es" ||
+    smoke.localeCreate.body.locale.indexable !== false ||
+    JSON.stringify(smoke.localeCreate.body.admin_locales) !== JSON.stringify(["bg", "ru", "en"])
+  ) {
+    throw new Error("HTTP smoke must add non-indexable website locale without changing admin locales");
+  }
+  if (smoke.localeFallback.status !== 200 || smoke.localeFallback.body.locale !== "en" || smoke.localeFallback.body.indexable !== false) {
+    throw new Error("HTTP smoke must keep new locale fallback non-indexable");
   }
   if (smoke.translationDraft.status !== 201 || smoke.translationDraft.body.public_indexable !== false) {
     throw new Error("HTTP smoke must store non-indexable Hermes translation draft");

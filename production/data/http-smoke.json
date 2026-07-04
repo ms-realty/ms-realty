@@ -1143,6 +1143,68 @@
       ]
     }
   },
+  "localeCreate": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "locale": {
+        "code": "es",
+        "native_name": "Español",
+        "admin_name": "Spanish",
+        "direction": "ltr",
+        "public_enabled": false,
+        "indexable": false,
+        "fallback_locale": "en",
+        "translation_provider_mode": "hermes_draft",
+        "reviewer_role": "translator_es",
+        "route_segments": {
+          "listing": "propiedades",
+          "search": "buscar"
+        }
+      },
+      "admin_locales": [
+        "bg",
+        "ru",
+        "en"
+      ],
+      "public_indexable_locales": [
+        "bg",
+        "en",
+        "de",
+        "nl",
+        "ru",
+        "el",
+        "he"
+      ]
+    }
+  },
+  "localeFallback": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "language_fallback",
+      "status": 200,
+      "requested_locale": "es",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "path": "/en/",
+      "canonical": "/en/",
+      "indexable": false,
+      "metadata": {
+        "title": "MS Realty language request",
+        "description": "Fallback route for languages that are not yet reviewed and approved for indexing.",
+        "robots": "noindex,follow"
+      },
+      "request_language_available": true,
+      "hermes_chat_available": true,
+      "public_translation_available": false
+    }
+  },
   "leadLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/lead-ledger.jsonl",
     "rows": 2
@@ -1162,5 +1224,9 @@
   "listingEditLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/listing-edits.jsonl",
     "rows": 1
+  },
+  "localeRegistry": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/admin-locale-registry-smoke.json",
+    "locales": 9
   }
 }
