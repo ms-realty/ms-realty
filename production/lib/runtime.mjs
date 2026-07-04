@@ -161,6 +161,16 @@ export function buildRuntimeSmoke(registry, seed) {
       contact_preference: "whatsapp",
       message: "Interested in this property.",
     }),
+    viewingLead_he: submitRuntimeLead(registry, seed, {
+      id: "runtime-viewing-lead-he-0001",
+      source: "website_viewing_request",
+      leadType: "buyer",
+      language: "he",
+      listingReference: runtimeListing.id,
+      contact: { name: "Noa Levi" },
+      contact_preference: "phone",
+      message: "I would like to view this property.",
+    }),
   };
 }
 
@@ -174,6 +184,12 @@ export function assertRuntimeSmoke(smoke) {
   ) {
     throw new Error("Runtime smoke must expose listing callback action");
   }
+  if (
+    smoke.listing_he.body.actions?.primary?.find((action) => action.id === "request_viewing")?.payload.source !==
+    "website_viewing_request"
+  ) {
+    throw new Error("Runtime smoke must expose listing viewing request action");
+  }
   if (smoke.listing_ru.status !== 200 || !smoke.listing_ru.path.startsWith("/ru/")) {
     throw new Error("Runtime Russian listing route missing");
   }
@@ -186,6 +202,13 @@ export function assertRuntimeSmoke(smoke) {
     throw new Error("Runtime lead must route to EN admin queue with broker approval");
   }
   if (smoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime lead must preserve contact preference");
+  if (
+    smoke.viewingLead_he.lead.source !== "website_viewing_request" ||
+    smoke.viewingLead_he.contact_preference !== "phone" ||
+    smoke.viewingLead_he.hermes_reply_draft.broker_approval_required !== true
+  ) {
+    throw new Error("Runtime viewing request lead must stay review-gated in CRM");
+  }
   if (JSON.stringify(smoke).match(/Sandanski sea|sea destination|Сандански море/i)) {
     throw new Error("Runtime smoke must not introduce Sandanski sea framing");
   }

@@ -15,6 +15,7 @@ export function appendLead(lead, { filePath = DEFAULT_LEAD_LEDGER_PATH, received
     received_at: receivedAt,
     id: lead.id,
     lead_id: lead.lead?.id,
+    source: lead.lead?.source,
     lead_type: lead.lead?.leadType,
     listing_reference: lead.lead?.listingReference || null,
     original_language: lead.original_language,
@@ -39,7 +40,9 @@ export function readLeadLedger(filePath = DEFAULT_LEAD_LEDGER_PATH) {
 export function assertLeadLedger(rows) {
   if (!rows.length) throw new Error("Lead ledger must contain at least one row");
   for (const row of rows) {
-    if (!row.lead_id || !row.original_language || !row.admin_locale) throw new Error("Lead ledger row is missing routing data");
+    if (!row.lead_id || !row.source || !row.original_language || !row.admin_locale) {
+      throw new Error("Lead ledger row is missing routing data");
+    }
     if (row.broker_approval_required !== true) throw new Error("Lead ledger must preserve broker approval gate");
   }
   return true;

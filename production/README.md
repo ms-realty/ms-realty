@@ -37,7 +37,7 @@ What it proves now:
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
 - Runtime search query/facet filtering before pagination, with total match counts.
-- Listing conversion actions for inquiry, callback, save, share, and print/PDF, with direct broker contact channels review-gated.
+- Listing conversion actions for inquiry, callback, viewing request, save, share, and print/PDF, with direct broker contact channels review-gated.
 - Broker contact approval ledger that enables direct phone, WhatsApp, and Viber links only after review.
 - Lead contact preference validation and persistence for phone, Viber, WhatsApp, and email.
 - Search API overlays translation ledger state before card display/indexability.
@@ -46,7 +46,7 @@ What it proves now:
 - Authenticated admin locale creation for non-indexable website locales.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
-- Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
+- Append-only lead ledger for persisted buyer inquiry, viewing request, and seller valuation smoke rows, including source classification.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
 - Broker-booked viewing ledger with open follow-up tasks from existing CRM leads.

@@ -252,6 +252,20 @@
               "source": "website_callback_request",
               "contact_preference": "phone"
             }
+          },
+          {
+            "id": "request_viewing",
+            "label": "תיאום סיור",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_viewing_request",
+              "contact_preference": "phone"
+            }
           }
         ],
         "direct_contact": {
@@ -530,6 +544,20 @@
               "language": "ru",
               "listingReference": "MS-CRAWL-0114",
               "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          },
+          {
+            "id": "request_viewing",
+            "label": "Просмотр",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "ru",
+              "listingReference": "MS-CRAWL-0114",
+              "source": "website_viewing_request",
               "contact_preference": "phone"
             }
           }
@@ -964,6 +992,45 @@
     "requires_translation": true,
     "contact_preference": "whatsapp",
     "message_original": "Interested in this property.",
+    "hermes_reply_draft": {
+      "status": "draft",
+      "language": "he",
+      "broker_approval_required": true,
+      "can_send_without_approval": false
+    },
+    "views": {
+      "show_original_available": true,
+      "translated_draft_available": true
+    }
+  },
+  "viewingLead_he": {
+    "id": "inbox-runtime-viewing-lead-he-0001",
+    "lead": {
+      "id": "runtime-viewing-lead-he-0001",
+      "source": "website_viewing_request",
+      "leadType": "buyer",
+      "listingReference": "MS-CRAWL-0001",
+      "contact": {
+        "name": "Noa Levi"
+      },
+      "contact_preference": "phone",
+      "message": "I would like to view this property.",
+      "language": {
+        "language": "he",
+        "direction": "rtl",
+        "adminLocale": "en",
+        "requiresTranslation": true
+      },
+      "status": "draft",
+      "requiresBrokerApproval": true,
+      "hermesDraftAllowed": true
+    },
+    "original_language": "he",
+    "original_direction": "rtl",
+    "admin_locale": "en",
+    "requires_translation": true,
+    "contact_preference": "phone",
+    "message_original": "I would like to view this property.",
     "hermes_reply_draft": {
       "status": "draft",
       "language": "he",

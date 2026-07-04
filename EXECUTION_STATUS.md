@@ -84,7 +84,7 @@ Date: 2026-07-04
   - search responses expose `total_matches` and `returned`
   - saved searches persist the full filtered match count, not just the first page size
 - Added listing conversion/share contract:
-  - listing pages expose sticky mobile inquiry and callback actions backed by `POST /api/leads`
+  - listing pages expose sticky mobile inquiry, callback, and viewing request actions backed by `POST /api/leads`
   - save, family-share, and print/PDF intents are present in the public listing payload
   - direct phone, WhatsApp, and Viber channels stay review-gated until broker contact data is approved
 - Added contact preference preservation:
@@ -150,7 +150,8 @@ Date: 2026-07-04
   - posts a valid Hebrew buyer lead
   - rejects an unknown buyer listing reference
 - Added append-only CRM lead ledger:
-  - persists accepted HTTP buyer and seller lead intake as JSONL
+  - persists accepted HTTP buyer, viewing request, and seller lead intake as JSONL
+  - stores source classification so viewing requests remain distinguishable in CRM
   - stores original language, admin queue locale, listing reference, and broker approval gate
   - keeps smoke artifact deterministic
 - Added gated admin lead inbox endpoint:

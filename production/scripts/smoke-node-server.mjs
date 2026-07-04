@@ -124,6 +124,19 @@ try {
         contact_preference: "whatsapp",
       }),
     }),
+    viewingLead: await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      body: JSON.stringify({
+        id: "server-viewing-lead-he-0001",
+        source: "website_viewing_request",
+        leadType: "buyer",
+        language: "he",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Noa Levi" },
+        contact_preference: "phone",
+        message: "I would like to view this property.",
+      }),
+    }),
     sellerLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       body: JSON.stringify({

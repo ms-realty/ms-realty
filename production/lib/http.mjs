@@ -392,6 +392,14 @@ export function assertHttpSmoke(smoke) {
   if (smoke.lead.body.contact_preference !== "whatsapp") {
     throw new Error("HTTP smoke must preserve lead contact preference");
   }
+  if (
+    smoke.viewingLead.status !== 201 ||
+    smoke.viewingLead.body.lead.source !== "website_viewing_request" ||
+    smoke.viewingLead.body.contact_preference !== "phone" ||
+    smoke.viewingLead.body.hermes_reply_draft.broker_approval_required !== true
+  ) {
+    throw new Error("HTTP smoke must accept public viewing request leads into the gated CRM flow");
+  }
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("HTTP smoke must accept seller valuation lead");
   }
@@ -473,7 +481,7 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must serve rendered seller valuation HTML");
   }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
-  if (smoke.admin.body.leads.length < 2) throw new Error("HTTP smoke must show buyer and seller leads");
+  if (smoke.admin.body.leads.length < 3) throw new Error("HTTP smoke must show buyer, viewing, and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
     throw new Error("HTTP smoke must queue broker-approved replies");

@@ -157,6 +157,19 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             contact_preference: "whatsapp",
           }),
         }),
+        viewingLead: await jsonFetch(baseUrl, "/api/leads", {
+          method: "POST",
+          body: JSON.stringify({
+            id: "node-server-viewing-lead-test",
+            source: "website_viewing_request",
+            leadType: "buyer",
+            language: "he",
+            listingReference: "MS-CRAWL-0001",
+            contact: { name: "Noa Levi" },
+            contact_preference: "phone",
+            message: "I would like to view this property.",
+          }),
+        }),
         sellerLead: await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           body: JSON.stringify({
@@ -261,6 +274,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
       assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
+      assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
       assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
       assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
       assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);

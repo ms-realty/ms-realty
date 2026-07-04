@@ -28,6 +28,8 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   assert.equal(he.indexable, true);
   assert.equal(he.body.actions.sticky_mobile, true);
   assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.contact_preference, "phone");
+  assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.source, "website_viewing_request");
+  assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.contact_preference, "phone");
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
   assert.ok(he.body.actions.direct_contact.channels.every((channel) => channel.enabled === false && channel.href === null));
   assert.ok(he.body.actions.secondary.find((action) => action.id === "print").url.endsWith("?print=1"));

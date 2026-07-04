@@ -179,6 +179,8 @@ if (runtimeSmoke.listing_he.body.media.gallery_count <= 0 || runtimeSmoke.listin
 if (
   runtimeSmoke.listing_he.body.actions?.primary?.find((action) => action.id === "callback")?.payload.source !==
     "website_callback_request" ||
+  runtimeSmoke.listing_he.body.actions?.primary?.find((action) => action.id === "request_viewing")?.payload.source !==
+    "website_viewing_request" ||
   runtimeSmoke.listing_he.body.actions?.direct_contact?.review_status !== "needs_broker_contact_review"
 ) {
   throw new Error("Runtime smoke must expose conversion actions without unreviewed broker contact data");
@@ -186,6 +188,12 @@ if (
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
 if (runtimeSmoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime smoke lead must preserve contact preference");
+if (
+  runtimeSmoke.viewingLead_he.lead.source !== "website_viewing_request" ||
+  runtimeSmoke.viewingLead_he.contact_preference !== "phone"
+) {
+  throw new Error("Runtime smoke viewing request lead must route through CRM");
+}
 if (runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001")?.translation_display !== "reviewed_translation") {
   throw new Error("Runtime smoke search must show reviewed Hebrew translation state");
 }
@@ -278,7 +286,14 @@ if (
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
-if (httpSmoke.leadLedger.rows !== 2) throw new Error("HTTP smoke must persist buyer and seller lead rows");
+if (
+  httpSmoke.viewingLead.status !== 201 ||
+  httpSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
+  httpSmoke.viewingLead.body.contact_preference !== "phone"
+) {
+  throw new Error("HTTP smoke must accept public viewing request leads");
+}
+if (httpSmoke.leadLedger.rows !== 3) throw new Error("HTTP smoke must persist buyer, viewing, and seller lead rows");
 if (httpSmoke.sellerLead.status !== 201 || httpSmoke.sellerLead.body.lead.leadType !== "seller") {
   throw new Error("HTTP smoke must accept seller valuation lead");
 }
@@ -314,7 +329,14 @@ if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !
   throw new Error("Node server smoke must serve Hebrew listing as RTL 200");
 }
 if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
-if (nodeServerSmoke.leadLedger.rows !== 2) throw new Error("Node server smoke must persist buyer and seller lead rows");
+if (
+  nodeServerSmoke.viewingLead.status !== 201 ||
+  nodeServerSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
+  nodeServerSmoke.viewingLead.body.contact_preference !== "phone"
+) {
+  throw new Error("Node server smoke must accept public viewing request leads");
+}
+if (nodeServerSmoke.leadLedger.rows !== 3) throw new Error("Node server smoke must persist buyer, viewing, and seller lead rows");
 if (nodeServerSmoke.sellerLead.status !== 201 || nodeServerSmoke.sellerLead.body.lead.leadType !== "seller") {
   throw new Error("Node server smoke must accept seller valuation lead");
 }
@@ -373,7 +395,7 @@ if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server s
 if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node server smoke must persist one seller pipeline row");
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (leadLedger.length !== 2) throw new Error("Lead ledger artifact must contain buyer and seller smoke rows");
+if (leadLedger.length !== 3) throw new Error("Lead ledger artifact must contain buyer, viewing, and seller smoke rows");
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contain one deterministic smoke row");
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);

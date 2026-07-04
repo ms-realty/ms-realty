@@ -33,6 +33,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.ok(he.body.media.tour.fallback_gallery.length > 0);
   assert.equal(he.body.actions.primary.find((action) => action.id === "inquiry").endpoint, "/api/leads");
   assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.source, "website_callback_request");
+  assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.source, "website_viewing_request");
   assert.equal(he.body.actions.secondary.find((action) => action.id === "share_family").url, he.path);
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
   assert.equal(seller.kind, "seller");
@@ -198,6 +199,27 @@ test("runtime lead intake stores language and keeps Hermes reply review-gated", 
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "whatsapp");
   assert.equal(lead.hermes_reply_draft.can_send_without_approval, false);
+});
+
+test("runtime viewing request lead stays routed through broker-approved CRM flow", () => {
+  const lead = submitRuntimeLead(registry, seed, {
+    id: "runtime-viewing-lead-test",
+    source: "website_viewing_request",
+    leadType: "buyer",
+    language: "he",
+    listingReference: "MS-CRAWL-0001",
+    contact: { name: "Noa Levi" },
+    contact_preference: "phone",
+    message: "I would like to view this property.",
+  });
+
+  assert.equal(lead.lead.source, "website_viewing_request");
+  assert.equal(lead.lead.leadType, "buyer");
+  assert.equal(lead.lead.listingReference, "MS-CRAWL-0001");
+  assert.equal(lead.original_language, "he");
+  assert.equal(lead.admin_locale, "en");
+  assert.equal(lead.contact_preference, "phone");
+  assert.equal(lead.hermes_reply_draft.broker_approval_required, true);
 });
 
 test("runtime smoke fixture proves listing, search, fallback, and lead flow", () => {

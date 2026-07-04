@@ -91,7 +91,7 @@ Implemented now:
   - result payloads expose total matches separately from returned cards
   - saved-search alerts use the full filtered match count
 - Listing conversion/share contract:
-  - listing pages expose sticky mobile inquiry and callback actions through the lead intake endpoint
+  - listing pages expose sticky mobile inquiry, callback, and viewing request actions through the lead intake endpoint
   - save, family-share, and print/PDF intents are part of the public payload
   - phone, WhatsApp, and Viber actions remain review-gated until broker contact data is approved
 - Broker contact approval contract:
@@ -100,6 +100,7 @@ Implemented now:
   - approved contact rows are stored in an append-only broker contact ledger
 - Lead contact preference contract:
   - public leads preserve phone, Viber, WhatsApp, or email preference
+  - public viewing requests are stored as `website_viewing_request` buyer leads before broker booking
   - CRM inbox and append-only lead ledger expose the normalized preference for broker follow-up
   - unsupported contact channels are rejected before persistence
 - Mobile and elderly-user QA gate:

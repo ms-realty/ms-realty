@@ -119,6 +119,20 @@
               "source": "website_callback_request",
               "contact_preference": "phone"
             }
+          },
+          {
+            "id": "request_viewing",
+            "label": "Оглед",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "bg",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_viewing_request",
+              "contact_preference": "phone"
+            }
           }
         ],
         "direct_contact": {
@@ -293,6 +307,20 @@
               "language": "el",
               "listingReference": "MS-CRAWL-0001",
               "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          },
+          {
+            "id": "request_viewing",
+            "label": "Ραντεβού προβολής",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "el",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_viewing_request",
               "contact_preference": "phone"
             }
           }
@@ -471,6 +499,20 @@
               "source": "website_callback_request",
               "contact_preference": "phone"
             }
+          },
+          {
+            "id": "request_viewing",
+            "label": "תיאום סיור",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_viewing_request",
+              "contact_preference": "phone"
+            }
           }
         ],
         "direct_contact": {
@@ -628,6 +670,20 @@
               "language": "en",
               "listingReference": "MS-CRAWL-0001",
               "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          },
+          {
+            "id": "request_viewing",
+            "label": "Viewing",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "en",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_viewing_request",
               "contact_preference": "phone"
             }
           }

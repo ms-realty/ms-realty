@@ -169,6 +169,20 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         message: "Interested in this property.",
       },
     }),
+    viewingLead: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        id: "http-viewing-lead-test",
+        source: "website_viewing_request",
+        leadType: "buyer",
+        language: "he",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Noa Levi" },
+        contact_preference: "phone",
+        message: "I would like to view this property.",
+      },
+    }),
     sellerLead: await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
@@ -280,6 +294,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
+  assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
   assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
@@ -291,7 +306,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
-  assert.equal(smoke.admin.body.leads.length, 2);
+  assert.equal(smoke.admin.body.leads.length, 3);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
@@ -299,6 +314,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.listingEdits.length, 1);
   assert.equal(smoke.admin.body.viewings.length, 1);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
+  assert.equal(smoke.admin.body.leads.some((lead) => lead.source === "website_viewing_request"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
 });
 
