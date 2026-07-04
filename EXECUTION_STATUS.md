@@ -54,6 +54,11 @@ Date: 2026-07-04
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations
   - unapproved French excluded
+- Added canonical CMS seed fixture:
+  - 165 listing records composed from crawl/search evidence
+  - 4,978 listing media rows attached
+  - migration and route review state carried into each listing
+  - approved translations included without unapproved French drafts
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`
@@ -97,6 +102,7 @@ python3 locales/validate_locale_registry.py
 npm run migration:build
 npm run routes:build
 npm run sitemap:build
+npm run cms:build
 npm run public:build
 npm run admin:build
 npm run test

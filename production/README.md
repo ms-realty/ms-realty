@@ -16,6 +16,7 @@ What it proves now:
 - Normalized migration records from the crawl CSVs with launch-gate checks.
 - Legacy route map for reviewed listing redirects and unmapped review queues.
 - Localized sitemap fixture gated by approved translation records.
+- Canonical CMS seed records composed from crawl, route, translation, and media evidence.
 - Public route fixtures for locale-prefixed listing/search/fallback routes.
 - Admin CRM/CMS shell language availability in BG, RU, and EN.
 - Website route coverage for Greek and Hebrew, including Hebrew RTL metadata.
@@ -32,6 +33,7 @@ Generated production data:
 - `production/data/migration-records.json`
 - `production/data/legacy-route-map.json`
 - `production/data/localized-sitemap.json`
+- `production/data/cms-seed.json`
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`
 

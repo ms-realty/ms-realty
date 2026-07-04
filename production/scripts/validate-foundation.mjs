@@ -70,6 +70,13 @@ if (sitemap.summary.byLocale.el !== 1 || sitemap.summary.byLocale.he !== 1) {
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
 
+const cmsSeed = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-seed.json"), "utf8"));
+if (cmsSeed.summary.listings !== 165) throw new Error("CMS seed must include 165 listings");
+if (cmsSeed.summary.bySourceLocale.ru !== 52) throw new Error("CMS seed must include 52 RU source listings");
+if (cmsSeed.summary.mediaAssets !== 4978) throw new Error("CMS seed must include listing media rows");
+if (cmsSeed.summary.deployableRoutes !== 0) throw new Error("CMS seed routes must stay review-gated");
+if (cmsSeed.summary.translationLocales.fr) throw new Error("CMS seed must not include unapproved French translations");
+
 const publicFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "public-fixtures.json"), "utf8"));
 if (publicFixtures.listing_he.dir !== "rtl") throw new Error("Hebrew public fixture must render RTL");
 if (publicFixtures.listing_el.path !== `/el/akinita/${publicFixtures.source_listing_id}`) {
