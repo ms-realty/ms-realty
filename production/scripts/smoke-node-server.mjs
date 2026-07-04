@@ -8,6 +8,7 @@ import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lea
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
+import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -17,12 +18,14 @@ const languageRequestPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-
 const translationLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-translations-")), "translations.jsonl");
 const listingEditLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-listing-edits-")), "edits.jsonl");
 const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewings-")), "viewings.jsonl");
+const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-saved-searches-")), "saved-searches.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
 resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
+resetSavedSearches(savedSearchLedgerPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
@@ -31,11 +34,13 @@ const server = createNodeServer(
     translationLedgerPath,
     listingEditLedgerPath,
     viewingLedgerPath,
+    savedSearchLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
+    savedAt: "2026-07-04T00:07:00Z",
   }),
 );
 const address = await listen(server);
@@ -66,6 +71,16 @@ try {
     }),
     sitemap: await textFetch(baseUrl, "/sitemap.xml"),
     robots: await textFetch(baseUrl, "/robots.txt"),
+    savedSearch: await jsonFetch(baseUrl, "/api/saved-searches", {
+      method: "POST",
+      body: JSON.stringify({
+        id: "saved-search-server-he-0001",
+        locale: "he",
+        query: "Sandanski",
+        filters: { property_type: "apartment" },
+        contact: { name: "Noa Levi" },
+      }),
+    }),
     lead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       body: JSON.stringify({
@@ -200,6 +215,9 @@ try {
   const viewings = readViewings(viewingLedgerPath);
   assertViewingLedger(viewings);
   smoke.viewingLedger = { rows: viewings.length };
+  const savedSearches = readSavedSearches(savedSearchLedgerPath);
+  assertSavedSearches(savedSearches);
+  smoke.savedSearchLedger = { rows: savedSearches.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);

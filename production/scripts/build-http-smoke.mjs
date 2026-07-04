@@ -32,6 +32,12 @@ import {
   readViewings,
   resetViewingLedger,
 } from "../lib/viewing-ledger.mjs";
+import {
+  assertSavedSearches,
+  DEFAULT_SAVED_SEARCH_LEDGER_PATH,
+  readSavedSearches,
+  resetSavedSearches,
+} from "../lib/saved-searches.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -41,6 +47,7 @@ resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
 resetListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
 resetViewingLedger(DEFAULT_VIEWING_LEDGER_PATH);
+resetSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -50,12 +57,14 @@ const app = createHttpApp({
   translationLedgerPath: DEFAULT_TRANSLATION_LEDGER_PATH,
   listingEditLedgerPath: DEFAULT_LISTING_EDIT_LEDGER_PATH,
   viewingLedgerPath: DEFAULT_VIEWING_LEDGER_PATH,
+  savedSearchLedgerPath: DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
   editedAt: "2026-07-04T00:03:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
   bookedAt: "2026-07-04T00:06:00Z",
+  savedAt: "2026-07-04T00:07:00Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 const smoke = {
@@ -77,6 +86,17 @@ const smoke = {
   }),
   sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
   robots: await dispatchHttp(app, { url: "/robots.txt" }),
+  savedSearch: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/saved-searches",
+    body: {
+      id: "saved-search-he-0001",
+      locale: "he",
+      query: "Sandanski",
+      filters: { property_type: "apartment" },
+      contact: { name: "Noa Levi" },
+    },
+  }),
   lead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",
@@ -218,6 +238,9 @@ smoke.listingEditLedger = { path: DEFAULT_LISTING_EDIT_LEDGER_PATH, rows: listin
 const viewings = readViewings(DEFAULT_VIEWING_LEDGER_PATH);
 assertViewingLedger(viewings);
 smoke.viewingLedger = { path: DEFAULT_VIEWING_LEDGER_PATH, rows: viewings.length };
+const savedSearches = readSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
+assertSavedSearches(savedSearches);
+smoke.savedSearchLedger = { path: DEFAULT_SAVED_SEARCH_LEDGER_PATH, rows: savedSearches.length };
 smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");

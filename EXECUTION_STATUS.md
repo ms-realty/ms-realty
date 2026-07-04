@@ -131,6 +131,11 @@ Date: 2026-07-04
   - verifies the lead exists in the CRM ledger
   - persists a booked viewing row with an open follow-up task
   - authenticated admin inbox returns persisted viewing rows
+- Added saved search and alert intake:
+  - `POST /api/saved-searches` stores locale-scoped search criteria
+  - current match count is calculated from the runtime search renderer
+  - persisted rows create open alert tasks for broker follow-up
+  - authenticated admin inbox returns persisted saved searches
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`

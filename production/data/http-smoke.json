@@ -357,6 +357,56 @@
     },
     "body": "User-agent: *\nAllow: /\nSitemap: https://makler-realty.com/sitemap.xml\n"
   },
+  "savedSearch": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "saved_at": "2026-07-04T00:07:00Z",
+      "id": "saved-search-he-0001",
+      "requested_locale": "he",
+      "locale": "he",
+      "fallback_used": false,
+      "query": "Sandanski",
+      "filters": {
+        "property_type": "apartment"
+      },
+      "contact": {
+        "name": "Noa Levi"
+      },
+      "match_count": 12,
+      "alert_frequency": "weekly",
+      "status": "active",
+      "alert_task": {
+        "id": "alert-he-1783123620000",
+        "status": "open",
+        "owner": "broker_en"
+      },
+      "ledger": {
+        "saved_at": "2026-07-04T00:07:00Z",
+        "id": "saved-search-he-0001",
+        "requested_locale": "he",
+        "locale": "he",
+        "fallback_used": false,
+        "query": "Sandanski",
+        "filters": {
+          "property_type": "apartment"
+        },
+        "contact": {
+          "name": "Noa Levi"
+        },
+        "match_count": 12,
+        "alert_frequency": "weekly",
+        "status": "active",
+        "alert_task": {
+          "id": "alert-he-1783123620000",
+          "status": "open",
+          "owner": "broker_en"
+        }
+      }
+    }
+  },
   "lead": {
     "status": 201,
     "headers": {
@@ -628,6 +678,30 @@
             "owner": "broker_ru",
             "status": "open",
             "due_at": "2026-07-06T10:00:00Z"
+          }
+        }
+      ],
+      "savedSearches": [
+        {
+          "saved_at": "2026-07-04T00:07:00Z",
+          "id": "saved-search-he-0001",
+          "requested_locale": "he",
+          "locale": "he",
+          "fallback_used": false,
+          "query": "Sandanski",
+          "filters": {
+            "property_type": "apartment"
+          },
+          "contact": {
+            "name": "Noa Levi"
+          },
+          "match_count": 12,
+          "alert_frequency": "weekly",
+          "status": "active",
+          "alert_task": {
+            "id": "alert-he-1783123620000",
+            "status": "open",
+            "owner": "broker_en"
           }
         }
       ]
@@ -1280,6 +1354,10 @@
   },
   "viewingLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/viewings.jsonl",
+    "rows": 1
+  },
+  "savedSearchLedger": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/saved-searches.jsonl",
     "rows": 1
   },
   "localeRegistry": {

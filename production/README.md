@@ -41,6 +41,7 @@ What it proves now:
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
 - Broker-booked viewing ledger with open follow-up tasks from existing CRM leads.
+- Saved-search ledger with open alert tasks from public search criteria.
 
 Run:
 
@@ -67,6 +68,7 @@ Generated production data:
 - `production/data/lead-ledger.jsonl`
 - `production/data/reply-outbox.jsonl`
 - `production/data/viewings.jsonl`
+- `production/data/saved-searches.jsonl`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/listing-edits.jsonl`

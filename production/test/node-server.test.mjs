@@ -9,6 +9,7 @@ import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lea
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
+import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -19,12 +20,14 @@ async function withServer(fn) {
   const translationLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-translations-`)}/translations.jsonl`;
   const listingEditLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-listing-edits-`)}/edits.jsonl`;
   const viewingLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewings-`)}/viewings.jsonl`;
+  const savedSearchLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-saved-searches-`)}/saved-searches.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
   resetTranslationLedger(translationLedgerPath);
   resetListingEdits(listingEditLedgerPath);
   resetViewingLedger(viewingLedgerPath);
+  resetSavedSearches(savedSearchLedgerPath);
   const server = createNodeServer(
     createHttpApp({
       leadLedgerPath,
@@ -33,11 +36,13 @@ async function withServer(fn) {
       translationLedgerPath,
       listingEditLedgerPath,
       viewingLedgerPath,
+      savedSearchLedgerPath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
       editedAt: "2026-07-04T00:03:00Z",
       reviewedAt: "2026-07-04T00:05:00Z",
       bookedAt: "2026-07-04T00:06:00Z",
+      savedAt: "2026-07-04T00:07:00Z",
     }),
   );
   const address = await listen(server);
@@ -50,6 +55,7 @@ async function withServer(fn) {
       translationLedgerPath,
       listingEditLedgerPath,
       viewingLedgerPath,
+      savedSearchLedgerPath,
     );
   } finally {
     await close(server);
@@ -62,7 +68,16 @@ function deployableRedirect() {
 
 test("Node server serves live listing, search, lead, and viewing endpoints", async () => {
   await withServer(
-    async (baseUrl, leadLedgerPath, replyOutboxPath, languageRequestPath, translationLedgerPath, listingEditLedgerPath, viewingLedgerPath) => {
+    async (
+      baseUrl,
+      leadLedgerPath,
+      replyOutboxPath,
+      languageRequestPath,
+      translationLedgerPath,
+      listingEditLedgerPath,
+      viewingLedgerPath,
+      savedSearchLedgerPath,
+    ) => {
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
       const smoke = {
@@ -81,6 +96,16 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             requestedPath: "/fr/",
             contact: { name: "Claire Martin" },
             message: "Please notify me when French property pages are reviewed.",
+          }),
+        }),
+        savedSearch: await jsonFetch(baseUrl, "/api/saved-searches", {
+          method: "POST",
+          body: JSON.stringify({
+            id: "node-server-saved-search-test",
+            locale: "he",
+            query: "Sandanski",
+            filters: { property_type: "apartment" },
+            contact: { name: "Noa Levi" },
           }),
         }),
         sitemap: await textFetch(baseUrl, "/sitemap.xml"),
@@ -203,6 +228,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
       assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
+      assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
     },
   );

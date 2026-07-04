@@ -67,6 +67,9 @@ export function assertServerSmoke(smoke) {
   if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable language request");
   }
+  if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
+    throw new Error("Server must store saved search alert tasks");
+  }
   if (smoke.translationDraft.status !== 201 || smoke.translationDraft.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable Hermes translation draft");
   }

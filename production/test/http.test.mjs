@@ -9,6 +9,7 @@ import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lea
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
+import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -48,6 +49,12 @@ function tempViewings() {
   return file;
 }
 
+function tempSavedSearches() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-saved-searches-`)}/saved-searches.jsonl`;
+  resetSavedSearches(file);
+  return file;
+}
+
 function tempRegistry() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
   fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
@@ -65,6 +72,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const translationLedgerPath = tempTranslations();
   const listingEditLedgerPath = tempListingEdits();
   const viewingLedgerPath = tempViewings();
+  const savedSearchLedgerPath = tempSavedSearches();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
@@ -72,11 +80,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     translationLedgerPath,
     listingEditLedgerPath,
     viewingLedgerPath,
+    savedSearchLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
+    savedAt: "2026-07-04T00:07:00Z",
   });
   const redirect = deployableRedirect();
   const smoke = {
@@ -93,6 +103,17 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         requestedPath: "/fr/",
         contact: { name: "Claire Martin" },
         message: "Please notify me when French property pages are reviewed.",
+      },
+    }),
+    savedSearch: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/saved-searches",
+      body: {
+        id: "http-saved-search-test",
+        locale: "he",
+        query: "Sandanski",
+        filters: { property_type: "apartment" },
+        contact: { name: "Noa Levi" },
       },
     }),
     sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
@@ -224,9 +245,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
   assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
   assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
+  assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 2);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
+  assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
   assert.equal(smoke.admin.body.listingEdits.length, 1);
   assert.equal(smoke.admin.body.viewings.length, 1);

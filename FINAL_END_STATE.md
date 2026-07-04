@@ -64,6 +64,9 @@ Implemented now:
 - Broker viewing/task contract:
   - `POST /api/admin/viewings`
   - booked viewings require known CRM leads and create open follow-up tasks
+- Saved search/alert contract:
+  - `POST /api/saved-searches`
+  - saved searches persist search criteria, match count, and an open alert task
 - Dynamic locale publishing contract:
   - newly added public locales can draft, approve, publish, and serve a locale-prefixed listing from the translation ledger
   - served sitemap XML includes those approved dynamic locale routes

@@ -14,6 +14,7 @@ import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } fr
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
 import { appendListingEdit, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { appendViewing, readViewings } from "./viewing-ledger.mjs";
+import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 
 function response(status, body, contentType, headers = {}) {
   return {
@@ -37,12 +38,14 @@ export function createHttpApp({
   translationLedgerPath = null,
   listingEditLedgerPath = null,
   viewingLedgerPath = null,
+  savedSearchLedgerPath = null,
   localeRegistryPath = null,
   receivedAt,
   requestedAt,
   editedAt,
   reviewedAt,
   bookedAt,
+  savedAt,
 } = {}) {
   let activeRegistry = registry;
   return async function handle(request) {
@@ -103,6 +106,7 @@ export function createHttpApp({
         translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
         listingEdits: readListingEdits(listingEditLedgerPath || undefined),
         viewings: readViewings(viewingLedgerPath || undefined),
+        savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
       });
     }
 
@@ -239,6 +243,22 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/saved-searches") {
+      try {
+        const input = JSON.parse(request.body || "{}");
+        const search = searchRuntimeListings(activeRegistry, seed, {
+          localeCode: input.locale || activeRegistry.source_locale,
+          query: input.query || "",
+          translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+        });
+        const savedSearch = createSavedSearch(activeRegistry, input, { matchCount: search.cards.length, savedAt });
+        const ledger = savedSearchLedgerPath ? appendSavedSearch(savedSearch, { filePath: savedSearchLedgerPath }) : null;
+        return json(201, { ...savedSearch, ledger });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method !== "GET") return json(405, { kind: "method_not_allowed" });
 
     const rendered = renderRuntimePath(activeRegistry, seed, url.pathname, readTranslationLedger(translationLedgerPath || undefined));
@@ -271,6 +291,9 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
     throw new Error("HTTP smoke must store non-indexable language request");
+  }
+  if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
+    throw new Error("HTTP smoke must store saved search alert tasks");
   }
   if (
     smoke.localeCreate.status !== 201 ||
