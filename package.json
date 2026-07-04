@@ -7,7 +7,8 @@
     "test": "node --test production/test/*.test.mjs",
     "migration:build": "node production/scripts/build-migration-records.mjs",
     "public:build": "node production/scripts/render-public-fixtures.mjs",
-    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run migration:build && npm run public:build && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
+    "admin:build": "node production/scripts/build-admin-fixtures.mjs",
+    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run migration:build && npm run public:build && npm run admin:build && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
     "check": "npm run test && npm run validate"
   },
   "engines": {

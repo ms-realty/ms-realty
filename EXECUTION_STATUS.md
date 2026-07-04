@@ -52,6 +52,12 @@ Date: 2026-07-04
   - French fallback/request flow without indexability
   - Hebrew mobile search backed by Typesense/Meilisearch fixtures
   - Admin CRM/CMS shell limited to BG, RU, and EN interface locales
+- Added executable admin workflow fixtures:
+  - Hermes CMS translation drafts for Hebrew and Greek listings
+  - human approval/publish gates before indexability
+  - Hebrew buyer lead intake routed to EN admin queue
+  - Greek seller valuation lead intake routed to EN admin queue
+  - broker approval required before Hermes reply drafts can be sent
 
 ## Crawl Counts
 
@@ -81,6 +87,7 @@ python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.p
 python3 locales/validate_locale_registry.py
 npm run migration:build
 npm run public:build
+npm run admin:build
 npm run test
 npm run validate
 python3 qa/mobile_elderly_static_check.py

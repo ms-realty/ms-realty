@@ -17,6 +17,7 @@ What it proves now:
 - Public route fixtures for locale-prefixed listing/search/fallback routes.
 - Admin CRM/CMS shell language availability in BG, RU, and EN.
 - Website route coverage for Greek and Hebrew, including Hebrew RTL metadata.
+- Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
 
 Run:
 
@@ -28,6 +29,7 @@ Generated production data:
 
 - `production/data/migration-records.json`
 - `production/data/public-fixtures.json`
+- `production/data/admin-fixtures.json`
 
 The next production slice can consume these contracts from a Next.js App Router
 public app and Payload CMS collections without re-deciding URL, locale, AI, or

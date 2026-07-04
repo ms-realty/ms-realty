@@ -69,4 +69,22 @@ if (JSON.stringify(publicFixtures.admin_ru.interface_locales.map((locale) => loc
   throw new Error("Admin fixture must expose only BG, RU, EN interface locales");
 }
 
+const adminFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "admin-fixtures.json"), "utf8"));
+if (JSON.stringify(adminFixtures.workspaces.ru.interface_locales) !== JSON.stringify(["bg", "ru", "en"])) {
+  throw new Error("Admin workspace must expose BG, RU, EN");
+}
+if (adminFixtures.workspaces.he_fallback.locale !== "en") throw new Error("Website-only admin locale must fall back to EN");
+if (adminFixtures.translation_tasks.he_draft.public_indexable !== false) {
+  throw new Error("Hermes draft translation must not be indexable");
+}
+if (adminFixtures.translation_tasks.el_published.public_indexable !== true) {
+  throw new Error("Published Greek translation fixture must be indexable");
+}
+if (adminFixtures.crm_inbox.buyer_he.hermes_reply_draft.can_send_without_approval !== false) {
+  throw new Error("Hermes CRM reply draft must require broker approval");
+}
+if (adminFixtures.crm_inbox.buyer_he.admin_locale !== "en" || adminFixtures.crm_inbox.seller_el.admin_locale !== "en") {
+  throw new Error("Greek and Hebrew CRM work must route to EN admin queue");
+}
+
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

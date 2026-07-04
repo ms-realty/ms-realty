@@ -1,0 +1,342 @@
+{
+  "fixture_id": "admin-workflow-fixtures-20260704",
+  "workspaces": {
+    "bg": {
+      "kind": "admin_workspace",
+      "requested_locale": "bg",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "interface_locales": [
+        "bg",
+        "ru",
+        "en"
+      ],
+      "modules": [
+        {
+          "id": "crm",
+          "label": "CRM",
+          "primary_view": "Входящи запитвания"
+        },
+        {
+          "id": "cms",
+          "label": "CMS",
+          "primary_view": "Преводи за преглед"
+        }
+      ]
+    },
+    "ru": {
+      "kind": "admin_workspace",
+      "requested_locale": "ru",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "interface_locales": [
+        "bg",
+        "ru",
+        "en"
+      ],
+      "modules": [
+        {
+          "id": "crm",
+          "label": "CRM",
+          "primary_view": "Входящие заявки"
+        },
+        {
+          "id": "cms",
+          "label": "CMS",
+          "primary_view": "Переводы на проверку"
+        }
+      ]
+    },
+    "en": {
+      "kind": "admin_workspace",
+      "requested_locale": "en",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "interface_locales": [
+        "bg",
+        "ru",
+        "en"
+      ],
+      "modules": [
+        {
+          "id": "crm",
+          "label": "CRM",
+          "primary_view": "Lead inbox"
+        },
+        {
+          "id": "cms",
+          "label": "CMS",
+          "primary_view": "Translation review"
+        }
+      ]
+    },
+    "he_fallback": {
+      "kind": "admin_workspace",
+      "requested_locale": "he",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "interface_locales": [
+        "bg",
+        "ru",
+        "en"
+      ],
+      "modules": [
+        {
+          "id": "crm",
+          "label": "CRM",
+          "primary_view": "Lead inbox"
+        },
+        {
+          "id": "cms",
+          "label": "CMS",
+          "primary_view": "Translation review"
+        }
+      ]
+    }
+  },
+  "translation_tasks": {
+    "he_draft": {
+      "id": "translation-listing-MS-CRAWL-0001-he",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "target_locale": "he",
+      "target_direction": "rtl",
+      "status": "hermes_drafted",
+      "source_hash": "d9435290d46501b3d949844f49fb242d4cb9a6b84c834afa6d16d7450e31ac84",
+      "draft_hash": "f72528860e3f70e87788ec929f13386b4abbdcec54a3d7bf685f0d539ebcae86",
+      "provider_mode": "hermes_draft",
+      "reviewer_role": "translator_he",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "hermes": {
+        "prompt": {
+          "role": "translation_draft",
+          "sourceLocale": "bg",
+          "targetLocale": "he",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nАвторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+          "propertyFacts": {
+            "id": "MS-CRAWL-0001",
+            "location": "Sandanski",
+            "price_eur": null,
+            "image_count": 35
+          },
+          "glossary": {},
+          "rules": [
+            "Draft only; never publish.",
+            "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+            "Do not describe Sandanski as a sea destination.",
+            "Legal, tax, financing, and valuation claims require approved CMS source content.",
+            "Return SEO title and meta description drafts within normal search-result lengths."
+          ]
+        },
+        "can_publish": false,
+        "can_mark_indexable": false
+      }
+    },
+    "he_approved": {
+      "id": "translation-listing-MS-CRAWL-0001-he",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "target_locale": "he",
+      "target_direction": "rtl",
+      "status": "approved",
+      "source_hash": "d9435290d46501b3d949844f49fb242d4cb9a6b84c834afa6d16d7450e31ac84",
+      "draft_hash": "f72528860e3f70e87788ec929f13386b4abbdcec54a3d7bf685f0d539ebcae86",
+      "provider_mode": "hermes_draft",
+      "reviewer_role": "translator_he",
+      "public_indexable": true,
+      "requires_human_approval": true,
+      "hermes": {
+        "prompt": {
+          "role": "translation_draft",
+          "sourceLocale": "bg",
+          "targetLocale": "he",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nАвторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+          "propertyFacts": {
+            "id": "MS-CRAWL-0001",
+            "location": "Sandanski",
+            "price_eur": null,
+            "image_count": 35
+          },
+          "glossary": {},
+          "rules": [
+            "Draft only; never publish.",
+            "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+            "Do not describe Sandanski as a sea destination.",
+            "Legal, tax, financing, and valuation claims require approved CMS source content.",
+            "Return SEO title and meta description drafts within normal search-result lengths."
+          ]
+        },
+        "can_publish": false,
+        "can_mark_indexable": false
+      },
+      "reviewer": "translator_he",
+      "approved_at": "2026-07-04T00:00:00Z",
+      "human_approved": true
+    },
+    "el_draft": {
+      "id": "translation-listing-MS-CRAWL-0001-el",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "target_locale": "el",
+      "target_direction": "ltr",
+      "status": "hermes_drafted",
+      "source_hash": "d9435290d46501b3d949844f49fb242d4cb9a6b84c834afa6d16d7450e31ac84",
+      "draft_hash": "04b8e9433b62b0546237e4f1f37fa1804ffe8419b9d8488be330b8bee0dfb592",
+      "provider_mode": "hermes_draft",
+      "reviewer_role": "translator_el",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "hermes": {
+        "prompt": {
+          "role": "translation_draft",
+          "sourceLocale": "bg",
+          "targetLocale": "el",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nАвторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+          "propertyFacts": {
+            "id": "MS-CRAWL-0001",
+            "location": "Sandanski",
+            "price_eur": null,
+            "image_count": 35
+          },
+          "glossary": {},
+          "rules": [
+            "Draft only; never publish.",
+            "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+            "Do not describe Sandanski as a sea destination.",
+            "Legal, tax, financing, and valuation claims require approved CMS source content.",
+            "Return SEO title and meta description drafts within normal search-result lengths."
+          ]
+        },
+        "can_publish": false,
+        "can_mark_indexable": false
+      }
+    },
+    "el_published": {
+      "id": "translation-listing-MS-CRAWL-0001-el",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "target_locale": "el",
+      "target_direction": "ltr",
+      "status": "published",
+      "source_hash": "d9435290d46501b3d949844f49fb242d4cb9a6b84c834afa6d16d7450e31ac84",
+      "draft_hash": "04b8e9433b62b0546237e4f1f37fa1804ffe8419b9d8488be330b8bee0dfb592",
+      "provider_mode": "hermes_draft",
+      "reviewer_role": "translator_el",
+      "public_indexable": true,
+      "requires_human_approval": true,
+      "hermes": {
+        "prompt": {
+          "role": "translation_draft",
+          "sourceLocale": "bg",
+          "targetLocale": "el",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nАвторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+          "propertyFacts": {
+            "id": "MS-CRAWL-0001",
+            "location": "Sandanski",
+            "price_eur": null,
+            "image_count": 35
+          },
+          "glossary": {},
+          "rules": [
+            "Draft only; never publish.",
+            "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+            "Do not describe Sandanski as a sea destination.",
+            "Legal, tax, financing, and valuation claims require approved CMS source content.",
+            "Return SEO title and meta description drafts within normal search-result lengths."
+          ]
+        },
+        "can_publish": false,
+        "can_mark_indexable": false
+      },
+      "reviewer": "translator_el",
+      "approved_at": "2026-07-04T00:00:00Z",
+      "human_approved": true,
+      "published": true
+    }
+  },
+  "crm_inbox": {
+    "buyer_he": {
+      "id": "inbox-lead-he-buyer-0001",
+      "lead": {
+        "id": "lead-he-buyer-0001",
+        "source": "website_listing_detail",
+        "leadType": "buyer",
+        "listingReference": "MS-CRAWL-0001",
+        "contact": {
+          "name": "Noa Levi"
+        },
+        "message": "Interested in this listing.",
+        "language": {
+          "language": "he",
+          "direction": "rtl",
+          "adminLocale": "en",
+          "requiresTranslation": true
+        },
+        "status": "draft",
+        "requiresBrokerApproval": true,
+        "hermesDraftAllowed": true
+      },
+      "original_language": "he",
+      "original_direction": "rtl",
+      "admin_locale": "en",
+      "requires_translation": true,
+      "message_original": "Interested in this listing.",
+      "hermes_reply_draft": {
+        "status": "draft",
+        "language": "he",
+        "broker_approval_required": true,
+        "can_send_without_approval": false
+      },
+      "views": {
+        "show_original_available": true,
+        "translated_draft_available": true
+      }
+    },
+    "seller_el": {
+      "id": "inbox-lead-el-seller-0001",
+      "lead": {
+        "id": "lead-el-seller-0001",
+        "source": "website_seller_valuation",
+        "leadType": "seller",
+        "listingReference": null,
+        "contact": {
+          "name": "Nikos Papadopoulos"
+        },
+        "message": "I want a valuation for my property.",
+        "language": {
+          "language": "el",
+          "direction": "ltr",
+          "adminLocale": "en",
+          "requiresTranslation": true
+        },
+        "status": "draft",
+        "requiresBrokerApproval": true,
+        "hermesDraftAllowed": true
+      },
+      "original_language": "el",
+      "original_direction": "ltr",
+      "admin_locale": "en",
+      "requires_translation": true,
+      "message_original": "I want a valuation for my property.",
+      "hermes_reply_draft": {
+        "status": "draft",
+        "language": "el",
+        "broker_approval_required": true,
+        "can_send_without_approval": false
+      },
+      "views": {
+        "show_original_available": true,
+        "translated_draft_available": true
+      }
+    }
+  }
+}
