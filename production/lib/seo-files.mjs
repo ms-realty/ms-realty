@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fromRoot } from "./paths.mjs";
 import { mergeRuntimeTranslations } from "./runtime.mjs";
-import { sitemapEntriesForListing } from "./seo.mjs";
+import { sitemapEntriesForListing, sitemapEntriesForSeller } from "./seo.mjs";
 
 export const DEFAULT_PUBLIC_ORIGIN = process.env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com";
 export const DEFAULT_LOCALIZED_SITEMAP_PATH = fromRoot("production", "data", "localized-sitemap.json");
@@ -24,13 +24,17 @@ function countBy(rows, keyFn) {
 
 export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = []) {
   const listings = seed.records.filter((record) => record.collection === "listings");
-  const entries = listings.flatMap((record) =>
+  const listingEntries = listings.flatMap((record) =>
     sitemapEntriesForListing(registry, record.id, mergeRuntimeTranslations(record, translationTasks)),
   );
+  const sellerEntries = sitemapEntriesForSeller(registry);
+  const entries = [...listingEntries, ...sellerEntries];
   return {
     artifact_id: "runtime-localized-sitemap",
     summary: {
       listings: listings.length,
+      listing_entries: listingEntries.length,
+      seller_pages: sellerEntries.length,
       entries: entries.length,
       byLocale: countBy(entries, (entry) => entry.locale),
     },
@@ -74,6 +78,7 @@ export function renderRobotsTxt({ origin = DEFAULT_PUBLIC_ORIGIN } = {}) {
 
 export function assertSeoFiles({ sitemapXml, robotsTxt }) {
   if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001")) throw new Error("Sitemap XML must include approved Hebrew route");
+  if (!sitemapXml.includes("/he/sell")) throw new Error("Sitemap XML must include Hebrew seller route");
   if (sitemapXml.includes("/fr/")) throw new Error("Sitemap XML must not include unapproved French routes");
   if (!sitemapXml.includes('hreflang="x-default"')) throw new Error("Sitemap XML must include x-default links");
   if (!robotsTxt.includes("User-agent: *")) throw new Error("Robots must declare user agent");

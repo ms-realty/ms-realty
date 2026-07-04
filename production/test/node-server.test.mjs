@@ -142,6 +142,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         }),
         sitemap: await textFetch(baseUrl, "/sitemap.xml"),
         robots: await textFetch(baseUrl, "/robots.txt"),
+        sellerPage: await jsonFetch(baseUrl, "/he/sell"),
+        sellerHtml: await textFetch(baseUrl, "/he/sell", {
+          headers: { accept: "text/html" },
+        }),
         lead: await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           body: JSON.stringify({

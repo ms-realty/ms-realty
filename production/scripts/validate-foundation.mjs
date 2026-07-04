@@ -99,17 +99,20 @@ const redirectApprovals = fs
 if (redirectApprovals.length !== 2) throw new Error("Redirect approval ledger must contain two reviewed rows");
 
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
-if (sitemap.summary.byLocale.bg !== 113 || sitemap.summary.byLocale.ru !== 52) {
+if (sitemap.summary.listing_entries !== 167 || sitemap.summary.seller_pages !== 7) {
+  throw new Error("Localized sitemap must include approved listing entries plus public seller pages");
+}
+if (sitemap.summary.byLocale.bg !== 114 || sitemap.summary.byLocale.ru !== 53) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 1 || sitemap.summary.byLocale.he !== 1) {
+if (sitemap.summary.byLocale.el !== 2 || sitemap.summary.byLocale.he !== 2) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
 
 const sitemapXml = fs.readFileSync(fromRoot("production", "data", "sitemap.xml"), "utf8");
 const robotsTxt = fs.readFileSync(fromRoot("production", "data", "robots.txt"), "utf8");
-if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001") || sitemapXml.includes("/fr/")) {
+if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001") || !sitemapXml.includes("/he/sell") || sitemapXml.includes("/fr/")) {
   throw new Error("Sitemap XML must include approved Hebrew and exclude French");
 }
 if (!robotsTxt.includes("Sitemap:")) throw new Error("Robots must include sitemap URL");
@@ -210,6 +213,13 @@ if (
 }
 if (httpSmoke.searchHtml.status !== 200 || !httpSmoke.searchHtml.body.includes("data-kind=\"search\"")) {
   throw new Error("HTTP smoke must expose server-rendered search HTML");
+}
+if (
+  httpSmoke.sellerPage.status !== 200 ||
+  httpSmoke.sellerPage.body.body.valuation.payload.leadType !== "seller" ||
+  !httpSmoke.sellerHtml.body.includes("data-lead-type=\"seller\"")
+) {
+  throw new Error("HTTP smoke must expose seller valuation page contract");
 }
 if (
   httpSmoke.brokerContact.status !== 201 ||

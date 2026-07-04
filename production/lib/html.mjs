@@ -78,6 +78,22 @@ function renderSearch(page) {
 </main>`;
 }
 
+function renderSeller(page) {
+  return `
+<main data-kind="seller">
+  <h1>${escapeHtml(page.body.h1)}</h1>
+  <p>${escapeHtml(page.body.intro)}</p>
+  <form method="post" action="${escapeHtml(page.body.valuation.endpoint)}" data-lead-type="seller">
+    <input type="hidden" name="source" value="${escapeHtml(page.body.valuation.payload.source)}">
+    <input type="hidden" name="leadType" value="${escapeHtml(page.body.valuation.payload.leadType)}">
+    <input type="hidden" name="language" value="${escapeHtml(page.body.valuation.payload.language)}">
+    <label>Name <input name="contact.name" required autocomplete="name"></label>
+    <label>Property details <textarea name="message" required></textarea></label>
+    <button type="submit">${escapeHtml(page.body.valuation.label)}</button>
+  </form>
+</main>`;
+}
+
 function renderFallback(page) {
   return `
 <main data-kind="language-fallback">
@@ -90,6 +106,7 @@ function renderFallback(page) {
 function renderBody(page) {
   if (page.kind === "listing") return renderListing(page);
   if (page.kind === "search") return renderSearch(page);
+  if (page.kind === "seller") return renderSeller(page);
   if (page.kind === "language_fallback") return renderFallback(page);
   return `<main data-kind="not-found"><h1>Not found</h1></main>`;
 }

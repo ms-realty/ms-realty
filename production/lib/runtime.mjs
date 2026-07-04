@@ -3,8 +3,8 @@ import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
 import { fromRoot } from "./paths.mjs";
-import { renderLanguageFallback, renderListingPage, renderSearchPage } from "./public-site.mjs";
-import { listingPath } from "./seo.mjs";
+import { renderLanguageFallback, renderListingPage, renderSearchPage, renderSellerPage } from "./public-site.mjs";
+import { listingPath, sellerPath } from "./seo.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 
 export const DEFAULT_CMS_SEED_PATH = fromRoot("production", "data", "cms-seed.json");
@@ -85,6 +85,15 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
     };
   }
 
+  const sellerLocale = registry.locales.find((locale) => {
+    try {
+      return sellerPath(registry, locale.code) === normalized;
+    } catch {
+      return false;
+    }
+  });
+  if (sellerLocale) return { type: "seller", localeCode: sellerLocale.code };
+
   const localeMatch = normalized.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)\/?$/);
   if (localeMatch) {
     return { type: "language_fallback", localeCode: localeMatch[1] };
@@ -106,6 +115,9 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   }
   if (resolved.type === "language_fallback") {
     return renderLanguageFallback({ registry, requestedLocale: resolved.localeCode });
+  }
+  if (resolved.type === "seller") {
+    return renderSellerPage({ registry, localeCode: resolved.localeCode });
   }
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
@@ -136,6 +148,7 @@ export function buildRuntimeSmoke(registry, seed) {
     fixture_id: "runtime-smoke-20260704",
     listing_he: renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"),
     listing_ru: renderRuntimePath(registry, seed, ruListing.routing.target_path),
+    seller_he: renderRuntimePath(registry, seed, "/he/sell"),
     fallback_fr: renderRuntimePath(registry, seed, "/fr/"),
     search_he: searchRuntimeListings(registry, seed, { localeCode: "he", query: "Sandanski" }),
     lead_he: submitRuntimeLead(registry, seed, {
@@ -165,6 +178,9 @@ export function assertRuntimeSmoke(smoke) {
     throw new Error("Runtime Russian listing route missing");
   }
   if (smoke.fallback_fr.indexable !== false) throw new Error("Runtime French fallback must not be indexable");
+  if (smoke.seller_he.status !== 200 || smoke.seller_he.body.valuation.payload.source !== "website_seller_valuation") {
+    throw new Error("Runtime seller page must expose seller valuation lead action");
+  }
   if (smoke.search_he.mobile_policy.list_first_mobile !== true) throw new Error("Runtime search must preserve mobile policy");
   if (smoke.lead_he.admin_locale !== "en" || smoke.lead_he.hermes_reply_draft.can_send_without_approval !== false) {
     throw new Error("Runtime lead must route to EN admin queue with broker approval");

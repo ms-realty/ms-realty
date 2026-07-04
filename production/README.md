@@ -33,6 +33,7 @@ What it proves now:
 - Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Server-rendered HTML adapter for listing, search, and fallback pages with SEO metadata.
+- Locale-prefixed seller valuation page backed by the existing seller lead pipeline.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
 - Runtime search query/facet filtering before pagination, with total match counts.
@@ -51,6 +52,7 @@ What it proves now:
 - Broker-booked viewing ledger with open follow-up tasks from existing CRM leads.
 - Saved-search ledger with open alert tasks from public search criteria.
 - Seller valuation pipeline ledger with callback/appraisal tasks from seller leads.
+- Public seller pages are included in the localized sitemap for approved website locales.
 
 Run:
 

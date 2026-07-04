@@ -106,9 +106,12 @@ test("generated localized sitemap file is approved-translation gated when presen
   if (!fs.existsSync(file)) return;
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(data.summary.listings, 165);
-  assert.equal(data.summary.byLocale.bg, 113);
-  assert.equal(data.summary.byLocale.ru, 52);
-  assert.equal(data.summary.byLocale.el, 1);
-  assert.equal(data.summary.byLocale.he, 1);
+  assert.equal(data.summary.listing_entries, 167);
+  assert.equal(data.summary.seller_pages, 7);
+  assert.equal(data.summary.byLocale.bg, 114);
+  assert.equal(data.summary.byLocale.ru, 53);
+  assert.equal(data.summary.byLocale.el, 2);
+  assert.equal(data.summary.byLocale.he, 2);
   assert.equal(data.summary.byLocale.fr, undefined);
+  assert.equal(data.entries.some((entry) => entry.loc === "/he/sell" && entry.type === "seller"), true);
 });

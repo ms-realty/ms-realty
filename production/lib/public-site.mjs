@@ -1,5 +1,5 @@
 import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } from "./locales.mjs";
-import { hreflangForListing, isTranslationIndexable, listingPath } from "./seo.mjs";
+import { hreflangForListing, hreflangForSeller, isTranslationIndexable, listingPath, sellerPath } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { publicTour } from "./tours.mjs";
@@ -97,6 +97,44 @@ const PUBLIC_COPY = {
   },
 };
 
+const SELLER_COPY = {
+  bg: {
+    title: "Продайте имота си с MS Realty",
+    description: "Заявете брокерска оценка и обратна връзка от екипа на MS Realty.",
+    h1: "Продайте имота си",
+  },
+  en: {
+    title: "Sell your property with MS Realty",
+    description: "Request a broker valuation and follow-up from the MS Realty team.",
+    h1: "Sell your property",
+  },
+  de: {
+    title: "Verkaufen Sie Ihre Immobilie mit MS Realty",
+    description: "Fordern Sie eine Maklerbewertung und Rückmeldung vom MS Realty Team an.",
+    h1: "Immobilie verkaufen",
+  },
+  nl: {
+    title: "Verkoop uw vastgoed met MS Realty",
+    description: "Vraag een makelaarswaardering en opvolging van het MS Realty team aan.",
+    h1: "Vastgoed verkopen",
+  },
+  ru: {
+    title: "Продайте недвижимость с MS Realty",
+    description: "Запросите брокерскую оценку и обратную связь от команды MS Realty.",
+    h1: "Продайте недвижимость",
+  },
+  el: {
+    title: "Πουλήστε το ακίνητό σας με τη MS Realty",
+    description: "Ζητήστε εκτίμηση από μεσίτη και επικοινωνία από την ομάδα της MS Realty.",
+    h1: "Πουλήστε το ακίνητό σας",
+  },
+  he: {
+    title: "מכירת נכס עם MS Realty",
+    description: "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
+    h1: "מכירת נכס",
+  },
+};
+
 function labelsFor(localeCode) {
   return ACTION_LABELS[localeCode] || ACTION_LABELS.en;
 }
@@ -124,6 +162,10 @@ function localizedCopy(localeCode, view) {
 
 function translationFor(translations, localeCode) {
   return translations.find((translation) => translation.locale === localeCode) || null;
+}
+
+function sellerCopy(localeCode) {
+  return SELLER_COPY[localeCode] || SELLER_COPY.en;
 }
 
 function translationsForSearchListing(registry, listing) {
@@ -396,6 +438,60 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       },
     },
     cards,
+  };
+}
+
+export function renderSellerPage({ registry, localeCode }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const path = sellerPath(registry, locale.code);
+  const labels = labelsFor(locale.code);
+  const copy = sellerCopy(locale.code);
+
+  return {
+    kind: "seller",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: resolved.available,
+    metadata: {
+      title: copy.title,
+      description: copy.description,
+      robots: resolved.available ? "index,follow" : "noindex,follow",
+    },
+    hreflang: resolved.available ? hreflangForSeller(registry) : [],
+    body: {
+      h1: copy.h1,
+      intro: copy.description,
+      valuation: {
+        endpoint: "/api/leads",
+        method: "POST",
+        minimum_tap_target_px: 44,
+        required_fields: ["contact.name", "message"],
+        payload: {
+          source: "website_seller_valuation",
+          leadType: "seller",
+          language: locale.code,
+          contact_preference: "phone",
+        },
+        label: labels.valuation,
+      },
+      callback: {
+        endpoint: "/api/leads",
+        method: "POST",
+        payload: {
+          source: "website_seller_callback",
+          leadType: "seller",
+          language: locale.code,
+          contact_preference: "phone",
+        },
+        label: labels.callback,
+      },
+    },
   };
 }
 

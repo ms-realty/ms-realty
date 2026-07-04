@@ -123,6 +123,13 @@ export function assertServerSmoke(smoke) {
   if (smoke.searchHtml?.status !== 200 || !smoke.searchHtml.body.includes("data-kind=\"search\"")) {
     throw new Error("Server must serve rendered search HTML");
   }
+  if (
+    smoke.sellerPage?.status !== 200 ||
+    smoke.sellerPage.body.body.valuation.payload.source !== "website_seller_valuation" ||
+    !smoke.sellerHtml?.body.includes("data-lead-type=\"seller\"")
+  ) {
+    throw new Error("Server must serve seller valuation page");
+  }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
   if (smoke.admin.body.leads.length < 2) throw new Error("Server must show buyer and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated admin leads");

@@ -99,6 +99,10 @@ try {
     }),
     sitemap: await textFetch(baseUrl, "/sitemap.xml"),
     robots: await textFetch(baseUrl, "/robots.txt"),
+    sellerPage: await jsonFetch(baseUrl, "/he/sell"),
+    sellerHtml: await textFetch(baseUrl, "/he/sell", {
+      headers: { accept: "text/html" },
+    }),
     savedSearch: await jsonFetch(baseUrl, "/api/saved-searches", {
       method: "POST",
       body: JSON.stringify({

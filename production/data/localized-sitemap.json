@@ -2,16 +2,22 @@
   "artifact_id": "localized-sitemap-20260704",
   "summary": {
     "listings": 165,
-    "entries": 167,
+    "listing_entries": 167,
+    "seller_pages": 7,
+    "entries": 174,
     "byLocale": {
-      "bg": 113,
-      "el": 1,
-      "he": 1,
-      "ru": 52
+      "bg": 114,
+      "el": 2,
+      "he": 2,
+      "ru": 53,
+      "en": 1,
+      "de": 1,
+      "nl": 1
     }
   },
   "entries": [
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0001",
       "hreflang": [
@@ -34,6 +40,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "el",
       "loc": "/el/akinita/MS-CRAWL-0001",
       "hreflang": [
@@ -56,6 +63,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "he",
       "loc": "/he/properties/MS-CRAWL-0001",
       "hreflang": [
@@ -78,6 +86,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0002",
       "hreflang": [
@@ -92,6 +101,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0003",
       "hreflang": [
@@ -106,6 +116,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0004",
       "hreflang": [
@@ -120,6 +131,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0005",
       "hreflang": [
@@ -134,6 +146,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0006",
       "hreflang": [
@@ -148,6 +161,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0007",
       "hreflang": [
@@ -162,6 +176,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0008",
       "hreflang": [
@@ -176,6 +191,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0009",
       "hreflang": [
@@ -190,6 +206,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0010",
       "hreflang": [
@@ -204,6 +221,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0011",
       "hreflang": [
@@ -218,6 +236,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0012",
       "hreflang": [
@@ -232,6 +251,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0013",
       "hreflang": [
@@ -246,6 +266,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0014",
       "hreflang": [
@@ -260,6 +281,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0015",
       "hreflang": [
@@ -274,6 +296,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0016",
       "hreflang": [
@@ -288,6 +311,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0017",
       "hreflang": [
@@ -302,6 +326,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0018",
       "hreflang": [
@@ -316,6 +341,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0019",
       "hreflang": [
@@ -330,6 +356,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0020",
       "hreflang": [
@@ -344,6 +371,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0021",
       "hreflang": [
@@ -358,6 +386,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0022",
       "hreflang": [
@@ -372,6 +401,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0023",
       "hreflang": [
@@ -386,6 +416,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0024",
       "hreflang": [
@@ -400,6 +431,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0025",
       "hreflang": [
@@ -414,6 +446,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0026",
       "hreflang": [
@@ -428,6 +461,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0027",
       "hreflang": [
@@ -442,6 +476,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0028",
       "hreflang": [
@@ -456,6 +491,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0029",
       "hreflang": [
@@ -470,6 +506,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0030",
       "hreflang": [
@@ -484,6 +521,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0031",
       "hreflang": [
@@ -498,6 +536,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0032",
       "hreflang": [
@@ -512,6 +551,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0033",
       "hreflang": [
@@ -526,6 +566,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0034",
       "hreflang": [
@@ -540,6 +581,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0035",
       "hreflang": [
@@ -554,6 +596,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0036",
       "hreflang": [
@@ -568,6 +611,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0037",
       "hreflang": [
@@ -582,6 +626,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0038",
       "hreflang": [
@@ -596,6 +641,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0039",
       "hreflang": [
@@ -610,6 +656,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0040",
       "hreflang": [
@@ -624,6 +671,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0041",
       "hreflang": [
@@ -638,6 +686,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0042",
       "hreflang": [
@@ -652,6 +701,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0043",
       "hreflang": [
@@ -666,6 +716,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0044",
       "hreflang": [
@@ -680,6 +731,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0045",
       "hreflang": [
@@ -694,6 +746,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0046",
       "hreflang": [
@@ -708,6 +761,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0047",
       "hreflang": [
@@ -722,6 +776,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0048",
       "hreflang": [
@@ -736,6 +791,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0049",
       "hreflang": [
@@ -750,6 +806,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0050",
       "hreflang": [
@@ -764,6 +821,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0051",
       "hreflang": [
@@ -778,6 +836,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0052",
       "hreflang": [
@@ -792,6 +851,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0053",
       "hreflang": [
@@ -806,6 +866,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0054",
       "hreflang": [
@@ -820,6 +881,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0055",
       "hreflang": [
@@ -834,6 +896,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0056",
       "hreflang": [
@@ -848,6 +911,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0057",
       "hreflang": [
@@ -862,6 +926,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0058",
       "hreflang": [
@@ -876,6 +941,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0059",
       "hreflang": [
@@ -890,6 +956,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0060",
       "hreflang": [
@@ -904,6 +971,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0061",
       "hreflang": [
@@ -918,6 +986,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0062",
       "hreflang": [
@@ -932,6 +1001,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0063",
       "hreflang": [
@@ -946,6 +1016,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0064",
       "hreflang": [
@@ -960,6 +1031,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0065",
       "hreflang": [
@@ -974,6 +1046,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0066",
       "hreflang": [
@@ -988,6 +1061,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0067",
       "hreflang": [
@@ -1002,6 +1076,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0068",
       "hreflang": [
@@ -1016,6 +1091,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0069",
       "hreflang": [
@@ -1030,6 +1106,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0070",
       "hreflang": [
@@ -1044,6 +1121,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0071",
       "hreflang": [
@@ -1058,6 +1136,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0072",
       "hreflang": [
@@ -1072,6 +1151,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0073",
       "hreflang": [
@@ -1086,6 +1166,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0074",
       "hreflang": [
@@ -1100,6 +1181,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0075",
       "hreflang": [
@@ -1114,6 +1196,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-3000",
       "hreflang": [
@@ -1128,6 +1211,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0077",
       "hreflang": [
@@ -1142,6 +1226,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0078",
       "hreflang": [
@@ -1156,6 +1241,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0079",
       "hreflang": [
@@ -1170,6 +1256,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0080",
       "hreflang": [
@@ -1184,6 +1271,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0081",
       "hreflang": [
@@ -1198,6 +1286,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0082",
       "hreflang": [
@@ -1212,6 +1301,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0083",
       "hreflang": [
@@ -1226,6 +1316,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0084",
       "hreflang": [
@@ -1240,6 +1331,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0085",
       "hreflang": [
@@ -1254,6 +1346,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0086",
       "hreflang": [
@@ -1268,6 +1361,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0087",
       "hreflang": [
@@ -1282,6 +1376,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0088",
       "hreflang": [
@@ -1296,6 +1391,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0089",
       "hreflang": [
@@ -1310,6 +1406,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0090",
       "hreflang": [
@@ -1324,6 +1421,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0091",
       "hreflang": [
@@ -1338,6 +1436,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0092",
       "hreflang": [
@@ -1352,6 +1451,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0093",
       "hreflang": [
@@ -1366,6 +1466,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0094",
       "hreflang": [
@@ -1380,6 +1481,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0095",
       "hreflang": [
@@ -1394,6 +1496,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0096",
       "hreflang": [
@@ -1408,6 +1511,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0097",
       "hreflang": [
@@ -1422,6 +1526,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0098",
       "hreflang": [
@@ -1436,6 +1541,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0099",
       "hreflang": [
@@ -1450,6 +1556,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0100",
       "hreflang": [
@@ -1464,6 +1571,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0101",
       "hreflang": [
@@ -1478,6 +1586,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0102",
       "hreflang": [
@@ -1492,6 +1601,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0103",
       "hreflang": [
@@ -1506,6 +1616,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0104",
       "hreflang": [
@@ -1520,6 +1631,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0105",
       "hreflang": [
@@ -1534,6 +1646,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0106",
       "hreflang": [
@@ -1548,6 +1661,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0107",
       "hreflang": [
@@ -1562,6 +1676,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0108",
       "hreflang": [
@@ -1576,6 +1691,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0109",
       "hreflang": [
@@ -1590,6 +1706,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0110",
       "hreflang": [
@@ -1604,6 +1721,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0111",
       "hreflang": [
@@ -1618,6 +1736,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0112",
       "hreflang": [
@@ -1632,6 +1751,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "bg",
       "loc": "/bg/imoti/MS-CRAWL-0113",
       "hreflang": [
@@ -1646,6 +1766,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0114",
       "hreflang": [
@@ -1656,6 +1777,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0115",
       "hreflang": [
@@ -1666,6 +1788,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0116",
       "hreflang": [
@@ -1676,6 +1799,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0117",
       "hreflang": [
@@ -1686,6 +1810,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0118",
       "hreflang": [
@@ -1696,6 +1821,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0119",
       "hreflang": [
@@ -1706,6 +1832,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0120",
       "hreflang": [
@@ -1716,6 +1843,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0121",
       "hreflang": [
@@ -1726,6 +1854,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0122",
       "hreflang": [
@@ -1736,6 +1865,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0123",
       "hreflang": [
@@ -1746,6 +1876,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0124",
       "hreflang": [
@@ -1756,6 +1887,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0125",
       "hreflang": [
@@ -1766,6 +1898,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0126",
       "hreflang": [
@@ -1776,6 +1909,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0127",
       "hreflang": [
@@ -1786,6 +1920,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0128",
       "hreflang": [
@@ -1796,6 +1931,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0129",
       "hreflang": [
@@ -1806,6 +1942,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0130",
       "hreflang": [
@@ -1816,6 +1953,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0131",
       "hreflang": [
@@ -1826,6 +1964,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0132",
       "hreflang": [
@@ -1836,6 +1975,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0133",
       "hreflang": [
@@ -1846,6 +1986,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0134",
       "hreflang": [
@@ -1856,6 +1997,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0135",
       "hreflang": [
@@ -1866,6 +2008,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0136",
       "hreflang": [
@@ -1876,6 +2019,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0137",
       "hreflang": [
@@ -1886,6 +2030,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0138",
       "hreflang": [
@@ -1896,6 +2041,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0139",
       "hreflang": [
@@ -1906,6 +2052,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0140",
       "hreflang": [
@@ -1916,6 +2063,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0141",
       "hreflang": [
@@ -1926,6 +2074,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0142",
       "hreflang": [
@@ -1936,6 +2085,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0143",
       "hreflang": [
@@ -1946,6 +2096,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0144",
       "hreflang": [
@@ -1956,6 +2107,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0145",
       "hreflang": [
@@ -1966,6 +2118,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0146",
       "hreflang": [
@@ -1976,6 +2129,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0147",
       "hreflang": [
@@ -1986,6 +2140,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0148",
       "hreflang": [
@@ -1996,6 +2151,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0149",
       "hreflang": [
@@ -2006,6 +2162,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0150",
       "hreflang": [
@@ -2016,6 +2173,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0151",
       "hreflang": [
@@ -2026,6 +2184,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0152",
       "hreflang": [
@@ -2036,6 +2195,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0153",
       "hreflang": [
@@ -2046,6 +2206,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0154",
       "hreflang": [
@@ -2056,6 +2217,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0155",
       "hreflang": [
@@ -2066,6 +2228,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0156",
       "hreflang": [
@@ -2076,6 +2239,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0157",
       "hreflang": [
@@ -2086,6 +2250,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0158",
       "hreflang": [
@@ -2096,6 +2261,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0159",
       "hreflang": [
@@ -2106,6 +2272,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0160",
       "hreflang": [
@@ -2116,6 +2283,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0161",
       "hreflang": [
@@ -2126,6 +2294,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0162",
       "hreflang": [
@@ -2136,6 +2305,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0163",
       "hreflang": [
@@ -2146,6 +2316,7 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0164",
       "hreflang": [
@@ -2156,12 +2327,286 @@
       ]
     },
     {
+      "type": "listing",
       "locale": "ru",
       "loc": "/ru/properties/MS-CRAWL-0165",
       "hreflang": [
         {
           "hreflang": "ru",
           "href": "/ru/properties/MS-CRAWL-0165"
+        }
+      ]
+    },
+    {
+      "type": "seller",
+      "locale": "bg",
+      "loc": "/bg/prodai",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/prodai"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/sell"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/verkaufen"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/verkopen"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/sell"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/polisi"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/sell"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/prodai"
+        }
+      ]
+    },
+    {
+      "type": "seller",
+      "locale": "en",
+      "loc": "/en/sell",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/prodai"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/sell"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/verkaufen"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/verkopen"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/sell"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/polisi"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/sell"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/prodai"
+        }
+      ]
+    },
+    {
+      "type": "seller",
+      "locale": "de",
+      "loc": "/de/verkaufen",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/prodai"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/sell"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/verkaufen"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/verkopen"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/sell"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/polisi"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/sell"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/prodai"
+        }
+      ]
+    },
+    {
+      "type": "seller",
+      "locale": "nl",
+      "loc": "/nl/verkopen",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/prodai"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/sell"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/verkaufen"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/verkopen"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/sell"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/polisi"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/sell"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/prodai"
+        }
+      ]
+    },
+    {
+      "type": "seller",
+      "locale": "ru",
+      "loc": "/ru/sell",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/prodai"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/sell"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/verkaufen"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/verkopen"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/sell"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/polisi"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/sell"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/prodai"
+        }
+      ]
+    },
+    {
+      "type": "seller",
+      "locale": "el",
+      "loc": "/el/polisi",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/prodai"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/sell"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/verkaufen"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/verkopen"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/sell"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/polisi"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/sell"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/prodai"
+        }
+      ]
+    },
+    {
+      "type": "seller",
+      "locale": "he",
+      "loc": "/he/sell",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/prodai"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/sell"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/verkaufen"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/verkopen"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/sell"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/polisi"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/sell"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/prodai"
         }
       ]
     }

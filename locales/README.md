@@ -23,6 +23,7 @@ Locale-prefixed URLs are the standard:
 /en/properties/ms-987
 /el/akinita/ms-987
 /he/properties/ms-987
+/he/sell
 ```
 
 Do not add an indexable localized page unless the translation is reviewed and

@@ -30,7 +30,8 @@
       "reviewer_role": "editor_bg",
       "route_segments": {
         "listing": "imoti",
-        "search": "tarsene"
+        "search": "tarsene",
+        "seller": "prodai"
       }
     },
     {
@@ -45,7 +46,8 @@
       "reviewer_role": "editor_en",
       "route_segments": {
         "listing": "properties",
-        "search": "search"
+        "search": "search",
+        "seller": "sell"
       }
     },
     {
@@ -60,7 +62,8 @@
       "reviewer_role": "translator_de",
       "route_segments": {
         "listing": "immobilien",
-        "search": "suche"
+        "search": "suche",
+        "seller": "verkaufen"
       }
     },
     {
@@ -75,7 +78,8 @@
       "reviewer_role": "translator_nl",
       "route_segments": {
         "listing": "vastgoed",
-        "search": "zoeken"
+        "search": "zoeken",
+        "seller": "verkopen"
       }
     },
     {
@@ -90,7 +94,8 @@
       "reviewer_role": "editor_ru",
       "route_segments": {
         "listing": "properties",
-        "search": "search"
+        "search": "search",
+        "seller": "sell"
       }
     },
     {
@@ -105,7 +110,8 @@
       "reviewer_role": "translator_el",
       "route_segments": {
         "listing": "akinita",
-        "search": "anazitisi"
+        "search": "anazitisi",
+        "seller": "polisi"
       }
     },
     {
@@ -120,7 +126,8 @@
       "reviewer_role": "translator_he",
       "route_segments": {
         "listing": "properties",
-        "search": "search"
+        "search": "search",
+        "seller": "sell"
       }
     },
     {
@@ -135,7 +142,8 @@
       "reviewer_role": "translator_fr",
       "route_segments": {
         "listing": "properties",
-        "search": "recherche"
+        "search": "recherche",
+        "seller": "vendre"
       }
     },
     {
@@ -150,7 +158,8 @@
       "reviewer_role": "translator_es",
       "route_segments": {
         "listing": "propiedades",
-        "search": "buscar"
+        "search": "buscar",
+        "seller": "sell"
       }
     }
   ]

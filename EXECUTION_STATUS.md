@@ -109,6 +109,7 @@ Date: 2026-07-04
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations
+  - public seller valuation pages included for each indexable website locale
   - unapproved French excluded
 - Added generated SEO files:
   - `production/data/sitemap.xml` from approved localized sitemap entries
@@ -139,6 +140,7 @@ Date: 2026-07-04
 - Added server-rendered HTML adapter:
   - `GET /he/properties/MS-CRAWL-0001` serves listing HTML when `Accept: text/html` or `?format=html` is present
   - `GET /he/search?q=Sandanski` serves locale-scoped search HTML
+  - `GET /he/sell` serves a Hebrew RTL seller valuation page backed by `POST /api/leads`
   - HTML includes `lang`, `dir`, canonical, robots, hreflang, and listing schema metadata
   - direct phone, WhatsApp, and Viber links stay absent until broker contact approval exists
 - Added live Node server smoke fixture:

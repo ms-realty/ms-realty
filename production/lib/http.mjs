@@ -462,6 +462,16 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must serve rendered search HTML");
   }
+  if (
+    smoke.sellerPage?.status !== 200 ||
+    smoke.sellerPage.body.body.valuation.payload.source !== "website_seller_valuation" ||
+    smoke.sellerPage.body.dir !== "rtl"
+  ) {
+    throw new Error("HTTP smoke must serve seller valuation page");
+  }
+  if (smoke.sellerHtml?.status !== 200 || !smoke.sellerHtml.body.includes("data-lead-type=\"seller\"")) {
+    throw new Error("HTTP smoke must serve rendered seller valuation HTML");
+  }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
   if (smoke.admin.body.leads.length < 2) throw new Error("HTTP smoke must show buyer and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");

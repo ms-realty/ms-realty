@@ -789,4 +789,81 @@
     <loc>https://makler-realty.com/ru/properties/MS-CRAWL-0165</loc>
     <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/properties/MS-CRAWL-0165" />
   </url>
+  <url>
+    <loc>https://makler-realty.com/bg/prodai</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/verkaufen" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/verkopen" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/sell" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/polisi" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/sell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/prodai" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/en/sell</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/verkaufen" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/verkopen" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/sell" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/polisi" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/sell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/prodai" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/de/verkaufen</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/verkaufen" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/verkopen" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/sell" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/polisi" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/sell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/prodai" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/nl/verkopen</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/verkaufen" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/verkopen" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/sell" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/polisi" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/sell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/prodai" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/ru/sell</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/verkaufen" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/verkopen" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/sell" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/polisi" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/sell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/prodai" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/el/polisi</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/verkaufen" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/verkopen" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/sell" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/polisi" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/sell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/prodai" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/he/sell</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/prodai" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/sell" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://makler-realty.com/de/verkaufen" />
+    <xhtml:link rel="alternate" hreflang="nl" href="https://makler-realty.com/nl/verkopen" />
+    <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/sell" />
+    <xhtml:link rel="alternate" hreflang="el" href="https://makler-realty.com/el/polisi" />
+    <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/sell" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/prodai" />
+  </url>
 </urlset>

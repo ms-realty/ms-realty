@@ -44,8 +44,10 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
     },
   ]);
 
-  assert.equal(sitemap.summary.byLocale.es, 1);
+  assert.equal(sitemap.summary.byLocale.es, 2);
+  assert.equal(sitemap.summary.seller_pages, 8);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/propiedades/MS-CRAWL-0001"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/sell" && entry.type === "seller"), true);
 });
 
 test("generated SEO files are valid when present", () => {

@@ -154,6 +154,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     }),
     sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
     robots: await dispatchHttp(app, { url: "/robots.txt" }),
+    sellerPage: await dispatchHttp(app, { url: "/he/sell" }),
+    sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
     lead: await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",

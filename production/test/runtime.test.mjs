@@ -18,6 +18,7 @@ const seed = loadCmsSeed();
 
 test("runtime resolves locale-prefixed listing and fallback routes from CMS seed", () => {
   const he = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001");
+  const seller = renderRuntimePath(registry, seed, "/he/sell");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
 
@@ -34,6 +35,9 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.source, "website_callback_request");
   assert.equal(he.body.actions.secondary.find((action) => action.id === "share_family").url, he.path);
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
+  assert.equal(seller.kind, "seller");
+  assert.equal(seller.path, "/he/sell");
+  assert.equal(seller.body.valuation.payload.leadType, "seller");
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
@@ -81,7 +85,7 @@ test("runtime resolves admin-added approved locale listing routes from translati
     admin_name: "Spanish",
     public_enabled: true,
     indexable: true,
-    route_segments: { listing: "propiedades", search: "buscar" },
+    route_segments: { listing: "propiedades", search: "buscar", seller: "vender" },
   });
   const page = renderRuntimePath(updated, seed, "/es/propiedades/MS-CRAWL-0001", [
     {
@@ -99,6 +103,7 @@ test("runtime resolves admin-added approved locale listing routes from translati
   assert.equal(page.locale, "es");
   assert.equal(page.indexable, true);
   assert.equal(page.hreflang.some((link) => link.hreflang === "es"), true);
+  assert.equal(renderRuntimePath(updated, seed, "/es/vender").locale, "es");
 });
 
 test("runtime search uses CMS seed listings and keeps mobile-first contract", () => {
@@ -151,7 +156,7 @@ test("runtime search shows reviewed cards for admin-added approved locales", () 
     admin_name: "Spanish",
     public_enabled: true,
     indexable: true,
-    route_segments: { listing: "propiedades", search: "buscar" },
+    route_segments: { listing: "propiedades", search: "buscar", seller: "vender" },
   });
   const search = searchRuntimeListings(updated, seed, {
     localeCode: "es",

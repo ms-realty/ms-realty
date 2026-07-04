@@ -4,7 +4,7 @@ import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { assertHtmlPage, renderHtmlPage } from "../lib/html.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
-import { renderLanguageFallback, renderListingPage, renderSearchPage } from "../lib/public-site.mjs";
+import { renderLanguageFallback, renderListingPage, renderSearchPage, renderSellerPage } from "../lib/public-site.mjs";
 
 const registry = loadLocaleRegistry();
 const listings = loadListings();
@@ -27,6 +27,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
     }),
   );
   const searchHtml = renderHtmlPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" }));
+  const sellerHtml = renderHtmlPage(renderSellerPage({ registry, localeCode: "he" }));
   const fallbackHtml = renderHtmlPage(renderLanguageFallback({ registry, requestedLocale: "fr" }));
 
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
@@ -36,6 +37,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(approvedListingHtml, /tel:\+359880000000/);
   assert.equal(assertHtmlPage(searchHtml, { lang: "he", dir: "rtl", kind: "search" }), true);
   assert.match(searchHtml, /data-total-matches=/);
+  assert.equal(assertHtmlPage(sellerHtml, { lang: "he", dir: "rtl", kind: "seller" }), true);
+  assert.match(sellerHtml, /data-lead-type="seller"/);
   assert.equal(assertHtmlPage(fallbackHtml, { lang: "en", dir: "ltr", kind: "language-fallback" }), true);
   assert.match(fallbackHtml, /noindex,follow/);
 });

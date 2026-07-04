@@ -590,6 +590,87 @@
       }
     }
   },
+  "seller_he": {
+    "kind": "seller",
+    "status": 200,
+    "requested_locale": "he",
+    "locale": "he",
+    "lang": "he",
+    "dir": "rtl",
+    "path": "/he/sell",
+    "canonical": "/he/sell",
+    "indexable": true,
+    "metadata": {
+      "title": "מכירת נכס עם MS Realty",
+      "description": "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
+      "robots": "index,follow"
+    },
+    "hreflang": [
+      {
+        "hreflang": "bg",
+        "href": "/bg/prodai"
+      },
+      {
+        "hreflang": "en",
+        "href": "/en/sell"
+      },
+      {
+        "hreflang": "de",
+        "href": "/de/verkaufen"
+      },
+      {
+        "hreflang": "nl",
+        "href": "/nl/verkopen"
+      },
+      {
+        "hreflang": "ru",
+        "href": "/ru/sell"
+      },
+      {
+        "hreflang": "el",
+        "href": "/el/polisi"
+      },
+      {
+        "hreflang": "he",
+        "href": "/he/sell"
+      },
+      {
+        "hreflang": "x-default",
+        "href": "/bg/prodai"
+      }
+    ],
+    "body": {
+      "h1": "מכירת נכס",
+      "intro": "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
+      "valuation": {
+        "endpoint": "/api/leads",
+        "method": "POST",
+        "minimum_tap_target_px": 44,
+        "required_fields": [
+          "contact.name",
+          "message"
+        ],
+        "payload": {
+          "source": "website_seller_valuation",
+          "leadType": "seller",
+          "language": "he",
+          "contact_preference": "phone"
+        },
+        "label": "הערכת מוכר"
+      },
+      "callback": {
+        "endpoint": "/api/leads",
+        "method": "POST",
+        "payload": {
+          "source": "website_seller_callback",
+          "leadType": "seller",
+          "language": "he",
+          "contact_preference": "phone"
+        },
+        "label": "שיחה חוזרת"
+      }
+    }
+  },
   "fallback_fr": {
     "kind": "language_fallback",
     "status": 200,

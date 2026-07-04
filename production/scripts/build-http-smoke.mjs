@@ -120,6 +120,8 @@ const smoke = {
   }),
   sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
   robots: await dispatchHttp(app, { url: "/robots.txt" }),
+  sellerPage: await dispatchHttp(app, { url: "/he/sell" }),
+  sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
   savedSearch: await dispatchHttp(app, {
     method: "POST",
     url: "/api/saved-searches",

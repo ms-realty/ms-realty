@@ -497,6 +497,8 @@ Current local proof:
 
 - The stdlib HTTP server can return SEO-safe listing and search HTML from the
   same runtime contracts used by the JSON smokes.
+- A locale-prefixed seller valuation page can render as HTML/JSON and submit
+  into the existing seller lead pipeline.
 - The final Next.js route layer still needs to consume this contract before
   launch.
 

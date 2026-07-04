@@ -8,6 +8,7 @@ import {
   renderLanguageFallback,
   renderListingPage,
   renderSearchPage,
+  renderSellerPage,
 } from "../lib/public-site.mjs";
 
 const registry = loadLocaleRegistry();
@@ -114,6 +115,21 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.equal(apartments.search.filters.property_type, "apartment");
 });
 
+test("seller valuation page is locale-prefixed and posts seller leads", () => {
+  const he = renderSellerPage({ registry, localeCode: "he" });
+  const fr = renderSellerPage({ registry, localeCode: "fr" });
+
+  assert.equal(he.status, 200);
+  assert.equal(he.path, "/he/sell");
+  assert.equal(he.dir, "rtl");
+  assert.equal(he.indexable, true);
+  assert.equal(he.body.valuation.endpoint, "/api/leads");
+  assert.equal(he.body.valuation.payload.leadType, "seller");
+  assert.equal(he.body.valuation.payload.source, "website_seller_valuation");
+  assert.equal(fr.locale, "en");
+  assert.equal(fr.indexable, false);
+});
+
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {
   const adminRu = renderAdminShell({ registry, requestedLocale: "ru" });
   const adminEl = renderAdminShell({ registry, requestedLocale: "el" });
@@ -134,6 +150,7 @@ test("rendered public fixtures do not introduce Sandanski sea framing", () => {
     el: renderListingPage({ registry, listing, localeCode: "el" }),
     he: renderListingPage({ registry, listing, localeCode: "he" }),
     search: renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" }),
+    seller: renderSellerPage({ registry, localeCode: "he" }),
   });
 
   assert.doesNotMatch(rendered, /Sandanski sea|sea destination|Сандански море/i);
