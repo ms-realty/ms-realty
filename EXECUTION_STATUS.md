@@ -136,9 +136,15 @@ Date: 2026-07-04
   - `GET /api/search?locale=he&q=Sandanski`
   - `GET /fr/`
   - `POST /api/leads`
+- Added server-rendered HTML adapter:
+  - `GET /he/properties/MS-CRAWL-0001` serves listing HTML when `Accept: text/html` or `?format=html` is present
+  - `GET /he/search?q=Sandanski` serves locale-scoped search HTML
+  - HTML includes `lang`, `dir`, canonical, robots, hreflang, and listing schema metadata
+  - direct phone, WhatsApp, and Viber links stay absent until broker contact approval exists
 - Added live Node server smoke fixture:
   - starts a stdlib HTTP server on an ephemeral local port
   - fetches Hebrew listing and Hebrew search endpoints
+  - fetches Hebrew listing/search HTML through browser-style content negotiation
   - posts a valid Hebrew buyer lead
   - rejects an unknown buyer listing reference
 - Added append-only CRM lead ledger:

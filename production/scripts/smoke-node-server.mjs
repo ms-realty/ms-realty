@@ -67,6 +67,9 @@ try {
       captureHeaders: true,
     }),
     listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+    listingHtml: await textFetch(baseUrl, "/he/properties/MS-CRAWL-0001", {
+      headers: { accept: "text/html" },
+    }),
     brokerContact: await jsonFetch(baseUrl, "/api/admin/broker-contacts", {
       method: "POST",
       headers: { authorization: "Bearer local-admin-smoke" },
@@ -81,6 +84,9 @@ try {
     }),
     listingAfterBrokerContact: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
     search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
+    searchHtml: await textFetch(baseUrl, "/he/search?q=Sandanski", {
+      headers: { accept: "text/html" },
+    }),
     languageRequest: await jsonFetch(baseUrl, "/api/language-requests", {
       method: "POST",
       body: JSON.stringify({

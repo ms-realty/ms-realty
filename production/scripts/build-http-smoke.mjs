@@ -88,6 +88,7 @@ const smoke = {
   fixture_id: "http-smoke-20260704",
   legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+  listingHtml: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
   brokerContact: await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/broker-contacts",
@@ -103,6 +104,7 @@ const smoke = {
   }),
   listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
+  searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
   searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
   fallback: await dispatchHttp(app, { url: "/fr/" }),
   languageRequest: await dispatchHttp(app, {

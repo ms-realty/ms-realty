@@ -1,4 +1,5 @@
 import { addLocaleToRegistry, loadLocaleRegistry, writeLocaleRegistry } from "./locales.mjs";
+import { renderHtmlPage } from "./html.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
@@ -28,6 +29,16 @@ function response(status, body, contentType, headers = {}) {
 
 function json(status, body) {
   return response(status, body, "application/json; charset=utf-8");
+}
+
+function wantsHtml(request, url) {
+  const accept = request.headers?.accept || request.headers?.Accept || "";
+  return url.searchParams.get("format") === "html" || accept.includes("text/html");
+}
+
+function publicResponse(request, url, rendered) {
+  if (wantsHtml(request, url)) return response(rendered.status || 200, renderHtmlPage(rendered), "text/html; charset=utf-8");
+  return json(rendered.status || 200, rendered);
 }
 
 const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min"];
@@ -112,6 +123,25 @@ export function createHttpApp({
           translationTasks: readTranslationLedger(translationLedgerPath || undefined),
         }),
       );
+    }
+
+    if (request.method === "GET") {
+      const normalized = url.pathname.replace(/\/$/, "");
+      const searchLocale = activeRegistry.locales.find(
+        (locale) => locale.route_segments?.search && `/${locale.code}/${locale.route_segments.search}` === normalized,
+      );
+      if (searchLocale) {
+        return publicResponse(
+          request,
+          url,
+          searchRuntimeListings(activeRegistry, seed, {
+            localeCode: searchLocale.code,
+            query: url.searchParams.get("q") || "",
+            filters: searchFiltersFromParams(url.searchParams),
+            translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+          }),
+        );
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
@@ -311,7 +341,7 @@ export function createHttpApp({
       readTranslationLedger(translationLedgerPath || undefined),
       readBrokerContacts(brokerContactLedgerPath || undefined),
     );
-    return json(rendered.status || 200, rendered);
+    return publicResponse(request, url, rendered);
   };
 }
 
@@ -416,6 +446,22 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");
+  if (
+    smoke.listingHtml?.status !== 200 ||
+    smoke.listingHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
+    !smoke.listingHtml.body.includes("<html lang=\"he\" dir=\"rtl\">") ||
+    !smoke.listingHtml.body.includes("data-kind=\"listing\"") ||
+    smoke.listingHtml.body.includes("tel:+359880000000")
+  ) {
+    throw new Error("HTTP smoke must serve rendered listing HTML without unapproved direct contact");
+  }
+  if (
+    smoke.searchHtml?.status !== 200 ||
+    !smoke.searchHtml.body.includes("data-kind=\"search\"") ||
+    !smoke.searchHtml.body.includes("data-total-matches=")
+  ) {
+    throw new Error("HTTP smoke must serve rendered search HTML");
+  }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
   if (smoke.admin.body.leads.length < 2) throw new Error("HTTP smoke must show buyer and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");

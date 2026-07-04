@@ -201,6 +201,17 @@ if (httpSmoke.listing.body.body.actions?.secondary?.find((action) => action.id =
   throw new Error("HTTP smoke must expose print/PDF action contract");
 }
 if (
+  httpSmoke.listingHtml.status !== 200 ||
+  !httpSmoke.listingHtml.body.includes("<html lang=\"he\" dir=\"rtl\">") ||
+  !httpSmoke.listingHtml.body.includes("<link rel=\"canonical\"") ||
+  httpSmoke.listingHtml.body.includes("tel:+359880000000")
+) {
+  throw new Error("HTTP smoke must expose SEO-safe listing HTML without unapproved direct contact");
+}
+if (httpSmoke.searchHtml.status !== 200 || !httpSmoke.searchHtml.body.includes("data-kind=\"search\"")) {
+  throw new Error("HTTP smoke must expose server-rendered search HTML");
+}
+if (
   httpSmoke.brokerContact.status !== 201 ||
   httpSmoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status !== "approved_broker_contact" ||
   httpSmoke.listingAfterBrokerContact.body.body.actions.direct_contact.channels.some((channel) => !channel.enabled || !channel.href)

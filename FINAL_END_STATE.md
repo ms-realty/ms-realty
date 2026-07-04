@@ -493,6 +493,13 @@ Build:
 - Hreflang/canonical/schema output.
 - Sitemap generation.
 
+Current local proof:
+
+- The stdlib HTTP server can return SEO-safe listing and search HTML from the
+  same runtime contracts used by the JSON smokes.
+- The final Next.js route layer still needs to consume this contract before
+  launch.
+
 Done when:
 
 - Staging crawl matches the migration inventory.

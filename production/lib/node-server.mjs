@@ -16,7 +16,7 @@ export function createNodeServer(app = createHttpApp()) {
       body: await readBody(req),
     });
     res.writeHead(response.status, response.headers);
-    res.end(JSON.stringify(response.body));
+    res.end(typeof response.body === "string" ? response.body : JSON.stringify(response.body));
   });
 }
 
@@ -113,6 +113,16 @@ export function assertServerSmoke(smoke) {
   if (smoke.badLead.status !== 400) throw new Error("Server must reject unknown buyer listing");
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("Server must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");
+  if (
+    smoke.listingHtml?.status !== 200 ||
+    !smoke.listingHtml.body.includes("<html lang=\"he\" dir=\"rtl\">") ||
+    !smoke.listingHtml.body.includes("data-kind=\"listing\"")
+  ) {
+    throw new Error("Server must serve rendered listing HTML");
+  }
+  if (smoke.searchHtml?.status !== 200 || !smoke.searchHtml.body.includes("data-kind=\"search\"")) {
+    throw new Error("Server must serve rendered search HTML");
+  }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
   if (smoke.admin.body.leads.length < 2) throw new Error("Server must show buyer and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated admin leads");
