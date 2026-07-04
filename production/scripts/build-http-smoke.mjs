@@ -116,6 +116,7 @@ const smoke = {
       language: "he",
       listingReference: "MS-CRAWL-0001",
       contact: { name: "Noa Levi" },
+      contact_preference: "whatsapp",
       message: "Interested in this property.",
     },
   }),

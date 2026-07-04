@@ -87,6 +87,10 @@ Date: 2026-07-04
   - listing pages expose sticky mobile inquiry and callback actions backed by `POST /api/leads`
   - save, family-share, and print/PDF intents are present in the public listing payload
   - direct phone, WhatsApp, and Viber channels stay review-gated until broker contact data is approved
+- Added contact preference preservation:
+  - lead intake accepts phone, Viber, WhatsApp, and email preferences
+  - CRM inbox and append-only lead ledger store the normalized contact preference
+  - invalid contact channels are rejected at the shared lead boundary
 - Added authenticated CMS translation review endpoints:
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability

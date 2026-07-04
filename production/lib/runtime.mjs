@@ -143,6 +143,7 @@ export function buildRuntimeSmoke(registry, seed) {
       language: "he",
       listingReference: runtimeListing.id,
       contact: { name: "Noa Levi" },
+      contact_preference: "whatsapp",
       message: "Interested in this property.",
     }),
   };
@@ -166,6 +167,7 @@ export function assertRuntimeSmoke(smoke) {
   if (smoke.lead_he.admin_locale !== "en" || smoke.lead_he.hermes_reply_draft.can_send_without_approval !== false) {
     throw new Error("Runtime lead must route to EN admin queue with broker approval");
   }
+  if (smoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime lead must preserve contact preference");
   if (JSON.stringify(smoke).match(/Sandanski sea|sea destination|Сандански море/i)) {
     throw new Error("Runtime smoke must not introduce Sandanski sea framing");
   }

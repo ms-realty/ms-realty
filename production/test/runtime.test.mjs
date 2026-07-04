@@ -167,12 +167,14 @@ test("runtime lead intake stores language and keeps Hermes reply review-gated", 
     language: "he",
     listingReference: "MS-CRAWL-0001",
     contact: { name: "Noa Levi" },
+    contact_preference: "whatsapp",
     message: "Interested in this property.",
   });
 
   assert.equal(lead.original_language, "he");
   assert.equal(lead.original_direction, "rtl");
   assert.equal(lead.admin_locale, "en");
+  assert.equal(lead.contact_preference, "whatsapp");
   assert.equal(lead.hermes_reply_draft.can_send_without_approval, false);
 });
 

@@ -128,6 +128,9 @@ export function createCrmInboxItem(registry, input) {
     language: input.language,
     listingReference: input.listingReference,
     contact: input.contact,
+    contact_preference: input.contact_preference,
+    contactPreference: input.contactPreference,
+    preferred_channel: input.preferred_channel,
     message: input.message,
   });
 
@@ -138,6 +141,7 @@ export function createCrmInboxItem(registry, input) {
     original_direction: lead.language.direction,
     admin_locale: lead.language.adminLocale,
     requires_translation: lead.language.requiresTranslation,
+    contact_preference: lead.contact_preference,
     message_original: lead.message,
     hermes_reply_draft: {
       status: "draft",
@@ -203,6 +207,7 @@ export function buildAdminWorkflowFixture(registry, listing) {
         language: "he",
         listingReference: listing.id,
         contact: { name: "Noa Levi" },
+        contact_preference: "whatsapp",
         message: "Interested in this listing.",
       }),
       seller_el: createCrmInboxItem(registry, {

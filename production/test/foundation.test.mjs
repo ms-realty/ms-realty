@@ -113,7 +113,20 @@ test("lead intake accepts Greek and Hebrew website languages but routes admin wo
     leadType: "buyer",
     language: "he",
     contact: { name: "Noa" },
+    contact_preference: "WhatsApp",
   });
   assert.equal(hebrewLead.language.direction, "rtl");
   assert.equal(hebrewLead.language.requiresTranslation, true);
+  assert.equal(hebrewLead.contact_preference, "whatsapp");
+  assert.throws(
+    () =>
+      createLeadDraft(registry, {
+        source: "website_listing_detail",
+        leadType: "buyer",
+        language: "he",
+        contact: { name: "Noa" },
+        contact_preference: "fax",
+      }),
+    /contact_preference/,
+  );
 });

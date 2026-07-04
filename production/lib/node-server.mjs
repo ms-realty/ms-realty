@@ -97,6 +97,7 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must mark stale search cards as fallback");
   }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
+  if (smoke.lead.body.contact_preference !== "whatsapp") throw new Error("Server must preserve lead contact preference");
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("Server must accept seller valuation lead");
   }

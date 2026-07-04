@@ -159,6 +159,9 @@ if (adminFixtures.crm_inbox.buyer_he.hermes_reply_draft.can_send_without_approva
 if (adminFixtures.crm_inbox.buyer_he.admin_locale !== "en" || adminFixtures.crm_inbox.seller_el.admin_locale !== "en") {
   throw new Error("Greek and Hebrew CRM work must route to EN admin queue");
 }
+if (adminFixtures.crm_inbox.buyer_he.contact_preference !== "whatsapp") {
+  throw new Error("Admin fixture must preserve buyer contact preference");
+}
 
 const runtimeSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "runtime-smoke.json"), "utf8"));
 if (runtimeSmoke.listing_he.dir !== "rtl" || runtimeSmoke.listing_he.status !== 200) {
@@ -179,6 +182,7 @@ if (
 }
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
+if (runtimeSmoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime smoke lead must preserve contact preference");
 if (runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001")?.translation_display !== "reviewed_translation") {
   throw new Error("Runtime smoke search must show reviewed Hebrew translation state");
 }
@@ -198,6 +202,9 @@ if (httpSmoke.listing.body.body.actions?.secondary?.find((action) => action.id =
 }
 if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.requested_locale !== "fr") {
   throw new Error("HTTP smoke must accept French language request");
+}
+if (httpSmoke.lead.body.contact_preference !== "whatsapp") {
+  throw new Error("HTTP smoke must preserve lead contact preference");
 }
 if (httpSmoke.savedSearch.status !== 201 || httpSmoke.savedSearch.body.alert_task?.status !== "open") {
   throw new Error("HTTP smoke must store one saved search alert task");

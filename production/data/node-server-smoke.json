@@ -666,6 +666,7 @@
         "contact": {
           "name": "Noa Levi"
         },
+        "contact_preference": "whatsapp",
         "message": "",
         "language": {
           "language": "he",
@@ -681,6 +682,7 @@
       "original_direction": "rtl",
       "admin_locale": "en",
       "requires_translation": true,
+      "contact_preference": "whatsapp",
       "message_original": "",
       "hermes_reply_draft": {
         "status": "draft",
@@ -700,6 +702,7 @@
         "listing_reference": "MS-CRAWL-0001",
         "original_language": "he",
         "admin_locale": "en",
+        "contact_preference": "whatsapp",
         "broker_approval_required": true
       },
       "sellerPipeline": null
@@ -717,6 +720,7 @@
         "contact": {
           "name": "Nikos Papadopoulos"
         },
+        "contact_preference": null,
         "message": "I want a valuation for my property.",
         "language": {
           "language": "el",
@@ -732,6 +736,7 @@
       "original_direction": "ltr",
       "admin_locale": "en",
       "requires_translation": true,
+      "contact_preference": null,
       "message_original": "I want a valuation for my property.",
       "hermes_reply_draft": {
         "status": "draft",
@@ -751,6 +756,7 @@
         "listing_reference": null,
         "original_language": "el",
         "admin_locale": "en",
+        "contact_preference": null,
         "broker_approval_required": true
       },
       "sellerPipeline": {
@@ -822,6 +828,7 @@
           "listing_reference": "MS-CRAWL-0001",
           "original_language": "he",
           "admin_locale": "en",
+          "contact_preference": "whatsapp",
           "broker_approval_required": true
         },
         {
@@ -832,6 +839,7 @@
           "listing_reference": null,
           "original_language": "el",
           "admin_locale": "en",
+          "contact_preference": null,
           "broker_approval_required": true
         }
       ],

@@ -19,6 +19,7 @@ export function appendLead(lead, { filePath = DEFAULT_LEAD_LEDGER_PATH, received
     listing_reference: lead.lead?.listingReference || null,
     original_language: lead.original_language,
     admin_locale: lead.admin_locale,
+    contact_preference: lead.contact_preference,
     broker_approval_required: lead.hermes_reply_draft?.broker_approval_required === true,
   };
   fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);

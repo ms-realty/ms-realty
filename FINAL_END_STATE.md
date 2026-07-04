@@ -94,6 +94,10 @@ Implemented now:
   - listing pages expose sticky mobile inquiry and callback actions through the lead intake endpoint
   - save, family-share, and print/PDF intents are part of the public payload
   - phone, WhatsApp, and Viber actions remain review-gated until broker contact data is approved
+- Lead contact preference contract:
+  - public leads preserve phone, Viber, WhatsApp, or email preference
+  - CRM inbox and append-only lead ledger expose the normalized preference for broker follow-up
+  - unsupported contact channels are rejected before persistence
 - Mobile and elderly-user QA gate:
   - `qa/mobile_elderly_static_check.py`
   - `qa/mobile-elderly-accessibility.md`

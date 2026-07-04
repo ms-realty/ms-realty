@@ -36,6 +36,7 @@ What it proves now:
 - Runtime 301 handling for reviewed legacy redirects only.
 - Runtime search query/facet filtering before pagination, with total match counts.
 - Listing conversion actions for inquiry, callback, save, share, and print/PDF, with direct broker contact channels review-gated.
+- Lead contact preference validation and persistence for phone, Viber, WhatsApp, and email.
 - Search API overlays translation ledger state before card display/indexability.
 - Search API returns reviewed translation cards for admin-added approved locales.
 - Language request intake for unavailable public locales.

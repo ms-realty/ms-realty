@@ -54,6 +54,7 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
     language: "he",
     listingReference: listing.id,
     contact: { name: "Noa Levi" },
+    contact_preference: "whatsapp",
     message: "Interested in the listing.",
   });
   const greek = createCrmInboxItem(registry, {
@@ -68,6 +69,7 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
   assert.equal(hebrew.original_language, "he");
   assert.equal(hebrew.original_direction, "rtl");
   assert.equal(hebrew.admin_locale, "en");
+  assert.equal(hebrew.contact_preference, "whatsapp");
   assert.equal(hebrew.hermes_reply_draft.can_send_without_approval, false);
   assert.equal(greek.original_language, "el");
   assert.equal(greek.admin_locale, "en");
@@ -82,5 +84,6 @@ test("admin workflow fixture combines CMS translation review and CRM lead intake
   assert.equal(fixture.translation_tasks.he_draft.status, "hermes_drafted");
   assert.equal(fixture.translation_tasks.el_published.status, "published");
   assert.equal(fixture.crm_inbox.buyer_he.original_language, "he");
+  assert.equal(fixture.crm_inbox.buyer_he.contact_preference, "whatsapp");
   assert.equal(fixture.crm_inbox.seller_el.lead.leadType, "seller");
 });

@@ -274,6 +274,7 @@
         "contact": {
           "name": "Noa Levi"
         },
+        "contact_preference": "whatsapp",
         "message": "Interested in this listing.",
         "language": {
           "language": "he",
@@ -289,6 +290,7 @@
       "original_direction": "rtl",
       "admin_locale": "en",
       "requires_translation": true,
+      "contact_preference": "whatsapp",
       "message_original": "Interested in this listing.",
       "hermes_reply_draft": {
         "status": "draft",
@@ -311,6 +313,7 @@
         "contact": {
           "name": "Nikos Papadopoulos"
         },
+        "contact_preference": null,
         "message": "I want a valuation for my property.",
         "language": {
           "language": "el",
@@ -326,6 +329,7 @@
       "original_direction": "ltr",
       "admin_locale": "en",
       "requires_translation": true,
+      "contact_preference": null,
       "message_original": "I want a valuation for my property.",
       "hermes_reply_draft": {
         "status": "draft",

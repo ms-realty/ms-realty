@@ -328,6 +328,9 @@ export function assertHttpSmoke(smoke) {
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") {
     throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
   }
+  if (smoke.lead.body.contact_preference !== "whatsapp") {
+    throw new Error("HTTP smoke must preserve lead contact preference");
+  }
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("HTTP smoke must accept seller valuation lead");
   }

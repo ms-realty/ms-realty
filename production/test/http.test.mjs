@@ -138,6 +138,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         language: "he",
         listingReference: "MS-CRAWL-0001",
         contact: { name: "Noa Levi" },
+        contact_preference: "whatsapp",
         message: "Interested in this property.",
       },
     }),
@@ -251,6 +252,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
+  assert.equal(smoke.lead.body.contact_preference, "whatsapp");
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
