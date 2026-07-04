@@ -58,6 +58,10 @@ Date: 2026-07-04
 - Added runtime serving for reviewed legacy redirects:
   - HTTP and live Node server smokes return `301 Location: /bg/imoti/MS-CRAWL-0001`
   - mapped but unapproved listing rows do not redirect
+- Added language request intake for unavailable website locales:
+  - `POST /api/language-requests` stores non-indexable requests
+  - French fallback users route into the EN admin queue
+  - authenticated admin inbox includes language requests next to leads and replies
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations

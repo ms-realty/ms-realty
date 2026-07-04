@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -19,6 +20,12 @@ function tempOutbox() {
   return file;
 }
 
+function tempLanguageRequests() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-language-`)}/requests.jsonl`;
+  resetLanguageRequests(file);
+  return file;
+}
+
 function deployableRedirect() {
   return JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 }
@@ -26,10 +33,13 @@ function deployableRedirect() {
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();
   const replyOutboxPath = tempOutbox();
+  const languageRequestPath = tempLanguageRequests();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
+    languageRequestPath,
     receivedAt: "2026-07-04T00:00:00Z",
+    requestedAt: "2026-07-04T00:01:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
   });
   const redirect = deployableRedirect();
@@ -38,6 +48,17 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
     fallback: await dispatchHttp(app, { url: "/fr/" }),
+    languageRequest: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/language-requests",
+      body: {
+        id: "http-language-request-test",
+        requestedLocale: "fr",
+        requestedPath: "/fr/",
+        contact: { name: "Claire Martin" },
+        message: "Please notify me when French property pages are reviewed.",
+      },
+    }),
     sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
     robots: await dispatchHttp(app, { url: "/robots.txt" }),
     lead: await dispatchHttp(app, {
@@ -94,9 +115,22 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
+  assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
   assert.equal(smoke.admin.body.leads.length, 2);
+  assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
+});
+
+test("HTTP app rejects invalid language requests", async () => {
+  const response = await dispatchHttp(createHttpApp(), {
+    method: "POST",
+    url: "/api/language-requests",
+    body: { requestedLocale: "not a locale", requestedPath: "/x/" },
+  });
+
+  assert.equal(response.status, 400);
+  assert.match(response.body.message, /BCP 47/);
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {

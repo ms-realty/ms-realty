@@ -3,6 +3,12 @@ import path from "node:path";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, DEFAULT_LEAD_LEDGER_PATH, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import {
+  assertLanguageRequests,
+  DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
+  readLanguageRequests,
+  resetLanguageRequests,
+} from "../lib/language-requests.mjs";
+import {
   assertReplyOutbox,
   DEFAULT_REPLY_OUTBOX_PATH,
   readReplyOutbox,
@@ -12,10 +18,13 @@ import { fromRoot } from "../lib/paths.mjs";
 
 resetLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
 resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
+resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 const app = createHttpApp({
   leadLedgerPath: DEFAULT_LEAD_LEDGER_PATH,
   replyOutboxPath: DEFAULT_REPLY_OUTBOX_PATH,
+  languageRequestPath: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
   receivedAt: "2026-07-04T00:00:00Z",
+  requestedAt: "2026-07-04T00:01:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
@@ -25,6 +34,17 @@ const smoke = {
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
   fallback: await dispatchHttp(app, { url: "/fr/" }),
+  languageRequest: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/language-requests",
+    body: {
+      id: "language-request-fr-0001",
+      requestedLocale: "fr",
+      requestedPath: "/fr/",
+      contact: { name: "Claire Martin" },
+      message: "Please notify me when French property pages are reviewed.",
+    },
+  }),
   sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
   robots: await dispatchHttp(app, { url: "/robots.txt" }),
   lead: await dispatchHttp(app, {
@@ -86,6 +106,9 @@ smoke.leadLedger = { path: DEFAULT_LEAD_LEDGER_PATH, rows: ledger.length };
 const outbox = readReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 assertReplyOutbox(outbox);
 smoke.replyOutbox = { path: DEFAULT_REPLY_OUTBOX_PATH, rows: outbox.length };
+const languageRequests = readLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
+assertLanguageRequests(languageRequests);
+smoke.languageRequestLedger = { path: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, rows: languageRequests.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");
 fs.mkdirSync(path.dirname(outPath), { recursive: true });

@@ -5,6 +5,7 @@ import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLea
 import { loadLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
 import { loadDeployableRedirects } from "./redirect-approvals.mjs";
+import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 
 function response(status, body, contentType, headers = {}) {
   return {
@@ -24,7 +25,9 @@ export function createHttpApp({
   redirects = loadDeployableRedirects(),
   leadLedgerPath = null,
   replyOutboxPath = null,
+  languageRequestPath = null,
   receivedAt,
+  requestedAt,
   reviewedAt,
 } = {}) {
   return async function handle(request) {
@@ -70,6 +73,7 @@ export function createHttpApp({
         workspace: renderAdminWorkspace({ registry, requestedLocale }),
         leads: readLeadLedger(leadLedgerPath || undefined),
         replies: readReplyOutbox(replyOutboxPath || undefined),
+        languageRequests: readLanguageRequests(languageRequestPath || undefined),
       });
     }
 
@@ -97,6 +101,17 @@ export function createHttpApp({
         const lead = submitRuntimeLead(registry, seed, input);
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         return json(201, { ...lead, ledger });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/language-requests") {
+      try {
+        const input = JSON.parse(request.body || "{}");
+        const requestRow = createLanguageRequest(registry, input, requestedAt);
+        const ledger = languageRequestPath ? appendLanguageRequest(requestRow, { filePath: languageRequestPath }) : null;
+        return json(201, { ...requestRow, ledger });
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }
@@ -131,6 +146,9 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.fallback.status !== 200 || smoke.fallback.body.indexable !== false) {
     throw new Error("HTTP smoke must serve non-indexable fallback");
+  }
+  if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
+    throw new Error("HTTP smoke must store non-indexable language request");
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");

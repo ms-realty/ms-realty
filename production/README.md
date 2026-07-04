@@ -27,6 +27,7 @@ What it proves now:
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
+- Language request intake for unavailable public locales.
 - Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
@@ -54,6 +55,7 @@ Generated production data:
 - `production/data/node-server-smoke.json`
 - `production/data/lead-ledger.jsonl`
 - `production/data/reply-outbox.jsonl`
+- `production/data/language-requests.jsonl`
 
 The next production slice can consume these contracts from a Next.js App Router
 public app and Payload CMS collections without re-deciding URL, locale, AI, or

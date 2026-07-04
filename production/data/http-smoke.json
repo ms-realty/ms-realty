@@ -261,6 +261,40 @@
       "public_translation_available": false
     }
   },
+  "languageRequest": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "requested_at": "2026-07-04T00:01:00Z",
+      "id": "language-request-fr-0001",
+      "requested_locale": "fr",
+      "requested_path": "/fr/",
+      "fallback_locale": "en",
+      "admin_locale": "en",
+      "public_indexable": false,
+      "hermes_chat_available": true,
+      "contact": {
+        "name": "Claire Martin"
+      },
+      "message": "Please notify me when French property pages are reviewed.",
+      "ledger": {
+        "requested_at": "2026-07-04T00:01:00Z",
+        "id": "language-request-fr-0001",
+        "requested_locale": "fr",
+        "requested_path": "/fr/",
+        "fallback_locale": "en",
+        "admin_locale": "en",
+        "public_indexable": false,
+        "hermes_chat_available": true,
+        "contact": {
+          "name": "Claire Martin"
+        },
+        "message": "Please notify me when French property pages are reviewed."
+      }
+    }
+  },
   "sitemap": {
     "status": 200,
     "headers": {
@@ -433,7 +467,23 @@
           "broker_approval_required": true
         }
       ],
-      "replies": []
+      "replies": [],
+      "languageRequests": [
+        {
+          "requested_at": "2026-07-04T00:01:00Z",
+          "id": "language-request-fr-0001",
+          "requested_locale": "fr",
+          "requested_path": "/fr/",
+          "fallback_locale": "en",
+          "admin_locale": "en",
+          "public_indexable": false,
+          "hermes_chat_available": true,
+          "contact": {
+            "name": "Claire Martin"
+          },
+          "message": "Please notify me when French property pages are reviewed."
+        }
+      ]
     }
   },
   "adminUnauthorized": {
@@ -479,6 +529,10 @@
   },
   "replyOutbox": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/reply-outbox.jsonl",
+    "rows": 1
+  },
+  "languageRequestLedger": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/language-requests.jsonl",
     "rows": 1
   }
 }

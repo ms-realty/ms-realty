@@ -144,6 +144,9 @@ if (httpSmoke.legacyRedirect.status !== 301 || httpSmoke.legacyRedirect.headers.
 if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
   throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
 }
+if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.requested_locale !== "fr") {
+  throw new Error("HTTP smoke must accept French language request");
+}
 if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") {
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
@@ -162,6 +165,7 @@ if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_fo
   throw new Error("HTTP smoke must queue broker-approved reply");
 }
 if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist one reply outbox row");
+if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.legacyRedirect.status !== 301 || nodeServerSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
@@ -172,6 +176,12 @@ if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !
 }
 if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
 if (nodeServerSmoke.leadLedger.rows !== 2) throw new Error("Node server smoke must persist buyer and seller lead rows");
+if (nodeServerSmoke.languageRequest.status !== 201 || nodeServerSmoke.languageRequest.body.requested_locale !== "fr") {
+  throw new Error("Node server smoke must accept French language request");
+}
+if (nodeServerSmoke.languageRequestLedger.rows !== 1) {
+  throw new Error("Node server smoke must persist one language request row");
+}
 if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
   throw new Error("Node server smoke must serve robots");
 }
@@ -186,5 +196,7 @@ const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.j
 if (leadLedger.length !== 2) throw new Error("Lead ledger artifact must contain buyer and seller smoke rows");
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contain one deterministic smoke row");
+const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

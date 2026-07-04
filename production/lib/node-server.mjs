@@ -64,6 +64,9 @@ export function assertServerSmoke(smoke) {
   }
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") throw new Error("Server must serve Hebrew listing");
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
+  if (smoke.languageRequest.status !== 201 || smoke.languageRequest.body.public_indexable !== false) {
+    throw new Error("Server must store non-indexable language request");
+  }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
   if (smoke.sellerLead.status !== 201 || smoke.sellerLead.body.lead.leadType !== "seller") {
     throw new Error("Server must accept seller valuation lead");

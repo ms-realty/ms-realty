@@ -3,19 +3,24 @@ import path from "node:path";
 import os from "node:os";
 import { createHttpApp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const leadLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-leads-")), "leads.jsonl");
 const replyOutboxPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-replies-")), "replies.jsonl");
+const languageRequestPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-language-")), "requests.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
+resetLanguageRequests(languageRequestPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
+    languageRequestPath,
     receivedAt: "2026-07-04T00:00:00Z",
+    requestedAt: "2026-07-04T00:01:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
   }),
 );
@@ -35,6 +40,16 @@ try {
     }),
     listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
     search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
+    languageRequest: await jsonFetch(baseUrl, "/api/language-requests", {
+      method: "POST",
+      body: JSON.stringify({
+        id: "server-language-request-fr-0001",
+        requestedLocale: "fr",
+        requestedPath: "/fr/",
+        contact: { name: "Claire Martin" },
+        message: "Please notify me when French property pages are reviewed.",
+      }),
+    }),
     sitemap: await textFetch(baseUrl, "/sitemap.xml"),
     robots: await textFetch(baseUrl, "/robots.txt"),
     lead: await jsonFetch(baseUrl, "/api/leads", {
@@ -103,6 +118,9 @@ try {
   const outbox = readReplyOutbox(replyOutboxPath);
   assertReplyOutbox(outbox);
   smoke.replyOutbox = { rows: outbox.length };
+  const languageRequests = readLanguageRequests(languageRequestPath);
+  assertLanguageRequests(languageRequests);
+  smoke.languageRequestLedger = { rows: languageRequests.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);
