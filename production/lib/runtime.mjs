@@ -108,12 +108,12 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
 
-export function searchRuntimeListings(registry, seed, { localeCode, query = "", translationTasks = [] }) {
+export function searchRuntimeListings(registry, seed, { localeCode, query = "", filters = {}, translationTasks = [] }) {
   const listings = listingRecords(seed).map((record) => ({
     ...listingFromCmsRecord(record),
     translations: mergeRuntimeTranslations(record, translationTasks),
   }));
-  return renderSearchPage({ registry, localeCode, listings, query });
+  return renderSearchPage({ registry, localeCode, listings, query, filters });
 }
 
 export function submitRuntimeLead(registry, seed, input) {

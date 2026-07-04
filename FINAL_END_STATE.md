@@ -86,6 +86,10 @@ Implemented now:
   - newly added public locales can draft, approve, publish, and serve a locale-prefixed listing from the translation ledger
   - served sitemap XML includes those approved dynamic locale routes
   - search API cards reflect the same reviewed dynamic locale translation state
+- Runtime search filter contract:
+  - query and core facets are applied before pagination
+  - result payloads expose total matches separately from returned cards
+  - saved-search alerts use the full filtered match count
 - Mobile and elderly-user QA gate:
   - `qa/mobile_elderly_static_check.py`
   - `qa/mobile-elderly-accessibility.md`

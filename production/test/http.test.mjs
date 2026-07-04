@@ -103,6 +103,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     legacyRedirect: await dispatchHttp(app, { url: redirect.old_url }),
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
+    searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
     fallback: await dispatchHttp(app, { url: "/fr/" }),
     languageRequest: await dispatchHttp(app, {
       method: "POST",
@@ -122,7 +123,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         id: "http-saved-search-test",
         locale: "he",
         query: "Sandanski",
-        filters: { property_type: "apartment" },
+        filters: { property_type: "apartment", unsupported_filter: "ignored" },
         contact: { name: "Noa Levi" },
       },
     }),
@@ -249,6 +250,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
   assert.equal(smoke.search.body.cards.length > 0, true);
+  assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);

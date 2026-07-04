@@ -283,6 +283,8 @@
           "public_enabled": true,
           "indexable": true
         },
+        "total_matches": 108,
+        "returned": 12,
         "fallback": {
           "enabled": true,
           "locale": "en",
@@ -300,6 +302,11 @@
           "translation_indexable": true,
           "translation_human_approved": true,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -312,6 +319,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 20
         },
         {
@@ -324,6 +336,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 32
         },
         {
@@ -336,6 +353,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -348,6 +370,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -360,6 +387,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 18
         },
         {
@@ -372,6 +404,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 24
         },
         {
@@ -384,6 +421,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -396,6 +438,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -408,6 +455,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 34
         },
         {
@@ -420,6 +472,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 38
         },
         {
@@ -432,7 +489,265 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 19
+        }
+      ]
+    }
+  },
+  "searchFiltered": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "search",
+      "status": 200,
+      "requested_locale": "he",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "path": "/he/search",
+      "canonical": "/he/search",
+      "indexable": true,
+      "metadata": {
+        "title": "MS Realty property search",
+        "description": "Locale-scoped property search backed by reviewed MS Realty inventory.",
+        "robots": "index,follow"
+      },
+      "mobile_policy": {
+        "list_first_mobile": true,
+        "sticky_contact_actions": true,
+        "minimum_tap_target_px": 44
+      },
+      "search": {
+        "engines": [
+          "typesense",
+          "meilisearch"
+        ],
+        "query": "Sandanski",
+        "filters": {
+          "locale": "he",
+          "public_enabled": true,
+          "indexable": true,
+          "property_type": "apartment"
+        },
+        "total_matches": 34,
+        "returned": 12,
+        "fallback": {
+          "enabled": true,
+          "locale": "en",
+          "label": "fallback_source_locale"
+        }
+      },
+      "cards": [
+        {
+          "id": "MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0003",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 32
+        },
+        {
+          "id": "MS-CRAWL-0004",
+          "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0004",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 26
+        },
+        {
+          "id": "MS-CRAWL-0005",
+          "title": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0005",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 26
+        },
+        {
+          "id": "MS-CRAWL-0007",
+          "title": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0007",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 24
+        },
+        {
+          "id": "MS-CRAWL-0008",
+          "title": "Двустаен апартамент в центъра на Сандански - наем - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0008",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 35
+        },
+        {
+          "id": "MS-CRAWL-0009",
+          "title": "Двустаен апартамент под наем в парка на Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0009",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 26
+        },
+        {
+          "id": "MS-CRAWL-0010",
+          "title": "Двустаен апартамент в идеалния център на гр. Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0010",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 34
+        },
+        {
+          "id": "MS-CRAWL-0014",
+          "title": "Наем - Двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0014",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 23
+        },
+        {
+          "id": "MS-CRAWL-0017",
+          "title": "Нов двустаен апартамент в гр.Сандански - продажба - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0017",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 29
+        },
+        {
+          "id": "MS-CRAWL-0021",
+          "title": "Панорамен двустаен апартамент с гараж - паркова зона - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0021",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 44
+        },
+        {
+          "id": "MS-CRAWL-0024",
+          "title": "Продава апартамент в Солун - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0024",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 28
+        },
+        {
+          "id": "MS-CRAWL-0027",
+          "title": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0027",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 24
         }
       ]
     }
@@ -528,7 +843,7 @@
       "contact": {
         "name": "Noa Levi"
       },
-      "match_count": 12,
+      "match_count": 34,
       "alert_frequency": "weekly",
       "status": "active",
       "alert_task": {
@@ -549,7 +864,7 @@
         "contact": {
           "name": "Noa Levi"
         },
-        "match_count": 12,
+        "match_count": 34,
         "alert_frequency": "weekly",
         "status": "active",
         "alert_task": {
@@ -873,7 +1188,7 @@
           "contact": {
             "name": "Noa Levi"
           },
-          "match_count": 12,
+          "match_count": 34,
           "alert_frequency": "weekly",
           "status": "active",
           "alert_task": {
@@ -1473,6 +1788,8 @@
           "public_enabled": true,
           "indexable": true
         },
+        "total_matches": 108,
+        "returned": 12,
         "fallback": {
           "enabled": true,
           "locale": "en",
@@ -1490,6 +1807,11 @@
           "translation_indexable": false,
           "translation_human_approved": true,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -1502,6 +1824,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 20
         },
         {
@@ -1514,6 +1841,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 32
         },
         {
@@ -1526,6 +1858,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -1538,6 +1875,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -1550,6 +1892,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 18
         },
         {
@@ -1562,6 +1909,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 24
         },
         {
@@ -1574,6 +1926,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -1586,6 +1943,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -1598,6 +1960,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 34
         },
         {
@@ -1610,6 +1977,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 38
         },
         {
@@ -1622,6 +1994,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 19
         }
       ]

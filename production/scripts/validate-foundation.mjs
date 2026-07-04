@@ -175,6 +175,9 @@ if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke l
 if (runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001")?.translation_display !== "reviewed_translation") {
   throw new Error("Runtime smoke search must show reviewed Hebrew translation state");
 }
+if (runtimeSmoke.search_he.search.total_matches <= runtimeSmoke.search_he.cards.length) {
+  throw new Error("Runtime smoke search must expose total matches before pagination");
+}
 
 const httpSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "http-smoke.json"), "utf8"));
 if (httpSmoke.legacyRedirect.status !== 301 || httpSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
@@ -188,6 +191,13 @@ if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.r
 }
 if (httpSmoke.savedSearch.status !== 201 || httpSmoke.savedSearch.body.alert_task?.status !== "open") {
   throw new Error("HTTP smoke must store one saved search alert task");
+}
+if (
+  httpSmoke.searchFiltered.status !== 200 ||
+  httpSmoke.searchFiltered.body.search.filters.property_type !== "apartment" ||
+  httpSmoke.savedSearch.body.match_count <= 12
+) {
+  throw new Error("HTTP smoke must apply search filters and store full saved-search match counts");
 }
 if (
   httpSmoke.localeCreate.status !== 201 ||

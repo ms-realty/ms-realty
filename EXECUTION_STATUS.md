@@ -79,6 +79,10 @@ Date: 2026-07-04
   - a newly added public locale can draft, approve, publish, and serve a locale-prefixed listing without seed-code changes
   - served `/sitemap.xml` includes approved dynamic locale translations from the review ledger
   - `/api/search` returns reviewed translation cards for those admin-added approved locales
+- Added runtime search filtering:
+  - text query and location/property type/offer type/price/bedroom filters apply before card pagination
+  - search responses expose `total_matches` and `returned`
+  - saved searches persist the full filtered match count, not just the first page size
 - Added authenticated CMS translation review endpoints:
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability

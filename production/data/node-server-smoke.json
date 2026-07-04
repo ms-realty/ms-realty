@@ -274,6 +274,8 @@
           "public_enabled": true,
           "indexable": true
         },
+        "total_matches": 108,
+        "returned": 12,
         "fallback": {
           "enabled": true,
           "locale": "en",
@@ -291,6 +293,11 @@
           "translation_indexable": true,
           "translation_human_approved": true,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -303,6 +310,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 20
         },
         {
@@ -315,6 +327,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 32
         },
         {
@@ -327,6 +344,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -339,6 +361,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -351,6 +378,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 18
         },
         {
@@ -363,6 +395,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 24
         },
         {
@@ -375,6 +412,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -387,6 +429,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -399,6 +446,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 34
         },
         {
@@ -411,6 +463,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 38
         },
         {
@@ -423,6 +480,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 19
         }
       ]
@@ -482,7 +544,7 @@
       "contact": {
         "name": "Noa Levi"
       },
-      "match_count": 12,
+      "match_count": 34,
       "alert_frequency": "weekly",
       "status": "active",
       "alert_task": {
@@ -503,7 +565,7 @@
         "contact": {
           "name": "Noa Levi"
         },
-        "match_count": 12,
+        "match_count": 34,
         "alert_frequency": "weekly",
         "status": "active",
         "alert_task": {
@@ -825,7 +887,7 @@
           "contact": {
             "name": "Noa Levi"
           },
-          "match_count": 12,
+          "match_count": 34,
           "alert_frequency": "weekly",
           "status": "active",
           "alert_task": {
@@ -1395,6 +1457,8 @@
           "public_enabled": true,
           "indexable": true
         },
+        "total_matches": 108,
+        "returned": 12,
         "fallback": {
           "enabled": true,
           "locale": "en",
@@ -1412,6 +1476,11 @@
           "translation_indexable": false,
           "translation_human_approved": true,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -1424,6 +1493,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 20
         },
         {
@@ -1436,6 +1510,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 32
         },
         {
@@ -1448,6 +1527,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -1460,6 +1544,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -1472,6 +1561,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 18
         },
         {
@@ -1484,6 +1578,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 24
         },
         {
@@ -1496,6 +1595,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 35
         },
         {
@@ -1508,6 +1612,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 26
         },
         {
@@ -1520,6 +1629,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 34
         },
         {
@@ -1532,6 +1646,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 38
         },
         {
@@ -1544,6 +1663,11 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "hotel",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "price_eur": null,
           "image_count": 19
         }
       ]

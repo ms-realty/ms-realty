@@ -81,6 +81,7 @@ const smoke = {
   legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
+  searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
   fallback: await dispatchHttp(app, { url: "/fr/" }),
   languageRequest: await dispatchHttp(app, {
     method: "POST",
@@ -102,7 +103,7 @@ const smoke = {
       id: "saved-search-he-0001",
       locale: "he",
       query: "Sandanski",
-      filters: { property_type: "apartment" },
+      filters: { property_type: "apartment", unsupported_filter: "ignored" },
       contact: { name: "Noa Levi" },
     },
   }),

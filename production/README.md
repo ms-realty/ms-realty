@@ -34,6 +34,7 @@ What it proves now:
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
+- Runtime search query/facet filtering before pagination, with total match counts.
 - Search API overlays translation ledger state before card display/indexability.
 - Search API returns reviewed translation cards for admin-added approved locales.
 - Language request intake for unavailable public locales.

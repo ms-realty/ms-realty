@@ -83,13 +83,21 @@ test("runtime resolves admin-added approved locale listing routes from translati
 
 test("runtime search uses CMS seed listings and keeps mobile-first contract", () => {
   const search = searchRuntimeListings(registry, seed, { localeCode: "he", query: "Sandanski" });
+  const apartmentSearch = searchRuntimeListings(registry, seed, {
+    localeCode: "he",
+    query: "Sandanski",
+    filters: { property_type: "apartment" },
+  });
 
   assert.equal(search.status, 200);
   assert.equal(search.dir, "rtl");
   assert.equal(search.mobile_policy.list_first_mobile, true);
+  assert.ok(search.search.total_matches > search.cards.length);
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
+  assert.ok(apartmentSearch.cards.every((card) => card.property_type === "apartment"));
+  assert.ok(apartmentSearch.search.total_matches > apartmentSearch.cards.length);
 });
 
 test("runtime search overlays stale translation ledger rows before card rendering", () => {

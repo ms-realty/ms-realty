@@ -90,6 +90,39 @@ function searchTranslationState(registry, listing, locale) {
   };
 }
 
+function norm(value) {
+  return String(value ?? "").toLocaleLowerCase();
+}
+
+function queryTokens(query) {
+  return norm(query).split(/\s+/).filter(Boolean);
+}
+
+function searchableText(view) {
+  return norm([view.id, view.title, view.h1, view.description, view.location, view.property_type, view.offer_type].join(" "));
+}
+
+function numberFilter(value, min, max) {
+  if (min === undefined && max === undefined) return true;
+  if (value === null || value === undefined || value === "") return false;
+  const number = Number(value);
+  if (!Number.isFinite(number)) return false;
+  if (min !== undefined && number < Number(min)) return false;
+  if (max !== undefined && number > Number(max)) return false;
+  return true;
+}
+
+function matchesSearch(view, query, filters = {}) {
+  const text = searchableText(view);
+  if (!queryTokens(query).every((token) => text.includes(token))) return false;
+  if (filters.location && !norm(view.location).includes(norm(filters.location))) return false;
+  if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
+  if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
+  if (!numberFilter(view.price_eur, filters.price_min, filters.price_max)) return false;
+  if (!numberFilter(view.bedrooms, filters.bedrooms_min, undefined)) return false;
+  return true;
+}
+
 export function renderListingPage({ registry, listing, localeCode, translations }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -170,14 +203,17 @@ export function renderListingPage({ registry, listing, localeCode, translations 
   };
 }
 
-export function renderSearchPage({ registry, localeCode, listings, query = "" }) {
+export function renderSearchPage({ registry, localeCode, listings, query = "", filters = {} }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const localeMatches = listings.filter((listing) => listing.locale === locale.code);
   const fallbackMatches = listings.filter(
     (listing) => listing.locale === (locale.fallback_locale || registry.source_locale) || listing.locale === registry.source_locale,
   );
-  const cards = (localeMatches.length ? localeMatches : fallbackMatches).slice(0, 12).map((listing) => {
+  const matchedListings = (localeMatches.length ? localeMatches : fallbackMatches).filter((listing) =>
+    matchesSearch(listingToPublicViewModel(listing), query, filters),
+  );
+  const cards = matchedListings.slice(0, 12).map((listing) => {
     const view = listingToPublicViewModel(listing);
     const state = searchTranslationState(registry, listing, locale);
     const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
@@ -192,6 +228,11 @@ export function renderSearchPage({ registry, localeCode, listings, query = "" })
       translation_indexable: state.indexable,
       translation_human_approved: state.translation?.human_approved === true,
       source_locale: listing.locale,
+      location: view.location,
+      property_type: view.property_type,
+      offer_type: view.offer_type,
+      bedrooms: view.bedrooms,
+      price_eur: view.price_eur,
       image_count: Number(listing.image_count || 0),
     };
   });
@@ -223,7 +264,10 @@ export function renderSearchPage({ registry, localeCode, listings, query = "" })
         locale: locale.code,
         public_enabled: true,
         indexable: true,
+        ...filters,
       },
+      total_matches: matchedListings.length,
+      returned: cards.length,
       fallback: {
         enabled: true,
         locale: locale.fallback_locale || registry.source_locale,

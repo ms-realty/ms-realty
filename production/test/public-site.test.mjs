@@ -60,10 +60,29 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.mobile_policy.list_first_mobile, true);
   assert.deepEqual(search.search.engines, ["typesense", "meilisearch"]);
   assert.equal(search.search.filters.locale, "he");
+  assert.ok(search.search.total_matches > search.cards.length);
+  assert.equal(search.search.returned, search.cards.length);
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
+});
+
+test("search applies text and facet filters before paginating cards", () => {
+  const petrich = renderSearchPage({ registry, listings, localeCode: "he", query: "Petrich" });
+  const apartments = renderSearchPage({
+    registry,
+    listings,
+    localeCode: "he",
+    query: "Sandanski",
+    filters: { property_type: "apartment" },
+  });
+
+  assert.ok(petrich.search.total_matches > 0);
+  assert.ok(petrich.cards.every((card) => card.location === "Petrich"));
+  assert.ok(apartments.search.total_matches > apartments.cards.length);
+  assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
+  assert.equal(apartments.search.filters.property_type, "apartment");
 });
 
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {

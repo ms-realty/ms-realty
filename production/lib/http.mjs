@@ -29,6 +29,21 @@ function json(status, body) {
   return response(status, body, "application/json; charset=utf-8");
 }
 
+const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min"];
+
+function searchFiltersFromObject(input = {}) {
+  const filters = {};
+  for (const field of SEARCH_FILTER_FIELDS) {
+    const value = input[field];
+    if (value) filters[field] = value;
+  }
+  return filters;
+}
+
+function searchFiltersFromParams(params) {
+  return searchFiltersFromObject(Object.fromEntries(params));
+}
+
 export function createHttpApp({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
@@ -91,6 +106,7 @@ export function createHttpApp({
         searchRuntimeListings(activeRegistry, seed, {
           localeCode,
           query,
+          filters: searchFiltersFromParams(url.searchParams),
           translationTasks: readTranslationLedger(translationLedgerPath || undefined),
         }),
       );
@@ -256,12 +272,14 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
       try {
         const input = JSON.parse(request.body || "{}");
+        const filters = searchFiltersFromObject(input.filters);
         const search = searchRuntimeListings(activeRegistry, seed, {
           localeCode: input.locale || activeRegistry.source_locale,
           query: input.query || "",
+          filters,
           translationTasks: readTranslationLedger(translationLedgerPath || undefined),
         });
-        const savedSearch = createSavedSearch(activeRegistry, input, { matchCount: search.cards.length, savedAt });
+        const savedSearch = createSavedSearch(activeRegistry, { ...input, filters }, { matchCount: search.search.total_matches, savedAt });
         const ledger = savedSearchLedgerPath ? appendSavedSearch(savedSearch, { filePath: savedSearchLedgerPath }) : null;
         return json(201, { ...savedSearch, ledger });
       } catch (error) {
@@ -290,6 +308,16 @@ export function assertHttpSmoke(smoke) {
   if (smoke.search.status !== 200 || smoke.search.body.mobile_policy.list_first_mobile !== true) {
     throw new Error("HTTP smoke must serve mobile-first search");
   }
+  if (smoke.search.body.search.total_matches <= smoke.search.body.cards.length) {
+    throw new Error("HTTP smoke must filter search before paginating cards");
+  }
+  if (
+    smoke.searchFiltered.status !== 200 ||
+    smoke.searchFiltered.body.search.filters.property_type !== "apartment" ||
+    !smoke.searchFiltered.body.cards.every((card) => card.property_type === "apartment")
+  ) {
+    throw new Error("HTTP smoke must apply search query-string filters");
+  }
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") {
     throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
   }
@@ -307,6 +335,12 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("HTTP smoke must store saved search alert tasks");
+  }
+  if (smoke.savedSearch.body.match_count <= 12) {
+    throw new Error("HTTP smoke must store full saved-search match count");
+  }
+  if (smoke.savedSearch.body.filters?.unsupported_filter) {
+    throw new Error("HTTP smoke must ignore unsupported saved-search filters");
   }
   if (
     smoke.localeCreate.status !== 201 ||
