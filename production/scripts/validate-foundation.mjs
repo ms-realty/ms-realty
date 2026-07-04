@@ -70,6 +70,13 @@ if (sitemap.summary.byLocale.el !== 1 || sitemap.summary.byLocale.he !== 1) {
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
 
+const sitemapXml = fs.readFileSync(fromRoot("production", "data", "sitemap.xml"), "utf8");
+const robotsTxt = fs.readFileSync(fromRoot("production", "data", "robots.txt"), "utf8");
+if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001") || sitemapXml.includes("/fr/")) {
+  throw new Error("Sitemap XML must include approved Hebrew and exclude French");
+}
+if (!robotsTxt.includes("Sitemap:")) throw new Error("Robots must include sitemap URL");
+
 const cmsSeed = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-seed.json"), "utf8"));
 if (cmsSeed.summary.listings !== 165) throw new Error("CMS seed must include 165 listings");
 if (cmsSeed.summary.bySourceLocale.ru !== 52) throw new Error("CMS seed must include 52 RU source listings");
@@ -124,6 +131,9 @@ if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") 
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
 if (httpSmoke.leadLedger.rows !== 1) throw new Error("HTTP smoke must persist one lead ledger row");
+if (httpSmoke.sitemap.status !== 200 || httpSmoke.sitemap.body.includes("/fr/")) {
+  throw new Error("HTTP smoke must serve approved sitemap");
+}
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !== "rtl") {
@@ -131,6 +141,9 @@ if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !
 }
 if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
 if (nodeServerSmoke.leadLedger.rows !== 1) throw new Error("Node server smoke must persist one lead ledger row");
+if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includes("Sitemap:")) {
+  throw new Error("Node server smoke must serve robots");
+}
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 1) throw new Error("Lead ledger artifact must contain one deterministic smoke row");

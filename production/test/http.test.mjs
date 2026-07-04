@@ -19,6 +19,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
     fallback: await dispatchHttp(app, { url: "/fr/" }),
+    sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
+    robots: await dispatchHttp(app, { url: "/robots.txt" }),
     lead: await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
@@ -35,6 +37,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
+  assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
 });

@@ -46,10 +46,20 @@ export async function jsonFetch(baseUrl, path, options = {}) {
   };
 }
 
+export async function textFetch(baseUrl, path, options = {}) {
+  const response = await fetch(`${baseUrl}${path}`, options);
+  return {
+    status: response.status,
+    body: await response.text(),
+  };
+}
+
 export function assertServerSmoke(smoke) {
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") throw new Error("Server must serve Hebrew listing");
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");
   if (smoke.badLead.status !== 400) throw new Error("Server must reject unknown buyer listing");
+  if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("Server must serve approved sitemap");
+  if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");
   return true;
 }

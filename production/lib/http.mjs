@@ -1,18 +1,31 @@
 import { loadLocaleRegistry } from "./locales.mjs";
 import { appendLead } from "./lead-ledger.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { loadLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 
-function json(status, body) {
+function response(status, body, contentType) {
   return {
     status,
-    headers: { "content-type": "application/json; charset=utf-8" },
+    headers: { "content-type": contentType },
     body,
   };
+}
+
+function json(status, body) {
+  return response(status, body, "application/json; charset=utf-8");
 }
 
 export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsSeed(), leadLedgerPath = null, receivedAt } = {}) {
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
+
+    if (request.method === "GET" && url.pathname === "/sitemap.xml") {
+      return response(200, renderSitemapXml(loadLocalizedSitemap()), "application/xml; charset=utf-8");
+    }
+
+    if (request.method === "GET" && url.pathname === "/robots.txt") {
+      return response(200, renderRobotsTxt(), "text/plain; charset=utf-8");
+    }
 
     if (request.method === "GET" && url.pathname === "/api/search") {
       const localeCode = url.searchParams.get("locale") || "bg";
@@ -55,5 +68,7 @@ export function assertHttpSmoke(smoke) {
   if (smoke.fallback.status !== 200 || smoke.fallback.body.indexable !== false) {
     throw new Error("HTTP smoke must serve non-indexable fallback");
   }
+  if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
+  if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");
   return true;
 }

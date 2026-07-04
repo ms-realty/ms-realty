@@ -54,6 +54,10 @@ Date: 2026-07-04
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations
   - unapproved French excluded
+- Added generated SEO files:
+  - `production/data/sitemap.xml` from approved localized sitemap entries
+  - `production/data/robots.txt` pointing at the sitemap
+  - HTTP and live server smoke coverage for `/sitemap.xml` and `/robots.txt`
 - Added canonical CMS seed fixture:
   - 165 listing records composed from crawl/search evidence
   - 4,978 listing media rows attached
@@ -121,6 +125,7 @@ python3 locales/validate_locale_registry.py
 npm run migration:build
 npm run routes:build
 npm run sitemap:build
+npm run seo:build
 npm run cms:build
 npm run public:build
 npm run admin:build

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://makler-realty.com/sitemap.xml

@@ -11,6 +11,8 @@ const smoke = {
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
   fallback: await dispatchHttp(app, { url: "/fr/" }),
+  sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
+  robots: await dispatchHttp(app, { url: "/robots.txt" }),
   lead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",

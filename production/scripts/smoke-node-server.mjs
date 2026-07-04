@@ -3,7 +3,7 @@ import path from "node:path";
 import os from "node:os";
 import { createHttpApp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
-import { assertServerSmoke, close, createNodeServer, jsonFetch, listen } from "../lib/node-server.mjs";
+import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const leadLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-leads-")), "leads.jsonl");
@@ -18,6 +18,8 @@ try {
     baseUrl,
     listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
     search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
+    sitemap: await textFetch(baseUrl, "/sitemap.xml"),
+    robots: await textFetch(baseUrl, "/robots.txt"),
     lead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       body: JSON.stringify({
