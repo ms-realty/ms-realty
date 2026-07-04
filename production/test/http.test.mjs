@@ -1,11 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
+function tempLedger() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-`)}/leads.jsonl`;
+  resetLeadLedger(file);
+  return file;
+}
+
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
-  const app = createHttpApp();
+  const leadLedgerPath = tempLedger();
+  const app = createHttpApp({ leadLedgerPath, receivedAt: "2026-07-04T00:00:00Z" });
   const smoke = {
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
@@ -27,6 +36,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
   assert.equal(smoke.search.body.cards.length > 0, true);
+  assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

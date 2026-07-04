@@ -1,9 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
+import { createHttpApp } from "../lib/http.mjs";
+import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
-const server = createNodeServer();
+const leadLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-leads-")), "leads.jsonl");
+resetLeadLedger(leadLedgerPath);
+const server = createNodeServer(createHttpApp({ leadLedgerPath, receivedAt: "2026-07-04T00:00:00Z" }));
 const address = await listen(server);
 const baseUrl = `http://${address.address}:${address.port}`;
 
@@ -35,6 +40,9 @@ try {
     }),
   };
   assertServerSmoke(smoke);
+  const ledger = readLeadLedger(leadLedgerPath);
+  assertLeadLedger(ledger);
+  smoke.leadLedger = { rows: ledger.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);

@@ -1,4 +1,5 @@
 import { loadLocaleRegistry } from "./locales.mjs";
+import { appendLead } from "./lead-ledger.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 
 function json(status, body) {
@@ -9,7 +10,7 @@ function json(status, body) {
   };
 }
 
-export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsSeed() } = {}) {
+export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsSeed(), leadLedgerPath = null, receivedAt } = {}) {
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
 
@@ -22,7 +23,9 @@ export function createHttpApp({ registry = loadLocaleRegistry(), seed = loadCmsS
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = JSON.parse(request.body || "{}");
-        return json(201, submitRuntimeLead(registry, seed, input));
+        const lead = submitRuntimeLead(registry, seed, input);
+        const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
+        return json(201, { ...lead, ledger });
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }

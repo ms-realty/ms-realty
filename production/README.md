@@ -24,6 +24,7 @@ What it proves now:
 - Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
+- Append-only lead ledger for persisted CRM intake smoke rows.
 
 Run:
 
@@ -42,6 +43,7 @@ Generated production data:
 - `production/data/runtime-smoke.json`
 - `production/data/http-smoke.json`
 - `production/data/node-server-smoke.json`
+- `production/data/lead-ledger.jsonl`
 
 The next production slice can consume these contracts from a Next.js App Router
 public app and Payload CMS collections without re-deciding URL, locale, AI, or

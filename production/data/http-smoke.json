@@ -290,7 +290,21 @@
       "views": {
         "show_original_available": true,
         "translated_draft_available": true
+      },
+      "ledger": {
+        "received_at": "2026-07-04T00:00:00Z",
+        "id": "inbox-http-lead-he-0001",
+        "lead_id": "http-lead-he-0001",
+        "lead_type": "buyer",
+        "listing_reference": "MS-CRAWL-0001",
+        "original_language": "he",
+        "admin_locale": "en",
+        "broker_approval_required": true
       }
     }
+  },
+  "leadLedger": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/lead-ledger.jsonl",
+    "rows": 1
   }
 }

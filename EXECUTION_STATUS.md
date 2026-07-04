@@ -74,6 +74,10 @@ Date: 2026-07-04
   - fetches Hebrew listing and Hebrew search endpoints
   - posts a valid Hebrew buyer lead
   - rejects an unknown buyer listing reference
+- Added append-only CRM lead ledger:
+  - persists accepted HTTP lead intake as JSONL
+  - stores original language, admin queue locale, listing reference, and broker approval gate
+  - keeps smoke artifact deterministic
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`

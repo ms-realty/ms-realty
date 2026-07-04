@@ -1,21 +1,26 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import { createHttpApp } from "../lib/http.mjs";
+import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 async function withServer(fn) {
-  const server = createNodeServer();
+  const leadLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-`)}/leads.jsonl`;
+  resetLeadLedger(leadLedgerPath);
+  const server = createNodeServer(createHttpApp({ leadLedgerPath, receivedAt: "2026-07-04T00:00:00Z" }));
   const address = await listen(server);
   try {
-    return await fn(`http://${address.address}:${address.port}`);
+    return await fn(`http://${address.address}:${address.port}`, leadLedgerPath);
   } finally {
     await close(server);
   }
 }
 
 test("Node server serves live listing, search, and lead endpoints", async () => {
-  await withServer(async (baseUrl) => {
+  await withServer(async (baseUrl, leadLedgerPath) => {
     const smoke = {
       listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
       search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
@@ -41,6 +46,7 @@ test("Node server serves live listing, search, and lead endpoints", async () => 
       }),
     };
     assert.equal(assertServerSmoke(smoke), true);
+    assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   });
 });
 
