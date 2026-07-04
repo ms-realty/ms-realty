@@ -154,6 +154,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         sellerHtml: await textFetch(baseUrl, "/he/sell", {
           headers: { accept: "text/html" },
         }),
+        contact: await jsonFetch(baseUrl, "/he/contact"),
+        contactHtml: await textFetch(baseUrl, "/he/contact", {
+          headers: { accept: "text/html" },
+        }),
         lead: await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           body: JSON.stringify({
@@ -176,6 +180,18 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             contact: { name: "Noa Levi" },
             contact_preference: "phone",
             message: "I would like to view this property.",
+          }),
+        }),
+        contactLead: await jsonFetch(baseUrl, "/api/leads", {
+          method: "POST",
+          body: JSON.stringify({
+            id: "node-server-contact-lead-test",
+            source: "website_contact_callback",
+            leadType: "general",
+            language: "he",
+            contact: { name: "Noa Levi" },
+            contact_preference: "phone",
+            message: "Please call me about buying in Sandanski.",
           }),
         }),
         sellerLead: await jsonFetch(baseUrl, "/api/leads", {
@@ -285,6 +301,9 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.location.body.cards.length, 1);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
       assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
+      assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
+      assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
+      assert.equal(smoke.contactLead.body.lead.leadType, "general");
       assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
       assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
       assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);

@@ -57,6 +57,7 @@ export function assertLocaleRegistry(registry) {
       !locale.route_segments?.listing ||
       !locale.route_segments?.search ||
       !locale.route_segments?.location ||
+      !locale.route_segments?.contact ||
       !locale.route_segments?.seller
     ) {
       throw new Error(`Missing route segments for ${locale.code}`);
@@ -65,6 +66,7 @@ export function assertLocaleRegistry(registry) {
       !ROUTE_SEGMENT.test(locale.route_segments.listing) ||
       !ROUTE_SEGMENT.test(locale.route_segments.search) ||
       !ROUTE_SEGMENT.test(locale.route_segments.location) ||
+      !ROUTE_SEGMENT.test(locale.route_segments.contact) ||
       !ROUTE_SEGMENT.test(locale.route_segments.seller)
     ) {
       throw new Error(`Invalid route segment for ${locale.code}`);
@@ -98,6 +100,7 @@ export function addLocaleToRegistry(registry, input) {
       listing: input.route_segments?.listing || "properties",
       search: input.route_segments?.search || "search",
       location: input.route_segments?.location || "locations",
+      contact: input.route_segments?.contact || "contact",
       seller: input.route_segments?.seller || "sell",
     },
   };

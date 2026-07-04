@@ -6,15 +6,16 @@
     "listing_entries": 167,
     "location_pages": 6,
     "seller_pages": 7,
-    "entries": 187,
+    "contact_pages": 7,
+    "entries": 194,
     "byLocale": {
-      "bg": 117,
-      "en": 2,
-      "de": 2,
-      "nl": 2,
-      "ru": 56,
-      "el": 4,
-      "he": 4
+      "bg": 118,
+      "en": 3,
+      "de": 3,
+      "nl": 3,
+      "ru": 57,
+      "el": 5,
+      "he": 5
     }
   },
   "entries": [
@@ -3034,6 +3035,279 @@
         {
           "hreflang": "x-default",
           "href": "/bg/prodai"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "locale": "bg",
+      "loc": "/bg/kontakt",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/kontakt"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/contact"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/kontakt"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/contact"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/contact"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/epikoinonia"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/contact"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/kontakt"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "locale": "en",
+      "loc": "/en/contact",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/kontakt"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/contact"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/kontakt"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/contact"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/contact"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/epikoinonia"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/contact"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/kontakt"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "locale": "de",
+      "loc": "/de/kontakt",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/kontakt"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/contact"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/kontakt"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/contact"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/contact"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/epikoinonia"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/contact"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/kontakt"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "locale": "nl",
+      "loc": "/nl/contact",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/kontakt"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/contact"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/kontakt"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/contact"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/contact"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/epikoinonia"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/contact"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/kontakt"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "locale": "ru",
+      "loc": "/ru/contact",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/kontakt"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/contact"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/kontakt"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/contact"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/contact"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/epikoinonia"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/contact"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/kontakt"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "locale": "el",
+      "loc": "/el/epikoinonia",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/kontakt"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/contact"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/kontakt"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/contact"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/contact"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/epikoinonia"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/contact"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/kontakt"
+        }
+      ]
+    },
+    {
+      "type": "contact",
+      "locale": "he",
+      "loc": "/he/contact",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/kontakt"
+        },
+        {
+          "hreflang": "en",
+          "href": "/en/contact"
+        },
+        {
+          "hreflang": "de",
+          "href": "/de/kontakt"
+        },
+        {
+          "hreflang": "nl",
+          "href": "/nl/contact"
+        },
+        {
+          "hreflang": "ru",
+          "href": "/ru/contact"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/epikoinonia"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/contact"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/kontakt"
         }
       ]
     }

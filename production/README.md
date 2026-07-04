@@ -23,8 +23,8 @@ What it proves now:
 - Canonical CMS seed records composed from crawl, route, translation, and media evidence.
 - Moderated public media contract that separates imported gallery photos from review-gated floor-plan/video/tour assets.
 - Draft Photo Sphere Viewer 360 tour fields with required gallery fallback policy.
-- Public route fixtures for locale-prefixed listing/search/fallback routes.
-- Locale homepages with search, seller, location, and featured listing paths.
+- Public route fixtures for locale-prefixed listing/search/contact/fallback routes.
+- Locale homepages with search, seller, contact, location, and featured listing paths.
 - Crawlable location pages generated from reviewed listing inventory.
 - Admin CRM/CMS shell language availability in BG, RU, and EN.
 - Website route coverage for Greek and Hebrew, including Hebrew RTL metadata.
@@ -32,10 +32,11 @@ What it proves now:
 - Authenticated admin translation draft and human-approved publish endpoints.
 - Authenticated listing edit endpoint that marks dependent translations stale.
 - Public listing routes overlay translation ledger state before indexability.
-- Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
-- HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
-- Server-rendered HTML adapter for listing, search, and fallback pages with SEO metadata.
+- Runtime smoke fixture for listing route, search route, contact route, fallback route, and lead intake.
+- HTTP JSON adapter smoke fixture for listing, search, contact, fallback, and lead endpoints.
+- Server-rendered HTML adapter for listing, search, contact, and fallback pages with SEO metadata.
 - Locale-prefixed seller valuation page backed by the existing seller lead pipeline.
+- Locale-prefixed contact callback page backed by the existing gated CRM lead intake.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
 - Runtime locale roots serve public homepages for approved locales and keep disabled locales in the fallback/request flow.
@@ -51,13 +52,13 @@ What it proves now:
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
 - Served sitemap XML includes approved home and location pages without unapproved French routes.
-- Append-only lead ledger for persisted buyer inquiry, viewing request, and seller valuation smoke rows, including source classification.
+- Append-only lead ledger for persisted buyer inquiry, viewing request, contact callback, and seller valuation smoke rows, including source classification.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
 - Broker-booked viewing ledger with open follow-up tasks from existing CRM leads.
 - Saved-search ledger with open alert tasks from public search criteria.
 - Seller valuation pipeline ledger with callback/appraisal tasks from seller leads.
-- Public seller pages are included in the localized sitemap for approved website locales.
+- Public seller and contact pages are included in the localized sitemap for approved website locales.
 
 Run:
 

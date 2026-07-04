@@ -103,14 +103,18 @@ if (
   sitemap.summary.home_pages !== 7 ||
   sitemap.summary.listing_entries !== 167 ||
   sitemap.summary.location_pages !== 6 ||
-  sitemap.summary.seller_pages !== 7
+  sitemap.summary.seller_pages !== 7 ||
+  sitemap.summary.contact_pages !== 7
 ) {
-  throw new Error("Localized sitemap must include approved home, listing, location, and seller pages");
+  throw new Error("Localized sitemap must include approved home, listing, location, seller, and contact pages");
 }
-if (sitemap.summary.byLocale.bg !== 117 || sitemap.summary.byLocale.ru !== 56) {
+if (sitemap.summary.entries !== 194) {
+  throw new Error("Localized sitemap must include 194 approved public routes");
+}
+if (sitemap.summary.byLocale.bg !== 118 || sitemap.summary.byLocale.ru !== 57) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 4 || sitemap.summary.byLocale.he !== 4) {
+if (sitemap.summary.byLocale.el !== 5 || sitemap.summary.byLocale.he !== 5) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
@@ -122,6 +126,7 @@ if (
   !sitemapXml.includes("/he/properties/MS-CRAWL-0001") ||
   !sitemapXml.includes("/he/locations/sandanski") ||
   !sitemapXml.includes("/he/sell") ||
+  !sitemapXml.includes("/he/contact") ||
   sitemapXml.includes("/fr/")
 ) {
   throw new Error("Sitemap XML must include approved Hebrew and exclude French");
@@ -149,6 +154,12 @@ if (publicFixtures.listing_el.path !== `/el/akinita/${publicFixtures.source_list
 }
 if (publicFixtures.listing_fr_fallback.indexable !== false) throw new Error("French fallback listing must not be indexable");
 if (publicFixtures.fallback_fr.indexable !== false) throw new Error("French language fallback must not be indexable");
+if (
+  publicFixtures.contact_he.path !== "/he/contact" ||
+  publicFixtures.contact_he.body.callback.payload.source !== "website_contact_callback"
+) {
+  throw new Error("Public fixtures must include Hebrew contact callback page");
+}
 if (JSON.stringify(publicFixtures).match(/Sandanski sea|sea destination|Сандански море/i)) {
   throw new Error("Public fixtures must not introduce Sandanski sea framing");
 }
@@ -184,6 +195,9 @@ if (runtimeSmoke.home_he.kind !== "home" || runtimeSmoke.home_he.body.search.pat
 if (runtimeSmoke.home_he.body.seller.path !== "/he/sell") {
   throw new Error("Runtime smoke homepage must expose seller path");
 }
+if (runtimeSmoke.home_he.body.contact.path !== "/he/contact") {
+  throw new Error("Runtime smoke homepage must expose contact path");
+}
 if (runtimeSmoke.listing_he.dir !== "rtl" || runtimeSmoke.listing_he.status !== 200) {
   throw new Error("Runtime smoke must render Hebrew listing as RTL 200");
 }
@@ -203,6 +217,13 @@ if (
   throw new Error("Runtime smoke must expose conversion actions without unreviewed broker contact data");
 }
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
+if (
+  runtimeSmoke.contact_he.status !== 200 ||
+  runtimeSmoke.contact_he.kind !== "contact" ||
+  runtimeSmoke.contact_he.body.callback.payload.source !== "website_contact_callback"
+) {
+  throw new Error("Runtime smoke must expose contact callback page");
+}
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
 if (runtimeSmoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime smoke lead must preserve contact preference");
 if (
@@ -210,6 +231,13 @@ if (
   runtimeSmoke.viewingLead_he.contact_preference !== "phone"
 ) {
   throw new Error("Runtime smoke viewing request lead must route through CRM");
+}
+if (
+  runtimeSmoke.contactLead_he.lead.source !== "website_contact_callback" ||
+  runtimeSmoke.contactLead_he.lead.leadType !== "general" ||
+  runtimeSmoke.contactLead_he.contact_preference !== "phone"
+) {
+  throw new Error("Runtime smoke contact callback lead must route through CRM");
 }
 if (runtimeSmoke.search_he.cards.find((card) => card.id === "MS-CRAWL-0001")?.translation_display !== "reviewed_translation") {
   throw new Error("Runtime smoke search must show reviewed Hebrew translation state");
@@ -252,6 +280,13 @@ if (
   !httpSmoke.sellerHtml.body.includes("data-lead-type=\"seller\"")
 ) {
   throw new Error("HTTP smoke must expose seller valuation page contract");
+}
+if (
+  httpSmoke.contact.status !== 200 ||
+  httpSmoke.contact.body.body.callback.payload.leadType !== "general" ||
+  !httpSmoke.contactHtml.body.includes("data-lead-type=\"general\"")
+) {
+  throw new Error("HTTP smoke must expose contact callback page contract");
 }
 if (
   httpSmoke.brokerContact.status !== 201 ||
@@ -317,7 +352,15 @@ if (
 ) {
   throw new Error("HTTP smoke must accept public viewing request leads");
 }
-if (httpSmoke.leadLedger.rows !== 3) throw new Error("HTTP smoke must persist buyer, viewing, and seller lead rows");
+if (
+  httpSmoke.contactLead.status !== 201 ||
+  httpSmoke.contactLead.body.lead.source !== "website_contact_callback" ||
+  httpSmoke.contactLead.body.lead.leadType !== "general" ||
+  httpSmoke.contactLead.body.contact_preference !== "phone"
+) {
+  throw new Error("HTTP smoke must accept public contact callback leads");
+}
+if (httpSmoke.leadLedger.rows !== 4) throw new Error("HTTP smoke must persist buyer, viewing, contact, and seller lead rows");
 if (httpSmoke.sellerLead.status !== 201 || httpSmoke.sellerLead.body.lead.leadType !== "seller") {
   throw new Error("HTTP smoke must accept seller valuation lead");
 }
@@ -367,7 +410,22 @@ if (
 ) {
   throw new Error("Node server smoke must accept public viewing request leads");
 }
-if (nodeServerSmoke.leadLedger.rows !== 3) throw new Error("Node server smoke must persist buyer, viewing, and seller lead rows");
+if (
+  nodeServerSmoke.contact.status !== 200 ||
+  nodeServerSmoke.contact.body.body.callback.payload.leadType !== "general" ||
+  !nodeServerSmoke.contactHtml.body.includes("data-lead-type=\"general\"")
+) {
+  throw new Error("Node server smoke must expose contact callback page contract");
+}
+if (
+  nodeServerSmoke.contactLead.status !== 201 ||
+  nodeServerSmoke.contactLead.body.lead.source !== "website_contact_callback" ||
+  nodeServerSmoke.contactLead.body.lead.leadType !== "general" ||
+  nodeServerSmoke.contactLead.body.contact_preference !== "phone"
+) {
+  throw new Error("Node server smoke must accept public contact callback leads");
+}
+if (nodeServerSmoke.leadLedger.rows !== 4) throw new Error("Node server smoke must persist buyer, viewing, contact, and seller lead rows");
 if (nodeServerSmoke.sellerLead.status !== 201 || nodeServerSmoke.sellerLead.body.lead.leadType !== "seller") {
   throw new Error("Node server smoke must accept seller valuation lead");
 }
@@ -426,7 +484,7 @@ if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server s
 if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node server smoke must persist one seller pipeline row");
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (leadLedger.length !== 3) throw new Error("Lead ledger artifact must contain buyer, viewing, and seller smoke rows");
+if (leadLedger.length !== 4) throw new Error("Lead ledger artifact must contain buyer, viewing, contact, and seller smoke rows");
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contain one deterministic smoke row");
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);

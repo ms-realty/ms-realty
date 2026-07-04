@@ -80,7 +80,7 @@ Date: 2026-07-04
   - served `/sitemap.xml` includes approved dynamic locale translations from the review ledger
   - `/api/search` returns reviewed translation cards for those admin-added approved locales
 - Added locale homepage route resolution:
-  - approved locale roots like `/he/` serve a real homepage with search, seller, location, and featured listing paths
+  - approved locale roots like `/he/` serve a real homepage with search, seller, contact, location, and featured listing paths
   - disabled locale roots like `/fr/` stay in the non-indexable fallback/request flow
   - homepage routes are included in hreflang and sitemap output
 - Added crawlable location route resolution:
@@ -120,6 +120,8 @@ Date: 2026-07-04
   - Greek and Hebrew included only for explicit approved seed translations
   - approved location pages included for real inventory locations
   - public seller valuation pages included for each indexable website locale
+  - public contact callback pages included for each indexable website locale
+  - current generated sitemap contains 194 approved localized routes
   - unapproved French excluded
 - Added generated SEO files:
   - `production/data/sitemap.xml` from approved localized sitemap entries
@@ -138,31 +140,34 @@ Date: 2026-07-04
 - Added runtime smoke fixture:
   - resolves Hebrew and Russian locale-prefixed listing routes from CMS seed
   - runs Hebrew mobile-first search from CMS seed
+  - resolves Hebrew contact callback route `/he/contact`
   - keeps French fallback non-indexable
-  - accepts a Hebrew buyer lead into the EN admin queue with broker approval required
+  - accepts Hebrew buyer, viewing, and contact callback leads into the EN admin queue with broker approval required
   - exposes a moderated public photo gallery instead of raw crawl media
   - exposes a draft 360 tour field with non-WebGL fallback gallery on listing pages
 - Added HTTP JSON adapter smoke fixture:
   - `GET /he/properties/MS-CRAWL-0001`
   - `GET /api/search?locale=he&q=Sandanski`
+  - `GET /he/contact`
   - `GET /fr/`
   - `POST /api/leads`
 - Added server-rendered HTML adapter:
-  - `GET /he/` serves a Hebrew RTL homepage with search and seller paths
+  - `GET /he/` serves a Hebrew RTL homepage with search, seller, and contact paths
   - `GET /he/properties/MS-CRAWL-0001` serves listing HTML when `Accept: text/html` or `?format=html` is present
   - `GET /he/search?q=Sandanski` serves locale-scoped search HTML
   - `GET /he/sell` serves a Hebrew RTL seller valuation page backed by `POST /api/leads`
+  - `GET /he/contact` serves a Hebrew RTL callback page backed by `POST /api/leads`
   - HTML includes `lang`, `dir`, canonical, robots, hreflang, and listing schema metadata
   - direct phone, WhatsApp, and Viber links stay absent until broker contact approval exists
 - Added live Node server smoke fixture:
   - starts a stdlib HTTP server on an ephemeral local port
   - fetches Hebrew listing and Hebrew search endpoints
   - fetches Hebrew listing/search HTML through browser-style content negotiation
-  - posts a valid Hebrew buyer lead
+  - posts valid Hebrew buyer, viewing, and contact callback leads
   - rejects an unknown buyer listing reference
 - Added append-only CRM lead ledger:
-  - persists accepted HTTP buyer, viewing request, and seller lead intake as JSONL
-  - stores source classification so viewing requests remain distinguishable in CRM
+  - persists accepted HTTP buyer, viewing request, contact callback, and seller lead intake as JSONL
+  - stores source classification so viewing requests and generic contact callbacks remain distinguishable in CRM
   - stores original language, admin queue locale, listing reference, and broker approval gate
   - keeps smoke artifact deterministic
 - Added gated admin lead inbox endpoint:
@@ -189,10 +194,15 @@ Date: 2026-07-04
   - persisted seller rows start at `valuation_requested`
   - callback and appraisal checklist items are opened for broker follow-up
   - authenticated admin inbox returns persisted seller pipeline rows
+- Added locale-prefixed contact callback intake:
+  - `GET /he/contact` resolves as an approved Hebrew public page
+  - contact pages carry hreflang/canonical metadata and participate in sitemap output
+  - `website_contact_callback` leads are stored as `general` CRM leads and remain broker-approval gated
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`
   - Hebrew website route `/he/properties/{id}` with RTL metadata
+  - Hebrew contact route `/he/contact` with callback lead payload
   - French fallback/request flow without indexability
   - Hebrew mobile search backed by Typesense/Meilisearch fixtures
   - Admin CRM/CMS shell limited to BG, RU, and EN interface locales

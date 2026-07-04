@@ -51,7 +51,13 @@ def main() -> int:
         if locale.get("translation_provider_mode") not in {"human", "hermes_draft", "external_import"}:
             fail(f"invalid provider mode for {code}")
         segments = locale.get("route_segments") or {}
-        if not segments.get("listing") or not segments.get("search") or not segments.get("location") or not segments.get("seller"):
+        if (
+            not segments.get("listing")
+            or not segments.get("search")
+            or not segments.get("location")
+            or not segments.get("contact")
+            or not segments.get("seller")
+        ):
             fail(f"missing route segments for {code}")
 
     if by_code["he"].get("direction") != "rtl":

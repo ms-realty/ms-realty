@@ -9,9 +9,10 @@ import {
   renderListingPage,
   renderLocationPage,
   renderSearchPage,
+  renderContactPage,
   renderSellerPage,
 } from "./public-site.mjs";
-import { locationPath, listingPath, sellerPath } from "./seo.mjs";
+import { contactPath, locationPath, listingPath, sellerPath } from "./seo.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 
 export const DEFAULT_CMS_SEED_PATH = fromRoot("production", "data", "cms-seed.json");
@@ -105,6 +106,15 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   });
   if (sellerLocale) return { type: "seller", localeCode: sellerLocale.code };
 
+  const contactLocale = registry.locales.find((locale) => {
+    try {
+      return contactPath(registry, locale.code) === normalized;
+    } catch {
+      return false;
+    }
+  });
+  if (contactLocale) return { type: "contact", localeCode: contactLocale.code };
+
   for (const locale of registry.locales) {
     const location = locationNames(seed).find((candidate) => locationPath(registry, locale.code, candidate) === normalized);
     if (location) return { type: "location", localeCode: locale.code, location };
@@ -146,6 +156,9 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   }
   if (resolved.type === "seller") {
     return renderSellerPage({ registry, localeCode: resolved.localeCode });
+  }
+  if (resolved.type === "contact") {
+    return renderContactPage({ registry, localeCode: resolved.localeCode });
   }
   if (resolved.type === "location") {
     return renderLocationPage({
@@ -189,6 +202,7 @@ export function buildRuntimeSmoke(registry, seed) {
     listing_ru: renderRuntimePath(registry, seed, ruListing.routing.target_path),
     home_he: renderRuntimePath(registry, seed, "/he/"),
     seller_he: renderRuntimePath(registry, seed, "/he/sell"),
+    contact_he: renderRuntimePath(registry, seed, "/he/contact"),
     location_he: renderRuntimePath(registry, seed, "/he/locations/sandanski"),
     fallback_fr: renderRuntimePath(registry, seed, "/fr/"),
     search_he: searchRuntimeListings(registry, seed, { localeCode: "he", query: "Sandanski" }),
@@ -211,6 +225,15 @@ export function buildRuntimeSmoke(registry, seed) {
       contact: { name: "Noa Levi" },
       contact_preference: "phone",
       message: "I would like to view this property.",
+    }),
+    contactLead_he: submitRuntimeLead(registry, seed, {
+      id: "runtime-contact-lead-he-0001",
+      source: "website_contact_callback",
+      leadType: "general",
+      language: "he",
+      contact: { name: "Noa Levi" },
+      contact_preference: "phone",
+      message: "Please call me about buying in Sandanski.",
     }),
   };
 }
@@ -242,6 +265,14 @@ export function assertRuntimeSmoke(smoke) {
   if (smoke.seller_he.status !== 200 || smoke.seller_he.body.valuation.payload.source !== "website_seller_valuation") {
     throw new Error("Runtime seller page must expose seller valuation lead action");
   }
+  if (
+    smoke.contact_he.status !== 200 ||
+    smoke.contact_he.kind !== "contact" ||
+    smoke.contact_he.body.callback.payload.source !== "website_contact_callback" ||
+    smoke.contact_he.body.callback.payload.leadType !== "general"
+  ) {
+    throw new Error("Runtime contact page must expose generic callback lead action");
+  }
   if (smoke.location_he.status !== 200 || smoke.location_he.kind !== "location" || smoke.location_he.body.location !== "Sandanski") {
     throw new Error("Runtime location page must render reviewed Sandanski inventory");
   }
@@ -259,6 +290,14 @@ export function assertRuntimeSmoke(smoke) {
     smoke.viewingLead_he.hermes_reply_draft.broker_approval_required !== true
   ) {
     throw new Error("Runtime viewing request lead must stay review-gated in CRM");
+  }
+  if (
+    smoke.contactLead_he.lead.source !== "website_contact_callback" ||
+    smoke.contactLead_he.lead.leadType !== "general" ||
+    smoke.contactLead_he.contact_preference !== "phone" ||
+    smoke.contactLead_he.hermes_reply_draft.broker_approval_required !== true
+  ) {
+    throw new Error("Runtime contact callback lead must stay review-gated in CRM");
   }
   if (JSON.stringify(smoke).match(/Sandanski sea|sea destination|Сандански море/i)) {
     throw new Error("Runtime smoke must not introduce Sandanski sea framing");

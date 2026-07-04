@@ -20,6 +20,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   const he = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001");
   const home = renderRuntimePath(registry, seed, "/he/");
   const seller = renderRuntimePath(registry, seed, "/he/sell");
+  const contact = renderRuntimePath(registry, seed, "/he/contact");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
 
@@ -43,6 +44,10 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(seller.kind, "seller");
   assert.equal(seller.path, "/he/sell");
   assert.equal(seller.body.valuation.payload.leadType, "seller");
+  assert.equal(contact.kind, "contact");
+  assert.equal(contact.path, "/he/contact");
+  assert.equal(contact.body.callback.payload.source, "website_contact_callback");
+  assert.equal(contact.body.callback.payload.leadType, "general");
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").kind, "location");
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length, 1);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/petrich").status, 404);
@@ -114,6 +119,7 @@ test("runtime resolves admin-added approved locale listing routes from translati
   assert.equal(page.hreflang.some((link) => link.hreflang === "es"), true);
   assert.equal(renderRuntimePath(updated, seed, "/es/", translationTasks).kind, "home");
   assert.equal(renderRuntimePath(updated, seed, "/es/vender").locale, "es");
+  assert.equal(renderRuntimePath(updated, seed, "/es/contact").kind, "contact");
   assert.equal(renderRuntimePath(updated, seed, "/es/locations/sandanski", translationTasks).status, 200);
 });
 
@@ -226,6 +232,25 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
   assert.equal(lead.lead.source, "website_viewing_request");
   assert.equal(lead.lead.leadType, "buyer");
   assert.equal(lead.lead.listingReference, "MS-CRAWL-0001");
+  assert.equal(lead.original_language, "he");
+  assert.equal(lead.admin_locale, "en");
+  assert.equal(lead.contact_preference, "phone");
+  assert.equal(lead.hermes_reply_draft.broker_approval_required, true);
+});
+
+test("runtime contact callback lead stays routed through broker-approved CRM flow", () => {
+  const lead = submitRuntimeLead(registry, seed, {
+    id: "runtime-contact-lead-test",
+    source: "website_contact_callback",
+    leadType: "general",
+    language: "he",
+    contact: { name: "Noa Levi" },
+    contact_preference: "phone",
+    message: "Please call me about buying in Sandanski.",
+  });
+
+  assert.equal(lead.lead.source, "website_contact_callback");
+  assert.equal(lead.lead.leadType, "general");
   assert.equal(lead.original_language, "he");
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "phone");

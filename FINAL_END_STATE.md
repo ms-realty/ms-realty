@@ -87,9 +87,13 @@ Implemented now:
   - served sitemap XML includes those approved dynamic locale routes
   - search API cards reflect the same reviewed dynamic locale translation state
 - Homepage contract:
-  - approved locale roots serve real homepages with search, seller, location, and featured listing paths
+  - approved locale roots serve real homepages with search, seller, contact, location, and featured listing paths
   - disabled locale roots remain non-indexable fallback/request flows
   - homepage routes participate in sitemap and hreflang output
+- Contact callback contract:
+  - approved public locales expose locale-prefixed contact pages, including Hebrew `/he/contact`
+  - contact pages participate in sitemap and hreflang output
+  - `website_contact_callback` submissions are stored as `general` CRM leads and remain broker-approval gated
 - Location page contract:
   - real listing locations generate crawlable locale-prefixed pages only when that locale has indexable inventory there
   - Hebrew Sandanski is served at `/he/locations/sandanski`
@@ -109,6 +113,7 @@ Implemented now:
 - Lead contact preference contract:
   - public leads preserve phone, Viber, WhatsApp, or email preference
   - public viewing requests are stored as `website_viewing_request` buyer leads before broker booking
+  - public contact callback requests are stored as `website_contact_callback` general leads
   - CRM inbox and append-only lead ledger expose the normalized preference for broker follow-up
   - unsupported contact channels are rejected before persistence
 - Mobile and elderly-user QA gate:

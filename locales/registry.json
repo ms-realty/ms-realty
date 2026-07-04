@@ -20,6 +20,7 @@
         "listing": "imoti",
         "search": "tarsene",
         "location": "lokacii",
+        "contact": "kontakt",
         "seller": "prodai"
       }
     },
@@ -37,6 +38,7 @@
         "listing": "properties",
         "search": "search",
         "location": "locations",
+        "contact": "contact",
         "seller": "sell"
       }
     },
@@ -54,6 +56,7 @@
         "listing": "immobilien",
         "search": "suche",
         "location": "orte",
+        "contact": "kontakt",
         "seller": "verkaufen"
       }
     },
@@ -71,6 +74,7 @@
         "listing": "vastgoed",
         "search": "zoeken",
         "location": "locaties",
+        "contact": "contact",
         "seller": "verkopen"
       }
     },
@@ -88,6 +92,7 @@
         "listing": "properties",
         "search": "search",
         "location": "locations",
+        "contact": "contact",
         "seller": "sell"
       }
     },
@@ -105,6 +110,7 @@
         "listing": "akinita",
         "search": "anazitisi",
         "location": "topothesies",
+        "contact": "epikoinonia",
         "seller": "polisi"
       }
     },
@@ -122,6 +128,7 @@
         "listing": "properties",
         "search": "search",
         "location": "locations",
+        "contact": "contact",
         "seller": "sell"
       }
     },
@@ -139,6 +146,7 @@
         "listing": "properties",
         "search": "recherche",
         "location": "lieux",
+        "contact": "contact",
         "seller": "vendre"
       }
     }

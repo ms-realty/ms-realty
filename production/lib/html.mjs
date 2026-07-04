@@ -81,6 +81,7 @@ function renderHome(page) {
     <button type="submit">Search</button>
   </form>
   <a href="${escapeHtml(page.body.seller.path)}" data-action="seller">${escapeHtml(page.body.seller.label)}</a>
+  <a href="${escapeHtml(page.body.contact.path)}" data-action="contact">${escapeHtml(page.body.contact.label)}</a>
   <nav aria-label="Locations">${locations}</nav>
   <section aria-label="Featured listings">${cards}</section>
 </main>`;
@@ -131,6 +132,27 @@ function renderSeller(page) {
 </main>`;
 }
 
+function renderContact(page) {
+  return `
+<main data-kind="contact">
+  <h1>${escapeHtml(page.body.h1)}</h1>
+  <p>${escapeHtml(page.body.intro)}</p>
+  <form method="post" action="${escapeHtml(page.body.callback.endpoint)}" data-lead-type="general" data-source="${escapeHtml(
+    page.body.callback.payload.source,
+  )}">
+    <input type="hidden" name="source" value="${escapeHtml(page.body.callback.payload.source)}">
+    <input type="hidden" name="leadType" value="${escapeHtml(page.body.callback.payload.leadType)}">
+    <input type="hidden" name="language" value="${escapeHtml(page.body.callback.payload.language)}">
+    <input type="hidden" name="contact_preference" value="${escapeHtml(page.body.callback.payload.contact_preference)}">
+    <label>Name <input name="contact.name" required autocomplete="name"></label>
+    <label>Message <textarea name="message" required></textarea></label>
+    <button type="submit">${escapeHtml(page.body.callback.label)}</button>
+  </form>
+  <a href="${escapeHtml(page.body.search.path)}" data-action="search">Search</a>
+  <a href="${escapeHtml(page.body.seller.path)}" data-action="seller">Seller valuation</a>
+</main>`;
+}
+
 function renderFallback(page) {
   return `
 <main data-kind="language-fallback">
@@ -146,6 +168,7 @@ function renderBody(page) {
   if (page.kind === "search") return renderSearch(page);
   if (page.kind === "location") return renderLocation(page);
   if (page.kind === "seller") return renderSeller(page);
+  if (page.kind === "contact") return renderContact(page);
   if (page.kind === "language_fallback") return renderFallback(page);
   return `<main data-kind="not-found"><h1>Not found</h1></main>`;
 }

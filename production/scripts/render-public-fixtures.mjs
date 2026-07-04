@@ -4,6 +4,7 @@ import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   renderAdminShell,
+  renderContactPage,
   renderHomePage,
   renderLanguageFallback,
   renderListingPage,
@@ -29,6 +30,7 @@ const fixtures = {
   search_he: renderSearchPage({ registry, localeCode: "he", listings, query: "Sandanski" }),
   location_he: renderLocationPage({ registry, localeCode: "he", location: "Sandanski", listings }),
   seller_he: renderSellerPage({ registry, localeCode: "he" }),
+  contact_he: renderContactPage({ registry, localeCode: "he" }),
   admin_ru: renderAdminShell({ registry, requestedLocale: "ru" }),
   admin_el_fallback: renderAdminShell({ registry, requestedLocale: "el" }),
 };

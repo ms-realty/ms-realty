@@ -1,8 +1,10 @@
 import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } from "./locales.mjs";
 import {
+  contactPath,
   hreflangForListing,
   hreflangForLocation,
   hreflangForHome,
+  hreflangForContact,
   hreflangForSeller,
   homePath,
   isTranslationIndexable,
@@ -190,6 +192,44 @@ const HOME_COPY = {
   },
 };
 
+const CONTACT_COPY = {
+  bg: {
+    title: "Свържете се с MS Realty",
+    h1: "Свържете се с брокер",
+    description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty.",
+  },
+  en: {
+    title: "Contact MS Realty",
+    h1: "Contact a broker",
+    description: "Send a question or callback request to the MS Realty team.",
+  },
+  de: {
+    title: "MS Realty kontaktieren",
+    h1: "Makler kontaktieren",
+    description: "Senden Sie eine Frage oder Rückrufanfrage an das MS Realty Team.",
+  },
+  nl: {
+    title: "Neem contact op met MS Realty",
+    h1: "Neem contact op met een makelaar",
+    description: "Stuur een vraag of terugbelverzoek naar het MS Realty team.",
+  },
+  ru: {
+    title: "Связаться с MS Realty",
+    h1: "Связаться с брокером",
+    description: "Отправьте вопрос или запрос на обратный звонок команде MS Realty.",
+  },
+  el: {
+    title: "Επικοινωνία με τη MS Realty",
+    h1: "Επικοινωνήστε με μεσίτη",
+    description: "Στείλτε ερώτηση ή αίτημα επανάκλησης στην ομάδα της MS Realty.",
+  },
+  he: {
+    title: "יצירת קשר עם MS Realty",
+    h1: "יצירת קשר עם מתווך",
+    description: "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
+  },
+};
+
 function labelsFor(localeCode) {
   return ACTION_LABELS[localeCode] || ACTION_LABELS.en;
 }
@@ -225,6 +265,10 @@ function sellerCopy(localeCode) {
 
 function homeCopy(localeCode) {
   return HOME_COPY[localeCode] || HOME_COPY.en;
+}
+
+function contactCopy(localeCode) {
+  return CONTACT_COPY[localeCode] || CONTACT_COPY.en;
 }
 
 function translationsForSearchListing(registry, listing) {
@@ -564,9 +608,62 @@ export function renderHomePage({ registry, localeCode, listings }) {
         path: sellerPath(registry, locale.code),
         label: labelsFor(locale.code).valuation,
       },
+      contact: {
+        path: contactPath(registry, locale.code),
+        label: labelsFor(locale.code).callback,
+      },
       locations,
     },
     cards: search.cards.slice(0, 6),
+  };
+}
+
+export function renderContactPage({ registry, localeCode }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const path = contactPath(registry, locale.code);
+  const labels = labelsFor(locale.code);
+  const copy = contactCopy(locale.code);
+
+  return {
+    kind: "contact",
+    status: 200,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: resolved.available,
+    metadata: {
+      title: copy.title,
+      description: copy.description,
+      robots: resolved.available ? "index,follow" : "noindex,follow",
+    },
+    hreflang: resolved.available ? hreflangForContact(registry) : [],
+    body: {
+      h1: copy.h1,
+      intro: copy.description,
+      callback: {
+        endpoint: "/api/leads",
+        method: "POST",
+        minimum_tap_target_px: 44,
+        required_fields: ["contact.name", "message"],
+        payload: {
+          source: "website_contact_callback",
+          leadType: "general",
+          language: locale.code,
+          contact_preference: "phone",
+        },
+        label: labels.callback,
+      },
+      search: {
+        path: `/${locale.code}/${locale.route_segments.search}`,
+      },
+      seller: {
+        path: sellerPath(registry, locale.code),
+      },
+    },
   };
 }
 

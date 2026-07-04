@@ -111,6 +111,10 @@ try {
     sellerHtml: await textFetch(baseUrl, "/he/sell", {
       headers: { accept: "text/html" },
     }),
+    contact: await jsonFetch(baseUrl, "/he/contact"),
+    contactHtml: await textFetch(baseUrl, "/he/contact", {
+      headers: { accept: "text/html" },
+    }),
     savedSearch: await jsonFetch(baseUrl, "/api/saved-searches", {
       method: "POST",
       body: JSON.stringify({
@@ -143,6 +147,18 @@ try {
         contact: { name: "Noa Levi" },
         contact_preference: "phone",
         message: "I would like to view this property.",
+      }),
+    }),
+    contactLead: await jsonFetch(baseUrl, "/api/leads", {
+      method: "POST",
+      body: JSON.stringify({
+        id: "server-lead-contact-he-0001",
+        source: "website_contact_callback",
+        leadType: "general",
+        language: "he",
+        contact: { name: "Noa Levi" },
+        contact_preference: "phone",
+        message: "Please call me about buying in Sandanski.",
       }),
     }),
     sellerLead: await jsonFetch(baseUrl, "/api/leads", {

@@ -6,6 +6,7 @@ import { assertHtmlPage, renderHtmlPage } from "../lib/html.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   renderLanguageFallback,
+  renderContactPage,
   renderHomePage,
   renderListingPage,
   renderLocationPage,
@@ -37,6 +38,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   const searchHtml = renderHtmlPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" }));
   const locationHtml = renderHtmlPage(renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" }));
   const sellerHtml = renderHtmlPage(renderSellerPage({ registry, localeCode: "he" }));
+  const contactHtml = renderHtmlPage(renderContactPage({ registry, localeCode: "he" }));
   const fallbackHtml = renderHtmlPage(renderLanguageFallback({ registry, requestedLocale: "fr" }));
 
   assert.equal(assertHtmlPage(homeHtml, { lang: "he", dir: "rtl", kind: "home" }), true);
@@ -53,6 +55,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(locationHtml, /data-location="Sandanski"/);
   assert.equal(assertHtmlPage(sellerHtml, { lang: "he", dir: "rtl", kind: "seller" }), true);
   assert.match(sellerHtml, /data-lead-type="seller"/);
+  assert.equal(assertHtmlPage(contactHtml, { lang: "he", dir: "rtl", kind: "contact" }), true);
+  assert.match(contactHtml, /data-lead-type="general"/);
+  assert.match(contactHtml, /website_contact_callback/);
   assert.equal(assertHtmlPage(fallbackHtml, { lang: "en", dir: "ltr", kind: "language-fallback" }), true);
   assert.match(fallbackHtml, /noindex,follow/);
 });

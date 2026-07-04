@@ -2,7 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { fromRoot } from "./paths.mjs";
 import { mergeRuntimeTranslations } from "./runtime.mjs";
-import { sitemapEntriesForHome, sitemapEntriesForListing, sitemapEntriesForLocations, sitemapEntriesForSeller } from "./seo.mjs";
+import {
+  sitemapEntriesForContact,
+  sitemapEntriesForHome,
+  sitemapEntriesForListing,
+  sitemapEntriesForLocations,
+  sitemapEntriesForSeller,
+} from "./seo.mjs";
 
 export const DEFAULT_PUBLIC_ORIGIN = process.env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com";
 export const DEFAULT_LOCALIZED_SITEMAP_PATH = fromRoot("production", "data", "localized-sitemap.json");
@@ -32,7 +38,8 @@ export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = 
   );
   const sellerEntries = sitemapEntriesForSeller(registry);
   const homeEntries = sitemapEntriesForHome(registry);
-  const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries];
+  const contactEntries = sitemapEntriesForContact(registry);
+  const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries, ...contactEntries];
   return {
     artifact_id: "runtime-localized-sitemap",
     summary: {
@@ -41,6 +48,7 @@ export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = 
       listing_entries: listingEntries.length,
       location_pages: locationEntries.length,
       seller_pages: sellerEntries.length,
+      contact_pages: contactEntries.length,
       entries: entries.length,
       byLocale: countBy(entries, (entry) => entry.locale),
     },
@@ -87,6 +95,7 @@ export function assertSeoFiles({ sitemapXml, robotsTxt }) {
   if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001")) throw new Error("Sitemap XML must include approved Hebrew route");
   if (!sitemapXml.includes("/he/locations/sandanski")) throw new Error("Sitemap XML must include approved Hebrew location route");
   if (!sitemapXml.includes("/he/sell")) throw new Error("Sitemap XML must include Hebrew seller route");
+  if (!sitemapXml.includes("/he/contact")) throw new Error("Sitemap XML must include Hebrew contact route");
   if (sitemapXml.includes("/fr/")) throw new Error("Sitemap XML must not include unapproved French routes");
   if (!sitemapXml.includes('hreflang="x-default"')) throw new Error("Sitemap XML must include x-default links");
   if (!robotsTxt.includes("User-agent: *")) throw new Error("Robots must declare user agent");

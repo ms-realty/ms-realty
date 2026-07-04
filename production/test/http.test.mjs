@@ -160,6 +160,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     robots: await dispatchHttp(app, { url: "/robots.txt" }),
     sellerPage: await dispatchHttp(app, { url: "/he/sell" }),
     sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
+    contact: await dispatchHttp(app, { url: "/he/contact" }),
+    contactHtml: await dispatchHttp(app, { url: "/he/contact?format=html" }),
     lead: await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
@@ -185,6 +187,19 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         contact: { name: "Noa Levi" },
         contact_preference: "phone",
         message: "I would like to view this property.",
+      },
+    }),
+    contactLead: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        id: "http-contact-lead-test",
+        source: "website_contact_callback",
+        leadType: "general",
+        language: "he",
+        contact: { name: "Noa Levi" },
+        contact_preference: "phone",
+        message: "Please call me about buying in Sandanski.",
       },
     }),
     sellerLead: await dispatchHttp(app, {
@@ -303,6 +318,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
   assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
+  assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
+  assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
+  assert.equal(smoke.contactLead.body.lead.leadType, "general");
   assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
@@ -314,7 +332,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
-  assert.equal(smoke.admin.body.leads.length, 3);
+  assert.equal(smoke.admin.body.leads.length, 4);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
@@ -323,6 +341,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.viewings.length, 1);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.source === "website_viewing_request"), true);
+  assert.equal(smoke.admin.body.leads.some((lead) => lead.source === "website_contact_callback"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
 });
 

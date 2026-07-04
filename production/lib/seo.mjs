@@ -12,6 +12,11 @@ export function sellerPath(registry, localeCode) {
   return `/${locale.code}/${locale.route_segments.seller}`;
 }
 
+export function contactPath(registry, localeCode) {
+  const locale = getLocale(registry, localeCode);
+  return `/${locale.code}/${locale.route_segments.contact}`;
+}
+
 export function homePath(registry, localeCode) {
   const locale = getLocale(registry, localeCode);
   return `/${locale.code}/`;
@@ -39,6 +44,16 @@ export function hreflangForSeller(registry) {
       href: sellerPath(registry, locale.code),
     })),
     { hreflang: "x-default", href: sellerPath(registry, registry.source_locale) },
+  ];
+}
+
+export function hreflangForContact(registry) {
+  return [
+    ...publicIndexableLocales(registry).map((locale) => ({
+      hreflang: locale.code,
+      href: contactPath(registry, locale.code),
+    })),
+    { hreflang: "x-default", href: contactPath(registry, registry.source_locale) },
   ];
 }
 
@@ -109,6 +124,16 @@ export function sitemapEntriesForHome(registry) {
     type: "home",
     locale: locale.code,
     loc: homePath(registry, locale.code),
+    hreflang,
+  }));
+}
+
+export function sitemapEntriesForContact(registry) {
+  const hreflang = hreflangForContact(registry);
+  return publicIndexableLocales(registry).map((locale) => ({
+    type: "contact",
+    locale: locale.code,
+    loc: contactPath(registry, locale.code),
     hreflang,
   }));
 }

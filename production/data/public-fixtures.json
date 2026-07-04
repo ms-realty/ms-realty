@@ -63,6 +63,10 @@
         "path": "/he/sell",
         "label": "הערכת מוכר"
       },
+      "contact": {
+        "path": "/he/contact",
+        "label": "שיחה חוזרת"
+      },
       "locations": [
         {
           "location": "Sandanski",
@@ -1324,6 +1328,82 @@
           "contact_preference": "phone"
         },
         "label": "שיחה חוזרת"
+      }
+    }
+  },
+  "contact_he": {
+    "kind": "contact",
+    "status": 200,
+    "requested_locale": "he",
+    "locale": "he",
+    "lang": "he",
+    "dir": "rtl",
+    "path": "/he/contact",
+    "canonical": "/he/contact",
+    "indexable": true,
+    "metadata": {
+      "title": "יצירת קשר עם MS Realty",
+      "description": "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
+      "robots": "index,follow"
+    },
+    "hreflang": [
+      {
+        "hreflang": "bg",
+        "href": "/bg/kontakt"
+      },
+      {
+        "hreflang": "en",
+        "href": "/en/contact"
+      },
+      {
+        "hreflang": "de",
+        "href": "/de/kontakt"
+      },
+      {
+        "hreflang": "nl",
+        "href": "/nl/contact"
+      },
+      {
+        "hreflang": "ru",
+        "href": "/ru/contact"
+      },
+      {
+        "hreflang": "el",
+        "href": "/el/epikoinonia"
+      },
+      {
+        "hreflang": "he",
+        "href": "/he/contact"
+      },
+      {
+        "hreflang": "x-default",
+        "href": "/bg/kontakt"
+      }
+    ],
+    "body": {
+      "h1": "יצירת קשר עם מתווך",
+      "intro": "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
+      "callback": {
+        "endpoint": "/api/leads",
+        "method": "POST",
+        "minimum_tap_target_px": 44,
+        "required_fields": [
+          "contact.name",
+          "message"
+        ],
+        "payload": {
+          "source": "website_contact_callback",
+          "leadType": "general",
+          "language": "he",
+          "contact_preference": "phone"
+        },
+        "label": "שיחה חוזרת"
+      },
+      "search": {
+        "path": "/he/search"
+      },
+      "seller": {
+        "path": "/he/sell"
       }
     }
   },

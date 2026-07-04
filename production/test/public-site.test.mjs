@@ -5,6 +5,7 @@ import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   renderAdminShell,
+  renderContactPage,
   renderHomePage,
   renderLanguageFallback,
   renderListingPage,
@@ -128,6 +129,7 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.equal(he.indexable, true);
   assert.equal(he.body.search.path, "/he/search");
   assert.equal(he.body.seller.path, "/he/sell");
+  assert.equal(he.body.contact.path, "/he/contact");
   assert.equal(he.body.locations.some((location) => location.path === "/he/locations/sandanski"), true);
   assert.ok(he.cards.length > 0);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
@@ -165,6 +167,23 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
   assert.equal(fr.indexable, false);
 });
 
+test("contact callback page is locale-prefixed and posts generic CRM leads", () => {
+  const he = renderContactPage({ registry, localeCode: "he" });
+  const fr = renderContactPage({ registry, localeCode: "fr" });
+
+  assert.equal(he.status, 200);
+  assert.equal(he.path, "/he/contact");
+  assert.equal(he.dir, "rtl");
+  assert.equal(he.indexable, true);
+  assert.equal(he.body.callback.endpoint, "/api/leads");
+  assert.equal(he.body.callback.payload.source, "website_contact_callback");
+  assert.equal(he.body.callback.payload.leadType, "general");
+  assert.equal(he.body.callback.payload.contact_preference, "phone");
+  assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
+  assert.equal(fr.locale, "en");
+  assert.equal(fr.indexable, false);
+});
+
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {
   const adminRu = renderAdminShell({ registry, requestedLocale: "ru" });
   const adminEl = renderAdminShell({ registry, requestedLocale: "el" });
@@ -186,6 +205,7 @@ test("rendered public fixtures do not introduce Sandanski sea framing", () => {
     he: renderListingPage({ registry, listing, localeCode: "he" }),
     search: renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" }),
     seller: renderSellerPage({ registry, localeCode: "he" }),
+    contact: renderContactPage({ registry, localeCode: "he" }),
   });
 
   assert.doesNotMatch(rendered, /Sandanski sea|sea destination|Сандански море/i);

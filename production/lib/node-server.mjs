@@ -134,6 +134,22 @@ export function assertServerSmoke(smoke) {
   if (smoke.sellerLead.body.sellerPipeline?.stage !== "valuation_requested") {
     throw new Error("Server must create seller valuation pipeline row");
   }
+  if (
+    smoke.contact?.status !== 200 ||
+    smoke.contact.body.kind !== "contact" ||
+    smoke.contact.body.body.callback.payload.source !== "website_contact_callback"
+  ) {
+    throw new Error("Server must serve generic contact callback page");
+  }
+  if (
+    smoke.contactLead?.status !== 201 ||
+    smoke.contactLead.body.lead.source !== "website_contact_callback" ||
+    smoke.contactLead.body.lead.leadType !== "general" ||
+    smoke.contactLead.body.contact_preference !== "phone" ||
+    smoke.contactLead.body.hermes_reply_draft.broker_approval_required !== true
+  ) {
+    throw new Error("Server must accept contact callback leads into the gated CRM flow");
+  }
   if (smoke.badLead.status !== 400) throw new Error("Server must reject unknown buyer listing");
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("Server must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");
@@ -164,8 +180,15 @@ export function assertServerSmoke(smoke) {
   ) {
     throw new Error("Server must serve seller valuation page");
   }
+  if (
+    smoke.contactHtml?.status !== 200 ||
+    !smoke.contactHtml.body.includes("data-kind=\"contact\"") ||
+    !smoke.contactHtml.body.includes("data-lead-type=\"general\"")
+  ) {
+    throw new Error("Server must serve rendered contact callback HTML");
+  }
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
-  if (smoke.admin.body.leads.length < 3) throw new Error("Server must show buyer, viewing, and seller leads");
+  if (smoke.admin.body.leads.length < 4) throw new Error("Server must show buyer, viewing, contact, and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated admin leads");
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
     throw new Error("Server must queue broker-approved replies");

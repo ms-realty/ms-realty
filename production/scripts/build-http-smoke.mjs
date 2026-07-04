@@ -126,6 +126,8 @@ const smoke = {
   robots: await dispatchHttp(app, { url: "/robots.txt" }),
   sellerPage: await dispatchHttp(app, { url: "/he/sell" }),
   sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
+  contact: await dispatchHttp(app, { url: "/he/contact" }),
+  contactHtml: await dispatchHttp(app, { url: "/he/contact?format=html" }),
   savedSearch: await dispatchHttp(app, {
     method: "POST",
     url: "/api/saved-searches",
@@ -162,6 +164,19 @@ const smoke = {
       contact: { name: "Noa Levi" },
       contact_preference: "phone",
       message: "I would like to view this property.",
+    },
+  }),
+  contactLead: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/leads",
+    body: {
+      id: "http-lead-contact-he-0001",
+      source: "website_contact_callback",
+      leadType: "general",
+      language: "he",
+      contact: { name: "Noa Levi" },
+      contact_preference: "phone",
+      message: "Please call me about buying in Sandanski.",
     },
   }),
   sellerLead: await dispatchHttp(app, {
