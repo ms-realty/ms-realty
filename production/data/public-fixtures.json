@@ -67,7 +67,17 @@
         "image_count": 35
       },
       "media": {
+        "gallery": [],
         "gallery_count": 0,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 0,
+          "public_gallery_assets": 0,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 0
+        },
         "tour": {
           "available": false,
           "provider": "photo-sphere-viewer",
@@ -153,7 +163,17 @@
         "image_count": 35
       },
       "media": {
+        "gallery": [],
         "gallery_count": 0,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 0,
+          "public_gallery_assets": 0,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 0
+        },
         "tour": {
           "available": false,
           "provider": "photo-sphere-viewer",
@@ -239,7 +259,17 @@
         "image_count": 35
       },
       "media": {
+        "gallery": [],
         "gallery_count": 0,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 0,
+          "public_gallery_assets": 0,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 0
+        },
         "tour": {
           "available": false,
           "provider": "photo-sphere-viewer",
@@ -308,7 +338,17 @@
         "image_count": 35
       },
       "media": {
+        "gallery": [],
         "gallery_count": 0,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 0,
+          "public_gallery_assets": 0,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 0
+        },
         "tour": {
           "available": false,
           "provider": "photo-sphere-viewer",

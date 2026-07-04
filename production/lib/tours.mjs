@@ -1,22 +1,9 @@
+import { imageUrlFromMediaItem } from "./media.mjs";
+
 export const TOUR_PROVIDER = "photo-sphere-viewer";
 
 function httpsUrl(value) {
   return typeof value === "string" && /^https:\/\//.test(value);
-}
-
-function imageUrlFromMediaItem(item) {
-  if (!httpsUrl(item?.url)) return null;
-
-  try {
-    const parsed = new URL(item.url);
-    const src = parsed.searchParams.get("src");
-    const candidate = src && httpsUrl(src) ? src : item.url;
-    if (!/\/wp-content\/uploads\/\d{4}\/\d{2}\//.test(candidate)) return null;
-    if (!/\.(avif|gif|jpe?g|png|webp)(\?|$)/i.test(candidate)) return null;
-    return candidate;
-  } catch {
-    return null;
-  }
 }
 
 export function galleryFallback(media = []) {

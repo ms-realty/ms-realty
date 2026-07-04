@@ -59,6 +59,10 @@ Implemented now:
   - CMS seed has draft `photo-sphere-viewer` tour fields for every listing
   - public listing pages keep tours unavailable until panorama and caption review
   - fallback galleries remain available without WebGL
+- Executable media moderation contract:
+  - imported listing photos are normalized into public gallery candidates
+  - floor-plan/video/tour assets are review-gated until explicitly approved
+  - public listing pages expose moderated media, not raw crawl chrome
 - CRM lead-intake examples:
   - `prototypes/crm-lead-intake/lead-intake-demo.json`
 - Admin locale creation contract:

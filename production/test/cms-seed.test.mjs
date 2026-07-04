@@ -20,6 +20,9 @@ test("CMS seed composes listing, migration, route, translation, and media data",
 
   assert.equal(summary.listings, 165);
   assert.equal(summary.mediaAssets, 4978);
+  assert.ok(summary.publicGalleryAssets > 0);
+  assert.ok(summary.mediaReviewGatedAssets > 0);
+  assert.equal(summary.videoCandidates, 0);
   assert.equal(summary.tourFields, 165);
   assert.equal(summary.publicTours, 0);
   assert.equal(fixtureListing.translations.some((translation) => translation.locale === "he" && translation.public_indexable), true);
@@ -27,6 +30,8 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(fixtureListing.routing.deployable, false);
   assert.equal(fixtureListing.routing.review_required, true);
   assert.ok(fixtureListing.media.length > 0);
+  assert.ok(fixtureListing.media.some((media) => media.kind === "photo" && media.is_public));
+  assert.equal(fixtureListing.media_workflow.total_assets, fixtureListing.media.length);
   assert.equal(fixtureListing.tour.provider, "photo-sphere-viewer");
   assert.equal(fixtureListing.tour.is_public, false);
   assert.ok(fixtureListing.tour.fallback_gallery.length > 0);

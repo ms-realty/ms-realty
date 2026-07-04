@@ -105,6 +105,10 @@ const cmsSeed = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-s
 if (cmsSeed.summary.listings !== 165) throw new Error("CMS seed must include 165 listings");
 if (cmsSeed.summary.bySourceLocale.ru !== 52) throw new Error("CMS seed must include 52 RU source listings");
 if (cmsSeed.summary.mediaAssets !== 4978) throw new Error("CMS seed must include listing media rows");
+if (cmsSeed.summary.publicGalleryAssets <= 0 || cmsSeed.summary.mediaReviewGatedAssets <= 0) {
+  throw new Error("CMS seed must split imported public photos from review-gated media");
+}
+if (cmsSeed.summary.videoCandidates !== 0) throw new Error("CMS seed must not invent listing videos from crawl media");
 if (cmsSeed.summary.tourFields !== 165 || cmsSeed.summary.publicTours !== 0) {
   throw new Error("CMS seed must include draft 360 tour fields without publishing unreviewed tours");
 }
@@ -149,6 +153,9 @@ if (runtimeSmoke.listing_he.dir !== "rtl" || runtimeSmoke.listing_he.status !== 
 }
 if (runtimeSmoke.listing_he.body.media.tour.provider !== "photo-sphere-viewer" || runtimeSmoke.listing_he.body.media.tour.available !== false) {
   throw new Error("Runtime smoke must expose draft 360 tour field with fallback gallery");
+}
+if (runtimeSmoke.listing_he.body.media.gallery_count <= 0 || runtimeSmoke.listing_he.body.media.videos.length !== 0) {
+  throw new Error("Runtime smoke must expose reviewed photo gallery without unreviewed videos");
 }
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");

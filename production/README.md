@@ -20,6 +20,7 @@ What it proves now:
 - Localized sitemap fixture gated by approved translation records.
 - Generated `sitemap.xml` and `robots.txt` from approved localized sitemap entries.
 - Canonical CMS seed records composed from crawl, route, translation, and media evidence.
+- Moderated public media contract that separates imported gallery photos from review-gated floor-plan/video/tour assets.
 - Draft Photo Sphere Viewer 360 tour fields with required gallery fallback policy.
 - Public route fixtures for locale-prefixed listing/search/fallback routes.
 - Admin CRM/CMS shell language availability in BG, RU, and EN.

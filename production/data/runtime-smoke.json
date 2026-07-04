@@ -66,7 +66,126 @@
         "image_count": 35
       },
       "media": {
-        "gallery_count": 35,
+        "gallery": [
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+            "alt": "Property photo",
+            "width": 45,
+            "height": 45
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": null,
+            "height": null
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          }
+        ],
+        "gallery_count": 18,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 35,
+          "public_gallery_assets": 19,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 16
+        },
         "tour": {
           "available": false,
           "provider": "photo-sphere-viewer",
@@ -165,7 +284,108 @@
         "image_count": 33
       },
       "media": {
-        "gallery_count": 33,
+        "gallery": [
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg",
+            "alt": "Property photo",
+            "width": 45,
+            "height": 45
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg",
+            "alt": "Property photo",
+            "width": 45,
+            "height": 45
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg",
+            "alt": "Property photo",
+            "width": 45,
+            "height": 45
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/06/-e1466494223645.jpg",
+            "alt": "Property photo",
+            "width": 45,
+            "height": 45
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg",
+            "alt": "Апартаменты в Парк отеле Пирин — г.Сандански",
+            "width": null,
+            "height": null
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-1-72x72.jpg",
+            "alt": "Property photo",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-2-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-3-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-4-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-5-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-6-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-7-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-8-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-9-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-сандански-парк-отель-пирин-72x72.jpg",
+            "alt": "Продажа квартир в Парк Отеле Пирин",
+            "width": 72,
+            "height": 72
+          }
+        ],
+        "gallery_count": 15,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 33,
+          "public_gallery_assets": 21,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 12
+        },
         "tour": {
           "available": false,
           "provider": "photo-sphere-viewer",

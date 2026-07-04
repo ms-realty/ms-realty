@@ -1,6 +1,7 @@
 import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } from "./locales.mjs";
 import { hreflangForListing, isTranslationIndexable, listingPath } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+import { publicMediaLibrary } from "./media.mjs";
 import { publicTour } from "./tours.mjs";
 
 const ACTION_LABELS = {
@@ -101,6 +102,7 @@ export function renderListingPage({ registry, listing, localeCode, translations 
   const hreflang = indexable ? hreflangForListing(registry, listing.id, allTranslations) : [];
   const labels = labelsFor(locale.code);
   const copy = localizedCopy(locale.code, view);
+  const publicMedia = publicMediaLibrary(view.media);
 
   return {
     kind: "listing",
@@ -151,7 +153,7 @@ export function renderListingPage({ registry, listing, localeCode, translations 
         image_count: view.image_count,
       },
       media: {
-        gallery_count: view.media.length,
+        ...publicMedia,
         tour: publicTour(view.tour),
       },
       ctas: {

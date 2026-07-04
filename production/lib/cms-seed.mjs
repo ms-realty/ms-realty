@@ -3,6 +3,7 @@ import path from "node:path";
 import { parseCsv } from "./csv.mjs";
 import { approvedTranslationRecordsForListing, listingSourceSnapshot } from "./content.mjs";
 import { getLocale } from "./locales.mjs";
+import { mediaWorkflow, normalizeMediaAsset } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
 import { isTranslationIndexable } from "./seo.mjs";
 import { createTourField } from "./tours.mjs";
@@ -39,12 +40,10 @@ function countBy(rows, keyFn) {
 }
 
 function mediaEntry(row) {
-  return {
-    url: row.image_url,
-    alt: row.alt || "",
+  return normalizeMediaAsset(row, {
     width: numberOrNull(row.width),
     height: numberOrNull(row.height),
-  };
+  });
 }
 
 export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows }) {
@@ -82,6 +81,7 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       },
       translations,
       media,
+      media_workflow: mediaWorkflow(media),
       tour: createTourField({ listingId: listing.id, media }),
       migration: migration
         ? {
@@ -105,6 +105,10 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
   const translationRows = records.flatMap((record) => record.translations);
   const mediaAssets = records.reduce((total, record) => total + record.media.length, 0);
   const mediaWithAlt = records.reduce((total, record) => total + record.media.filter((media) => media.alt).length, 0);
+  const publicGalleryAssets = records.reduce((total, record) => total + record.media_workflow.public_gallery_assets, 0);
+  const floorPlanCandidates = records.reduce((total, record) => total + record.media_workflow.floor_plan_candidates, 0);
+  const videoCandidates = records.reduce((total, record) => total + record.media_workflow.video_candidates, 0);
+  const mediaReviewGatedAssets = records.reduce((total, record) => total + record.media_workflow.review_gated_assets, 0);
   const tourFields = records.filter((record) => record.tour).length;
   const publicTours = records.filter((record) => record.tour?.is_public).length;
 
@@ -116,6 +120,10 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       translationLocales: countBy(translationRows, (translation) => translation.locale),
       mediaAssets,
       mediaWithAlt,
+      publicGalleryAssets,
+      floorPlanCandidates,
+      videoCandidates,
+      mediaReviewGatedAssets,
       tourFields,
       publicTours,
       missingMigrationRecords: records.filter((record) => !record.migration).length,
@@ -136,6 +144,9 @@ export function assertCmsSeed(seed) {
   }
   if (seed.summary.translationLocales.fr) throw new Error("French CMS translations must not be seeded before approval");
   if (seed.summary.mediaAssets !== 4978) throw new Error(`Expected 4978 listing media rows, got ${seed.summary.mediaAssets}`);
+  if (seed.summary.publicGalleryAssets <= 0) throw new Error("CMS seed must expose reviewed imported photo gallery assets");
+  if (seed.summary.mediaReviewGatedAssets <= 0) throw new Error("CMS seed must keep non-gallery media review-gated");
+  if (seed.summary.videoCandidates !== 0) throw new Error("Crawl seed must not invent listing video assets");
   if (seed.summary.tourFields !== 165) throw new Error("Expected one draft 360 tour field per CMS listing");
   if (seed.summary.publicTours !== 0) throw new Error("Crawl seed must not publish unreviewed 360 tours");
   if (seed.summary.missingMigrationRecords !== 0) throw new Error("Every CMS listing needs a migration record");

@@ -35,6 +35,7 @@ export function listingFromCmsRecord(record) {
     price_eur: record.facts.price_eur,
     image_count: record.facts.image_count,
     media: record.media || [],
+    media_workflow: record.media_workflow || null,
     tour: record.tour || null,
     word_count: record.facts.word_count,
     schema_present: record.seo.schema_present,

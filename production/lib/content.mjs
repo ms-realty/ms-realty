@@ -83,6 +83,7 @@ export function listingToPublicViewModel(listing) {
     price_eur: snapshot.price_eur,
     image_count: snapshot.image_count,
     media: listing.media || [],
+    media_workflow: listing.media_workflow || null,
     tour: listing.tour || null,
     word_count: snapshot.word_count,
     schema_present: Boolean(listing.schema_present),
