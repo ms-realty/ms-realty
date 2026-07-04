@@ -1,0 +1,56 @@
+{
+  "generated_from": "MS Realty crawl-first migration slice",
+  "lead_intake_examples": [
+    {
+      "id": "lead-listing-inquiry-ms-987",
+      "source": "website_listing_detail",
+      "language": "bg",
+      "lead_type": "buyer",
+      "pipeline_stage": "new_inquiry",
+      "listing_reference": "ms-987",
+      "listing_url": "https://makler-realty.com/",
+      "contact": {
+        "name": "Мария Петрова",
+        "phone": "+359 88 000 0000",
+        "email": "maria@example.test",
+        "preferred_channel": "phone"
+      },
+      "message": "Интересувам се от оглед през уикенда. Може ли разговор днес?",
+      "crm_actions": [
+        "create_or_match_contact_by_phone",
+        "attach_listing_context",
+        "assign_to_available_broker",
+        "create_same_day_callback_task",
+        "send_buyer_confirmation"
+      ]
+    },
+    {
+      "id": "lead-seller-valuation-sandanski",
+      "source": "sell_your_property_form",
+      "language": "bg",
+      "lead_type": "seller",
+      "pipeline_stage": "valuation_requested",
+      "property": {
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "bedrooms": 2,
+        "area_sqm": 84,
+        "condition": "ready_to_live",
+        "ownership_documents_ready": true
+      },
+      "contact": {
+        "name": "Георги Иванов",
+        "phone": "+359 89 000 0000",
+        "email": "georgi@example.test",
+        "preferred_channel": "viber"
+      },
+      "crm_actions": [
+        "create_seller_lead",
+        "request_photos_and_document_checklist",
+        "schedule_valuation_call",
+        "create_property_draft",
+        "assign_listing_editor"
+      ]
+    }
+  ]
+}

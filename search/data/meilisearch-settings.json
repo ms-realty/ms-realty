@@ -1,0 +1,32 @@
+{
+  "searchableAttributes": [
+    "title",
+    "description",
+    "h1",
+    "search_text",
+    "location"
+  ],
+  "filterableAttributes": [
+    "domain",
+    "language",
+    "location",
+    "property_type",
+    "offer_type",
+    "bedrooms"
+  ],
+  "sortableAttributes": [
+    "image_count",
+    "word_count"
+  ],
+  "displayedAttributes": [
+    "*"
+  ],
+  "rankingRules": [
+    "words",
+    "typo",
+    "proximity",
+    "attribute",
+    "sort",
+    "exactness"
+  ]
+}

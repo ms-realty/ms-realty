@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MS Realty Remaining Screens</title>
+    <link rel="stylesheet" href="../../styles.css" />
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../../_ds_bundle.js"></script>
+    <script src="../website/data.js"></script>
+    <script src="../crm/crm-data.js"></script>
+    <style>
+      :root {
+        --screen-bg: #f6f4ef;
+        --ink: #22201d;
+        --muted: #6e675f;
+        --line: #ded8cf;
+        --surface: #fffdfa;
+        --accent: #27614f;
+        --accent-strong: #164235;
+        --warn: #9a5c1f;
+        --touch: 48px;
+      }
+
+      body {
+        background: var(--screen-bg);
+        color: var(--ink);
+        font-size: 17px;
+        letter-spacing: 0;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      .suite {
+        min-height: 100vh;
+      }
+
+      .suite-header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: end;
+        gap: 24px;
+        padding: 28px clamp(18px, 4vw, 48px) 18px;
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .suite-title {
+        margin: 0;
+        font-size: clamp(26px, 4vw, 42px);
+        line-height: 1.04;
+        letter-spacing: 0;
+      }
+
+      .suite-subtitle {
+        margin: 8px 0 0;
+        color: var(--muted);
+        max-width: 760px;
+      }
+
+      .suite-nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .suite-nav button,
+      .icon-button,
+      .action-button,
+      .chip-button {
+        min-height: var(--touch);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--ink);
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+
+      .suite-nav button[aria-selected="true"],
+      .action-button.primary,
+      .chip-button.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+      }
+
+      .screen-wrap {
+        padding: clamp(18px, 4vw, 44px);
+      }
+
+      .screen-grid {
+        display: grid;
+        grid-template-columns: minmax(300px, 420px) minmax(320px, 1fr);
+        gap: clamp(22px, 4vw, 52px);
+        align-items: start;
+      }
+
+      .phone {
+        width: min(100%, 390px);
+        min-height: 780px;
+        margin-inline: auto;
+        border: 1px solid #d2cabf;
+        border-radius: 28px;
+        background: #fffaf5;
+        box-shadow: 0 18px 60px rgba(54, 47, 39, 0.16);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .phone-header,
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .phone-header {
+        min-height: 66px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        background: #fffdf8;
+      }
+
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+      }
+
+      .brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: var(--accent);
+        color: white;
+      }
+
+      .phone-content {
+        padding: 14px;
+        padding-bottom: 96px;
+      }
+
+      .search-block,
+      .panel,
+      .editor-panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .search-block {
+        padding: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .search-field {
+        min-height: 52px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        background: #fff;
+      }
+
+      .search-field input {
+        border: 0;
+        outline: 0;
+        width: 100%;
+        min-width: 0;
+        background: transparent;
+      }
+
+      .chips {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .chip-button {
+        white-space: nowrap;
+        min-height: 42px;
+        padding: 0 12px;
+      }
+
+      .result-list,
+      .lead-list,
+      .timeline-list,
+      .check-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .listing-row,
+      .lead-row,
+      .task-row,
+      .check-row {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 12px;
+      }
+
+      .listing-row {
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 12px;
+      }
+
+      .listing-thumb,
+      .gallery-main,
+      .tour-preview {
+        background:
+          linear-gradient(135deg, rgba(39, 97, 79, 0.2), rgba(178, 142, 83, 0.18)),
+          #eee5da;
+      }
+
+      .listing-thumb {
+        min-height: 110px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        color: var(--accent-strong);
+        font-weight: 800;
+      }
+
+      .listing-row h3,
+      .lead-row h3,
+      .editor-panel h3,
+      .panel h3 {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.18;
+        letter-spacing: 0;
+      }
+
+      .meta,
+      .fineprint {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.35;
+      }
+
+      .price {
+        margin-top: 8px;
+        color: var(--accent-strong);
+        font-weight: 800;
+      }
+
+      .mobile-actions {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        min-height: 78px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 10px 12px 14px;
+        border-top: 1px solid var(--line);
+        background: rgba(255, 253, 248, 0.96);
+        backdrop-filter: blur(12px);
+      }
+
+      .mobile-actions .action-button {
+        padding: 0 8px;
+      }
+
+      .gallery-main {
+        min-height: 260px;
+        border-radius: 0 0 16px 16px;
+        display: grid;
+        place-items: center;
+        color: var(--accent-strong);
+        font-weight: 800;
+      }
+
+      .detail-body {
+        padding: 14px;
+        padding-bottom: 104px;
+      }
+
+      .media-tabs,
+      .spec-grid,
+      .form-grid,
+      .editor-grid {
+        display: grid;
+        gap: 10px;
+      }
+
+      .media-tabs {
+        grid-template-columns: repeat(4, 1fr);
+        margin: -22px 12px 14px;
+        position: relative;
+      }
+
+      .media-tabs button {
+        min-height: 44px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .media-tabs button:first-child {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
+      .spec-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .spec {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      .panel,
+      .editor-panel {
+        padding: 18px;
+      }
+
+      .desktop-board {
+        min-height: 720px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      .board-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--line);
+        background: #fffdf8;
+      }
+
+      .board-body {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        min-height: 650px;
+      }
+
+      .board-list {
+        border-right: 1px solid var(--line);
+        padding: 14px;
+        background: #faf7f0;
+      }
+
+      .board-detail,
+      .editor-detail {
+        padding: 18px;
+      }
+
+      .lead-row {
+        display: grid;
+        gap: 6px;
+        cursor: pointer;
+      }
+
+      .lead-row.active {
+        border-color: var(--accent);
+        box-shadow: inset 4px 0 0 var(--accent);
+      }
+
+      .pill-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        min-height: 30px;
+        padding: 0 9px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .pill.urgent {
+        color: var(--warn);
+        border-color: #dfb47f;
+        background: #fff5e8;
+      }
+
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field label {
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .field input,
+      .field select,
+      .field textarea {
+        width: 100%;
+        min-height: 48px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: white;
+        color: var(--ink);
+      }
+
+      .field textarea {
+        min-height: 112px;
+        resize: vertical;
+      }
+
+      .full {
+        grid-column: 1 / -1;
+      }
+
+      .check-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .status-dot {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .status-dot.todo {
+        background: #d19b45;
+      }
+
+      .editor-grid {
+        grid-template-columns: 1.1fr 0.9fr;
+      }
+
+      .tour-preview {
+        min-height: 230px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 18px;
+      }
+
+      .screen-note {
+        max-width: 680px;
+      }
+
+      .screen-note h2 {
+        margin-top: 0;
+        font-size: clamp(24px, 3vw, 34px);
+        letter-spacing: 0;
+      }
+
+      .screen-note li {
+        margin: 8px 0;
+      }
+
+      @media (max-width: 980px) {
+        .suite-header,
+        .screen-grid,
+        .board-body,
+        .editor-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .suite-nav {
+          justify-content: flex-start;
+        }
+
+        .desktop-board {
+          min-height: auto;
+        }
+
+        .board-list {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+      }
+
+      @media (max-width: 560px) {
+        .suite-header,
+        .screen-wrap {
+          padding-inline: 14px;
+        }
+
+        .phone {
+          min-height: 760px;
+          border-radius: 18px;
+        }
+
+        .form-grid,
+        .spec-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useMemo, useState } = React;
+      const ds = window.MaklerRealtyDesignSystem_9b7f1e || {};
+      const website = window.MK_DATA || {};
+      const crm = window.CRM_DATA || {};
+      const listings = website.LISTINGS || [];
+      const leads = crm.LEADS || [];
+      const stock = crm.STOCK || [];
+      const agents = website.AGENTS || [];
+      const money = website.money || ((value) => `€${value}`);
+      const Icon = ({ name, size = 18 }) => {
+        const icons = window.lucide || {};
+        const Component = icons[name];
+        return Component ? <Component size={size} strokeWidth={2.1} /> : null;
+      };
+
+      const screenTabs = [
+        { id: "mobile-search", label: "Mobile search", icon: "Search" },
+        { id: "listing-detail", label: "Listing detail", icon: "Image" },
+        { id: "sell-property", label: "Sell property", icon: "Handshake" },
+        { id: "lead-inbox", label: "Lead inbox", icon: "Inbox" },
+        { id: "property-editor", label: "Property editor", icon: "PencilRuler" },
+      ];
+
+      function ActionButton({ icon, children, primary, ariaLabel }) {
+        return (
+          <button className={`action-button ${primary ? "primary" : ""}`} aria-label={ariaLabel || children}>
+            <Icon name={icon} />
+            <span>{children}</span>
+          </button>
+        );
+      }
+
+      function PhoneHeader({ title, actionIcon = "SlidersHorizontal" }) {
+        return (
+          <div className="phone-header">
+            <div className="brand-lockup">
+              <div className="brand-mark" aria-hidden="true">MS</div>
+              <div>
+                <div>{title}</div>
+                <div className="fineprint">BG · EN · DE · NL · RU</div>
+              </div>
+            </div>
+            <button className="icon-button" aria-label="Open screen actions">
+              <Icon name={actionIcon} />
+            </button>
+          </div>
+        );
+      }
+
+      function ListingRow({ listing }) {
+        return (
+          <article className="listing-row">
+            <div className="listing-thumb" aria-label={`Photo placeholder for ${listing.title}`}>{listing.ref}</div>
+            <div>
+              <h3>{listing.title}</h3>
+              <div className="meta">{listing.location} · {listing.beds} bed · {listing.area} m²</div>
+              <div className="price">{money(listing.price)}</div>
+              <div className="pill-row" style={{ marginTop: 8 }}>
+                <span className="pill">Verified photos</span>
+                <span className="pill">Call broker</span>
+              </div>
+            </div>
+          </article>
+        );
+      }
+
+      function MobileSearchScreen() {
+        const primaryListings = listings.slice(0, 3);
+        return (
+          <div className="screen-grid">
+            <section className="phone" aria-label="Mobile search screen">
+              <PhoneHeader title="MS Realty" />
+              <div className="phone-content">
+                <div className="search-block">
+                  <div className="search-field">
+                    <Icon name="MapPin" />
+                    <input aria-label="Search location" value="Сандански" readOnly />
+                  </div>
+                  <div className="chips" aria-label="Search filters">
+                    <button className="chip-button active">Продажба</button>
+                    <button className="chip-button">Апартамент</button>
+                    <button className="chip-button">€40k-€120k</button>
+                    <button className="chip-button">Оглед днес</button>
+                  </div>
+                </div>
+                <div className="result-list" aria-label="Search results">
+                  {primaryListings.map((listing) => <ListingRow key={listing.id} listing={listing} />)}
+                </div>
+              </div>
+              <div className="mobile-actions">
+                <ActionButton icon="SlidersHorizontal">Филтри</ActionButton>
+                <ActionButton icon="Map">Карта</ActionButton>
+                <ActionButton icon="Phone" primary>Обади се</ActionButton>
+              </div>
+            </section>
+            <ScreenNote
+              title="Mobile search"
+              bullets={[
+                "Search starts with location, offer type, and a short horizontal filter row instead of a dense desktop sidebar.",
+                "Cards keep direct broker contact visible for older buyers who prefer phone/Viber over account flows.",
+                "Sandanski is treated as a spa and residential market, not a sea resort.",
+              ]}
+            />
+          </div>
+        );
+      }
+
+      function ListingDetailScreen() {
+        const listing = listings[0] || {};
+        const agent = agents[0] || {};
+        return (
+          <div className="screen-grid">
+            <section className="phone" aria-label="Listing detail screen">
+              <PhoneHeader title={listing.ref || "MS"} actionIcon="Share2" />
+              <div className="gallery-main" aria-label="Listing gallery preview">
+                {listing.ref} Gallery
+              </div>
+              <div className="media-tabs" aria-label="Media modes">
+                <button>Photos</button>
+                <button>360</button>
+                <button>Video</button>
+                <button>Plan</button>
+              </div>
+              <div className="detail-body">
+                <h1 style={{ fontSize: 26, lineHeight: 1.08, margin: "0 0 8px" }}>{listing.title}</h1>
+                <div className="meta">{listing.location} · {listing.beds} bedrooms · {listing.area} m²</div>
+                <div className="price" style={{ fontSize: 24 }}>{money(listing.price || 0)}</div>
+                <div className="spec-grid" style={{ marginTop: 14 }}>
+                  <div className="spec"><strong>Ready status</strong><br /><span className="meta">Documents checked</span></div>
+                  <div className="spec"><strong>Viewing</strong><br /><span className="meta">Today or weekend</span></div>
+                  <div className="spec"><strong>Language</strong><br /><span className="meta">BG / EN / RU</span></div>
+                  <div className="spec"><strong>Tour</strong><br /><span className="meta">360 field ready</span></div>
+                </div>
+                <div className="panel" style={{ marginTop: 14 }}>
+                  <h3>{agent.name || "MS Realty broker"}</h3>
+                  <p className="meta">{agent.phone || "+359"} · fast callback · viewing coordination</p>
+                </div>
+              </div>
+              <div className="mobile-actions">
+                <ActionButton icon="Phone" primary>Call</ActionButton>
+                <ActionButton icon="MessageCircle">Viber</ActionButton>
+                <ActionButton icon="CalendarPlus">Ask</ActionButton>
+              </div>
+            </section>
+            <ScreenNote
+              title="Listing detail"
+              bullets={[
+                "The first viewport prioritizes gallery, trust details, price, and direct contact.",
+                "360 tour is a first-class media mode but does not replace the normal photo gallery.",
+                "Sticky actions avoid forcing elderly users to search for broker contact after scrolling.",
+              ]}
+            />
+          </div>
+        );
+      }
+
+      function SellPropertyScreen() {
+        return (
+          <div className="screen-grid">
+            <section className="phone" aria-label="Sell your property screen">
+              <PhoneHeader title="Продай имот" actionIcon="Languages" />
+              <div className="phone-content">
+                <h1 style={{ fontSize: 28, lineHeight: 1.06, margin: "8px 0 8px" }}>
+                  Безплатна първа оценка от брокер
+                </h1>
+                <p className="meta">
+                  Кратка форма за собственици в Сандански, Банско и региона. Без публична публикация преди потвърждение.
+                </p>
+                <div className="form-grid" style={{ marginTop: 14 }}>
+                  <div className="field full">
+                    <label>Къде се намира имотът?</label>
+                    <input value="Сандански" readOnly />
+                  </div>
+                  <div className="field">
+                    <label>Тип</label>
+                    <select value="apartment" readOnly>
+                      <option value="apartment">Апартамент</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>Площ</label>
+                    <input value="84 m²" readOnly />
+                  </div>
+                  <div className="field full">
+                    <label>Телефон за обратна връзка</label>
+                    <input value="+359 89 000 0000" readOnly />
+                  </div>
+                  <div className="field full">
+                    <label>Бележка</label>
+                    <textarea value="Имотът е готов за снимки. Документите са налични." readOnly />
+                  </div>
+                </div>
+                <div className="check-list">
+                  <div className="check-row"><span className="status-dot"></span><span>Собственикът е потвърден</span><span className="meta">CRM</span></div>
+                  <div className="check-row"><span className="status-dot todo"></span><span>Нужни са снимки и 360 тур</span><span className="meta">Editor</span></div>
+                </div>
+              </div>
+              <div className="mobile-actions">
+                <ActionButton icon="Phone">Call</ActionButton>
+                <ActionButton icon="Upload">Photos</ActionButton>
+                <ActionButton icon="Send" primary>Оценка</ActionButton>
+              </div>
+            </section>
+            <ScreenNote
+              title="Sell your property"
+              bullets={[
+                "Seller intake is short and phone-friendly, with ownership and media readiness feeding the CRM.",
+                "The form creates a seller lead and a draft property record before public publication.",
+                "The screen avoids market promises; broker review stays in the loop.",
+              ]}
+            />
+          </div>
+        );
+      }
+
+      function BrokerLeadInboxScreen() {
+        const selected = leads[0] || {};
+        return (
+          <div>
+            <div className="desktop-board" aria-label="Broker lead inbox">
+              <div className="board-toolbar">
+                <div>
+                  <h2 style={{ margin: 0 }}>Broker lead inbox</h2>
+                  <div className="meta">Website inquiries, seller valuations, Viber follow-ups</div>
+                </div>
+                <div className="pill-row">
+                  <span className="pill urgent">3 same-day callbacks</span>
+                  <span className="pill">BG · EN · RU</span>
+                </div>
+              </div>
+              <div className="board-body">
+                <aside className="board-list">
+                  <div className="search-field">
+                    <Icon name="Search" />
+                    <input aria-label="Search leads" value="listing inquiry" readOnly />
+                  </div>
+                  <div className="lead-list">
+                    {leads.slice(0, 5).map((lead, index) => (
+                      <article className={`lead-row ${index === 0 ? "active" : ""}`} key={lead.id}>
+                        <h3>{lead.name}</h3>
+                        <div className="meta">{lead.need} · {lead.budget}</div>
+                        <div className="pill-row">
+                          <span className="pill">{lead.stage}</span>
+                          <span className="pill">{lead.channel}</span>
+                        </div>
+                      </article>
+                    ))}
+                    <article className="lead-row">
+                      <h3>Георги Иванов</h3>
+                      <div className="meta">Seller valuation · Sandanski · Viber</div>
+                      <div className="pill-row">
+                        <span className="pill urgent">valuation requested</span>
+                        <span className="pill">draft property</span>
+                      </div>
+                    </article>
+                  </div>
+                </aside>
+                <main className="board-detail">
+                  <div className="panel-header">
+                    <div>
+                      <h2 style={{ margin: 0 }}>{selected.name || "Lead"}</h2>
+                      <div className="meta">{selected.source || "Website"} · assigned to broker desk</div>
+                    </div>
+                    <ActionButton icon="Phone" primary>Call now</ActionButton>
+                  </div>
+                  <div className="editor-grid" style={{ marginTop: 18 }}>
+                    <section className="panel">
+                      <h3>Inquiry context</h3>
+                      <p className="meta">Interested in listing, wants a weekend viewing, prefers phone before Viber.</p>
+                      <div className="timeline-list">
+                        <div className="task-row"><strong>09:40</strong><br /><span className="meta">Website listing form submitted.</span></div>
+                        <div className="task-row"><strong>09:41</strong><br /><span className="meta">CRM matched listing and created callback task.</span></div>
+                        <div className="task-row"><strong>Next</strong><br /><span className="meta">Confirm viewing window and send address only after broker approval.</span></div>
+                      </div>
+                    </section>
+                    <section className="panel">
+                      <h3>Quick actions</h3>
+                      <div className="check-list">
+                        <div className="check-row"><span className="status-dot todo"></span><span>Call within 15 minutes</span><Icon name="Phone" /></div>
+                        <div className="check-row"><span className="status-dot"></span><span>Send listing summary</span><Icon name="Send" /></div>
+                        <div className="check-row"><span className="status-dot todo"></span><span>Create viewing appointment</span><Icon name="CalendarPlus" /></div>
+                      </div>
+                    </section>
+                  </div>
+                </main>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function PropertyEditorScreen() {
+        const listing = stock[0] || listings[0] || {};
+        return (
+          <div>
+            <div className="desktop-board" aria-label="Property editor">
+              <div className="board-toolbar">
+                <div>
+                  <h2 style={{ margin: 0 }}>Property editor</h2>
+                  <div className="meta">Draft listing, media, translations, SEO, and 360 tour fields</div>
+                </div>
+                <div className="pill-row">
+                  <span className="pill urgent">Missing RU description</span>
+                  <span className="pill">SEO draft</span>
+                </div>
+              </div>
+              <div className="editor-detail">
+                <div className="editor-grid">
+                  <section className="editor-panel">
+                    <h3>Core listing</h3>
+                    <div className="form-grid" style={{ marginTop: 14 }}>
+                      <div className="field">
+                        <label>Reference</label>
+                        <input value={listing.ref || "MS-987"} readOnly />
+                      </div>
+                      <div className="field">
+                        <label>Status</label>
+                        <select value="draft" readOnly>
+                          <option value="draft">Draft review</option>
+                        </select>
+                      </div>
+                      <div className="field full">
+                        <label>Title BG</label>
+                        <input value="Двустаен апартамент в Сандански" readOnly />
+                      </div>
+                      <div className="field">
+                        <label>Location</label>
+                        <input value="Sandanski" readOnly />
+                      </div>
+                      <div className="field">
+                        <label>Price</label>
+                        <input value="€62,000" readOnly />
+                      </div>
+                      <div className="field full">
+                        <label>Public description</label>
+                        <textarea value="Светъл апартамент в спа град Сандански, подходящ за целогодишно живеене и инвестиция." readOnly />
+                      </div>
+                    </div>
+                    <div className="check-list">
+                      <div className="check-row"><span className="status-dot"></span><span>Canonical URL mapped</span><span className="meta">SEO</span></div>
+                      <div className="check-row"><span className="status-dot todo"></span><span>RU translation missing</span><span className="meta">Locale</span></div>
+                      <div className="check-row"><span className="status-dot"></span><span>No homepage redirect assumption</span><span className="meta">Migration</span></div>
+                    </div>
+                  </section>
+                  <section className="editor-panel">
+                    <h3>360 tour CMS field</h3>
+                    <p className="meta">Provider: Photo Sphere Viewer. Publish only when gallery fallback and caption are complete.</p>
+                    <div
+                      id="psv-editor-preview"
+                      className="tour-preview"
+                      data-library="Photo Sphere Viewer"
+                      data-panorama-url="https://cdn.example.test/listings/ms-987/panorama.jpg"
+                    >
+                      <div>
+                        <Icon name="Orbit" size={32} />
+                        <div style={{ fontWeight: 800, marginTop: 8 }}>Photo Sphere Viewer preview</div>
+                        <div className="meta">Panorama URL, hotspots, and accessible caption are stored with the listing.</div>
+                      </div>
+                    </div>
+                    <div className="form-grid" style={{ marginTop: 14 }}>
+                      <div className="field full">
+                        <label>Panorama URL</label>
+                        <input value="https://cdn.example.test/listings/ms-987/panorama.jpg" readOnly />
+                      </div>
+                      <div className="field full">
+                        <label>Accessibility caption</label>
+                        <textarea value="360-degree view of the living room, balcony door, and kitchen entrance." readOnly />
+                      </div>
+                    </div>
+                    <div className="check-list">
+                      <div className="check-row"><span className="status-dot"></span><span>Fallback photos selected</span><Icon name="Images" /></div>
+                      <div className="check-row"><span className="status-dot todo"></span><span>Hotspot labels need broker review</span><Icon name="MapPinned" /></div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      function ScreenNote({ title, bullets }) {
+        return (
+          <aside className="screen-note">
+            <h2>{title}</h2>
+            <ul>
+              {bullets.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+            <div className="panel">
+              <h3>QA target</h3>
+              <p className="meta">
+                Large touch targets, readable body text, direct phone fallback, and crawl-preserving SEO assumptions before visual polish.
+              </p>
+            </div>
+          </aside>
+        );
+      }
+
+      function App() {
+        const [active, setActive] = useState(screenTabs[0].id);
+        const activeScreen = useMemo(() => {
+          switch (active) {
+            case "listing-detail":
+              return <ListingDetailScreen />;
+            case "sell-property":
+              return <SellPropertyScreen />;
+            case "lead-inbox":
+              return <BrokerLeadInboxScreen />;
+            case "property-editor":
+              return <PropertyEditorScreen />;
+            default:
+              return <MobileSearchScreen />;
+          }
+        }, [active]);
+
+        return (
+          <main className="suite">
+            <header className="suite-header">
+              <div>
+                <h1 className="suite-title">MS Realty migration screen pack</h1>
+                <p className="suite-subtitle">
+                  Design-system screens for the crawl-first migration slice: mobile search, listing detail, seller intake, broker inbox, and property editing.
+                </p>
+              </div>
+              <nav className="suite-nav" aria-label="Screen tabs">
+                {screenTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    aria-selected={active === tab.id}
+                    onClick={() => setActive(tab.id)}
+                  >
+                    <Icon name={tab.icon} />
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </header>
+            <section className="screen-wrap">{activeScreen}</section>
+          </main>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
