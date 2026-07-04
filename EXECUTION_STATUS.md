@@ -24,6 +24,7 @@ Date: 2026-07-04
   - `search/data/meilisearch-settings.json`
   - `search/data/meilisearch-listings.ndjson`
   - search imports now include 167 locale-scoped documents: 165 source listings plus approved Greek and Hebrew translation documents for `MS-CRAWL-0001`
+  - `search/validate_search_imports.py` validates the Typesense and Meilisearch import payloads locally
 - Added design-system screens in
   `makler-realty-design-system/project/ui_kits/remaining/index.html`:
   - Mobile search.
@@ -154,7 +155,8 @@ Date: 2026-07-04
 
 ```bash
 python3 search/build_search_indexes.py
-python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
+python3 search/validate_search_imports.py
+python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py search/validate_search_imports.py qa/mobile_elderly_static_check.py locales/validate_locale_registry.py
 python3 locales/validate_locale_registry.py
 npm run migration:build
 npm run routes:build

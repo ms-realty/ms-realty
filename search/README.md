@@ -13,6 +13,7 @@ are BG, RU, and EN.
 
 ```bash
 python3 search/build_search_indexes.py
+python3 search/validate_search_imports.py
 ```
 
 Generated files:
@@ -24,6 +25,10 @@ Generated files:
 - `search/data/meilisearch-settings.json` - Meilisearch index settings.
 - `search/data/meilisearch-listings.ndjson` - Meilisearch NDJSON import body.
 - `search/data/search-fixture-summary.json` - corpus counts and inferred facets.
+
+`validate_search_imports.py` checks that the Typesense JSONL and Meilisearch
+NDJSON match `index-listings.json`, have unique IDs, fit the Typesense schema,
+and exclude non-indexable locale documents.
 
 Locale fields in each search index document:
 

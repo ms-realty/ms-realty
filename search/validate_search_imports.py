@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Validate local Typesense and Meilisearch import fixtures."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "search" / "data"
+
+
+def load_json(path: Path) -> object:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_jsonl(path: Path) -> list[dict[str, object]]:
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def field_ok(value: object, field: dict[str, object]) -> bool:
+    if value is None and field.get("optional"):
+        return True
+    kind = field["type"]
+    if kind == "string":
+        return isinstance(value, str)
+    if kind == "bool":
+        return isinstance(value, bool)
+    if kind == "int32":
+        return isinstance(value, int) and not isinstance(value, bool)
+    return False
+
+
+def main() -> int:
+    source_docs = load_json(DATA / "listings.json")
+    index_docs = load_json(DATA / "index-listings.json")
+    typesense_docs = load_jsonl(DATA / "typesense-listings.jsonl")
+    meili_docs = load_jsonl(DATA / "meilisearch-listings.ndjson")
+    schema = load_json(DATA / "typesense-schema.json")
+    settings = load_json(DATA / "meilisearch-settings.json")
+
+    if len(source_docs) != 165:
+        raise SystemExit("Expected 165 source listing docs")
+    if len(index_docs) != 167 or typesense_docs != index_docs or meili_docs != index_docs:
+        raise SystemExit("Search import feeds must match the 167-document locale index")
+
+    ids = [doc["id"] for doc in index_docs]
+    if len(ids) != len(set(ids)):
+        raise SystemExit("Search index document ids must be unique")
+
+    fields = {field["name"]: field for field in schema["fields"]}
+    for doc in typesense_docs:
+        for name, field in fields.items():
+            if name not in doc:
+                if field.get("optional"):
+                    continue
+                raise SystemExit(f"Typesense doc {doc['id']} missing {name}")
+            if not field_ok(doc[name], field):
+                raise SystemExit(f"Typesense doc {doc['id']} has invalid {name}")
+
+    for attr in settings["filterableAttributes"]:
+        if attr not in fields:
+            raise SystemExit(f"Meilisearch filterable attribute not in Typesense schema: {attr}")
+
+    approved = [doc for doc in index_docs if doc["search_document_type"] == "approved_translation"]
+    if {(doc["source_listing_id"], doc["locale"]) for doc in approved} != {("MS-CRAWL-0001", "el"), ("MS-CRAWL-0001", "he")}:
+        raise SystemExit("Expected only approved Greek and Hebrew translation search docs")
+    if any(doc["locale"] == "fr" or doc["translation_indexable"] is not True for doc in index_docs):
+        raise SystemExit("Search import must exclude French and non-indexable docs")
+
+    print("PASS: search import fixtures validate for Typesense and Meilisearch")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

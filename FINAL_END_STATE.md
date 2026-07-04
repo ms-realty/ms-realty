@@ -45,6 +45,7 @@ Implemented now:
   - `search/data/meilisearch-settings.json`
   - `search/data/meilisearch-listings.ndjson`
   - current search import feed: 167 locale-scoped documents, including approved Greek and Hebrew search documents for `MS-CRAWL-0001`
+  - `search/validate_search_imports.py` checks both search-engine import payloads without requiring Docker in the default gate
 - Design-system prototype screens:
   - `makler-realty-design-system/project/ui_kits/remaining/index.html`
   - Mobile search.
@@ -64,7 +65,8 @@ Validation already passes:
 
 ```bash
 python3 search/build_search_indexes.py
-python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py qa/mobile_elderly_static_check.py
+python3 search/validate_search_imports.py
+python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py search/validate_search_imports.py qa/mobile_elderly_static_check.py
 python3 qa/mobile_elderly_static_check.py
 ```
 
