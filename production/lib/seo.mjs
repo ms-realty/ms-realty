@@ -37,3 +37,12 @@ export function hreflangForListing(registry, listingId, translations) {
 
   return links;
 }
+
+export function sitemapEntriesForListing(registry, listingId, translations) {
+  const hreflang = hreflangForListing(registry, listingId, translations);
+  return translations.filter((translation) => isTranslationIndexable(registry, translation)).map((translation) => ({
+    locale: translation.locale,
+    loc: listingPath(registry, translation.locale, listingId),
+    hreflang,
+  }));
+}

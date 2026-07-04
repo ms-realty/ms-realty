@@ -50,6 +50,10 @@ Date: 2026-07-04
   - 52 Russian listings mapped under `/ru/`
   - pages, posts, and taxonomy URLs left review-gated
   - zero homepage/search fallback redirects
+- Added approved-translation-gated localized sitemap fixture:
+  - BG and RU source listings included from published crawl fixtures
+  - Greek and Hebrew included only for explicit approved seed translations
+  - unapproved French excluded
 - Added executable public route fixtures:
   - BG listing route `/bg/imoti/{id}`
   - Greek website route `/el/akinita/{id}`
@@ -92,6 +96,7 @@ python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.p
 python3 locales/validate_locale_registry.py
 npm run migration:build
 npm run routes:build
+npm run sitemap:build
 npm run public:build
 npm run admin:build
 npm run test

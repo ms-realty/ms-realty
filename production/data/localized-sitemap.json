@@ -1,0 +1,2169 @@
+{
+  "artifact_id": "localized-sitemap-20260704",
+  "summary": {
+    "listings": 165,
+    "entries": 167,
+    "byLocale": {
+      "bg": 113,
+      "el": 1,
+      "he": 1,
+      "ru": 52
+    }
+  },
+  "entries": [
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0001",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/akinita/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/properties/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        }
+      ]
+    },
+    {
+      "locale": "el",
+      "loc": "/el/akinita/MS-CRAWL-0001",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/akinita/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/properties/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        }
+      ]
+    },
+    {
+      "locale": "he",
+      "loc": "/he/properties/MS-CRAWL-0001",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/akinita/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/properties/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0002",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0002"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0002"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0003",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0003"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0003"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0004",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0004"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0004"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0005",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0005"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0005"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0006",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0006"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0006"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0007",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0007"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0007"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0008",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0008"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0008"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0009",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0009"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0009"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0010",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0010"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0010"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0011",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0011"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0011"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0012",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0012"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0012"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0013",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0013"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0013"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0014",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0014"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0014"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0015",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0015"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0015"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0016",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0016"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0016"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0017",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0017"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0017"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0018",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0018"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0018"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0019",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0019"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0019"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0020",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0020"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0020"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0021",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0021"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0021"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0022",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0022"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0022"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0023",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0023"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0023"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0024",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0024"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0024"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0025",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0025"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0025"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0026",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0026"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0026"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0027",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0027"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0027"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0028",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0028"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0028"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0029",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0029"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0029"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0030",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0030"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0030"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0031",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0031"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0031"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0032",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0032"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0032"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0033",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0033"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0033"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0034",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0034"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0034"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0035",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0035"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0035"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0036",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0036"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0036"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0037",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0037"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0037"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0038",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0038"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0038"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0039",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0039"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0039"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0040",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0040"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0040"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0041",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0041"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0041"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0042",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0042"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0042"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0043",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0043"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0043"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0044",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0044"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0044"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0045",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0045"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0045"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0046",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0046"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0046"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0047",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0047"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0047"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0048",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0048"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0048"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0049",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0049"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0049"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0050",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0050"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0050"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0051",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0051"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0051"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0052",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0052"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0052"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0053",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0053"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0053"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0054",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0054"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0054"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0055",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0055"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0055"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0056",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0056"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0056"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0057",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0057"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0057"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0058",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0058"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0058"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0059",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0059"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0059"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0060",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0060"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0060"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0061",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0061"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0061"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0062",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0062"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0062"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0063",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0063"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0063"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0064",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0064"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0064"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0065",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0065"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0065"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0066",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0066"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0066"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0067",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0067"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0067"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0068",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0068"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0068"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0069",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0069"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0069"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0070",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0070"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0070"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0071",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0071"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0071"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0072",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0072"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0072"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0073",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0073"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0073"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0074",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0074"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0074"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0075",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0075"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0075"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-3000",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-3000"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-3000"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0077",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0077"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0077"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0078",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0078"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0078"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0079",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0079"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0079"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0080",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0080"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0080"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0081",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0081"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0081"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0082",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0082"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0082"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0083",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0083"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0083"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0084",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0084"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0084"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0085",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0085"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0085"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0086",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0086"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0086"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0087",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0087"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0087"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0088",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0088"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0088"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0089",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0089"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0089"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0090",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0090"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0090"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0091",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0091"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0091"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0092",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0092"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0092"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0093",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0093"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0093"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0094",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0094"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0094"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0095",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0095"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0095"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0096",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0096"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0096"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0097",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0097"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0097"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0098",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0098"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0098"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0099",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0099"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0099"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0100",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0100"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0100"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0101",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0101"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0101"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0102",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0102"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0102"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0103",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0103"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0103"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0104",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0104"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0104"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0105",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0105"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0105"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0106",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0106"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0106"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0107",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0107"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0107"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0108",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0108"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0108"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0109",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0109"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0109"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0110",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0110"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0110"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0111",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0111"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0111"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0112",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0112"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0112"
+        }
+      ]
+    },
+    {
+      "locale": "bg",
+      "loc": "/bg/imoti/MS-CRAWL-0113",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0113"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0113"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0114",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0114"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0115",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0115"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0116",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0116"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0117",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0117"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0118",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0118"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0119",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0119"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0120",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0120"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0121",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0121"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0122",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0122"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0123",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0123"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0124",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0124"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0125",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0125"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0126",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0126"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0127",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0127"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0128",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0128"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0129",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0129"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0130",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0130"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0131",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0131"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0132",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0132"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0133",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0133"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0134",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0134"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0135",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0135"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0136",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0136"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0137",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0137"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0138",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0138"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0139",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0139"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0140",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0140"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0141",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0141"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0142",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0142"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0143",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0143"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0144",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0144"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0145",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0145"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0146",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0146"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0147",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0147"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0148",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0148"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0149",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0149"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0150",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0150"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0151",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0151"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0152",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0152"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0153",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0153"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0154",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0154"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0155",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0155"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0156",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0156"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0157",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0157"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0158",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0158"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0159",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0159"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0160",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0160"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0161",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0161"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0162",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0162"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0163",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0163"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0164",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0164"
+        }
+      ]
+    },
+    {
+      "locale": "ru",
+      "loc": "/ru/properties/MS-CRAWL-0165",
+      "hreflang": [
+        {
+          "hreflang": "ru",
+          "href": "/ru/properties/MS-CRAWL-0165"
+        }
+      ]
+    }
+  ]
+}

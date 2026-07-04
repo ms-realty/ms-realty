@@ -73,3 +73,15 @@ test("generated legacy route map file is valid when present", () => {
   assert.equal(data.summary.mappedListings, 165);
   assert.equal(data.routes.length, 457);
 });
+
+test("generated localized sitemap file is approved-translation gated when present", () => {
+  const file = fromRoot("production", "data", "localized-sitemap.json");
+  if (!fs.existsSync(file)) return;
+  const data = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(data.summary.listings, 165);
+  assert.equal(data.summary.byLocale.bg, 113);
+  assert.equal(data.summary.byLocale.ru, 52);
+  assert.equal(data.summary.byLocale.el, 1);
+  assert.equal(data.summary.byLocale.he, 1);
+  assert.equal(data.summary.byLocale.fr, undefined);
+});

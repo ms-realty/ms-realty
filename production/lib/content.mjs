@@ -1,10 +1,11 @@
 import fs from "node:fs";
-import { publicIndexableLocales } from "./locales.mjs";
+import { getLocale } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { contentHash } from "./translations.mjs";
 
 export const DEFAULT_LISTINGS_PATH = fromRoot("search", "data", "listings.json");
 export const DEFAULT_MIGRATION_RECORDS_PATH = fromRoot("production", "data", "migration-records.json");
+const SEEDED_APPROVED_TRANSLATIONS = new Map([["MS-CRAWL-0001", ["el", "he"]]]);
 
 export function loadListings(path = DEFAULT_LISTINGS_PATH) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
@@ -45,8 +46,12 @@ export function listingSourceSnapshot(listing) {
 export function approvedTranslationRecordsForListing(registry, listing) {
   const source = listingSourceSnapshot(listing);
   const sourceHash = contentHash(source);
+  const locales = new Set();
+  if (listing.locale && listing.translation_status === "published") locales.add(listing.locale);
+  for (const locale of SEEDED_APPROVED_TRANSLATIONS.get(listing.id) || []) locales.add(locale);
 
-  return publicIndexableLocales(registry).map((locale) => {
+  return [...locales].map((localeCode) => {
+    const locale = getLocale(registry, localeCode);
     const sourceLocaleMatch = listing.locale === locale.code && listing.translation_status === "published";
     return {
       locale: locale.code,

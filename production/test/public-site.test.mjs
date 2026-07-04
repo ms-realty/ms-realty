@@ -34,6 +34,7 @@ test("listing SEO includes approved hreflang and excludes unavailable draft loca
   assert.ok(hreflangCodes.includes("el"));
   assert.ok(hreflangCodes.includes("he"));
   assert.equal(hreflangCodes.includes("fr"), false);
+  assert.equal(hreflangCodes.includes("de"), false);
   assert.equal(page.schema["@type"], "RealEstateListing");
   assert.equal(page.schema.url, page.canonical);
 });

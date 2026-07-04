@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { loadLocaleRegistry, assertLocaleRegistry, resolvePublicLocale } from "../lib/locales.mjs";
-import { listingPath, hreflangForListing } from "../lib/seo.mjs";
+import { listingPath, hreflangForListing, sitemapEntriesForListing } from "../lib/seo.mjs";
 import { approveHumanTranslation, contentHash, markStaleWhenSourceChanges } from "../lib/translations.mjs";
 import { assertHermesActionAllowed, translationPrompt } from "../lib/hermes.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
@@ -30,6 +30,20 @@ test("locale routes and hreflang only include human-approved translations", () =
     links.map((link) => link.hreflang).sort(),
     ["bg", "el", "he", "x-default"].sort(),
   );
+});
+
+test("localized sitemap entries are generated only for approved translations", () => {
+  const entries = sitemapEntriesForListing(registry, "ms-987", [
+    { locale: "bg", status: "published", human_approved: true },
+    { locale: "he", status: "approved", human_approved: true },
+    { locale: "fr", status: "hermes_drafted", human_approved: false },
+  ]);
+
+  assert.deepEqual(
+    entries.map((entry) => entry.locale).sort(),
+    ["bg", "he"],
+  );
+  assert.equal(entries.some((entry) => entry.loc.startsWith("/fr/")), false);
 });
 
 test("unavailable language falls back without becoming indexable", () => {

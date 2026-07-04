@@ -61,6 +61,15 @@ if (routeMap.summary.byTargetLocale.ru !== 52) throw new Error("Legacy route map
 if (routeMap.summary.homepageTargets !== 0) throw new Error("Legacy route map must not target homepages");
 if (routeMap.summary.deployable !== 0) throw new Error("Legacy route map must stay review-gated");
 
+const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
+if (sitemap.summary.byLocale.bg !== 113 || sitemap.summary.byLocale.ru !== 52) {
+  throw new Error("Localized sitemap must include published source BG/RU listings");
+}
+if (sitemap.summary.byLocale.el !== 1 || sitemap.summary.byLocale.he !== 1) {
+  throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
+}
+if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
+
 const publicFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "public-fixtures.json"), "utf8"));
 if (publicFixtures.listing_he.dir !== "rtl") throw new Error("Hebrew public fixture must render RTL");
 if (publicFixtures.listing_el.path !== `/el/akinita/${publicFixtures.source_listing_id}`) {

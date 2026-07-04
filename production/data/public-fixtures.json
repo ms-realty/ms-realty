@@ -27,22 +27,6 @@
         "href": "/bg/imoti/MS-CRAWL-0001"
       },
       {
-        "hreflang": "en",
-        "href": "/en/properties/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "de",
-        "href": "/de/immobilien/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "nl",
-        "href": "/nl/vastgoed/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "ru",
-        "href": "/ru/properties/MS-CRAWL-0001"
-      },
-      {
         "hreflang": "el",
         "href": "/el/akinita/MS-CRAWL-0001"
       },
@@ -120,22 +104,6 @@
         "href": "/bg/imoti/MS-CRAWL-0001"
       },
       {
-        "hreflang": "en",
-        "href": "/en/properties/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "de",
-        "href": "/de/immobilien/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "nl",
-        "href": "/nl/vastgoed/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "ru",
-        "href": "/ru/properties/MS-CRAWL-0001"
-      },
-      {
         "hreflang": "el",
         "href": "/el/akinita/MS-CRAWL-0001"
       },
@@ -211,22 +179,6 @@
       {
         "hreflang": "bg",
         "href": "/bg/imoti/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "en",
-        "href": "/en/properties/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "de",
-        "href": "/de/immobilien/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "nl",
-        "href": "/nl/vastgoed/MS-CRAWL-0001"
-      },
-      {
-        "hreflang": "ru",
-        "href": "/ru/properties/MS-CRAWL-0001"
       },
       {
         "hreflang": "el",
@@ -313,9 +265,9 @@
     },
     "translation": {
       "locale": "en",
-      "status": "approved",
-      "human_approved": true,
-      "reviewer": "editor_en"
+      "status": "missing",
+      "human_approved": false,
+      "reviewer": null
     },
     "body": {
       "h1": "MS Realty property MS-CRAWL-0001 in Sandanski",
