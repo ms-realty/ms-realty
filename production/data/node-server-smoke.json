@@ -1,6 +1,13 @@
 {
   "fixture_id": "node-server-smoke-20260704",
-  "baseUrl": "http://127.0.0.1:54874",
+  "baseUrl": "http://127.0.0.1:0",
+  "legacyRedirect": {
+    "status": 301,
+    "body": "{\"kind\":\"legacy_redirect\",\"location\":\"/bg/imoti/MS-CRAWL-0001\"}",
+    "headers": {
+      "location": "/bg/imoti/MS-CRAWL-0001"
+    }
+  },
   "listing": {
     "status": 200,
     "body": {

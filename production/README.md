@@ -26,6 +26,7 @@ What it proves now:
 - Runtime smoke fixture for listing route, search route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, fallback, and lead endpoints.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
+- Runtime 301 handling for reviewed legacy redirects only.
 - Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.

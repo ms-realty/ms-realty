@@ -66,6 +66,11 @@ export function readRedirectApprovals(filePath = DEFAULT_REDIRECT_APPROVALS_PATH
     .map((line) => JSON.parse(line));
 }
 
+export function loadDeployableRedirects(filePath = DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT) {
+  if (!fs.existsSync(filePath)) return [];
+  return JSON.parse(fs.readFileSync(filePath, "utf8")).redirects || [];
+}
+
 export function buildDeployableRedirects(routeMap, approvals) {
   const routes = new Map(routeMap.map((route) => [route.old_url, route]));
   return approvals

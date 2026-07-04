@@ -19,6 +19,10 @@ function tempOutbox() {
   return file;
 }
 
+function deployableRedirect() {
+  return JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
+}
+
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();
   const replyOutboxPath = tempOutbox();
@@ -28,7 +32,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     receivedAt: "2026-07-04T00:00:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
   });
+  const redirect = deployableRedirect();
   const smoke = {
+    legacyRedirect: await dispatchHttp(app, { url: redirect.old_url }),
     listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
     fallback: await dispatchHttp(app, { url: "/fr/" }),
@@ -84,12 +90,25 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
+  assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(smoke.admin.body.leads.length, 2);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);
   assert.deepEqual(smoke.admin.body.workspace.interface_locales, ["bg", "ru", "en"]);
+});
+
+test("HTTP app only redirects rows in the reviewed deployable export", async () => {
+  const app = createHttpApp();
+  const approved = deployableRedirect();
+  const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
+  const unapproved = routeMap.find(
+    (route) => route.url_type === "listing" && route.target_path && route.old_url !== approved.old_url,
+  );
+
+  assert.equal((await dispatchHttp(app, { url: approved.old_url })).status, 301);
+  assert.notEqual((await dispatchHttp(app, { url: unapproved.old_url })).status, 301);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

@@ -1,5 +1,16 @@
 {
   "fixture_id": "http-smoke-20260704",
+  "legacyRedirect": {
+    "status": 301,
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "location": "/bg/imoti/MS-CRAWL-0001"
+    },
+    "body": {
+      "kind": "legacy_redirect",
+      "location": "/bg/imoti/MS-CRAWL-0001"
+    }
+  },
   "listing": {
     "status": 200,
     "headers": {

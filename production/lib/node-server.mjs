@@ -48,14 +48,20 @@ export async function jsonFetch(baseUrl, path, options = {}) {
 }
 
 export async function textFetch(baseUrl, path, options = {}) {
-  const response = await fetch(`${baseUrl}${path}`, options);
-  return {
+  const { captureHeaders = false, ...fetchOptions } = options;
+  const response = await fetch(`${baseUrl}${path}`, fetchOptions);
+  const result = {
     status: response.status,
     body: await response.text(),
   };
+  if (captureHeaders) result.headers = Object.fromEntries(response.headers.entries());
+  return result;
 }
 
 export function assertServerSmoke(smoke) {
+  if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
+    throw new Error("Server must serve approved legacy redirect");
+  }
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") throw new Error("Server must serve Hebrew listing");
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
   if (smoke.lead.status !== 201 || smoke.lead.body.admin_locale !== "en") throw new Error("Server must accept lead");

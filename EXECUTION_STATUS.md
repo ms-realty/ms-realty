@@ -55,6 +55,9 @@ Date: 2026-07-04
   - `production/data/deployable-redirects.json` exports only approved same-content 301s
   - smoke export includes one BG listing and one RU listing
   - legacy route map remains fully non-deployable until each row is reviewed
+- Added runtime serving for reviewed legacy redirects:
+  - HTTP and live Node server smokes return `301 Location: /bg/imoti/MS-CRAWL-0001`
+  - mapped but unapproved listing rows do not redirect
 - Added approved-translation-gated localized sitemap fixture:
   - BG and RU source listings included from published crawl fixtures
   - Greek and Hebrew included only for explicit approved seed translations

@@ -4,11 +4,12 @@ import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { loadLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
+import { loadDeployableRedirects } from "./redirect-approvals.mjs";
 
-function response(status, body, contentType) {
+function response(status, body, contentType, headers = {}) {
   return {
     status,
-    headers: { "content-type": contentType },
+    headers: { "content-type": contentType, ...headers },
     body,
   };
 }
@@ -20,6 +21,7 @@ function json(status, body) {
 export function createHttpApp({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
+  redirects = loadDeployableRedirects(),
   leadLedgerPath = null,
   replyOutboxPath = null,
   receivedAt,
@@ -28,6 +30,22 @@ export function createHttpApp({
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
+    const host =
+      request.headers?.["x-forwarded-host"] ||
+      request.headers?.["X-Forwarded-Host"] ||
+      request.headers?.host ||
+      request.headers?.Host;
+    const legacyUrl = request.url.startsWith("http") ? url.href : host ? `https://${host}${url.pathname}${url.search}` : "";
+    const legacyRedirect = request.method === "GET" ? redirects.find((row) => row.old_url === legacyUrl) : null;
+
+    if (legacyRedirect) {
+      return response(
+        301,
+        { kind: "legacy_redirect", location: legacyRedirect.target_path },
+        "application/json; charset=utf-8",
+        { location: legacyRedirect.target_path },
+      );
+    }
 
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       return response(200, renderSitemapXml(loadLocalizedSitemap()), "application/xml; charset=utf-8");
@@ -96,6 +114,9 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
+  if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
+    throw new Error("HTTP smoke must serve approved legacy redirect");
+  }
   if (smoke.listing.status !== 200 || smoke.listing.body.dir !== "rtl") {
     throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
   }

@@ -138,6 +138,9 @@ if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke
 if (runtimeSmoke.lead_he.admin_locale !== "en") throw new Error("Runtime smoke lead must route to EN admin queue");
 
 const httpSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "http-smoke.json"), "utf8"));
+if (httpSmoke.legacyRedirect.status !== 301 || httpSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
+  throw new Error("HTTP smoke must serve approved legacy redirect");
+}
 if (httpSmoke.listing.status !== 200 || httpSmoke.listing.body.dir !== "rtl") {
   throw new Error("HTTP smoke must serve Hebrew listing as RTL 200");
 }
@@ -161,6 +164,9 @@ if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_fo
 if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist one reply outbox row");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
+if (nodeServerSmoke.legacyRedirect.status !== 301 || nodeServerSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
+  throw new Error("Node server smoke must serve approved legacy redirect");
+}
 if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !== "rtl") {
   throw new Error("Node server smoke must serve Hebrew listing as RTL 200");
 }

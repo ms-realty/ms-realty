@@ -18,8 +18,10 @@ const app = createHttpApp({
   receivedAt: "2026-07-04T00:00:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
 });
+const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 const smoke = {
   fixture_id: "http-smoke-20260704",
+  legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
   listing: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
   fallback: await dispatchHttp(app, { url: "/fr/" }),

@@ -21,11 +21,18 @@ const server = createNodeServer(
 );
 const address = await listen(server);
 const baseUrl = `http://${address.address}:${address.port}`;
+const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
+const legacyUrl = new URL(legacyRedirect.old_url);
 
 try {
   const smoke = {
     fixture_id: "node-server-smoke-20260704",
-    baseUrl,
+    baseUrl: "http://127.0.0.1:0",
+    legacyRedirect: await textFetch(baseUrl, legacyUrl.pathname, {
+      headers: { "x-forwarded-host": legacyRedirect.source_domain },
+      redirect: "manual",
+      captureHeaders: true,
+    }),
     listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
     search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
     sitemap: await textFetch(baseUrl, "/sitemap.xml"),
@@ -88,6 +95,7 @@ try {
       }),
     }),
   };
+  smoke.legacyRedirect.headers = { location: smoke.legacyRedirect.headers.location };
   assertServerSmoke(smoke);
   const ledger = readLeadLedger(leadLedgerPath);
   assertLeadLedger(ledger);

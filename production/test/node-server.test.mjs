@@ -29,9 +29,20 @@ async function withServer(fn) {
   }
 }
 
+function deployableRedirect() {
+  return JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
+}
+
 test("Node server serves live listing, search, and lead endpoints", async () => {
   await withServer(async (baseUrl, leadLedgerPath, replyOutboxPath) => {
+    const redirect = deployableRedirect();
+    const oldUrl = new URL(redirect.old_url);
     const smoke = {
+      legacyRedirect: await textFetch(baseUrl, oldUrl.pathname, {
+        headers: { "x-forwarded-host": redirect.source_domain },
+        redirect: "manual",
+        captureHeaders: true,
+      }),
       listing: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
       search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
       sitemap: await textFetch(baseUrl, "/sitemap.xml"),
@@ -92,6 +103,7 @@ test("Node server serves live listing, search, and lead endpoints", async () => 
       }),
     };
     assert.equal(assertServerSmoke(smoke), true);
+    assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
     assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
     assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   });
