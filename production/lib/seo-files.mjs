@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fromRoot } from "./paths.mjs";
+import { mergeRuntimeTranslations } from "./runtime.mjs";
+import { sitemapEntriesForListing } from "./seo.mjs";
 
 export const DEFAULT_PUBLIC_ORIGIN = process.env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com";
 export const DEFAULT_LOCALIZED_SITEMAP_PATH = fromRoot("production", "data", "localized-sitemap.json");
@@ -9,6 +11,31 @@ export const DEFAULT_ROBOTS_OUTPUT = fromRoot("production", "data", "robots.txt"
 
 export function loadLocalizedSitemap(filePath = DEFAULT_LOCALIZED_SITEMAP_PATH) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function countBy(rows, keyFn) {
+  const counts = {};
+  for (const row of rows) {
+    const key = keyFn(row);
+    counts[key] = (counts[key] || 0) + 1;
+  }
+  return counts;
+}
+
+export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = []) {
+  const listings = seed.records.filter((record) => record.collection === "listings");
+  const entries = listings.flatMap((record) =>
+    sitemapEntriesForListing(registry, record.id, mergeRuntimeTranslations(record, translationTasks)),
+  );
+  return {
+    artifact_id: "runtime-localized-sitemap",
+    summary: {
+      listings: listings.length,
+      entries: entries.length,
+      byLocale: countBy(entries, (entry) => entry.locale),
+    },
+    entries,
+  };
 }
 
 function escapeXml(value) {

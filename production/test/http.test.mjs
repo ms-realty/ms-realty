@@ -326,6 +326,7 @@ test("HTTP admin can publish an approved translation for a newly added public lo
     },
   });
   const page = await dispatchHttp(app, { url: "/es/propiedades/MS-CRAWL-0001" });
+  const sitemap = await dispatchHttp(app, { url: "/sitemap.xml" });
 
   assert.equal(draft.status, 201);
   assert.equal(publish.status, 201);
@@ -333,6 +334,7 @@ test("HTTP admin can publish an approved translation for a newly added public lo
   assert.equal(page.body.locale, "es");
   assert.equal(page.body.indexable, true);
   assert.equal(page.body.hreflang.some((link) => link.hreflang === "es"), true);
+  assert.match(sitemap.body, /\/es\/propiedades\/MS-CRAWL-0001/);
 });
 
 test("generated HTTP smoke file is valid when present", () => {

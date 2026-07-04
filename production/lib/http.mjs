@@ -2,7 +2,7 @@ import { addLocaleToRegistry, loadLocaleRegistry, writeLocaleRegistry } from "./
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
-import { loadLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
+import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
   approveTranslationTask,
   createTranslationReviewTask,
@@ -63,7 +63,11 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
-      return response(200, renderSitemapXml(loadLocalizedSitemap()), "application/xml; charset=utf-8");
+      return response(
+        200,
+        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, seed, readTranslationLedger(translationLedgerPath || undefined))),
+        "application/xml; charset=utf-8",
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/robots.txt") {

@@ -44,6 +44,8 @@ Source of truth:
 - Runtime listing routes resolve approved translation-ledger rows, so newly
   added public locales can publish locale-prefixed listing pages without code
   changes.
+- Runtime sitemap rendering also reads the translation ledger, so approved
+  dynamic locale pages are discoverable and draft/stale pages are excluded.
 - `prototypes/crm-lead-intake/lead-intake-demo.json` includes Greek and Hebrew
   website leads routed into the BG/RU/EN admin workflow.
 - `qa/mobile_elderly_static_check.py` validates the locale registry and screen

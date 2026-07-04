@@ -35,6 +35,7 @@ What it proves now:
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
+- Served sitemap XML includes approved dynamic locale translations from the review ledger.
 - Append-only lead ledger for persisted buyer inquiry and seller valuation smoke rows.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
