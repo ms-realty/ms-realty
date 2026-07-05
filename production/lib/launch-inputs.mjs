@@ -90,6 +90,7 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 \`\`\`bash
 npm run redirects:preflight
 npm run redirects:build
+npm run seo:preflight
 npm run seo:evidence
 npm run launch:readiness
 npm run launch:inputs

@@ -95,6 +95,7 @@ Fail closed before launch:
 
 ```bash
 npm run redirects:preflight
+npm run seo:preflight
 npm run launch:preflight
 ```
 

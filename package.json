@@ -23,6 +23,7 @@
     "runtime:build": "node production/scripts/build-runtime-smoke.mjs",
     "http:build": "node production/scripts/build-http-smoke.mjs",
     "seo:evidence": "node production/scripts/build-seo-evidence.mjs",
+    "seo:preflight": "node production/scripts/validate-seo-evidence-inputs.mjs",
     "server:smoke": "node production/scripts/smoke-node-server.mjs",
     "qa:mobile": "node production/scripts/build-mobile-elderly-qa-report.mjs",
     "launch:readiness": "node production/scripts/build-launch-readiness.mjs",

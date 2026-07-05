@@ -2,8 +2,33 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { assertSeoEvidence, buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport } from "../lib/seo-evidence.mjs";
+import { spawnSync } from "node:child_process";
+import {
+  assertSeoEvidence,
+  buildSeoEvidence,
+  loadMigrationRecords,
+  readSeoExportTemplate,
+  validateSeoEvidenceInputs,
+  writeExternalSeoExport,
+} from "../lib/seo-evidence.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+
+function legacyDomainSampleUrls() {
+  const records = loadMigrationRecords();
+  const com = records.find((row) => row.source_domain === "makler-realty.com");
+  const ru = records.find((row) => row.source_domain === "makler-realty.ru");
+  assert.ok(com?.old_url);
+  assert.ok(ru?.old_url);
+  return { com: com.old_url, ru: ru.old_url };
+}
+
+function writeCompleteSeoInputFixture(dir) {
+  const { com, ru } = legacyDomainSampleUrls();
+  fs.writeFileSync(`${dir}/search-console.csv`, `url,clicks,impressions,position\n${com},3,30,7\n${ru},2,20,8\n`);
+  fs.writeFileSync(`${dir}/yandex-webmaster.csv`, `url,indexed,issue\n${com},yes,\n${ru},yes,\n`);
+  fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com},https://example.com/a\n${ru},https://example.com/b\n`);
+  return { com, ru };
+}
 
 test("SEO evidence joins external exports and privacy events to crawled URLs", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-evidence-`);
@@ -114,6 +139,43 @@ test("required SEO exports need matched coverage for both legacy domains", () =>
 
   assert.deepEqual(evidence.summary.missing_required_sources, []);
   assert.deepEqual(evidence.summary.sources.backlinks.matched_source_domains, ["makler-realty.com", "makler-realty.ru"]);
+});
+
+test("SEO evidence input preflight passes complete local exports without writing output", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-valid-seo-preflight-`);
+  const { com } = writeCompleteSeoInputFixture(dir);
+  const evidencePath = fromRoot("production", "data", "seo-evidence.json");
+  const existingEvidence = fs.existsSync(evidencePath) ? fs.readFileSync(evidencePath, "utf8") : null;
+
+  const result = validateSeoEvidenceInputs({
+    inputDir: dir,
+    events: [{ type: "page_view", path: com }],
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+
+  assert.equal(result.ready, true);
+  assert.deepEqual(result.missing_required_sources, []);
+  assert.equal(result.sources.search_console.matched_rows, 2);
+  assert.deepEqual(result.sources.search_console.matched_source_domains, ["makler-realty.com", "makler-realty.ru"]);
+  assert.equal(fs.existsSync(evidencePath) ? fs.readFileSync(evidencePath, "utf8") : null, existingEvidence);
+});
+
+test("SEO evidence preflight CLI fails missing exports and passes complete exports", () => {
+  const script = fromRoot("production", "scripts", "validate-seo-evidence-inputs.mjs");
+  const missingDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-missing-seo-preflight-`);
+  const missing = spawnSync(process.execPath, [script, missingDir], { cwd: fromRoot(), encoding: "utf8" });
+
+  assert.notEqual(missing.status, 0);
+  assert.match(missing.stderr, /SEO EVIDENCE PREFLIGHT FAILED/);
+  assert.match(missing.stderr, /Missing required SEO evidence/);
+
+  const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-preflight-`);
+  writeCompleteSeoInputFixture(validDir);
+  const valid = spawnSync(process.execPath, [script, validDir], { cwd: fromRoot(), encoding: "utf8" });
+
+  assert.equal(valid.status, 0, valid.stderr);
+  assert.match(valid.stdout, /SEO evidence inputs valid/);
+  assert.match(valid.stdout, /search_console: 2 rows, 2 matched/);
 });
 
 test("single-domain SEO exports remain launch blockers", () => {

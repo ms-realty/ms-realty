@@ -308,6 +308,16 @@ export function assertSeoEvidence(evidence) {
   return true;
 }
 
+export function validateSeoEvidenceInputs(options = {}) {
+  const evidence = buildSeoEvidence(options);
+  assertSeoEvidence(evidence);
+  return {
+    ready: evidence.summary.missing_required_sources.length === 0,
+    missing_required_sources: evidence.summary.missing_required_sources,
+    sources: Object.fromEntries(REQUIRED_EXPORTS.map((source) => [source, evidence.summary.sources[source]])),
+  };
+}
+
 export function writeSeoEvidence(evidence, outPath = DEFAULT_SEO_EVIDENCE_OUTPUT) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   assertSeoEvidence(evidence);
