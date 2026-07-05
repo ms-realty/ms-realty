@@ -5,7 +5,7 @@
     "affected_listings": 165,
     "issue_counts": {
       "missing_price": 155,
-      "missing_bedrooms": 163,
+      "missing_bedrooms": 138,
       "media_review_pending": 165,
       "missing_alt_text": 165,
       "tour_review_pending": 165,
@@ -350,7 +350,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -361,7 +360,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -382,7 +380,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -393,7 +390,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -636,7 +632,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -647,7 +642,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1146,7 +1140,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1157,7 +1150,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1178,7 +1170,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1189,7 +1180,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1692,7 +1682,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1703,7 +1692,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1756,7 +1744,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1767,7 +1754,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1788,7 +1774,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1799,7 +1784,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1820,7 +1804,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1831,7 +1814,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1852,7 +1834,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1863,7 +1844,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1914,7 +1894,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1925,7 +1904,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1946,7 +1924,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1957,7 +1934,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -2170,7 +2146,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2182,7 +2157,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -2204,7 +2178,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2215,7 +2188,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -2268,7 +2240,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "location",
         "media_review",
         "media_alt_text",
@@ -2279,7 +2250,6 @@
       "description": "Продажба на 38дка земя в близост до минерална вода",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_location",
         "media_review_pending",
         "missing_alt_text",
@@ -2394,7 +2364,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2405,7 +2374,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -2426,7 +2394,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2437,7 +2404,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -2580,7 +2546,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -2590,7 +2555,6 @@
       "description": "Участок в поселке Струмяни. Продажа участка под строительство в поселке Струмяни. Недвижими имоти в Сандански.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -2738,7 +2702,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -2748,7 +2711,6 @@
       "description": "Продава апартаменти в Парк Хотел Пирин. Продажба на апартаменти в парк хотел Пирин Сандански. Цени на свободните апартаменти в Парк Хотел Пирин Сандански.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -2765,9 +2727,8 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0087",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0087",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -2776,7 +2737,6 @@
       "location": "Sandanski",
       "description": "Big plot of land 20 740 sq.m., buildings 720 sq.m., asphalt road - price 75 000 Euro.",
       "issues": [
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -2796,7 +2756,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2807,7 +2766,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -3340,7 +3298,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3351,7 +3308,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -3531,7 +3487,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0111",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "location",
         "media_review",
         "media_alt_text",
@@ -3541,7 +3496,6 @@
       "location": "",
       "description": "Private land covering 24,416 m2, three massive buildings with a total area of 2,200 m2, 2 solar panels, each with a capacity of 500 kilowatts. €750,000",
       "issues": [
-        "missing_bedrooms",
         "missing_location",
         "media_review_pending",
         "missing_alt_text",
@@ -3562,7 +3516,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3573,7 +3526,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -3840,7 +3792,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3851,7 +3802,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",

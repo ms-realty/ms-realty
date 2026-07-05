@@ -30,6 +30,15 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });
 
+test("listing quality does not require bedrooms for land listings", () => {
+  const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0111");
+
+  assert.ok(row);
+  assert.equal(row.issues.includes("missing_bedrooms"), false);
+  assert.equal(row.required_editor_fields.includes("bedrooms"), false);
+});
+
 test("listing quality workbook gives editors importable review rows without approvals", () => {
   const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
   const rows = parseCsv(renderListingQualityWorkbook(report));

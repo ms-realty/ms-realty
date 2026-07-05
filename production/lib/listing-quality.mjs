@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
+import { bedroomsRequired } from "./listing-facts.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -63,7 +64,7 @@ function qualityRow(record) {
   const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
   if (!filled(facts.price_eur)) issues.push("missing_price");
-  if (!filled(facts.bedrooms)) issues.push("missing_bedrooms");
+  if (bedroomsRequired(facts) && !filled(facts.bedrooms)) issues.push("missing_bedrooms");
   if (!filled(facts.location)) issues.push("missing_location");
   if (!filled(facts.description)) issues.push("missing_description");
   if (record.media_workflow?.review_gated_assets) issues.push("media_review_pending");

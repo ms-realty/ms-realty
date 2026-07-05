@@ -38,6 +38,14 @@ test("structured data warnings use reviewed listing edits", () => {
   assert.equal(reviewed.summary.warnings.media_review_pending, base.summary.warnings.media_review_pending - 3);
 });
 
+test("structured data warnings do not require bedrooms for land listings", () => {
+  const report = buildStructuredDataReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0111");
+
+  assert.ok(row);
+  assert.equal(row.warnings.includes("missing_bedrooms"), false);
+});
+
 test("generated structured data report covers indexable listing sitemap entries", () => {
   const file = fromRoot("production", "data", "structured-data-report.json");
   if (!fs.existsSync(file)) return;
