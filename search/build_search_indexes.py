@@ -39,8 +39,8 @@ LOCATION_PATTERNS = [
 TYPE_PATTERNS = [
     ("apartment", re.compile(r"\b(apartment|flat|апартамент|квартира)\b", re.I)),
     ("house", re.compile(r"\b(house|villa|къща|вила|дом)\b", re.I)),
-    ("land", re.compile(r"\b(land|plot|земя|парцел)\b", re.I)),
-    ("commercial", re.compile(r"\b(office|shop|commercial|офис|магазин|търгов)\b", re.I)),
+    ("land", re.compile(r"\b(land|plot|земя|парцел|участок)\b", re.I)),
+    ("commercial", re.compile(r"\b(office|shop|commercial|industrial|industrieel|офис|магазин|търгов\w*|промишлен\w*|промышленн\w*|работилница|бензиностанц\w*)\b", re.I)),
     ("hotel", re.compile(r"\b(hotel|хотел)\b", re.I)),
 ]
 

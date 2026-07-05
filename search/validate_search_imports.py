@@ -76,6 +76,16 @@ def main() -> int:
     if any(doc["description"] != reviewed_description or reviewed_description not in doc["search_text"] for doc in reviewed_docs):
         raise SystemExit("Search imports must apply reviewed CMS listing edits before export")
 
+    property_types = {doc["id"]: doc["property_type"] for doc in source_docs}
+    expected_types = {
+        "MS-CRAWL-0001": "commercial",
+        "MS-CRAWL-0006": "commercial",
+        "MS-CRAWL-0158": "land",
+    }
+    for listing_id, property_type in expected_types.items():
+        if property_types.get(listing_id) != property_type:
+            raise SystemExit(f"Search imports must classify {listing_id} as {property_type}")
+
     print("PASS: search import fixtures validate for Typesense and Meilisearch")
     return 0
 

@@ -5,10 +5,10 @@
     "affected_listings": 165,
     "issue_counts": {
       "missing_price": 155,
-      "missing_bedrooms": 138,
       "media_review_pending": 165,
       "missing_alt_text": 165,
       "tour_review_pending": 165,
+      "missing_bedrooms": 123,
       "missing_description": 122,
       "thin_public_gallery": 5,
       "missing_location": 3
@@ -32,7 +32,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -42,7 +41,6 @@
       "description": "Updated approved source description.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -190,7 +188,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "public_gallery",
@@ -201,7 +198,6 @@
       "description": "Industrieel gebouw te huur in Sandanski",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "thin_public_gallery",
@@ -1954,7 +1950,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1965,7 +1960,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -2574,7 +2568,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "public_gallery",
@@ -2585,7 +2578,6 @@
       "description": "Продажа участка подходящего для фермы.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "thin_public_gallery",
@@ -2946,7 +2938,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2957,7 +2948,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -2978,7 +2968,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2989,7 +2978,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -3010,7 +2998,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3021,7 +3008,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -3978,7 +3964,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -3988,7 +3973,6 @@
       "description": "Продажа большого участка рядом с горячей минеральной водой. Участок находится на дороге между г.Сандански и Мельник.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4742,7 +4726,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4752,7 +4735,6 @@
       "description": "Участок в поселке Лешница - район города Сандански. Продажа недвижимости.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4772,7 +4754,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4782,7 +4763,6 @@
       "description": "Участок в поселке Струмяни. Продажа участка под строительство в поселке Струмяни. Недвижими имоти в Сандански.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4799,9 +4779,8 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0154",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0154",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4810,7 +4789,6 @@
       "location": "Sandanski",
       "description": "Продажа участка в поселке Струмяни.Недвижимость в 10 км от Сандански.Панорамный участок с видом на горы и р.Струма. 677 м2 цена 11 000 Евро.Все коммуникации",
       "issues": [
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4830,7 +4808,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4840,7 +4817,6 @@
       "description": "Участок под застройку в Сандански",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4860,7 +4836,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4870,7 +4845,6 @@
       "description": "Продажа участка под застройку в поселке Ласкарево - 8км от г.Сандански",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4890,7 +4864,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4900,7 +4873,6 @@
       "description": "Участок под строительство отеля в Сандански",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4920,7 +4892,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "location",
         "media_review",
         "media_alt_text",
@@ -4931,7 +4902,6 @@
       "description": "Участок под строительство, Участок с проектом",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_location",
         "media_review_pending",
         "missing_alt_text",

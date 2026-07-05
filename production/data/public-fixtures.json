@@ -108,7 +108,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -193,7 +193,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -247,7 +247,7 @@
       "identifier": "MS-CRAWL-0001",
       "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански",
       "description": "Updated approved source description.",
-      "category": "property",
+      "category": "commercial",
       "image": [],
       "additionalProperty": [
         {
@@ -278,7 +278,7 @@
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -455,7 +455,7 @@
       "identifier": "MS-CRAWL-0001",
       "name": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
       "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
-      "category": "property",
+      "category": "commercial",
       "image": [],
       "additionalProperty": [
         {
@@ -486,7 +486,7 @@
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -663,7 +663,7 @@
       "identifier": "MS-CRAWL-0001",
       "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
       "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
-      "category": "property",
+      "category": "commercial",
       "image": [],
       "additionalProperty": [
         {
@@ -694,7 +694,7 @@
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -854,7 +854,7 @@
       "identifier": "MS-CRAWL-0001",
       "name": "MS Realty property MS-CRAWL-0001 in Sandanski",
       "description": "Reviewed MS Realty property facts for Sandanski.",
-      "category": "property",
+      "category": "commercial",
       "image": [],
       "additionalProperty": [
         {
@@ -885,7 +885,7 @@
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -1086,7 +1086,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -1171,7 +1171,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
@@ -1335,7 +1335,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "location": "Sandanski",
-        "property_type": "property",
+        "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
