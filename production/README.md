@@ -82,6 +82,7 @@ What it proves now:
 - Public health endpoint that reports liveness while still exposing launch blockers.
 - Production Node server adapter exposed by `npm start`.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
+- Generated mobile/elderly QA report over rendered public HTML, including Hebrew RTL, search form, sticky listing actions, phone-first forms, fallback noindex, and BG/RU/EN admin language policy.
 
 Run:
 
@@ -131,6 +132,7 @@ Generated production data:
 - `production/data/http-smoke.json`
 - `production/data/admin-locale-registry-smoke.json`
 - `production/data/node-server-smoke.json`
+- `production/data/mobile-elderly-qa-report.json`
 - `production/data/lead-ledger.jsonl`
 - `production/data/reply-outbox.jsonl`
 - `production/data/viewings.jsonl`

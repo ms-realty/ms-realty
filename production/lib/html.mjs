@@ -39,6 +39,7 @@ function meta(page) {
   return [
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+    "<style>button,input,textarea,select{min-height:44px}nav[data-mobile-sticky-actions=\"true\"]{position:sticky;bottom:0;background:#fff}</style>",
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,
     `<meta name="robots" content="${escapeHtml(page.metadata?.robots || (page.indexable ? "index,follow" : "noindex,follow"))}">`,
@@ -73,11 +74,11 @@ function renderListing(page) {
     .map((action) => `<button type="button" data-endpoint="${escapeHtml(action.endpoint)}">${escapeHtml(action.label)}</button>`)
     .join("");
   return `
-<main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}">
+<main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}" data-min-touch-target="44">
   <h1>${escapeHtml(page.body.h1)}</h1>
   <dl>${renderFacts(page.body.facts)}</dl>
   <section aria-label="Gallery">${gallery}</section>
-  <nav aria-label="Listing actions">${primary}</nav>
+  <nav aria-label="Listing actions" data-mobile-sticky-actions="${escapeHtml(page.body.actions.sticky_mobile ? "true" : "false")}">${primary}</nav>
   <nav aria-label="Broker contact">${direct}</nav>
 </main>`;
 }
@@ -140,6 +141,10 @@ function renderHome(page) {
 }
 
 function renderSearch(page) {
+  const filter = (name, label) => {
+    const value = page.search.filters?.[name] || "";
+    return `<label>${escapeHtml(label)} <input name="${escapeHtml(name)}" value="${escapeHtml(value)}"></label>`;
+  };
   const cards = page.cards
     .map(
       (card) =>
@@ -147,8 +152,16 @@ function renderSearch(page) {
     )
     .join("");
   return `
-<main data-kind="search" data-total-matches="${escapeHtml(page.search.total_matches)}">
+<main data-kind="search" data-total-matches="${escapeHtml(page.search.total_matches)}" data-list-first-mobile="${escapeHtml(
+    page.mobile_policy?.list_first_mobile ? "true" : "false",
+  )}" data-min-touch-target="${escapeHtml(page.mobile_policy?.minimum_tap_target_px || 44)}">
   <h1>${escapeHtml(page.metadata.title)}</h1>
+  <form action="${escapeHtml(page.path)}" method="get" role="search">
+    <label>Search <input name="q" type="search" value="${escapeHtml(page.search.query || "")}" autocomplete="off"></label>
+    ${filter("location", "Location")}
+    ${filter("property_type", "Type")}
+    <button type="submit">Search</button>
+  </form>
   <p>${escapeHtml(page.search.total_matches)} matches</p>
   <section aria-label="Search results">${cards}</section>
 </main>`;
@@ -170,7 +183,7 @@ function renderLocation(page) {
 
 function renderSeller(page) {
   return `
-<main data-kind="seller">
+<main data-kind="seller" data-phone-first="true" data-min-touch-target="44">
   <h1>${escapeHtml(page.body.h1)}</h1>
   <p>${escapeHtml(page.body.intro)}</p>
   <form method="post" action="${escapeHtml(page.body.valuation.endpoint)}" data-lead-type="seller">
@@ -186,7 +199,7 @@ function renderSeller(page) {
 
 function renderContact(page) {
   return `
-<main data-kind="contact">
+<main data-kind="contact" data-phone-first="true" data-min-touch-target="44">
   <h1>${escapeHtml(page.body.h1)}</h1>
   <p>${escapeHtml(page.body.intro)}</p>
   <form method="post" action="${escapeHtml(page.body.callback.endpoint)}" data-lead-type="general" data-source="${escapeHtml(

@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-07-05T00:00:00Z",
+  "status": "pass",
+  "summary": {
+    "checks": 7,
+    "passed": 7,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "id": "viewport_and_touch_targets",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "hebrew_rtl_public_pages",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "mobile_search_form",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "listing_sticky_actions",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "phone_first_forms",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "fallback_noindex_request",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "admin_and_market_languages",
+      "status": "pass",
+      "evidence": {
+        "admin_locales": [
+          "bg",
+          "ru",
+          "en"
+        ],
+        "market_coverage": [
+          {
+            "id": "greece_greek",
+            "market": "Greece",
+            "country_code": "GR",
+            "locale": "el",
+            "language": "Greek",
+            "public_route_prefix": "/el/",
+            "status": "approved_public_seed"
+          },
+          {
+            "id": "israel_hebrew",
+            "market": "Israel",
+            "country_code": "IL",
+            "locale": "he",
+            "language": "Hebrew",
+            "public_route_prefix": "/he/",
+            "status": "approved_public_seed",
+            "requires_rtl_qa": true
+          }
+        ]
+      }
+    }
+  ]
+}

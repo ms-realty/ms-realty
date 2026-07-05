@@ -685,6 +685,16 @@ if (
   throw new Error("Listing quality report must keep price, media review, and alt text gaps actionable");
 }
 
+const mobileQa = JSON.parse(fs.readFileSync(fromRoot("production", "data", "mobile-elderly-qa-report.json"), "utf8"));
+if (mobileQa.status !== "pass" || mobileQa.summary.failed !== 0) {
+  throw new Error("Mobile/elderly QA report must pass");
+}
+for (const id of ["mobile_search_form", "listing_sticky_actions", "admin_and_market_languages"]) {
+  if (!mobileQa.checks.some((check) => check.id === id && check.status === "pass")) {
+    throw new Error(`Mobile/elderly QA report missing ${id}`);
+  }
+}
+
 const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data", "launch-readiness.json"), "utf8"));
 if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
   throw new Error("Launch readiness report must stay blocked until production blockers are cleared");

@@ -23,9 +23,10 @@
     "http:build": "node production/scripts/build-http-smoke.mjs",
     "seo:evidence": "node production/scripts/build-seo-evidence.mjs",
     "server:smoke": "node production/scripts/smoke-node-server.mjs",
+    "qa:mobile": "node production/scripts/build-mobile-elderly-qa-report.mjs",
     "launch:readiness": "node production/scripts/build-launch-readiness.mjs",
     "launch:inputs": "node production/scripts/build-launch-input-checklist.mjs",
-    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run listing:quality && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run seo:evidence && npm run server:smoke && npm run launch:readiness && npm run launch:inputs && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
+    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run listing:quality && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run seo:evidence && npm run server:smoke && npm run qa:mobile && npm run launch:readiness && npm run launch:inputs && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
     "check": "npm run test && npm run validate"
   },
   "engines": {

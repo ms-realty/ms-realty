@@ -32,6 +32,7 @@ Pass for the current local prototype slice.
 Run:
 
 ```bash
+npm run qa:mobile
 python3 qa/mobile_elderly_static_check.py
 ```
 
@@ -42,6 +43,16 @@ PASS: mobile/elderly static QA markers present
 PASS: dynamic approved locale registry includes public Greek/Hebrew and admin bg/ru/en
 PASS: crawl rows url=457 metadata=457 media=11859 redirect=457
 ```
+
+`npm run qa:mobile` writes `production/data/mobile-elderly-qa-report.json`
+from rendered public pages and fails if the live HTML loses:
+
+- Hebrew `lang`/`dir` coverage.
+- Mobile search form and list-first result marker.
+- Sticky listing actions.
+- Phone-first seller/contact forms.
+- Noindex fallback language request flow.
+- BG/RU/EN admin language policy plus Greek/Hebrew market coverage.
 
 ## Remaining Manual QA Before Visual Polish
 

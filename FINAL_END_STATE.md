@@ -163,6 +163,7 @@ Implemented now:
   - unsupported contact channels are rejected before persistence
 - Mobile and elderly-user QA gate:
   - `qa/mobile_elderly_static_check.py`
+  - `production/data/mobile-elderly-qa-report.json`
   - `qa/mobile-elderly-accessibility.md`
 
 Validation already passes:
@@ -170,6 +171,7 @@ Validation already passes:
 ```bash
 python3 search/build_search_indexes.py
 python3 search/validate_search_imports.py
+npm run qa:mobile
 python3 -m py_compile migration/crawl_inventory.py search/build_search_indexes.py search/validate_search_imports.py qa/mobile_elderly_static_check.py
 python3 qa/mobile_elderly_static_check.py
 ```
