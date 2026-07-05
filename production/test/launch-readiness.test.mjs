@@ -76,4 +76,5 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import/);
   assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
+  assert.match(markdown, /npm run launch:inputs/);
 });

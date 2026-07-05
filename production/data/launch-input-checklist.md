@@ -43,4 +43,5 @@ Blockers: redirect_reviews, external_seo_exports
 npm run redirects:build
 npm run seo:evidence
 npm run launch:readiness
+npm run launch:inputs
 ```
