@@ -1,5 +1,5 @@
 import { adminLocales, getLocale, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage } from "./locales.mjs";
-import { assertHermesActionAllowed, translationPrompt } from "./hermes.mjs";
+import { assertHermesActionAllowed, translationPrompt, validateHermesTranslationDraft } from "./hermes.mjs";
 import { createLeadDraft } from "./leads.mjs";
 import { contentHash } from "./translations.mjs";
 
@@ -58,6 +58,14 @@ export function createTranslationReviewTask(registry, input) {
   }
 
   assertHermesActionAllowed("draft_translation");
+  const sourceHash = contentHash({ sourceLocale, sourceContent });
+  const sourceSnapshot = {
+    object_type: input.objectType,
+    object_id: input.objectId,
+    source_locale: sourceLocale,
+    source_hash: sourceHash,
+    approved_legal_content: input.approvedLegalContent === true,
+  };
   const prompt = translationPrompt({
     sourceLocale,
     targetLocale: target.code,
@@ -65,6 +73,13 @@ export function createTranslationReviewTask(registry, input) {
     propertyFacts: input.propertyFacts || {},
     glossary: input.glossary || {},
   });
+  const output = input.draftOutput
+    ? validateHermesTranslationDraft({
+        draft: input.draftOutput,
+        propertyFacts: input.propertyFacts || {},
+        sourceSnapshot,
+      })
+    : null;
 
   return {
     id: `translation-${input.objectType}-${input.objectId}-${target.code}`,
@@ -74,7 +89,7 @@ export function createTranslationReviewTask(registry, input) {
     target_locale: target.code,
     target_direction: target.direction,
     status: "hermes_drafted",
-    source_hash: contentHash({ sourceLocale, sourceContent }),
+    source_hash: sourceHash,
     draft_hash: contentHash({ targetLocale: target.code, sourceContent, propertyFacts: input.propertyFacts || {} }),
     provider_mode: target.translation_provider_mode,
     reviewer_role: target.reviewer_role,
@@ -82,6 +97,8 @@ export function createTranslationReviewTask(registry, input) {
     requires_human_approval: true,
     hermes: {
       prompt,
+      output,
+      source_snapshot: sourceSnapshot,
       can_publish: false,
       can_mark_indexable: false,
     },

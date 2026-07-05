@@ -19,7 +19,7 @@ import {
   sitemapEntriesForListing,
 } from "../lib/seo.mjs";
 import { approveHumanTranslation, contentHash, markStaleWhenSourceChanges } from "../lib/translations.mjs";
-import { assertHermesActionAllowed, translationPrompt } from "../lib/hermes.mjs";
+import { assertHermesActionAllowed, translationPrompt, validateHermesTranslationDraft } from "../lib/hermes.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 
 const registry = loadLocaleRegistry();
@@ -141,6 +141,28 @@ test("Hermes can draft translations but cannot publish or send", () => {
       propertyFacts: { location: "Sandanski" },
     }).rules.join(" "),
     /Sandanski/,
+  );
+  const draft = validateHermesTranslationDraft({
+    propertyFacts: { id: "MS-1", location: "Sandanski" },
+    sourceSnapshot: { source_hash: "source-1" },
+    draft: {
+      title: "MS-1 Sandanski",
+      body: "MS-1 Sandanski",
+      seo_title: "MS-1 Sandanski",
+      meta_description: "MS-1 Sandanski",
+      citations: [{ source: "cms", field: "title" }],
+    },
+  });
+  assert.equal(draft.public_indexable, false);
+  assert.equal(draft.source_snapshot.source_hash, "source-1");
+  assert.throws(
+    () =>
+      validateHermesTranslationDraft({
+        propertyFacts: { id: "MS-1", location: "Sandanski" },
+        sourceSnapshot: { source_hash: "source-1" },
+        draft: { body: "MS-1 Sandanski tax guarantee", citations: [{ source: "cms", field: "title" }] },
+      }),
+    /legal\/tax\/process/,
   );
 });
 

@@ -2384,6 +2384,14 @@
                 "Return SEO title and meta description drafts within normal search-result lengths."
               ]
             },
+            "output": null,
+            "source_snapshot": {
+              "object_type": "listing",
+              "object_id": "MS-CRAWL-0001",
+              "source_locale": "bg",
+              "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+              "approved_legal_content": false
+            },
             "can_publish": false,
             "can_mark_indexable": false
           },
@@ -2627,6 +2635,14 @@
             "Return SEO title and meta description drafts within normal search-result lengths."
           ]
         },
+        "output": null,
+        "source_snapshot": {
+          "object_type": "listing",
+          "object_id": "MS-CRAWL-0001",
+          "source_locale": "bg",
+          "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+          "approved_legal_content": false
+        },
         "can_publish": false,
         "can_mark_indexable": false
       }
@@ -2666,6 +2682,14 @@
             "Legal, tax, financing, and valuation claims require approved CMS source content.",
             "Return SEO title and meta description drafts within normal search-result lengths."
           ]
+        },
+        "output": null,
+        "source_snapshot": {
+          "object_type": "listing",
+          "object_id": "MS-CRAWL-0001",
+          "source_locale": "bg",
+          "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+          "approved_legal_content": false
         },
         "can_publish": false,
         "can_mark_indexable": false
@@ -2760,6 +2784,14 @@
                 "Return SEO title and meta description drafts within normal search-result lengths."
               ]
             },
+            "output": null,
+            "source_snapshot": {
+              "object_type": "listing",
+              "object_id": "MS-CRAWL-0001",
+              "source_locale": "bg",
+              "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+              "approved_legal_content": false
+            },
             "can_publish": false,
             "can_mark_indexable": false
           },
@@ -2805,6 +2837,14 @@
                 "Legal, tax, financing, and valuation claims require approved CMS source content.",
                 "Return SEO title and meta description drafts within normal search-result lengths."
               ]
+            },
+            "output": null,
+            "source_snapshot": {
+              "object_type": "listing",
+              "object_id": "MS-CRAWL-0001",
+              "source_locale": "bg",
+              "source_hash": "7d28b946c486e35249a116d7a708eeff77e458b6982e8a83bf9d29f46e7a9889",
+              "approved_legal_content": false
             },
             "can_publish": false,
             "can_mark_indexable": false

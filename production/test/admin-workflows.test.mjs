@@ -46,6 +46,44 @@ test("Hermes translation tasks are drafts until human approval and publication",
   assert.equal(published.public_indexable, true);
 });
 
+test("Hermes draft output must preserve facts and source snapshot before review", () => {
+  const task = createTranslationReviewTask(registry, {
+    objectType: "listing",
+    objectId: listing.id,
+    sourceLocale: "bg",
+    targetLocale: "el",
+    sourceContent: { title: listing.h1, description: listing.description || listing.h1 },
+    propertyFacts: { id: listing.id, location: "Sandanski" },
+    draftOutput: {
+      title: `${listing.id} Sandanski`,
+      body: `${listing.id} Sandanski approved draft`,
+      seo_title: `${listing.id} Sandanski`,
+      meta_description: `${listing.id} Sandanski`,
+      citations: [{ source: "cms", field: "title" }],
+    },
+  });
+
+  assert.equal(task.hermes.output.status, "hermes_drafted");
+  assert.equal(task.hermes.output.public_indexable, false);
+  assert.equal(task.hermes.output.source_snapshot.source_hash, task.source_hash);
+  assert.throws(
+    () =>
+      createTranslationReviewTask(registry, {
+        objectType: "listing",
+        objectId: listing.id,
+        targetLocale: "he",
+        sourceContent: { title: listing.h1, description: listing.description || listing.h1 },
+        propertyFacts: { id: listing.id, location: "Sandanski" },
+        draftOutput: {
+          title: `${listing.id} Sandanski sea view`,
+          body: `${listing.id} Sandanski beach property`,
+          citations: [{ source: "cms", field: "title" }],
+        },
+      }),
+    /Sandanski/,
+  );
+});
+
 test("CRM inbox keeps original Greek and Hebrew lead language while routing admin work to EN", () => {
   const hebrew = createCrmInboxItem(registry, {
     id: "lead-he-buyer-test",
