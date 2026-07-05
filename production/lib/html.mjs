@@ -278,9 +278,12 @@ function renderAdminMigrationReview(page) {
     page.routeMap.reviewRequired,
   )}" data-launch-readiness-endpoint="${escapeHtml(page.launchReadinessEndpoint)}" data-launch-readiness-export-endpoint="${escapeHtml(
     page.launchReadinessExportEndpoint,
+  )}" data-launch-input-checklist-endpoint="${escapeHtml(
+    page.launchInputChecklistEndpoint,
   )}">
   <h1>Migration review</h1>
   <p><a href="${escapeHtml(page.launchReadinessEndpoint)}">Launch readiness JSON</a></p>
+  <p><a href="${escapeHtml(page.launchInputChecklistEndpoint)}">Launch input checklist</a></p>
   <form method="post" action="${escapeHtml(page.launchReadinessExportEndpoint)}">
     <button type="submit">Export launch readiness</button>
   </form>

@@ -34,6 +34,7 @@ import { appendTourApproval, createTourApproval, readTourApprovals } from "./tou
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
+import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { buildListingQualityReport, renderListingQualityWorkbook } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -268,6 +269,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
+    launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     deployablePreview: buildDeployableRedirects(routes, approvals),
   };
 }
@@ -310,8 +312,10 @@ export function createHttpApp({
       events: readEventLedger(eventLedgerPath || undefined),
       generatedAt: reviewedAt || new Date().toISOString(),
     });
+  const currentDeployableRedirects = () =>
+    buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
   const currentLaunchReadiness = () => {
-    const redirectRows = buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
+    const redirectRows = currentDeployableRedirects();
     return buildLaunchReadinessReport({
       generatedAt: reviewedAt || new Date().toISOString(),
       routeMap: {
@@ -323,6 +327,19 @@ export function createHttpApp({
       seoEvidence: currentSeoEvidence(),
     });
   };
+  const currentLaunchInputChecklist = () =>
+    renderLaunchInputChecklist({
+      generatedAt: reviewedAt || new Date().toISOString(),
+      launchReadiness: currentLaunchReadiness(),
+      seoEvidence: currentSeoEvidence(),
+      redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap)),
+      deployableRedirects: { summary: summarizeDeployableRedirects(currentDeployableRedirects()) },
+      routeMap: {
+        summary: {
+          mappedListings: routeMap.filter((route) => route.url_type === "listing" && route.target_path).length,
+        },
+      },
+    });
   const recordEvent = (input) =>
     eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
   return async function handle(request) {
@@ -512,6 +529,11 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return json(200, currentLaunchReadiness());
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return response(200, currentLaunchInputChecklist(), "text/markdown; charset=utf-8");
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
@@ -1051,6 +1073,7 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.routeMap.total !== 457 ||
     smoke.adminMigrationReview.body.routeMap.mappedListings !== 165 ||
     smoke.adminMigrationReview.body.listingQuality.summary.affected_listings !== 165 ||
+    smoke.adminMigrationReview.body.launchInputChecklistEndpoint !== "/api/admin/launch-input-checklist" ||
     smoke.adminMigrationReview.body.routeMap.approvableSample?.length < 1
   ) {
     throw new Error("HTTP smoke must serve admin migration review workbench contract");
@@ -1068,6 +1091,7 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-endpoint=\"/api/admin/launch-readiness\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-export-endpoint=\"/api/admin/launch-readiness/export\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-launch-input-checklist-endpoint=\"/api/admin/launch-input-checklist\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-quality-workbook-endpoint=\"/api/admin/listing-quality-workbook\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-quality-listing=\"true\"")
   ) {
