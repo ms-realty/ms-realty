@@ -492,7 +492,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     (route) => route.url_type === "listing" && route.target_locale === "ru" && route.target_path && route.old_url !== ruListing.old_url,
   );
   const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
-  const app = createHttpApp({ routeMap, redirectApprovalPath, deployableRedirectOutputPath, reviewedAt: "2026-07-05T00:00:00Z" });
+  const app = createHttpApp({
+    routeMap,
+    redirectApprovalPath,
+    deployableRedirectOutputPath,
+    reviewedAt: "2026-07-05T00:00:00Z",
+    listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
+  });
 
   const approved = await dispatchHttp(app, {
     method: "POST",
@@ -658,6 +664,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
   assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
   assert.equal(review.body.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
+  assert.equal(review.body.listingQuality.generated_at, "2026-07-05T00:09:00Z");
   assert.equal(review.body.listingQuality.summary.listings, 165);
   assert.ok(review.body.listingQuality.summary.issue_counts.missing_price > 0);
   assert.ok(review.body.listingQuality.summary.issue_counts.missing_alt_text > 0);

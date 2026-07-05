@@ -98,6 +98,7 @@ const app = createHttpApp({
   bookedAt: "2026-07-04T00:06:00Z",
   savedAt: "2026-07-04T00:07:00Z",
   sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
+  listingQualityGeneratedAt: "2026-07-05T03:01:09.839Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 const smoke = {

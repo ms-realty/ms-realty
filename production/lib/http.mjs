@@ -263,7 +263,7 @@ function seoEvidencePayload(seoEvidence) {
   };
 }
 
-function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, seed) {
+function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, seed, listingQualityGeneratedAt) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const reviewRequired = routes.filter((route) => route.review_required);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
@@ -301,7 +301,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
     seoEvidence: seoEvidencePayload(seoEvidence),
-    listingQuality: buildListingQualityReport({ seed, limit: 20 }),
+    listingQuality: buildListingQualityReport({ seed, generatedAt: listingQualityGeneratedAt, limit: 20 }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
@@ -340,6 +340,7 @@ export function createHttpApp({
   bookedAt,
   savedAt,
   sellerPipelineCreatedAt,
+  listingQualityGeneratedAt,
 } = {}) {
   let activeRegistry = registry;
   const currentSeoEvidence = () =>
@@ -547,6 +548,7 @@ export function createHttpApp({
         readRedirectApprovals(redirectApprovalPath || undefined),
         currentSeoEvidence(),
         seed,
+        listingQualityGeneratedAt,
       );
       return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
     }
@@ -563,6 +565,7 @@ export function createHttpApp({
         approvals,
         currentSeoEvidence(),
         seed,
+        listingQualityGeneratedAt,
       );
       if (wantsHtml(request, url)) return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
