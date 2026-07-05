@@ -697,6 +697,10 @@ test("HTTP admin auth does not accept local smoke token in production without co
       url: "/api/admin/leads",
       headers: { authorization: "Bearer local-admin-smoke" },
     });
+    const nearMatchToken = await dispatchHttp(app, {
+      url: "/api/admin/leads",
+      headers: { authorization: "Bearer real-admin-token-extra" },
+    });
     const configuredToken = await dispatchHttp(app, {
       url: "/api/admin/leads",
       headers: { authorization: "Bearer real-admin-token" },
@@ -704,6 +708,7 @@ test("HTTP admin auth does not accept local smoke token in production without co
 
     assert.equal(defaultToken.status, 401);
     assert.equal(wrongToken.status, 401);
+    assert.equal(nearMatchToken.status, 401);
     assert.equal(configuredToken.status, 200);
   } finally {
     if (oldNodeEnv === undefined) delete process.env.NODE_ENV;

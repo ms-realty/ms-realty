@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { timingSafeEqual } from "node:crypto";
 import { addLocaleToRegistry, loadLocaleRegistry, writeLocaleRegistry } from "./locales.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
@@ -85,7 +86,8 @@ function adminBearerToken() {
 
 function isAdminAuthorized(auth) {
   const expected = adminBearerToken();
-  return Boolean(expected) && auth === expected;
+  if (!expected || !auth || Buffer.byteLength(auth) !== Buffer.byteLength(expected)) return false;
+  return timingSafeEqual(Buffer.from(auth), Buffer.from(expected));
 }
 
 function adminUnauthorized() {
