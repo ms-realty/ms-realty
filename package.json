@@ -11,6 +11,7 @@
     "migration:db": "python3 migration/build_migration_db.py",
     "routes:build": "node production/scripts/build-route-map.mjs",
     "migration:review": "node production/scripts/build-migration-review-queue.mjs",
+    "redirects:preflight": "node production/scripts/validate-redirect-approvals.mjs",
     "redirects:build": "node production/scripts/build-deployable-redirects.mjs",
     "sitemap:build": "node production/scripts/build-localized-sitemap.mjs",
     "seo:build": "node production/scripts/build-seo-files.mjs",

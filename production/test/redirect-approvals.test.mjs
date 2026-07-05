@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import {
   appendRedirectApproval,
   assertDeployableRedirects,
@@ -13,6 +14,7 @@ import {
   renderRedirectApprovalWorkbook,
   resetRedirectApprovals,
   summarizeDeployableRedirects,
+  validateRedirectApprovalsCsv,
 } from "../lib/redirect-approvals.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -103,6 +105,44 @@ test("CSV redirect approval import validates rows before appending", () => {
   );
   assert.equal(approvals.length, 1);
   assert.equal(readRedirectApprovals(filePath).length, 1);
+});
+
+test("redirect approval preflight validates CSV without appending approvals", () => {
+  const routeMap = loadRouteMap();
+  const filePath = tempApprovalFile();
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "ru");
+  const csv = `old_url,equivalent_content,reviewer,approved_at,reason\n${listing.old_url},true,editor_ru,2026-07-04T00:00:00Z,Reviewed same content\n`;
+
+  resetRedirectApprovals(filePath);
+  const result = validateRedirectApprovalsCsv(routeMap, csv, { approvedAt: "2026-07-04T00:00:00Z" });
+
+  assert.equal(result.approvals.length, 1);
+  assert.equal(result.summary.total, 1);
+  assert.deepEqual(readRedirectApprovals(filePath), []);
+});
+
+test("redirect approval preflight CLI fails missing CSV and passes valid CSV", () => {
+  const routeMap = loadRouteMap();
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg");
+  const csvPath = path.join(os.tmpdir(), `ms-realty-redirect-preflight-${process.pid}-${Date.now()}.csv`);
+  fs.writeFileSync(
+    csvPath,
+    `old_url,equivalent_content,reviewer,approved_at,reason\n${listing.old_url},true,editor_bg,2026-07-04T00:00:00Z,Reviewed same content\n`,
+  );
+
+  const missing = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-redirect-approvals.mjs"), `${csvPath}.missing`], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+  });
+  const valid = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-redirect-approvals.mjs"), csvPath], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+  });
+
+  assert.notEqual(missing.status, 0);
+  assert.match(missing.stderr, /REDIRECT APPROVAL PREFLIGHT FAILED/);
+  assert.equal(valid.status, 0);
+  assert.match(valid.stdout, /Redirect approval CSV valid: 1 rows/);
 });
 
 test("duplicate approval imports keep one deployable redirect per old URL", () => {

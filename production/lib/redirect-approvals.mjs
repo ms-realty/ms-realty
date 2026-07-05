@@ -56,6 +56,13 @@ function approvalInputFromRow(row) {
   };
 }
 
+function approvalsFromCsv(routeMap, csvText, approvedAt) {
+  return parseCsv(csvText).map((row) => {
+    const input = approvalInputFromRow(row);
+    return normalizeApproval(routeByOldUrl(routeMap, input.oldUrl), input, row.approved_at || approvedAt);
+  });
+}
+
 function csvCell(value) {
   const text = String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
@@ -82,15 +89,19 @@ export function importRedirectApprovalsCsv(
   csvText,
   { filePath = DEFAULT_REDIRECT_APPROVALS_PATH, approvedAt = new Date().toISOString() } = {},
 ) {
-  const rows = parseCsv(csvText);
-  const approvals = rows.map((row) => {
-    const input = approvalInputFromRow(row);
-    return normalizeApproval(routeByOldUrl(routeMap, input.oldUrl), input, row.approved_at || approvedAt);
-  });
+  const approvals = approvalsFromCsv(routeMap, csvText, approvedAt);
   if (!approvals.length) return [];
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${approvals.map((approval) => JSON.stringify(approval)).join("\n")}\n`);
   return approvals;
+}
+
+export function validateRedirectApprovalsCsv(routeMap, csvText, { approvedAt = new Date().toISOString() } = {}) {
+  const approvals = approvalsFromCsv(routeMap, csvText, approvedAt);
+  return {
+    approvals,
+    summary: summarizeDeployableRedirects(buildDeployableRedirects(routeMap, approvals)),
+  };
 }
 
 export function buildRedirectApprovalWorkbook(routeMap) {

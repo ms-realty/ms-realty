@@ -88,6 +88,7 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 ## Validate After Inputs
 
 \`\`\`bash
+npm run redirects:preflight
 npm run redirects:build
 npm run seo:evidence
 npm run launch:readiness
