@@ -9,7 +9,9 @@ What it proves now:
 - Dynamic approved locale registry.
 - Locale-prefixed public listing routes.
 - Hreflang generation only for approved/indexable translations.
-- Hermes Agent draft-only translation guardrails.
+- Hermes Agent draft-only translation guardrails (the Hermes engine — self-hosted Nous
+  open-weight Hermes models + function-calling format — is specified in
+  `../SOURCE_OF_TRUTH.md` §11; these contracts define the guardrail it must satisfy).
 - Translation stale-state rules.
 - CRM lead language routing into BG/RU/EN admin queues.
 - Search fixtures carry locale/indexability metadata and approved translation documents.

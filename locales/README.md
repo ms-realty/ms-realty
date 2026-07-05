@@ -9,7 +9,9 @@ Rules:
   indexable pages, hreflang entries, and localized sitemap URLs.
 - `fallback_locale` must point to an existing public/indexable locale.
 - Hermes Agent may create translation drafts for any enabled locale, but cannot
-  publish or mark content indexable.
+  publish or mark content indexable. (Hermes = self-hosted Nous Research open-weight
+  Hermes models + function-calling format, draft-only; engine spec in
+  `../SOURCE_OF_TRUTH.md` §11.)
 - BG is the default source locale.
 - Admin CMS/CRM UI is available in exactly BG, RU, and EN for the first
   production implementation.
