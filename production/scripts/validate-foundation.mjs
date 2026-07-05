@@ -593,4 +593,17 @@ if (tourApprovals.length !== 1) throw new Error("Tour approval artifact must con
 const events = fs.readFileSync(fromRoot("production", "data", "events.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (events.length < 1) throw new Error("Event artifact must contain deterministic smoke rows");
 
+const seoEvidence = JSON.parse(fs.readFileSync(fromRoot("production", "data", "seo-evidence.json"), "utf8"));
+if (seoEvidence.summary.crawl_urls !== 457 || seoEvidence.url_evidence.length !== 457) {
+  throw new Error("SEO evidence joins must cover every crawled URL");
+}
+if (seoEvidence.summary.sources.privacy_events.status !== "imported") {
+  throw new Error("SEO evidence joins must include privacy-aware analytics");
+}
+for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
+  if (!seoEvidence.summary.missing_required_sources.includes(source)) {
+    throw new Error(`SEO evidence joins must flag missing ${source} export before launch`);
+  }
+}
+
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

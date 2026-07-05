@@ -211,6 +211,10 @@ Date: 2026-07-04
   - page views, searches, lead submissions, and CTA clicks append to `production/data/events.jsonl`
   - `POST /api/events` accepts CTA events without contact/message payloads
   - search queries are scrubbed before analytics persistence
+- Added SEO evidence joins:
+  - `production/data/seo-evidence.json` joins crawled URLs with Search Console, Yandex, backlink, optional analytics exports, and the local privacy event ledger
+  - missing external exports are explicit launch risks instead of silently passing
+  - privacy-aware analytics rows are imported from `production/data/events.jsonl`
 - Added seller valuation pipeline intake:
   - seller leads from `POST /api/leads` create a seller pipeline row
   - persisted seller rows start at `valuation_requested`

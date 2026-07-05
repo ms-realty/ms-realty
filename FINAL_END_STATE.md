@@ -105,6 +105,9 @@ Implemented now:
 - Privacy-safe analytics contract:
   - `production/data/events.jsonl`
   - page views, searches, lead submissions, and CTA clicks are persisted without contact/message payloads
+- SEO evidence join contract:
+  - crawled URLs join to Search Console, Yandex Webmaster, backlink, optional analytics exports, and privacy event evidence
+  - missing external exports are recorded as launch risks in `production/data/seo-evidence.json`
 - Seller pipeline contract:
   - seller valuation leads create `valuation_requested` pipeline rows
   - callback and appraisal checklist tasks start open
