@@ -100,6 +100,11 @@
       "optional": true
     },
     {
+      "name": "price_on_request",
+      "type": "bool",
+      "facet": true
+    },
+    {
       "name": "image_count",
       "type": "int32"
     },

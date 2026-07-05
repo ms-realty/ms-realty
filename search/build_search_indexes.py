@@ -206,7 +206,17 @@ def apply_listing_edits(docs: list[dict[str, object]], edits: list[dict[str, obj
         patch = patches.get(str(doc["id"]))
         if not patch:
             continue
-        for field in ("title", "description", "h1", "location", "property_type", "offer_type", "bedrooms", "price_eur"):
+        for field in (
+            "title",
+            "description",
+            "h1",
+            "location",
+            "property_type",
+            "offer_type",
+            "bedrooms",
+            "price_eur",
+            "price_on_request",
+        ):
             if field in patch:
                 doc[field] = patch[field]
         doc["search_text"] = textish(
@@ -264,6 +274,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
                     "offer_type": infer_offer(combined),
                     "bedrooms": infer_bedrooms(combined),
                     "price_eur": None,
+                    "price_on_request": False,
                     "image_count": int(row.get("image_count") or 0),
                     "word_count": int(row.get("word_count") or 0),
                     "schema_present": row.get("schema_present") == "true",
@@ -309,6 +320,7 @@ def write_typesense_schema(path: Path) -> None:
             {"name": "property_type", "type": "string", "facet": True},
             {"name": "offer_type", "type": "string", "facet": True},
             {"name": "bedrooms", "type": "int32", "facet": True, "optional": True},
+            {"name": "price_on_request", "type": "bool", "facet": True},
             {"name": "image_count", "type": "int32"},
             {"name": "word_count", "type": "int32"},
             {"name": "search_text", "type": "string"},
@@ -338,6 +350,7 @@ def write_meili_settings(path: Path) -> None:
             "property_type",
             "offer_type",
             "bedrooms",
+            "price_on_request",
         ],
         "sortableAttributes": ["image_count", "word_count"],
         "displayedAttributes": ["*"],

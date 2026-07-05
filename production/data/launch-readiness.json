@@ -7,10 +7,6 @@
   ],
   "warnings": [
     {
-      "id": "missing_price",
-      "count": 30
-    },
-    {
       "id": "missing_bedrooms",
       "count": 4
     }
@@ -87,8 +83,10 @@
         "failing_entries": 0,
         "entries_with_offer": 137,
         "warnings": {
-          "missing_price": 30,
-          "missing_bedrooms": 4
+          "missing_location": 0,
+          "missing_price": 0,
+          "missing_bedrooms": 4,
+          "media_review_pending": 0
         },
         "by_locale": {
           "bg": 113,

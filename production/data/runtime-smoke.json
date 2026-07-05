@@ -100,6 +100,7 @@
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 35
       },
       "media": {
@@ -446,6 +447,7 @@
         "offer_type": "sale",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 33
       },
       "media": {
@@ -779,6 +781,7 @@
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 35
       },
       {
@@ -796,6 +799,7 @@
         "offer_type": "sale",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 20
       },
       {
@@ -813,6 +817,7 @@
         "offer_type": "rent",
         "bedrooms": 2,
         "price_eur": 600,
+        "price_on_request": false,
         "image_count": 32
       },
       {
@@ -830,6 +835,7 @@
         "offer_type": "rent",
         "bedrooms": 1,
         "price_eur": 355,
+        "price_on_request": false,
         "image_count": 26
       },
       {
@@ -847,6 +853,7 @@
         "offer_type": "rent",
         "bedrooms": 2,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 26
       },
       {
@@ -864,6 +871,7 @@
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": 1,
+        "price_on_request": false,
         "image_count": 18
       }
     ]
@@ -1083,6 +1091,7 @@
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 35
       }
     ]
@@ -1161,6 +1170,7 @@
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 35
       },
       {
@@ -1178,6 +1188,7 @@
         "offer_type": "sale",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 20
       },
       {
@@ -1195,6 +1206,7 @@
         "offer_type": "rent",
         "bedrooms": 2,
         "price_eur": 600,
+        "price_on_request": false,
         "image_count": 32
       },
       {
@@ -1212,6 +1224,7 @@
         "offer_type": "rent",
         "bedrooms": 1,
         "price_eur": 355,
+        "price_on_request": false,
         "image_count": 26
       },
       {
@@ -1229,6 +1242,7 @@
         "offer_type": "rent",
         "bedrooms": 2,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 26
       },
       {
@@ -1246,6 +1260,7 @@
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": 1,
+        "price_on_request": false,
         "image_count": 18
       },
       {
@@ -1263,6 +1278,7 @@
         "offer_type": "sale",
         "bedrooms": 1,
         "price_eur": 53289,
+        "price_on_request": false,
         "image_count": 24
       },
       {
@@ -1280,6 +1296,7 @@
         "offer_type": "rent",
         "bedrooms": 1,
         "price_eur": 350,
+        "price_on_request": false,
         "image_count": 35
       },
       {
@@ -1297,6 +1314,7 @@
         "offer_type": "rent",
         "bedrooms": 1,
         "price_eur": 400,
+        "price_on_request": false,
         "image_count": 26
       },
       {
@@ -1314,6 +1332,7 @@
         "offer_type": "sale",
         "bedrooms": 1,
         "price_eur": 130000,
+        "price_on_request": false,
         "image_count": 34
       },
       {
@@ -1331,6 +1350,7 @@
         "offer_type": "rent",
         "bedrooms": null,
         "price_eur": null,
+        "price_on_request": true,
         "image_count": 38
       },
       {
@@ -1348,6 +1368,7 @@
         "offer_type": "sale",
         "bedrooms": null,
         "price_eur": 950000,
+        "price_on_request": false,
         "image_count": 19
       }
     ]

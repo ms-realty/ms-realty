@@ -22,7 +22,8 @@
     "location",
     "property_type",
     "offer_type",
-    "bedrooms"
+    "bedrooms",
+    "price_on_request"
   ],
   "sortableAttributes": [
     "image_count",

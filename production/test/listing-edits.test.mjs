@@ -13,7 +13,7 @@ test("listing edits persist and stale dependent translations", () => {
     {
       listingId: "MS-CRAWL-0001",
       editor: "editor_bg",
-      patch: { description: " Updated approved source description. ", price_eur: "123000", bedrooms: "2" },
+      patch: { description: " Updated approved source description. ", price_eur: "123000", bedrooms: "2", price_on_request: "on" },
     },
     [],
     "2026-07-04T00:03:00Z",
@@ -26,6 +26,7 @@ test("listing edits persist and stale dependent translations", () => {
   assert.equal(rows[0].patch.description, "Updated approved source description.");
   assert.equal(rows[0].patch.price_eur, 123000);
   assert.equal(rows[0].patch.bedrooms, 2);
+  assert.equal(rows[0].patch.price_on_request, true);
   assert.equal(result.staleTranslations.some((translation) => translation.locale === "el" && translation.status === "stale"), true);
   assert.equal(result.staleTranslations.every((translation) => translation.public_indexable === false), true);
   assert.equal(assertListingEdits(rows), true);
@@ -36,7 +37,7 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
   const updated = applyListingEdits(seed, [
     {
       listing_id: "MS-CRAWL-0001",
-      patch: { description: "Reviewed source description.", price_eur: 123000, bedrooms: 2 },
+      patch: { description: "Reviewed source description.", price_eur: 123000, bedrooms: 2, price_on_request: true },
       media_reviewer: "media_editor",
     },
   ]);
@@ -47,6 +48,7 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
   assert.equal(record.facts.description, "Reviewed source description.");
   assert.equal(record.facts.price_eur, 123000);
   assert.equal(record.facts.bedrooms, 2);
+  assert.equal(record.facts.price_on_request, true);
   assert.equal(record.media_workflow.review_gated_assets, 0);
   assert.equal(record.media_workflow.media_reviewer, "media_editor");
 });

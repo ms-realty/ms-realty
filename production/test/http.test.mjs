@@ -615,7 +615,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     method: "POST",
     url: "/api/admin/listing-quality/import",
     headers: { "content-type": "text/csv" },
-    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0001,123000,2,Sandanski,Reviewed source description,editor_bg,media_editor,Reviewed\n",
+    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0041,,2,Sandanski,Reviewed source description,editor_bg,media_editor,Reviewed\n",
   });
   const qualityImported = await dispatchHttp(app, {
     method: "POST",
@@ -624,7 +624,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
       authorization: "Bearer local-admin-smoke",
       "content-type": "text/csv",
     },
-    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0001,123000,2,Sandanski,Reviewed source description,editor_bg,media_editor,Reviewed\n",
+    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0041,,2,Sandanski,Reviewed source description,editor_bg,media_editor,Reviewed\n",
   });
   const launchChecklistUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/launch-input-checklist",
@@ -701,7 +701,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.body.edited, 1);
   assert.equal(qualityImported.body.mediaReviewRows, 0);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
-  assert.equal(readListingEdits(listingEditLedgerPath)[0].patch.price_eur, 123000);
+  assert.equal(readListingEdits(listingEditLedgerPath)[0].patch.bedrooms, 2);
   assert.equal(readListingEdits(listingEditLedgerPath)[0].media_reviewer, "media_editor");
   assert.equal(launchChecklistUnauthorized.status, 401);
   assert.equal(launchChecklist.status, 200);
@@ -738,7 +738,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
   assert.equal(review.body.listingQuality.generated_at, "2026-07-05T00:09:00Z");
   assert.equal(review.body.listingQuality.summary.listings, 165);
-  assert.ok(review.body.listingQuality.summary.issue_counts.missing_price > 0);
+  assert.equal(Object.hasOwn(review.body.listingQuality.summary.issue_counts, "missing_price"), true);
+  assert.ok(review.body.listingQuality.summary.issue_counts.missing_bedrooms > 0);
   assert.equal(Object.hasOwn(review.body.listingQuality.summary.issue_counts, "missing_alt_text"), true);
   assert.ok(review.body.listingQuality.rows.every((row) => Number.isInteger(row.missing_alt_text_assets)));
   assert.ok(review.body.listingQuality.rows.some((row) => row.editor_path.includes("/admin/listings/edit?listingId=")));

@@ -5,8 +5,10 @@
     "failing_entries": 0,
     "entries_with_offer": 137,
     "warnings": {
-      "missing_price": 30,
-      "missing_bedrooms": 4
+      "missing_location": 0,
+      "missing_price": 0,
+      "missing_bedrooms": 4,
+      "media_review_pending": 0
     },
     "by_locale": {
       "bg": 113,
@@ -25,9 +27,7 @@
       "image_count": 18,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/el/akinita/MS-CRAWL-0001",
@@ -38,9 +38,7 @@
       "image_count": 18,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/he/properties/MS-CRAWL-0001",
@@ -51,9 +49,7 @@
       "image_count": 18,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0002",
@@ -64,9 +60,7 @@
       "image_count": 3,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0003",
@@ -99,9 +93,7 @@
       "image_count": 9,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0006",
@@ -167,9 +159,7 @@
       "image_count": 21,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0012",
@@ -213,9 +203,7 @@
       "image_count": 22,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0016",
@@ -457,9 +445,7 @@
       "image_count": 11,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0038",
@@ -481,9 +467,7 @@
       "image_count": 3,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0040",
@@ -630,9 +614,7 @@
       "image_count": 13,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0053",
@@ -643,9 +625,7 @@
       "image_count": 5,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0054",
@@ -667,9 +647,7 @@
       "image_count": 7,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0056",
@@ -735,9 +713,7 @@
       "image_count": 17,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0062",
@@ -759,9 +735,7 @@
       "image_count": 6,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0064",
@@ -972,9 +946,7 @@
       "image_count": 1,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0083",
@@ -1018,9 +990,7 @@
       "image_count": 12,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0087",
@@ -1053,9 +1023,7 @@
       "image_count": 17,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0090",
@@ -1077,9 +1045,7 @@
       "image_count": 13,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0092",
@@ -1134,9 +1100,7 @@
       "image_count": 11,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0097",
@@ -1180,9 +1144,7 @@
       "image_count": 11,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0101",
@@ -1237,9 +1199,7 @@
       "image_count": 30,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0106",
@@ -1283,9 +1243,7 @@
       "image_count": 18,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0110",
@@ -1296,9 +1254,7 @@
       "image_count": 12,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0111",
@@ -1342,9 +1298,7 @@
       "image_count": 15,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0115",
@@ -1399,9 +1353,7 @@
       "image_count": 24,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0120",
@@ -1456,9 +1408,7 @@
       "image_count": 26,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0125",
@@ -1568,9 +1518,7 @@
       "image_count": 12,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0135",
@@ -1603,9 +1551,7 @@
       "image_count": 6,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0138",
@@ -1638,9 +1584,7 @@
       "image_count": 30,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0141",
@@ -1873,9 +1817,7 @@
       "image_count": 9,
       "has_offer": false,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0162",

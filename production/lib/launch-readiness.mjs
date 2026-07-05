@@ -25,7 +25,9 @@ function blockersFrom(gates) {
 }
 
 function warningsFrom(structuredData) {
-  return Object.entries(structuredData.summary.warnings || {}).map(([id, count]) => ({ id, count }));
+  return Object.entries(structuredData.summary.warnings || {})
+    .filter(([, count]) => count > 0)
+    .map(([id, count]) => ({ id, count }));
 }
 
 export function buildLaunchReadinessReport({

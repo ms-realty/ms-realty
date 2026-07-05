@@ -100,7 +100,17 @@ function publicResponse(request, url, rendered) {
 }
 
 const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min"];
-const LISTING_EDIT_FIELDS = ["title", "h1", "description", "location", "property_type", "offer_type", "bedrooms", "price_eur"];
+const LISTING_EDIT_FIELDS = [
+  "title",
+  "h1",
+  "description",
+  "location",
+  "property_type",
+  "offer_type",
+  "bedrooms",
+  "price_eur",
+  "price_on_request",
+];
 const LOCAL_ADMIN_TOKEN = "local-admin-smoke";
 
 function adminBearerToken() {

@@ -44,7 +44,6 @@ Blockers: external_seo_exports
 - Review columns: `review_status`, `required_editor_fields`, `price_eur`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
 - Admin import endpoint: `POST /api/admin/listing-quality/import`
 - Admin editor endpoint: `POST /api/admin/listings/edit`
-- missing_price: 30
 - missing_bedrooms: 4
 
 ## Validate After Inputs

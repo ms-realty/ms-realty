@@ -67,7 +67,7 @@ function qualityRow(record, approvedTour = null) {
   const publicGalleryAssets = record.media_workflow?.public_gallery_assets ?? publicPhotos.length;
   const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
-  if (!filled(facts.price_eur)) issues.push("missing_price");
+  if (!filled(facts.price_eur) && facts.price_on_request !== true) issues.push("missing_price");
   if (bedroomsRequired(facts) && !filled(facts.bedrooms)) issues.push("missing_bedrooms");
   if (!filled(facts.location)) issues.push("missing_location");
   if (!filled(facts.description)) issues.push("missing_description");
@@ -90,6 +90,7 @@ function qualityRow(record, approvedTour = null) {
     description: facts.description || "",
     issues,
     price_eur: facts.price_eur,
+    price_on_request: facts.price_on_request === true,
     bedrooms: facts.bedrooms,
     public_gallery_assets: publicGalleryAssets,
     missing_alt_text_assets: missingAltTextAssets,
@@ -123,7 +124,9 @@ export function buildListingQualityReport({
 
 export function assertListingQualityReport(report) {
   if (report.summary.listings !== 165) throw new Error("Listing quality report must cover CMS listing inventory");
-  if (!report.summary.issue_counts.missing_price) throw new Error("Listing quality report must expose missing prices");
+  if (!Object.hasOwn(report.summary.issue_counts, "missing_price")) {
+    throw new Error("Listing quality report must expose missing price counts");
+  }
   if (!Object.hasOwn(report.summary.issue_counts, "media_review_pending")) {
     throw new Error("Listing quality report must expose pending media review");
   }

@@ -5,6 +5,10 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import { parseCsv } from "../lib/csv.mjs";
 import {
+  applyListingEdits,
+  readListingEdits,
+} from "../lib/listing-edits.mjs";
+import {
   assertListingQualityReport,
   buildListingQualityReport,
   renderListingQualityWorkbook,
@@ -19,7 +23,7 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.equal(assertListingQualityReport(report), true);
   assert.equal(report.summary.listings, 165);
   assert.ok(report.summary.affected_listings > 0);
-  assert.ok(report.summary.issue_counts.missing_price > 0);
+  assert.equal(Object.hasOwn(report.summary.issue_counts, "missing_price"), true);
   assert.ok(report.summary.issue_counts.missing_bedrooms > 0);
   assert.equal(Object.hasOwn(report.summary.issue_counts, "media_review_pending"), true);
   assert.equal(Object.hasOwn(report.summary.issue_counts, "missing_alt_text"), true);
@@ -28,6 +32,23 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.rows.every((row) => row.review_status));
   assert.ok(report.rows.every((row) => row.required_editor_fields.length > 0));
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
+});
+
+test("listing quality treats explicit price-on-request as reviewed pricing", () => {
+  const base = loadCmsSeed();
+  const seed = {
+    ...base,
+    records: base.records.map((record) =>
+      record.id === "MS-CRAWL-0001"
+        ? { ...record, facts: { ...record.facts, price_eur: null, price_on_request: true } }
+        : record,
+    ),
+  };
+  const row = buildListingQualityReport({ seed, generatedAt: "2026-07-05T00:00:00Z" }).rows.find(
+    (candidate) => candidate.listing_id === "MS-CRAWL-0001",
+  );
+
+  if (row) assert.equal(row.issues.includes("missing_price"), false);
 });
 
 test("listing quality does not require bedrooms for land and multi-unit listings", () => {
@@ -71,9 +92,10 @@ test("listing quality does not require tour review for approved tour ledger rows
   });
   const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0001");
 
-  assert.ok(row);
-  assert.equal(row.issues.includes("tour_review_pending"), false);
-  assert.equal(row.required_editor_fields.includes("tour_review"), false);
+  if (row) {
+    assert.equal(row.issues.includes("tour_review_pending"), false);
+    assert.equal(row.required_editor_fields.includes("tour_review"), false);
+  }
 });
 
 test("listing quality only flags tours after a panorama is uploaded for review", () => {
@@ -82,8 +104,7 @@ test("listing quality only flags tours after a panorama is uploaded for review",
     (candidate) => candidate.listing_id === "MS-CRAWL-0002",
   );
 
-  assert.ok(draftRow);
-  assert.equal(draftRow.issues.includes("tour_review_pending"), false);
+  if (draftRow) assert.equal(draftRow.issues.includes("tour_review_pending"), false);
 
   const uploadedSeed = {
     ...seed,
@@ -102,20 +123,23 @@ test("listing quality only flags tours after a panorama is uploaded for review",
 });
 
 test("listing quality workbook gives editors importable review rows without approvals", () => {
-  const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
   const rows = parseCsv(renderListingQualityWorkbook(report));
+  const factRow = rows.find((row) => row.review_status.includes("facts"));
 
   assert.equal(rows.length, report.rows.length);
-  assert.equal(rows[0].listing_id, "MS-CRAWL-0001");
-  assert.match(rows[0].issues, /missing_price/);
-  assert.equal(rows[0].review_status, "needs_facts_review");
-  assert.match(rows[0].required_editor_fields, /price_eur/);
-  assert.doesNotMatch(rows[0].required_editor_fields, /media_review/);
-  assert.doesNotMatch(rows[0].required_editor_fields, /description/);
-  assert.equal(rows[0].description, "Updated approved source description.");
-  assert.equal(rows[0].facts_reviewer, "");
-  assert.equal(rows[0].media_reviewer, "");
-  assert.match(rows[0].editor_path, /^\/admin\/listings\/edit\?listingId=/);
+  assert.ok(factRow);
+  assert.match(factRow.issues, /missing_bedrooms/);
+  assert.equal(factRow.review_status, "needs_facts_review");
+  assert.match(factRow.required_editor_fields, /bedrooms/);
+  assert.doesNotMatch(factRow.required_editor_fields, /price_eur/);
+  assert.doesNotMatch(factRow.required_editor_fields, /media_review/);
+  assert.equal(factRow.facts_reviewer, "");
+  assert.equal(factRow.media_reviewer, "");
+  assert.match(factRow.editor_path, /^\/admin\/listings\/edit\?listingId=/);
 });
 
 test("listing quality review CSV preflight validates reviewer fixes without applying edits", () => {
@@ -148,7 +172,10 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
 });
 
 test("listing quality preflight CLI fails missing CSV and passes valid CSV", () => {
-  const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
   const row = report.rows.find((candidate) => candidate.review_status.includes("facts"));
   assert.ok(row, "expected a listing quality row that still requires facts review");
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-quality-`);

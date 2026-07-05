@@ -5,8 +5,19 @@ import { contentHash, markStaleWhenSourceChanges } from "./translations.mjs";
 
 export const DEFAULT_LISTING_EDIT_LEDGER_PATH = fromRoot("production", "data", "listing-edits.jsonl");
 
-const EDITABLE_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type", "bedrooms", "price_eur"]);
+const EDITABLE_FACT_FIELDS = new Set([
+  "title",
+  "h1",
+  "description",
+  "location",
+  "property_type",
+  "offer_type",
+  "bedrooms",
+  "price_eur",
+  "price_on_request",
+]);
 const TEXT_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type"]);
+const BOOLEAN_FACT_FIELDS = new Set(["price_on_request"]);
 
 export function resetListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -72,6 +83,7 @@ function normalizePatch(patch = {}) {
 
 function normalizePatchValue(field, value) {
   if (TEXT_FACT_FIELDS.has(field)) return typeof value === "string" ? value.trim() : value;
+  if (BOOLEAN_FACT_FIELDS.has(field)) return value === true || value === "true" || value === "on" || value === "1";
   if (value === "" || value === null) return "";
   const number = Number(value);
   if (!Number.isFinite(number)) throw new Error(`${field} must be numeric`);

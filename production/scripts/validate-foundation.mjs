@@ -702,8 +702,8 @@ const structuredData = JSON.parse(fs.readFileSync(fromRoot("production", "data",
 if (structuredData.summary.listing_entries !== 167 || structuredData.summary.failing_entries !== 0) {
   throw new Error("Structured data report must cover all indexable listing entries without schema failures");
 }
-if (!structuredData.summary.warnings.missing_price) {
-  throw new Error("Structured data report must preserve listing price gaps as launch warnings");
+if (!Object.hasOwn(structuredData.summary.warnings, "missing_price")) {
+  throw new Error("Structured data report must preserve the missing-price warning metric");
 }
 
 const listingQuality = JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-quality-report.json"), "utf8"));
@@ -711,7 +711,7 @@ if (listingQuality.summary.listings !== 165 || listingQuality.summary.affected_l
   throw new Error("Listing quality report must cover source listings and expose actionable content gaps");
 }
 if (
-  !listingQuality.summary.issue_counts.missing_price ||
+  !Object.hasOwn(listingQuality.summary.issue_counts, "missing_price") ||
   !Object.hasOwn(listingQuality.summary.issue_counts, "media_review_pending") ||
   !Object.hasOwn(listingQuality.summary.issue_counts, "missing_alt_text") ||
   !Object.hasOwn(listingQuality.summary.issue_counts, "tour_review_pending")

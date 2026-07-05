@@ -8,6 +8,7 @@ import { applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { bedroomsRequired } from "./listing-facts.mjs";
 
 export const DEFAULT_STRUCTURED_DATA_REPORT = fromRoot("production", "data", "structured-data-report.json");
+const KNOWN_WARNINGS = ["missing_location", "missing_price", "missing_bedrooms", "media_review_pending"];
 
 function filled(value) {
   return value !== null && value !== undefined && value !== "";
@@ -22,7 +23,7 @@ function reportRow(registry, seed, entry) {
   const issues = schemaIssues(page.schema);
   const warnings = [];
   if (!filled(page.body?.facts?.location)) warnings.push("missing_location");
-  if (!filled(page.body?.facts?.price_eur)) warnings.push("missing_price");
+  if (!filled(page.body?.facts?.price_eur) && page.body?.facts?.price_on_request !== true) warnings.push("missing_price");
   if (bedroomsRequired(page.body?.facts) && !filled(page.body?.facts?.bedrooms)) warnings.push("missing_bedrooms");
   if (page.body?.media?.review?.review_gated_assets) warnings.push("media_review_pending");
 
@@ -56,7 +57,7 @@ export function buildStructuredDataReport({
     warnings: rows.reduce((counts, row) => {
       for (const warning of row.warnings) counts[warning] = (counts[warning] || 0) + 1;
       return counts;
-    }, {}),
+    }, Object.fromEntries(KNOWN_WARNINGS.map((warning) => [warning, 0]))),
     by_locale: rows.reduce((counts, row) => ({ ...counts, [row.locale]: (counts[row.locale] || 0) + 1 }), {}),
   };
   return { summary, rows };
