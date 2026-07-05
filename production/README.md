@@ -107,6 +107,8 @@ Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.
 Set `MS_REALTY_ADMIN_TOKEN` before running the production server.
 Set `MS_REALTY_MAX_BODY_BYTES` to tune the Node adapter request-body limit
 for large admin CSV imports. The default is 10 MiB.
+Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers
+need to live outside `production/data/`.
 
 Generated production data:
 

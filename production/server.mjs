@@ -1,9 +1,19 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
+import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
+import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
+import { DEFAULT_REPLY_OUTBOX_PATH } from "./lib/lead-replies.mjs";
+import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
 import { fromRoot } from "./lib/paths.mjs";
+import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
+import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
+import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./lib/tours.mjs";
+import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./lib/translation-ledger.mjs";
+import { DEFAULT_VIEWING_LEDGER_PATH } from "./lib/viewing-ledger.mjs";
 
 function portFrom(value) {
   const raw = value === undefined || value === "" ? "3000" : String(value);
@@ -33,6 +43,16 @@ export function productionServerConfig(env = process.env) {
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
+    leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
+    languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
+    translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
+    listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
+    sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+    tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH || fromRoot("locales", "registry.json"),
   };
 }
@@ -40,6 +60,16 @@ export function productionServerConfig(env = process.env) {
 export function createProductionHttpApp(config = productionServerConfig()) {
   return createHttpApp({
     eventLedgerPath: config.eventLedgerPath,
+    leadLedgerPath: config.leadLedgerPath,
+    replyOutboxPath: config.replyOutboxPath,
+    languageRequestPath: config.languageRequestPath,
+    translationLedgerPath: config.translationLedgerPath,
+    listingEditLedgerPath: config.listingEditLedgerPath,
+    viewingLedgerPath: config.viewingLedgerPath,
+    savedSearchLedgerPath: config.savedSearchLedgerPath,
+    sellerPipelinePath: config.sellerPipelinePath,
+    brokerContactLedgerPath: config.brokerContactLedgerPath,
+    tourApprovalLedgerPath: config.tourApprovalLedgerPath,
     localeRegistryPath: config.localeRegistryPath,
   });
 }
