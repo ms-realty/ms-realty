@@ -4,6 +4,7 @@ import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { loadCmsSeed, renderRuntimePath } from "./runtime.mjs";
 import { schemaIssues } from "./structured-data.mjs";
+import { applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 
 export const DEFAULT_STRUCTURED_DATA_REPORT = fromRoot("production", "data", "structured-data-report.json");
 
@@ -40,10 +41,12 @@ function reportRow(registry, seed, entry) {
 export function buildStructuredDataReport({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
+  listingEdits = readListingEdits(),
   sitemap = loadLocalizedSitemap(),
   generatedAt = new Date().toISOString(),
 } = {}) {
-  const rows = sitemap.entries.filter((entry) => entry.type === "listing").map((entry) => reportRow(registry, seed, entry));
+  const reviewedSeed = applyListingEdits(seed, listingEdits);
+  const rows = sitemap.entries.filter((entry) => entry.type === "listing").map((entry) => reportRow(registry, reviewedSeed, entry));
   const summary = {
     generated_at: generatedAt,
     listing_entries: rows.length,

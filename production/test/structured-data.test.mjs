@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertStructuredDataReport } from "../lib/structured-data-report.mjs";
+import { assertStructuredDataReport, buildStructuredDataReport } from "../lib/structured-data-report.mjs";
 import { assertListingSchema, buildListingSchema } from "../lib/structured-data.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -24,6 +24,17 @@ test("listing schema keeps launch-critical listing facts", () => {
   assert.equal(assertListingSchema(schema), true);
   assert.equal(schema.offers.priceCurrency, "EUR");
   assert.equal(schema.image.length, 1);
+});
+
+test("structured data warnings use reviewed listing edits", () => {
+  const base = buildStructuredDataReport({ listingEdits: [], generatedAt: "2026-07-05T00:00:00Z" });
+  const reviewed = buildStructuredDataReport({
+    listingEdits: [{ listing_id: "MS-CRAWL-0001", patch: { price_eur: 123000, bedrooms: 2 } }],
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+
+  assert.equal(reviewed.summary.warnings.missing_price, base.summary.warnings.missing_price - 3);
+  assert.equal(reviewed.summary.warnings.missing_bedrooms, base.summary.warnings.missing_bedrooms - 3);
 });
 
 test("generated structured data report covers indexable listing sitemap entries", () => {
