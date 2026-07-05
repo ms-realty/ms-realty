@@ -35,6 +35,8 @@ Blockers: redirect_reviews, external_seo_exports
 
 - Workbook: `production/data/listing-quality-workbook.csv`
 - Scope: 165 source listing rows; warning counts below include indexable localized listing entries.
+- Review columns: `review_status`, `required_editor_fields`, `facts_reviewer`, `media_reviewer`, `review_notes`
+- Admin editor endpoint: `POST /api/admin/listings/edit`
 - missing_price: 167
 - missing_bedrooms: 167
 - media_review_pending: 167

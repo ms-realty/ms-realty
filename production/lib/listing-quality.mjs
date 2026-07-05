@@ -6,6 +6,19 @@ import { fromRoot } from "./paths.mjs";
 export const DEFAULT_LISTING_QUALITY_REPORT = fromRoot("production", "data", "listing-quality-report.json");
 export const DEFAULT_LISTING_QUALITY_WORKBOOK = fromRoot("production", "data", "listing-quality-workbook.csv");
 
+const FACT_FIELDS_BY_ISSUE = {
+  missing_price: "price_eur",
+  missing_bedrooms: "bedrooms",
+  missing_location: "location",
+  missing_description: "description",
+};
+const MEDIA_FIELDS_BY_ISSUE = {
+  media_review_pending: "media_review",
+  missing_alt_text: "media_alt_text",
+  thin_public_gallery: "public_gallery",
+  tour_review_pending: "tour_review",
+};
+
 function filled(value) {
   return value !== null && value !== undefined && value !== "";
 }
@@ -30,6 +43,18 @@ function csvCell(value) {
   return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
 }
 
+function reviewStatus(issues) {
+  const needsFacts = issues.some((issue) => FACT_FIELDS_BY_ISSUE[issue]);
+  const needsMedia = issues.some((issue) => MEDIA_FIELDS_BY_ISSUE[issue]);
+  if (needsFacts && needsMedia) return "needs_facts_and_media_review";
+  if (needsFacts) return "needs_facts_review";
+  return "needs_media_review";
+}
+
+function requiredEditorFields(issues) {
+  return issues.map((issue) => FACT_FIELDS_BY_ISSUE[issue] || MEDIA_FIELDS_BY_ISSUE[issue]).filter(Boolean);
+}
+
 function qualityRow(record) {
   const facts = record.facts || {};
   const publicPhotos = (record.media || []).filter((media) => media.kind === "photo" && media.is_public);
@@ -51,6 +76,8 @@ function qualityRow(record) {
     source_domain: record.source_domain,
     target_path: record.routing?.target_path || null,
     editor_path: `/admin/listings/edit?listingId=${encodeURIComponent(record.id)}`,
+    review_status: reviewStatus(issues),
+    required_editor_fields: requiredEditorFields(issues),
     title: facts.h1 || facts.title || record.id,
     location: facts.location || "",
     issues,
@@ -96,6 +123,8 @@ export function renderListingQualityWorkbook(report) {
     "source_locale",
     "source_domain",
     "issues",
+    "review_status",
+    "required_editor_fields",
     "title",
     "location",
     "price_eur",

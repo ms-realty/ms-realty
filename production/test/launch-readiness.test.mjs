@@ -130,5 +130,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=backlinks`: `target_url,source_url,referring_domain/);
   assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
+  assert.match(markdown, /review_status/);
+  assert.match(markdown, /required_editor_fields/);
+  assert.match(markdown, /POST \/api\/admin\/listings\/edit/);
   assert.match(markdown, /npm run launch:inputs/);
 });

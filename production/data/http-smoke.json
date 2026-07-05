@@ -4030,6 +4030,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0001",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0001",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "location": "Sandanski",
             "issues": [
@@ -4052,6 +4061,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0002",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Апартаменти в парка на Сандански. Затворен комплекс",
             "location": "Sandanski",
             "issues": [
@@ -4074,6 +4092,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0003",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0003",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Тристаен апартамент под наем в Сандански + паркомясто",
             "location": "Sandanski",
             "issues": [
@@ -4096,6 +4123,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0004",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4118,6 +4154,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0005",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0005",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Апартамент под наем в гр.Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4140,6 +4185,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0006",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "media_review",
+              "media_alt_text",
+              "public_gallery",
+              "tour_review"
+            ],
             "title": "Дава под наем промишлена сграда в Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4162,6 +4216,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0007",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0007",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Продава двустаен апартамент в гр.Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4184,6 +4247,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0008",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0008",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Двустаен апартамент в центъра на Сандански – наем",
             "location": "Sandanski",
             "issues": [
@@ -4206,6 +4278,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0009",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0009",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Двустаен апартамент под наем в парка на Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4228,6 +4309,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0010",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0010",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Двустаен апартамент в идеалния център на гр. Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4250,6 +4340,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0011",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0011",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4272,6 +4371,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0012",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0012",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Инвестиционен проект в Сандански – хотел ресторант",
             "location": "Sandanski",
             "issues": [
@@ -4294,6 +4402,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0013",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0013",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "location",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
             "location": "",
             "issues": [
@@ -4316,6 +4433,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0014",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0014",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Наем – Двустаен апартамент в гр.Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4338,6 +4464,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0015",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0015",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Нова къща под наем в с.Микрево",
             "location": "Sandanski",
             "issues": [
@@ -4360,6 +4495,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0016",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0016",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Новостроящи се къщи в с.Джигурово",
             "location": "Sandanski",
             "issues": [
@@ -4382,6 +4526,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0017",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0017",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Нов двустаен апартамент в гр.Сандански – продажба",
             "location": "Sandanski",
             "issues": [
@@ -4404,6 +4557,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0018",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0018",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Оборудвана оранжерия в гр.Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4426,6 +4588,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0019",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0019",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Офиси/магазини под наем в гр.Сандански",
             "location": "Sandanski",
             "issues": [
@@ -4448,6 +4619,15 @@
             "source_domain": "makler-realty.com",
             "target_path": "/bg/imoti/MS-CRAWL-0020",
             "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0020",
+            "review_status": "needs_facts_and_media_review",
+            "required_editor_fields": [
+              "price_eur",
+              "bedrooms",
+              "description",
+              "media_review",
+              "media_alt_text",
+              "tour_review"
+            ],
             "title": "Офис под наем в центъра на гр.Сандански",
             "location": "Sandanski",
             "issues": [

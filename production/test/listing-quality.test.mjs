@@ -18,6 +18,8 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.summary.issue_counts.missing_alt_text > 0);
   assert.ok(report.summary.issue_counts.thin_public_gallery > 0);
   assert.ok(report.rows.some((row) => row.missing_alt_text_assets > 0));
+  assert.ok(report.rows.every((row) => row.review_status));
+  assert.ok(report.rows.every((row) => row.required_editor_fields.length > 0));
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });
 
@@ -28,6 +30,9 @@ test("listing quality workbook gives editors importable review rows without appr
   assert.equal(rows.length, report.rows.length);
   assert.equal(rows[0].listing_id, "MS-CRAWL-0001");
   assert.match(rows[0].issues, /missing_price/);
+  assert.equal(rows[0].review_status, "needs_facts_and_media_review");
+  assert.match(rows[0].required_editor_fields, /price_eur/);
+  assert.match(rows[0].required_editor_fields, /media_review/);
   assert.equal(rows[0].facts_reviewer, "");
   assert.equal(rows[0].media_reviewer, "");
   assert.match(rows[0].editor_path, /^\/admin\/listings\/edit\?listingId=/);
@@ -46,5 +51,7 @@ test("generated listing quality workbook is valid when present", () => {
   if (!fs.existsSync(file)) return;
   const rows = parseCsv(fs.readFileSync(file, "utf8"));
   assert.equal(rows.length, 165);
+  assert.ok(rows.every((row) => row.review_status));
+  assert.ok(rows.every((row) => row.required_editor_fields));
   assert.ok(rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });

@@ -80,6 +80,8 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 
 - Workbook: \`production/data/listing-quality-workbook.csv\`
 - Scope: 165 source listing rows; warning counts below include indexable localized listing entries.
+- Review columns: \`review_status\`, \`required_editor_fields\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`
+- Admin editor endpoint: \`POST /api/admin/listings/edit\`
 ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
 
 ## Validate After Inputs
