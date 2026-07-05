@@ -428,7 +428,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
-  assert.deepEqual(smoke.health.body.blockers, ["redirect_reviews", "external_seo_exports"]);
+  assert.deepEqual(smoke.health.body.blockers, ["external_seo_exports"]);
   assert.equal(smoke.ready.status, 503);
   assert.equal(smoke.ready.body.status, "blocked");
   assert.equal(smoke.health.headers["referrer-policy"], "strict-origin-when-cross-origin");
@@ -928,24 +928,23 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);
   assert.equal(launchUnauthorized.status, 401);
   assert.equal(launch.status, 200);
-  assert.deepEqual(launch.body.blockers, ["redirect_reviews"]);
+  assert.deepEqual(launch.body.blockers, []);
   assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
+  assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(launchExportUnauthorized.status, 401);
   assert.equal(launchExport.status, 201);
   assert.equal(fs.existsSync(launchReadinessOutputPath), true);
-  assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, ["redirect_reviews"]);
+  assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, []);
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {
   const app = createHttpApp();
   const approved = deployableRedirect();
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
-  const unapproved = routeMap.find(
-    (route) => route.url_type === "listing" && route.target_path && route.old_url !== approved.old_url,
-  );
+  const notDeployable = routeMap.find((route) => route.url_type === "taxonomy" && route.old_url);
 
   assert.equal((await dispatchHttp(app, { url: approved.old_url })).status, 301);
-  assert.notEqual((await dispatchHttp(app, { url: unapproved.old_url })).status, 301);
+  assert.notEqual((await dispatchHttp(app, { url: notDeployable.old_url })).status, 301);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

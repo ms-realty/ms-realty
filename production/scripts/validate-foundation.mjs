@@ -88,9 +88,14 @@ if (reviewQueue.summary.byOwner.ru_preservation_editor !== 179) {
 
 const deployableRedirects = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8"));
 const redirectSummary = assertDeployableRedirects(deployableRedirects.redirects);
-if (redirectSummary.total !== 2) throw new Error("Deployable redirect smoke must include exactly two reviewed listings");
-if (redirectSummary.byTargetLocale.bg !== 1 || redirectSummary.byTargetLocale.ru !== 1) {
-  throw new Error("Deployable redirect smoke must include one BG and one RU route");
+if (redirectSummary.total !== routeMap.summary.mappedListings) {
+  throw new Error("Deployable redirect export must include every reviewed mapped listing");
+}
+if (redirectSummary.byTargetLocale.bg !== 113 || redirectSummary.byTargetLocale.ru !== 52) {
+  throw new Error("Deployable redirect export must preserve 113 BG and 52 RU listing routes");
+}
+if (redirectSummary.homepageTargets !== 0 || redirectSummary.duplicateOldUrls !== 0) {
+  throw new Error("Deployable redirect export must not include homepage targets or duplicate old URLs");
 }
 const redirectWorkbook = fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8").trim().split("\n");
 if (redirectWorkbook.length !== 166 || !redirectWorkbook[0].includes("equivalent_content")) {
@@ -104,7 +109,9 @@ const redirectApprovals = fs
   .trim()
   .split("\n")
   .filter(Boolean);
-if (redirectApprovals.length !== 2) throw new Error("Redirect approval ledger must contain two reviewed rows");
+if (redirectApprovals.length !== routeMap.summary.mappedListings) {
+  throw new Error("Redirect approval ledger must contain every reviewed mapped listing");
+}
 
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
 if (
@@ -725,8 +732,11 @@ const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data"
 if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
   throw new Error("Launch readiness report must stay blocked until production blockers are cleared");
 }
-for (const blocker of ["redirect_reviews", "external_seo_exports"]) {
+for (const blocker of ["external_seo_exports"]) {
   if (!launchReadiness.blockers.includes(blocker)) throw new Error(`Launch readiness report must include ${blocker}`);
+}
+if (launchReadiness.blockers.includes("redirect_reviews")) {
+  throw new Error("Launch readiness report should not include redirect_reviews after all listing redirects are approved");
 }
 if (launchReadiness.blockers.includes("production_app_layer")) {
   throw new Error("Launch readiness report should not include production_app_layer after the Node adapter is present");

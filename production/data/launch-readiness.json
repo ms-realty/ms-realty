@@ -3,7 +3,6 @@
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
-    "redirect_reviews",
     "external_seo_exports"
   ],
   "warnings": [
@@ -50,11 +49,11 @@
     },
     {
       "id": "redirect_reviews",
-      "status": "blocked",
-      "message": "Only reviewed same-content redirects with no homepage targets or duplicate old URLs may launch.",
+      "status": "pass",
+      "message": "",
       "evidence": {
         "mapped_listings": 165,
-        "deployable_redirects": 2,
+        "deployable_redirects": 165,
         "homepage_targets": 0,
         "duplicate_old_urls": 0
       }

@@ -14,7 +14,8 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
-  assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports"]);
+  assert.deepEqual(report.blockers, ["external_seo_exports"]);
+  assert.equal(report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.ok(report.rollback_plan.length >= 3);
 });
@@ -130,7 +131,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   });
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /LAUNCH BLOCKED: redirect_reviews, external_seo_exports/);
+  assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports/);
 });
 
 test("launch input checklist names remaining operator-owned blockers", () => {
@@ -144,7 +145,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   });
 
   assert.match(markdown, /Status: blocked/);
-  assert.match(markdown, /Remaining approvals required: 163/);
+  assert.match(markdown, /Remaining approvals required: 0/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
   assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(markdown, /target_listing_id/);

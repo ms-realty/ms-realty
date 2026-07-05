@@ -87,17 +87,18 @@ export async function textFetch(baseUrl, path, options = {}) {
 }
 
 export function assertServerSmoke(smoke) {
+  const expectedBlockers = ["external_seo_exports"];
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||
-    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"])
+    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(expectedBlockers)
   ) {
     throw new Error("Server must expose liveness without hiding launch blockers");
   }
   if (
     smoke.ready?.status !== 503 ||
     smoke.ready.body.status !== "blocked" ||
-    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"])
+    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(expectedBlockers)
   ) {
     throw new Error("Server must fail readiness while launch blockers remain");
   }

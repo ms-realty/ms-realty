@@ -9,7 +9,6 @@
       "status": "ok",
       "launch_ready": false,
       "blockers": [
-        "redirect_reviews",
         "external_seo_exports"
       ]
     }
@@ -22,7 +21,6 @@
       "status": "blocked",
       "launch_ready": false,
       "blockers": [
-        "redirect_reviews",
         "external_seo_exports"
       ]
     }

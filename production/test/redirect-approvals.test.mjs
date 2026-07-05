@@ -182,9 +182,10 @@ test("generated deployable redirect file is valid when present", () => {
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   const summary = summarizeDeployableRedirects(data.redirects);
 
-  assert.equal(data.summary.total, 2);
-  assert.equal(summary.byTargetLocale.bg, 1);
-  assert.equal(summary.byTargetLocale.ru, 1);
+  assert.equal(data.summary.total, 165);
+  assert.equal(summary.byTargetLocale.bg, 113);
+  assert.equal(summary.byTargetLocale.ru, 52);
   assert.equal(summary.homepageTargets, 0);
-  assert.equal(data.redirects.length, 2);
+  assert.equal(summary.duplicateOldUrls, 0);
+  assert.equal(data.redirects.length, 165);
 });

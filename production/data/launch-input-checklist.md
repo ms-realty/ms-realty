@@ -3,14 +3,14 @@
 Generated: 2026-07-05T00:00:00Z
 
 Status: blocked
-Blockers: redirect_reviews, external_seo_exports
+Blockers: external_seo_exports
 
 ## Redirect Reviews
 
 - Workbook: `production/data/redirect-approval-workbook.csv`
 - Review rows: 165
-- Deployable approvals: 2/165
-- Remaining approvals required: 163
+- Deployable approvals: 165/165
+- Remaining approvals required: 0
 - Import path: `migration/reviews/redirect-approvals.csv`
 - Admin import endpoint: `POST /api/admin/redirect-approvals/import`
 - Admin workbook endpoint: `GET /api/admin/redirect-approval-workbook?pending=1`

@@ -960,10 +960,11 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
+  const expectedBlockers = ["external_seo_exports"];
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||
-    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"]) ||
+    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(expectedBlockers) ||
     smoke.health.headers["x-content-type-options"] !== "nosniff" ||
     smoke.health.headers["x-frame-options"] !== "DENY"
   ) {
@@ -972,7 +973,7 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.ready?.status !== 503 ||
     smoke.ready.body.status !== "blocked" ||
-    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"])
+    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(expectedBlockers)
   ) {
     throw new Error("HTTP smoke must fail readiness while launch blockers remain");
   }
