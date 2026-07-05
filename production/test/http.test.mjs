@@ -410,6 +410,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
   assert.deepEqual(smoke.health.body.blockers, ["redirect_reviews", "external_seo_exports"]);
+  assert.equal(smoke.health.headers["referrer-policy"], "strict-origin-when-cross-origin");
+  assert.equal(smoke.homeHtml.headers["x-frame-options"], "DENY");
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);

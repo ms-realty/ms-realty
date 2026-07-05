@@ -38,10 +38,17 @@ import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { buildListingQualityReport, renderListingQualityWorkbook } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 
+const SECURITY_HEADERS = {
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "x-frame-options": "DENY",
+  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+};
+
 function response(status, body, contentType, headers = {}) {
   return {
     status,
-    headers: { "content-type": contentType, ...headers },
+    headers: { ...SECURITY_HEADERS, "content-type": contentType, ...headers },
     body,
   };
 }
@@ -857,7 +864,9 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||
-    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"])
+    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"]) ||
+    smoke.health.headers["x-content-type-options"] !== "nosniff" ||
+    smoke.health.headers["x-frame-options"] !== "DENY"
   ) {
     throw new Error("HTTP smoke must expose liveness without hiding launch blockers");
   }
