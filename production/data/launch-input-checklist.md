@@ -23,7 +23,10 @@ Blockers: redirect_reviews, external_seo_exports
 - `migration/external/seo/yandex-webmaster.csv`: missing_export, 0 matched rows, domains: none
 - `migration/external/seo/backlinks.csv`: missing_export, 0 matched rows, domains: none
 
-- Admin import endpoint: `POST /api/admin/seo-evidence/import`
+- Admin import endpoints:
+- `POST /api/admin/seo-evidence/import?source=search_console`: `url,clicks,impressions,position`
+- `POST /api/admin/seo-evidence/import?source=yandex_webmaster`: `url,indexed,issue`
+- `POST /api/admin/seo-evidence/import?source=backlinks`: `target_url,source_url,referring_domain`
 - Template endpoints: `GET /api/admin/seo-evidence/template?source=search_console`, `?source=yandex_webmaster`, `?source=backlinks`
 - Optional analytics: `migration/external/seo/analytics.csv`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both `makler-realty.com` and `makler-realty.ru`.

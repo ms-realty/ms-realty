@@ -125,7 +125,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/backlinks\.csv`: missing_export/);
-  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import/);
+  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=search_console`: `url,clicks,impressions,position/);
+  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=yandex_webmaster`: `url,indexed,issue/);
+  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=backlinks`: `target_url,source_url,referring_domain/);
   assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /npm run launch:inputs/);

@@ -4,19 +4,34 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_INPUT_CHECKLIST_OUTPUT = fromRoot("production", "data", "launch-input-checklist.md");
 
+const SEO_EXPORTS = {
+  search_console: {
+    filename: "search-console.csv",
+    columns: "url,clicks,impressions,position",
+  },
+  yandex_webmaster: {
+    filename: "yandex-webmaster.csv",
+    columns: "url,indexed,issue",
+  },
+  backlinks: {
+    filename: "backlinks.csv",
+    columns: "target_url,source_url,referring_domain",
+  },
+};
+
 function rowCount(csvText) {
   return parseCsv(csvText).length;
 }
 
 function sourceLine(source, summary) {
   const state = summary.sources[source];
-  const filename = {
-    search_console: "search-console.csv",
-    yandex_webmaster: "yandex-webmaster.csv",
-    backlinks: "backlinks.csv",
-  }[source];
+  const filename = SEO_EXPORTS[source].filename;
   const domains = (state.matched_source_domains || []).join(", ") || "none";
   return `- \`migration/external/seo/${filename}\`: ${state.status}, ${state.matched_rows} matched rows, domains: ${domains}`;
+}
+
+function importLine(source) {
+  return `- \`POST /api/admin/seo-evidence/import?source=${source}\`: \`${SEO_EXPORTS[source].columns}\``;
 }
 
 export function renderLaunchInputChecklist({
@@ -55,7 +70,8 @@ Blockers: ${launchReadiness.blockers.join(", ") || "none"}
 
 ${["search_console", "yandex_webmaster", "backlinks"].map((source) => sourceLine(source, seoEvidence.summary)).join("\n")}
 
-- Admin import endpoint: \`POST /api/admin/seo-evidence/import\`
+- Admin import endpoints:
+${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")}
 - Template endpoints: \`GET /api/admin/seo-evidence/template?source=search_console\`, \`?source=yandex_webmaster\`, \`?source=backlinks\`
 - Optional analytics: \`migration/external/seo/analytics.csv\`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
