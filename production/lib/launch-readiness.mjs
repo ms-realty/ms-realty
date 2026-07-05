@@ -119,12 +119,12 @@ export function buildLaunchReadinessReport({
 
 export function assertLaunchReadinessReport(report) {
   if (!Array.isArray(report.gates) || report.gates.length < 7) throw new Error("Launch readiness report must include core gates");
-  if (report.launch_ready !== false || report.status !== "blocked") {
-    throw new Error("Launch readiness must stay blocked until production blockers are cleared");
+  const gateBlockers = blockersFrom(report.gates);
+  if (JSON.stringify(report.blockers || []) !== JSON.stringify(gateBlockers)) {
+    throw new Error("Launch readiness blockers must match blocked gates");
   }
-  for (const blocker of ["redirect_reviews", "external_seo_exports"]) {
-    if (!report.blockers.includes(blocker)) throw new Error(`Launch readiness must include blocker ${blocker}`);
-  }
+  if (report.launch_ready !== (gateBlockers.length === 0)) throw new Error("Launch readiness flag must match blockers");
+  if (report.status !== (report.launch_ready ? "ready" : "blocked")) throw new Error("Launch readiness status must match blockers");
   if (report.blockers.includes("production_app_layer")) throw new Error("Production app layer should be covered by the Node adapter");
   if (!report.gates.find((item) => item.id === "crawl_inventory" && item.status === "pass")) {
     throw new Error("Launch readiness must prove crawl inventory passed");
