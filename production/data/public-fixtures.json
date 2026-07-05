@@ -223,10 +223,27 @@
       "@type": "RealEstateListing",
       "@id": "/bg/imoti/MS-CRAWL-0001#listing",
       "url": "/bg/imoti/MS-CRAWL-0001",
+      "identifier": "MS-CRAWL-0001",
       "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански",
       "description": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-      "image_count": 35,
-      "areaServed": "Sandanski"
+      "category": "property",
+      "image": [],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "rent"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "source_locale",
+          "value": "bg"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
     },
     "translation": {
       "locale": "bg",
@@ -413,10 +430,27 @@
       "@type": "RealEstateListing",
       "@id": "/el/akinita/MS-CRAWL-0001#listing",
       "url": "/el/akinita/MS-CRAWL-0001",
+      "identifier": "MS-CRAWL-0001",
       "name": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
       "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
-      "image_count": 35,
-      "areaServed": "Sandanski"
+      "category": "property",
+      "image": [],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "rent"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "source_locale",
+          "value": "bg"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
     },
     "translation": {
       "locale": "el",
@@ -603,10 +637,27 @@
       "@type": "RealEstateListing",
       "@id": "/he/properties/MS-CRAWL-0001#listing",
       "url": "/he/properties/MS-CRAWL-0001",
+      "identifier": "MS-CRAWL-0001",
       "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
       "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
-      "image_count": 35,
-      "areaServed": "Sandanski"
+      "category": "property",
+      "image": [],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "rent"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "source_locale",
+          "value": "bg"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
     },
     "translation": {
       "locale": "he",
@@ -776,10 +827,27 @@
       "@type": "RealEstateListing",
       "@id": "/en/properties/MS-CRAWL-0001#listing",
       "url": "/en/properties/MS-CRAWL-0001",
+      "identifier": "MS-CRAWL-0001",
       "name": "MS Realty property MS-CRAWL-0001 in Sandanski",
       "description": "Reviewed MS Realty property facts for Sandanski.",
-      "image_count": 35,
-      "areaServed": "Sandanski"
+      "category": "property",
+      "image": [],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "rent"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "source_locale",
+          "value": "bg"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
     },
     "translation": {
       "locale": "en",

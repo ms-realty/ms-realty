@@ -108,6 +108,9 @@ Implemented now:
 - SEO evidence join contract:
   - crawled URLs join to Search Console, Yandex Webmaster, backlink, optional analytics exports, and privacy event evidence
   - missing external exports are recorded as launch risks in `production/data/seo-evidence.json`
+- Structured-data launch report:
+  - all 167 indexable listing sitemap entries are checked for RealEstateListing JSON-LD readiness
+  - missing source prices are recorded as warnings, not invented schema offers
 - Seller pipeline contract:
   - seller valuation leads create `valuation_requested` pipeline rows
   - callback and appraisal checklist tasks start open

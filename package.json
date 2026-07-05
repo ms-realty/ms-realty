@@ -13,6 +13,7 @@
     "redirects:build": "node production/scripts/build-deployable-redirects.mjs",
     "sitemap:build": "node production/scripts/build-localized-sitemap.mjs",
     "seo:build": "node production/scripts/build-seo-files.mjs",
+    "structured:data": "node production/scripts/build-structured-data-report.mjs",
     "cms:build": "node production/scripts/build-cms-seed.mjs",
     "public:build": "node production/scripts/render-public-fixtures.mjs",
     "admin:build": "node production/scripts/build-admin-fixtures.mjs",
@@ -20,7 +21,7 @@
     "http:build": "node production/scripts/build-http-smoke.mjs",
     "seo:evidence": "node production/scripts/build-seo-evidence.mjs",
     "server:smoke": "node production/scripts/smoke-node-server.mjs",
-    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run seo:evidence && npm run server:smoke && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
+    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run seo:evidence && npm run server:smoke && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
     "check": "npm run test && npm run validate"
   },
   "engines": {

@@ -606,4 +606,12 @@ for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
   }
 }
 
+const structuredData = JSON.parse(fs.readFileSync(fromRoot("production", "data", "structured-data-report.json"), "utf8"));
+if (structuredData.summary.listing_entries !== 167 || structuredData.summary.failing_entries !== 0) {
+  throw new Error("Structured data report must cover all indexable listing entries without schema failures");
+}
+if (!structuredData.summary.warnings.missing_price) {
+  throw new Error("Structured data report must preserve listing price gaps as launch warnings");
+}
+
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

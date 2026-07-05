@@ -141,6 +141,10 @@ Date: 2026-07-04
   - `production/data/sitemap.xml` from approved localized sitemap entries
   - `production/data/robots.txt` pointing at the sitemap
   - HTTP and live server smoke coverage for `/sitemap.xml` and `/robots.txt`
+- Added structured-data launch validation:
+  - listing pages use a shared RealEstateListing JSON-LD builder
+  - `production/data/structured-data-report.json` validates all 167 indexable listing sitemap entries
+  - missing source prices stay visible as launch warnings rather than invented facts
 - Added canonical CMS seed fixture:
   - 165 listing records composed from crawl/search evidence
   - 4,978 listing media rows attached

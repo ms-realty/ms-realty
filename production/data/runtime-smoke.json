@@ -43,10 +43,46 @@
       "@type": "RealEstateListing",
       "@id": "/he/properties/MS-CRAWL-0001#listing",
       "url": "/he/properties/MS-CRAWL-0001",
+      "identifier": "MS-CRAWL-0001",
       "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
       "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
-      "image_count": 35,
-      "areaServed": "Sandanski"
+      "category": "property",
+      "image": [
+        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg"
+      ],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "rent"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "source_locale",
+          "value": "bg"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
     },
     "translation": {
       "locale": "he",
@@ -355,10 +391,43 @@
       "@type": "RealEstateListing",
       "@id": "/ru/properties/MS-CRAWL-0114#listing",
       "url": "/ru/properties/MS-CRAWL-0114",
+      "identifier": "MS-CRAWL-0114",
       "name": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа квартир.",
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
-      "image_count": 33,
-      "areaServed": "Sandanski"
+      "category": "property",
+      "image": [
+        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/06/-e1466494223645.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-1-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-2-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-3-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-4-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-5-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-6-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-7-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-8-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-9-72x72.jpg",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-сандански-парк-отель-пирин-72x72.jpg"
+      ],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "sale"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "source_locale",
+          "value": "ru"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
     },
     "translation": {
       "locale": "ru",

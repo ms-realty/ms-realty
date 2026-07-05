@@ -14,6 +14,7 @@ import {
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
+import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
 
 const ACTION_LABELS = {
@@ -467,16 +468,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       robots: indexable ? "index,follow" : "noindex,follow",
     },
     hreflang,
-    schema: {
-      "@context": "https://schema.org",
-      "@type": "RealEstateListing",
-      "@id": `${path}#listing`,
-      url: path,
-      name: copy.title,
-      description: copy.description,
-      image_count: view.image_count,
-      areaServed: view.location,
-    },
+    schema: buildListingSchema({ path, view, copy, publicMedia }),
     translation: {
       locale: translation?.locale || locale.code,
       status: translation?.status || "missing",
