@@ -114,6 +114,7 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
     leadType: "buyer",
     language: "he",
     listingReference: listing.id,
+    listingContext: { location: listing.location, property_type: listing.property_type },
     contact: { name: "Noa Levi" },
     contact_preference: "whatsapp",
     message: "Interested in the listing.",
@@ -131,6 +132,15 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
   assert.equal(hebrew.original_direction, "rtl");
   assert.equal(hebrew.admin_locale, "en");
   assert.equal(hebrew.contact_preference, "whatsapp");
+  assert.equal(hebrew.broker_assignment.broker_id, "broker_international");
+  assert.equal(hebrew.broker_assignment.method, "rules");
+  assert.deepEqual(hebrew.broker_assignment.criteria, {
+    language: "he",
+    admin_locale: "en",
+    location: listing.location,
+    property_type: listing.property_type,
+    lead_type: "buyer",
+  });
   assert.deepEqual(hebrew.confirmation, {
     status: "ready",
     message_key: "lead_received",
@@ -142,7 +152,32 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
   assert.equal(greek.original_language, "el");
   assert.equal(greek.admin_locale, "en");
   assert.equal(greek.lead.leadType, "seller");
+  assert.equal(greek.broker_assignment.broker_id, "broker_international");
   assert.equal(greek.confirmation.channel, "broker_follow_up");
+
+  const manual = createCrmInboxItem(registry, {
+    id: "lead-bg-manual-test",
+    source: "website_listing_detail",
+    leadType: "buyer",
+    language: "bg",
+    listingReference: listing.id,
+    manualBrokerId: "broker_ru",
+    contact: { name: "Manual Owner" },
+  });
+  assert.equal(manual.broker_assignment.broker_id, "broker_ru");
+  assert.equal(manual.broker_assignment.method, "manual_override");
+  assert.throws(
+    () =>
+      createCrmInboxItem(registry, {
+        id: "lead-bg-bad-manual-test",
+        source: "website_listing_detail",
+        leadType: "buyer",
+        language: "bg",
+        manualBrokerId: "missing_broker",
+        contact: { name: "Manual Owner" },
+      }),
+    /manualBrokerId/,
+  );
 });
 
 test("admin workflow fixture combines CMS translation review and CRM lead intake", () => {
@@ -165,6 +200,7 @@ test("admin workflow fixture combines CMS translation review and CRM lead intake
   assert.equal(fixture.translation_tasks.el_published.status, "published");
   assert.equal(fixture.crm_inbox.buyer_he.original_language, "he");
   assert.equal(fixture.crm_inbox.buyer_he.contact_preference, "whatsapp");
+  assert.equal(fixture.crm_inbox.buyer_he.broker_assignment.broker_id, "broker_international");
   assert.equal(fixture.crm_inbox.buyer_he.confirmation.message_key, "lead_received");
   assert.equal(fixture.crm_inbox.seller_el.lead.leadType, "seller");
 });

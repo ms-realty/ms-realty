@@ -446,8 +446,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.savedSearch.headers["cache-control"], "no-store");
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
+  assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
+  assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
   assert.equal(smoke.lead.headers["cache-control"], "no-store");
   assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
+  assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");

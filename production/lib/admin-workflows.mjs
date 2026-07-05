@@ -1,6 +1,6 @@
 import { adminLocales, getLocale, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage } from "./locales.mjs";
 import { assertHermesActionAllowed, translationPrompt, validateHermesTranslationDraft } from "./hermes.mjs";
-import { createLeadDraft } from "./leads.mjs";
+import { assignLeadBroker, createLeadDraft } from "./leads.mjs";
 import { contentHash } from "./translations.mjs";
 
 const ADMIN_COPY = {
@@ -276,6 +276,11 @@ export function createCrmInboxItem(registry, input) {
     preferred_channel: input.preferred_channel,
     message: input.message,
   });
+  const brokerAssignment = assignLeadBroker(lead, {
+    manualBrokerId: input.manualBrokerId,
+    brokerProfiles: input.brokerProfiles,
+    listingContext: input.listingContext,
+  });
 
   return {
     id: `inbox-${lead.id}`,
@@ -286,6 +291,7 @@ export function createCrmInboxItem(registry, input) {
     requires_translation: lead.language.requiresTranslation,
     contact_preference: lead.contact_preference,
     message_original: lead.message,
+    broker_assignment: brokerAssignment,
     confirmation: {
       status: "ready",
       message_key: "lead_received",
@@ -314,6 +320,7 @@ export function buildAdminWorkflowFixture(registry, listing) {
   const propertyFacts = {
     id: listing.id,
     location: listing.location,
+    property_type: listing.property_type,
     price_eur: listing.price_eur,
     image_count: listing.image_count,
   };
@@ -362,6 +369,7 @@ export function buildAdminWorkflowFixture(registry, listing) {
         leadType: "buyer",
         language: "he",
         listingReference: listing.id,
+        listingContext: { location: listing.location, property_type: listing.property_type },
         contact: { name: "Noa Levi" },
         contact_preference: "whatsapp",
         message: "Interested in this listing.",

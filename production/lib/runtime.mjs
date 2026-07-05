@@ -191,6 +191,9 @@ export function submitRuntimeLead(registry, seed, input) {
   return createCrmInboxItem(registry, {
     ...input,
     source: input.source || "website_listing_detail",
+    listingContext: record
+      ? { location: record.facts.location, property_type: record.facts.property_type, offer_type: record.facts.offer_type }
+      : input.listingContext,
   });
 }
 
@@ -288,8 +291,15 @@ export function assertRuntimeSmoke(smoke) {
   }
   if (smoke.lead_he.contact_preference !== "whatsapp") throw new Error("Runtime lead must preserve contact preference");
   if (
+    smoke.lead_he.broker_assignment?.broker_id !== "broker_international" ||
+    smoke.lead_he.broker_assignment?.criteria?.location !== "Sandanski"
+  ) {
+    throw new Error("Runtime lead must assign broker using language and listing facts");
+  }
+  if (
     smoke.viewingLead_he.lead.source !== "website_viewing_request" ||
     smoke.viewingLead_he.contact_preference !== "phone" ||
+    smoke.viewingLead_he.broker_assignment?.broker_id !== "broker_international" ||
     smoke.viewingLead_he.hermes_reply_draft.broker_approval_required !== true
   ) {
     throw new Error("Runtime viewing request lead must stay review-gated in CRM");
@@ -298,6 +308,7 @@ export function assertRuntimeSmoke(smoke) {
     smoke.contactLead_he.lead.source !== "website_contact_callback" ||
     smoke.contactLead_he.lead.leadType !== "general" ||
     smoke.contactLead_he.contact_preference !== "phone" ||
+    smoke.contactLead_he.broker_assignment?.broker_id !== "broker_international" ||
     smoke.contactLead_he.hermes_reply_draft.broker_approval_required !== true
   ) {
     throw new Error("Runtime contact callback lead must stay review-gated in CRM");

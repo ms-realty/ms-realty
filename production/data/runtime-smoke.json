@@ -1426,6 +1426,18 @@
     "requires_translation": true,
     "contact_preference": "whatsapp",
     "message_original": "Interested in this property.",
+    "broker_assignment": {
+      "status": "assigned",
+      "method": "rules",
+      "broker_id": "broker_international",
+      "criteria": {
+        "language": "he",
+        "admin_locale": "en",
+        "location": "Sandanski",
+        "property_type": "commercial",
+        "lead_type": "buyer"
+      }
+    },
     "confirmation": {
       "status": "ready",
       "message_key": "lead_received",
@@ -1472,6 +1484,18 @@
     "requires_translation": true,
     "contact_preference": "phone",
     "message_original": "I would like to view this property.",
+    "broker_assignment": {
+      "status": "assigned",
+      "method": "rules",
+      "broker_id": "broker_international",
+      "criteria": {
+        "language": "he",
+        "admin_locale": "en",
+        "location": "Sandanski",
+        "property_type": "commercial",
+        "lead_type": "buyer"
+      }
+    },
     "confirmation": {
       "status": "ready",
       "message_key": "lead_received",
@@ -1518,6 +1542,18 @@
     "requires_translation": true,
     "contact_preference": "phone",
     "message_original": "Please call me about buying in Sandanski.",
+    "broker_assignment": {
+      "status": "assigned",
+      "method": "rules",
+      "broker_id": "broker_international",
+      "criteria": {
+        "language": "he",
+        "admin_locale": "en",
+        "location": null,
+        "property_type": null,
+        "lead_type": "general"
+      }
+    },
     "confirmation": {
       "status": "ready",
       "message_key": "lead_received",

@@ -381,7 +381,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
       assert.equal(smoke.location.body.cards.length, 1);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
+      assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
+      assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
       assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
+      assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
       assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
       assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
       assert.equal(smoke.contactLead.body.lead.leadType, "general");

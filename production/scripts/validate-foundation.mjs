@@ -427,9 +427,16 @@ if (httpSmoke.lead.status !== 201 || httpSmoke.lead.body.admin_locale !== "en") 
   throw new Error("HTTP smoke must accept Hebrew lead into EN admin queue");
 }
 if (
+  httpSmoke.lead.body.broker_assignment?.broker_id !== "broker_international" ||
+  httpSmoke.lead.body.broker_assignment?.criteria?.location !== "Sandanski"
+) {
+  throw new Error("HTTP smoke must assign listing leads by language and listing facts");
+}
+if (
   httpSmoke.viewingLead.status !== 201 ||
   httpSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
-  httpSmoke.viewingLead.body.contact_preference !== "phone"
+  httpSmoke.viewingLead.body.contact_preference !== "phone" ||
+  httpSmoke.viewingLead.body.broker_assignment?.broker_id !== "broker_international"
 ) {
   throw new Error("HTTP smoke must accept public viewing request leads");
 }
@@ -533,7 +540,8 @@ if (
 if (
   nodeServerSmoke.viewingLead.status !== 201 ||
   nodeServerSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
-  nodeServerSmoke.viewingLead.body.contact_preference !== "phone"
+  nodeServerSmoke.viewingLead.body.contact_preference !== "phone" ||
+  nodeServerSmoke.viewingLead.body.broker_assignment?.broker_id !== "broker_international"
 ) {
   throw new Error("Node server smoke must accept public viewing request leads");
 }

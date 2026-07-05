@@ -946,7 +946,7 @@
       "target_direction": "rtl",
       "status": "hermes_drafted",
       "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "7a2d2e1e8d4e64ba71b2e041a4b952ba1e1bc48109d40fdd244a937a80b80ac0",
+      "draft_hash": "77c4047057479ed7f67d11d8c6f7698be1a36e57bfd50e00fc75d7f7e3707709",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_he",
       "public_indexable": false,
@@ -960,6 +960,7 @@
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
+            "property_type": "commercial",
             "price_eur": null,
             "image_count": 35
           },
@@ -993,7 +994,7 @@
       "target_direction": "rtl",
       "status": "approved",
       "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "7a2d2e1e8d4e64ba71b2e041a4b952ba1e1bc48109d40fdd244a937a80b80ac0",
+      "draft_hash": "77c4047057479ed7f67d11d8c6f7698be1a36e57bfd50e00fc75d7f7e3707709",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_he",
       "public_indexable": true,
@@ -1007,6 +1008,7 @@
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
+            "property_type": "commercial",
             "price_eur": null,
             "image_count": 35
           },
@@ -1043,7 +1045,7 @@
       "target_direction": "ltr",
       "status": "hermes_drafted",
       "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "f3b9e9917dc169bfe724c4c5f9010e97a27d029c898d391b6ea7df845d2d8526",
+      "draft_hash": "c3dc0e9cf44f613b1a5cdb33c89857fd6c04a3ce250d8fbbc8fc61fcf05b336f",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_el",
       "public_indexable": false,
@@ -1057,6 +1059,7 @@
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
+            "property_type": "commercial",
             "price_eur": null,
             "image_count": 35
           },
@@ -1090,7 +1093,7 @@
       "target_direction": "ltr",
       "status": "published",
       "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "f3b9e9917dc169bfe724c4c5f9010e97a27d029c898d391b6ea7df845d2d8526",
+      "draft_hash": "c3dc0e9cf44f613b1a5cdb33c89857fd6c04a3ce250d8fbbc8fc61fcf05b336f",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_el",
       "public_indexable": true,
@@ -1104,6 +1107,7 @@
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
+            "property_type": "commercial",
             "price_eur": null,
             "image_count": 35
           },
@@ -1162,6 +1166,18 @@
       "requires_translation": true,
       "contact_preference": "whatsapp",
       "message_original": "Interested in this listing.",
+      "broker_assignment": {
+        "status": "assigned",
+        "method": "rules",
+        "broker_id": "broker_international",
+        "criteria": {
+          "language": "he",
+          "admin_locale": "en",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "lead_type": "buyer"
+        }
+      },
       "confirmation": {
         "status": "ready",
         "message_key": "lead_received",
@@ -1208,6 +1224,18 @@
       "requires_translation": true,
       "contact_preference": null,
       "message_original": "I want a valuation for my property.",
+      "broker_assignment": {
+        "status": "assigned",
+        "method": "rules",
+        "broker_id": "broker_international",
+        "criteria": {
+          "language": "el",
+          "admin_locale": "en",
+          "location": null,
+          "property_type": null,
+          "lead_type": "seller"
+        }
+      },
       "confirmation": {
         "status": "ready",
         "message_key": "lead_received",

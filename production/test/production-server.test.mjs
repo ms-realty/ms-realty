@@ -85,6 +85,7 @@ test("production server persists public leads and reviewed admin replies", async
       }),
     });
     assert.equal(lead.status, 201);
+    assert.equal(lead.body.broker_assignment.broker_id, "broker_international");
     assert.equal(readLeadLedger(leadLedgerPath).length, 1);
 
     const reply = await jsonFetch(baseUrl, "/api/admin/replies", {

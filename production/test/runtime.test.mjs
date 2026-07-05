@@ -243,6 +243,9 @@ test("runtime lead intake stores language and keeps Hermes reply review-gated", 
   assert.equal(lead.original_direction, "rtl");
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "whatsapp");
+  assert.equal(lead.broker_assignment.broker_id, "broker_international");
+  assert.equal(lead.broker_assignment.criteria.location, "Sandanski");
+  assert.equal(lead.broker_assignment.criteria.property_type, "commercial");
   assert.equal(lead.hermes_reply_draft.can_send_without_approval, false);
 });
 
@@ -264,6 +267,7 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
   assert.equal(lead.original_language, "he");
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "phone");
+  assert.equal(lead.broker_assignment.broker_id, "broker_international");
   assert.equal(lead.hermes_reply_draft.broker_approval_required, true);
 });
 
@@ -283,6 +287,7 @@ test("runtime contact callback lead stays routed through broker-approved CRM flo
   assert.equal(lead.original_language, "he");
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "phone");
+  assert.equal(lead.broker_assignment.broker_id, "broker_international");
   assert.equal(lead.hermes_reply_draft.broker_approval_required, true);
 });
 

@@ -1059,9 +1059,16 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must preserve lead contact preference");
   }
   if (
+    smoke.lead.body.broker_assignment?.broker_id !== "broker_international" ||
+    smoke.lead.body.broker_assignment?.criteria?.location !== "Sandanski"
+  ) {
+    throw new Error("HTTP smoke must assign listing leads by language and listing facts");
+  }
+  if (
     smoke.viewingLead.status !== 201 ||
     smoke.viewingLead.body.lead.source !== "website_viewing_request" ||
     smoke.viewingLead.body.contact_preference !== "phone" ||
+    smoke.viewingLead.body.broker_assignment?.broker_id !== "broker_international" ||
     smoke.viewingLead.body.hermes_reply_draft.broker_approval_required !== true
   ) {
     throw new Error("HTTP smoke must accept public viewing request leads into the gated CRM flow");
