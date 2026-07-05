@@ -199,7 +199,7 @@ function joinPrivacyEvents(events, byKey, byListingReference) {
 }
 
 function summarize(records, sourceSummaries, urlEvidence) {
-  const missing = REQUIRED_EXPORTS.filter((source) => sourceSummaries[source]?.status === "missing_export");
+  const missing = REQUIRED_EXPORTS.filter((source) => sourceSummaries[source]?.status !== "imported");
   const analyticsReady =
     sourceSummaries.privacy_events?.status === "imported" || sourceSummaries.analytics_export?.status === "imported";
   return {
