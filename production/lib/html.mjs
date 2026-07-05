@@ -305,6 +305,58 @@ function renderAdminLeadInbox(page) {
 </main>`;
 }
 
+function renderAdminListingEditor(page) {
+  const facts = page.listing.facts || {};
+  const inputFor = (field) => {
+    const value = facts[field] ?? "";
+    if (field === "description") {
+      return `<textarea name="${escapeHtml(field)}">${escapeHtml(value)}</textarea>`;
+    }
+    return `<input name="${escapeHtml(field)}" value="${escapeHtml(value)}">`;
+  };
+  const fields = page.editableFields
+    .map((field) => `<label>${escapeHtml(field.replaceAll("_", " "))} ${inputFor(field)}</label>`)
+    .join("");
+  const translations = (page.listing.translations || [])
+    .map(
+      (translation) =>
+        `<li data-translation-locale="${escapeHtml(translation.locale)}">${escapeHtml(translation.locale)}: ${escapeHtml(
+          translation.status,
+        )}</li>`,
+    )
+    .join("");
+  const staleTasks = page.translationTasks
+    .filter((task) => task.status === "stale")
+    .map((task) => `<li>${escapeHtml(task.target_locale || task.locale)} stale</li>`)
+    .join("");
+  return `
+<main data-kind="admin-listing-editor" data-listing-id="${escapeHtml(page.listing.id)}" data-admin-locale="${escapeHtml(
+    page.workspace.locale,
+  )}">
+  <h1>Property editor</h1>
+  <p>${escapeHtml(page.listing.source_domain)} ${escapeHtml(page.listing.source_locale)}</p>
+  <form method="post" action="/api/admin/listings/edit" data-editor-form="listing">
+    <input type="hidden" name="listingId" value="${escapeHtml(page.listing.id)}">
+    <label>Editor <input name="editor" required autocomplete="name"></label>
+    ${fields}
+    <button type="submit">Save source edit</button>
+  </form>
+  <section aria-label="Translation state">
+    <h2>Translation state</h2>
+    <ul>${translations}${staleTasks}</ul>
+  </section>
+  <section aria-label="Quality">
+    <h2>Quality</h2>
+    <dl>
+      <dt>CMS status</dt><dd>${escapeHtml(page.listing.cms_status)}</dd>
+      <dt>Schema</dt><dd>${escapeHtml(page.listing.seo?.schema_present ? "present" : "missing")}</dd>
+      <dt>Media assets</dt><dd>${escapeHtml((page.listing.media || []).length)}</dd>
+      <dt>Public tour</dt><dd>${escapeHtml(page.listing.tour?.available ? "available" : "review required")}</dd>
+    </dl>
+  </section>
+</main>`;
+}
+
 function renderBody(page, options = {}) {
   if (page.kind === "home") return renderHome(page);
   if (page.kind === "listing" && options.print) return renderListingPrint(page);
@@ -316,6 +368,7 @@ function renderBody(page, options = {}) {
   if (page.kind === "language_fallback") return renderFallback(page);
   if (page.kind === "admin_migration_review") return renderAdminMigrationReview(page);
   if (page.kind === "admin_lead_inbox") return renderAdminLeadInbox(page);
+  if (page.kind === "admin_listing_editor") return renderAdminListingEditor(page);
   return `<main data-kind="not-found"><h1>Not found</h1></main>`;
 }
 

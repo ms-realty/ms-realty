@@ -307,15 +307,22 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       approvedAt: "2026-07-04T00:02:00Z",
     },
   });
+  smoke.listingEditorHtml = await dispatchHttp(app, {
+    url: "/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   smoke.listingEdit = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/listings/edit",
-    headers: { authorization: "Bearer local-admin-smoke" },
-    body: {
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
       listingId: "MS-CRAWL-0001",
       editor: "editor_bg",
-      patch: { description: "Updated approved source description." },
-    },
+      description: "Updated approved source description.",
+    }).toString(),
   });
   smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
   smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
@@ -380,6 +387,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
+  assert.equal(smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\""), true);
+  assert.equal(smoke.listingEditorHtml.body.includes("data-listing-id=\"MS-CRAWL-0001\""), true);
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);

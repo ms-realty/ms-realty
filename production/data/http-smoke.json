@@ -3520,6 +3520,13 @@
       "published": true
     }
   },
+  "listingEditorHtml": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8"
+    },
+    "body": "<!doctype html>\n<html lang=\"bg\" dir=\"ltr\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>MS Realty property editor</title>\n<meta name=\"description\" content=\"Admin-only listing fact editor with stale translation review state.\">\n<meta name=\"robots\" content=\"noindex,nofollow\">\n<link rel=\"canonical\" href=\"/admin/listings/edit\">\n</head>\n<body>\n\n<main data-kind=\"admin-listing-editor\" data-listing-id=\"MS-CRAWL-0001\" data-admin-locale=\"bg\">\n  <h1>Property editor</h1>\n  <p>makler-realty.com bg</p>\n  <form method=\"post\" action=\"/api/admin/listings/edit\" data-editor-form=\"listing\">\n    <input type=\"hidden\" name=\"listingId\" value=\"MS-CRAWL-0001\">\n    <label>Editor <input name=\"editor\" required autocomplete=\"name\"></label>\n    <label>title <input name=\"title\" value=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\"></label><label>h1 <input name=\"h1\" value=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"></label><label>description <textarea name=\"description\"></textarea></label><label>location <input name=\"location\" value=\"Sandanski\"></label><label>property type <input name=\"property_type\" value=\"property\"></label><label>offer type <input name=\"offer_type\" value=\"rent\"></label><label>bedrooms <input name=\"bedrooms\" value=\"\"></label><label>price eur <input name=\"price_eur\" value=\"\"></label>\n    <button type=\"submit\">Save source edit</button>\n  </form>\n  <section aria-label=\"Translation state\">\n    <h2>Translation state</h2>\n    <ul><li data-translation-locale=\"bg\">bg: published</li><li data-translation-locale=\"el\">el: approved</li><li data-translation-locale=\"he\">he: approved</li></ul>\n  </section>\n  <section aria-label=\"Quality\">\n    <h2>Quality</h2>\n    <dl>\n      <dt>CMS status</dt><dd>source_imported_review_required</dd>\n      <dt>Schema</dt><dd>missing</dd>\n      <dt>Media assets</dt><dd>35</dd>\n      <dt>Public tour</dt><dd>review required</dd>\n    </dl>\n  </section>\n</main>\n</body>\n</html>"
+  },
   "listingEdit": {
     "status": 201,
     "headers": {

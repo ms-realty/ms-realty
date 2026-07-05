@@ -337,6 +337,13 @@ if (httpSmoke.translationDraft.status !== 201 || httpSmoke.translationDraft.body
 if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("HTTP smoke must publish human-approved translation");
 }
+if (
+  httpSmoke.listingEditorHtml.status !== 200 ||
+  !httpSmoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\"") ||
+  !httpSmoke.listingEditorHtml.body.includes("data-editor-form=\"listing\"")
+) {
+  throw new Error("HTTP smoke must serve admin listing editor HTML");
+}
 if (httpSmoke.listingEdit.status !== 201 || httpSmoke.listingEdit.body.edit.stale_translation_count < 1) {
   throw new Error("HTTP smoke must stale dependent translations after listing edit");
 }

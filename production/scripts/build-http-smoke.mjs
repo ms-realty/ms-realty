@@ -290,15 +290,22 @@ smoke.translationPublish = await dispatchHttp(app, {
     approvedAt: "2026-07-04T00:02:00Z",
   },
 });
+smoke.listingEditorHtml = await dispatchHttp(app, {
+  url: "/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001",
+  headers: { authorization: "Bearer local-admin-smoke" },
+});
 smoke.listingEdit = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/listings/edit",
-  headers: { authorization: "Bearer local-admin-smoke" },
-  body: {
+  headers: {
+    authorization: "Bearer local-admin-smoke",
+    "content-type": "application/x-www-form-urlencoded",
+  },
+  body: new URLSearchParams({
     listingId: "MS-CRAWL-0001",
     editor: "editor_bg",
-    patch: { description: "Updated approved source description." },
-  },
+    description: "Updated approved source description.",
+  }).toString(),
 });
 smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
 smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });

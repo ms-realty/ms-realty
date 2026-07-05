@@ -116,7 +116,9 @@ Date: 2026-07-04
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability
   - `production/data/translation-tasks.jsonl` stores draft and published review rows
 - Added authenticated listing edit endpoint:
+  - `GET /admin/listings/edit?listingId=MS-CRAWL-0001` renders a BG/RU/EN admin property editor for imported listing facts
   - `POST /api/admin/listings/edit` stores reviewed source edits
+  - listing edits accept JSON and form-encoded admin submissions
   - dependent translations are marked stale and non-indexable after source changes
   - `production/data/listing-edits.jsonl` stores the deterministic property editor smoke row
 - Added stale-aware public listing rendering:

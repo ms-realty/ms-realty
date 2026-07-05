@@ -85,6 +85,10 @@ Implemented now:
   - `GET /admin/leads` renders the persisted CRM lead queue in BG/RU/EN admin locales
   - inbox rows preserve original lead language, admin queue locale, contact preference, source, and listing reference
   - reviewed replies can be queued from form submissions but are not auto-sent
+- Property editor workbench:
+  - `GET /admin/listings/edit` renders imported listing facts, translation state, SEO readiness, media count, and 360-tour review status
+  - source edits can be submitted as form data and still mark dependent translations stale
+  - the editor stays admin-only and uses the BG/RU/EN admin locale shell
 - Migration review queue:
   - every crawled URL has a review owner, admin locale, action, and priority
   - `.ru` preservation rows are kept in a dedicated review lane

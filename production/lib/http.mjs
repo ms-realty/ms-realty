@@ -56,6 +56,7 @@ function publicResponse(request, url, rendered) {
 }
 
 const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min"];
+const LISTING_EDIT_FIELDS = ["title", "h1", "description", "location", "property_type", "offer_type", "bedrooms", "price_eur"];
 
 function loadLegacyRouteMap(filePath = fromRoot("production", "data", "legacy-route-map.json")) {
   return JSON.parse(fs.readFileSync(filePath, "utf8")).routes || [];
@@ -103,6 +104,46 @@ function reviewedReplyInput(request) {
   return {
     ...input,
     approved: input.approved === true || input.approved === "true" || input.approved === "on" || input.approved === "1",
+  };
+}
+
+function listingEditInput(request) {
+  const input = parseBody(request);
+  if (input.patch) return input;
+  const patch = {};
+  for (const field of LISTING_EDIT_FIELDS) {
+    if (input[field] !== undefined && input[field] !== "") patch[field] = input[field];
+  }
+  return { ...input, patch };
+}
+
+function listingRecord(seed, listingId) {
+  return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
+}
+
+function renderAdminListingEditorPayload(registry, requestedLocale, seed, listingId, edits, translationTasks) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const record = listingRecord(seed, listingId || "MS-CRAWL-0001");
+  if (!record) throw new Error("Known listingId is required");
+  return {
+    kind: "admin_listing_editor",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/listings/edit",
+    canonical: "/admin/listings/edit",
+    indexable: false,
+    metadata: {
+      title: "MS Realty property editor",
+      description: "Admin-only listing fact editor with stale translation review state.",
+      robots: "noindex,nofollow",
+    },
+    workspace,
+    listing: record,
+    edits: edits.filter((edit) => edit.listing_id === record.id),
+    translationTasks: translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
+    editableFields: LISTING_EDIT_FIELDS,
   };
 }
 
@@ -324,6 +365,30 @@ export function createHttpApp({
       });
     }
 
+    if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        return response(
+          200,
+          renderHtmlPage(
+            renderAdminListingEditorPayload(
+              activeRegistry,
+              url.searchParams.get("locale") || "en",
+              seed,
+              url.searchParams.get("listingId"),
+              readListingEdits(listingEditLedgerPath || undefined),
+              latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+            ),
+          ),
+          "text/html; charset=utf-8",
+        );
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "GET" && url.pathname === "/admin/migration/review") {
       if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
         return json(401, { kind: "unauthorized" });
@@ -421,7 +486,7 @@ export function createHttpApp({
         return json(401, { kind: "unauthorized" });
       }
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = listingEditInput(request);
         const result = createListingEdit(seed, input, latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)), editedAt);
         const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
         const persistedStaleTranslations = result.staleTranslations
@@ -665,6 +730,15 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.translationPublish.status !== 201 || smoke.translationPublish.body.public_indexable !== true) {
     throw new Error("HTTP smoke must publish only human-approved translation");
+  }
+  if (
+    smoke.listingEditorHtml?.status !== 200 ||
+    smoke.listingEditorHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
+    !smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\"") ||
+    !smoke.listingEditorHtml.body.includes("data-listing-id=\"MS-CRAWL-0001\"") ||
+    !smoke.listingEditorHtml.body.includes("data-editor-form=\"listing\"")
+  ) {
+    throw new Error("HTTP smoke must serve admin listing editor HTML");
   }
   if (smoke.listingEdit.status !== 201 || smoke.listingEdit.body.edit.stale_translation_count < 1) {
     throw new Error("HTTP smoke must stale dependent translations after listing edit");
