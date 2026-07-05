@@ -115,6 +115,13 @@ def infer_bedrooms(text: str) -> int | None:
     match = re.search(r"\b([1-6])\s*(?:bed|bedroom|bedrooms|стай|стаен|спал)", text, re.I)
     if match:
         return int(match.group(1))
+    lowered = text.lower()
+    word_match = re.search(r"\b(една|две|три|четири|пет|шест)\s+(?:спални|спальни)", lowered, re.I)
+    if word_match:
+        return {"една": 1, "две": 2, "три": 3, "четири": 4, "пет": 5, "шест": 6}[word_match.group(1)]
+    for token, bedrooms in (("студио", 0), ("едностаен", 0), ("двустаен", 1), ("тристаен", 2), ("четиристаен", 3)):
+        if token in lowered:
+            return bedrooms
     return None
 
 

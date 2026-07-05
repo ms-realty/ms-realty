@@ -7,7 +7,7 @@
     "warnings": {
       "missing_price": 157,
       "media_review_pending": 167,
-      "missing_bedrooms": 123,
+      "missing_bedrooms": 95,
       "missing_location": 3
     },
     "by_locale": {
@@ -86,7 +86,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -145,7 +144,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -160,7 +158,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -175,7 +172,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -190,7 +186,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -248,7 +243,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -293,7 +287,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -352,7 +345,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -442,7 +434,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -457,7 +448,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -472,7 +462,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -487,7 +476,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -844,7 +832,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1002,7 +989,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1017,7 +1003,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1032,7 +1017,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1193,7 +1177,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1208,7 +1191,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1279,7 +1261,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1294,7 +1275,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1350,7 +1330,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1512,7 +1491,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1527,7 +1505,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1542,7 +1519,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1601,7 +1577,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1616,7 +1591,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1646,7 +1620,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1704,7 +1677,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },

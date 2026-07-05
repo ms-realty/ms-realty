@@ -8,7 +8,7 @@
       "media_review_pending": 165,
       "missing_alt_text": 165,
       "tour_review_pending": 165,
-      "missing_bedrooms": 123,
+      "missing_bedrooms": 95,
       "missing_description": 122,
       "thin_public_gallery": 5,
       "missing_location": 3
@@ -92,7 +92,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -103,14 +102,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 16,
       "missing_alt_text_assets": 6,
       "review_gated_assets": 16
@@ -218,7 +216,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -229,14 +226,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 8,
       "missing_alt_text_assets": 2,
       "review_gated_assets": 16
@@ -250,7 +246,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -261,14 +256,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 19,
       "missing_alt_text_assets": 11,
       "review_gated_assets": 16
@@ -282,7 +276,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -293,14 +286,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 9,
       "review_gated_assets": 16
@@ -314,7 +306,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -325,14 +316,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 18,
       "missing_alt_text_assets": 17,
       "review_gated_assets": 16
@@ -436,7 +426,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -447,14 +436,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 7,
       "missing_alt_text_assets": 6,
       "review_gated_assets": 16
@@ -532,7 +520,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -543,14 +530,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 13,
       "missing_alt_text_assets": 3,
       "review_gated_assets": 16
@@ -658,7 +644,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -669,14 +654,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 28,
       "missing_alt_text_assets": 27,
       "review_gated_assets": 16
@@ -848,7 +832,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -859,14 +842,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 8,
       "missing_alt_text_assets": 2,
       "review_gated_assets": 16
@@ -880,7 +862,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -891,14 +872,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 15,
       "missing_alt_text_assets": 14,
       "review_gated_assets": 16
@@ -912,7 +892,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -923,14 +902,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 9,
       "missing_alt_text_assets": 8,
       "review_gated_assets": 16
@@ -944,7 +922,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -955,14 +932,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 9,
       "review_gated_assets": 16
@@ -1708,7 +1684,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1719,14 +1694,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 18,
       "missing_alt_text_assets": 12,
       "review_gated_assets": 16
@@ -2044,7 +2018,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2055,14 +2028,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 12,
       "missing_alt_text_assets": 5,
       "review_gated_assets": 16
@@ -2076,7 +2048,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2087,14 +2058,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 26,
       "missing_alt_text_assets": 15,
       "review_gated_assets": 16
@@ -2108,7 +2078,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2119,14 +2088,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 7,
       "review_gated_assets": 16
@@ -2450,7 +2418,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2461,14 +2428,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 11,
       "missing_alt_text_assets": 4,
       "review_gated_assets": 16
@@ -2482,7 +2448,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2493,14 +2458,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 19,
       "missing_alt_text_assets": 18,
       "review_gated_assets": 16
@@ -2630,7 +2594,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2641,14 +2604,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 18,
       "missing_alt_text_assets": 17,
       "review_gated_assets": 16
@@ -2662,7 +2624,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2673,14 +2634,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 9,
       "review_gated_assets": 16
@@ -2778,7 +2738,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2789,14 +2748,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 18,
       "missing_alt_text_assets": 4,
       "review_gated_assets": 16
@@ -3124,7 +3082,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3135,14 +3092,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 12,
       "missing_alt_text_assets": 11,
       "review_gated_assets": 16
@@ -3156,7 +3112,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3167,14 +3122,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 21,
       "missing_alt_text_assets": 4,
       "review_gated_assets": 16
@@ -3188,7 +3142,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3199,14 +3152,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 16,
       "missing_alt_text_assets": 8,
       "review_gated_assets": 16
@@ -3314,7 +3266,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3325,14 +3276,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 16,
       "missing_alt_text_assets": 9,
       "review_gated_assets": 16
@@ -3346,7 +3296,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3357,14 +3306,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 16,
       "missing_alt_text_assets": 14,
       "review_gated_assets": 16
@@ -3410,7 +3358,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3421,14 +3368,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 19,
       "missing_alt_text_assets": 13,
       "review_gated_assets": 16
@@ -3532,7 +3478,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -3543,14 +3488,13 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 22,
       "missing_alt_text_assets": 15,
       "review_gated_assets": 16

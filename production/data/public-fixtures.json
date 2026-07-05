@@ -144,7 +144,7 @@
         "location": "Sandanski",
         "property_type": "apartment",
         "offer_type": "rent",
-        "bedrooms": null,
+        "bedrooms": 2,
         "price_eur": null,
         "image_count": 32
       },
@@ -1122,7 +1122,7 @@
         "location": "Sandanski",
         "property_type": "apartment",
         "offer_type": "rent",
-        "bedrooms": null,
+        "bedrooms": 2,
         "price_eur": null,
         "image_count": 32
       },
@@ -1190,7 +1190,7 @@
         "location": "Sandanski",
         "property_type": "apartment",
         "offer_type": "sale",
-        "bedrooms": null,
+        "bedrooms": 1,
         "price_eur": null,
         "image_count": 24
       },
@@ -1207,7 +1207,7 @@
         "location": "Sandanski",
         "property_type": "apartment",
         "offer_type": "rent",
-        "bedrooms": null,
+        "bedrooms": 1,
         "price_eur": null,
         "image_count": 35
       },
@@ -1224,7 +1224,7 @@
         "location": "Sandanski",
         "property_type": "apartment",
         "offer_type": "rent",
-        "bedrooms": null,
+        "bedrooms": 1,
         "price_eur": null,
         "image_count": 26
       },
@@ -1241,7 +1241,7 @@
         "location": "Sandanski",
         "property_type": "apartment",
         "offer_type": "sale",
-        "bedrooms": null,
+        "bedrooms": 1,
         "price_eur": null,
         "image_count": 34
       },

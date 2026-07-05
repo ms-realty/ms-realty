@@ -86,6 +86,16 @@ def main() -> int:
         if property_types.get(listing_id) != property_type:
             raise SystemExit(f"Search imports must classify {listing_id} as {property_type}")
 
+    bedrooms = {doc["id"]: doc["bedrooms"] for doc in source_docs}
+    expected_bedrooms = {
+        "MS-CRAWL-0003": 2,
+        "MS-CRAWL-0007": 1,
+        "MS-CRAWL-0029": 0,
+    }
+    for listing_id, bedroom_count in expected_bedrooms.items():
+        if bedrooms.get(listing_id) != bedroom_count:
+            raise SystemExit(f"Search imports must infer {bedroom_count} bedrooms for {listing_id}")
+
     print("PASS: search import fixtures validate for Typesense and Meilisearch")
     return 0
 
