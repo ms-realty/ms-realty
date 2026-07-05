@@ -7,6 +7,7 @@ import { createLeadDraft } from "../lib/leads.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
 import { assertSlugHistory } from "../lib/slug-history.mjs";
+import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -808,6 +809,15 @@ if (
   !Object.hasOwn(listingQuality.summary.issue_counts, "tour_review_pending")
 ) {
   throw new Error("Listing quality report must keep price, media, alt text, and tour metrics actionable");
+}
+const listingPublication = JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-publication-report.json"), "utf8"));
+assertListingPublicationReport(listingPublication);
+if (
+  listingPublication.summary.listings !== 165 ||
+  listingPublication.summary.missing_sitemap_entries !== 0 ||
+  !listingPublication.rows.find((row) => row.listing_id === "MS-CRAWL-0001")?.internal_link_suggestion_count
+) {
+  throw new Error("Listing publication report must prove sitemap coverage and internal-link suggestions");
 }
 
 const mobileQa = JSON.parse(fs.readFileSync(fromRoot("production", "data", "mobile-elderly-qa-report.json"), "utf8"));

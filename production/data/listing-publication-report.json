@@ -1,0 +1,6094 @@
+{
+  "generated_at": "2026-07-05T00:00:00Z",
+  "summary": {
+    "listings": 165,
+    "listings_with_sitemap_entries": 165,
+    "listings_with_internal_link_suggestions": 165,
+    "missing_sitemap_entries": 0
+  },
+  "rows": [
+    {
+      "listing_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0001",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0001",
+        "/el/akinita/MS-CRAWL-0001",
+        "/he/properties/MS-CRAWL-0001"
+      ],
+      "sitemap_entry_count": 3,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0001",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0001",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0001",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0003",
+          "to_path": "/bg/imoti/MS-CRAWL-0001",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0002",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0002",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0002"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0002",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0002",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0002",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0003",
+          "to_path": "/bg/imoti/MS-CRAWL-0002",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0003",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0003",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0003"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0003",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0003",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0003",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0003",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0004",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0004",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0004"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0004",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0004",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0004",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0004",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0005",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0005",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0005"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0005",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0005",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0005",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0005",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0006",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0006",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0006"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0006",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0006",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0006",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0006",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0007",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0007",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0007"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0007",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0007",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0007",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0007",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0008",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0008",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0008"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0008",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0008",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0008",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0008",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0009",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0009",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0009"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0009",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0009",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0009",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0009",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0010",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0010",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0010"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0010",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0010",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0010",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0010",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0011",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0011",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0011"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0011",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0011",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0011",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0011",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0012",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0012",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0012"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0012",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0012",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0012",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0012",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0013",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0013",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0013"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0013",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/hotovo",
+          "to_path": "/bg/imoti/MS-CRAWL-0013",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0064",
+          "to_path": "/bg/imoti/MS-CRAWL-0013",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0071",
+          "to_path": "/bg/imoti/MS-CRAWL-0013",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0014",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0014",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0014"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0014",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0014",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0014",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0014",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0015",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0015",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0015"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0015",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0015",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0015",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0015",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0016",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0016",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0016"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0016",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0016",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0016",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0016",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0017",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0017",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0017"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0017",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0017",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0017",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0017",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0018",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0018",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0018"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0018",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0018",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0018",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0018",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0019",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0019",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0019"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0019",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0019",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0019",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0019",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0020",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0020",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0020"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0020",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0020",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0020",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0020",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0021",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0021",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0021"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0021",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0021",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0021",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0021",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0022",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0022",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0022"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0022",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0022",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0022",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0022",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0023",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0023",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0023"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0023",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0023",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0023",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0023",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0024",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0024",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0024"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0024",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0024",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0024",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0024",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0025",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0025",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0025"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0025",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0025",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0025",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0025",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0026",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0026",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0026"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0026",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0026",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0026",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0026",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0027",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0027",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0027"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0027",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0027",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0027",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0027",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0028",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0028",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0028"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0028",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0028",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0028",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0028",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0029",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0029",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0029"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0029",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0029",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0029",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0029",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0030",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0030",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0030"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0030",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0030",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0030",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0030",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0031",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0031",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0031"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0031",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0031",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0031",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0031",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0032",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0032",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0032"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0032",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0032",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0032",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0032",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0033",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0033",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0033"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0033",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0033",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0033",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0033",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0034",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0034",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0034"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0034",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0034",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0034",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0034",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0035",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0035",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0035"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0035",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0035",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0035",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0035",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0036",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0036",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0036"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0036",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0036",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0036",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0036",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0037",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0037",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0037"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0037",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0037",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0037",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0037",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0038",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0038",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0038"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0038",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0038",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0038",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0038",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0039",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0039",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0039"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0039",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0039",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0039",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0039",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0040",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0040",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0040"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0040",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0040",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0040",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0040",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0041",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0041",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0041"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0041",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0041",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0041",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0041",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0042",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0042",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0042"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0042",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0042",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0042",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0042",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0043",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0043",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0043"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0043",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0043",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0043",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0043",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0044",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0044",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0044"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0044",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0044",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0044",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0044",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0045",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0045",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0045"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0045",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0045",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0045",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0045",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0046",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0046",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0046"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0046",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0046",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0046",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0046",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0047",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0047",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0047"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0047",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0047",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0047",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0047",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0048",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0048",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0048"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0048",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0048",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0048",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0048",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0049",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0049",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0049"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0049",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0049",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0049",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0049",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0050",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0050",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0050"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0050",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0050",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0050",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0050",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0051",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0051",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0051"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0051",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0051",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0051",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0051",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0052",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0052",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0052"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0052",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0052",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0052",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0052",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0053",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0053",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0053"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0053",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0053",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0053",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0053",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0054",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0054",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0054"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0054",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0054",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0054",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0054",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0055",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0055",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0055"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0055",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0055",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0055",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0055",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0056",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0056",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0056"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0056",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0056",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0056",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0056",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0057",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0057",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0057"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0057",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0057",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0057",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0057",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0058",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0058",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0058"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0058",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0058",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0058",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0058",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0059",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0059",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0059"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0059",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0059",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0059",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0059",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0060",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0060",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0060"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0060",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0060",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0060",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0060",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0061",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0061",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0061"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0061",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0061",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0061",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0061",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0062",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0062",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0062"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0062",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0062",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0062",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0062",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0063",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0063",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0063"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0063",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0063",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0063",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0063",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0064",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0064",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0064"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0064",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/hotovo",
+          "to_path": "/bg/imoti/MS-CRAWL-0064",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0013",
+          "to_path": "/bg/imoti/MS-CRAWL-0064",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0071",
+          "to_path": "/bg/imoti/MS-CRAWL-0064",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0065",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0065",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0065"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0065",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0065",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0065",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0065",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0066",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0066",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0066"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0066",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0066",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0066",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0066",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0067",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0067",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0067"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0067",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0067",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0067",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0067",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0068",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0068",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0068"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0068",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0068",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0068",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0068",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0069",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0069",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0069"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0069",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0069",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0069",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0069",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0070",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0070",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0070"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0070",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/petrich",
+          "to_path": "/bg/imoti/MS-CRAWL-0070",
+          "label": "Add to location inventory"
+        }
+      ],
+      "internal_link_suggestion_count": 2
+    },
+    {
+      "listing_id": "MS-CRAWL-0071",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0071",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0071"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0071",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/hotovo",
+          "to_path": "/bg/imoti/MS-CRAWL-0071",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0013",
+          "to_path": "/bg/imoti/MS-CRAWL-0071",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0064",
+          "to_path": "/bg/imoti/MS-CRAWL-0071",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0072",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0072",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0072"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0072",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0072",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0072",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0072",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0073",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0073",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0073"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0073",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0073",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0073",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0073",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0074",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0074",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0074"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0074",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0074",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0074",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0074",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0075",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0075",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0075"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0075",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0075",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0075",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0075",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-3000",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-3000",
+      "sitemap_paths": [
+        "/bg/imoti/MS-3000"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-3000",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-3000",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-3000",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-3000",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0077",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0077",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0077"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0077",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0077",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0077",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0077",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0078",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0078",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0078"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0078",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0078",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0078",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0078",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0079",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0079",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0079"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0079",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0079",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0079",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0079",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0080",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0080",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0080"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0080",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0080",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0080",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0080",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0081",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0081",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0081"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0081",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0081",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0081",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0081",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0082",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0082",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0082"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0082",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0082",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0082",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0082",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0083",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0083",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0083"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0083",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0083",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0083",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0083",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0084",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0084",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0084"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0084",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0084",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0084",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0084",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0085",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0085",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0085"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0085",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0085",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0085",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0085",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0086",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0086",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0086"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0086",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0086",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0086",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0086",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0087",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0087",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0087"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0087",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0087",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0087",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0087",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0088",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0088",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0088"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0088",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0088",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0088",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0088",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0089",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0089",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0089"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0089",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0089",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0089",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0089",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0090",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0090",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0090"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0090",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0090",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0090",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0090",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0091",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0091",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0091"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0091",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0091",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0091",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0091",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0092",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0092",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0092"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0092",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0092",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0092",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0092",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0093",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0093",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0093"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0093",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0093",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0093",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0093",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0094",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0094",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0094"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0094",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0094",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0094",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0094",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0095",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0095",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0095"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0095",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0095",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0095",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0095",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0096",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0096",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0096"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0096",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0096",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0096",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0096",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0097",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0097",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0097"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0097",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0097",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0097",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0097",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0098",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0098",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0098"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0098",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0098",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0098",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0098",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0099",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0099",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0099"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0099",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0099",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0099",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0099",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0100",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0100",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0100"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0100",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0100",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0100",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0100",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0101",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0101",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0101"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0101",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0101",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0101",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0101",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0102",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0102",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0102"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0102",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0102",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0102",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0102",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0103",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0103",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0103"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0103",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0103",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0103",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0103",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0104",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0104",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0104"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0104",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0104",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0104",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0104",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0105",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0105",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0105"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0105",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0105",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0105",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0105",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0106",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0106",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0106"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0106",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0106",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0106",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0106",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0107",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0107",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0107"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0107",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0107",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0107",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0107",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0108",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0108",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0108"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0108",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0108",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0108",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0108",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0109",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0109",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0109"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0109",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0109",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0109",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0109",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0110",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0110",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0110"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0110",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0110",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0110",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0110",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0111",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0111",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0111"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0111",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0111",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0111",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0111",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0112",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0112",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0112"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0112",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0112",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0112",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0112",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0113",
+      "source_locale": "bg",
+      "listing_status": "available",
+      "primary_path": "/bg/imoti/MS-CRAWL-0113",
+      "sitemap_paths": [
+        "/bg/imoti/MS-CRAWL-0113"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/bg/",
+          "to_path": "/bg/imoti/MS-CRAWL-0113",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/bg/lokacii/sandanski",
+          "to_path": "/bg/imoti/MS-CRAWL-0113",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "to_path": "/bg/imoti/MS-CRAWL-0113",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "to_path": "/bg/imoti/MS-CRAWL-0113",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0114",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0114",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0114"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0114",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0114",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0114",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0116",
+          "to_path": "/ru/properties/MS-CRAWL-0114",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0115",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0115",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0115"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0115",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0115",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0115",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0116",
+          "to_path": "/ru/properties/MS-CRAWL-0115",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0116",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0116",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0116"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0116",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0116",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0116",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0116",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0117",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0117",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0117"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0117",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0117",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0117",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0117",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0118",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0118",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0118"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0118",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0118",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0118",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0118",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0119",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0119",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0119"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0119",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0119",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0119",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0119",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0120",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0120",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0120"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0120",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0120",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0120",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0120",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0121",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0121",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0121"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0121",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0121",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0121",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0121",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0122",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0122",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0122"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0122",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0122",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0122",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0122",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0123",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0123",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0123"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0123",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/petrich",
+          "to_path": "/ru/properties/MS-CRAWL-0123",
+          "label": "Add to location inventory"
+        }
+      ],
+      "internal_link_suggestion_count": 2
+    },
+    {
+      "listing_id": "MS-CRAWL-0124",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0124",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0124"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0124",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0124",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0124",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0124",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0125",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0125",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0125"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0125",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0125",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0125",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0125",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0126",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0126",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0126"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0126",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0126",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0126",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0126",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0127",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0127",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0127"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0127",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0127",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0127",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0127",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0128",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0128",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0128"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0128",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0128",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0128",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0128",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0129",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0129",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0129"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0129",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0129",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0129",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0129",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0130",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0130",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0130"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0130",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0130",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0130",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0130",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0131",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0131",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0131"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0131",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0131",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0131",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0131",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0132",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0132",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0132"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0132",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0132",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0132",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0132",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0133",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0133",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0133"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0133",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0133",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0133",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0133",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0134",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0134",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0134"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0134",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0134",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0134",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0134",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0135",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0135",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0135"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0135",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0135",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0135",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0135",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0136",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0136",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0136"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0136",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0136",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0136",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0136",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0137",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0137",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0137"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0137",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0137",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0137",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0137",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0138",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0138",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0138"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0138",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0138",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0138",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0138",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0139",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0139",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0139"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0139",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0139",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0139",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0139",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0140",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0140",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0140"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0140",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0140",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0140",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0140",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0141",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0141",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0141"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0141",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0141",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0141",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0141",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0142",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0142",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0142"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0142",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0142",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0142",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0142",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0143",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0143",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0143"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0143",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0143",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0143",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0143",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0144",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0144",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0144"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0144",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0144",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0144",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0144",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0145",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0145",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0145"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0145",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0145",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0145",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0145",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0146",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0146",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0146"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0146",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0146",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0146",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0146",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0147",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0147",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0147"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0147",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0147",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0147",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0147",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0148",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0148",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0148"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0148",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0148",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0148",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0148",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0149",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0149",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0149"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0149",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0149",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0149",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0149",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0150",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0150",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0150"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0150",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0150",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0150",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0150",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0151",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0151",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0151"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0151",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0151",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0151",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0151",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0152",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0152",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0152"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0152",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0152",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0152",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0152",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0153",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0153",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0153"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0153",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0153",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0153",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0153",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0154",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0154",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0154"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0154",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0154",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0154",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0154",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0155",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0155",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0155"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0155",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0155",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0155",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0155",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0156",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0156",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0156"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0156",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0156",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0156",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0156",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0157",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0157",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0157"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0157",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0157",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0157",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0157",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0158",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0158",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0158"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0158",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0158",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0158",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0158",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0159",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0159",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0159"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0159",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0159",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0159",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0159",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0160",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0160",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0160"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0160",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0160",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0160",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0160",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0161",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0161",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0161"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0161",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0161",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0161",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0161",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0162",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0162",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0162"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0162",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0162",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0162",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0162",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0163",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0163",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0163"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0163",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0163",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0163",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0163",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0164",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0164",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0164"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0164",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0164",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0164",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0164",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    },
+    {
+      "listing_id": "MS-CRAWL-0165",
+      "source_locale": "ru",
+      "listing_status": "available",
+      "primary_path": "/ru/properties/MS-CRAWL-0165",
+      "sitemap_paths": [
+        "/ru/properties/MS-CRAWL-0165"
+      ],
+      "sitemap_entry_count": 1,
+      "internal_link_suggestions": [
+        {
+          "kind": "homepage_feature",
+          "from_path": "/ru/",
+          "to_path": "/ru/properties/MS-CRAWL-0165",
+          "label": "Add to featured listings"
+        },
+        {
+          "kind": "location_page",
+          "from_path": "/ru/locations/sandanski",
+          "to_path": "/ru/properties/MS-CRAWL-0165",
+          "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "to_path": "/ru/properties/MS-CRAWL-0165",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "to_path": "/ru/properties/MS-CRAWL-0165",
+          "label": "Add as related listing"
+        }
+      ],
+      "internal_link_suggestion_count": 4
+    }
+  ]
+}

@@ -464,6 +464,7 @@ JSON-LD report over all indexable entries, listing-quality report, server-render
 lead/reply/viewing/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
 listing-status workflow that keeps sold pages live while removing them from active inventory,
 CMS slug-history workflow that creates path-only automatic 301s to canonical listing routes,
+listing-publication workflow that proves sitemap paths and internal-link suggestions,
 mobile/elderly QA report, and a live Node server (`npm start`) exposing the same contracts.
 
 **Blocked until launch:** human redirect reviews (`migration/reviews/redirect-approvals.csv`) and real

@@ -53,6 +53,7 @@ What it proves now:
 - Structured-data launch report for every indexable listing sitemap entry.
 - Listing quality report that turns missing price, bedroom, location, alt text, thin gallery, media review, and tour review warnings into admin editor links.
 - 165-row listing quality workbook for editor import/review.
+- Listing publication report that proves sitemap coverage and internal-link suggestions for every CMS listing.
 - Locale-prefixed seller valuation page backed by the existing seller lead pipeline.
 - Locale-prefixed contact callback page backed by the existing gated CRM lead intake.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
@@ -150,6 +151,7 @@ Generated production data:
 - `production/data/structured-data-report.json`
 - `production/data/listing-quality-report.json`
 - `production/data/listing-quality-workbook.csv`
+- `production/data/listing-publication-report.json`
 - `production/data/cms-seed.json`
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`
