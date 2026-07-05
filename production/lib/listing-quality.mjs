@@ -3,6 +3,7 @@ import path from "node:path";
 import { parseCsv } from "./csv.mjs";
 import { bedroomsRequired } from "./listing-facts.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
+import { latestTourForListing, readTourApprovals } from "./tours.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LISTING_QUALITY_REPORT = fromRoot("production", "data", "listing-quality-report.json");
@@ -59,8 +60,9 @@ function requiredEditorFields(issues) {
   return issues.map((issue) => FACT_FIELDS_BY_ISSUE[issue] || MEDIA_FIELDS_BY_ISSUE[issue]).filter(Boolean);
 }
 
-function qualityRow(record) {
+function qualityRow(record, approvedTour = null) {
   const facts = record.facts || {};
+  const tour = approvedTour || record.tour;
   const publicPhotos = (record.media || []).filter((media) => media.kind === "photo" && media.is_public);
   const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
@@ -71,7 +73,7 @@ function qualityRow(record) {
   if (record.media_workflow?.review_gated_assets) issues.push("media_review_pending");
   if (missingAltTextAssets) issues.push("missing_alt_text");
   if (publicPhotos.length < 3) issues.push("thin_public_gallery");
-  if (record.tour && !record.tour.is_public) issues.push("tour_review_pending");
+  if (tour && !tour.is_public) issues.push("tour_review_pending");
   if (!issues.length) return null;
 
   return {
@@ -94,8 +96,16 @@ function qualityRow(record) {
   };
 }
 
-export function buildListingQualityReport({ seed = loadCmsSeed(), generatedAt = new Date().toISOString(), limit = null } = {}) {
-  const allRows = seed.records.filter((record) => record.collection === "listings").map(qualityRow).filter(Boolean);
+export function buildListingQualityReport({
+  seed = loadCmsSeed(),
+  tourApprovals = readTourApprovals(),
+  generatedAt = new Date().toISOString(),
+  limit = null,
+} = {}) {
+  const allRows = seed.records
+    .filter((record) => record.collection === "listings")
+    .map((record) => qualityRow(record, latestTourForListing(tourApprovals, record.id)))
+    .filter(Boolean);
   const rows = limit ? allRows.slice(0, limit) : allRows;
   return {
     generated_at: generatedAt,

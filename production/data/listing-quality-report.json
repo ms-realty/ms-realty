@@ -11,7 +11,7 @@
       "media_review_pending": 165,
       "missing_alt_text": 0,
       "thin_public_gallery": 5,
-      "tour_review_pending": 165
+      "tour_review_pending": 164
     },
     "by_source_locale": {
       "bg": 113,
@@ -32,16 +32,14 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "media_review",
-        "tour_review"
+        "media_review"
       ],
       "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
       "location": "Sandanski",
       "description": "Updated approved source description.",
       "issues": [
         "missing_price",
-        "media_review_pending",
-        "tour_review_pending"
+        "media_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,

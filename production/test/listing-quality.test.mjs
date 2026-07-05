@@ -39,6 +39,32 @@ test("listing quality does not require bedrooms for land listings", () => {
   assert.equal(row.required_editor_fields.includes("bedrooms"), false);
 });
 
+test("listing quality does not require tour review for approved tour ledger rows", () => {
+  const seed = loadCmsSeed();
+  const record = seed.records.find((candidate) => candidate.collection === "listings" && candidate.id === "MS-CRAWL-0001");
+  const report = buildListingQualityReport({
+    seed,
+    tourApprovals: [
+      {
+        ...record.tour,
+        listing_id: record.id,
+        panorama_url: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+        accessibility_caption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+        is_public: true,
+        review_status: "approved",
+        reviewer: "media_editor",
+        approved_at: "2026-07-05T00:00:00Z",
+      },
+    ],
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0001");
+
+  assert.ok(row);
+  assert.equal(row.issues.includes("tour_review_pending"), false);
+  assert.equal(row.required_editor_fields.includes("tour_review"), false);
+});
+
 test("listing quality workbook gives editors importable review rows without approvals", () => {
   const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
   const rows = parseCsv(renderListingQualityWorkbook(report));
