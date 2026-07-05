@@ -13,7 +13,15 @@ import {
 test("viewing ledger requires a known lead and creates follow-up task", () => {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewings-`)}/viewings.jsonl`;
   resetViewingLedger(file);
-  const leads = [{ lead_id: "lead-test", listing_reference: "MS-CRAWL-0001", original_language: "he", admin_locale: "en" }];
+  const leads = [
+    {
+      lead_id: "lead-test",
+      listing_reference: "MS-CRAWL-0001",
+      original_language: "he",
+      admin_locale: "en",
+      contact_preference: "whatsapp",
+    },
+  ];
 
   assert.throws(
     () => appendViewing(leads, { leadId: "missing", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" }, { filePath: file }),
@@ -34,6 +42,13 @@ test("viewing ledger requires a known lead and creates follow-up task", () => {
   assert.equal(rows.length, 1);
   assert.equal(rows[0].listing_reference, "MS-CRAWL-0001");
   assert.equal(rows[0].follow_up_task.status, "open");
+  assert.deepEqual(rows[0].feedback_request, {
+    id: "feedback-lead-test",
+    owner: "broker_ru",
+    status: "open",
+    due_at: "2026-07-06T12:00:00.000Z",
+    channel: "whatsapp",
+  });
   assert.equal(assertViewingLedger(rows), true);
 
   const calendar = renderViewingCalendar(rows, { now: "2026-07-04T00:06:00Z" });

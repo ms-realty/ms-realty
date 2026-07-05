@@ -485,8 +485,12 @@ if (httpSmoke.formReply.status !== 201 || httpSmoke.formReply.body.status !== "q
   throw new Error("HTTP smoke must queue form-encoded broker-approved reply");
 }
 if (httpSmoke.replyOutbox.rows !== 2) throw new Error("HTTP smoke must persist two reply outbox rows");
-if (httpSmoke.viewing.status !== 201 || httpSmoke.viewing.body.follow_up_task?.status !== "open") {
-  throw new Error("HTTP smoke must book one viewing with follow-up task");
+if (
+  httpSmoke.viewing.status !== 201 ||
+  httpSmoke.viewing.body.follow_up_task?.status !== "open" ||
+  httpSmoke.viewing.body.feedback_request?.status !== "open"
+) {
+  throw new Error("HTTP smoke must book one viewing with follow-up and feedback tasks");
 }
 if (
   httpSmoke.viewingCalendar.status !== 200 ||
@@ -637,8 +641,12 @@ for (const response of [
 if (nodeServerSmoke.reply.status !== 201 || nodeServerSmoke.reply.body.status !== "queued_for_manual_send") {
   throw new Error("Node server smoke must queue broker-approved reply");
 }
-if (nodeServerSmoke.viewing.status !== 201 || nodeServerSmoke.viewing.body.follow_up_task?.status !== "open") {
-  throw new Error("Node server smoke must book one viewing with follow-up task");
+if (
+  nodeServerSmoke.viewing.status !== 201 ||
+  nodeServerSmoke.viewing.body.follow_up_task?.status !== "open" ||
+  nodeServerSmoke.viewing.body.feedback_request?.status !== "open"
+) {
+  throw new Error("Node server smoke must book one viewing with follow-up and feedback tasks");
 }
 if (
   nodeServerSmoke.viewingCalendar.status !== 200 ||
@@ -684,6 +692,9 @@ for (const listingId of ["MS-CRAWL-0013", "MS-CRAWL-0064"]) {
 }
 const viewings = fs.readFileSync(fromRoot("production", "data", "viewings.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (viewings.length !== 1) throw new Error("Viewing artifact must contain one deterministic smoke row");
+if (JSON.parse(viewings[0]).feedback_request?.status !== "open") {
+  throw new Error("Viewing artifact must contain a post-viewing feedback request");
+}
 const savedSearches = fs.readFileSync(fromRoot("production", "data", "saved-searches.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (savedSearches.length !== 1) throw new Error("Saved search artifact must contain one deterministic smoke row");
 const sellerPipeline = fs.readFileSync(fromRoot("production", "data", "seller-pipeline.jsonl"), "utf8").trim().split("\n").filter(Boolean);

@@ -3400,6 +3400,13 @@
             "owner": "broker_ru",
             "status": "open",
             "due_at": "2026-07-06T10:00:00Z"
+          },
+          "feedback_request": {
+            "id": "feedback-http-lead-he-0001",
+            "owner": "broker_ru",
+            "status": "open",
+            "due_at": "2026-07-06T12:00:00.000Z",
+            "channel": "whatsapp"
           }
         }
       ],
@@ -8675,6 +8682,13 @@
         "owner": "broker_ru",
         "status": "open",
         "due_at": "2026-07-06T10:00:00Z"
+      },
+      "feedback_request": {
+        "id": "feedback-http-lead-he-0001",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T12:00:00.000Z",
+        "channel": "whatsapp"
       }
     }
   },

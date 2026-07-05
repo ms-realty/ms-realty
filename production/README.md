@@ -79,6 +79,7 @@ What it proves now:
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
 - Broker reply approval accepts JSON and form-encoded admin submissions.
 - Broker-booked viewing ledger with open follow-up tasks and admin `.ics` calendar export from existing CRM leads.
+- Booked viewings create post-viewing feedback request tasks using the lead contact preference.
 - Saved-search ledger with open alert tasks from public search criteria.
 - Seller valuation pipeline ledger with callback/appraisal tasks from seller leads.
 - Privacy-safe analytics event ledger for page views, searches, lead submissions, and CTA clicks.

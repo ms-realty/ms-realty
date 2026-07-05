@@ -24,6 +24,8 @@ export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_
   if (!lead) throw new Error("Viewing requires a known leadId");
   if (!input.startsAt || !input.broker) throw new Error("startsAt and broker are required");
   if (Number.isNaN(Date.parse(input.startsAt))) throw new Error("startsAt must be an ISO date");
+  const feedbackDueAt =
+    input.feedbackDueAt || new Date(Date.parse(input.startsAt) + 2 * 60 * 60 * 1000).toISOString();
 
   const row = {
     id: input.id || `viewing-${input.leadId}`,
@@ -42,6 +44,13 @@ export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_
       status: "open",
       due_at: input.followUpDueAt || input.startsAt,
     },
+    feedback_request: {
+      id: input.feedbackTaskId || `feedback-${input.leadId}`,
+      owner: input.broker,
+      status: "open",
+      due_at: feedbackDueAt,
+      channel: input.feedbackChannel || lead.contact_preference || "broker_follow_up",
+    },
   };
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -55,6 +64,7 @@ export function assertViewingLedger(rows) {
     if (!row.lead_id || !row.broker || !row.starts_at) throw new Error("Viewing row is missing booking data");
     if (row.status !== "booked") throw new Error("Viewing must be booked");
     if (row.follow_up_task?.status !== "open") throw new Error("Viewing must create an open follow-up task");
+    if (row.feedback_request?.status !== "open") throw new Error("Viewing must create a post-viewing feedback request");
   }
   return true;
 }

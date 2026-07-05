@@ -385,6 +385,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
       assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
       assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
+      assert.equal(smoke.viewing.body.feedback_request.status, "open");
+      assert.equal(smoke.viewing.body.feedback_request.channel, "whatsapp");
       assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
       assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
       assert.equal(smoke.contactLead.body.lead.leadType, "general");
