@@ -88,6 +88,10 @@ function tempRedirectApprovals() {
   return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-redirect-approvals-`)}/redirect-approvals.jsonl`;
 }
 
+function tempDeployableRedirects() {
+  return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-deployable-redirects-`)}/deployable-redirects.json`;
+}
+
 function tempSeoEvidenceDir() {
   return fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-evidence-`);
 }
@@ -464,6 +468,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
 
 test("HTTP admin can append reviewed redirect approvals without broad homepage mappings", async () => {
   const redirectApprovalPath = tempRedirectApprovals();
+  const deployableRedirectOutputPath = tempDeployableRedirects();
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -474,7 +479,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     (route) => route.url_type === "listing" && route.target_locale === "ru" && route.target_path && route.old_url !== ruListing.old_url,
   );
   const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
-  const app = createHttpApp({ routeMap, redirectApprovalPath, reviewedAt: "2026-07-05T00:00:00Z" });
+  const app = createHttpApp({ routeMap, redirectApprovalPath, deployableRedirectOutputPath, reviewedAt: "2026-07-05T00:00:00Z" });
 
   const approved = await dispatchHttp(app, {
     method: "POST",
@@ -557,6 +562,15 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/redirect-approval-workbook?pending=1",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const exportUnauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/deployable-redirects/export",
+  });
+  const exported = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/deployable-redirects/export",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const review = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -592,14 +606,22 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(pendingRows.length, 161);
   assert.equal(pendingRows.some((row) => row.old_url === listing.old_url), false);
   assert.equal(pendingRows.some((row) => row.old_url === importRuListing.old_url), false);
+  assert.equal(exportUnauthorized.status, 401);
+  assert.equal(exported.status, 201);
+  assert.equal(exported.body.exported, 4);
+  assert.equal(exported.body.summary.total, 4);
+  assert.equal(fs.existsSync(deployableRedirectOutputPath), true);
+  assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 4);
   assert.equal(review.body.workspace.locale, "ru");
   assert.equal(review.body.redirectApprovalImport.endpoint, "/api/admin/redirect-approvals/import");
+  assert.equal(review.body.redirectApprovalImport.exportEndpoint, "/api/admin/deployable-redirects/export");
   assert.equal(review.body.redirectApprovalImport.workbookEndpoint, "/api/admin/redirect-approval-workbook");
   assert.equal(review.body.redirectApprovalImport.pendingWorkbookEndpoint, "/api/admin/redirect-approval-workbook?pending=1");
   assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);
   assert.equal(reviewHtml.body.includes('data-redirect-import-endpoint="/api/admin/redirect-approvals/import"'), true);
+  assert.equal(reviewHtml.body.includes('data-redirect-export-endpoint="/api/admin/deployable-redirects/export"'), true);
   assert.equal(reviewHtml.body.includes('data-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-pending-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook?pending=1"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-endpoint="/api/admin/launch-readiness"'), true);

@@ -275,6 +275,8 @@ function renderAdminMigrationReview(page) {
   </section>
   <section aria-label="Redirect approval CSV import" data-redirect-import-endpoint="${escapeHtml(
     page.redirectApprovalImport.endpoint,
+  )}" data-redirect-export-endpoint="${escapeHtml(
+    page.redirectApprovalImport.exportEndpoint,
   )}" data-redirect-workbook-endpoint="${escapeHtml(page.redirectApprovalImport.workbookEndpoint)}" data-pending-redirect-workbook-endpoint="${escapeHtml(
     page.redirectApprovalImport.pendingWorkbookEndpoint,
   )}">
@@ -283,6 +285,9 @@ function renderAdminMigrationReview(page) {
     <form method="post" action="${escapeHtml(page.redirectApprovalImport.endpoint)}">
       <textarea name="csv" rows="5" required></textarea>
       <button type="submit">Import CSV</button>
+    </form>
+    <form method="post" action="${escapeHtml(page.redirectApprovalImport.exportEndpoint)}">
+      <button type="submit">Export deployable redirects</button>
     </form>
   </section>
   <section aria-label="External SEO evidence" data-seo-import-endpoint="${escapeHtml(page.seoEvidence.importEndpoint)}" data-seo-template-endpoint="${escapeHtml(

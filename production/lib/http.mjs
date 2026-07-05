@@ -22,6 +22,7 @@ import {
   readRedirectApprovals,
   renderRedirectApprovalWorkbook,
   summarizeDeployableRedirects,
+  writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
@@ -240,6 +241,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     redirectApprovalImport: {
       method: "POST",
       endpoint: "/api/admin/redirect-approvals/import",
+      exportEndpoint: "/api/admin/deployable-redirects/export",
       workbookEndpoint: "/api/admin/redirect-approval-workbook",
       pendingWorkbookEndpoint: "/api/admin/redirect-approval-workbook?pending=1",
       contentType: "text/csv",
@@ -269,6 +271,7 @@ export function createHttpApp({
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
   redirectApprovalPath = null,
+  deployableRedirectOutputPath = null,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
@@ -574,6 +577,19 @@ export function createHttpApp({
           approvals: imported,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
         });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const rows = buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
+        const written = writeDeployableRedirects(rows, deployableRedirectOutputPath || undefined);
+        return json(201, { exported: rows.length, ...written });
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }
@@ -1051,6 +1067,7 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-redirect-export-endpoint=\"/api/admin/deployable-redirects/export\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-pending-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook?pending=1\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"") ||
