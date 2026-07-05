@@ -111,6 +111,10 @@ Date: 2026-07-04
   - `POST /api/admin/broker-contacts` stores reviewer-approved broker phone data
   - listing pages keep direct phone, WhatsApp, and Viber links disabled until approval exists
   - approved rows enable `tel:`, WhatsApp, and Viber links on the public listing payload
+- Added reviewer-approved 360 tour publishing workflow:
+  - `POST /api/admin/tours/approve` stores approved Photo Sphere Viewer panorama data in `production/data/tour-approvals.jsonl`
+  - public listing routes overlay approved tours only after reviewer approval
+  - approved tours expose `psv-listing-tour` mount data while imported crawl tour media stays gated by default
 - Added authenticated CMS translation review endpoints:
   - `POST /api/admin/translations/draft` creates non-indexable Hermes drafts
   - `POST /api/admin/translations/publish` requires reviewer approval before indexability

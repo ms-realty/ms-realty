@@ -28,6 +28,7 @@ What it proves now:
 - Canonical CMS seed records composed from crawl, route, translation, and media evidence.
 - Moderated public media contract that separates imported gallery photos from review-gated floor-plan/video/tour assets.
 - Draft Photo Sphere Viewer 360 tour fields with required gallery fallback policy.
+- Authenticated 360 tour approval endpoint and ledger; approved tours overlay public listing routes with Photo Sphere Viewer mount data.
 - Public route fixtures for locale-prefixed listing/search/contact/fallback routes.
 - Locale homepages with search, seller, contact, location, and featured listing paths.
 - Crawlable location pages generated from reviewed listing inventory.
@@ -100,6 +101,7 @@ Generated production data:
 - `production/data/saved-searches.jsonl`
 - `production/data/seller-pipeline.jsonl`
 - `production/data/broker-contacts.jsonl`
+- `production/data/tour-approvals.jsonl`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/listing-edits.jsonl`

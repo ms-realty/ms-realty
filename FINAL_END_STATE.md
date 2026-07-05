@@ -66,6 +66,8 @@ Implemented now:
 - Executable 360 tour CMS/public contract:
   - CMS seed has draft `photo-sphere-viewer` tour fields for every listing
   - public listing pages keep tours unavailable until panorama and caption review
+  - `POST /api/admin/tours/approve` stores reviewed panorama/caption rows in `production/data/tour-approvals.jsonl`
+  - approved tours overlay public listing routes with `psv-listing-tour` Photo Sphere Viewer mount data
   - fallback galleries remain available without WebGL
 - Executable media moderation contract:
   - imported listing photos are normalized into public gallery candidates
@@ -422,8 +424,9 @@ The media pipeline will implement:
 - WebGL fallback: normal gallery and accessible caption must still work.
 - Low-bandwidth media behavior on mobile.
 
-The 360 CMS field contract already exists locally and should become the first
-production implementation.
+The first production implementation is the gated approval overlay: imported
+listings start with draft tour fields, and only reviewer-approved panorama rows
+become public Photo Sphere Viewer mounts.
 
 ## AI And Automation
 

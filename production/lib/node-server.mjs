@@ -86,6 +86,16 @@ export function assertServerSmoke(smoke) {
   if (smoke.listingAfterBrokerContact?.body.body.actions.direct_contact.review_status !== "approved_broker_contact") {
     throw new Error("Server must expose approved direct contact links");
   }
+  if (smoke.tourApproval?.status !== 201 || smoke.tourApproval.body.is_public !== true) {
+    throw new Error("Server must approve reviewed 360 tour media");
+  }
+  if (
+    smoke.listingAfterTourApproval?.status !== 200 ||
+    smoke.listingAfterTourApproval.body.body.media.tour.available !== true ||
+    smoke.listingAfterTourApproval.body.body.media.tour.mount_target !== "psv-listing-tour"
+  ) {
+    throw new Error("Server must expose approved public 360 tour");
+  }
   if (smoke.search.status !== 200 || smoke.search.body.cards.length === 0) throw new Error("Server must serve search results");
   if (
     smoke.location.status !== 200 ||

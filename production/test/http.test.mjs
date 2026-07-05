@@ -12,6 +12,7 @@ import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/vi
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
+import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -69,6 +70,12 @@ function tempBrokerContacts() {
   return file;
 }
 
+function tempTourApprovals() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-tour-approvals-`)}/tour-approvals.jsonl`;
+  resetTourApprovals(file);
+  return file;
+}
+
 function tempRedirectApprovals() {
   return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-redirect-approvals-`)}/redirect-approvals.jsonl`;
 }
@@ -93,6 +100,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const savedSearchLedgerPath = tempSavedSearches();
   const sellerPipelinePath = tempSellerPipeline();
   const brokerContactLedgerPath = tempBrokerContacts();
+  const tourApprovalLedgerPath = tempTourApprovals();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
@@ -103,6 +111,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     savedSearchLedgerPath,
     sellerPipelinePath,
     brokerContactLedgerPath,
+    tourApprovalLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -133,6 +142,19 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       },
     }),
     listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+    tourApproval: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/tours/approve",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        id: "tour-approval-test",
+        listingId: "MS-CRAWL-0001",
+        panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+        accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+        reviewer: "media_editor",
+      },
+    }),
+    listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
     searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
     location: await dispatchHttp(app, { url: "/he/locations/sandanski" }),
@@ -373,6 +395,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");
   assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
+  assert.equal(smoke.tourApproval.body.is_public, true);
+  assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
+  assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
@@ -382,6 +407,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
+  assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 4);
   assert.equal(smoke.admin.body.languageRequests.length, 1);

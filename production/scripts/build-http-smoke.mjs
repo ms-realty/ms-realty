@@ -50,6 +50,12 @@ import {
   readBrokerContacts,
   resetBrokerContacts,
 } from "../lib/broker-contacts.mjs";
+import {
+  assertTourApprovals,
+  DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
+  readTourApprovals,
+  resetTourApprovals,
+} from "../lib/tours.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -62,6 +68,7 @@ resetViewingLedger(DEFAULT_VIEWING_LEDGER_PATH);
 resetSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
 resetSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
 resetBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
+resetTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -74,6 +81,7 @@ const app = createHttpApp({
   savedSearchLedgerPath: DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   sellerPipelinePath: DEFAULT_SELLER_PIPELINE_PATH,
   brokerContactLedgerPath: DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+  tourApprovalLedgerPath: DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
@@ -106,6 +114,19 @@ const smoke = {
     },
   }),
   listingAfterBrokerContact: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+  tourApproval: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/tours/approve",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      id: "tour-approval-MS-CRAWL-0001",
+      listingId: "MS-CRAWL-0001",
+      panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      reviewer: "media_editor",
+    },
+  }),
+  listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
   searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
   location: await dispatchHttp(app, { url: "/he/locations/sandanski" }),
@@ -358,6 +379,9 @@ smoke.sellerPipelineLedger = { path: DEFAULT_SELLER_PIPELINE_PATH, rows: sellerP
 const brokerContacts = readBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
 assertBrokerContacts(brokerContacts);
 smoke.brokerContactLedger = { path: DEFAULT_BROKER_CONTACT_LEDGER_PATH, rows: brokerContacts.length };
+const tourApprovals = readTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
+assertTourApprovals(tourApprovals);
+smoke.tourApprovalLedger = { path: DEFAULT_TOUR_APPROVAL_LEDGER_PATH, rows: tourApprovals.length };
 smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");

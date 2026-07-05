@@ -14,6 +14,7 @@ import {
 } from "./public-site.mjs";
 import { contactPath, locationPath, listingPath, sellerPath } from "./seo.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
+import { latestTourForListing } from "./tours.mjs";
 
 export const DEFAULT_CMS_SEED_PATH = fromRoot("production", "data", "cms-seed.json");
 
@@ -21,7 +22,7 @@ export function loadCmsSeed(path = DEFAULT_CMS_SEED_PATH) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
 }
 
-export function listingFromCmsRecord(record) {
+export function listingFromCmsRecord(record, approvedTour = null) {
   return {
     id: record.id,
     url: record.source_url,
@@ -45,7 +46,7 @@ export function listingFromCmsRecord(record) {
     image_count: record.facts.image_count,
     media: record.media || [],
     media_workflow: record.media_workflow || null,
-    tour: record.tour || null,
+    tour: approvedTour || record.tour || null,
     word_count: record.facts.word_count,
     schema_present: record.seo.schema_present,
   };
@@ -80,7 +81,7 @@ function locationNames(seed) {
   return [...new Set(listingRecords(seed).map((record) => String(record.facts.location || "").trim()).filter(Boolean))];
 }
 
-export function resolveRuntimePath(registry, seed, pathname, translationTasks = []) {
+export function resolveRuntimePath(registry, seed, pathname, translationTasks = [], tourApprovals = []) {
   const normalized = pathname.replace(/\/$/, "");
   for (const record of listingRecords(seed)) {
     const translations = mergeRuntimeTranslations(record, translationTasks);
@@ -92,7 +93,7 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
     return {
       type: "listing",
       record,
-      listing: listingFromCmsRecord(record),
+      listing: listingFromCmsRecord(record, latestTourForListing(tourApprovals, record.id)),
       localeCode: matchedLocale,
     };
   }
@@ -130,8 +131,8 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   return { type: "not_found", status: 404 };
 }
 
-export function renderRuntimePath(registry, seed, pathname, translationTasks = [], brokerContacts = []) {
-  const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks);
+export function renderRuntimePath(registry, seed, pathname, translationTasks = [], brokerContacts = [], tourApprovals = []) {
+  const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks, tourApprovals);
   if (resolved.type === "listing") {
     return renderListingPage({
       registry,

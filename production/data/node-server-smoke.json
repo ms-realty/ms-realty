@@ -873,6 +873,378 @@
       }
     }
   },
+  "tourApproval": {
+    "status": 201,
+    "body": {
+      "provider": "photo-sphere-viewer",
+      "listing_id": "MS-CRAWL-0001",
+      "panorama_url": "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      "thumbnail_url": null,
+      "hotspots": [],
+      "is_public": true,
+      "accessibility_caption": "Reviewed 360 panorama for MS-CRAWL-0001.",
+      "review_status": "approved",
+      "fallback_gallery": [
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+          "alt": "Property photo"
+        },
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+          "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+        },
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+          "alt": "Property photo"
+        },
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+          "alt": "Property photo"
+        },
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+          "alt": "Property photo"
+        },
+        {
+          "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+          "alt": "Property photo"
+        }
+      ],
+      "id": "tour-approval-server-MS-CRAWL-0001",
+      "reviewer": "media_editor",
+      "approved_at": "2026-07-04T00:05:00Z"
+    }
+  },
+  "listingAfterTourApproval": {
+    "status": 200,
+    "body": {
+      "kind": "listing",
+      "status": 200,
+      "requested_locale": "he",
+      "locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "path": "/he/properties/MS-CRAWL-0001",
+      "canonical": "/he/properties/MS-CRAWL-0001",
+      "indexable": true,
+      "fallback": {
+        "active": false,
+        "requested_locale": "he",
+        "resolved_locale": "he"
+      },
+      "metadata": {
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+        "robots": "index,follow"
+      },
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "el",
+          "href": "/el/akinita/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "he",
+          "href": "/he/properties/MS-CRAWL-0001"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/imoti/MS-CRAWL-0001"
+        }
+      ],
+      "schema": {
+        "@context": "https://schema.org",
+        "@type": "RealEstateListing",
+        "@id": "/he/properties/MS-CRAWL-0001#listing",
+        "url": "/he/properties/MS-CRAWL-0001",
+        "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+        "image_count": 35,
+        "areaServed": "Sandanski"
+      },
+      "translation": {
+        "locale": "he",
+        "status": "approved",
+        "human_approved": true,
+        "reviewer": "translator_he"
+      },
+      "body": {
+        "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "facts": {
+          "id": "MS-CRAWL-0001",
+          "location": "Sandanski",
+          "property_type": "property",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "price_eur": null,
+          "image_count": 35
+        },
+        "media": {
+          "gallery": [
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+              "alt": "Property photo",
+              "width": 45,
+              "height": 45
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+              "width": null,
+              "height": null
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
+              "alt": "Property photo",
+              "width": 72,
+              "height": 72
+            }
+          ],
+          "gallery_count": 18,
+          "floor_plans": [],
+          "videos": [],
+          "review": {
+            "total_assets": 35,
+            "public_gallery_assets": 19,
+            "floor_plan_candidates": 0,
+            "video_candidates": 0,
+            "review_gated_assets": 16
+          },
+          "tour": {
+            "available": true,
+            "provider": "photo-sphere-viewer",
+            "mount_target": "psv-listing-tour",
+            "panorama_url": "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+            "thumbnail_url": null,
+            "accessibility_caption": "Reviewed 360 panorama for MS-CRAWL-0001.",
+            "fallback_gallery": [
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+                "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+                "alt": "Property photo"
+              },
+              {
+                "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+                "alt": "Property photo"
+              }
+            ]
+          }
+        },
+        "ctas": {
+          "inquiry": "פנייה",
+          "seller_valuation": "הערכת מוכר"
+        },
+        "actions": {
+          "sticky_mobile": true,
+          "minimum_tap_target_px": 44,
+          "primary": [
+            {
+              "id": "inquiry",
+              "label": "פנייה",
+              "kind": "lead",
+              "method": "POST",
+              "endpoint": "/api/leads",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0001",
+                "source": "website_listing_detail"
+              }
+            },
+            {
+              "id": "callback",
+              "label": "שיחה חוזרת",
+              "kind": "lead",
+              "method": "POST",
+              "endpoint": "/api/leads",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0001",
+                "source": "website_callback_request",
+                "contact_preference": "phone"
+              }
+            },
+            {
+              "id": "request_viewing",
+              "label": "תיאום סיור",
+              "kind": "lead",
+              "method": "POST",
+              "endpoint": "/api/leads",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0001",
+                "source": "website_viewing_request",
+                "contact_preference": "phone"
+              }
+            }
+          ],
+          "direct_contact": {
+            "review_status": "approved_broker_contact",
+            "broker": "broker_ru",
+            "reviewer": "owner",
+            "channels": [
+              {
+                "id": "phone",
+                "label": "טלפון",
+                "enabled": true,
+                "href": "tel:+359880000000"
+              },
+              {
+                "id": "whatsapp",
+                "label": "WhatsApp",
+                "enabled": true,
+                "href": "https://wa.me/359880000000"
+              },
+              {
+                "id": "viber",
+                "label": "Viber",
+                "enabled": true,
+                "href": "viber://chat?number=%2B359880000000"
+              }
+            ]
+          },
+          "secondary": [
+            {
+              "id": "save",
+              "label": "שמירה",
+              "kind": "client_saved_listing",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0001"
+            },
+            {
+              "id": "share_family",
+              "label": "שיתוף",
+              "kind": "share",
+              "url": "/he/properties/MS-CRAWL-0001"
+            },
+            {
+              "id": "print",
+              "label": "הדפסה/PDF",
+              "kind": "print",
+              "url": "/he/properties/MS-CRAWL-0001?print=1",
+              "pdf_status": "browser_print_ready"
+            }
+          ]
+        },
+        "source": {
+          "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
+          "source_domain": "makler-realty.com",
+          "source_locale": "bg",
+          "source_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+        }
+      }
+    }
+  },
   "search": {
     "status": 200,
     "body": {
@@ -2449,9 +2821,12 @@
             "review_gated_assets": 16
           },
           "tour": {
-            "available": false,
+            "available": true,
             "provider": "photo-sphere-viewer",
-            "review_status": "needs_panorama_upload",
+            "mount_target": "psv-listing-tour",
+            "panorama_url": "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+            "thumbnail_url": null,
+            "accessibility_caption": "Reviewed 360 panorama for MS-CRAWL-0001.",
             "fallback_gallery": [
               {
                 "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
@@ -2861,6 +3236,9 @@
     "rows": 1
   },
   "brokerContactLedger": {
+    "rows": 1
+  },
+  "tourApprovalLedger": {
     "rows": 1
   }
 }

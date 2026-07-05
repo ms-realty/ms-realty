@@ -304,6 +304,14 @@ if (
 ) {
   throw new Error("HTTP smoke must expose approved broker contact links");
 }
+if (
+  httpSmoke.tourApproval.status !== 201 ||
+  httpSmoke.tourApproval.body.is_public !== true ||
+  httpSmoke.listingAfterTourApproval.body.body.media.tour.available !== true ||
+  httpSmoke.listingAfterTourApproval.body.body.media.tour.mount_target !== "psv-listing-tour"
+) {
+  throw new Error("HTTP smoke must expose approved Photo Sphere Viewer tour only after review");
+}
 if (httpSmoke.languageRequest.status !== 201 || httpSmoke.languageRequest.body.requested_locale !== "fr") {
   throw new Error("HTTP smoke must accept French language request");
 }
@@ -426,6 +434,7 @@ if (
 if (httpSmoke.viewingLedger.rows !== 1) throw new Error("HTTP smoke must persist one viewing row");
 if (httpSmoke.savedSearchLedger.rows !== 1) throw new Error("HTTP smoke must persist one saved search row");
 if (httpSmoke.sellerPipelineLedger.rows !== 1) throw new Error("HTTP smoke must persist one seller pipeline row");
+if (httpSmoke.tourApprovalLedger.rows !== 1) throw new Error("HTTP smoke must persist one tour approval row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
 if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, published, and stale translation rows");
 if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
@@ -443,6 +452,14 @@ if (
 }
 if (nodeServerSmoke.listing.status !== 200 || nodeServerSmoke.listing.body.dir !== "rtl") {
   throw new Error("Node server smoke must serve Hebrew listing as RTL 200");
+}
+if (
+  nodeServerSmoke.tourApproval.status !== 201 ||
+  nodeServerSmoke.tourApproval.body.is_public !== true ||
+  nodeServerSmoke.listingAfterTourApproval.body.body.media.tour.available !== true ||
+  nodeServerSmoke.listingAfterTourApproval.body.body.media.tour.mount_target !== "psv-listing-tour"
+) {
+  throw new Error("Node server smoke must expose approved Photo Sphere Viewer tour only after review");
 }
 if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
 if (
@@ -531,6 +548,7 @@ if (
 if (nodeServerSmoke.viewingLedger.rows !== 1) throw new Error("Node server smoke must persist one viewing row");
 if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server smoke must persist one saved search row");
 if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node server smoke must persist one seller pipeline row");
+if (nodeServerSmoke.tourApprovalLedger.rows !== 1) throw new Error("Node server smoke must persist one tour approval row");
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 4) throw new Error("Lead ledger artifact must contain buyer, viewing, contact, and seller smoke rows");
@@ -548,5 +566,7 @@ const savedSearches = fs.readFileSync(fromRoot("production", "data", "saved-sear
 if (savedSearches.length !== 1) throw new Error("Saved search artifact must contain one deterministic smoke row");
 const sellerPipeline = fs.readFileSync(fromRoot("production", "data", "seller-pipeline.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (sellerPipeline.length !== 1) throw new Error("Seller pipeline artifact must contain one deterministic smoke row");
+const tourApprovals = fs.readFileSync(fromRoot("production", "data", "tour-approvals.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (tourApprovals.length !== 1) throw new Error("Tour approval artifact must contain one deterministic smoke row");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

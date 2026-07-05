@@ -11,6 +11,7 @@ import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/vi
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
+import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -23,6 +24,7 @@ const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-re
 const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-saved-searches-")), "saved-searches.jsonl");
 const sellerPipelinePath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-seller-pipeline-")), "seller-pipeline.jsonl");
 const brokerContactLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-broker-contacts-")), "broker-contacts.jsonl");
+const tourApprovalLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-tour-approvals-")), "tour-approvals.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
@@ -32,6 +34,7 @@ resetViewingLedger(viewingLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
 resetBrokerContacts(brokerContactLedgerPath);
+resetTourApprovals(tourApprovalLedgerPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
@@ -43,6 +46,7 @@ const server = createNodeServer(
     savedSearchLedgerPath,
     sellerPipelinePath,
     brokerContactLedgerPath,
+    tourApprovalLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -88,6 +92,18 @@ try {
       }),
     }),
     listingAfterBrokerContact: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+    tourApproval: await jsonFetch(baseUrl, "/api/admin/tours/approve", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        id: "tour-approval-server-MS-CRAWL-0001",
+        listingId: "MS-CRAWL-0001",
+        panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+        accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+        reviewer: "media_editor",
+      }),
+    }),
+    listingAfterTourApproval: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
     search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
     searchHtml: await textFetch(baseUrl, "/he/search?q=Sandanski", {
       headers: { accept: "text/html" },
@@ -299,6 +315,9 @@ try {
   const brokerContacts = readBrokerContacts(brokerContactLedgerPath);
   assertBrokerContacts(brokerContacts);
   smoke.brokerContactLedger = { rows: brokerContacts.length };
+  const tourApprovals = readTourApprovals(tourApprovalLedgerPath);
+  assertTourApprovals(tourApprovals);
+  smoke.tourApprovalLedger = { rows: tourApprovals.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);

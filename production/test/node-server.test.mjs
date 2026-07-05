@@ -12,6 +12,7 @@ import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/vi
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
+import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -25,6 +26,7 @@ async function withServer(fn) {
   const savedSearchLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-saved-searches-`)}/saved-searches.jsonl`;
   const sellerPipelinePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-seller-pipeline-`)}/seller-pipeline.jsonl`;
   const brokerContactLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-broker-contacts-`)}/broker-contacts.jsonl`;
+  const tourApprovalLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-tour-approvals-`)}/tour-approvals.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
@@ -34,6 +36,7 @@ async function withServer(fn) {
   resetSavedSearches(savedSearchLedgerPath);
   resetSellerPipeline(sellerPipelinePath);
   resetBrokerContacts(brokerContactLedgerPath);
+  resetTourApprovals(tourApprovalLedgerPath);
   const server = createNodeServer(
     createHttpApp({
       leadLedgerPath,
@@ -45,6 +48,7 @@ async function withServer(fn) {
       savedSearchLedgerPath,
       sellerPipelinePath,
       brokerContactLedgerPath,
+      tourApprovalLedgerPath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
       editedAt: "2026-07-04T00:03:00Z",
@@ -67,6 +71,7 @@ async function withServer(fn) {
       savedSearchLedgerPath,
       sellerPipelinePath,
       brokerContactLedgerPath,
+      tourApprovalLedgerPath,
     );
   } finally {
     await close(server);
@@ -90,6 +95,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       savedSearchLedgerPath,
       sellerPipelinePath,
       brokerContactLedgerPath,
+      tourApprovalLedgerPath,
     ) => {
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
@@ -121,6 +127,18 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           }),
         }),
         listingAfterBrokerContact: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+        tourApproval: await jsonFetch(baseUrl, "/api/admin/tours/approve", {
+          method: "POST",
+          headers: { authorization: "Bearer local-admin-smoke" },
+          body: JSON.stringify({
+            id: "node-server-tour-approval-test",
+            listingId: "MS-CRAWL-0001",
+            panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+            accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+            reviewer: "media_editor",
+          }),
+        }),
+        listingAfterTourApproval: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
         search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
         searchHtml: await textFetch(baseUrl, "/he/search?q=Sandanski", {
           headers: { accept: "text/html" },
@@ -305,6 +323,9 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.listingPrint.body.includes("data-kind=\"listing-print\""), true);
       assert.equal(smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\""), true);
       assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
+      assert.equal(smoke.tourApproval.body.is_public, true);
+      assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
+      assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
       assert.equal(smoke.location.body.cards.length, 1);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
       assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
@@ -322,6 +343,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
       assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
       assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
+      assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
     },
   );

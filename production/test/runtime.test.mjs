@@ -12,6 +12,7 @@ import {
   searchRuntimeListings,
   submitRuntimeLead,
 } from "../lib/runtime.mjs";
+import { createTourApproval } from "../lib/tours.mjs";
 
 const registry = loadLocaleRegistry();
 const seed = loadCmsSeed();
@@ -69,6 +70,34 @@ test("runtime overlays approved broker contact links on listing routes", () => {
 
   assert.equal(page.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "viber").href, "viber://chat?number=%2B359880000000");
+});
+
+test("runtime overlays approved 360 tour before public listing render", () => {
+  const page = renderRuntimePath(
+    registry,
+    seed,
+    "/he/properties/MS-CRAWL-0001",
+    [],
+    [],
+    [
+      createTourApproval(
+        seed,
+        {
+          id: "tour-approval-runtime-test",
+          listingId: "MS-CRAWL-0001",
+          panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+          accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+          reviewer: "media_editor",
+        },
+        "2026-07-05T00:00:00Z",
+      ),
+    ],
+  );
+
+  assert.equal(page.status, 200);
+  assert.equal(page.body.media.tour.available, true);
+  assert.equal(page.body.media.tour.mount_target, "psv-listing-tour");
+  assert.equal(page.body.media.tour.provider, "photo-sphere-viewer");
 });
 
 test("runtime overlays stale translation ledger rows before public rendering", () => {

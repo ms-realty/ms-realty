@@ -24,6 +24,7 @@ import { appendListingEdit, createListingEdit, readListingEdits } from "./listin
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
+import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -223,6 +224,7 @@ export function createHttpApp({
   savedSearchLedgerPath = null,
   sellerPipelinePath = null,
   brokerContactLedgerPath = null,
+  tourApprovalLedgerPath = null,
   redirectApprovalPath = null,
   localeRegistryPath = null,
   receivedAt,
@@ -546,6 +548,22 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        return json(
+          201,
+          appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
+            filePath: tourApprovalLedgerPath || undefined,
+          }),
+        );
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = JSON.parse(request.body || "{}");
@@ -600,6 +618,7 @@ export function createHttpApp({
       url.pathname,
       readTranslationLedger(translationLedgerPath || undefined),
       readBrokerContacts(brokerContactLedgerPath || undefined),
+      readTourApprovals(tourApprovalLedgerPath || undefined),
     );
     return publicResponse(request, url, rendered);
   };
@@ -641,6 +660,16 @@ export function assertHttpSmoke(smoke) {
     !smoke.listingAfterBrokerContact.body.body.actions.direct_contact.channels.every((channel) => channel.enabled && channel.href)
   ) {
     throw new Error("HTTP smoke must expose approved direct contact links");
+  }
+  if (smoke.tourApproval?.status !== 201 || smoke.tourApproval.body.is_public !== true) {
+    throw new Error("HTTP smoke must approve reviewed 360 tour media");
+  }
+  if (
+    smoke.listingAfterTourApproval?.status !== 200 ||
+    smoke.listingAfterTourApproval.body.body.media.tour.available !== true ||
+    smoke.listingAfterTourApproval.body.body.media.tour.mount_target !== "psv-listing-tour"
+  ) {
+    throw new Error("HTTP smoke must expose approved public 360 tour");
   }
   if (smoke.search.status !== 200 || smoke.search.body.mobile_policy.list_first_mobile !== true) {
     throw new Error("HTTP smoke must serve mobile-first search");
