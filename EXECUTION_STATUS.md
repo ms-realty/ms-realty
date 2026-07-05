@@ -224,6 +224,9 @@ Date: 2026-07-04
 - Added production server adapter:
   - `npm start` runs `production/server.mjs`
   - launch report now treats the Node adapter as the production app layer while redirect reviews and external SEO exports remain blocked
+- Added production redirect review import path:
+  - `migration/reviews/redirect-approvals.csv` can feed human-approved same-content redirect rows into the existing deployable 301 export
+  - without that CSV, validation keeps the two-row BG/RU smoke export and leaves the full redirect review blocker intact
 - Added seller valuation pipeline intake:
   - seller leads from `POST /api/leads` create a seller pipeline row
   - persisted seller rows start at `valuation_requested`

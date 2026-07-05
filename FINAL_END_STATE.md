@@ -116,6 +116,9 @@ Implemented now:
 - Production Node server adapter:
   - `npm start` runs `production/server.mjs` against the same public/admin contracts
   - launch remains blocked until redirect reviews and external SEO exports are complete
+- Production redirect review import:
+  - human-approved rows from `migration/reviews/redirect-approvals.csv` feed the deployable 301 export
+  - the importer still rejects non-mapped rows, homepage targets, and missing same-content confirmation
 - Seller pipeline contract:
   - seller valuation leads create `valuation_requested` pipeline rows
   - callback and appraisal checklist tasks start open

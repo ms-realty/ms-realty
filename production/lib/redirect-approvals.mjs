@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { parseCsv } from "./csv.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_REDIRECT_APPROVALS_PATH = fromRoot("production", "data", "redirect-approvals.jsonl");
@@ -41,6 +42,19 @@ function normalizeApproval(route, input, approvedAt) {
   };
 }
 
+function truthy(value) {
+  return value === true || ["true", "1", "yes", "on"].includes(String(value || "").trim().toLowerCase());
+}
+
+function approvalInputFromRow(row) {
+  return {
+    oldUrl: row.old_url || row.oldUrl || row.url,
+    equivalentContent: truthy(row.equivalent_content || row.equivalentContent),
+    reviewer: row.reviewer,
+    reason: row.reason,
+  };
+}
+
 export function resetRedirectApprovals(filePath = DEFAULT_REDIRECT_APPROVALS_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, "");
@@ -55,6 +69,22 @@ export function appendRedirectApproval(
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${JSON.stringify(approval)}\n`);
   return approval;
+}
+
+export function importRedirectApprovalsCsv(
+  routeMap,
+  csvText,
+  { filePath = DEFAULT_REDIRECT_APPROVALS_PATH, approvedAt = new Date().toISOString() } = {},
+) {
+  const rows = parseCsv(csvText);
+  const approvals = rows.map((row) => {
+    const input = approvalInputFromRow(row);
+    return normalizeApproval(routeByOldUrl(routeMap, input.oldUrl), input, row.approved_at || approvedAt);
+  });
+  if (!approvals.length) return [];
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.appendFileSync(filePath, `${approvals.map((approval) => JSON.stringify(approval)).join("\n")}\n`);
+  return approvals;
 }
 
 export function readRedirectApprovals(filePath = DEFAULT_REDIRECT_APPROVALS_PATH) {

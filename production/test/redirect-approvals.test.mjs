@@ -7,6 +7,7 @@ import {
   appendRedirectApproval,
   assertDeployableRedirects,
   buildDeployableRedirects,
+  importRedirectApprovalsCsv,
   readRedirectApprovals,
   resetRedirectApprovals,
   summarizeDeployableRedirects,
@@ -72,6 +73,33 @@ test("approved BG and RU listing routes export as deployable 301 redirects", () 
   assert.equal(summary.byTargetLocale.ru, 1);
   assert.equal(summary.homepageTargets, 0);
   assert.ok(rows.every((row) => row.status === 301));
+});
+
+test("CSV redirect approval import validates rows before appending", () => {
+  const routeMap = loadRouteMap();
+  const filePath = tempApprovalFile();
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg");
+  const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
+
+  resetRedirectApprovals(filePath);
+  assert.throws(
+    () =>
+      importRedirectApprovalsCsv(
+        routeMap,
+        `old_url,equivalent_content,reviewer,approved_at,reason\n${listing.old_url},true,editor_bg,2026-07-04T00:00:00Z,Reviewed\n${taxonomy.old_url},true,editor_bg,2026-07-04T00:00:00Z,Bad\n`,
+        { filePath },
+      ),
+    /Only mapped 301 routes/,
+  );
+  assert.deepEqual(readRedirectApprovals(filePath), []);
+
+  const approvals = importRedirectApprovalsCsv(
+    routeMap,
+    `old_url,equivalent_content,reviewer,approved_at,reason\n${listing.old_url},true,editor_bg,2026-07-04T00:00:00Z,Reviewed same content\n`,
+    { filePath },
+  );
+  assert.equal(approvals.length, 1);
+  assert.equal(readRedirectApprovals(filePath).length, 1);
 });
 
 test("generated deployable redirect file is valid when present", () => {
