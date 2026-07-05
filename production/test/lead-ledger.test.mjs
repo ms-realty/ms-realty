@@ -25,5 +25,14 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
   assert.equal(rows[0].admin_locale, "en");
   assert.equal(rows[0].source, "website_listing_detail");
   assert.equal(rows[0].contact_preference, "whatsapp");
+  assert.equal(rows[0].sla_due_at, "2026-07-04T00:15:00.000Z");
+  assert.equal(rows[0].manager_escalation_due_at, "2026-07-04T01:00:00.000Z");
+  assert.deepEqual(rows[0].follow_up_task, {
+    id: "sla-lead-test",
+    status: "open",
+    owner: "broker_assignment",
+    due_at: "2026-07-04T00:15:00.000Z",
+    action: "broker_response_required",
+  });
   assert.equal(assertLeadLedger(rows), true);
 });

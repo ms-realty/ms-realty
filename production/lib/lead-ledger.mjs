@@ -9,8 +9,18 @@ export function resetLeadLedger(filePath = DEFAULT_LEAD_LEDGER_PATH) {
   fs.writeFileSync(filePath, "");
 }
 
-export function appendLead(lead, { filePath = DEFAULT_LEAD_LEDGER_PATH, receivedAt = new Date().toISOString() } = {}) {
+function minutesAfter(isoString, minutes) {
+  const time = Date.parse(isoString);
+  if (!Number.isFinite(time)) throw new Error("receivedAt must be an ISO timestamp");
+  return new Date(time + minutes * 60 * 1000).toISOString();
+}
+
+export function appendLead(
+  lead,
+  { filePath = DEFAULT_LEAD_LEDGER_PATH, receivedAt = new Date().toISOString(), slaMinutes = 15, escalationMinutes = 60 } = {},
+) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const slaDueAt = minutesAfter(receivedAt, slaMinutes);
   const row = {
     received_at: receivedAt,
     id: lead.id,
@@ -22,6 +32,15 @@ export function appendLead(lead, { filePath = DEFAULT_LEAD_LEDGER_PATH, received
     admin_locale: lead.admin_locale,
     contact_preference: lead.contact_preference,
     broker_approval_required: lead.hermes_reply_draft?.broker_approval_required === true,
+    sla_due_at: slaDueAt,
+    manager_escalation_due_at: minutesAfter(receivedAt, escalationMinutes),
+    follow_up_task: {
+      id: `sla-${lead.lead?.id || lead.id}`,
+      status: "open",
+      owner: "broker_assignment",
+      due_at: slaDueAt,
+      action: "broker_response_required",
+    },
   };
   fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
   return row;
@@ -44,6 +63,9 @@ export function assertLeadLedger(rows) {
       throw new Error("Lead ledger row is missing routing data");
     }
     if (row.broker_approval_required !== true) throw new Error("Lead ledger must preserve broker approval gate");
+    if (!row.sla_due_at || row.follow_up_task?.status !== "open") {
+      throw new Error("Lead ledger must create an immediate broker follow-up SLA task");
+    }
   }
   return true;
 }

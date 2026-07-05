@@ -2065,7 +2065,16 @@
         "original_language": "he",
         "admin_locale": "en",
         "contact_preference": "whatsapp",
-        "broker_approval_required": true
+        "broker_approval_required": true,
+        "sla_due_at": "2026-07-04T00:15:00.000Z",
+        "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+        "follow_up_task": {
+          "id": "sla-server-lead-he-0001",
+          "status": "open",
+          "owner": "broker_assignment",
+          "due_at": "2026-07-04T00:15:00.000Z",
+          "action": "broker_response_required"
+        }
       },
       "sellerPipeline": null
     },
@@ -2123,7 +2132,16 @@
         "original_language": "he",
         "admin_locale": "en",
         "contact_preference": "phone",
-        "broker_approval_required": true
+        "broker_approval_required": true,
+        "sla_due_at": "2026-07-04T00:15:00.000Z",
+        "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+        "follow_up_task": {
+          "id": "sla-server-viewing-lead-he-0001",
+          "status": "open",
+          "owner": "broker_assignment",
+          "due_at": "2026-07-04T00:15:00.000Z",
+          "action": "broker_response_required"
+        }
       },
       "sellerPipeline": null
     },
@@ -2181,7 +2199,16 @@
         "original_language": "he",
         "admin_locale": "en",
         "contact_preference": "phone",
-        "broker_approval_required": true
+        "broker_approval_required": true,
+        "sla_due_at": "2026-07-04T00:15:00.000Z",
+        "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+        "follow_up_task": {
+          "id": "sla-server-lead-contact-he-0001",
+          "status": "open",
+          "owner": "broker_assignment",
+          "due_at": "2026-07-04T00:15:00.000Z",
+          "action": "broker_response_required"
+        }
       },
       "sellerPipeline": null
     },
@@ -2239,7 +2266,16 @@
         "original_language": "el",
         "admin_locale": "en",
         "contact_preference": null,
-        "broker_approval_required": true
+        "broker_approval_required": true,
+        "sla_due_at": "2026-07-04T00:15:00.000Z",
+        "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+        "follow_up_task": {
+          "id": "sla-server-lead-seller-el-0001",
+          "status": "open",
+          "owner": "broker_assignment",
+          "due_at": "2026-07-04T00:15:00.000Z",
+          "action": "broker_response_required"
+        }
       },
       "sellerPipeline": {
         "created_at": "2026-07-04T00:08:00Z",
@@ -2530,7 +2566,16 @@
           "original_language": "he",
           "admin_locale": "en",
           "contact_preference": "whatsapp",
-          "broker_approval_required": true
+          "broker_approval_required": true,
+          "sla_due_at": "2026-07-04T00:15:00.000Z",
+          "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+          "follow_up_task": {
+            "id": "sla-server-lead-he-0001",
+            "status": "open",
+            "owner": "broker_assignment",
+            "due_at": "2026-07-04T00:15:00.000Z",
+            "action": "broker_response_required"
+          }
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
@@ -2542,7 +2587,16 @@
           "original_language": "he",
           "admin_locale": "en",
           "contact_preference": "phone",
-          "broker_approval_required": true
+          "broker_approval_required": true,
+          "sla_due_at": "2026-07-04T00:15:00.000Z",
+          "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+          "follow_up_task": {
+            "id": "sla-server-viewing-lead-he-0001",
+            "status": "open",
+            "owner": "broker_assignment",
+            "due_at": "2026-07-04T00:15:00.000Z",
+            "action": "broker_response_required"
+          }
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
@@ -2554,7 +2608,16 @@
           "original_language": "he",
           "admin_locale": "en",
           "contact_preference": "phone",
-          "broker_approval_required": true
+          "broker_approval_required": true,
+          "sla_due_at": "2026-07-04T00:15:00.000Z",
+          "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+          "follow_up_task": {
+            "id": "sla-server-lead-contact-he-0001",
+            "status": "open",
+            "owner": "broker_assignment",
+            "due_at": "2026-07-04T00:15:00.000Z",
+            "action": "broker_response_required"
+          }
         },
         {
           "received_at": "2026-07-04T00:00:00Z",
@@ -2566,7 +2629,16 @@
           "original_language": "el",
           "admin_locale": "en",
           "contact_preference": null,
-          "broker_approval_required": true
+          "broker_approval_required": true,
+          "sla_due_at": "2026-07-04T00:15:00.000Z",
+          "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+          "follow_up_task": {
+            "id": "sla-server-lead-seller-el-0001",
+            "status": "open",
+            "owner": "broker_assignment",
+            "due_at": "2026-07-04T00:15:00.000Z",
+            "action": "broker_response_required"
+          }
         }
       ],
       "replies": [
