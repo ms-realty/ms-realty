@@ -31,18 +31,32 @@ export function appendListingEdit(edit, { filePath = DEFAULT_LISTING_EDIT_LEDGER
 
 export function applyListingEdits(seed, edits = []) {
   const patches = new Map();
+  const mediaReviewers = new Map();
   for (const edit of edits) {
-    if (!edit.listing_id || !edit.patch) continue;
-    patches.set(edit.listing_id, { ...(patches.get(edit.listing_id) || {}), ...edit.patch });
+    if (!edit.listing_id) continue;
+    if (edit.patch) patches.set(edit.listing_id, { ...(patches.get(edit.listing_id) || {}), ...edit.patch });
+    if (edit.media_reviewer) mediaReviewers.set(edit.listing_id, edit.media_reviewer);
   }
-  if (!patches.size) return seed;
+  if (!patches.size && !mediaReviewers.size) return seed;
   return {
     ...seed,
-    records: seed.records.map((record) =>
-      record.collection === "listings" && patches.has(record.id)
-        ? { ...record, facts: { ...record.facts, ...patches.get(record.id) } }
-        : record,
-    ),
+    records: seed.records.map((record) => {
+      if (record.collection !== "listings" || (!patches.has(record.id) && !mediaReviewers.has(record.id))) return record;
+      const mediaReviewer = mediaReviewers.get(record.id);
+      const media = mediaReviewer
+        ? (record.media || []).map((item) =>
+            item.is_public ? item : { ...item, review_status: "reviewed_private", media_reviewer: mediaReviewer },
+          )
+        : record.media;
+      return {
+        ...record,
+        facts: { ...record.facts, ...(patches.get(record.id) || {}) },
+        media,
+        media_workflow: mediaReviewer
+          ? { ...record.media_workflow, review_gated_assets: 0, media_reviewer: mediaReviewer }
+          : record.media_workflow,
+      };
+    }),
   };
 }
 

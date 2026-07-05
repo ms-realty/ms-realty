@@ -25,3 +25,12 @@ test("media library exposes imported photos and gates plans or videos for review
   assert.equal(library.review.video_candidates, 1);
   assert.equal(library.review.review_gated_assets, 3);
 });
+
+test("reviewed private media no longer blocks media review", () => {
+  const library = publicMediaLibrary([
+    { kind: "floor_plan", is_public: false, review_status: "reviewed_private" },
+    { kind: "video", is_public: false, review_status: "reviewed_private" },
+  ]);
+
+  assert.equal(library.review.review_gated_assets, 0);
+});

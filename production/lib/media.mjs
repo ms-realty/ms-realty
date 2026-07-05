@@ -64,7 +64,7 @@ export function mediaWorkflow(media = []) {
     public_gallery_assets: media.filter((item) => item.kind === "photo" && item.is_public).length,
     floor_plan_candidates: media.filter((item) => item.kind === "floor_plan").length,
     video_candidates: media.filter((item) => item.kind === "video").length,
-    review_gated_assets: media.filter((item) => !item.is_public).length,
+    review_gated_assets: media.filter((item) => !item.is_public && item.review_status !== "reviewed_private").length,
   };
 }
 

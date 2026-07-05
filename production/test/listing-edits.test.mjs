@@ -37,6 +37,7 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
     {
       listing_id: "MS-CRAWL-0001",
       patch: { description: "Reviewed source description.", price_eur: 123000, bedrooms: 2 },
+      media_reviewer: "media_editor",
     },
   ]);
   const original = seed.records.find((record) => record.id === "MS-CRAWL-0001");
@@ -46,6 +47,8 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
   assert.equal(record.facts.description, "Reviewed source description.");
   assert.equal(record.facts.price_eur, 123000);
   assert.equal(record.facts.bedrooms, 2);
+  assert.equal(record.media_workflow.review_gated_assets, 0);
+  assert.equal(record.media_workflow.media_reviewer, "media_editor");
 });
 
 test("listing edits reject invalid numeric facts before persistence", () => {
