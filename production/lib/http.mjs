@@ -33,7 +33,7 @@ import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } fr
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
-import { buildLaunchReadinessReport } from "./launch-readiness.mjs";
+import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -249,6 +249,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     },
     seoEvidence: seoEvidencePayload(seoEvidence),
     launchReadinessEndpoint: "/api/admin/launch-readiness",
+    launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     deployablePreview: buildDeployableRedirects(routes, approvals),
   };
 }
@@ -272,6 +273,7 @@ export function createHttpApp({
   eventLedgerPath = null,
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
+  launchReadinessOutputPath = null,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
@@ -508,6 +510,15 @@ export function createHttpApp({
         return json(401, { kind: "unauthorized" });
       }
       return json(200, currentLaunchReadiness());
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      const report = currentLaunchReadiness();
+      const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined);
+      return json(201, { outPath, report });
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
@@ -1072,7 +1083,8 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-pending-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook?pending=1\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-endpoint=\"/api/admin/launch-readiness\"")
+    !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-endpoint=\"/api/admin/launch-readiness\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-export-endpoint=\"/api/admin/launch-readiness/export\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
   }

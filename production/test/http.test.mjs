@@ -618,6 +618,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.redirectApprovalImport.workbookEndpoint, "/api/admin/redirect-approval-workbook");
   assert.equal(review.body.redirectApprovalImport.pendingWorkbookEndpoint, "/api/admin/redirect-approval-workbook?pending=1");
   assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
+  assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);
   assert.equal(reviewHtml.body.includes('data-redirect-import-endpoint="/api/admin/redirect-approvals/import"'), true);
@@ -625,6 +626,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-pending-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook?pending=1"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-endpoint="/api/admin/launch-readiness"'), true);
+  assert.equal(reviewHtml.body.includes('data-launch-readiness-export-endpoint="/api/admin/launch-readiness/export"'), true);
 });
 
 test("HTTP app rejects invalid language requests", async () => {
@@ -644,10 +646,12 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const ru = routeMap.find((route) => route.url_type === "listing" && route.source_domain === "makler-realty.ru");
   const seoEvidenceInputDir = tempSeoEvidenceDir();
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
+  const launchReadinessOutputPath = `${seoEvidenceInputDir}/launch-readiness.json`;
   const app = createHttpApp({
     routeMap,
     seoEvidenceInputDir,
     seoEvidenceOutputPath,
+    launchReadinessOutputPath,
     reviewedAt: "2026-07-05T00:00:00Z",
   });
 
@@ -712,6 +716,15 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     url: "/api/admin/launch-readiness",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const launchExportUnauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/launch-readiness/export",
+  });
+  const launchExport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/launch-readiness/export",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(unauthorized.status, 401);
   assert.equal(templateUnauthorized.status, 401);
@@ -739,6 +752,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launch.status, 200);
   assert.deepEqual(launch.body.blockers, ["redirect_reviews"]);
   assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
+  assert.equal(launchExportUnauthorized.status, 401);
+  assert.equal(launchExport.status, 201);
+  assert.equal(fs.existsSync(launchReadinessOutputPath), true);
+  assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, ["redirect_reviews"]);
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {
