@@ -5,6 +5,7 @@ import {
   resolvePublicLocale,
   websiteLanguageCoverage,
 } from "./locales.mjs";
+import { adminSurfaceCatalog } from "./admin-workflows.mjs";
 import {
   contactPath,
   hreflangForListing,
@@ -790,6 +791,7 @@ export function renderAdminShell({ registry, requestedLocale = "en" }) {
   const allowed = adminLocales(registry);
   const selectedCode = allowed.includes(requestedLocale) ? requestedLocale : "en";
   const selected = getLocale(registry, selectedCode);
+  const surface = adminSurfaceCatalog(registry, requestedLocale);
 
   return {
     kind: "admin_shell",
@@ -800,6 +802,7 @@ export function renderAdminShell({ registry, requestedLocale = "en" }) {
     dir: selected.direction,
     path: "/admin",
     modules: ["crm", "cms"],
+    localized_surface: surface,
     interface_locales: allowed.map((code) => {
       const locale = getLocale(registry, code);
       return {

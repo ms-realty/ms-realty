@@ -1512,6 +1512,116 @@
       "crm",
       "cms"
     ],
+    "localized_surface": {
+      "requested_locale": "ru",
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "title": "Администрирование MS Realty",
+      "interface_locales": [
+        "bg",
+        "ru",
+        "en"
+      ],
+      "modules": [
+        {
+          "id": "crm",
+          "label": "CRM",
+          "screens": [
+            {
+              "id": "lead_inbox",
+              "label": "Входящие заявки"
+            },
+            {
+              "id": "lead_detail",
+              "label": "Детали заявки"
+            },
+            {
+              "id": "seller_pipeline",
+              "label": "Воронка продавцов"
+            },
+            {
+              "id": "broker_assignment",
+              "label": "Назначение брокера"
+            },
+            {
+              "id": "reply_review",
+              "label": "Проверка ответа"
+            }
+          ],
+          "controls": [
+            {
+              "id": "show_original",
+              "label": "Показать оригинал"
+            },
+            {
+              "id": "translated_draft",
+              "label": "Переведенный черновик"
+            },
+            {
+              "id": "approve_reply",
+              "label": "Одобрить ответ"
+            },
+            {
+              "id": "assign_broker",
+              "label": "Назначить брокера"
+            }
+          ]
+        },
+        {
+          "id": "cms",
+          "label": "CMS",
+          "screens": [
+            {
+              "id": "property_editor",
+              "label": "Редактор объектов"
+            },
+            {
+              "id": "listing_editor",
+              "label": "Редактор объявлений"
+            },
+            {
+              "id": "media_review",
+              "label": "Проверка медиа"
+            },
+            {
+              "id": "translation_queue",
+              "label": "Переводы на проверку"
+            },
+            {
+              "id": "locale_registry",
+              "label": "Реестр языков"
+            },
+            {
+              "id": "redirect_review",
+              "label": "Проверка редиректов"
+            }
+          ],
+          "controls": [
+            {
+              "id": "save_draft",
+              "label": "Сохранить черновик"
+            },
+            {
+              "id": "approve_translation",
+              "label": "Одобрить перевод"
+            },
+            {
+              "id": "publish_translation",
+              "label": "Опубликовать перевод"
+            },
+            {
+              "id": "mark_stale",
+              "label": "Отметить устаревшим"
+            },
+            {
+              "id": "create_listing",
+              "label": "Создать объявление"
+            }
+          ]
+        }
+      ]
+    },
     "interface_locales": [
       {
         "code": "bg",
@@ -1581,6 +1691,116 @@
       "crm",
       "cms"
     ],
+    "localized_surface": {
+      "requested_locale": "el",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "title": "MS Realty Admin",
+      "interface_locales": [
+        "bg",
+        "ru",
+        "en"
+      ],
+      "modules": [
+        {
+          "id": "crm",
+          "label": "CRM",
+          "screens": [
+            {
+              "id": "lead_inbox",
+              "label": "Lead inbox"
+            },
+            {
+              "id": "lead_detail",
+              "label": "Lead detail"
+            },
+            {
+              "id": "seller_pipeline",
+              "label": "Seller pipeline"
+            },
+            {
+              "id": "broker_assignment",
+              "label": "Broker assignment"
+            },
+            {
+              "id": "reply_review",
+              "label": "Reply review"
+            }
+          ],
+          "controls": [
+            {
+              "id": "show_original",
+              "label": "Show original"
+            },
+            {
+              "id": "translated_draft",
+              "label": "Translated draft"
+            },
+            {
+              "id": "approve_reply",
+              "label": "Approve reply"
+            },
+            {
+              "id": "assign_broker",
+              "label": "Assign broker"
+            }
+          ]
+        },
+        {
+          "id": "cms",
+          "label": "CMS",
+          "screens": [
+            {
+              "id": "property_editor",
+              "label": "Property editor"
+            },
+            {
+              "id": "listing_editor",
+              "label": "Listing editor"
+            },
+            {
+              "id": "media_review",
+              "label": "Media review"
+            },
+            {
+              "id": "translation_queue",
+              "label": "Translation review"
+            },
+            {
+              "id": "locale_registry",
+              "label": "Locale registry"
+            },
+            {
+              "id": "redirect_review",
+              "label": "Redirect review"
+            }
+          ],
+          "controls": [
+            {
+              "id": "save_draft",
+              "label": "Save draft"
+            },
+            {
+              "id": "approve_translation",
+              "label": "Approve translation"
+            },
+            {
+              "id": "publish_translation",
+              "label": "Publish translation"
+            },
+            {
+              "id": "mark_stale",
+              "label": "Mark stale"
+            },
+            {
+              "id": "create_listing",
+              "label": "Create listing"
+            }
+          ]
+        }
+      ]
+    },
     "interface_locales": [
       {
         "code": "bg",

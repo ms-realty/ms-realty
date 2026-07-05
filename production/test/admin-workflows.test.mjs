@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
+  adminSurfaceCatalog,
   approveTranslationTask,
   buildAdminWorkflowFixture,
   createCrmInboxItem,
@@ -20,6 +21,28 @@ test("admin workspace is available in BG, RU, and EN with fallback for website-o
   assert.equal(renderAdminWorkspace({ registry, requestedLocale: "en" }).locale, "en");
   assert.equal(renderAdminWorkspace({ registry, requestedLocale: "he" }).locale, "en");
   assert.deepEqual(renderAdminWorkspace({ registry, requestedLocale: "ru" }).interface_locales, ["bg", "ru", "en"]);
+});
+
+test("admin CRM and CMS surfaces have localized BG, RU, and EN labels", () => {
+  const bg = adminSurfaceCatalog(registry, "bg");
+  const ru = adminSurfaceCatalog(registry, "ru");
+  const en = adminSurfaceCatalog(registry, "en");
+  const moduleIds = (surface) => surface.modules.map((module) => module.id);
+  const screenIds = (surface, moduleId) =>
+    surface.modules.find((module) => module.id === moduleId).screens.map((screen) => screen.id);
+  const controlIds = (surface, moduleId) =>
+    surface.modules.find((module) => module.id === moduleId).controls.map((control) => control.id);
+
+  assert.deepEqual(moduleIds(bg), ["crm", "cms"]);
+  assert.deepEqual(moduleIds(ru), moduleIds(bg));
+  assert.deepEqual(moduleIds(en), moduleIds(bg));
+  assert.deepEqual(screenIds(ru, "crm"), screenIds(bg, "crm"));
+  assert.deepEqual(screenIds(en, "cms"), screenIds(bg, "cms"));
+  assert.deepEqual(controlIds(ru, "crm"), ["show_original", "translated_draft", "approve_reply", "assign_broker"]);
+  assert.deepEqual(controlIds(en, "cms"), ["save_draft", "approve_translation", "publish_translation", "mark_stale", "create_listing"]);
+  assert.equal(bg.modules.find((module) => module.id === "crm").screens[0].label, "Входящи запитвания");
+  assert.equal(ru.modules.find((module) => module.id === "cms").screens[0].label, "Редактор объектов");
+  assert.equal(en.modules.find((module) => module.id === "cms").screens[0].label, "Property editor");
 });
 
 test("Hermes translation tasks are drafts until human approval and publication", () => {

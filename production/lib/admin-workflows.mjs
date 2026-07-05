@@ -5,22 +5,79 @@ import { contentHash } from "./translations.mjs";
 
 const ADMIN_COPY = {
   bg: {
+    workspaceTitle: "Администрация MS Realty",
     crm: "CRM",
     cms: "CMS",
     translationQueue: "Преводи за преглед",
     leadInbox: "Входящи запитвания",
+    leadDetail: "Детайли на запитване",
+    sellerPipeline: "Продавачески поток",
+    brokerAssignment: "Разпределение към брокер",
+    replyReview: "Преглед на отговор",
+    propertyEditor: "Редактор на имоти",
+    listingEditor: "Редактор на обяви",
+    mediaReview: "Преглед на медия",
+    localeRegistry: "Регистър на езици",
+    redirectReview: "Преглед на пренасочвания",
+    showOriginal: "Покажи оригинала",
+    translatedDraft: "Преведен чернови отговор",
+    approveReply: "Одобри отговор",
+    saveDraft: "Запази чернова",
+    approveTranslation: "Одобри превод",
+    publishTranslation: "Публикувай превод",
+    markStale: "Маркирай като остарял",
+    createListing: "Създай обява",
+    assignBroker: "Назначи брокер",
   },
   ru: {
+    workspaceTitle: "Администрирование MS Realty",
     crm: "CRM",
     cms: "CMS",
     translationQueue: "Переводы на проверку",
     leadInbox: "Входящие заявки",
+    leadDetail: "Детали заявки",
+    sellerPipeline: "Воронка продавцов",
+    brokerAssignment: "Назначение брокера",
+    replyReview: "Проверка ответа",
+    propertyEditor: "Редактор объектов",
+    listingEditor: "Редактор объявлений",
+    mediaReview: "Проверка медиа",
+    localeRegistry: "Реестр языков",
+    redirectReview: "Проверка редиректов",
+    showOriginal: "Показать оригинал",
+    translatedDraft: "Переведенный черновик",
+    approveReply: "Одобрить ответ",
+    saveDraft: "Сохранить черновик",
+    approveTranslation: "Одобрить перевод",
+    publishTranslation: "Опубликовать перевод",
+    markStale: "Отметить устаревшим",
+    createListing: "Создать объявление",
+    assignBroker: "Назначить брокера",
   },
   en: {
+    workspaceTitle: "MS Realty Admin",
     crm: "CRM",
     cms: "CMS",
     translationQueue: "Translation review",
     leadInbox: "Lead inbox",
+    leadDetail: "Lead detail",
+    sellerPipeline: "Seller pipeline",
+    brokerAssignment: "Broker assignment",
+    replyReview: "Reply review",
+    propertyEditor: "Property editor",
+    listingEditor: "Listing editor",
+    mediaReview: "Media review",
+    localeRegistry: "Locale registry",
+    redirectReview: "Redirect review",
+    showOriginal: "Show original",
+    translatedDraft: "Translated draft",
+    approveReply: "Approve reply",
+    saveDraft: "Save draft",
+    approveTranslation: "Approve translation",
+    publishTranslation: "Publish translation",
+    markStale: "Mark stale",
+    createListing: "Create listing",
+    assignBroker: "Assign broker",
   },
 };
 
@@ -30,9 +87,73 @@ function adminLocaleFor(registry, requestedLocale) {
   return getLocale(registry, localeCode);
 }
 
+function copyForAdminLocale(localeCode) {
+  return ADMIN_COPY[localeCode] || ADMIN_COPY.en;
+}
+
+function adminControls(copy) {
+  return {
+    crm: [
+      { id: "show_original", label: copy.showOriginal },
+      { id: "translated_draft", label: copy.translatedDraft },
+      { id: "approve_reply", label: copy.approveReply },
+      { id: "assign_broker", label: copy.assignBroker },
+    ],
+    cms: [
+      { id: "save_draft", label: copy.saveDraft },
+      { id: "approve_translation", label: copy.approveTranslation },
+      { id: "publish_translation", label: copy.publishTranslation },
+      { id: "mark_stale", label: copy.markStale },
+      { id: "create_listing", label: copy.createListing },
+    ],
+  };
+}
+
+export function adminSurfaceCatalog(registry, requestedLocale = "en") {
+  const locale = adminLocaleFor(registry, requestedLocale);
+  const copy = copyForAdminLocale(locale.code);
+  const controls = adminControls(copy);
+
+  return {
+    requested_locale: requestedLocale,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    title: copy.workspaceTitle,
+    interface_locales: adminLocales(registry),
+    modules: [
+      {
+        id: "crm",
+        label: copy.crm,
+        screens: [
+          { id: "lead_inbox", label: copy.leadInbox },
+          { id: "lead_detail", label: copy.leadDetail },
+          { id: "seller_pipeline", label: copy.sellerPipeline },
+          { id: "broker_assignment", label: copy.brokerAssignment },
+          { id: "reply_review", label: copy.replyReview },
+        ],
+        controls: controls.crm,
+      },
+      {
+        id: "cms",
+        label: copy.cms,
+        screens: [
+          { id: "property_editor", label: copy.propertyEditor },
+          { id: "listing_editor", label: copy.listingEditor },
+          { id: "media_review", label: copy.mediaReview },
+          { id: "translation_queue", label: copy.translationQueue },
+          { id: "locale_registry", label: copy.localeRegistry },
+          { id: "redirect_review", label: copy.redirectReview },
+        ],
+        controls: controls.cms,
+      },
+    ],
+  };
+}
+
 export function renderAdminWorkspace({ registry, requestedLocale = "en" }) {
   const locale = adminLocaleFor(registry, requestedLocale);
-  const copy = ADMIN_COPY[locale.code] || ADMIN_COPY.en;
+  const surface = adminSurfaceCatalog(registry, requestedLocale);
 
   return {
     kind: "admin_workspace",
@@ -40,11 +161,16 @@ export function renderAdminWorkspace({ registry, requestedLocale = "en" }) {
     locale: locale.code,
     lang: locale.code,
     dir: locale.direction,
-    interface_locales: adminLocales(registry),
-    modules: [
-      { id: "crm", label: copy.crm, primary_view: copy.leadInbox },
-      { id: "cms", label: copy.cms, primary_view: copy.translationQueue },
-    ],
+    interface_locales: surface.interface_locales,
+    title: surface.title,
+    modules: surface.modules.map((module) => ({
+      id: module.id,
+      label: module.label,
+      primary_view: module.screens[0]?.label || module.label,
+      screens: module.screens,
+      controls: module.controls,
+    })),
+    surface,
   };
 }
 

@@ -204,6 +204,18 @@ test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {
   );
   assert.deepEqual(adminRu.modules, ["crm", "cms"]);
   assert.equal(adminEl.locale, "en");
+  assert.equal(adminRu.localized_surface.title, "Администрирование MS Realty");
+  assert.equal(
+    adminRu.localized_surface.modules.find((module) => module.id === "crm").screens.find((screen) => screen.id === "lead_inbox")
+      .label,
+    "Входящие заявки",
+  );
+  assert.equal(
+    adminRu.localized_surface.modules.find((module) => module.id === "cms").screens.find((screen) => screen.id === "property_editor")
+      .label,
+    "Редактор объектов",
+  );
+  assert.equal(adminEl.localized_surface.locale, "en");
   assert.deepEqual(
     adminRu.website_language_coverage.map((item) => [item.market, item.locale, item.public_route_prefix]),
     [
