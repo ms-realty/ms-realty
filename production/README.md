@@ -71,6 +71,7 @@ What it proves now:
 - Seller valuation pipeline ledger with callback/appraisal tasks from seller leads.
 - Privacy-safe analytics event ledger for page views, searches, lead submissions, and CTA clicks.
 - SEO evidence join artifact for Search Console, Yandex Webmaster, backlinks, and privacy analytics.
+- Launch readiness report that aggregates crawl, redirect, sitemap, schema, monitoring, and rollback gates.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
 
 Run:
@@ -109,6 +110,7 @@ Generated production data:
 - `production/data/tour-approvals.jsonl`
 - `production/data/events.jsonl`
 - `production/data/seo-evidence.json`
+- `production/data/launch-readiness.json`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/listing-edits.jsonl`

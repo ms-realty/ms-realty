@@ -614,4 +614,12 @@ if (!structuredData.summary.warnings.missing_price) {
   throw new Error("Structured data report must preserve listing price gaps as launch warnings");
 }
 
+const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data", "launch-readiness.json"), "utf8"));
+if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
+  throw new Error("Launch readiness report must stay blocked until production blockers are cleared");
+}
+for (const blocker of ["redirect_reviews", "external_seo_exports", "production_app_layer"]) {
+  if (!launchReadiness.blockers.includes(blocker)) throw new Error(`Launch readiness report must include ${blocker}`);
+}
+
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

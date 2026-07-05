@@ -111,6 +111,9 @@ Implemented now:
 - Structured-data launch report:
   - all 167 indexable listing sitemap entries are checked for RealEstateListing JSON-LD readiness
   - missing source prices are recorded as warnings, not invented schema offers
+- Launch readiness report:
+  - `production/data/launch-readiness.json` aggregates current launch gates and rollback/monitoring steps
+  - launch remains blocked until redirect reviews, external SEO exports, and final production app adapter are complete
 - Seller pipeline contract:
   - seller valuation leads create `valuation_requested` pipeline rows
   - callback and appraisal checklist tasks start open
