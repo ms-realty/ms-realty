@@ -423,11 +423,14 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.location.body.cards.length, 1);
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
+  assert.equal(smoke.savedSearch.headers["cache-control"], "no-store");
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
+  assert.equal(smoke.lead.headers["cache-control"], "no-store");
   assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
   assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");
+  assert.equal(smoke.languageRequest.headers["cache-control"], "no-store");
   assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(smoke.tourApproval.body.is_public, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);

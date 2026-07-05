@@ -2088,7 +2088,8 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
     },
     "body": {
       "requested_at": "2026-07-04T00:01:00Z",
@@ -2347,7 +2348,8 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
     },
     "body": {
       "saved_at": "2026-07-04T00:07:00Z",
@@ -2401,7 +2403,8 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
     },
     "body": {
       "id": "inbox-http-lead-he-0001",
@@ -2463,7 +2466,8 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
     },
     "body": {
       "id": "inbox-http-viewing-lead-he-0001",
@@ -2525,7 +2529,8 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
     },
     "body": {
       "id": "inbox-http-lead-contact-he-0001",
@@ -2587,7 +2592,8 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
     },
     "body": {
       "id": "inbox-http-lead-seller-el-0001",

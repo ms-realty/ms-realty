@@ -59,12 +59,20 @@ function json(status, body) {
   return response(status, body, "application/json; charset=utf-8");
 }
 
-function adminResponse(status, body, contentType, headers = {}) {
+function privateResponse(status, body, contentType, headers = {}) {
   return response(status, body, contentType, { ...PRIVATE_HEADERS, ...headers });
 }
 
+function privateJson(status, body) {
+  return privateResponse(status, body, "application/json; charset=utf-8");
+}
+
+function adminResponse(status, body, contentType, headers = {}) {
+  return privateResponse(status, body, contentType, headers);
+}
+
 function adminJson(status, body) {
-  return adminResponse(status, body, "application/json; charset=utf-8");
+  return privateJson(status, body);
 }
 
 function wantsHtml(request, url) {
@@ -810,9 +818,9 @@ export function createHttpApp({
           listingReference: lead.lead?.listingReference,
           action: lead.lead?.source,
         });
-        return json(201, { ...lead, ledger, sellerPipeline });
+        return privateJson(201, { ...lead, ledger, sellerPipeline });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return privateJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -831,9 +839,9 @@ export function createHttpApp({
         const input = parseJsonBody(request);
         const requestRow = createLanguageRequest(activeRegistry, input, requestedAt);
         const ledger = languageRequestPath ? appendLanguageRequest(requestRow, { filePath: languageRequestPath }) : null;
-        return json(201, { ...requestRow, ledger });
+        return privateJson(201, { ...requestRow, ledger });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return privateJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -849,9 +857,9 @@ export function createHttpApp({
         });
         const savedSearch = createSavedSearch(activeRegistry, { ...input, filters }, { matchCount: search.search.total_matches, savedAt });
         const ledger = savedSearchLedgerPath ? appendSavedSearch(savedSearch, { filePath: savedSearchLedgerPath }) : null;
-        return json(201, { ...savedSearch, ledger });
+        return privateJson(201, { ...savedSearch, ledger });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return privateJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
