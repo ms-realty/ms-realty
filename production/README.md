@@ -73,6 +73,7 @@ What it proves now:
 - Lead intake returns a deterministic instant-confirmation contract without sending unreviewed messages.
 - Lead ledger rows create an immediate broker follow-up SLA task and manager escalation timestamp.
 - Broker assignment is rules-based by language plus listing location/type, with validated manual override.
+- Lead ledger duplicate detection stores privacy-safe contact fingerprints instead of raw contact fields.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Gated admin lead inbox HTML endpoint with BG/RU/EN interface locale support.
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.

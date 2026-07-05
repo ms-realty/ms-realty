@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LEAD_LEDGER_PATH = fromRoot("production", "data", "lead-ledger.jsonl");
@@ -15,12 +16,29 @@ function minutesAfter(isoString, minutes) {
   return new Date(time + minutes * 60 * 1000).toISOString();
 }
 
+function normalizeContactValue(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function contactFingerprint(contact = {}) {
+  const email = normalizeContactValue(contact.email);
+  const phone = normalizeContactValue(contact.phone || contact.whatsapp || contact.viber).replace(/[^\d+]/g, "");
+  const key = email ? `email:${email}` : phone ? `phone:${phone}` : "";
+  return key ? crypto.createHash("sha256").update(key).digest("hex") : null;
+}
+
 export function appendLead(
   lead,
   { filePath = DEFAULT_LEAD_LEDGER_PATH, receivedAt = new Date().toISOString(), slaMinutes = 15, escalationMinutes = 60 } = {},
 ) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   const slaDueAt = minutesAfter(receivedAt, slaMinutes);
+  const contact_fingerprint = contactFingerprint(lead.lead?.contact);
+  const possibleDuplicate = contact_fingerprint
+    ? readLeadLedger(filePath).find((candidate) => candidate.contact_fingerprint === contact_fingerprint)
+    : null;
   const row = {
     received_at: receivedAt,
     id: lead.id,
@@ -36,6 +54,9 @@ export function appendLead(
     confirmation_message_key: lead.confirmation?.message_key || null,
     assigned_broker: lead.broker_assignment?.broker_id || null,
     assignment_method: lead.broker_assignment?.method || null,
+    contact_fingerprint,
+    duplicate_status: contact_fingerprint ? (possibleDuplicate ? "possible_duplicate" : "new_contact") : "no_contact_key",
+    possible_duplicate_of: possibleDuplicate?.lead_id || null,
     sla_due_at: slaDueAt,
     manager_escalation_due_at: minutesAfter(receivedAt, escalationMinutes),
     follow_up_task: {
@@ -71,6 +92,10 @@ export function assertLeadLedger(rows) {
       throw new Error("Lead ledger must preserve the instant confirmation contract");
     }
     if (!row.assigned_broker || !row.assignment_method) throw new Error("Lead ledger must preserve broker assignment");
+    if ("contact" in row || "email" in row || "phone" in row) throw new Error("Lead ledger must not persist raw contact data");
+    if (row.duplicate_status === "possible_duplicate" && !row.possible_duplicate_of) {
+      throw new Error("Possible duplicate lead rows must reference the earlier lead");
+    }
     if (!row.sla_due_at || row.follow_up_task?.status !== "open") {
       throw new Error("Lead ledger must create an immediate broker follow-up SLA task");
     }

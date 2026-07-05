@@ -2089,6 +2089,9 @@
         "confirmation_message_key": "lead_received",
         "assigned_broker": "broker_international",
         "assignment_method": "rules",
+        "contact_fingerprint": null,
+        "duplicate_status": "no_contact_key",
+        "possible_duplicate_of": null,
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -2179,6 +2182,9 @@
         "confirmation_message_key": "lead_received",
         "assigned_broker": "broker_international",
         "assignment_method": "rules",
+        "contact_fingerprint": null,
+        "duplicate_status": "no_contact_key",
+        "possible_duplicate_of": null,
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -2269,6 +2275,9 @@
         "confirmation_message_key": "lead_received",
         "assigned_broker": "broker_international",
         "assignment_method": "rules",
+        "contact_fingerprint": null,
+        "duplicate_status": "no_contact_key",
+        "possible_duplicate_of": null,
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -2359,6 +2368,9 @@
         "confirmation_message_key": "lead_received",
         "assigned_broker": "broker_international",
         "assignment_method": "rules",
+        "contact_fingerprint": null,
+        "duplicate_status": "no_contact_key",
+        "possible_duplicate_of": null,
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -2663,6 +2675,9 @@
           "confirmation_message_key": "lead_received",
           "assigned_broker": "broker_international",
           "assignment_method": "rules",
+          "contact_fingerprint": null,
+          "duplicate_status": "no_contact_key",
+          "possible_duplicate_of": null,
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
@@ -2688,6 +2703,9 @@
           "confirmation_message_key": "lead_received",
           "assigned_broker": "broker_international",
           "assignment_method": "rules",
+          "contact_fingerprint": null,
+          "duplicate_status": "no_contact_key",
+          "possible_duplicate_of": null,
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
@@ -2713,6 +2731,9 @@
           "confirmation_message_key": "lead_received",
           "assigned_broker": "broker_international",
           "assignment_method": "rules",
+          "contact_fingerprint": null,
+          "duplicate_status": "no_contact_key",
+          "possible_duplicate_of": null,
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
@@ -2738,6 +2759,9 @@
           "confirmation_message_key": "lead_received",
           "assigned_broker": "broker_international",
           "assignment_method": "rules",
+          "contact_fingerprint": null,
+          "duplicate_status": "no_contact_key",
+          "possible_duplicate_of": null,
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
