@@ -9,3 +9,6 @@ Drop real launch exports in this directory with these exact names:
 
 The real `.csv` files are gitignored. Keep the `.csv.example` files committed
 as import templates only.
+
+Launch readiness requires each required export to match crawled URLs from both
+`makler-realty.com` and `makler-realty.ru`.

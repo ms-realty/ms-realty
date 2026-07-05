@@ -24,10 +24,59 @@ test("SEO evidence joins external exports and privacy events to crawled URLs", (
 
   assert.equal(evidence.summary.crawl_urls, 1);
   assert.equal(evidence.summary.sources.search_console.matched_rows, 1);
+  assert.deepEqual(evidence.summary.sources.search_console.matched_source_domains, ["makler-realty.com"]);
   assert.equal(evidence.summary.sources.privacy_events.matched_rows, 2);
   assert.equal(evidence.url_evidence[0].search_console.clicks, 3);
   assert.equal(evidence.url_evidence[0].analytics.page_views, 1);
   assert.equal(evidence.url_evidence[0].analytics.leads, 1);
+});
+
+test("required SEO exports need matched coverage for both legacy domains", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-two-domain-seo-evidence-`);
+  fs.writeFileSync(
+    `${dir}/search-console.csv`,
+    "url,clicks,impressions,position\nhttps://makler-realty.com/p/1,3,30,7\nhttps://makler-realty.ru/p/2,2,20,8\n",
+  );
+  fs.writeFileSync(
+    `${dir}/yandex-webmaster.csv`,
+    "url,indexed,issue\nhttps://makler-realty.com/p/1,yes,\nhttps://makler-realty.ru/p/2,yes,\n",
+  );
+  fs.writeFileSync(
+    `${dir}/backlinks.csv`,
+    "target_url,source_url\nhttps://makler-realty.com/p/1,https://example.com/a\nhttps://makler-realty.ru/p/2,https://example.com/b\n",
+  );
+
+  const records = [
+    { old_url: "https://makler-realty.com/p/1", source_domain: "makler-realty.com", url_type: "listing" },
+    { old_url: "https://makler-realty.ru/p/2", source_domain: "makler-realty.ru", url_type: "listing" },
+  ];
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    records,
+    routeMap: [],
+    events: [{ type: "page_view", path: "https://makler-realty.com/p/1" }],
+  });
+
+  assert.deepEqual(evidence.summary.missing_required_sources, []);
+  assert.deepEqual(evidence.summary.sources.backlinks.matched_source_domains, ["makler-realty.com", "makler-realty.ru"]);
+});
+
+test("single-domain SEO exports remain launch blockers", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-single-domain-seo-evidence-`);
+  fs.writeFileSync(`${dir}/search-console.csv`, "url,clicks,impressions,position\nhttps://makler-realty.com/p/1,3,30,7\n");
+  fs.writeFileSync(`${dir}/yandex-webmaster.csv`, "url,indexed,issue\nhttps://makler-realty.com/p/1,yes,\n");
+  fs.writeFileSync(`${dir}/backlinks.csv`, "target_url,source_url\nhttps://makler-realty.com/p/1,https://example.com/a\n");
+
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    records: [{ old_url: "https://makler-realty.com/p/1", source_domain: "makler-realty.com", url_type: "listing" }],
+    routeMap: [],
+    events: [{ type: "page_view", path: "https://makler-realty.com/p/1" }],
+  });
+
+  assert.deepEqual(evidence.summary.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
 });
 
 test("generated SEO evidence file records missing external launch exports", () => {

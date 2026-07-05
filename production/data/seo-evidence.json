@@ -15,7 +15,8 @@
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
-        "unmatched_rows": 0
+        "unmatched_rows": 0,
+        "matched_source_domains": []
       },
       "yandex_webmaster": {
         "source": "yandex_webmaster",
@@ -23,7 +24,8 @@
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
-        "unmatched_rows": 0
+        "unmatched_rows": 0,
+        "matched_source_domains": []
       },
       "backlinks": {
         "source": "backlinks",
@@ -31,7 +33,8 @@
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
-        "unmatched_rows": 0
+        "unmatched_rows": 0,
+        "matched_source_domains": []
       },
       "analytics_export": {
         "source": "analytics_export",
@@ -39,7 +42,8 @@
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
-        "unmatched_rows": 0
+        "unmatched_rows": 0,
+        "matched_source_domains": []
       },
       "privacy_events": {
         "source": "privacy_events",

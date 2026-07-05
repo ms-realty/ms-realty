@@ -15,6 +15,7 @@ const EXPORTS = {
 };
 
 const REQUIRED_EXPORTS = ["search_console", "yandex_webmaster", "backlinks"];
+const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"];
 
 function lowerRow(row) {
   return Object.fromEntries(Object.entries(row).map(([key, value]) => [key.trim().toLowerCase().replaceAll(" ", "_"), value]));
@@ -149,12 +150,14 @@ function indexEvidence(records, routeMap) {
 
 function joinExternal(source, sourceData, byKey) {
   let matched = 0;
-  const domains = new Set();
+  const matchedSourceDomains = new Set();
+  const referringDomains = new Set();
 
   for (const row of sourceData.rows) {
     const target = row.keys.map((key) => byKey.get(key)).find(Boolean);
     if (!target) continue;
     matched += 1;
+    matchedSourceDomains.add(target.source_domain);
 
     if (source === "search_console") {
       addMetric(target.search_console, "clicks", row.clicks);
@@ -165,19 +168,23 @@ function joinExternal(source, sourceData, byKey) {
       if (row.issue) addMetric(target.yandex_webmaster, "issues", 1);
     } else if (source === "backlinks") {
       addMetric(target.backlinks, "backlinks", 1);
-      if (row.referring_domain) domains.add(`${target.old_url}|${row.referring_domain}`);
+      if (row.referring_domain) referringDomains.add(`${target.old_url}|${row.referring_domain}`);
     } else if (source === "analytics_export") {
       addMetric(target.analytics, "exported_page_views", row.page_views);
     }
   }
 
-  for (const key of domains) {
+  for (const key of referringDomains) {
     const [oldUrl] = key.split("|");
     const target = byKey.get(oldUrl);
     if (target) addMetric(target.backlinks, "referring_domains", 1);
   }
 
-  return { matched_rows: matched, unmatched_rows: sourceData.row_count - matched };
+  return {
+    matched_rows: matched,
+    unmatched_rows: sourceData.row_count - matched,
+    matched_source_domains: [...matchedSourceDomains].sort(),
+  };
 }
 
 function joinPrivacyEvents(events, byKey, byListingReference) {
@@ -201,7 +208,11 @@ function joinPrivacyEvents(events, byKey, byListingReference) {
 function summarize(records, sourceSummaries, urlEvidence) {
   const missing = REQUIRED_EXPORTS.filter((source) => {
     const summary = sourceSummaries[source];
-    return summary?.status !== "imported" || summary.matched_rows < 1;
+    return (
+      summary?.status !== "imported" ||
+      summary.matched_rows < 1 ||
+      REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
+    );
   });
   const analyticsReady =
     sourceSummaries.privacy_events?.status === "imported" || sourceSummaries.analytics_export?.status === "imported";
