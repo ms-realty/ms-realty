@@ -81,6 +81,10 @@ Implemented now:
   - `POST /api/admin/viewings`
   - booked viewings require known CRM leads and create open follow-up tasks
   - booked viewings export through an admin-gated `.ics` calendar feed
+- Broker lead inbox workbench:
+  - `GET /admin/leads` renders the persisted CRM lead queue in BG/RU/EN admin locales
+  - inbox rows preserve original lead language, admin queue locale, contact preference, source, and listing reference
+  - reviewed replies can be queued from form submissions but are not auto-sent
 - Migration review queue:
   - every crawled URL has a review owner, admin locale, action, and priority
   - `.ru` preservation rows are kept in a dedicated review lane

@@ -98,6 +98,43 @@ function redirectApprovalInput(request) {
   };
 }
 
+function reviewedReplyInput(request) {
+  const input = parseBody(request);
+  return {
+    ...input,
+    approved: input.approved === true || input.approved === "true" || input.approved === "on" || input.approved === "1",
+  };
+}
+
+function renderAdminLeadsPayload(registry, requestedLocale, data) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_lead_inbox",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/leads",
+    canonical: "/admin/leads",
+    indexable: false,
+    metadata: {
+      title: "MS Realty lead inbox",
+      description: "Admin-only CRM lead inbox with broker-reviewed replies.",
+      robots: "noindex,nofollow",
+    },
+    workspace,
+    ...data,
+    summary: {
+      leads: data.leads.length,
+      replies: data.replies.length,
+      languageRequests: data.languageRequests.length,
+      viewings: data.viewings.length,
+      savedSearches: data.savedSearches.length,
+      sellerPipeline: data.sellerPipeline.length,
+    },
+  };
+}
+
 function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const reviewRequired = routes.filter((route) => route.review_required);
@@ -226,8 +263,7 @@ export function createHttpApp({
         return json(401, { kind: "unauthorized" });
       }
       const requestedLocale = url.searchParams.get("locale") || "en";
-      return json(200, {
-        workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
+      const payload = renderAdminLeadsPayload(activeRegistry, requestedLocale, {
         leads: readLeadLedger(leadLedgerPath || undefined),
         replies: readReplyOutbox(replyOutboxPath || undefined),
         languageRequests: readLanguageRequests(languageRequestPath || undefined),
@@ -238,6 +274,31 @@ export function createHttpApp({
         sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
         brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
       });
+      if (wantsHtml(request, url)) return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      return json(200, payload);
+    }
+
+    if (request.method === "GET" && url.pathname === "/admin/leads") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      return response(
+        200,
+        renderHtmlPage(
+          renderAdminLeadsPayload(activeRegistry, url.searchParams.get("locale") || "en", {
+            leads: readLeadLedger(leadLedgerPath || undefined),
+            replies: readReplyOutbox(replyOutboxPath || undefined),
+            languageRequests: readLanguageRequests(languageRequestPath || undefined),
+            translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+            listingEdits: readListingEdits(listingEditLedgerPath || undefined),
+            viewings: readViewings(viewingLedgerPath || undefined),
+            savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
+            sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
+            brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
+          }),
+        ),
+        "text/html; charset=utf-8",
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
@@ -377,7 +438,7 @@ export function createHttpApp({
         return json(401, { kind: "unauthorized" });
       }
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = reviewedReplyInput(request);
         return json(
           201,
           appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
@@ -676,6 +737,16 @@ export function assertHttpSmoke(smoke) {
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("HTTP smoke must serve RU admin leads");
   if (smoke.admin.body.leads.length < 4) throw new Error("HTTP smoke must show buyer, viewing, contact, and seller leads");
   if (
+    smoke.adminHtml?.status !== 200 ||
+    smoke.adminHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
+    !smoke.adminHtml.body.includes("<html lang=\"ru\" dir=\"ltr\">") ||
+    !smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\"") ||
+    !smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\"") ||
+    !smoke.adminHtml.body.includes("data-lead-row=\"true\"")
+  ) {
+    throw new Error("HTTP smoke must serve RU admin lead inbox HTML");
+  }
+  if (
     smoke.adminMigrationReview?.status !== 200 ||
     smoke.adminMigrationReview.body.workspace.locale !== "bg" ||
     smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows !== 11859 ||
@@ -696,6 +767,9 @@ export function assertHttpSmoke(smoke) {
   if (smoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated admin leads");
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
     throw new Error("HTTP smoke must queue broker-approved replies");
+  }
+  if (smoke.formReply?.status !== 201 || smoke.formReply.body.status !== "queued_for_manual_send") {
+    throw new Error("HTTP smoke must queue form-encoded broker-approved replies");
   }
   if (smoke.replyUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated replies");
   if (smoke.viewing.status !== 201 || smoke.viewing.body.follow_up_task?.status !== "open") {

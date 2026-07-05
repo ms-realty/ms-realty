@@ -1705,6 +1705,19 @@
   "admin": {
     "status": 200,
     "body": {
+      "kind": "admin_lead_inbox",
+      "status": 200,
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "path": "/admin/leads",
+      "canonical": "/admin/leads",
+      "indexable": false,
+      "metadata": {
+        "title": "MS Realty lead inbox",
+        "description": "Admin-only CRM lead inbox with broker-reviewed replies.",
+        "robots": "noindex,nofollow"
+      },
       "workspace": {
         "kind": "admin_workspace",
         "requested_locale": "ru",
@@ -1960,7 +1973,15 @@
             "viber": "viber://chat?number=%2B359880000000"
           }
         }
-      ]
+      ],
+      "summary": {
+        "leads": 4,
+        "replies": 1,
+        "languageRequests": 1,
+        "viewings": 1,
+        "savedSearches": 1,
+        "sellerPipeline": 1
+      }
     }
   },
   "adminUnauthorized": {

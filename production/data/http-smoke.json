@@ -2051,6 +2051,19 @@
       "content-type": "application/json; charset=utf-8"
     },
     "body": {
+      "kind": "admin_lead_inbox",
+      "status": 200,
+      "locale": "ru",
+      "lang": "ru",
+      "dir": "ltr",
+      "path": "/admin/leads",
+      "canonical": "/admin/leads",
+      "indexable": false,
+      "metadata": {
+        "title": "MS Realty lead inbox",
+        "description": "Admin-only CRM lead inbox with broker-reviewed replies.",
+        "robots": "noindex,nofollow"
+      },
       "workspace": {
         "kind": "admin_workspace",
         "requested_locale": "ru",
@@ -2138,6 +2151,19 @@
           "status": "queued_for_manual_send",
           "broker_approved": true,
           "hermes_draft_used": true
+        },
+        {
+          "id": "reply-http-lead-contact-he-0001",
+          "lead_id": "http-lead-contact-he-0001",
+          "listing_reference": null,
+          "original_language": "he",
+          "reply_language": "he",
+          "reviewed_reply": "Reviewed callback reply approved by broker.",
+          "reviewer": "broker_en",
+          "reviewed_at": "2026-07-04T00:05:00Z",
+          "status": "queued_for_manual_send",
+          "broker_approved": true,
+          "hermes_draft_used": false
         }
       ],
       "languageRequests": [
@@ -2306,7 +2332,15 @@
             "viber": "viber://chat?number=%2B359880000000"
           }
         }
-      ]
+      ],
+      "summary": {
+        "leads": 4,
+        "replies": 2,
+        "languageRequests": 1,
+        "viewings": 1,
+        "savedSearches": 1,
+        "sellerPipeline": 1
+      }
     }
   },
   "adminMigrationReview": {
@@ -3318,6 +3352,25 @@
       "hermes_draft_used": true
     }
   },
+  "formReply": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "id": "reply-http-lead-contact-he-0001",
+      "lead_id": "http-lead-contact-he-0001",
+      "listing_reference": null,
+      "original_language": "he",
+      "reply_language": "he",
+      "reviewed_reply": "Reviewed callback reply approved by broker.",
+      "reviewer": "broker_en",
+      "reviewed_at": "2026-07-04T00:05:00Z",
+      "status": "queued_for_manual_send",
+      "broker_approved": true,
+      "hermes_draft_used": false
+    }
+  },
   "replyUnauthorized": {
     "status": 401,
     "headers": {
@@ -4244,13 +4297,20 @@
       "public_translation_available": false
     }
   },
+  "adminHtml": {
+    "status": 200,
+    "headers": {
+      "content-type": "text/html; charset=utf-8"
+    },
+    "body": "<!doctype html>\n<html lang=\"ru\" dir=\"ltr\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>MS Realty lead inbox</title>\n<meta name=\"description\" content=\"Admin-only CRM lead inbox with broker-reviewed replies.\">\n<meta name=\"robots\" content=\"noindex,nofollow\">\n<link rel=\"canonical\" href=\"/admin/leads\">\n</head>\n<body>\n\n<main data-kind=\"admin-lead-inbox\" data-admin-locale=\"ru\" data-interface-locales=\"bg,ru,en\">\n  <h1>Входящие заявки</h1>\n  <dl><dt>Leads</dt><dd>4</dd><dt>Replies queued</dt><dd>2</dd><dt>Language requests</dt><dd>1</dd><dt>Viewings</dt><dd>1</dd><dt>Saved searches</dt><dd>1</dd><dt>Seller pipeline</dt><dd>1</dd></dl>\n  <section aria-label=\"CRM leads\">\n    <h2>CRM leads</h2>\n    <table>\n      <thead><tr><th>Lead</th><th>Type</th><th>Source</th><th>Language</th><th>Contact</th><th>Reply</th></tr></thead>\n      <tbody>\n      <tr data-lead-row=\"true\">\n        <td><code>http-lead-he-0001</code></td>\n        <td>buyer</td>\n        <td>website_listing_detail</td>\n        <td>he -> en</td>\n        <td>whatsapp</td>\n        <td>\n          <form method=\"post\" action=\"/api/admin/replies\">\n            <input type=\"hidden\" name=\"leadId\" value=\"http-lead-he-0001\">\n            <input type=\"hidden\" name=\"language\" value=\"he\">\n            <input type=\"hidden\" name=\"approved\" value=\"true\">\n            <label>Reviewer <input name=\"reviewer\" required autocomplete=\"name\"></label>\n            <label>Reviewed reply <textarea name=\"reviewedReply\" required></textarea></label>\n            <button type=\"submit\">Queue reply</button>\n          </form>\n        </td>\n      </tr>\n      <tr data-lead-row=\"true\">\n        <td><code>http-viewing-lead-he-0001</code></td>\n        <td>buyer</td>\n        <td>website_viewing_request</td>\n        <td>he -> en</td>\n        <td>phone</td>\n        <td>\n          <form method=\"post\" action=\"/api/admin/replies\">\n            <input type=\"hidden\" name=\"leadId\" value=\"http-viewing-lead-he-0001\">\n            <input type=\"hidden\" name=\"language\" value=\"he\">\n            <input type=\"hidden\" name=\"approved\" value=\"true\">\n            <label>Reviewer <input name=\"reviewer\" required autocomplete=\"name\"></label>\n            <label>Reviewed reply <textarea name=\"reviewedReply\" required></textarea></label>\n            <button type=\"submit\">Queue reply</button>\n          </form>\n        </td>\n      </tr>\n      <tr data-lead-row=\"true\">\n        <td><code>http-lead-contact-he-0001</code></td>\n        <td>general</td>\n        <td>website_contact_callback</td>\n        <td>he -> en</td>\n        <td>phone</td>\n        <td>\n          <form method=\"post\" action=\"/api/admin/replies\">\n            <input type=\"hidden\" name=\"leadId\" value=\"http-lead-contact-he-0001\">\n            <input type=\"hidden\" name=\"language\" value=\"he\">\n            <input type=\"hidden\" name=\"approved\" value=\"true\">\n            <label>Reviewer <input name=\"reviewer\" required autocomplete=\"name\"></label>\n            <label>Reviewed reply <textarea name=\"reviewedReply\" required></textarea></label>\n            <button type=\"submit\">Queue reply</button>\n          </form>\n        </td>\n      </tr>\n      <tr data-lead-row=\"true\">\n        <td><code>http-lead-seller-el-0001</code></td>\n        <td>seller</td>\n        <td>website_seller_valuation</td>\n        <td>el -> en</td>\n        <td></td>\n        <td>\n          <form method=\"post\" action=\"/api/admin/replies\">\n            <input type=\"hidden\" name=\"leadId\" value=\"http-lead-seller-el-0001\">\n            <input type=\"hidden\" name=\"language\" value=\"el\">\n            <input type=\"hidden\" name=\"approved\" value=\"true\">\n            <label>Reviewer <input name=\"reviewer\" required autocomplete=\"name\"></label>\n            <label>Reviewed reply <textarea name=\"reviewedReply\" required></textarea></label>\n            <button type=\"submit\">Queue reply</button>\n          </form>\n        </td>\n      </tr></tbody>\n    </table>\n  </section>\n  <section aria-label=\"Language requests\">\n    <h2>Language requests</h2>\n    <ul><li>fr -> en</li></ul>\n  </section>\n</main>\n</body>\n</html>"
+  },
   "leadLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/lead-ledger.jsonl",
     "rows": 4
   },
   "replyOutbox": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/reply-outbox.jsonl",
-    "rows": 1
+    "rows": 2
   },
   "languageRequestLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/language-requests.jsonl",

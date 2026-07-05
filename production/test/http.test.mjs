@@ -266,6 +266,21 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     }),
     viewingCalendarUnauthorized: await dispatchHttp(app, { url: "/api/admin/viewings.ics" }),
   };
+  smoke.formReply = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/replies",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      leadId: "http-contact-lead-test",
+      language: "he",
+      reviewedReply: "Reviewed callback reply approved by broker.",
+      reviewer: "broker_en",
+      approved: "true",
+    }).toString(),
+  });
   smoke.translationDraft = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/translations/draft",
@@ -320,6 +335,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  smoke.adminHtml = await dispatchHttp(app, {
+    url: "/admin/leads?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   smoke.adminMigrationReview = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=bg",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -359,6 +378,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 4);
   assert.equal(smoke.admin.body.languageRequests.length, 1);
+  assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
+  assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);

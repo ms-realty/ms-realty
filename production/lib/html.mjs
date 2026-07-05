@@ -249,6 +249,62 @@ function renderAdminMigrationReview(page) {
 </main>`;
 }
 
+function renderAdminLeadInbox(page) {
+  const metrics = [
+    ["Leads", page.summary.leads],
+    ["Replies queued", page.summary.replies],
+    ["Language requests", page.summary.languageRequests],
+    ["Viewings", page.summary.viewings],
+    ["Saved searches", page.summary.savedSearches],
+    ["Seller pipeline", page.summary.sellerPipeline],
+  ]
+    .map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`)
+    .join("");
+  const leads = page.leads
+    .map(
+      (lead) => `
+      <tr data-lead-row="true">
+        <td><code>${escapeHtml(lead.lead_id)}</code></td>
+        <td>${escapeHtml(lead.lead_type)}</td>
+        <td>${escapeHtml(lead.source)}</td>
+        <td>${escapeHtml(lead.original_language)} -> ${escapeHtml(lead.admin_locale)}</td>
+        <td>${escapeHtml(lead.contact_preference)}</td>
+        <td>
+          <form method="post" action="/api/admin/replies">
+            <input type="hidden" name="leadId" value="${escapeHtml(lead.lead_id)}">
+            <input type="hidden" name="language" value="${escapeHtml(lead.original_language)}">
+            <input type="hidden" name="approved" value="true">
+            <label>Reviewer <input name="reviewer" required autocomplete="name"></label>
+            <label>Reviewed reply <textarea name="reviewedReply" required></textarea></label>
+            <button type="submit">Queue reply</button>
+          </form>
+        </td>
+      </tr>`,
+    )
+    .join("");
+  const requests = page.languageRequests
+    .map((request) => `<li>${escapeHtml(request.requested_locale)} -> ${escapeHtml(request.fallback_locale)}</li>`)
+    .join("");
+  return `
+<main data-kind="admin-lead-inbox" data-admin-locale="${escapeHtml(page.workspace.locale)}" data-interface-locales="${escapeHtml(
+    page.workspace.interface_locales.join(","),
+  )}">
+  <h1>${escapeHtml(page.workspace.modules.find((module) => module.id === "crm")?.primary_view || "Lead inbox")}</h1>
+  <dl>${metrics}</dl>
+  <section aria-label="CRM leads">
+    <h2>CRM leads</h2>
+    <table>
+      <thead><tr><th>Lead</th><th>Type</th><th>Source</th><th>Language</th><th>Contact</th><th>Reply</th></tr></thead>
+      <tbody>${leads}</tbody>
+    </table>
+  </section>
+  <section aria-label="Language requests">
+    <h2>Language requests</h2>
+    <ul>${requests}</ul>
+  </section>
+</main>`;
+}
+
 function renderBody(page, options = {}) {
   if (page.kind === "home") return renderHome(page);
   if (page.kind === "listing" && options.print) return renderListingPrint(page);
@@ -259,6 +315,7 @@ function renderBody(page, options = {}) {
   if (page.kind === "contact") return renderContact(page);
   if (page.kind === "language_fallback") return renderFallback(page);
   if (page.kind === "admin_migration_review") return renderAdminMigrationReview(page);
+  if (page.kind === "admin_lead_inbox") return renderAdminLeadInbox(page);
   return `<main data-kind="not-found"><h1>Not found</h1></main>`;
 }
 

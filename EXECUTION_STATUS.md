@@ -180,10 +180,12 @@ Date: 2026-07-04
   - keeps smoke artifact deterministic
 - Added gated admin lead inbox endpoint:
   - `GET /api/admin/leads?locale=ru` reads the persisted ledger
+  - `GET /admin/leads?locale=ru` renders the same CRM queue as an admin-only HTML inbox
   - unauthorized requests return `401`
   - admin workspace still exposes only BG, RU, and EN
 - Added broker-approved reply outbox:
   - `POST /api/admin/replies` requires admin bearer token
+  - accepts JSON and form-encoded reviewed replies
   - verifies the lead exists in the ledger
   - requires reviewer and explicit broker approval
   - queues replies for manual send instead of auto-sending

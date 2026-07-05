@@ -383,6 +383,13 @@ if (httpSmoke.admin.status !== 200 || httpSmoke.admin.body.workspace.locale !== 
   throw new Error("HTTP smoke must serve RU admin lead inbox");
 }
 if (
+  httpSmoke.adminHtml.status !== 200 ||
+  !httpSmoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\"") ||
+  !httpSmoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\"")
+) {
+  throw new Error("HTTP smoke must serve RU admin lead inbox HTML");
+}
+if (
   httpSmoke.adminMigrationReview.status !== 200 ||
   httpSmoke.adminMigrationReview.body.workspace.locale !== "bg" ||
   httpSmoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows !== 11859 ||
@@ -395,7 +402,10 @@ if (httpSmoke.adminUnauthorized.status !== 401) throw new Error("HTTP smoke must
 if (httpSmoke.reply.status !== 201 || httpSmoke.reply.body.status !== "queued_for_manual_send") {
   throw new Error("HTTP smoke must queue broker-approved reply");
 }
-if (httpSmoke.replyOutbox.rows !== 1) throw new Error("HTTP smoke must persist one reply outbox row");
+if (httpSmoke.formReply.status !== 201 || httpSmoke.formReply.body.status !== "queued_for_manual_send") {
+  throw new Error("HTTP smoke must queue form-encoded broker-approved reply");
+}
+if (httpSmoke.replyOutbox.rows !== 2) throw new Error("HTTP smoke must persist two reply outbox rows");
 if (httpSmoke.viewing.status !== 201 || httpSmoke.viewing.body.follow_up_task?.status !== "open") {
   throw new Error("HTTP smoke must book one viewing with follow-up task");
 }
@@ -518,7 +528,7 @@ if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node serve
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 4) throw new Error("Lead ledger artifact must contain buyer, viewing, contact, and seller smoke rows");
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (replyOutbox.length !== 1) throw new Error("Reply outbox artifact must contain one deterministic smoke row");
+if (replyOutbox.length !== 2) throw new Error("Reply outbox artifact must contain two deterministic smoke rows");
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
 const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);

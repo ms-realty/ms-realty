@@ -223,6 +223,21 @@ smoke.reply = await dispatchHttp(app, {
     approved: true,
   },
 });
+smoke.formReply = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/replies",
+  headers: {
+    authorization: "Bearer local-admin-smoke",
+    "content-type": "application/x-www-form-urlencoded",
+  },
+  body: new URLSearchParams({
+    leadId: "http-lead-contact-he-0001",
+    language: "he",
+    reviewedReply: "Reviewed callback reply approved by broker.",
+    reviewer: "broker_en",
+    approved: "true",
+  }).toString(),
+});
 smoke.replyUnauthorized = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/replies",
@@ -301,6 +316,10 @@ smoke.localeCreate = await dispatchHttp(app, {
 smoke.localeFallback = await dispatchHttp(app, { url: "/es/" });
 smoke.admin = await dispatchHttp(app, {
   url: "/api/admin/leads?locale=ru",
+  headers: { authorization: "Bearer local-admin-smoke" },
+});
+smoke.adminHtml = await dispatchHttp(app, {
+  url: "/admin/leads?locale=ru",
   headers: { authorization: "Bearer local-admin-smoke" },
 });
 
