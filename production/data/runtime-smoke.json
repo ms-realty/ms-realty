@@ -221,7 +221,7 @@
           "public_gallery_assets": 19,
           "floor_plan_candidates": 0,
           "video_candidates": 0,
-          "review_gated_assets": 16
+          "review_gated_assets": 0
         },
         "tour": {
           "available": false,
@@ -549,7 +549,7 @@
           "public_gallery_assets": 21,
           "floor_plan_candidates": 0,
           "video_candidates": 0,
-          "review_gated_assets": 12
+          "review_gated_assets": 0
         },
         "tour": {
           "available": false,

@@ -36,6 +36,7 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
   const assetUrl = imageUrlFromMediaItem({ url });
   const kind = classifyMediaAsset({ url, alt: row.alt });
   const publicImportedPhoto = kind === "photo" && Boolean(assetUrl);
+  const reviewedPrivate = kind === "site_chrome";
 
   return {
     url,
@@ -45,7 +46,7 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
     height,
     kind,
     is_public: publicImportedPhoto,
-    review_status: publicImportedPhoto ? "approved_imported_photo" : "needs_media_review",
+    review_status: publicImportedPhoto ? "approved_imported_photo" : reviewedPrivate ? "reviewed_private" : "needs_media_review",
   };
 }
 

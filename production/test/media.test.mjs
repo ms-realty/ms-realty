@@ -17,13 +17,15 @@ test("media library exposes imported photos and gates plans or videos for review
 
   const library = publicMediaLibrary(media);
 
+  assert.equal(media[0].kind, "site_chrome");
+  assert.equal(media[0].review_status, "reviewed_private");
   assert.equal(library.gallery_count, 1);
   assert.equal(library.gallery[0].url, "https://makler-realty.com/wp-content/uploads/2025/04/front.jpg");
   assert.equal(library.floor_plans.length, 0);
   assert.equal(library.videos.length, 0);
   assert.equal(library.review.floor_plan_candidates, 1);
   assert.equal(library.review.video_candidates, 1);
-  assert.equal(library.review.review_gated_assets, 3);
+  assert.equal(library.review.review_gated_assets, 2);
 });
 
 test("reviewed private media no longer blocks media review", () => {
