@@ -69,8 +69,11 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /Status: blocked/);
   assert.match(markdown, /Remaining approvals required: 163/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
+  assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/backlinks\.csv`: missing_export/);
+  assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import/);
+  assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
 });
