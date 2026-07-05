@@ -14,6 +14,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
   assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports"]);
+  assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.ok(report.rollback_plan.length >= 3);
 });
 
@@ -47,6 +48,26 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.equal(report.launch_ready, true);
   assert.equal(report.status, "ready");
   assert.deepEqual(report.blockers, []);
+});
+
+test("launch readiness blocks incomplete monitoring configuration", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  seoEvidence.summary.missing_required_sources = [];
+  seoEvidence.summary.sources.privacy_events.status = "";
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+  });
+
+  assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
+  assert.deepEqual(report.blockers, ["monitoring_rollback"]);
 });
 
 test("launch readiness blocks broad or duplicate deployable redirect exports", () => {

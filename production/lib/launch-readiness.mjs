@@ -51,6 +51,20 @@ export function buildLaunchReadinessReport({
     deployableRedirects.summary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
+  const monitoringPlan = [
+    { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
+    { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
+    { source: "yandex_webmaster", status: seoEvidence.summary.sources.yandex_webmaster.status },
+    { source: "backlinks", status: seoEvidence.summary.sources.backlinks.status },
+  ];
+  const rollbackPlan = [
+    "Keep legacy DNS/origin rollback available until post-launch crawl is stable.",
+    "Disable reviewed redirect deployment before changing content routes if crawl parity fails.",
+    "Republish previous sitemap and robots files if indexable route coverage regresses.",
+    "Use migration review queue owners to triage failed old URLs before broad redirects.",
+  ];
+  const monitoringReady = monitoringPlan.every((item) => item.source && item.status);
+  const rollbackReady = rollbackPlan.length >= 3;
 
   const gates = [
     gate("crawl_inventory", crawlPass ? "pass" : "blocked", migration.summary),
@@ -91,6 +105,16 @@ export function buildLaunchReadinessReport({
       },
     ),
     gate(
+      "monitoring_rollback",
+      monitoringReady && rollbackReady ? "pass" : "blocked",
+      {
+        monitoring_sources: monitoringPlan.map((item) => item.source),
+        privacy_events_status: monitoringPlan.find((item) => item.source === "privacy_events")?.status,
+        rollback_steps: rollbackPlan.length,
+      },
+      monitoringReady && rollbackReady ? "" : "Monitoring evidence and rollback steps are required before launch.",
+    ),
+    gate(
       "production_app_layer",
       appLayerReady ? "pass" : "blocked",
       appState,
@@ -106,18 +130,8 @@ export function buildLaunchReadinessReport({
     blockers,
     warnings: warningsFrom(structuredData),
     gates,
-    monitoring_plan: [
-      { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
-      { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
-      { source: "yandex_webmaster", status: seoEvidence.summary.sources.yandex_webmaster.status },
-      { source: "backlinks", status: seoEvidence.summary.sources.backlinks.status },
-    ],
-    rollback_plan: [
-      "Keep legacy DNS/origin rollback available until post-launch crawl is stable.",
-      "Disable reviewed redirect deployment before changing content routes if crawl parity fails.",
-      "Republish previous sitemap and robots files if indexable route coverage regresses.",
-      "Use migration review queue owners to triage failed old URLs before broad redirects.",
-    ],
+    monitoring_plan: monitoringPlan,
+    rollback_plan: rollbackPlan,
   };
 }
 
@@ -138,6 +152,9 @@ export function assertLaunchReadinessReport(report) {
   }
   if (!Array.isArray(report.rollback_plan) || report.rollback_plan.length < 3) {
     throw new Error("Launch readiness must include a rollback plan");
+  }
+  if (!report.gates.some((item) => item.id === "monitoring_rollback" && item.status === "pass")) {
+    throw new Error("Launch readiness must prove monitoring and rollback gate passed");
   }
   return true;
 }

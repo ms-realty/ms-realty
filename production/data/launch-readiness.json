@@ -140,6 +140,21 @@
       }
     },
     {
+      "id": "monitoring_rollback",
+      "status": "pass",
+      "message": "",
+      "evidence": {
+        "monitoring_sources": [
+          "privacy_events",
+          "search_console",
+          "yandex_webmaster",
+          "backlinks"
+        ],
+        "privacy_events_status": "imported",
+        "rollback_steps": 4
+      }
+    },
+    {
       "id": "production_app_layer",
       "status": "pass",
       "message": "Node production adapter is present; framework migration can consume the same contract later.",
