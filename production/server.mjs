@@ -21,9 +21,15 @@ function bytesFrom(value) {
   return bytes;
 }
 
+function hostFrom(value) {
+  const host = value === undefined || value === "" ? "0.0.0.0" : String(value);
+  if (host.trim() !== host || host === "") throw new Error("HOST must be a non-empty hostname or IP address");
+  return host;
+}
+
 export function productionServerConfig(env = process.env) {
   return {
-    host: env.MS_REALTY_HOST || env.HOST || "0.0.0.0",
+    host: hostFrom(env.MS_REALTY_HOST || env.HOST),
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,

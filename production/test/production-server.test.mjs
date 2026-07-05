@@ -33,13 +33,17 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   const config = productionServerConfig({
     PORT: "3000",
     HOST: "0.0.0.0",
+    MS_REALTY_HOST: "127.0.0.1",
     MS_REALTY_PORT: "8080",
     MS_REALTY_MAX_BODY_BYTES: "1024",
   });
 
   assert.equal(config.port, 8080);
-  assert.equal(config.host, "0.0.0.0");
+  assert.equal(config.host, "127.0.0.1");
   assert.equal(config.maxBodyBytes, 1024);
+  assert.equal(productionServerConfig({ HOST: "" }).host, "0.0.0.0");
+  assert.throws(() => productionServerConfig({ HOST: " 127.0.0.1" }), /HOST must be a non-empty/);
+  assert.throws(() => productionServerConfig({ MS_REALTY_HOST: "127.0.0.1 " }), /HOST must be a non-empty/);
   assert.throws(() => productionServerConfig({ PORT: " 0" }), /PORT must be an integer/);
   assert.throws(() => productionServerConfig({ MS_REALTY_PORT: "3000.5" }), /PORT must be an integer/);
   assert.throws(() => productionServerConfig({ MS_REALTY_MAX_BODY_BYTES: "0" }), /positive integer/);
