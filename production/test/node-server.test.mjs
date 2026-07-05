@@ -87,6 +87,14 @@ function deployableRedirect() {
   return JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 }
 
+function assertPrivateSecurityHeaders(headers) {
+  assert.equal(headers["cache-control"], "no-store");
+  assert.equal(headers["x-content-type-options"], "nosniff");
+  assert.equal(headers["referrer-policy"], "strict-origin-when-cross-origin");
+  assert.equal(headers["x-frame-options"], "DENY");
+  assert.equal(headers["permissions-policy"], "camera=(), microphone=(), geolocation=()");
+}
+
 test("Node server serves live listing, search, lead, and viewing endpoints", async () => {
   await withServer(
     async (
@@ -390,11 +398,25 @@ test("Node server rejects oversized request bodies", async () => {
 
     assert.equal(response.status, 413);
     assert.equal(response.body.kind, "request_too_large");
-    assert.equal(response.headers["cache-control"], "no-store");
-    assert.equal(response.headers["x-content-type-options"], "nosniff");
-    assert.equal(response.headers["referrer-policy"], "strict-origin-when-cross-origin");
-    assert.equal(response.headers["x-frame-options"], "DENY");
-    assert.equal(response.headers["permissions-policy"], "camera=(), microphone=(), geolocation=()");
+    assertPrivateSecurityHeaders(response.headers);
+  } finally {
+    await close(server);
+  }
+});
+
+test("Node server hides unexpected app errors behind private JSON responses", async () => {
+  const server = createNodeServer(async () => {
+    throw new Error("database password leaked");
+  });
+  const address = await listen(server);
+  try {
+    const response = await jsonFetch(`http://${address.address}:${address.port}`, "/api/leads", {
+      captureHeaders: true,
+    });
+
+    assert.equal(response.status, 500);
+    assert.deepEqual(response.body, { kind: "server_error" });
+    assertPrivateSecurityHeaders(response.headers);
   } finally {
     await close(server);
   }
