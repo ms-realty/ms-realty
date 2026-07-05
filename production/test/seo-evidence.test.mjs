@@ -31,6 +31,60 @@ test("SEO evidence joins external exports and privacy events to crawled URLs", (
   assert.equal(evidence.url_evidence[0].analytics.leads, 1);
 });
 
+test("external SEO evidence ignores exact duplicate rows without collapsing distinct rows", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-deduped-seo-evidence-`);
+  fs.writeFileSync(
+    `${dir}/search-console.csv`,
+    [
+      "url,clicks,impressions,position",
+      "https://makler-realty.com/p/1,3,30,7",
+      "https://makler-realty.com/p/1,3,30,7",
+      "https://makler-realty.com/p/1,1,10,8",
+    ].join("\n"),
+  );
+  fs.writeFileSync(
+    `${dir}/yandex-webmaster.csv`,
+    [
+      "url,indexed,issue",
+      "https://makler-realty.com/p/1,no,duplicate-title",
+      "https://makler-realty.com/p/1,no,duplicate-title",
+      "https://makler-realty.com/p/1,yes,",
+    ].join("\n"),
+  );
+  fs.writeFileSync(
+    `${dir}/backlinks.csv`,
+    [
+      "target_url,source_url",
+      "https://makler-realty.com/p/1,https://example.com/a",
+      "https://makler-realty.com/p/1,https://example.com/a",
+      "https://makler-realty.com/p/1,https://other.example/b",
+    ].join("\n"),
+  );
+
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    records: [{ old_url: "https://makler-realty.com/p/1", source_domain: "makler-realty.com", url_type: "listing" }],
+    routeMap: [],
+    events: [],
+  });
+
+  assert.equal(evidence.summary.sources.search_console.row_count, 3);
+  assert.equal(evidence.summary.sources.search_console.matched_rows, 2);
+  assert.equal(evidence.summary.sources.search_console.duplicate_rows, 1);
+  assert.equal(evidence.summary.sources.search_console.unmatched_rows, 0);
+  assert.equal(evidence.url_evidence[0].search_console.clicks, 4);
+  assert.equal(evidence.url_evidence[0].search_console.impressions, 40);
+  assert.equal(evidence.summary.sources.yandex_webmaster.matched_rows, 2);
+  assert.equal(evidence.summary.sources.yandex_webmaster.duplicate_rows, 1);
+  assert.equal(evidence.url_evidence[0].yandex_webmaster.rows, 2);
+  assert.equal(evidence.url_evidence[0].yandex_webmaster.issues, 1);
+  assert.equal(evidence.summary.sources.backlinks.matched_rows, 2);
+  assert.equal(evidence.summary.sources.backlinks.duplicate_rows, 1);
+  assert.equal(evidence.url_evidence[0].backlinks.backlinks, 2);
+  assert.equal(evidence.url_evidence[0].backlinks.referring_domains, 2);
+});
+
 test("required SEO exports need matched coverage for both legacy domains", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-two-domain-seo-evidence-`);
   fs.writeFileSync(

@@ -67,7 +67,8 @@ function sourceUrl(row, source) {
 function normalizeExternalRow(source, row) {
   const normalized = lowerRow(row);
   const url = sourceUrl(normalized, source);
-  const item = { url, keys: routeKeys(url) };
+  const rawKey = JSON.stringify(Object.entries(normalized).sort(([a], [b]) => a.localeCompare(b)));
+  const item = { url, keys: routeKeys(url), raw_key: rawKey };
 
   if (source === "search_console") {
     item.clicks = numberFrom(normalized, ["clicks"]);
@@ -86,6 +87,10 @@ function normalizeExternalRow(source, row) {
   }
 
   return item;
+}
+
+function externalRowDedupeKey(source, target, row) {
+  return JSON.stringify([source, target.old_url, row.raw_key]);
 }
 
 function readExternalSource(source, inputDir) {
@@ -150,12 +155,26 @@ function indexEvidence(records, routeMap) {
 
 function joinExternal(source, sourceData, byKey) {
   let matched = 0;
+  let unmatched = 0;
+  let duplicateRows = 0;
   const matchedSourceDomains = new Set();
   const referringDomains = new Set();
+  const seenRows = new Set();
 
   for (const row of sourceData.rows) {
     const target = row.keys.map((key) => byKey.get(key)).find(Boolean);
-    if (!target) continue;
+    if (!target) {
+      unmatched += 1;
+      continue;
+    }
+
+    const dedupeKey = externalRowDedupeKey(source, target, row);
+    if (seenRows.has(dedupeKey)) {
+      duplicateRows += 1;
+      continue;
+    }
+    seenRows.add(dedupeKey);
+
     matched += 1;
     matchedSourceDomains.add(target.source_domain);
 
@@ -182,7 +201,8 @@ function joinExternal(source, sourceData, byKey) {
 
   return {
     matched_rows: matched,
-    unmatched_rows: sourceData.row_count - matched,
+    unmatched_rows: unmatched,
+    duplicate_rows: duplicateRows,
     matched_source_domains: [...matchedSourceDomains].sort(),
   };
 }

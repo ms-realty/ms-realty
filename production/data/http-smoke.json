@@ -3804,6 +3804,7 @@
             "row_count": 0,
             "matched_rows": 0,
             "unmatched_rows": 0,
+            "duplicate_rows": 0,
             "matched_source_domains": []
           },
           "yandex_webmaster": {
@@ -3813,6 +3814,7 @@
             "row_count": 0,
             "matched_rows": 0,
             "unmatched_rows": 0,
+            "duplicate_rows": 0,
             "matched_source_domains": []
           },
           "backlinks": {
@@ -3822,6 +3824,7 @@
             "row_count": 0,
             "matched_rows": 0,
             "unmatched_rows": 0,
+            "duplicate_rows": 0,
             "matched_source_domains": []
           },
           "analytics_export": {
@@ -3831,6 +3834,7 @@
             "row_count": 0,
             "matched_rows": 0,
             "unmatched_rows": 0,
+            "duplicate_rows": 0,
             "matched_source_domains": []
           },
           "privacy_events": {
