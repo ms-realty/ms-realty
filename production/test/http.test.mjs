@@ -538,6 +538,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/redirect-approval-workbook",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const qualityWorkbookUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/listing-quality-workbook",
+  });
+  const qualityWorkbook = await dispatchHttp(app, {
+    url: "/api/admin/listing-quality-workbook",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const imported = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/redirect-approvals/import",
@@ -595,6 +602,10 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(workbook.status, 200);
   assert.equal(workbook.headers["content-type"], "text/csv; charset=utf-8");
   assert.equal(parseCsv(workbook.body).length, 165);
+  assert.equal(qualityWorkbookUnauthorized.status, 401);
+  assert.equal(qualityWorkbook.status, 200);
+  assert.equal(qualityWorkbook.headers["content-type"], "text/csv; charset=utf-8");
+  assert.equal(parseCsv(qualityWorkbook.body).length, 165);
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
@@ -617,6 +628,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.redirectApprovalImport.exportEndpoint, "/api/admin/deployable-redirects/export");
   assert.equal(review.body.redirectApprovalImport.workbookEndpoint, "/api/admin/redirect-approval-workbook");
   assert.equal(review.body.redirectApprovalImport.pendingWorkbookEndpoint, "/api/admin/redirect-approval-workbook?pending=1");
+  assert.equal(review.body.listingQualityWorkbookEndpoint, "/api/admin/listing-quality-workbook");
   assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
   assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
   assert.equal(review.body.listingQuality.summary.listings, 165);
@@ -632,6 +644,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-pending-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook?pending=1"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-endpoint="/api/admin/launch-readiness"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-export-endpoint="/api/admin/launch-readiness/export"'), true);
+  assert.equal(reviewHtml.body.includes('data-quality-workbook-endpoint="/api/admin/listing-quality-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-affected-listings="165"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-listing="true"'), true);
 });

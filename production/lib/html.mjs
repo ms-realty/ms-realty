@@ -327,10 +327,13 @@ function renderAdminMigrationReview(page) {
       <button type="submit">Import SEO CSV</button>
     </form>
   </section>
-  <section aria-label="Listing quality queue" data-quality-affected-listings="${escapeHtml(
+  <section aria-label="Listing quality queue" data-quality-workbook-endpoint="${escapeHtml(
+    page.listingQualityWorkbookEndpoint,
+  )}" data-quality-affected-listings="${escapeHtml(
     page.listingQuality?.summary?.affected_listings || 0,
   )}">
     <h2>Listing quality queue</h2>
+    <p><a href="${escapeHtml(page.listingQualityWorkbookEndpoint)}">Download listing quality workbook</a></p>
     <p>Issues: ${escapeHtml(JSON.stringify(page.listingQuality?.summary?.issue_counts || {}))}</p>
     <table>
       <thead><tr><th>Listing</th><th>Locale</th><th>Location</th><th>Issues</th><th>Public photos</th><th>Missing alt</th><th>Review-gated media</th></tr></thead>

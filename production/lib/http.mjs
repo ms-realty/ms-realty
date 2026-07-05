@@ -34,7 +34,7 @@ import { appendTourApproval, createTourApproval, readTourApprovals } from "./tou
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
-import { buildListingQualityReport } from "./listing-quality.mjs";
+import { buildListingQualityReport, renderListingQualityWorkbook } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -265,6 +265,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     },
     seoEvidence: seoEvidencePayload(seoEvidence),
     listingQuality: buildListingQualityReport({ seed, limit: 20 }),
+    listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     deployablePreview: buildDeployableRedirects(routes, approvals),
@@ -605,6 +606,16 @@ export function createHttpApp({
         renderRedirectApprovalWorkbook(rows),
         "text/csv; charset=utf-8",
         { "content-disposition": 'attachment; filename="redirect-approval-workbook.csv"' },
+      );
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return response(
+        200,
+        renderListingQualityWorkbook(buildListingQualityReport({ seed })),
+        "text/csv; charset=utf-8",
+        { "content-disposition": 'attachment; filename="listing-quality-workbook.csv"' },
       );
     }
 
@@ -1057,6 +1068,7 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-endpoint=\"/api/admin/launch-readiness\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-export-endpoint=\"/api/admin/launch-readiness/export\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-quality-workbook-endpoint=\"/api/admin/listing-quality-workbook\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-quality-listing=\"true\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
