@@ -12,7 +12,7 @@
     },
     {
       "id": "missing_bedrooms",
-      "count": 13
+      "count": 4
     }
   ],
   "gates": [
@@ -88,7 +88,7 @@
         "entries_with_offer": 137,
         "warnings": {
           "missing_price": 30,
-          "missing_bedrooms": 13
+          "missing_bedrooms": 4
         },
         "by_locale": {
           "bg": 113,

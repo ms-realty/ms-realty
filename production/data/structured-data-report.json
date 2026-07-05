@@ -6,7 +6,7 @@
     "entries_with_offer": 137,
     "warnings": {
       "missing_price": 30,
-      "missing_bedrooms": 13
+      "missing_bedrooms": 4
     },
     "by_locale": {
       "bg": 113,
@@ -65,8 +65,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ]
     },
     {
@@ -192,9 +191,7 @@
       "image_count": 7,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0014",
@@ -600,9 +597,7 @@
       "image_count": 1,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0050",
@@ -878,9 +873,7 @@
       "image_count": 7,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0074",
@@ -1026,8 +1019,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ]
     },
     {
@@ -1280,9 +1272,7 @@
       "image_count": 7,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0109",
@@ -1353,8 +1343,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ]
     },
     {
@@ -1568,9 +1557,7 @@
       "image_count": 4,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0134",
@@ -1629,9 +1616,7 @@
       "image_count": 9,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0139",

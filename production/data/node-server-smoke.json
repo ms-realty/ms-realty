@@ -137,7 +137,7 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "location": "Sandanski",
-          "property_type": "apartment",
+          "property_type": "multi_unit",
           "offer_type": "sale",
           "bedrooms": null,
           "price_eur": null,
@@ -1450,7 +1450,7 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "location": "Sandanski",
-          "property_type": "apartment",
+          "property_type": "multi_unit",
           "offer_type": "sale",
           "bedrooms": null,
           "price_eur": null,
@@ -1930,7 +1930,7 @@
       "contact": {
         "name": "Noa Levi"
       },
-      "match_count": 44,
+      "match_count": 41,
       "alert_frequency": "weekly",
       "status": "active",
       "alert_task": {
@@ -1951,7 +1951,7 @@
         "contact": {
           "name": "Noa Levi"
         },
-        "match_count": 44,
+        "match_count": 41,
         "alert_frequency": "weekly",
         "status": "active",
         "alert_task": {
@@ -2656,7 +2656,7 @@
           "contact": {
             "name": "Noa Levi"
           },
-          "match_count": 44,
+          "match_count": 41,
           "alert_frequency": "weekly",
           "status": "active",
           "alert_task": {
@@ -3448,7 +3448,7 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "location": "Sandanski",
-          "property_type": "apartment",
+          "property_type": "multi_unit",
           "offer_type": "sale",
           "bedrooms": null,
           "price_eur": null,

@@ -30,16 +30,23 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });
 
-test("listing quality does not require bedrooms for land listings", () => {
+test("listing quality does not require bedrooms for land and multi-unit listings", () => {
   const seed = loadCmsSeed();
   const report = buildListingQualityReport({ seed, generatedAt: "2026-07-05T00:00:00Z" });
-  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0158");
-  const listing = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0158");
+  const landRow = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0158");
+  const landListing = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0158");
+  const multiUnitRow = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0002");
+  const multiUnitListing = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0002");
 
-  assert.equal(listing.facts.property_type, "land");
-  if (row) {
-    assert.equal(row.issues.includes("missing_bedrooms"), false);
-    assert.equal(row.required_editor_fields.includes("bedrooms"), false);
+  assert.equal(landListing.facts.property_type, "land");
+  if (landRow) {
+    assert.equal(landRow.issues.includes("missing_bedrooms"), false);
+    assert.equal(landRow.required_editor_fields.includes("bedrooms"), false);
+  }
+  assert.equal(multiUnitListing.facts.property_type, "multi_unit");
+  if (multiUnitRow) {
+    assert.equal(multiUnitRow.issues.includes("missing_bedrooms"), false);
+    assert.equal(multiUnitRow.required_editor_fields.includes("bedrooms"), false);
   }
 });
 

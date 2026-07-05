@@ -31,7 +31,7 @@ test("structured data warnings use reviewed listing edits", () => {
   const reviewed = buildStructuredDataReport({
     listingEdits: [
       { listing_id: "MS-CRAWL-0001", patch: { price_eur: 123000 } },
-      { listing_id: "MS-CRAWL-0002", patch: { bedrooms: 1 } },
+      { listing_id: "MS-CRAWL-0044", patch: { bedrooms: 1 } },
       { listing_id: "MS-CRAWL-0037", media_reviewer: "media_editor" },
     ],
     generatedAt: "2026-07-05T00:00:00Z",
