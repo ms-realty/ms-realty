@@ -199,7 +199,10 @@ function joinPrivacyEvents(events, byKey, byListingReference) {
 }
 
 function summarize(records, sourceSummaries, urlEvidence) {
-  const missing = REQUIRED_EXPORTS.filter((source) => sourceSummaries[source]?.status !== "imported");
+  const missing = REQUIRED_EXPORTS.filter((source) => {
+    const summary = sourceSummaries[source];
+    return summary?.status !== "imported" || summary.matched_rows < 1;
+  });
   const analyticsReady =
     sourceSummaries.privacy_events?.status === "imported" || sourceSummaries.analytics_export?.status === "imported";
   return {

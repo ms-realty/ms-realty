@@ -57,6 +57,25 @@ test("empty required SEO export files remain launch blockers", () => {
   assert.equal(evidence.summary.sources.search_console.status, "empty_export");
 });
 
+test("unmatched required SEO export files remain launch blockers", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-unmatched-seo-evidence-`);
+  fs.writeFileSync(`${dir}/search-console.csv`, "url,clicks,impressions,position\nhttps://unrelated.example/page,3,30,7\n");
+  fs.writeFileSync(`${dir}/yandex-webmaster.csv`, "url,indexed,issue\nhttps://unrelated.example/page,yes,\n");
+  fs.writeFileSync(`${dir}/backlinks.csv`, "target_url,source_url\nhttps://unrelated.example/page,https://example.com/a\n");
+
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    records: [{ old_url: "https://makler-realty.com/p/1", source_domain: "makler-realty.com", url_type: "listing" }],
+    routeMap: [],
+    events: [{ type: "page_view", path: "https://makler-realty.com/p/1" }],
+  });
+
+  assert.deepEqual(evidence.summary.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
+  assert.equal(evidence.summary.sources.search_console.status, "imported");
+  assert.equal(evidence.summary.sources.search_console.matched_rows, 0);
+});
+
 test("external SEO export templates are present but real CSVs stay local", () => {
   const dir = fromRoot("migration", "external", "seo");
   for (const file of ["search-console.csv", "yandex-webmaster.csv", "backlinks.csv"]) {
