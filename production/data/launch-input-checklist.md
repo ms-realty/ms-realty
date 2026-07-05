@@ -44,7 +44,7 @@ Blockers: redirect_reviews, external_seo_exports
 - missing_price: 167
 - missing_bedrooms: 167
 - media_review_pending: 167
-- missing_location: 5
+- missing_location: 3
 
 ## Validate After Inputs
 

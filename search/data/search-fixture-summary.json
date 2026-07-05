@@ -30,9 +30,10 @@
     "nl",
     "ru"
   ],
-  "listing_edit_count": 1,
+  "listing_edit_count": 3,
   "url_strategy": "locale_prefix",
   "locations": [
+    "Hotovo",
     "Petrich",
     "Sandanski"
   ]

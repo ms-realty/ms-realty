@@ -21,7 +21,7 @@
     },
     {
       "id": "missing_location",
-      "count": 5
+      "count": 3
     }
   ],
   "gates": [
@@ -71,12 +71,12 @@
         "listings": 165,
         "home_pages": 7,
         "listing_entries": 167,
-        "location_pages": 6,
+        "location_pages": 7,
         "seller_pages": 7,
         "contact_pages": 7,
-        "entries": 194,
+        "entries": 195,
         "byLocale": {
-          "bg": 118,
+          "bg": 119,
           "en": 3,
           "de": 3,
           "nl": 3,
@@ -99,7 +99,7 @@
           "missing_price": 167,
           "missing_bedrooms": 167,
           "media_review_pending": 167,
-          "missing_location": 5
+          "missing_location": 3
         },
         "by_locale": {
           "bg": 113,

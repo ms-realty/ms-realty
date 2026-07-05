@@ -51,6 +51,20 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(report.blockers, []);
 });
 
+test("launch readiness accepts reviewed location page growth", () => {
+  const sitemap = readJson(["production", "data", "localized-sitemap.json"]);
+  sitemap.summary = {
+    ...sitemap.summary,
+    location_pages: sitemap.summary.location_pages + 1,
+    entries: sitemap.summary.entries + 1,
+    byLocale: { ...sitemap.summary.byLocale, bg: sitemap.summary.byLocale.bg + 1 },
+  };
+
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", sitemap });
+
+  assert.equal(report.gates.find((gate) => gate.id === "localized_sitemap").status, "pass");
+});
+
 test("launch readiness blocks incomplete monitoring configuration", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);

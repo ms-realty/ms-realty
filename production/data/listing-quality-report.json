@@ -11,7 +11,7 @@
       "tour_review_pending": 165,
       "missing_description": 122,
       "thin_public_gallery": 5,
-      "missing_location": 5
+      "missing_location": 3
     },
     "by_source_locale": {
       "bg": 113,
@@ -415,18 +415,16 @@
       "required_editor_fields": [
         "price_eur",
         "bedrooms",
-        "location",
         "media_review",
         "media_alt_text",
         "tour_review"
       ],
       "title": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
-      "location": "",
+      "location": "Hotovo",
       "description": "Продава се къща в с. Хотово с обща площ 160 кв.м. и парцел 440 кв.м. Подходяща за ремонт, ваканционен дом или инвестиция.",
       "issues": [
         "missing_price",
         "missing_bedrooms",
-        "missing_location",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -2045,19 +2043,17 @@
       "required_editor_fields": [
         "price_eur",
         "bedrooms",
-        "location",
         "description",
         "media_review",
         "media_alt_text",
         "tour_review"
       ],
       "title": "Продава стара къща в с.Хотово",
-      "location": "",
+      "location": "Hotovo",
       "description": "",
       "issues": [
         "missing_price",
         "missing_bedrooms",
-        "missing_location",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",

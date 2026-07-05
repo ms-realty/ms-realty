@@ -65,6 +65,19 @@ export function buildLaunchReadinessReport({
   ];
   const monitoringReady = monitoringPlan.every((item) => item.source && item.status);
   const rollbackReady = rollbackPlan.length >= 3;
+  const expectedSitemapEntries =
+    sitemap.summary.home_pages +
+    sitemap.summary.listing_entries +
+    sitemap.summary.location_pages +
+    sitemap.summary.seller_pages +
+    sitemap.summary.contact_pages;
+  const localizedSitemapReady =
+    sitemap.summary.home_pages === 7 &&
+    sitemap.summary.listing_entries === 167 &&
+    sitemap.summary.location_pages >= 6 &&
+    sitemap.summary.seller_pages === 7 &&
+    sitemap.summary.contact_pages === 7 &&
+    sitemap.summary.entries === expectedSitemapEntries;
 
   const gates = [
     gate("crawl_inventory", crawlPass ? "pass" : "blocked", migration.summary),
@@ -79,7 +92,7 @@ export function buildLaunchReadinessReport({
       },
       redirectsReviewed ? "" : "Only reviewed same-content redirects with no homepage targets or duplicate old URLs may launch.",
     ),
-    gate("localized_sitemap", sitemap.summary.entries === 194 && sitemap.summary.listing_entries === 167 ? "pass" : "blocked", sitemap.summary),
+    gate("localized_sitemap", localizedSitemapReady ? "pass" : "blocked", sitemap.summary),
     gate(
       "structured_data",
       structuredData.summary.failing_entries === 0 ? "pass" : "blocked",

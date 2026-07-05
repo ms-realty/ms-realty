@@ -899,6 +899,11 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/sandanski" />
   </url>
   <url>
+    <loc>https://makler-realty.com/bg/lokacii/hotovo</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/hotovo" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/lokacii/hotovo" />
+  </url>
+  <url>
     <loc>https://makler-realty.com/bg/lokacii/petrich</loc>
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/lokacii/petrich" />
     <xhtml:link rel="alternate" hreflang="ru" href="https://makler-realty.com/ru/locations/petrich" />
