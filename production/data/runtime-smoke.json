@@ -863,7 +863,7 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
-        "price_eur": null,
+        "price_eur": 1,
         "image_count": 18
       }
     ]
@@ -1245,7 +1245,7 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
-        "price_eur": null,
+        "price_eur": 1,
         "image_count": 18
       },
       {

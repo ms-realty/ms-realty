@@ -3,10 +3,10 @@
     "generated_at": "2026-07-05T00:00:00Z",
     "listing_entries": 167,
     "failing_entries": 0,
-    "entries_with_offer": 134,
+    "entries_with_offer": 137,
     "warnings": {
-      "missing_price": 33,
-      "missing_bedrooms": 16
+      "missing_price": 30,
+      "missing_bedrooms": 13
     },
     "by_locale": {
       "bg": 113,
@@ -111,11 +111,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 1,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0007",
@@ -262,11 +260,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 14,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0020",
@@ -571,9 +567,7 @@
       "image_count": 10,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0047",
@@ -771,8 +765,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ]
     },
     {
@@ -1125,11 +1118,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 5,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_price"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0095",
@@ -1408,9 +1399,7 @@
       "image_count": 14,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0119",

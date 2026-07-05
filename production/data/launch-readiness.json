@@ -8,11 +8,11 @@
   "warnings": [
     {
       "id": "missing_price",
-      "count": 33
+      "count": 30
     },
     {
       "id": "missing_bedrooms",
-      "count": 16
+      "count": 13
     }
   ],
   "gates": [
@@ -85,10 +85,10 @@
         "generated_at": "2026-07-05T00:00:00Z",
         "listing_entries": 167,
         "failing_entries": 0,
-        "entries_with_offer": 134,
+        "entries_with_offer": 137,
         "warnings": {
-          "missing_price": 33,
-          "missing_bedrooms": 16
+          "missing_price": 30,
+          "missing_bedrooms": 13
         },
         "by_locale": {
           "bg": 113,

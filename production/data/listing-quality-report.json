@@ -2,10 +2,10 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
     "listings": 165,
-    "affected_listings": 47,
+    "affected_listings": 43,
     "issue_counts": {
-      "missing_price": 31,
-      "missing_bedrooms": 16,
+      "missing_price": 28,
+      "missing_bedrooms": 13,
       "missing_location": 0,
       "missing_description": 0,
       "media_review_pending": 0,
@@ -14,12 +14,12 @@
       "tour_review_pending": 0
     },
     "by_source_locale": {
-      "bg": 36,
-      "ru": 11
+      "bg": 33,
+      "ru": 10
     },
     "by_source_domain": {
-      "makler-realty.com": 36,
-      "makler-realty.ru": 11
+      "makler-realty.com": 33,
+      "makler-realty.ru": 10
     }
   },
   "rows": [
@@ -97,19 +97,17 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0006",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "price_eur",
         "public_gallery"
       ],
       "title": "Дава под наем промишлена сграда в Сандански",
       "location": "Sandanski",
       "description": "Industrieel gebouw te huur in Sandanski",
       "issues": [
-        "missing_price",
         "thin_public_gallery"
       ],
-      "price_eur": null,
+      "price_eur": 1,
       "bedrooms": null,
       "public_gallery_assets": 1,
       "missing_alt_text_assets": 0,
@@ -204,28 +202,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0019",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0019",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0019",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "price_eur"
-      ],
-      "title": "Офиси/магазини под наем в гр.Сандански",
-      "location": "Sandanski",
-      "description": "Отдава се ПОД НАЕМ помещения -офис/магазин в гр. Сандански. Квадратурите са от15 до 122 кв.м. Сградата е построена през 2006 г., с добра визия и удобно разположение. Общите части се поддържат в добро състояние. Има възможност за лесно паркиране. Наемната цена е 12 лв/м2",
-      "issues": [
-        "missing_price"
-      ],
-      "price_eur": null,
-      "bedrooms": null,
-      "public_gallery_assets": 14,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0037",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -310,28 +286,6 @@
       "price_eur": 37000,
       "bedrooms": null,
       "public_gallery_assets": 5,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0046",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0046",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0046",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава къща в с.Поленица",
-      "location": "Sandanski",
-      "description": "Предлага се триетажна къща, разположена в с. Поленица, община Сандански, в район с чист въздух и красива природа. Имотът е на етап „груб строеж“, като първият етаж е напълно завършен, обзаведен и готов за обитаване, а останалите два етажа са в незавършен вид, което дава възможност за довършване и разпределение по индивидуален проект. Сградата е изградена с монолитна стоманобетонна конструкция с носещи елементи – колони, греди и плочи, а външните и вътрешните стени са изпълнени с тухлена зидария. Покривът е двускатен с дървена конструкция и покрит с керамични керемиди. Фасадата е частично измазана. Дограмата на първото ниво (кота -2.60 м) е PVC. Имотът е водоснабден и електрифициран. Разпределение по етажи: Сутерен / кота -2.60 м (136.97 кв.м) – напълно завършен и обзаведен: Антре – 10.52 кв.м Дневна – 22.69 кв.м Кухня – 13.16 кв.м Спалня – 19.17 кв.м Стая – 19.32 кв.м Баня с WC – 12.21",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 270000,
-      "bedrooms": null,
-      "public_gallery_assets": 10,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -455,18 +409,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0063",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продава се вила в с. Игралище, община Струмяни",
       "location": "Sandanski",
       "description": "Предлагаме за продажба нова вила, разположена в живописното село Игралище – малко и спокойно населено място в Малешевска планина. Районът е известен с чистия въздух, красивата природа и отличните условия за отдих, далеч от градския шум. До селото се стига по хубав асфалтов път. Вилата е изпълнена от сглобяема конструкция с много добра топлоизолация и е поставена върху солиден бетонов фундамент. Имотът се предлага в завършен вид, като е необходимо единствено оборудване на кухнята и банята според предпочитанията на новия собственик. Сградата е построена върху урегулиран парцел с площ от 342 кв.м. Има възможност за закупуване и на съседния имот с площ от 1068 кв.м. , който е със статут на земеделска земя, което предоставя допълнителни възможности за ползване и развитие на имота. Предимства на имота: Нова сглобяема вила с отлична топлоизолация; Бетонов фундамент; Завършен вид на сградата;",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 6,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -652,28 +604,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0094",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0094",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0094",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "price_eur"
-      ],
-      "title": "Индустриална сграда под наем в Петрич",
-      "location": "Sandanski",
-      "description": "Етаж 3 е с площ от 800кв.м. Етаж 4 е с площ 700 кв.м. и голяма тераса. Сградата има асансьор. Цена 3 ЛВ без ДДС за квадратен метър.",
-      "issues": [
-        "missing_price"
-      ],
-      "price_eur": null,
-      "bedrooms": null,
-      "public_gallery_assets": 5,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0096",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -848,28 +778,6 @@
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0118",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0118",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0118",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Дом на продажу в селе Петрово, муниципалитет Сандански",
-      "location": "Sandanski",
-      "description": "Представляем вашему вниманию просторный и функциональный дом общей площадью 163 кв.м., расположенный в живописном селе Петрово, входящем в муниципалитет Сандански. Этот объект идеально подходит для тех, кто ищет тишины и покоя. Характеристики объекта: Общая площадь дома: 163 кв.м. Площадь участка: 600 кв.м. Двор: Ровный, огорожен сеткой. Из дома открывается прекрасный панорамный вид на окружающие горы и природу. Структура дома: Этажи: 2 жилых этажа + мансардный этаж. Этажи имеют одинаковую планировку. Прихожая, гостиная, кухня, спальня, ванная комната с туалетом. При желании можно легко отделить вторую спальню. Входы: Каждый из жилых этажей имеет отдельный вход, что обеспечивает дополнительную приватность и возможности для самостоятельного проживания на обоих этажах. Первый этаж не имеет отделочных работ. На втором этаже заменены оконные рамы, сделана внутренняя ванная комната с",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 45000,
-      "bedrooms": null,
-      "public_gallery_assets": 14,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
