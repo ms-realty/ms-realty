@@ -469,6 +469,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
+  assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
   assert.equal(smoke.admin.body.leads.length, 4);
   assert.equal(smoke.admin.headers["cache-control"], "no-store");
   assert.equal(smoke.admin.body.languageRequests.length, 1);

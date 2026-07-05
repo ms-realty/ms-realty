@@ -483,6 +483,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
     },
     body: {
       h1: copy.h1,
+      description: descriptionFor(view),
       facts: {
         id: view.id,
         location: view.location,

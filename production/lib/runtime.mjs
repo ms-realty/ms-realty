@@ -35,8 +35,8 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     )
       ? "published"
       : "approved",
-    title: record.seo.title,
-    description: record.seo.description,
+    title: record.facts.title || record.seo.title,
+    description: record.facts.description || record.seo.description,
     h1: record.facts.h1,
     location: record.facts.location,
     property_type: record.facts.property_type,

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { createListingEdit, appendListingEdit, assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
+import { applyListingEdits, createListingEdit, appendListingEdit, assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 
 test("listing edits persist and stale dependent translations", () => {
@@ -29,6 +29,23 @@ test("listing edits persist and stale dependent translations", () => {
   assert.equal(result.staleTranslations.some((translation) => translation.locale === "el" && translation.status === "stale"), true);
   assert.equal(result.staleTranslations.every((translation) => translation.public_indexable === false), true);
   assert.equal(assertListingEdits(rows), true);
+});
+
+test("listing edit ledger overlays reviewed facts onto CMS seed records", () => {
+  const seed = loadCmsSeed();
+  const updated = applyListingEdits(seed, [
+    {
+      listing_id: "MS-CRAWL-0001",
+      patch: { description: "Reviewed source description.", price_eur: 123000, bedrooms: 2 },
+    },
+  ]);
+  const original = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const record = updated.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
+
+  assert.equal(original.facts.description, "");
+  assert.equal(record.facts.description, "Reviewed source description.");
+  assert.equal(record.facts.price_eur, 123000);
+  assert.equal(record.facts.bedrooms, 2);
 });
 
 test("listing edits reject invalid numeric facts before persistence", () => {

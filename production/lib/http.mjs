@@ -34,7 +34,7 @@ import {
 } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
-import { appendListingEdit, createListingEdit, readListingEdits } from "./listing-edits.mjs";
+import { appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
@@ -385,6 +385,7 @@ export function createHttpApp({
         },
       },
     });
+  const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
   const recordEvent = (input) =>
     eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
   return async function handle(request) {
@@ -445,7 +446,7 @@ export function createHttpApp({
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
       const filters = searchFiltersFromParams(url.searchParams);
-      const result = searchRuntimeListings(activeRegistry, seed, {
+      const result = searchRuntimeListings(activeRegistry, currentSeed(), {
         localeCode,
         query,
         filters,
@@ -467,7 +468,7 @@ export function createHttpApp({
         return publicResponse(
           request,
           url,
-          searchRuntimeListings(activeRegistry, seed, {
+          searchRuntimeListings(activeRegistry, currentSeed(), {
             localeCode: searchLocale.code,
             query,
             filters,
@@ -544,7 +545,7 @@ export function createHttpApp({
             renderAdminListingEditorPayload(
               activeRegistry,
               url.searchParams.get("locale") || "en",
-              seed,
+              currentSeed(),
               url.searchParams.get("listingId"),
               readListingEdits(listingEditLedgerPath || undefined),
               latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
@@ -566,7 +567,7 @@ export function createHttpApp({
         routeMap,
         readRedirectApprovals(redirectApprovalPath || undefined),
         currentSeoEvidence(),
-        seed,
+        currentSeed(),
         listingQualityGeneratedAt,
       );
       return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
@@ -583,7 +584,7 @@ export function createHttpApp({
         routeMap,
         approvals,
         currentSeoEvidence(),
-        seed,
+        currentSeed(),
         listingQualityGeneratedAt,
       );
       if (wantsHtml(request, url)) return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
@@ -704,7 +705,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        renderListingQualityWorkbook(buildListingQualityReport({ seed })),
+        renderListingQualityWorkbook(buildListingQualityReport({ seed: currentSeed() })),
         "text/csv; charset=utf-8",
         { "content-disposition": 'attachment; filename="listing-quality-workbook.csv"' },
       );
@@ -713,13 +714,13 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed }), csvInput(request));
+        const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed() }), csvInput(request));
         const translationTasks = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined));
         const edits = review.reviews
           .filter((row) => Object.keys(row.patch).length)
           .map((row) => {
             const result = createListingEdit(
-              seed,
+              currentSeed(),
               {
                 id: `listing-quality-${row.listing_id}`,
                 listingId: row.listing_id,
@@ -802,7 +803,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = listingEditInput(request);
-        const result = createListingEdit(seed, input, latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)), editedAt);
+        const result = createListingEdit(currentSeed(), input, latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)), editedAt);
         const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
         const persistedStaleTranslations = result.staleTranslations
           .filter((translation) => translation.id)
@@ -872,7 +873,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
         const input = parseJsonBody(request);
-        const lead = submitRuntimeLead(activeRegistry, seed, input);
+        const lead = submitRuntimeLead(activeRegistry, currentSeed(), input);
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         const sellerPipeline =
           sellerPipelinePath && lead.lead?.leadType === "seller"
@@ -918,7 +919,7 @@ export function createHttpApp({
       try {
         const input = parseJsonBody(request);
         const filters = searchFiltersFromObject(input.filters);
-        const search = searchRuntimeListings(activeRegistry, seed, {
+        const search = searchRuntimeListings(activeRegistry, currentSeed(), {
           localeCode: input.locale || activeRegistry.source_locale,
           query: input.query || "",
           filters,
@@ -936,7 +937,7 @@ export function createHttpApp({
 
     const rendered = renderRuntimePath(
       activeRegistry,
-      seed,
+      currentSeed(),
       url.pathname,
       readTranslationLedger(translationLedgerPath || undefined),
       readBrokerContacts(brokerContactLedgerPath || undefined),

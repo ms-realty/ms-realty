@@ -76,6 +76,7 @@ function renderListing(page) {
   return `
 <main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}" data-min-touch-target="44">
   <h1>${escapeHtml(page.body.h1)}</h1>
+  <p>${escapeHtml(page.body.description || "")}</p>
   <dl>${renderFacts(page.body.facts)}</dl>
   <section aria-label="Gallery">${gallery}</section>
   <nav aria-label="Listing actions" data-mobile-sticky-actions="${escapeHtml(page.body.actions.sticky_mobile ? "true" : "false")}">${primary}</nav>

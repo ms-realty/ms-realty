@@ -4,12 +4,17 @@ import {
   DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
   validateListingQualityReviewCsv,
 } from "../lib/listing-quality.mjs";
+import { applyListingEdits, readListingEdits } from "../lib/listing-edits.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 
 const inputPath = process.argv[2] || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
 
 try {
   if (!fs.existsSync(inputPath)) throw new Error(`Missing listing quality review CSV: ${inputPath}`);
-  const report = buildListingQualityReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
   const result = validateListingQualityReviewCsv(report, fs.readFileSync(inputPath, "utf8"));
 
   console.log(`Listing quality review CSV valid: ${result.summary.review_rows} rows`);

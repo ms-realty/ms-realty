@@ -29,6 +29,23 @@ export function appendListingEdit(edit, { filePath = DEFAULT_LISTING_EDIT_LEDGER
   return edit;
 }
 
+export function applyListingEdits(seed, edits = []) {
+  const patches = new Map();
+  for (const edit of edits) {
+    if (!edit.listing_id || !edit.patch) continue;
+    patches.set(edit.listing_id, { ...(patches.get(edit.listing_id) || {}), ...edit.patch });
+  }
+  if (!patches.size) return seed;
+  return {
+    ...seed,
+    records: seed.records.map((record) =>
+      record.collection === "listings" && patches.has(record.id)
+        ? { ...record, facts: { ...record.facts, ...patches.get(record.id) } }
+        : record,
+    ),
+  };
+}
+
 function findListing(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
 }
