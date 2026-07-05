@@ -632,6 +632,17 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     url: "/api/admin/seo-evidence/import",
     body: { source: "search_console", csv: "url,clicks\n" },
   });
+  const templateUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/seo-evidence/template?source=search_console",
+  });
+  const template = await dispatchHttp(app, {
+    url: "/api/admin/seo-evidence/template?source=search_console",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  const badTemplate = await dispatchHttp(app, {
+    url: "/api/admin/seo-evidence/template?source=unknown",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const searchConsole = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/seo-evidence/import",
@@ -672,6 +683,11 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   });
 
   assert.equal(unauthorized.status, 401);
+  assert.equal(templateUnauthorized.status, 401);
+  assert.equal(template.status, 200);
+  assert.equal(template.headers["content-type"], "text/csv; charset=utf-8");
+  assert.match(template.body, /url,clicks,impressions,position/);
+  assert.equal(badTemplate.status, 400);
   assert.equal(searchConsole.status, 201);
   assert.deepEqual(searchConsole.body.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
   assert.deepEqual(searchConsole.body.sources.search_console.matched_source_domains, [
@@ -684,8 +700,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.deepEqual(backlinks.body.missingRequiredSources, []);
   assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
   assert.equal(review.body.seoEvidence.importEndpoint, "/api/admin/seo-evidence/import");
+  assert.equal(review.body.seoEvidence.templateEndpoint, "/api/admin/seo-evidence/template");
   assert.deepEqual(review.body.seoEvidence.missingRequiredSources, []);
   assert.equal(reviewHtml.body.includes('data-seo-import-endpoint="/api/admin/seo-evidence/import"'), true);
+  assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {

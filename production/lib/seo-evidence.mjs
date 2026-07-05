@@ -270,6 +270,14 @@ export function writeExternalSeoExport(source, csvText, { inputDir = DEFAULT_SEO
   return { source, outPath, row_count: parseCsv(csvText || "").length };
 }
 
+export function readSeoExportTemplate(source, { inputDir = DEFAULT_SEO_EVIDENCE_INPUT_DIR } = {}) {
+  const filename = SEO_EXPORTS[source];
+  if (!filename) throw new Error(`Unknown SEO export source: ${source}`);
+  const templatePath = path.join(inputDir, `${filename}.example`);
+  if (!fs.existsSync(templatePath)) throw new Error(`Missing SEO export template for ${source}`);
+  return { source, filename: `${filename}.example`, csv: fs.readFileSync(templatePath, "utf8") };
+}
+
 export function assertSeoEvidence(evidence) {
   if (evidence.summary.crawl_urls !== evidence.url_evidence.length) throw new Error("SEO evidence must cover every crawled URL");
   if (evidence.summary.crawl_urls !== 457) throw new Error("SEO evidence must cover the 457 URL migration inventory");

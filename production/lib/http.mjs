@@ -30,7 +30,7 @@ import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
-import { buildSeoEvidence, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
+import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -203,6 +203,7 @@ function seoEvidencePayload(seoEvidence) {
     missingRequiredSources: seoEvidence.summary.missing_required_sources,
     sources: seoEvidence.summary.sources,
     importEndpoint: "/api/admin/seo-evidence/import",
+    templateEndpoint: "/api/admin/seo-evidence/template",
   };
 }
 
@@ -495,6 +496,20 @@ export function createHttpApp({
         return json(201, {
           imported,
           ...seoEvidencePayload(evidence),
+        });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/template") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const template = readSeoExportTemplate(url.searchParams.get("source"));
+        return response(200, template.csv, "text/csv; charset=utf-8", {
+          "content-disposition": `attachment; filename="${template.filename}"`,
         });
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
@@ -1015,7 +1030,8 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-pending-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook?pending=1\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"")
+    !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
   }

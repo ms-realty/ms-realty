@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { assertSeoEvidence, buildSeoEvidence, writeExternalSeoExport } from "../lib/seo-evidence.mjs";
+import { assertSeoEvidence, buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport } from "../lib/seo-evidence.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 test("SEO evidence joins external exports and privacy events to crawled URLs", () => {
@@ -140,4 +140,12 @@ test("external SEO export writer only writes known source files", () => {
   assert.equal(result.row_count, 1);
   assert.equal(fs.existsSync(`${dir}/search-console.csv`), true);
   assert.throws(() => writeExternalSeoExport("../bad", "url\n", { inputDir: dir }), /Unknown SEO export source/);
+});
+
+test("external SEO export templates are read only for known committed sources", () => {
+  const template = readSeoExportTemplate("backlinks");
+
+  assert.equal(template.filename, "backlinks.csv.example");
+  assert.match(template.csv, /target_url,source_url,referring_domain/);
+  assert.throws(() => readSeoExportTemplate("../bad"), /Unknown SEO export source/);
 });

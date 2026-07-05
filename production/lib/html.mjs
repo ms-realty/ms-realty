@@ -255,6 +255,7 @@ function renderAdminMigrationReview(page) {
       <li>
         <strong>${escapeHtml(source)}</strong>:
         ${escapeHtml(status.status)} · matched ${escapeHtml(status.matched_rows)} / ${escapeHtml(status.row_count)}
+        <a href="${escapeHtml(`${page.seoEvidence.templateEndpoint}?source=${source}`)}">CSV template</a>
       </li>`;
     })
     .join("");
@@ -283,7 +284,9 @@ function renderAdminMigrationReview(page) {
       <button type="submit">Import CSV</button>
     </form>
   </section>
-  <section aria-label="External SEO evidence" data-seo-import-endpoint="${escapeHtml(page.seoEvidence.importEndpoint)}">
+  <section aria-label="External SEO evidence" data-seo-import-endpoint="${escapeHtml(page.seoEvidence.importEndpoint)}" data-seo-template-endpoint="${escapeHtml(
+    page.seoEvidence.templateEndpoint,
+  )}">
     <h2>External SEO evidence</h2>
     <p>Missing required sources: ${escapeHtml(page.seoEvidence.missingRequiredSources.join(", ") || "none")}</p>
     <ul>${seoSources}</ul>
