@@ -11,6 +11,7 @@ import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
@@ -66,6 +67,12 @@ function tempSellerPipeline() {
   return file;
 }
 
+function tempDeals() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-deals-`)}/deals.jsonl`;
+  resetDealLedger(file);
+  return file;
+}
+
 function tempBrokerContacts() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-broker-contacts-`)}/broker-contacts.jsonl`;
   resetBrokerContacts(file);
@@ -115,6 +122,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const viewingLedgerPath = tempViewings();
   const savedSearchLedgerPath = tempSavedSearches();
   const sellerPipelinePath = tempSellerPipeline();
+  const dealLedgerPath = tempDeals();
   const brokerContactLedgerPath = tempBrokerContacts();
   const tourApprovalLedgerPath = tempTourApprovals();
   const eventLedgerPath = tempEvents();
@@ -127,6 +135,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     viewingLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
+    dealLedgerPath,
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
     eventLedgerPath,
@@ -137,6 +146,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     bookedAt: "2026-07-04T00:06:00Z",
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
+    dealClosedAt: "2026-07-10T10:00:00Z",
   });
   const redirect = deployableRedirect();
   const smoke = {
@@ -307,6 +317,17 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       headers: { authorization: "Bearer local-admin-smoke" },
     }),
     viewingCalendarUnauthorized: await dispatchHttp(app, { url: "/api/admin/viewings.ics" }),
+    dealClose: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/deals/close",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: { leadId: "http-lead-test", broker: "broker_ru" },
+    }),
+    dealCloseUnauthorized: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/deals/close",
+      body: { leadId: "http-lead-test", broker: "broker_ru" },
+    }),
   };
   smoke.formReply = await dispatchHttp(app, {
     method: "POST",
@@ -453,6 +474,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.viewing.body.feedback_request.status, "open");
   assert.equal(smoke.viewing.body.feedback_request.channel, "whatsapp");
+  assert.equal(smoke.dealClose.body.testimonial_request.status, "open");
+  assert.equal(smoke.dealClose.body.referral_request.status, "open");
+  assert.equal(smoke.dealClose.body.testimonial_request.channel, "whatsapp");
   assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");
@@ -469,6 +493,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
   assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
+  assert.equal(assertDealLedger(readDeals(dealLedgerPath)), true);
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
   assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
@@ -485,6 +510,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listingEditorHtml.body.includes("data-listing-id=\"MS-CRAWL-0001\""), true);
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
+  assert.equal(smoke.admin.body.deals.length, 1);
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
   assert.equal(smoke.admin.body.listingEdits.length, 1);
   assert.equal(smoke.admin.body.viewings.length, 1);

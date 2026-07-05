@@ -283,7 +283,13 @@ export function assertServerSmoke(smoke) {
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
   if (smoke.admin.body.leads.length < 4) throw new Error("Server must show buyer, viewing, contact, and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated admin leads");
-  for (const response of [smoke.adminUnauthorized, smoke.replyUnauthorized, smoke.viewingUnauthorized, smoke.viewingCalendarUnauthorized]) {
+  for (const response of [
+    smoke.adminUnauthorized,
+    smoke.replyUnauthorized,
+    smoke.viewingUnauthorized,
+    smoke.viewingCalendarUnauthorized,
+    smoke.dealCloseUnauthorized,
+  ]) {
     if (
       response?.headers?.["cache-control"] !== "no-store" ||
       response.headers["www-authenticate"] !== 'Bearer realm="ms-realty-admin"'
@@ -303,6 +309,14 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must book viewing follow-up and feedback tasks");
   }
   if (smoke.viewingUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated viewings");
+  if (
+    smoke.dealClose?.status !== 201 ||
+    smoke.dealClose.body.testimonial_request?.status !== "open" ||
+    smoke.dealClose.body.referral_request?.status !== "open"
+  ) {
+    throw new Error("Server must close deals with testimonial and referral tasks");
+  }
+  if (smoke.dealCloseUnauthorized?.status !== 401) throw new Error("Server must reject unauthenticated deal closes");
   if (
     smoke.viewingCalendar?.status !== 200 ||
     !smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR") ||

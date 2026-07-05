@@ -10,6 +10,7 @@ import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
@@ -43,6 +44,7 @@ const listingEditLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "m
 const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewings-")), "viewings.jsonl");
 const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-saved-searches-")), "saved-searches.jsonl");
 const sellerPipelinePath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-seller-pipeline-")), "seller-pipeline.jsonl");
+const dealLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-deals-")), "deals.jsonl");
 const brokerContactLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-broker-contacts-")), "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-tour-approvals-")), "tour-approvals.jsonl");
 const eventLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-events-")), "events.jsonl");
@@ -54,6 +56,7 @@ resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
+resetDealLedger(dealLedgerPath);
 resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
@@ -67,6 +70,7 @@ const server = createNodeServer(
     viewingLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
+    dealLedgerPath,
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
     eventLedgerPath,
@@ -77,6 +81,7 @@ const server = createNodeServer(
     bookedAt: "2026-07-04T00:06:00Z",
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
+    dealClosedAt: "2026-07-10T10:00:00Z",
   }),
 );
 const address = await listen(server);
@@ -281,6 +286,23 @@ try {
       headers: { authorization: "Bearer local-admin-smoke" },
     }),
     viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics", { captureHeaders: true }),
+    dealClose: await jsonFetch(baseUrl, "/api/admin/deals/close", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        id: "deal-server-lead-he-0001",
+        leadId: "server-lead-he-0001",
+        broker: "broker_ru",
+      }),
+    }),
+    dealCloseUnauthorized: await jsonFetch(baseUrl, "/api/admin/deals/close", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({
+        leadId: "server-lead-he-0001",
+        broker: "broker_ru",
+      }),
+    }),
   };
   smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
     method: "POST",
@@ -357,7 +379,7 @@ try {
   for (const name of ["languageRequest", "savedSearch", "lead", "viewingLead", "contactLead", "sellerLead", "badLead"]) {
     smoke[name].headers = { "cache-control": smoke[name].headers["cache-control"] };
   }
-  for (const name of ["adminUnauthorized", "replyUnauthorized", "viewingUnauthorized", "viewingCalendarUnauthorized"]) {
+  for (const name of ["adminUnauthorized", "replyUnauthorized", "viewingUnauthorized", "viewingCalendarUnauthorized", "dealCloseUnauthorized"]) {
     smoke[name].headers = {
       "cache-control": smoke[name].headers["cache-control"],
       "www-authenticate": smoke[name].headers["www-authenticate"],
@@ -388,6 +410,9 @@ try {
   const sellerPipeline = readSellerPipeline(sellerPipelinePath);
   assertSellerPipeline(sellerPipeline);
   smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
+  const deals = readDeals(dealLedgerPath);
+  assertDealLedger(deals);
+  smoke.dealLedger = { rows: deals.length };
   const brokerContacts = readBrokerContacts(brokerContactLedgerPath);
   assertBrokerContacts(brokerContacts);
   smoke.brokerContactLedger = { rows: brokerContacts.length };

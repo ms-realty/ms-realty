@@ -493,6 +493,13 @@ if (
   throw new Error("HTTP smoke must book one viewing with follow-up and feedback tasks");
 }
 if (
+  httpSmoke.dealClose.status !== 201 ||
+  httpSmoke.dealClose.body.testimonial_request?.status !== "open" ||
+  httpSmoke.dealClose.body.referral_request?.status !== "open"
+) {
+  throw new Error("HTTP smoke must close one deal with testimonial and referral tasks");
+}
+if (
   httpSmoke.viewingCalendar.status !== 200 ||
   !httpSmoke.viewingCalendar.body.includes("BEGIN:VCALENDAR") ||
   !httpSmoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z")
@@ -502,6 +509,7 @@ if (
 if (httpSmoke.viewingLedger.rows !== 1) throw new Error("HTTP smoke must persist one viewing row");
 if (httpSmoke.savedSearchLedger.rows !== 1) throw new Error("HTTP smoke must persist one saved search row");
 if (httpSmoke.sellerPipelineLedger.rows !== 1) throw new Error("HTTP smoke must persist one seller pipeline row");
+if (httpSmoke.dealLedger.rows !== 1) throw new Error("HTTP smoke must persist one closed deal row");
 if (httpSmoke.tourApprovalLedger.rows !== 1) throw new Error("HTTP smoke must persist one tour approval row");
 if (!httpSmoke.eventLedger.byType.cta_click) throw new Error("HTTP smoke must persist one CTA analytics event row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
@@ -630,6 +638,7 @@ for (const response of [
   nodeServerSmoke.replyUnauthorized,
   nodeServerSmoke.viewingUnauthorized,
   nodeServerSmoke.viewingCalendarUnauthorized,
+  nodeServerSmoke.dealCloseUnauthorized,
 ]) {
   if (
     response.headers?.["cache-control"] !== "no-store" ||
@@ -649,6 +658,13 @@ if (
   throw new Error("Node server smoke must book one viewing with follow-up and feedback tasks");
 }
 if (
+  nodeServerSmoke.dealClose.status !== 201 ||
+  nodeServerSmoke.dealClose.body.testimonial_request?.status !== "open" ||
+  nodeServerSmoke.dealClose.body.referral_request?.status !== "open"
+) {
+  throw new Error("Node server smoke must close one deal with testimonial and referral tasks");
+}
+if (
   nodeServerSmoke.viewingCalendar.status !== 200 ||
   !nodeServerSmoke.viewingCalendar.body.includes("BEGIN:VCALENDAR") ||
   !nodeServerSmoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z")
@@ -658,6 +674,7 @@ if (
 if (nodeServerSmoke.viewingLedger.rows !== 1) throw new Error("Node server smoke must persist one viewing row");
 if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server smoke must persist one saved search row");
 if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node server smoke must persist one seller pipeline row");
+if (nodeServerSmoke.dealLedger.rows !== 1) throw new Error("Node server smoke must persist one closed deal row");
 if (nodeServerSmoke.tourApprovalLedger.rows !== 1) throw new Error("Node server smoke must persist one tour approval row");
 if (!nodeServerSmoke.eventLedger.byType.cta_click) throw new Error("Node server smoke must persist one CTA analytics event row");
 
@@ -699,6 +716,12 @@ const savedSearches = fs.readFileSync(fromRoot("production", "data", "saved-sear
 if (savedSearches.length !== 1) throw new Error("Saved search artifact must contain one deterministic smoke row");
 const sellerPipeline = fs.readFileSync(fromRoot("production", "data", "seller-pipeline.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (sellerPipeline.length !== 1) throw new Error("Seller pipeline artifact must contain one deterministic smoke row");
+const deals = fs.readFileSync(fromRoot("production", "data", "deals.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (deals.length !== 1) throw new Error("Deal artifact must contain one deterministic smoke row");
+const deal = JSON.parse(deals[0]);
+if (deal.testimonial_request?.status !== "open" || deal.referral_request?.status !== "open") {
+  throw new Error("Deal artifact must contain testimonial and referral requests");
+}
 const tourApprovals = fs.readFileSync(fromRoot("production", "data", "tour-approvals.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (tourApprovals.length !== 1) throw new Error("Tour approval artifact must contain one deterministic smoke row");
 const events = fs.readFileSync(fromRoot("production", "data", "events.jsonl"), "utf8").trim().split("\n").filter(Boolean);

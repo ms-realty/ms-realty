@@ -461,7 +461,7 @@ reviewer-gated deployable 301 export, authenticated admin migration/editor/lead 
 approved-translation-gated localized sitemap (`sitemap.xml` + `robots.txt`), `RealEstateListing`
 JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with OG
 + hreflang + schema, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only
-lead/reply/viewing/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
+lead/reply/viewing/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
 mobile/elderly QA report, and a live Node server (`npm start`) exposing the same contracts.
 
 **Blocked until launch:** human redirect reviews (`migration/reviews/redirect-approvals.csv`) and real

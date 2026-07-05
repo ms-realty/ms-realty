@@ -11,6 +11,7 @@ import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
@@ -26,6 +27,7 @@ async function withServer(fn) {
   const viewingLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewings-`)}/viewings.jsonl`;
   const savedSearchLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-saved-searches-`)}/saved-searches.jsonl`;
   const sellerPipelinePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-seller-pipeline-`)}/seller-pipeline.jsonl`;
+  const dealLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-deals-`)}/deals.jsonl`;
   const brokerContactLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-broker-contacts-`)}/broker-contacts.jsonl`;
   const tourApprovalLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-tour-approvals-`)}/tour-approvals.jsonl`;
   const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-events-`)}/events.jsonl`;
@@ -37,6 +39,7 @@ async function withServer(fn) {
   resetViewingLedger(viewingLedgerPath);
   resetSavedSearches(savedSearchLedgerPath);
   resetSellerPipeline(sellerPipelinePath);
+  resetDealLedger(dealLedgerPath);
   resetBrokerContacts(brokerContactLedgerPath);
   resetTourApprovals(tourApprovalLedgerPath);
   resetEventLedger(eventLedgerPath);
@@ -50,6 +53,7 @@ async function withServer(fn) {
       viewingLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
+      dealLedgerPath,
       brokerContactLedgerPath,
       tourApprovalLedgerPath,
       eventLedgerPath,
@@ -60,6 +64,7 @@ async function withServer(fn) {
       bookedAt: "2026-07-04T00:06:00Z",
       savedAt: "2026-07-04T00:07:00Z",
       sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
+      dealClosedAt: "2026-07-10T10:00:00Z",
     }),
   );
   const address = await listen(server);
@@ -74,6 +79,7 @@ async function withServer(fn) {
       viewingLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
+      dealLedgerPath,
       brokerContactLedgerPath,
       tourApprovalLedgerPath,
       eventLedgerPath,
@@ -107,6 +113,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       viewingLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
+      dealLedgerPath,
       brokerContactLedgerPath,
       tourApprovalLedgerPath,
       eventLedgerPath,
@@ -303,6 +310,16 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           headers: { authorization: "Bearer local-admin-smoke" },
         }),
         viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics", { captureHeaders: true }),
+        dealClose: await jsonFetch(baseUrl, "/api/admin/deals/close", {
+          method: "POST",
+          headers: { authorization: "Bearer local-admin-smoke" },
+          body: JSON.stringify({ leadId: "node-server-lead-test", broker: "broker_ru" }),
+        }),
+        dealCloseUnauthorized: await jsonFetch(baseUrl, "/api/admin/deals/close", {
+          method: "POST",
+          captureHeaders: true,
+          body: JSON.stringify({ leadId: "node-server-lead-test", broker: "broker_ru" }),
+        }),
       };
       smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
         method: "POST",
@@ -387,6 +404,9 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
       assert.equal(smoke.viewing.body.feedback_request.status, "open");
       assert.equal(smoke.viewing.body.feedback_request.channel, "whatsapp");
+      assert.equal(smoke.dealClose.body.testimonial_request.status, "open");
+      assert.equal(smoke.dealClose.body.referral_request.status, "open");
+      assert.equal(smoke.dealClose.body.testimonial_request.channel, "whatsapp");
       assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
       assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
       assert.equal(smoke.contactLead.body.lead.leadType, "general");
@@ -400,6 +420,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
       assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
+      assert.equal(assertDealLedger(readDeals(dealLedgerPath)), true);
       assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
       assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
       assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);

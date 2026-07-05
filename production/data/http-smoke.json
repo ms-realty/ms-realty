@@ -3460,6 +3460,35 @@
           }
         }
       ],
+      "deals": [
+        {
+          "id": "deal-http-lead-he-0001",
+          "lead_id": "http-lead-he-0001",
+          "listing_reference": "MS-CRAWL-0001",
+          "original_language": "he",
+          "admin_locale": "en",
+          "broker": "broker_ru",
+          "closed_at": "2026-07-10T10:00:00Z",
+          "stage": "closed",
+          "status": "closed",
+          "testimonial_request": {
+            "id": "testimonial-http-lead-he-0001",
+            "kind": "testimonial_request",
+            "owner": "broker_ru",
+            "status": "open",
+            "due_at": "2026-07-12T10:00:00.000Z",
+            "channel": "whatsapp"
+          },
+          "referral_request": {
+            "id": "referral-http-lead-he-0001",
+            "kind": "referral_request",
+            "owner": "broker_ru",
+            "status": "open",
+            "due_at": "2026-07-17T10:00:00.000Z",
+            "channel": "whatsapp"
+          }
+        }
+      ],
       "brokerContacts": [
         {
           "reviewed_at": "2026-07-04T00:05:00Z",
@@ -3482,7 +3511,8 @@
         "languageRequests": 1,
         "viewings": 1,
         "savedSearches": 1,
-        "sellerPipeline": 1
+        "sellerPipeline": 1,
+        "deals": 1
       }
     }
   },
@@ -8735,6 +8765,59 @@
       "kind": "unauthorized"
     }
   },
+  "dealClose": {
+    "status": 201,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    },
+    "body": {
+      "id": "deal-http-lead-he-0001",
+      "lead_id": "http-lead-he-0001",
+      "listing_reference": "MS-CRAWL-0001",
+      "original_language": "he",
+      "admin_locale": "en",
+      "broker": "broker_ru",
+      "closed_at": "2026-07-10T10:00:00Z",
+      "stage": "closed",
+      "status": "closed",
+      "testimonial_request": {
+        "id": "testimonial-http-lead-he-0001",
+        "kind": "testimonial_request",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-12T10:00:00.000Z",
+        "channel": "whatsapp"
+      },
+      "referral_request": {
+        "id": "referral-http-lead-he-0001",
+        "kind": "referral_request",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-17T10:00:00.000Z",
+        "channel": "whatsapp"
+      }
+    }
+  },
+  "dealCloseUnauthorized": {
+    "status": 401,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
+    },
+    "body": {
+      "kind": "unauthorized"
+    }
+  },
   "translationDraft": {
     "status": 201,
     "headers": {
@@ -10810,6 +10893,9 @@
     "rows": 1
   },
   "sellerPipelineLedger": {
+    "rows": 1
+  },
+  "dealLedger": {
     "rows": 1
   },
   "brokerContactLedger": {

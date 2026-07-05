@@ -39,6 +39,11 @@ import {
   resetSellerPipeline,
 } from "../lib/seller-pipeline.mjs";
 import {
+  assertDealLedger,
+  readDeals,
+  resetDealLedger,
+} from "../lib/deal-ledger.mjs";
+import {
   assertBrokerContacts,
   readBrokerContacts,
   resetBrokerContacts,
@@ -84,6 +89,7 @@ const listingEditLedgerPath = path.join(smokeDir, "listing-edits.jsonl");
 const viewingLedgerPath = path.join(smokeDir, "viewings.jsonl");
 const savedSearchLedgerPath = path.join(smokeDir, "saved-searches.jsonl");
 const sellerPipelinePath = path.join(smokeDir, "seller-pipeline.jsonl");
+const dealLedgerPath = path.join(smokeDir, "deals.jsonl");
 const brokerContactLedgerPath = path.join(smokeDir, "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(smokeDir, "tour-approvals.jsonl");
 const eventLedgerPath = path.join(smokeDir, "events.jsonl");
@@ -97,6 +103,7 @@ resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
+resetDealLedger(dealLedgerPath);
 resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
@@ -110,6 +117,7 @@ const app = createHttpApp({
   viewingLedgerPath,
   savedSearchLedgerPath,
   sellerPipelinePath,
+  dealLedgerPath,
   brokerContactLedgerPath,
   tourApprovalLedgerPath,
   eventLedgerPath,
@@ -121,6 +129,7 @@ const app = createHttpApp({
   bookedAt: "2026-07-04T00:06:00Z",
   savedAt: "2026-07-04T00:07:00Z",
   sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
+  dealClosedAt: "2026-07-10T10:00:00Z",
   listingQualityGeneratedAt: "2026-07-05T03:01:09.839Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
@@ -319,6 +328,21 @@ smoke.viewingCalendar = await dispatchHttp(app, {
   headers: { authorization: "Bearer local-admin-smoke" },
 });
 smoke.viewingCalendarUnauthorized = await dispatchHttp(app, { url: "/api/admin/viewings.ics" });
+smoke.dealClose = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/deals/close",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    id: "deal-http-lead-he-0001",
+    leadId: "http-lead-he-0001",
+    broker: "broker_ru",
+  },
+});
+smoke.dealCloseUnauthorized = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/deals/close",
+  body: { leadId: "http-lead-he-0001", broker: "broker_ru" },
+});
 smoke.translationDraft = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/translations/draft",
@@ -448,6 +472,9 @@ smoke.savedSearchLedger = { rows: savedSearches.length };
 const sellerPipeline = readSellerPipeline(sellerPipelinePath);
 assertSellerPipeline(sellerPipeline);
 smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
+const deals = readDeals(dealLedgerPath);
+assertDealLedger(deals);
+smoke.dealLedger = { rows: deals.length };
 const brokerContacts = readBrokerContacts(brokerContactLedgerPath);
 assertBrokerContacts(brokerContacts);
 smoke.brokerContactLedger = { rows: brokerContacts.length };

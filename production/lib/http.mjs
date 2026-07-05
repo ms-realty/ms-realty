@@ -38,6 +38,7 @@ import { appendListingEdit, applyListingEdits, createListingEdit, readListingEdi
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
+import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
@@ -268,6 +269,7 @@ function renderAdminLeadsPayload(registry, requestedLocale, data) {
       viewings: data.viewings.length,
       savedSearches: data.savedSearches.length,
       sellerPipeline: data.sellerPipeline.length,
+      deals: data.deals.length,
     },
   };
 }
@@ -343,6 +345,7 @@ export function createHttpApp({
   viewingLedgerPath = null,
   savedSearchLedgerPath = null,
   sellerPipelinePath = null,
+  dealLedgerPath = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
@@ -359,6 +362,7 @@ export function createHttpApp({
   bookedAt,
   savedAt,
   sellerPipelineCreatedAt,
+  dealClosedAt,
   listingQualityGeneratedAt,
 } = {}) {
   let activeRegistry = registry;
@@ -501,6 +505,7 @@ export function createHttpApp({
         viewings: readViewings(viewingLedgerPath || undefined),
         savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
         sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
+        deals: readDeals(dealLedgerPath || undefined),
         brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
       });
       if (wantsHtml(request, url)) return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
@@ -521,6 +526,7 @@ export function createHttpApp({
             viewings: readViewings(viewingLedgerPath || undefined),
             savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
             sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
+            deals: readDeals(dealLedgerPath || undefined),
             brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
           }),
         ),
@@ -851,6 +857,21 @@ export function createHttpApp({
           appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
             filePath: viewingLedgerPath || undefined,
             bookedAt,
+          }),
+        );
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        return adminJson(
+          201,
+          appendClosedDeal(readLeadLedger(leadLedgerPath || undefined), parseJsonBody(request), {
+            filePath: dealLedgerPath || undefined,
+            closedAt: dealClosedAt,
           }),
         );
       } catch (error) {
@@ -1281,6 +1302,14 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must book viewing follow-up and feedback tasks");
   }
   if (smoke.viewingUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated viewings");
+  if (
+    smoke.dealClose?.status !== 201 ||
+    smoke.dealClose.body.testimonial_request?.status !== "open" ||
+    smoke.dealClose.body.referral_request?.status !== "open"
+  ) {
+    throw new Error("HTTP smoke must close deals with testimonial and referral tasks");
+  }
+  if (smoke.dealCloseUnauthorized?.status !== 401) throw new Error("HTTP smoke must reject unauthenticated deal closes");
   if (
     smoke.viewingCalendar?.status !== 200 ||
     smoke.viewingCalendar.headers["content-type"] !== "text/calendar; charset=utf-8" ||
