@@ -11,10 +11,17 @@ function portFrom(value) {
   return port;
 }
 
+function bytesFrom(value) {
+  const bytes = Number(value || 10 * 1024 * 1024);
+  if (!Number.isInteger(bytes) || bytes < 1) throw new Error("MS_REALTY_MAX_BODY_BYTES must be a positive integer");
+  return bytes;
+}
+
 export function productionServerConfig(env = process.env) {
   return {
     host: env.MS_REALTY_HOST || env.HOST || "0.0.0.0",
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
+    maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH || fromRoot("locales", "registry.json"),
   };
@@ -28,7 +35,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
 }
 
 export function createProductionServer(config = productionServerConfig()) {
-  return createNodeServer(createProductionHttpApp(config));
+  return createNodeServer(createProductionHttpApp(config), { maxBodyBytes: config.maxBodyBytes });
 }
 
 export async function startProductionServer(config = productionServerConfig()) {

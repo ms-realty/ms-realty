@@ -369,6 +369,22 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
   );
 });
 
+test("Node server rejects oversized request bodies", async () => {
+  const server = createNodeServer(createHttpApp(), { maxBodyBytes: 8 });
+  const address = await listen(server);
+  try {
+    const response = await jsonFetch(`http://${address.address}:${address.port}`, "/api/leads", {
+      method: "POST",
+      body: JSON.stringify({ id: "too-large" }),
+    });
+
+    assert.equal(response.status, 413);
+    assert.equal(response.body.kind, "request_too_large");
+  } finally {
+    await close(server);
+  }
+});
+
 test("generated Node server smoke file is valid when present", () => {
   const file = fromRoot("production", "data", "node-server-smoke.json");
   if (!fs.existsSync(file)) return;

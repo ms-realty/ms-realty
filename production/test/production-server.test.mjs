@@ -10,10 +10,12 @@ test("production server entrypoint serves runtime routes with env config", async
   const config = productionServerConfig({
     PORT: "0",
     HOST: "127.0.0.1",
+    MS_REALTY_MAX_BODY_BYTES: "64",
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
   });
   assert.equal(config.port, 0);
   assert.equal(config.host, "127.0.0.1");
+  assert.equal(config.maxBodyBytes, 64);
 
   const server = createProductionServer(config);
   const address = await listen(server, 0, "127.0.0.1");

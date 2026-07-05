@@ -1,22 +1,39 @@
 import http from "node:http";
 import { createHttpApp } from "./http.mjs";
 
-async function readBody(req) {
+const DEFAULT_MAX_BODY_BYTES = 10 * 1024 * 1024;
+
+async function readBody(req, maxBodyBytes = DEFAULT_MAX_BODY_BYTES) {
   const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
+  let total = 0;
+  for await (const chunk of req) {
+    total += chunk.length;
+    if (total > maxBodyBytes) {
+      const error = new Error("Request body too large");
+      error.status = 413;
+      throw error;
+    }
+    chunks.push(chunk);
+  }
   return Buffer.concat(chunks).toString("utf8");
 }
 
-export function createNodeServer(app = createHttpApp()) {
+export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT_MAX_BODY_BYTES } = {}) {
   return http.createServer(async (req, res) => {
-    const response = await app({
-      method: req.method,
-      url: req.url,
-      headers: req.headers,
-      body: await readBody(req),
-    });
-    res.writeHead(response.status, response.headers);
-    res.end(typeof response.body === "string" ? response.body : JSON.stringify(response.body));
+    try {
+      const response = await app({
+        method: req.method,
+        url: req.url,
+        headers: req.headers,
+        body: await readBody(req, maxBodyBytes),
+      });
+      res.writeHead(response.status, response.headers);
+      res.end(typeof response.body === "string" ? response.body : JSON.stringify(response.body));
+    } catch (error) {
+      const status = error.status || 500;
+      res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify({ kind: status === 413 ? "request_too_large" : "server_error" }));
+    }
   });
 }
 
