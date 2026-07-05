@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { assertLaunchReadinessReport, buildLaunchReadinessReport } from "../lib/launch-readiness.mjs";
+import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function readJson(path) {
@@ -53,4 +54,22 @@ test("generated launch readiness report is valid when present", () => {
   if (!fs.existsSync(file)) return;
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertLaunchReadinessReport(report), true);
+});
+
+test("launch input checklist names remaining operator-owned blockers", () => {
+  const markdown = renderLaunchInputChecklist({
+    generatedAt: "2026-07-05T00:00:00Z",
+    launchReadiness: readJson(["production", "data", "launch-readiness.json"]),
+    seoEvidence: readJson(["production", "data", "seo-evidence.json"]),
+    redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
+    deployableRedirects: readJson(["production", "data", "deployable-redirects.json"]),
+    routeMap: readJson(["production", "data", "legacy-route-map.json"]),
+  });
+
+  assert.match(markdown, /Status: blocked/);
+  assert.match(markdown, /Remaining approvals required: 163/);
+  assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
+  assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
+  assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);
+  assert.match(markdown, /migration\/external\/seo\/backlinks\.csv`: missing_export/);
 });

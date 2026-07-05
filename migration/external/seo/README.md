@@ -12,3 +12,6 @@ as import templates only.
 
 Launch readiness requires each required export to match crawled URLs from both
 `makler-realty.com` and `makler-realty.ru`.
+
+Current missing input counts are generated in
+`production/data/launch-input-checklist.md`.
