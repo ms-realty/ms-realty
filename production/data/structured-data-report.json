@@ -7,7 +7,7 @@
     "warnings": {
       "missing_price": 155,
       "media_review_pending": 167,
-      "missing_bedrooms": 90
+      "missing_bedrooms": 87
     },
     "by_locale": {
       "bg": 113,
@@ -1053,7 +1053,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1640,7 +1639,6 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -2228,7 +2226,6 @@
       "issues": [],
       "warnings": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },

@@ -83,6 +83,9 @@ def main() -> int:
         "MS-CRAWL-0006": "commercial",
         "MS-CRAWL-0013": "house",
         "MS-CRAWL-0019": "commercial",
+        "MS-CRAWL-0070": "commercial",
+        "MS-CRAWL-0111": "commercial",
+        "MS-CRAWL-0151": "commercial",
         "MS-CRAWL-0059": "land",
         "MS-CRAWL-0158": "land",
     }

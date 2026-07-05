@@ -43,7 +43,7 @@ Blockers: redirect_reviews, external_seo_exports
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - missing_price: 155
 - media_review_pending: 167
-- missing_bedrooms: 90
+- missing_bedrooms: 87
 
 ## Validate After Inputs
 

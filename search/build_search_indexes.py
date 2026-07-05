@@ -40,7 +40,7 @@ TYPE_PATTERNS = [
     ("apartment", re.compile(r"\b(apartment|flat|апартамент\w*|квартир\w*|мезонет\w*|студио)\b", re.I)),
     ("house", re.compile(r"\b(house|villa|къщ\w*|вил\w*|дом)\b", re.I)),
     ("land", re.compile(r"\b(land|plot|земя|парцел\w*|участок\w*)\b", re.I)),
-    ("commercial", re.compile(r"\b(office|shop|commercial|industrial|industrieel|офис\w*|магазин\w*|търгов\w*|производствен\w*|помещение|оранжери\w*|промишлен\w*|промышленн\w*|работилница|бензиностанц\w*)\b", re.I)),
+    ("commercial", re.compile(r"\b(office|shop|business|commercial|industrial|industrieel|офис\w*|магазин\w*|бизнес\w*|търгов\w*|производ\w*|помещение|оранжери\w*|теплиц\w*|промишлен\w*|промышленн\w*|работилница|бензиностанц\w*)\b", re.I)),
     ("hotel", re.compile(r"\b(hotel|хотел)\b", re.I)),
 ]
 

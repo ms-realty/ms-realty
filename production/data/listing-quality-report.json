@@ -5,7 +5,7 @@
     "affected_listings": 165,
     "issue_counts": {
       "missing_price": 153,
-      "missing_bedrooms": 90,
+      "missing_bedrooms": 87,
       "missing_location": 0,
       "missing_description": 122,
       "media_review_pending": 165,
@@ -2022,7 +2022,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "public_gallery",
         "tour_review"
@@ -2032,7 +2031,6 @@
       "description": "Продажа бизнес здания в центре г.Петрич",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "thin_public_gallery",
         "tour_review_pending"
@@ -3183,9 +3181,8 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0111",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0111",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "media_review",
         "tour_review"
       ],
@@ -3193,7 +3190,6 @@
       "location": "Sandanski",
       "description": "Private land covering 24,416 m2, three massive buildings with a total area of 2,200 m2, 2 solar panels, each with a capacity of 500 kilowatts. €750,000",
       "issues": [
-        "missing_bedrooms",
         "media_review_pending",
         "tour_review_pending"
       ],
@@ -4322,7 +4318,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "tour_review"
       ],
@@ -4331,7 +4326,6 @@
       "description": "Продается теплица в городе Сандански. Теплица полностью оборудованна и готова к использованию. Готовое решение бизнеса в Сандански.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "tour_review_pending"
       ],
