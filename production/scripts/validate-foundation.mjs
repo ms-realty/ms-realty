@@ -10,6 +10,7 @@ import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
 import { assertSlugHistory } from "../lib/slug-history.mjs";
 import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
+import { assertListingVerificationReport } from "../lib/listing-verification.mjs";
 import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -842,6 +843,17 @@ if (
   !listingPublication.rows.find((row) => row.listing_id === "MS-CRAWL-0001")?.internal_link_suggestion_count
 ) {
   throw new Error("Listing publication report must prove sitemap coverage and internal-link suggestions");
+}
+const listingVerification = JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-verification-report.json"), "utf8"));
+assertListingVerificationReport(listingVerification);
+if (
+  listingVerification.summary.edited_listings !== 165 ||
+  listingVerification.summary.broker_verification_tasks !== 165 ||
+  listingVerification.summary.by_owner.broker_bg !== 113 ||
+  listingVerification.summary.by_owner.broker_ru !== 52 ||
+  listingVerification.rows.find((row) => row.listing_id === "MS-CRAWL-0001")?.priority !== "high"
+) {
+  throw new Error("Listing verification report must create broker tasks for edited BG/RU listings");
 }
 
 const mobileQa = JSON.parse(fs.readFileSync(fromRoot("production", "data", "mobile-elderly-qa-report.json"), "utf8"));

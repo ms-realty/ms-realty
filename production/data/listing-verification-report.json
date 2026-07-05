@@ -1,0 +1,3332 @@
+{
+  "generated_at": "2026-07-05T00:00:00Z",
+  "summary": {
+    "edited_listings": 165,
+    "broker_verification_tasks": 165,
+    "high_priority": 74,
+    "stale_translation_tasks": 1,
+    "by_owner": {
+      "broker_bg": 113,
+      "broker_ru": 52
+    }
+  },
+  "rows": [
+    {
+      "listing_id": "MS-3000",
+      "latest_edit_id": "listing-edit-MS-3000-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "024ab240b0faae9acf9019ccda19c811a0718cd887bac1071e07e8e4233ebd74",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-3000",
+      "verification_task": {
+        "id": "verify-MS-3000",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0001",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0001-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "313a88b269040633c2e297e842b0b8ce5feb15ea92c56826595ad423cb0139df",
+      "stale_translation_count": 2,
+      "stale_locales": [
+        "el",
+        "he"
+      ],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0001",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0001",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0002",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0002-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "a13e6d460f668808e69fab90aa534ab2880b54d1070b973c489f1fb2fd8febf1",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0002",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0003",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0003-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "7645687aef15b82e95c15f05b269bbc1a0ec8f70dc027cf58f9f0b874e18ac2a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0003",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0003",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0004",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0004-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "be85c379d22556d9a2ca83d83a5b3a878c1b2217b71df01394c7202a7a5753bd",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0004",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0005",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0005-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "9e767b794f6711e3b105c241b320e6fdb9b630f95d5f8adf7475e78e4bd7aee1",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0005",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0005",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0006",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0006-live-quality-20260705b",
+      "edited_at": "2026-07-05T01:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "c88d2144ce09d30d691d07880d60b7fc787d16c665d4fa13a99abe9cf0ea1ea6",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0006",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0007",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0007-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "2c8b6573b8169eccb399bc97df5fd13d9441926fa2f9eab7259454bff50abdd1",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0007",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0007",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0008",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0008-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "51d85db0e74b8af4062fa394cb1d055431ee50dc3d9cbeb09cb824a766b44972",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0008",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0008",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0009",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0009-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "f84688cd872bb6eb795eb87a12ccd31c7c6ffd625df289543dc20db50230e11a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0009",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0009",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0010",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0010-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "fad0aff6647e67b2208cfdd901e33a384095c30315b04c6e7a65da268b711992",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0010",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0010",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0011",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0011-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "85536555d86fb722fae9da12773567381ed352e68ba0e1da861dd244e365fffc",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0011",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0011",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0012",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0012-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "11cbc3265fde460ae45614b02895d2077e8ccf3f5a4a340308044b8b4d23a63b",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0012",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0012",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0013",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0013-multi-unit-20260705",
+      "edited_at": "2026-07-05T01:45:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "b84b4d9b30deedc42cdb18dd6210b0a3d99a77cdc57a97376fd71a77d77f67e5",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0013",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0013",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0014",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0014-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "ce6353f1d3995f6a7f075fb1e8da211bb7bd267146a7500fb4982fd4cffdd9b7",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0014",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0014",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0015",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0015-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "794ab9ae546e70e9bee472c3f9bcda4a43a8205b363584573cac2ebfe70e3b60",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0015",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0015",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0016",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0016-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "c143a67dc892f6d329c68c036ec882211e1420598da7459e9b900b80d974677a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0016",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0016",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0017",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0017-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "6ee6a0fa331ab4975af49b623fd9c7ee8a0251ff83fbe48cb076a6bd3e11ee1e",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0017",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0017",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0018",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0018-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "9b5c356fbe27ce202581b547870a994dbda0ca724fae0880d4808d52c96a32cd",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0018",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0018",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0019",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0019-live-quality-20260705b",
+      "edited_at": "2026-07-05T01:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "4c3a3b7cfbe34d52690424785d4e0ab9c239f55e7a1e52846c32b814db502b79",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0019",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0019",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0020",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0020-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "07d56cfaeda7346d75c67771f6d34fb3fa52b7e3aaa0c9789317ca93d8bea0e4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0020",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0020",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0021",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0021-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "77abb4f598a7e488bba75ae58bf0bc35ec6497840f35a9cfdef0de246e58b94f",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0021",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0021",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0022",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0022-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "d6ff19b9f5de199b10097d25a8f1b1a7b11f016b2ece295a224ce64e660b45f4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0022",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0022",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0023",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0023-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "8871bc380b8f07792d9b9991e63c3f9ceca957d9c403af1b009de5a90427a55d",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0023",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0023",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0024",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0024-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "64de65332a69de27a2aa78e42891f8c6ecdf6429654da214e1facbc2f0d8afaa",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0024",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0024",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0025",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0025-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "3984134e050c45b1dd5457f6f5a214af6424f1549ed095c7fcf3881cd3ef3ad9",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0025",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0025",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0026",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0026-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "06cf50b3ebbbdba3011693d633c3c0e58cebf2d9d5f45d6f2a209d1ef9e8f7de",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0026",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0026",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0027",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0027-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "580d71dc3acd08bce7b6a6e5fbdb2f60bf7c0e44a66c7d020cb29e59fb9fff5e",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0027",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0027",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0028",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0028-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "dff2ae2a36e72f1bb691b575daa33c75bfe18861b939065b06430b6e58167495",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0028",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0028",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0029",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0029-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "2d8b5622acaa8973395aefae670b56c353c26ab396a7a671d3bc8428b7f869a2",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0029",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0029",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0030",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0030-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "7188b8145b2aa9535e2f2ff45af2c30bd4626f9bebbf4081d3e3253bd908e69e",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0030",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0030",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0031",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0031-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "e3c9b7fb6c988c83e4ad49b6b3d902cc8186dd0ddc5f45a2942274c93116587f",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0031",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0031",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0032",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0032-live-quality-20260705",
+      "edited_at": "2026-07-05T00:30:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms",
+        "property_type"
+      ],
+      "source_hash_after": "19928d4762e816f45bff9c4a55a49a4f181e62fb5cb5a6ce42a5f3f71605c40a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0032",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0032",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0033",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0033-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "a8226e15ccf36d2d27f6e77be7d557cf0f55ad45e369aae28d73fa9cc4085ef2",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0033",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0033",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0034",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0034-live-quality-20260705",
+      "edited_at": "2026-07-05T00:30:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms",
+        "property_type"
+      ],
+      "source_hash_after": "ab5d11ec8b67d52af442afaaf7074aa771360d725ca3078cf8d7ab13cf133ff4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0034",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0034",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0035",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0035-live-quality-20260705",
+      "edited_at": "2026-07-05T00:30:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms",
+        "property_type"
+      ],
+      "source_hash_after": "b45bbe9069ace4a94b96eeb9b6d54397284f590323afda8cf6b128a97c168a76",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0035",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0035",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0036",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0036-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "31e535bf1e76e97648324697c8a1240cccf60a7eaca47d5f4cc9556bff6c02f8",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0036",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0036",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0037",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0037-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "7960d9f118f9047a9380ef1ae62154b2d8331f345aa921dc0d5f891c76b8f9e6",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0037",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0037",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0038",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0038-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "0e487072c780d7fd405644aa25db08e19b1b2c247d027105b3d597134a1fa2d9",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0038",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0038",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0039",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0039-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "0eeb779c41bee61f8b2837b5058b024942c0faf0a1a864581a461cc8e001e3a7",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0039",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0039",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0040",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0040-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "74f18e7c584429508a2a7da463a91a3f2e5652efc35301edf48f21e263079bd7",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0040",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0040",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0041",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0041-bedrooms-not-applicable",
+      "edited_at": "2026-07-05T02:45:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms_not_applicable",
+        "property_type"
+      ],
+      "source_hash_after": "e005aa888d43fecb48aafaec4cf7fbd7c6020233377c7fcaee0d6dee5e9b0a3d",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0041",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0041",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0042",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0042-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "273bde04c4e76e7f4b154b1db4ea6e3ec96d06e24706bd1aa7f4be3f5aa474ae",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0042",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0042",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0043",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0043-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "b9b19dceeb970274c9151e80d1e5caf061fdfb2f459d7384df60a1b00cf47b4f",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0043",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0043",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0044",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0044-bedrooms-not-applicable",
+      "edited_at": "2026-07-05T02:45:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms_not_applicable"
+      ],
+      "source_hash_after": "37e64b42ee3d4e33874fce003375de5d4390348575dac4d10eefb63b7f426e19",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0044",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0044",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0045",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0045-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "cc4381972a8fb4d309a25ffbc4c52990a6bdd3ef8b33d6c482d339bc79cb1dc6",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0045",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0045",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0046",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0046-live-quality-20260705b",
+      "edited_at": "2026-07-05T01:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "b73fbda6bce6e823d1d4c9dcbb527af008a8b886c14e2029524c50b13b77d12b",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0046",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0046",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0047",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0047-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "a1865220f91153a0e36860241b503c6bbdcaa247944966f3c46b7e0d7e37ab09",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0047",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0047",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0048",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0048-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "eee7365f841174c79d92ea3f29afa3873367ea15d4133c385a76bcde1d47bdb3",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0048",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0048",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0049",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0049-multi-unit-20260705",
+      "edited_at": "2026-07-05T01:45:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "6ef866f5bfa887028cfa6f0c1ee4f62eeff9ad387072a61f01495c9004ac7c02",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0049",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0049",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0050",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0050-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "0bf4c12a35206c51d8cb91d0936a31ef07a8b1640830c953461fc8cfe40a37c3",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0050",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0050",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0051",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0051-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "551a7e9b1894cdfc3137ed0d29744ad00557e0b249c182d99f5e9c715bd93fde",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0051",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0051",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0052",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0052-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "9d5d8b70ab43573062f730586670bad9663f2dfaa368b3a006f8f0d11bd42115",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0052",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0052",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0053",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0053-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "0dbb7f8d22c1eadc3f31b9b59fd475c37ece51d14eb89c8013346891fbed1034",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0053",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0053",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0054",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0054-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "9d1ec420f4d021968e5ec4c9d567b68a0a559dd88c7844263a14e7d2f23b2908",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0054",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0054",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0055",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0055-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "4871f1e0ea6b6efc51b222e0e6fc4cf92fb730c230548c9342fc0677e4f91379",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0055",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0055",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0056",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0056-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "f5b21ff403dc1551771d3b990d7ca4633661e6b55b92a47ce1e816acfead4b8a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0056",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0056",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0057",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0057-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "abebebf9b26a8fa520a8247edb737fce8db493be39b8201bdf095511aa816e3c",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0057",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0057",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0058",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0058-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "2e7d80b999228126c85e61602859ac43e3d990d2a6e5279a1a87af1af1c967e4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0058",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0058",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0059",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0059-live-price-20260705",
+      "edited_at": "2026-07-05T00:07:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "f9c9c09ea77fa4dfcb9179bbd173209546e941403d247a17ad2841685460e006",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0059",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0059",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0060",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0060-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "cfa5bfa3da657333b42c1289138e06e67080eef00ea675c871c6c35967379483",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0060",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0060",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0061",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0061-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "0f05672d9f6b3025dbd288a94575332fb2b0bd36480047c8227cd67a7f59c4ad",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0061",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0061",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0062",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0062-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "7a9c27369282d8067998495e87cd9fe0a5431ca4ebb38b4e4365d5ba26b40116",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0062",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0062",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0063",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0063-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "b601ec46c6edcc2172b19bd077ba22ba252bae15385b37664032d76e508fd51c",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0063",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0063",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0064",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0064-bedrooms-not-applicable",
+      "edited_at": "2026-07-05T02:45:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms_not_applicable"
+      ],
+      "source_hash_after": "0aa2cf9f28d91c849bd25ede404a0f563516203501879fea3b5cd5e1ccbe6183",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0064",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0064",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0065",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0065-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "882b10cada204b3fd1819cdc8c020cf8243b18ca65d3c0fcef7c751201af0e93",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0065",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0065",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0066",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0066-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "10b1f78c78022ee1370373765ec36325aec4bd974566791fbbb4bef872ca1c16",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0066",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0066",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0067",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0067-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "30268292fbfe31f40fecbb9da12f82b6ffe87679dafe7f32d0272d3a11bc1d9b",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0067",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0067",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0068",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0068-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "8c14edef8529dccc2e063dcabedbe6899b92290e4c450ae1c88952991a1fdbda",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0068",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0068",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0069",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0069-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "b996c79156d75d1d3cf1180bf9a1aa11e142013fa3e97da5c491d8044c97d58a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0069",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0069",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0070",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0070-live-price-20260705",
+      "edited_at": "2026-07-05T00:07:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "5151872085cf5551369b5462d7dd754592f357e33ef9e83d7d30a07760a9cad5",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0070",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0070",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0071",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0071-source-location-price",
+      "edited_at": "2026-07-05T00:06:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "location",
+        "price_eur"
+      ],
+      "source_hash_after": "005771dc2b421a06fc6eec79419dfe4eb77fd0d4adcb4b9dadf4f9fdb2b47648",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0071",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0071",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0072",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0072-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "6ff496cbb5f32ae20a55950f9c39c0b411f530a9c8a7f34d24c33600dc46fbd5",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0072",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0072",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0073",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0073-multi-unit-20260705",
+      "edited_at": "2026-07-05T01:45:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "63d6b0c508f6f76661a4d9f192b0bcd1a0e91bb91260cfbea47970fd488a289e",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0073",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0073",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0074",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0074-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "295b6f8f58bb484360b4b147ac5d34fea83ecb6bce54b80114d64e486053cbc6",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0074",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0074",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0075",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0075-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "1352842066c4c4ae11b41cacfeebc18d3ab7ba69bbfa72d9dd4d57e1547f63a7",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0075",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0075",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0077",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0077-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "b669d66af46c623098af9fbb01ab61eaa69b734ebbb8382e446c0a918ed2b2ea",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0077",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0077",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0078",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0078-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "179521e47fcc4bafd4bc8da1a26dd697740c7b6cfd465280d8eab1204897928f",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0078",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0078",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0079",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0079-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "95b962d4c97d60340c4d5f4c58b9e8d04ae175a712d48f95d0b9c9492296b842",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0079",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0079",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0080",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0080",
+      "edited_at": "2026-07-05T00:05:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms",
+        "price_eur"
+      ],
+      "source_hash_after": "f63be157cdfc76f1e28b1561e9df8df3418afa7db50b119242618235ac3574b4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0080",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0080",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0081",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0081-live-price-20260705",
+      "edited_at": "2026-07-05T00:07:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "02964a0d4efef0b068e808892504cf95c55f9ba30aa9d0286e8590bea8df4bf0",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0081",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0081",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0082",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0082-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "d14ee1b611517a6d7e629f746323996e87c478f1a367397c62da51d4358c56a6",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0082",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0082",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0083",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0083-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "434ad58451929dd1002a1776a5be2c092a14924ee0c81d36c60624fb743f1179",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0083",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0083",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0084",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0084-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "e7330d6db2610b9f32488797b7c94046b4a9a2b0465c6cc76c8220042ba067b4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0084",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0084",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0085",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0085-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "fb283e13ff3227cacafdec150790dc05544d3791255679d887c773aad7fa5604",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0085",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0085",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0086",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0086-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "b20558bd041498b903b84c86973672ede01930a1f4304900c8abc994cddf8ba7",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0086",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0086",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0087",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0087",
+      "edited_at": "2026-07-05T00:05:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "2fcbba4624909b4cebe7f3803092b499c91713e366e2eb21543505ed06686950",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0087",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0087",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0088",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0088-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "d5505e6768da7e624c193e79a9594c38421a45f443bab0d46439e922aef668ca",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0088",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0088",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0089",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0089-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "62e8676ead29d252675486d65a7e4145d2b107b28ff88efdc4dde185e906bf2a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0089",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0089",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0090",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0090-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "0ed5831f58684edb5822d641f9822ab73a6ec0112fac164e15bbad7d9f46be46",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0090",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0090",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0091",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0091-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "a13151d7d203d5c68f7c2edb87bb65f785d8bf9038ebb5139a500ef7471d79e4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0091",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0091",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0092",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0092-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "78f97c13058300b1f48fd1613bd70a47a5ef66691c232af189999992596b7644",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0092",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0092",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0093",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0093-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "10c730ab56e678a1c45423f46a0f2beabb0cdfac409928b0a98a4b0dd7ecfc66",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0093",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0093",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0094",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0094-live-quality-20260705b",
+      "edited_at": "2026-07-05T01:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "4414888421d20d22b3b259caec7014668041b1555a5f7b39de714fcbe74a6505",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0094",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0094",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0095",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0095-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "4d41ffaba7f856b29cb0f9da022bbfe31125f377ecc74e36779d029b391a1c83",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0095",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0095",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0096",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0096-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "318ffc41b2c7e019e5568e4e4d2a08bb98679365c8d52dc3604e06298acb5bae",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0096",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0096",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0097",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0097-live-quality-20260705",
+      "edited_at": "2026-07-05T00:30:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "6b3f1ea5678a46b20e4119d655717d923f3825d693f1aeb0f6fec79245db9351",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0097",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0097",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0098",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0098-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "15cc4ac463f6b38c2f53eb6e371040eae50240ff886ad773356ab9a0047cf964",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0098",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0098",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0099",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0099-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "eaa46b5c321bee14fdc9a80767276177063235cb70771e70d205d03535d8ef01",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0099",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0099",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0100",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0100-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "3575f3f7bef83670b7267404f6b3d1a9463befb38d6a40bc35aded6cad1263b0",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0100",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0100",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0101",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0101-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "036c02bf4e84079c86ae0fc49b0acb4917d5f3d802b32d6a8d689ccbc4ea2424",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0101",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0101",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0102",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0102-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "9a4c2cbe36009ed45477e834055f4ca8b29a237f42b6815970d290a169b432ad",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0102",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0102",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0103",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0103-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "4e59ec4ee7bbeae4b80d0605398c45194014416ed09203acdb15d277c7a466d8",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0103",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0103",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0104",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0104-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "bedrooms",
+        "property_type"
+      ],
+      "source_hash_after": "a557fc4d9c53210634e48b74b62b179c137aaf46ff209a89d3b75fec5b33adeb",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0104",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0104",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0105",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0105-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "9cb32c675ab2e3ac3d2e5f62115c7ff4a6899126c073a62b8629eb3b0f376f74",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0105",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0105",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0106",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0106-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "e24ee3b12df3f1cfa5ab83e17cb167099044d7bef8ecaf8c146e0e8f91e0d1dc",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0106",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0106",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0107",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0107-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "1595a70d281c55988d0275f227f29668e27d16fb5969ac3ae1359a424db985d9",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0107",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0107",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0108",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0108-multi-unit-20260705",
+      "edited_at": "2026-07-05T01:45:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "475823a1dae2a175e8e8c660a977c3a4826980eb312ba7361057261c844ced44",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0108",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0108",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0109",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0109-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "95df7ac71ff210114c7accdd53eca4cf278110272a7befbad8d403bf9a090c9d",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0109",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0109",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0110",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0110-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "3287e57e7453aad66f431f7d23a1a99e8f44deee6838d1112a36ba2d0b4f76f6",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0110",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0110",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0111",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0111-source-location",
+      "edited_at": "2026-07-05T00:06:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "location",
+        "price_eur"
+      ],
+      "source_hash_after": "19d853b0b9f5e4d7167de3730eec3fb81ac9a5d5f3fa366f80c36417ff53a108",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0111",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0111",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0112",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0112-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "56e2ece985727f72dd31bac9f83127c67879bd0879341ecba9a91d79fbbafa4d",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0112",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0112",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0113",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0113-live-description-20260705",
+      "edited_at": "2026-07-05T00:10:00Z",
+      "source_locale": "bg",
+      "changed_fields": [
+        "description"
+      ],
+      "source_hash_after": "7334304164295102abfbe1da650312d64edb9fe7eaec2ca0237fc3a91c223932",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0113",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0113",
+        "owner": "broker_bg",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0114",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0114-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "0463e4d5a0e62aa080e1acad8f2ab4a1d446c66c3489b58b99e80ace1fc52ae8",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0114",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0114",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0115",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0115-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "89a0c0375148e5e3cbe74ffc75ec5bd5dc2f9e2503dd74a8e82d7c2fe9e08060",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0115",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0115",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0116",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0116-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "1557e5bf55f66f3269e3a88322de0b8a56b2359f93557a11b122d294b9554539",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0116",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0116",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0117",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0117-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "bedrooms",
+        "price_eur"
+      ],
+      "source_hash_after": "3d4c39bae55ee72f4756601ad096830531dade258b81b8c0be64affb396d8ea8",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0117",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0117",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0118",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0118-live-quality-20260705b",
+      "edited_at": "2026-07-05T01:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "bedrooms"
+      ],
+      "source_hash_after": "fa2136357a11e066b5b98acd612d53d8238d0e94d38fd211df3642fafdfe78e2",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "low",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0118",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0118",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0119",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0119-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "4970844c7189a94117423c69400f62d3b7a9beb6176374ebaa85de911feebe64",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0119",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0119",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0120",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0120-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "715e1ed432502b412ed993a7c9dae18fc1138504db3b1aa702570bb9359a4e54",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0120",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0120",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0121",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0121-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "8fa9863abe7aa5a6f58e69a3f7d374b203c01a18912fcdce98b8d188a76aa3d8",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0121",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0121",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0122",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0122-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "bedrooms",
+        "price_eur"
+      ],
+      "source_hash_after": "8d7fa18da715917697559106c06bf2212c01d5a620634cd7a7abcf238a7e7ab9",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0122",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0122",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0123",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0123-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "8cee873e2ef1383ab674025e278d26c6c0592cb9ae24d0b98ee0bcfb585b5627",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0123",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0123",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0124",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0124-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "019dc0748cdae262672bf40d9e5bbf793f89de0be6342084b4e016acad7c2fdb",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0124",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0124",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0125",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0125-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "e198788e4a7f4ae2179a87cb3735efe39fe0c5abbe357f2dfc253dedc246a272",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0125",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0125",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0126",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0126-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "bf3197515168d07638dfc23b5efb0a7931c2b46bb540a556144d8e7b880138e6",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0126",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0126",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0127",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0127-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "96f164c7430d18d138720ca3771acd6ae708048580bd9f66673aca73978b91e7",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0127",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0127",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0128",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0128-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "61e364fb8336e43285b59fa76b3e213977c5a105feaaf62f396c550cb62dc889",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0128",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0128",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0129",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0129-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "bedrooms",
+        "price_eur"
+      ],
+      "source_hash_after": "ba88178191ed479da7c969be956cdb8261525974eb514b87667170805e5376d5",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0129",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0129",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0130",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0130-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "56ac83cfaeda81711bc552d54a23fc8b0604da40aeaace192a7833b506fe258b",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0130",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0130",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0131",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0131-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "54e323d5e317a995b50ae82b20672a275f2d8853a40a63c6912946cfc7a74637",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0131",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0131",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0132",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0132-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "0b2e068f91dbcd92f89df6963fea03aa6118ba55cc0b68e9aa525a4ca47f4984",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0132",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0132",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0133",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0133-multi-unit-20260705",
+      "edited_at": "2026-07-05T01:45:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "840b7e48c3aff5f9c570082b9dd1d2f95264f55d82ea20f736725010abb7e8f4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0133",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0133",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0134",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0134-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "f422b993e2837e17e555b93612178629cf32012150b2d96b3e9a2c8b40296743",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0134",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0134",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0135",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0135-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "c2e4ff06e662062ec58712290eebd7876b8296ad77d78ecf46fe319a2008de58",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0135",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0135",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0136",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0136-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "a765054d153ef4cee8ed2987dd92d00ee16b357e5477954c1de3c80db92e2f78",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0136",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0136",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0137",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0137-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "58ad640edc97890daac0a70b40e0fd8f7a0a84e60f758e3acdb8b3e595544dbe",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0137",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0137",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0138",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0138-multi-unit-20260705",
+      "edited_at": "2026-07-05T01:45:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "117dddad0e0cd29dc1e0734e3dcf7ce6d4186adea3e54b6e1978abc1a546402a",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0138",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0138",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0139",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0139-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "a754c472ebacc72e677b465deec7b0b5965e7cac99628ac0b535e89e98a5ee73",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0139",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0139",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0140",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0140-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "b1c75617c85929144646af34b03d893c76282c210cfc15884b2da59cde31d29d",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0140",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0140",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0141",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0141-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "439a50820f1c5725602b9497b4b5d62b5d3a7d6dd0e7939d08545de39c204e43",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0141",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0141",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0142",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0142-bedrooms-not-applicable",
+      "edited_at": "2026-07-05T02:45:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "bedrooms_not_applicable",
+        "property_type"
+      ],
+      "source_hash_after": "94250398c2592f684e23ff7c62b55e84fb2f9a82822da6b4b430493c77fcfe67",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0142",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0142",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0143",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0143-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "b06af73a29e8278894a33d7f701b1ce608023d55aa50a22d6e312c71042cf3bd",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0143",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0143",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0144",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0144-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "b8c77ee66232261244ca5690a17144e5f4aabe6f84386d8554f41903b2fe2ece",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0144",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0144",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0145",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0145-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "c2fb93a21a18294d497e2e875c13d10418ff9013ce0181c1b7cb62ce038d57d4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0145",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0145",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0146",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0146-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "cb8ef9d68a12bd602dc6278af1169aa138021a456dd6eb50c2cd0309fc528e0d",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0146",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0146",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0147",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0147-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "475196182809f88fe7621f6ecc4c047ac8ae7bfc16f638ad5c183c6359912b5c",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0147",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0147",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0148",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0148",
+      "edited_at": "2026-07-05T00:05:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "bedrooms",
+        "price_eur"
+      ],
+      "source_hash_after": "39bdec87b7e527aba0d6aa16d7e86c87f910092f59802ac5516f923aa7aa58a5",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0148",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0148",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0149",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0149-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "8890614558ac8237f2248378ebfd9641d2a9daa0338d4fb233db39cbd63c4917",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0149",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0149",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0150",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0150-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "c2d880cfafe856761c4b04212dd937182ccf27745a299bb0110b691090f81198",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0150",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0150",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0151",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0151-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "e5820676c1de4a2e6b7cdcb822cd5aa2380b70aae8438d8c7b230ead48fa11f7",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0151",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0151",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0152",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0152-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "829edfdcb804ad9953d7e75c00aaf50e715eda963bc74e4653ee076bf47d98a4",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0152",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0152",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0153",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0153-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "f635916fc970ae90d44d462e7f096a3acc28c900c6a4634be41db8cdcfc7e049",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0153",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0153",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0154",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0154-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "431563f362dfb6db6eec5a5b68145ad0375f12c7e4c2d25eed38a32eafc779a0",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0154",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0154",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0155",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0155-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "95cb6a77cf1f54d52a45743ea6d3307f8ce1dd053f4876856144f4d54e2fa895",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0155",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0155",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0156",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0156-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "0e3540aa76aaae3860b1f2cbc4b5bd8b5d2e8bb36cc2750330599892d7d67eea",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0156",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0156",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0157",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0157-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "2238f6d9cbd6822fbb3918ae3f843a05425bf46dc2dc6df9cc6a845269345997",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0157",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0157",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0158",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0158-source-location-price",
+      "edited_at": "2026-07-05T00:06:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "location",
+        "price_eur"
+      ],
+      "source_hash_after": "639896176ef80e1624682c51fdfc86fe842875a7ac1e4f24e5465b9fef4959a3",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0158",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0158",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0159",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0159-live-bedroom-type-20260705",
+      "edited_at": "2026-07-05T00:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "property_type"
+      ],
+      "source_hash_after": "8c8ae60c12d212f61058f7a3b64d53eaedcb66eb517755d1c3bbedca2fcb53ad",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "normal",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0159",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0159",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-08T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0160",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0160-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "dda71020010e2e6fabece6329546f9d04402eef7ab3cab0b7b5c000e01b9e68f",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0160",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0160",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0161",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0161-price-on-request",
+      "edited_at": "2026-07-05T02:20:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_on_request"
+      ],
+      "source_hash_after": "c709bd8e34fb81791c2b510f891e10923f0aaa958cca7eb3e8282d0dd7b58d74",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0161",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0161",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0162",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0162-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "1723d377aa79680164d3356b5e99e7fec5a932a9b8ff3de2f1646118b761f449",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0162",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0162",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0163",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0163-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "6e8b481dd0619e476a29eb07ef10588a6c754908e4a5da449d5bc03ce64df4d1",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0163",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0163",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0164",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0164-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "0a9202cc9c0bad9db284a152bd8373056fce6ac37e9da1eb847f12618fe31c4e",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0164",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0164",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0165",
+      "latest_edit_id": "listing-edit-MS-CRAWL-0165-live-price-bedroom-20260705",
+      "edited_at": "2026-07-05T01:00:00Z",
+      "source_locale": "ru",
+      "changed_fields": [
+        "price_eur"
+      ],
+      "source_hash_after": "fe6a094a0bbb4f0c901426d0c714cc703a856c64b15862b7d92ecfb37bf6cb0f",
+      "stale_translation_count": 0,
+      "stale_locales": [],
+      "priority": "high",
+      "admin_path": "/admin/listings/edit?listingId=MS-CRAWL-0165",
+      "verification_task": {
+        "id": "verify-MS-CRAWL-0165",
+        "owner": "broker_ru",
+        "status": "open",
+        "due_at": "2026-07-06T00:00:00.000Z"
+      }
+    }
+  ]
+}

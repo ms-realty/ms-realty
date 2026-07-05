@@ -321,8 +321,8 @@ with open broker tasks only when current matches increase; status
 → sold/rented → remove from active search but **keep the SEO page if it has traffic** (archived/sold
 state + related listings); slug change → automatic 301; new listing → sitemap update + internal-link
 suggestions; missing translation → translator task; new public locale → Hermes draft queue → human
-review → indexable only after approval; stale listing → broker verification task; new valuation request
-→ seller pipeline + callback task; post-viewing → feedback request; closed deal → testimonial/referral
+review → indexable only after approval; stale listing → broker verification report with open BG/RU
+broker tasks; new valuation request → seller pipeline + callback task; post-viewing → feedback request; closed deal → testimonial/referral
 request.
 
 **Integrations — required:** Google Search Console · Yandex Webmaster · GA4 or privacy-aware analytics
@@ -450,7 +450,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
 | **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter built**; the **Next.js route layer still needs to consume them** |
-| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin HTML workbenches built** (editor, migration review, lead inbox); Payload app pending |
+| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin HTML workbenches + broker verification report built** (editor, migration review, lead inbox); Payload app pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, and gated-tour contract built; final engine + workers pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails + ledgers defined; **Hermes engine specified (§11)**, assistants pending |
 | **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; **blocked on redirect reviews + external SEO exports** |

@@ -54,6 +54,7 @@ What it proves now:
 - Listing quality report that turns missing price, bedroom, location, alt text, thin gallery, media review, and tour review warnings into admin editor links.
 - 165-row listing quality workbook for editor import/review.
 - Listing publication report that proves sitemap coverage and internal-link suggestions for every CMS listing.
+- Listing verification report that creates open broker verification tasks for edited listings, with high priority for stale translations and price/status changes.
 - Locale-prefixed seller valuation page backed by the existing seller lead pipeline.
 - Locale-prefixed contact callback page backed by the existing gated CRM lead intake.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
@@ -154,6 +155,7 @@ Generated production data:
 - `production/data/listing-quality-report.json`
 - `production/data/listing-quality-workbook.csv`
 - `production/data/listing-publication-report.json`
+- `production/data/listing-verification-report.json`
 - `production/data/cms-seed.json`
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`
