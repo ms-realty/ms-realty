@@ -463,6 +463,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\""), true);
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\""), true);
   assert.equal(smoke.adminMigrationReviewUnauthorized.status, 401);
+  assert.equal(smoke.adminMigrationReviewUnauthorized.headers["cache-control"], "no-store");
+  assert.equal(smoke.adminMigrationReviewUnauthorized.headers["www-authenticate"], 'Bearer realm="ms-realty-admin"');
   assert.equal(smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR"), true);
   assert.equal(smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);

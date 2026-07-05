@@ -4489,7 +4489,9 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     },
     "body": {
       "kind": "unauthorized"
@@ -4559,7 +4561,9 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     },
     "body": {
       "kind": "unauthorized"
@@ -4600,7 +4604,9 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     },
     "body": {
       "kind": "unauthorized"
@@ -4625,7 +4631,9 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     },
     "body": {
       "kind": "unauthorized"

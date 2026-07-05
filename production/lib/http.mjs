@@ -91,7 +91,10 @@ function isAdminAuthorized(auth) {
 }
 
 function adminUnauthorized() {
-  return json(401, { kind: "unauthorized" });
+  return response(401, { kind: "unauthorized" }, "application/json; charset=utf-8", {
+    "cache-control": "no-store",
+    "www-authenticate": 'Bearer realm="ms-realty-admin"',
+  });
 }
 
 function parseJsonBody(request) {
