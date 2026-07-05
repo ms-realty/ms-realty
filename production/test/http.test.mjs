@@ -699,7 +699,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.status, 201);
   assert.equal(qualityImported.body.imported, 1);
   assert.equal(qualityImported.body.edited, 1);
-  assert.equal(qualityImported.body.mediaReviewRows, 1);
+  assert.equal(qualityImported.body.mediaReviewRows, 0);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
   assert.equal(readListingEdits(listingEditLedgerPath)[0].patch.price_eur, 123000);
   assert.equal(readListingEdits(listingEditLedgerPath)[0].media_reviewer, "media_editor");

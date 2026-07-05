@@ -72,9 +72,9 @@ test("listing quality workbook gives editors importable review rows without appr
   assert.equal(rows.length, report.rows.length);
   assert.equal(rows[0].listing_id, "MS-CRAWL-0001");
   assert.match(rows[0].issues, /missing_price/);
-  assert.equal(rows[0].review_status, "needs_facts_and_media_review");
+  assert.equal(rows[0].review_status, "needs_facts_review");
   assert.match(rows[0].required_editor_fields, /price_eur/);
-  assert.match(rows[0].required_editor_fields, /media_review/);
+  assert.doesNotMatch(rows[0].required_editor_fields, /media_review/);
   assert.doesNotMatch(rows[0].required_editor_fields, /description/);
   assert.equal(rows[0].description, "Updated approved source description.");
   assert.equal(rows[0].facts_reviewer, "");

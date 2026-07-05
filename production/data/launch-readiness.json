@@ -8,7 +8,7 @@
   "warnings": [
     {
       "id": "missing_price",
-      "count": 155
+      "count": 70
     },
     {
       "id": "missing_bedrooms",
@@ -89,9 +89,9 @@
         "generated_at": "2026-07-05T00:00:00Z",
         "listing_entries": 167,
         "failing_entries": 0,
-        "entries_with_offer": 12,
+        "entries_with_offer": 97,
         "warnings": {
-          "missing_price": 155,
+          "missing_price": 70,
           "missing_bedrooms": 87,
           "media_review_pending": 2
         },

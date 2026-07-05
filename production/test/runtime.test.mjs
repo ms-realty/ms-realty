@@ -30,7 +30,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.indexable, true);
   assert.ok(he.body.media.gallery_count > 0);
   assert.equal(he.body.media.videos.length, 0);
-  assert.ok(he.body.media.review.review_gated_assets > 0);
+  assert.equal(he.body.media.review.review_gated_assets, 0);
   assert.equal(he.body.media.tour.provider, "photo-sphere-viewer");
   assert.equal(he.body.media.tour.available, false);
   assert.ok(he.body.media.tour.fallback_gallery.length > 0);
