@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, DEFAULT_LEAD_LEDGER_PATH, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import {
@@ -84,25 +85,28 @@ function compactAdminLocaleResponse(response, { includeLocales = false } = {}) {
   };
 }
 
+const smokeDir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-http-smoke-"));
+const listingEditLedgerPath = path.join(smokeDir, "listing-edits.jsonl");
+const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
+
 resetLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
 resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
-resetListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
+resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(DEFAULT_VIEWING_LEDGER_PATH);
 resetSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
 resetSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
 resetBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
 resetTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
 resetEventLedger(DEFAULT_EVENT_LEDGER_PATH);
-const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
   leadLedgerPath: DEFAULT_LEAD_LEDGER_PATH,
   replyOutboxPath: DEFAULT_REPLY_OUTBOX_PATH,
   languageRequestPath: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
   translationLedgerPath: DEFAULT_TRANSLATION_LEDGER_PATH,
-  listingEditLedgerPath: DEFAULT_LISTING_EDIT_LEDGER_PATH,
+  listingEditLedgerPath,
   viewingLedgerPath: DEFAULT_VIEWING_LEDGER_PATH,
   savedSearchLedgerPath: DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   sellerPipelinePath: DEFAULT_SELLER_PIPELINE_PATH,
@@ -422,42 +426,41 @@ smoke.adminHtml = await dispatchHttp(app, {
 assertHttpSmoke(smoke);
 const ledger = readLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
 assertLeadLedger(ledger);
-smoke.leadLedger = { path: DEFAULT_LEAD_LEDGER_PATH, rows: ledger.length };
+smoke.leadLedger = { rows: ledger.length };
 const outbox = readReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 assertReplyOutbox(outbox);
-smoke.replyOutbox = { path: DEFAULT_REPLY_OUTBOX_PATH, rows: outbox.length };
+smoke.replyOutbox = { rows: outbox.length };
 const languageRequests = readLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
 assertLanguageRequests(languageRequests);
-smoke.languageRequestLedger = { path: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, rows: languageRequests.length };
+smoke.languageRequestLedger = { rows: languageRequests.length };
 const translations = readTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
 assertTranslationLedger(translations);
-smoke.translationLedger = { path: DEFAULT_TRANSLATION_LEDGER_PATH, rows: translations.length };
-const listingEdits = readListingEdits(DEFAULT_LISTING_EDIT_LEDGER_PATH);
+smoke.translationLedger = { rows: translations.length };
+const listingEdits = readListingEdits(listingEditLedgerPath);
 assertListingEdits(listingEdits);
-smoke.listingEditLedger = { path: DEFAULT_LISTING_EDIT_LEDGER_PATH, rows: listingEdits.length };
+smoke.listingEditLedger = { rows: listingEdits.length };
 const viewings = readViewings(DEFAULT_VIEWING_LEDGER_PATH);
 assertViewingLedger(viewings);
-smoke.viewingLedger = { path: DEFAULT_VIEWING_LEDGER_PATH, rows: viewings.length };
+smoke.viewingLedger = { rows: viewings.length };
 const savedSearches = readSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
 assertSavedSearches(savedSearches);
-smoke.savedSearchLedger = { path: DEFAULT_SAVED_SEARCH_LEDGER_PATH, rows: savedSearches.length };
+smoke.savedSearchLedger = { rows: savedSearches.length };
 const sellerPipeline = readSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
 assertSellerPipeline(sellerPipeline);
-smoke.sellerPipelineLedger = { path: DEFAULT_SELLER_PIPELINE_PATH, rows: sellerPipeline.length };
+smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
 const brokerContacts = readBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
 assertBrokerContacts(brokerContacts);
-smoke.brokerContactLedger = { path: DEFAULT_BROKER_CONTACT_LEDGER_PATH, rows: brokerContacts.length };
+smoke.brokerContactLedger = { rows: brokerContacts.length };
 const tourApprovals = readTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
 assertTourApprovals(tourApprovals);
-smoke.tourApprovalLedger = { path: DEFAULT_TOUR_APPROVAL_LEDGER_PATH, rows: tourApprovals.length };
+smoke.tourApprovalLedger = { rows: tourApprovals.length };
 const events = readEventLedger(DEFAULT_EVENT_LEDGER_PATH);
 assertEventLedger(events);
 smoke.eventLedger = {
-  path: DEFAULT_EVENT_LEDGER_PATH,
   rows: events.length,
   byType: events.reduce((counts, row) => ({ ...counts, [row.type]: (counts[row.type] || 0) + 1 }), {}),
 };
-smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
+smoke.localeRegistry = { locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");
 fs.mkdirSync(path.dirname(outPath), { recursive: true });

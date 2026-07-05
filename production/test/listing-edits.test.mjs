@@ -42,7 +42,7 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
   const original = seed.records.find((record) => record.id === "MS-CRAWL-0001");
   const record = updated.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
 
-  assert.equal(original.facts.description, "");
+  assert.equal(original.facts.description, "Updated approved source description.");
   assert.equal(record.facts.description, "Reviewed source description.");
   assert.equal(record.facts.price_eur, 123000);
   assert.equal(record.facts.bedrooms, 2);

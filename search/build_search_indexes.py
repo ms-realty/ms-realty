@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARTIFACT = ROOT / "migration" / "artifacts" / "20260704-211155"
 OUT_DIR = ROOT / "search" / "data"
 LOCALE_REGISTRY = ROOT / "locales" / "registry.json"
+LISTING_EDITS_LEDGER = ROOT / "production" / "data" / "listing-edits.jsonl"
 
 
 LOCATION_PATTERNS = [
@@ -68,6 +69,12 @@ def infer_property_type(text: str) -> str:
 def load_locale_registry(path: Path = LOCALE_REGISTRY) -> dict[str, object]:
     with path.open(encoding="utf-8") as handle:
         return json.load(handle)
+
+
+def load_listing_edits(path: Path = LISTING_EDITS_LEDGER) -> list[dict[str, object]]:
+    if not path.exists():
+        return []
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
 def public_indexable_locales(registry: dict[str, object]) -> set[str]:
@@ -177,6 +184,30 @@ def build_index_docs(source_docs: list[dict[str, object]], registry: dict[str, o
             index_docs.append(approved_translation_index_doc(source, locale, registry))
 
     return index_docs
+
+
+def apply_listing_edits(docs: list[dict[str, object]], edits: list[dict[str, object]]) -> list[dict[str, object]]:
+    patches: dict[str, dict[str, object]] = {}
+    for edit in edits:
+        listing_id = str(edit.get("listing_id") or "")
+        patch = edit.get("patch")
+        if listing_id and isinstance(patch, dict):
+            patches[listing_id] = {**patches.get(listing_id, {}), **patch}
+
+    if not patches:
+        return docs
+
+    for doc in docs:
+        patch = patches.get(str(doc["id"]))
+        if not patch:
+            continue
+        for field in ("title", "description", "h1", "location", "property_type", "offer_type", "bedrooms", "price_eur"):
+            if field in patch:
+                doc[field] = patch[field]
+        doc["search_text"] = textish(
+            " ".join([str(doc.get("title") or ""), str(doc.get("description") or ""), str(doc.get("h1") or "")])
+        )
+    return docs
 
 
 def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[dict[str, object]]:
@@ -316,7 +347,8 @@ def main() -> int:
     args = parser.parse_args()
 
     registry = load_locale_registry()
-    source_docs = load_listing_docs(args.artifact_dir, registry)
+    listing_edits = load_listing_edits()
+    source_docs = apply_listing_edits(load_listing_docs(args.artifact_dir, registry), listing_edits)
     if not source_docs:
         raise SystemExit(f"No listing records found in {args.artifact_dir}")
     index_docs = build_index_docs(source_docs, registry)
@@ -338,6 +370,7 @@ def main() -> int:
         "index_languages": sorted({str(doc["language"]) for doc in index_docs}),
         "admin_locales": registry.get("admin_locales", []),
         "public_indexable_locales": sorted(public_indexable_locales(registry)),
+        "listing_edit_count": len(listing_edits),
         "url_strategy": registry.get("url_strategy"),
         "locations": sorted({str(doc["location"]) for doc in source_docs if doc["location"]}),
     }

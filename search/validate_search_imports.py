@@ -69,6 +69,13 @@ def main() -> int:
     if any(doc["locale"] == "fr" or doc["translation_indexable"] is not True for doc in index_docs):
         raise SystemExit("Search import must exclude French and non-indexable docs")
 
+    reviewed_description = "Updated approved source description."
+    reviewed_docs = [doc for doc in index_docs if doc["source_listing_id"] == "MS-CRAWL-0001"]
+    if {doc["locale"] for doc in reviewed_docs} != {"bg", "el", "he"}:
+        raise SystemExit("Reviewed listing must export BG source plus Greek and Hebrew search docs")
+    if any(doc["description"] != reviewed_description or reviewed_description not in doc["search_text"] for doc in reviewed_docs):
+        raise SystemExit("Search imports must apply reviewed CMS listing edits before export")
+
     print("PASS: search import fixtures validate for Typesense and Meilisearch")
     return 0
 
