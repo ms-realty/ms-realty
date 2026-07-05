@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-07-06T00:00:00Z",
+  "ledger_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-translations.jsonl",
+  "audit_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit.jsonl",
+  "summary": {
+    "attempted": 2,
+    "persisted": 2,
+    "rejected": 0
+  },
+  "persisted": [
+    {
+      "id": "translation-listing-MS-CRAWL-0001-el",
+      "target_locale": "el",
+      "status": "hermes_drafted",
+      "public_indexable": false
+    },
+    {
+      "id": "translation-listing-MS-3000-de",
+      "target_locale": "de",
+      "status": "hermes_drafted",
+      "public_indexable": false
+    }
+  ],
+  "rejected": []
+}

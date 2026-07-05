@@ -15,6 +15,7 @@ import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
 import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs";
 import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
+import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -781,6 +782,24 @@ if (
 ) {
   throw new Error("Hermes draft dispatch must batch safe non-publishing translation tasks");
 }
+const hermesDraftWorkerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-worker-smoke.json"), "utf8"));
+assertHermesDraftWorkerReport(hermesDraftWorkerSmoke);
+if (
+  hermesDraftWorkerSmoke.summary.attempted !== 2 ||
+  hermesDraftWorkerSmoke.summary.persisted !== 2 ||
+  hermesDraftWorkerSmoke.summary.rejected !== 0 ||
+  hermesDraftWorkerSmoke.persisted.some((row) => row.public_indexable)
+) {
+  throw new Error("Hermes draft worker smoke must persist only reviewer-gated drafts");
+}
+const hermesWorkerSmokeAudit = fs
+  .readFileSync(fromRoot("production", "data", "hermes-worker-smoke-audit.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+if (hermesWorkerSmokeAudit.length !== 2) throw new Error("Hermes worker smoke audit must contain two model-output rows");
+assertHermesAuditLedger(hermesWorkerSmokeAudit);
 const listingEdits = fs
   .readFileSync(fromRoot("production", "data", "listing-edits.jsonl"), "utf8")
   .trim()

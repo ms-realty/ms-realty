@@ -1,0 +1,118 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import {
+  assertHermesDraftWorkerReport,
+  openAiCompatibleHermesProvider,
+  runHermesDraftWorker,
+  taskFromHermesDraft,
+} from "../lib/hermes-draft-worker.mjs";
+import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
+
+function dispatchRow() {
+  return {
+    id: "translation-listing-MS-TEST-1-he",
+    status: "ready_for_hermes",
+    object_type: "listing",
+    object_id: "MS-TEST-1",
+    source_locale: "bg",
+    target_locale: "he",
+    target_direction: "rtl",
+    reviewer_role: "translator_he",
+    provider_mode: "hermes_draft",
+    public_indexable: false,
+    requires_human_approval: true,
+    can_publish: false,
+    can_mark_indexable: false,
+    source_hash: "source-hash",
+    draft_hash: "draft-hash",
+    admin_path: "/admin/translations?objectType=listing&objectId=MS-TEST-1&locale=he",
+    prompt: {
+      role: "translation_draft",
+      sourceLocale: "bg",
+      targetLocale: "he",
+      sourceText: "Sandanski apartment",
+      propertyFacts: { id: "MS-TEST-1", location: "Sandanski", price_eur: 50000 },
+      rules: ["Draft only; never publish."],
+    },
+    source_snapshot: {
+      object_type: "listing",
+      object_id: "MS-TEST-1",
+      source_locale: "bg",
+      source_hash: "source-hash",
+      approved_legal_content: false,
+    },
+    citations: [{ source: "cms_seed", object_id: "MS-TEST-1" }],
+  };
+}
+
+function validDraft() {
+  return {
+    title: "MS-TEST-1 Sandanski 50000",
+    body: "MS-TEST-1 Sandanski 50000 draft",
+    seo_title: "MS-TEST-1 Sandanski 50000",
+    meta_description: "MS-TEST-1 Sandanski 50000 draft",
+    citations: [{ source: "cms_seed", object_id: "MS-TEST-1" }],
+  };
+}
+
+test("Hermes draft worker persists validated drafts to the requested ledger", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-worker-`);
+  const file = `${dir}/translations.jsonl`;
+  const audit = `${dir}/audit.jsonl`;
+  const report = await runHermesDraftWorker({
+    dispatch: { rows: [dispatchRow()] },
+    provider: async () => validDraft(),
+    filePath: file,
+    auditPath: audit,
+  });
+
+  assert.equal(assertHermesDraftWorkerReport(report), true);
+  assert.equal(report.summary.persisted, 1);
+  assert.equal(report.summary.rejected, 0);
+  const rows = readTranslationLedger(file);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].status, "hermes_drafted");
+  assert.equal(rows[0].public_indexable, false);
+  assert.equal(rows[0].hermes.can_publish, false);
+  assert.equal(rows[0].hermes.output.human_approved, false);
+  assert.equal(readHermesAuditLedger(audit)[0].has_output, true);
+});
+
+test("Hermes draft worker rejects outputs that omit protected facts", () => {
+  assert.throws(
+    () =>
+      taskFromHermesDraft(dispatchRow(), {
+        title: "Sandanski",
+        body: "Missing protected id and price",
+        citations: [{ source: "cms_seed" }],
+      }),
+    /property fact/,
+  );
+});
+
+test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => {
+  let request;
+  const provider = openAiCompatibleHermesProvider({
+    endpoint: "https://hermes.local/v1/chat/completions",
+    apiKey: "test-key",
+    model: "NousResearch/Hermes-4-14B",
+    fetchImpl: async (url, options) => {
+      request = { url, options, body: JSON.parse(options.body) };
+      return {
+        ok: true,
+        async json() {
+          return { choices: [{ message: { content: `\`\`\`\n${JSON.stringify(validDraft())}\n\`\`\`` } }] };
+        },
+      };
+    },
+  });
+
+  const output = await provider(dispatchRow());
+  assert.equal(request.url, "https://hermes.local/v1/chat/completions");
+  assert.equal(request.options.headers.authorization, "Bearer test-key");
+  assert.equal(request.body.model, "NousResearch/Hermes-4-14B");
+  assert.equal(request.body.response_format.type, "json_object");
+  assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
+});
