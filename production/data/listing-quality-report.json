@@ -4,9 +4,9 @@
     "listings": 165,
     "affected_listings": 165,
     "issue_counts": {
-      "missing_price": 155,
+      "missing_price": 153,
       "missing_bedrooms": 90,
-      "missing_location": 3,
+      "missing_location": 0,
       "missing_description": 122,
       "media_review_pending": 165,
       "missing_alt_text": 0,
@@ -2049,23 +2049,19 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0071",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0071",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "price_eur",
-        "location",
         "media_review",
         "tour_review"
       ],
       "title": "Продажба на 38дка земя в близост до минерална вода",
-      "location": "",
+      "location": "Hotovo",
       "description": "Продажба на 38дка земя в близост до минерална вода",
       "issues": [
-        "missing_price",
-        "missing_location",
         "media_review_pending",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 50000,
       "bedrooms": null,
       "public_gallery_assets": 6,
       "missing_alt_text_assets": 0,
@@ -3190,20 +3186,18 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "bedrooms",
-        "location",
         "media_review",
         "tour_review"
       ],
       "title": "Продава работещ бизнес – производство на пелети",
-      "location": "",
+      "location": "Sandanski",
       "description": "Private land covering 24,416 m2, three massive buildings with a total area of 2,200 m2, 2 solar panels, each with a capacity of 500 kilowatts. €750,000",
       "issues": [
         "missing_bedrooms",
-        "missing_location",
         "media_review_pending",
         "tour_review_pending"
       ],
-      "price_eur": 750000,
+      "price_eur": 775000,
       "bedrooms": null,
       "public_gallery_assets": 24,
       "missing_alt_text_assets": 0,
@@ -4509,23 +4503,19 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0158",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0158",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "price_eur",
-        "location",
         "media_review",
         "tour_review"
       ],
       "title": "Участок под строительство",
-      "location": "",
+      "location": "Sandanski",
       "description": "Участок под строительство, Участок с проектом",
       "issues": [
-        "missing_price",
-        "missing_location",
         "media_review_pending",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 40000,
       "bedrooms": null,
       "public_gallery_assets": 16,
       "missing_alt_text_assets": 0,

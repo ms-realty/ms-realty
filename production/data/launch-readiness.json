@@ -9,7 +9,7 @@
   "warnings": [
     {
       "id": "missing_price",
-      "count": 157
+      "count": 155
     },
     {
       "id": "media_review_pending",
@@ -18,10 +18,6 @@
     {
       "id": "missing_bedrooms",
       "count": 90
-    },
-    {
-      "id": "missing_location",
-      "count": 3
     }
   ],
   "gates": [
@@ -94,12 +90,11 @@
         "generated_at": "2026-07-05T00:00:00Z",
         "listing_entries": 167,
         "failing_entries": 0,
-        "entries_with_offer": 10,
+        "entries_with_offer": 12,
         "warnings": {
-          "missing_price": 157,
+          "missing_price": 155,
           "media_review_pending": 167,
-          "missing_bedrooms": 90,
-          "missing_location": 3
+          "missing_bedrooms": 90
         },
         "by_locale": {
           "bg": 113,

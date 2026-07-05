@@ -3,12 +3,11 @@
     "generated_at": "2026-07-05T00:00:00Z",
     "listing_entries": 167,
     "failing_entries": 0,
-    "entries_with_offer": 10,
+    "entries_with_offer": 12,
     "warnings": {
-      "missing_price": 157,
+      "missing_price": 155,
       "media_review_pending": 167,
-      "missing_bedrooms": 90,
-      "missing_location": 3
+      "missing_bedrooms": 90
     },
     "by_locale": {
       "bg": 113,
@@ -1065,11 +1064,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 5,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_location",
-        "missing_price",
         "media_review_pending"
       ]
     },
@@ -1643,7 +1640,6 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_location",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -2327,11 +2323,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 10,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_location",
-        "missing_price",
         "media_review_pending"
       ]
     },
