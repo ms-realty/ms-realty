@@ -37,10 +37,10 @@ LOCATION_PATTERNS = [
 ]
 
 TYPE_PATTERNS = [
-    ("apartment", re.compile(r"\b(apartment|flat|апартамент|квартира)\b", re.I)),
-    ("house", re.compile(r"\b(house|villa|къща|вила|дом)\b", re.I)),
-    ("land", re.compile(r"\b(land|plot|земя|парцел|участок)\b", re.I)),
-    ("commercial", re.compile(r"\b(office|shop|commercial|industrial|industrieel|офис|магазин|търгов\w*|промишлен\w*|промышленн\w*|работилница|бензиностанц\w*)\b", re.I)),
+    ("apartment", re.compile(r"\b(apartment|flat|апартамент\w*|квартир\w*|мезонет\w*|студио)\b", re.I)),
+    ("house", re.compile(r"\b(house|villa|къщ\w*|вил\w*|дом)\b", re.I)),
+    ("land", re.compile(r"\b(land|plot|земя|парцел\w*|участок\w*)\b", re.I)),
+    ("commercial", re.compile(r"\b(office|shop|commercial|industrial|industrieel|офис\w*|магазин\w*|търгов\w*|производствен\w*|помещение|оранжери\w*|промишлен\w*|промышленн\w*|работилница|бензиностанц\w*)\b", re.I)),
     ("hotel", re.compile(r"\b(hotel|хотел)\b", re.I)),
 ]
 
@@ -60,10 +60,8 @@ def infer_location(text: str) -> str:
 
 
 def infer_property_type(text: str) -> str:
-    for kind, pattern in TYPE_PATTERNS:
-        if pattern.search(text):
-            return kind
-    return "property"
+    matches = [(match.start(), index, kind) for index, (kind, pattern) in enumerate(TYPE_PATTERNS) if (match := pattern.search(text))]
+    return min(matches)[2] if matches else "property"
 
 
 def load_locale_registry(path: Path = LOCALE_REGISTRY) -> dict[str, object]:
@@ -243,6 +241,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
             h1 = textish(row.get("h1"))
             domain = textish(row.get("source_domain"))
             combined = " ".join([title, description, h1, url])
+            type_text = " ".join([title, h1, url])
             locale = infer_language(domain, url, registry)
             locale_is_indexable = locale in indexable_locales
 
@@ -261,7 +260,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
                     "description": description,
                     "h1": h1,
                     "location": infer_location(combined),
-                    "property_type": infer_property_type(combined),
+                    "property_type": infer_property_type(type_text),
                     "offer_type": infer_offer(combined),
                     "bedrooms": infer_bedrooms(combined),
                     "price_eur": None,

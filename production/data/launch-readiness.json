@@ -17,7 +17,7 @@
     },
     {
       "id": "missing_bedrooms",
-      "count": 95
+      "count": 90
     },
     {
       "id": "missing_location",
@@ -98,7 +98,7 @@
         "warnings": {
           "missing_price": 157,
           "media_review_pending": 167,
-          "missing_bedrooms": 95,
+          "missing_bedrooms": 90,
           "missing_location": 3
         },
         "by_locale": {

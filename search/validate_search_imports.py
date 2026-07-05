@@ -79,7 +79,11 @@ def main() -> int:
     property_types = {doc["id"]: doc["property_type"] for doc in source_docs}
     expected_types = {
         "MS-CRAWL-0001": "commercial",
+        "MS-CRAWL-0002": "apartment",
         "MS-CRAWL-0006": "commercial",
+        "MS-CRAWL-0013": "house",
+        "MS-CRAWL-0019": "commercial",
+        "MS-CRAWL-0059": "land",
         "MS-CRAWL-0158": "land",
     }
     for listing_id, property_type in expected_types.items():

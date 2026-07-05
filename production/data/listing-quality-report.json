@@ -8,7 +8,7 @@
       "media_review_pending": 165,
       "missing_alt_text": 165,
       "tour_review_pending": 165,
-      "missing_bedrooms": 95,
+      "missing_bedrooms": 90,
       "missing_description": 122,
       "thin_public_gallery": 5,
       "missing_location": 3
@@ -550,7 +550,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -561,7 +560,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -582,7 +580,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -593,7 +590,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -674,7 +670,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -685,7 +680,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1622,7 +1616,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -1633,7 +1626,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -1834,7 +1826,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -1844,7 +1835,6 @@
       "description": "Продава се парцел в с. Хотово, община Сандански. Обща площ 762 кв.м., равен терен, подходящ за къща или вила.",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -2654,6 +2644,7 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
+        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -2663,6 +2654,7 @@
       "description": "Продава апартаменти в Парк Хотел Пирин. Продажба на апартаменти в парк хотел Пирин Сандански. Цени на свободните апартаменти в Парк Хотел Пирин Сандански.",
       "issues": [
         "missing_price",
+        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -2986,7 +2978,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -2997,7 +2988,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -3419,6 +3409,7 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0111",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
+        "bedrooms",
         "location",
         "media_review",
         "media_alt_text",
@@ -3428,6 +3419,7 @@
       "location": "",
       "description": "Private land covering 24,416 m2, three massive buildings with a total area of 2,200 m2, 2 solar panels, each with a capacity of 500 kilowatts. €750,000",
       "issues": [
+        "missing_bedrooms",
         "missing_location",
         "media_review_pending",
         "missing_alt_text",
@@ -3784,7 +3776,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -3794,7 +3785,6 @@
       "description": "Продается производственное здание oколо г. Петрич, новое здание, подходит для бизнеса, хороший подъезд к зданию, отличное расположение",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -3908,6 +3898,7 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
+        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -3917,6 +3908,7 @@
       "description": "Продажа большого участка рядом с горячей минеральной водой. Участок находится на дороге между г.Сандански и Мельник.",
       "issues": [
         "missing_price",
+        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4276,7 +4268,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4286,7 +4277,6 @@
       "description": "продажа производственной базы около Сандански",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
@@ -4576,7 +4566,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "media_review",
         "media_alt_text",
@@ -4587,7 +4576,6 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "media_review_pending",
         "missing_alt_text",
@@ -4723,8 +4711,9 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0154",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0154",
-      "review_status": "needs_media_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
+        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4733,6 +4722,7 @@
       "location": "Sandanski",
       "description": "Продажа участка в поселке Струмяни.Недвижимость в 10 км от Сандански.Панорамный участок с видом на горы и р.Струма. 677 м2 цена 11 000 Евро.Все коммуникации",
       "issues": [
+        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
