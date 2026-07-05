@@ -2,10 +2,10 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
     "listings": 165,
-    "affected_listings": 110,
+    "affected_listings": 91,
     "issue_counts": {
       "missing_price": 68,
-      "missing_bedrooms": 76,
+      "missing_bedrooms": 32,
       "missing_location": 0,
       "missing_description": 2,
       "media_review_pending": 0,
@@ -14,12 +14,12 @@
       "tour_review_pending": 0
     },
     "by_source_locale": {
-      "bg": 60,
-      "ru": 50
+      "bg": 46,
+      "ru": 45
     },
     "by_source_domain": {
-      "makler-realty.com": 60,
-      "makler-realty.ru": 50
+      "makler-realty.com": 46,
+      "makler-realty.ru": 45
     }
   },
   "rows": [
@@ -250,94 +250,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0023",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0023",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0023",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Прекрасна къща в близост до СПА курорт Сандански",
-      "location": "Sandanski",
-      "description": "Прекрасна къща в близост до СПА курорт Сандански. Жилищна площ 172 кв.м., гараж 22 кв.м., парцел 626 кв.м. Мебелирана. Беседка, барбекю, басеин",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 136000,
-      "bedrooms": null,
-      "public_gallery_assets": 14,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0025",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0025",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0025",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава вила в Пирин планина",
-      "location": "Sandanski",
-      "description": "Продава се вила в Пирин планина над село Илинденци – сред природа, тишина и чист въздух Предлагаме за продажба уютна вила в Пирин планина, разположена над село Илинденци, в живописна вилна зона, заобиколена от вековна гора и впечатляващи природни гледки. Имотът е отличен избор за хора, които търсят спокойствие, уединение и близост до природата, без да се лишават от удобствата на съвременния живот. Вилата разполага с всички необходими документи. Намира се в собствен поземлен имот с площ от 947 кв.м., а застроената площ на сградата е 51 кв.м. Сградата е на 2 нива. На първо ниво има хол с кухня, баня и тоалетна. На второ ниво 2 спални с обща баня и тоалетна. Имотът е напълно завършен и частично обзаведен, което позволява незабавно ползване както за лично ползване, така и като ваканционен имот или инвестиция за туристически наем. Къщата е електрифицирана и водоснабдена, с активни партиди за",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 86000,
-      "bedrooms": null,
-      "public_gallery_assets": 20,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0026",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0026",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0026",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава голяма къща в близост до гр.Сандански",
-      "location": "Sandanski",
-      "description": "Къщата се намира в едно от големите и предпочитани села в близост до СПА курорт Сандански Парцела е с площ от 760 кв.м. Къщата е със застроена площ от 152м2, а втори етаж е 161кв.м. Къщата е на 2 етажа, като на първи етаж има голям хол и изход към панорамна тераса, като от терасата има достъп и до парцела и 4 спални, като всяка от спалните е със собствена баня и тоалетна. По вътрешно стълбище се стига до втория жилищен етаж, който е с площ от 161 кв.м., където има 4 стаи, хол с кухня и баня с тоалетна. Къщата се предлага в напълно завършен вид, подходяща е както за постоянно пребиваване, така и за отдаване под наем цялата или на отделни стаи.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 225000,
-      "bedrooms": null,
-      "public_gallery_assets": 14,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0031",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0031",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0031",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава етаж от къща в гр.Сандански",
-      "location": "Sandanski",
-      "description": "Имота представлява целия трети жилищен етаж от 4 етажна къща. Застроената му площ е 112 кв.м., като се състои от голямо входно антре, 2 спални със северно изложение, хол с кухня и отделна голяма стая, която може да бъде и спалня и хол с южно изложение, тераса, баня с тоалетна, тоалетна и мокро помещение. Апартамента се продава във вида, в който се виждана снимките. Къщата се намира в непосредствена близост до 1-во основно училище.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 145000,
-      "bedrooms": null,
-      "public_gallery_assets": 12,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0032",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -356,28 +268,6 @@
       "price_eur": 86000,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0033",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0033",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0033",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава етаж от къща в с.Поленица",
-      "location": "Sandanski",
-      "description": "Предлагаме за продажба втори жилищен етаж от триетажна къща. Застроената площ на етажа е 120 кв.м., като се състои от голям хол с кухня с панорамна тераса на изток, 3 спални /две от спалните са с обща тераса с изглед на юг/, баня с тоалетна. Етажа се предлага във вид карабина, като е необходимо да се монтират дограми, да се направи електро и ВиК инсталации. Има възможност за закупуване и на таванския етаж, който по документи се състои от 2 апартамента с обща площ от 137,71 кв.м., както и идеална част от парцела под къщата.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 65000,
-      "bedrooms": null,
-      "public_gallery_assets": 13,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -477,15 +367,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0039",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продава имот в м.Ранковец, гр.Сандански",
       "location": "Sandanski",
       "description": "Продава 1/2 идеална част от имот с идентификатор 57176.41.8 в местността РАНКОВЕЦ. Имота е равен, с категория на земята 5, НТП Нива, площ на целия имот 8995 кв. м Имота граничи с полски път и е на около 45 метра от напоителния канал. В близост до имота има и застрояване.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -512,50 +400,6 @@
       "price_eur": 18000,
       "bedrooms": null,
       "public_gallery_assets": 7,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0042",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0042",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0042",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава имот на гл.път Е79 в гр.Сандански",
-      "location": "Sandanski",
-      "description": "Имота се намира на главен път Е79 , на около 1 км от гр.Сандански. Граничи от една страна с главния път, като лицето към пътя е около 110м, а от другата страна с черен път. Статута на земята е нива 5-та категория. Възможна е както продажба, така и различен тип заменя.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 60000,
-      "bedrooms": null,
-      "public_gallery_assets": 8,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0043",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0043",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0043",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава къща в Гърция, Еретрия – Котрони",
-      "location": "Sandanski",
-      "description": "Предлага се за продажба ексклузивна триетажна вила в Еретрия-Котрони, Гърция. Сградата с обща площ от 300 кв.м. e построена през 2009 г. върху парцел от 5.000 кв.м. Вилата е стилно обзаведена, като оборудването включва богат набор от удобства, сред които асансьор, камина, климатична система, отоплителна инсталация със слънчеви панели за вода, игрална зала, алуминиеви прозорци и щори, вътрешни стълби. Разпределението със своите 3 кухни, 4 бани, 1 отделна тоалетна, 2 хола, 6 спални, и едно складово помещение предлага значителен комфорт. Отоплението се осигурява от модерна система. Вилата оборудвана с алармена система",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 950000,
-      "bedrooms": null,
-      "public_gallery_assets": 16,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -690,28 +534,6 @@
       "price_eur": 594000,
       "bedrooms": null,
       "public_gallery_assets": 1,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0050",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0050",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0050",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава мезонет в Халкидики, р-н Елани Сани",
-      "location": "Sandanski",
-      "description": "Продава мезонет в Халкидики, на първи ръкав Имота се намира в един от най-красивите райони на Халкидики, само на 1 км от Сани Бийч Ризорт. Мезонета е построен през 2005 г. Състои се от хол с кухня, 2 бани с тоалетни и 3 спални. Общата площ на имота е 110 кв.м., има и градина с площ 150 кв.м. Предлага се в напълно завършен вид, отоплението е със дизелов котел.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 170000,
-      "bedrooms": null,
-      "public_gallery_assets": 11,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -938,28 +760,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0074",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0074",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0074",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продажба на луксозна къща в гр. Сандански",
-      "location": "Sandanski",
-      "description": "Имота се намира в един от най-предпочитаните райони на гр. Сандански – парковата зона. В непосредствена близост до река Санданска Бистрица, градския стадион и летен театър. Комплекса има уникално разположение – той граничи с вековна гора, което дава свежест и прохлада през лятото, а в същото време има невероятен изглед, както към парка на гр. Сандански, така и към Пирин планина. Къщата е част от затворен комплекс от идентични еднофамилни сгради. Застроената и площ е 220 кв. м., разпределена в 3 нива. На партерно ниво има голямо антре с мокро помещение, 2 гаража. На първи жилищен етаж е разположен голям хол, кухня, баня с тоалетна и панорамна тераса. На втори жилищен етаж има 2 спални, с 2 бани и тоалетни. Къщата се предлага в напълно завършен вид, с всичките необходими за комфортното ви пребиваване мебели, всяка от стаите е обзаведена с легла, гардероби, шкафчета. Монтирана е и кухня с",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 339000,
-      "bedrooms": null,
-      "public_gallery_assets": 23,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0082",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -1030,28 +830,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0090",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0090",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0090",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Апартамент на първа линия в Пасалимани, Пиреус -Гърция",
-      "location": "Sandanski",
-      "description": "200 метра плюс 40 метра балкони общо 240 метра 3 спални 1 Кухня 2 бани 1 wc 1 много голяма всекидневна 1 Трапезария 1 склад 1 халат за отделение 1 чакалня 1 офис стая Отоплението е на газ Сградата разполага с асансьор Цена 1 250 000 евро Мястото е едно от най-скъпите места в Гърция.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 1250000,
-      "bedrooms": null,
-      "public_gallery_assets": 49,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0091",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -1059,63 +837,17 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0091",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продава къща в с.Виногради, 3 км от Мелник",
       "location": "Sandanski",
       "description": "Имота се намира в с.Виногдари, което е на около 15 км от гр.Сандански и 3 км от архитектурния град музей Мелник. Района е популярно туристическо направление, заради уникалната си природа и забележителностите, а в същото време селото е тихо и спокойно място, встрани от главния път. Къщата е изцяло реставрирана стара сграда, в която е направено всичко необходимо за комфортното ви пребиваване. Застроената и площ е 90 кв.м., а парцела е с площ 350 кв.м. Приземния етаж е голямо мазе-изба. Жилищния етаж се състои от коридор, 2 спални, хол с кухня, баня с тоалетна и тераса. Къщата е напълно мебелирана, като има всичките необходими електроуреди.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 13,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0092",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0092",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0092",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава къща в парка на Сандански",
-      "location": "Sandanski",
-      "description": "Сградата със застроена площ 514 кв.м., се състои от 2 къщи, построени на калкан върху имот 540 кв.м. Къща 1 е с площ 275м2, къща 2 е с площ 260 м2. Всяка от къщите е на два етажа плюс голямо мазе. На първия етаж има голяма дневна с кухня, 2 санитарни възела, спалня. На втория етаж – 3 спални, 2 санитарни възела и тераса. Във всяка от къщите е изградена ВиК и електро инстралацията. Предвидено е подово отопление, като са положни подовите топлоизолации и тръбите. Към къщите са подведени всички необходими комуникации. Имота е с отлична локация, сред вековна гора в непосредствена близост до р.Санданска Бистрица. 250 000 Евро е цената на по-малката къща.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 300000,
-      "bedrooms": null,
-      "public_gallery_assets": 17,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0093",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0093",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0093",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава къща в с. Лешница",
-      "location": "Sandanski",
-      "description": "Къща на три нива, На първо ниво има 2 стаи, като едната е предназначена за кухня, втората за трапезария. Има голяма веранда. На второ ниво има 2 спални, коридор и баня. На третия етаж разпределението е същото както на втория. Къщата се намира в едно от големите населени места в района. Само на 3 км от град Сандански. Инфраструктурата тук е добре развита и много хора предпочитат този район за постоянно пребиваване. В двора има много овощни дървета. Добре поддържан двор. В къщата е започнат ремонт, покрива е изцяло нов.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 110000,
-      "bedrooms": null,
-      "public_gallery_assets": 8,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -1186,28 +918,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0099",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0099",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0099",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава луксозна къща в Сандански",
-      "location": "Sandanski",
-      "description": "Вилното селище е уникално по рода си и единственото от този тип в района на Сандански , който е известен с благоприятните си климатични условия, които заедно с богатството от минерални извори с различна термалност и ниска минерализация, правят мястото предпочитано за почивка през цялата година. Новопостроените Къщи се намират само на 5 минути път с кола (2км) от центъра на най – слънчевия град в България – Сандански! Разположени са до вековни чинари на хълма над река Гушевица в село Поленица. От там се разкрива прекрасна гледка на север – към Пирин планина и връх Вихрен, на изток – към околните хълмове, над които гостите на комплекса могат да се насладят на изгряващото слънце, на юг – местността Рупите, Беласица и Петрич. Комплекса е от затворен тип с външно видео наблюдение и се състои от 6 къщи, всяка с обща площ около 140 кв. м. , подходяща за семейство или компания до 4 човека.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 235790,
-      "bedrooms": null,
-      "public_gallery_assets": 23,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0100",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -1226,28 +936,6 @@
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 11,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0104",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0104",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0104",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава имение в Гърция, гр.Нафлио",
-      "location": "Sandanski",
-      "description": "1.Къща 250м на 3 етажа с: 2 камини; 2 спални; 3 бани; 1 кухня; 1 голяма всекидневна; 1 трапезария; 1 гардеробна; 1 склад; 1 паркинг 2. Къща за гости 35 метра с кухня – спалня – баня 3. Конюшна 30 метра 4. Кокошарник 15 метра 5. Барбекю – пещ на дърва с оградено пространство 200 метра 6. 200 маслинови дръвчета 7. 130 лозови дървета Напълно обзаведена. Целият имот е ограден На 5 км от центъра на Нафплио На 8 км от най-близкия слънчев плаж Цена 650 000 евро",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 650000,
-      "bedrooms": null,
-      "public_gallery_assets": 60,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -1395,41 +1083,17 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0115",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Аренда панорамной двушки в Сандански",
       "location": "Sandanski",
       "description": "Элитная дом расположен у подножия горы Пирин в так называемой VIP зоне для отдыха. Дом часть комплекса Аква Сан «Aqua Sun». Квартира, которую мы предлагаем, расположена на третьем этаже / с видом на юг и запад /, откуда открывается живописный вид на Сандански, горы Пирин и Осогово, а также красивые скалы Мельника. Квартира состоит из гостиной с кухней и выходом на панорамную террасу / запад /, спальни с выходом на панорамную террасу / юг /, ванной комнаты. Квартира сдается с полной отделкой, мебелью. В стоимость входит подвал площадью 3,46 м2 и гараж.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 19,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0116",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0116",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0116",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Земля и здания на продажу недалеко от Сандански",
-      "location": "Sandanski",
-      "description": "Продажа земли 20 740 м2 вместе с построенными на участке зданиями общей застроенной площадью 720 м2 - новая цена 75 000 Евро",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 75000,
-      "bedrooms": null,
-      "public_gallery_assets": 12,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -1489,18 +1153,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0119",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Трехкомнатная квартира в Парк Отеле Пирин — Сандански",
       "location": "Sandanski",
       "description": "Трехкомнатная квартира в Парк Отеле Пирин - Сандански. Продажа квартиры площадью 93 кв.м. в комплексе закрытого типа в г.Сандански",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 24,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1513,15 +1175,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0120",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа отеля с рестораном в г.Сандански",
       "location": "Sandanski",
       "description": "Продажа отеля с рестораном в г.Сандански. Коммерческая недвижимость в Сандански",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -1605,18 +1265,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0124",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продается элитный дом в Сандански",
       "location": "Sandanski",
       "description": "Продается элитный дом в Сандански,",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 26,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1629,18 +1287,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0125",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа большого дома недалеко от города Сандански",
       "location": "Sandanski",
       "description": "Дом расположен в одном из крупных и предпочитаемых поселков недалеко от СПА-курорта Сандански Участок имеет площадь 760 кв.м. Дом имеет застроенную площадь 152 кв.м., а второй этаж — 161 кв.м. В доме 2 этажа, на первом этаже большая гостиная и выход на панорамную террасу, с террасы также есть выход на участок и 4 спальни, каждая из спален имеет свою ванную комнату и туалет. Внутренняя лестница ведет на второй жилой этаж, площадь которого составляет 161 кв.м., где находятся 4 комнаты, гостиная с кухней и ванная комната с туалетом. Дом предлагается в полностью готовом виде, подходит как для постоянного проживания, так и для сдачи в аренду целиком или по отдельным комнатам.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 4,
       "public_gallery_assets": 17,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1653,15 +1309,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0126",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа большого, панорамного участка в Сандански",
       "location": "Sandanski",
       "description": "Участок находится недалеко от санатория города Сандански. Он расположен выше всех домов, что обеспечивает отличную панораму. Участок достаточно большой и может быть продан целиком, либо выделенны более маленькие участки. Цена за кв.м. 49 Евро.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -1677,15 +1331,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0127",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа большого участка рядом с мин.водой",
       "location": "Sandanski",
       "description": "Продажа большого участка рядом с горячей минеральной водой. Участок находится на дороге между г.Сандански и Мельник.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -1747,18 +1399,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0130",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа дома в Сандански",
       "location": "Sandanski",
       "description": "Продажа дома в Сандански",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 3,
       "public_gallery_assets": 15,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1795,18 +1445,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0132",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа дома рядом со СПА-курортом Сандански",
       "location": "Sandanski",
       "description": "Дом расположен в деревне примерно в 12 км от города Сандански с удобным подъездом с автострады София — Афины. Деревня является одной из крупнейших в муниципалитетах Сандански и Струмяни, и здесь есть все необходимое для вашего комфортного проживания. Дом находится на 2 уровнях, каждый из которых составляет 74 кв. м. Распределение следующее: первый этаж — состоит из 3 комнат, ванной и туалета; второй этаж — гостиная с кухней, 2 спальни, 2 ванные комнаты и туалеты Участок имеет площадь 547 кв. м Дом предлагается полностью готовым с мебелью.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 17,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1843,18 +1491,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0134",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански",
       "location": "Sandanski",
       "description": "Продажа двухкомнатной квартиры в Парк Отель Пирин в Сандански, пятизвездочный отель, хорошая инфраструктура, есть все необходимое для проживания.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 12,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1867,18 +1513,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0135",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа меблированной студии в жилом комплексе Сапфир в Банско",
       "location": "Sandanski",
       "description": "Продается меблированная однокомнатная квартира в Банско. Новый, в хорошем состоянии 4-этажный дом. Лифт. Удобный подъезд. Площадь квартиры составляет 24,26 кв.м., общая площадь – 30 кв.м. Студия продается с имеющейся мебелью и бытовой техникой. Sapphire Residence – это современный комплекс, расположенный в зимнем курортном городе Банско. Комплекс находится на одной из центральных улиц Банско – улице Царя Симеона. Он расположен примерно в 600 м от отеля «Пирин» и в непосредственной близости от парка. Лифт находится примерно в 1,6 км. Sapphire Residence состоит из четырех отдельных зданий, каждое из которых имеет 4 этажа и внутреннюю инфраструктуру с благоустройством территории и освещением. Возможность аренды парковочного места на территории комплекса.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 14,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1891,15 +1535,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0136",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа недвижимости в центре села Левуново, Сандански",
       "location": "Sandanski",
       "description": "Недвижимость находится в центре села. На участке есть старая постройка. Имеются все необходимые коммуникации, а также трехфазный ток. Дополнительная информация по запросу.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -1915,15 +1557,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0137",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа недвижимости в селе Ласкарево, г.Сандански",
       "location": "Sandanski",
       "description": "Объект расположен в новом районе села Ласкарево, все соседние дома собственность иностранцев /немцы, русские, бельгийцы, англичане/. Потрясающие виды во все стороны.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -1985,41 +1625,17 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0140",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа СПА Отеля в г.Сандански",
       "location": "Sandanski",
       "description": "Комплекс построен в новом районе бальнеологического курорта Сандански, недалеко от парка города и пешеходной улицы Македонии. Комплекс состоит из гаражного уровня, SPA-центра с бассейном и джакузи, гостиничной части, фитнеса и кафе-бара. СТРОИТЕЛЬНЫЕ ПАРАМЕТРЫ ГОСТИНИЧНОГО КОМПЛЕКСА: Застроенная площадь — 420,49 м2 Общая площадь застройки — 1161,25 м2 / не включены площади от -240-507,17 м2, бассейн без раздевалки 373 м2 и все открытые террасы / Общая площадь застройки — 2771,09 м2 ВНУТРЕННИЙ БАССЕЙН — 432,39 м2 ОТЕЛЬ 40 КРОВАТЕЙ — 660,23 м2 ТЕРРАСЫ — 431.13 м2. ЗЕЛЕНЫЕ КРОВЕЛЬНЫЕ ТЕРРАСЫ — 298,54 кв.м. ГАРАЖИ 10 штук — 234,70 м2 Оборудование номеров в гостиничной части: Спальни с размерами 160 см на 200 см, шкаф для одежды, туалетный столик, холодильник, телевизор, кондиционер, ламинат и полностью оборудованная ванная комната с туалетом. Оснащение апартаментов в гостиничной части:",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 33,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0141",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0141",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0141",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продажа участка в поселке Дербере, Сандански",
-      "location": "Sandanski",
-      "description": "Продажа участка в поселке Дербере, Сандански. Общая площадь участка 2 000 кв.м., цена 14 000 Евро. Отличная панорама. Удобный доступ. Все коммунукации рядом",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 14000,
-      "bedrooms": null,
-      "public_gallery_assets": 10,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -2077,41 +1693,17 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0144",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа участка с видом на Сандански",
       "location": "Sandanski",
       "description": "Участок, который мы предлагаем, составляет 1/2 идеальной части (288 кв.м. из 576кв.м.) земельного участка, который уже частично застроен. Общая площадь участка 576 кв.м., а уже построенный на нем дом имеет застроенную площадь 60 кв.м. Место, предназначенное для строительства, имеет западную экспозицию и вид на город Сандански. Есть все необходимые коммуникации.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0145",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0145",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0145",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продажа участка 2 гка в районе г.Сандански",
-      "location": "Sandanski",
-      "description": "Продажа участка 2 гка в районе г.Сандански. Общая площадь участка 21 400 кв.м., огорожен, подведен кабель для електричества, цена 25 000 Евро",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 25000,
-      "bedrooms": null,
-      "public_gallery_assets": 4,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -2123,15 +1715,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0146",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа ресторана с отелем в г.Сандански",
       "location": "Sandanski",
       "description": "Продажа ресторана с отелем в г.Сандански. Недвижимость в Сандански",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -2147,18 +1737,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0147",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Посуточная аренда в центре города Сандански",
       "location": "Sandanski",
       "description": "Сдается апартамент в центре города Сандански, новый, хорошее качество ремонта, дорогая техника, хорошее расположение",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 18,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2276,28 +1864,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0154",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0154",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0154",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продажа участка в поселке Струмяни. Недвижимость в районе Сандански",
-      "location": "Sandanski",
-      "description": "Продажа участка в поселке Струмяни.Недвижимость в 10 км от Сандански.Панорамный участок с видом на горы и р.Струма. 677 м2 цена 11 000 Евро.Все коммуникации",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 11000,
-      "bedrooms": null,
-      "public_gallery_assets": 14,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0155",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
@@ -2364,28 +1930,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0159",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0159",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0159",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Центр профилактики, реабилитации и косметических процедур — продажа",
-      "location": "Sandanski",
-      "description": "Продажа центра профилактики, реабилитации и косметических процедур в бальнеологическом курорте Сандански, Болгария. Площадь 165 кв.м., цена 185 000 Евро",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 185000,
-      "bedrooms": null,
-      "public_gallery_assets": 19,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0160",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
@@ -2393,18 +1937,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0160",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Этаж дома с земельным участком в селе Левуново, Сандански",
       "location": "Sandanski",
       "description": "Недвижимость находится в центре села Левуново. Это первый этаж дома. Его площадь составляет 90 кв.м, вместе с подвалом и мансардой, а также 2/3 идеальной части участка, на котором построен дом, а именно 421 кв.м. Дом монолитный / бетонно-кирпичный /. Нуждается в освежающем ремонте. Полы деревянные. Стены — известковая штукатурка.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 3,
       "public_gallery_assets": 11,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2417,18 +1959,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0161",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Этаж дома с участком в г.Сандански — продажа",
       "location": "Sandanski",
       "description": "Квартира занимает весь второй жилой этаж двухэтажного дома. Она состоит из 3 комнат – кухни, 2 спален, ванной комнаты и туалета, а также прихожей. Вместе с этажом продается также часть участка площадью 77 кв.м., а также право на строительство. Объект расположен в центре города на улице Чудомира Кантарджиева, недалеко от двух школ и детского сада.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 9,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2441,18 +1981,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0162",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Aренда двухкомнатной квартиры в г.Сандански",
       "location": "Sandanski",
       "description": "Квартира расположена в новом здании в специфическом районе г.Сандански, который является предпочтительным местом для людей с бронхиальной астмой. Санаторий города расположен в метрах от квартиры. Квартира состоит из гостиной с кухней, спальни, террасы и ванной комнаты и туалета. Находится на 3 этаже дома. Имеется лифт. Квартира также может быть сдана в короткосрочную аренду, цена указана на сайте актуальна только для долгосрочной аренды. Квартира полностью меблирована, есть интернет и кабельное телевидение. В стоимость кораткосрочной аренды входит электричество, интернет, кабельное телевидение, а ее размер зависит от сезона и колличества ночевок.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 23,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2465,18 +2003,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0163",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Большая двухкомнатная квартира в аренду в Сандански + гараж",
       "location": "Sandanski",
       "description": "Долгосрочная аренда - Двухкомнатная квартира с гаражом в Сандански. Общая площадь квартиры 90 кв.м. Новый дом. Больой балкон!",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 18,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2489,18 +2025,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0164",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа трехкомнатной квартиры в Паралия Офринио, Греция",
       "location": "Sandanski",
       "description": "Комплекс Арианди состоит из нескольких двухэтажных жилых зданий с благоустроенными общими частями и прилегающей территорией. Квартира расположена на втором жилом этаже, высота +2,8 м, состоит из гостиной с кухней, 2 спален, 2 террас и ванной комнаты с туалетом. Чистая жилая площадь по документам на недвижимость составляет 42 кв. м. (в Болгарии метод измерения квадратных метров совершенно другой, поэтому аналогичная квартира в Болгарии будет иметь площадь около 65-70 м2 с общими частями). Квартира предлагается в полностью готовом виде, но без мебели. Также установлена ​​кухня без электроприборов.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 23,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2513,15 +2047,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0165",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа участка в Струмяни. Недвижимость в Сандански",
       "location": "Sandanski",
       "description": "Продажа участка под строительство в поселке Струмяни. Недвижимость в Сандански",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,

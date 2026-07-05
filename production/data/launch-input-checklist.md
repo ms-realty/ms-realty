@@ -45,7 +45,7 @@ Blockers: external_seo_exports
 - Admin import endpoint: `POST /api/admin/listing-quality/import`
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - missing_price: 70
-- missing_bedrooms: 76
+- missing_bedrooms: 32
 
 ## Validate After Inputs
 
