@@ -21,6 +21,7 @@ const MEDIA_FIELDS_BY_ISSUE = {
   thin_public_gallery: "public_gallery",
   tour_review_pending: "tour_review",
 };
+const KNOWN_ISSUES = [...Object.keys(FACT_FIELDS_BY_ISSUE), ...Object.keys(MEDIA_FIELDS_BY_ISSUE)];
 
 function filled(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
@@ -30,7 +31,7 @@ function issueCounts(rows) {
   return rows.reduce((counts, row) => {
     for (const issue of row.issues) counts[issue] = (counts[issue] || 0) + 1;
     return counts;
-  }, {});
+  }, Object.fromEntries(KNOWN_ISSUES.map((issue) => [issue, 0])));
 }
 
 function countBy(rows, keyFn) {
@@ -113,7 +114,9 @@ export function assertListingQualityReport(report) {
   if (report.summary.listings !== 165) throw new Error("Listing quality report must cover CMS listing inventory");
   if (!report.summary.issue_counts.missing_price) throw new Error("Listing quality report must expose missing prices");
   if (!report.summary.issue_counts.media_review_pending) throw new Error("Listing quality report must expose pending media review");
-  if (!report.summary.issue_counts.missing_alt_text) throw new Error("Listing quality report must expose missing media alt text");
+  if (!Object.hasOwn(report.summary.issue_counts, "missing_alt_text")) {
+    throw new Error("Listing quality report must expose missing media alt text");
+  }
   if (report.rows.some((row) => !row.editor_path.startsWith("/admin/listings/edit?listingId="))) {
     throw new Error("Listing quality rows must link to the admin listing editor");
   }

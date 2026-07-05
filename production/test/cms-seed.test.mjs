@@ -31,6 +31,7 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(fixtureListing.routing.review_required, true);
   assert.ok(fixtureListing.media.length > 0);
   assert.ok(fixtureListing.media.some((media) => media.kind === "photo" && media.is_public));
+  assert.ok(fixtureListing.media.filter((media) => media.kind === "photo" && media.is_public).every((media) => media.alt));
   assert.equal(fixtureListing.media_workflow.total_assets, fixtureListing.media.length);
   assert.equal(fixtureListing.tour.provider, "photo-sphere-viewer");
   assert.equal(fixtureListing.tour.is_public, false);

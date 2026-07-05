@@ -5,13 +5,13 @@
     "affected_listings": 165,
     "issue_counts": {
       "missing_price": 155,
-      "media_review_pending": 165,
-      "missing_alt_text": 165,
-      "tour_review_pending": 165,
       "missing_bedrooms": 90,
+      "missing_location": 3,
       "missing_description": 122,
+      "media_review_pending": 165,
+      "missing_alt_text": 0,
       "thin_public_gallery": 5,
-      "missing_location": 3
+      "tour_review_pending": 165
     },
     "by_source_locale": {
       "bg": 113,
@@ -33,7 +33,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
@@ -42,13 +41,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
-      "missing_alt_text_assets": 18,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -63,7 +61,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Апартаменти в парка на Сандански. Затворен комплекс",
@@ -74,13 +71,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -94,7 +90,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Тристаен апартамент под наем в Сандански + паркомясто",
@@ -104,13 +99,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 6,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -125,7 +119,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
@@ -136,13 +129,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -157,7 +149,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Апартамент под наем в гр.Сандански",
@@ -168,13 +159,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -187,7 +177,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "public_gallery",
         "tour_review"
       ],
@@ -197,14 +186,13 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -218,7 +206,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава двустаен апартамент в гр.Сандански",
@@ -228,13 +215,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -248,7 +234,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен апартамент в центъра на Сандански – наем",
@@ -258,13 +243,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 19,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -278,7 +262,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен апартамент под наем в парка на Сандански",
@@ -288,13 +271,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -308,7 +290,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен апартамент в идеалния център на гр. Сандански",
@@ -318,13 +299,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 17,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -338,7 +318,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
@@ -348,13 +327,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 22,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -368,7 +346,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Инвестиционен проект в Сандански – хотел ресторант",
@@ -378,13 +355,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 3,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -398,7 +374,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
@@ -408,13 +383,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 6,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -428,7 +402,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Наем – Двустаен апартамент в гр.Сандански",
@@ -438,13 +411,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 7,
-      "missing_alt_text_assets": 6,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -459,7 +431,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Нова къща под наем в с.Микрево",
@@ -470,13 +441,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
-      "missing_alt_text_assets": 22,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -491,7 +461,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Новостроящи се къщи в с.Джигурово",
@@ -502,13 +471,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 22,
-      "missing_alt_text_assets": 17,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -522,7 +490,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Нов двустаен апартамент в гр.Сандански – продажба",
@@ -532,13 +499,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 13,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -552,7 +518,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Оборудвана оранжерия в гр.Сандански",
@@ -562,13 +527,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 30,
-      "missing_alt_text_assets": 28,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -582,7 +546,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Офиси/магазини под наем в гр.Сандански",
@@ -592,13 +555,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 14,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -612,7 +574,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Офис под наем в центъра на гр.Сандански",
@@ -622,13 +583,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -642,7 +602,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Панорамен двустаен апартамент с гараж – паркова зона",
@@ -652,13 +611,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 28,
-      "missing_alt_text_assets": 27,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -672,7 +630,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Дава под наем производствено помещение в Сандански",
@@ -682,13 +639,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 8,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -702,7 +658,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Прекрасна къща в близост до СПА курорт Сандански",
@@ -712,13 +667,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -733,7 +687,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава апартамент в Солун",
@@ -744,13 +697,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -765,7 +717,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава вила в Пирин планина",
@@ -776,13 +727,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
-      "missing_alt_text_assets": 19,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -797,7 +747,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава голяма къща в близост до гр.Сандански",
@@ -808,13 +757,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 14,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -828,7 +776,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава двустаен апартамент в гр.Сандански",
@@ -838,13 +785,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -858,7 +804,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава двустаен апартамент в центъра на гр.Сандански",
@@ -868,13 +813,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 14,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -888,7 +832,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава едностаен апартамент/студио в центъра на Сандански",
@@ -898,13 +841,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 0,
       "public_gallery_assets": 9,
-      "missing_alt_text_assets": 8,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -918,7 +860,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава едностаен апартамент",
@@ -928,13 +869,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 0,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -949,7 +889,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава етаж от къща в гр.Сандански",
@@ -960,13 +899,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -981,7 +919,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава етаж от къща в Сандански",
@@ -992,13 +929,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 7,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1013,7 +949,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава етаж от къща в с.Поленица",
@@ -1024,13 +959,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 13,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1045,7 +979,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава етаж от къща в широкия център на гр.Сандански",
@@ -1056,13 +989,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 9,
-      "missing_alt_text_assets": 8,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1077,7 +1009,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава етаж от къща с парцел в с.Левуново",
@@ -1088,13 +1019,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1108,7 +1038,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава земеделска земя – с.Джигурово",
@@ -1118,13 +1047,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1138,7 +1066,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава земя на Е79 в Сандански",
@@ -1148,13 +1075,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 7,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 17
     },
     {
@@ -1169,7 +1095,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава имение в района на гр. Сандански",
@@ -1180,13 +1105,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 45,
-      "missing_alt_text_assets": 44,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1201,7 +1125,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава имот в м.Ранковец, гр.Сандански",
@@ -1212,13 +1135,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1233,7 +1155,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава имот в с.Ласкарево",
@@ -1244,13 +1165,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1265,7 +1185,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава имот в центъра на с.Левуново",
@@ -1276,13 +1195,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 7,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1297,7 +1215,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава имот на гл.път Е79 в гр.Сандански",
@@ -1308,13 +1225,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 9,
-      "missing_alt_text_assets": 8,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1329,7 +1245,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в Гърция, Еретрия – Котрони",
@@ -1340,13 +1255,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1361,7 +1275,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в с. Кулата",
@@ -1372,13 +1285,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1393,7 +1305,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в с.Пирин",
@@ -1404,13 +1315,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1425,7 +1335,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в с.Поленица",
@@ -1436,13 +1345,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1457,7 +1365,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в с. Спатово, община Сандански",
@@ -1468,13 +1375,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1489,7 +1395,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в с.Цапарево",
@@ -1500,13 +1405,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
-      "missing_alt_text_assets": 16,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1521,7 +1425,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "public_gallery",
         "tour_review"
       ],
@@ -1533,14 +1436,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1555,7 +1457,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава мезонет в Халкидики, р-н Елани Сани",
@@ -1566,13 +1467,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1587,7 +1487,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава нова къща в община Сандански",
@@ -1598,13 +1497,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1618,7 +1516,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава оранжерия в Сандански",
@@ -1628,13 +1525,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1648,7 +1544,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава офис в Сандански",
@@ -1658,13 +1553,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1678,7 +1572,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава панорамен двустаен апартамент в Сандански",
@@ -1688,13 +1581,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1708,7 +1600,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел в Сандански",
@@ -1718,13 +1609,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 7,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1738,7 +1628,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел в Сандански",
@@ -1748,13 +1637,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1768,7 +1656,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел в с.Микрево",
@@ -1778,13 +1665,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1798,7 +1684,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел в с.Поленица",
@@ -1808,13 +1693,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1827,7 +1711,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел в с.Хотово",
@@ -1836,13 +1719,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1856,7 +1738,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел за строителство в Сандански",
@@ -1866,13 +1747,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1886,7 +1766,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел за строителство в с.Струмяни",
@@ -1896,13 +1775,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1916,7 +1794,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава промишлени халета в близост до гр.Сандански",
@@ -1926,13 +1803,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 8,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1947,7 +1823,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава се вила в с. Игралище, община Струмяни",
@@ -1958,13 +1833,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 7,
-      "missing_alt_text_assets": 6,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -1979,7 +1853,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава стара къща в с.Хотово",
@@ -1990,13 +1863,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2010,7 +1882,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава обзаведено студио в Сапфир Резиденс Банско",
@@ -2020,13 +1891,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 0,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2040,7 +1910,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава тристаен апартамент в Паралия Офринио, Гърция",
@@ -2050,13 +1919,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 26,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2070,7 +1938,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава тристаен апартамент в центъра на гр.Сандански",
@@ -2080,13 +1947,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 7,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2100,7 +1966,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "public_gallery",
         "tour_review"
       ],
@@ -2111,14 +1976,13 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2132,7 +1996,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава 8дка земя в землището на с.Лешница",
@@ -2142,13 +2005,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2162,7 +2024,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "public_gallery",
         "tour_review"
       ],
@@ -2173,14 +2034,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2194,7 +2054,6 @@
         "price_eur",
         "location",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажба на 38дка земя в близост до минерална вода",
@@ -2204,13 +2063,12 @@
         "missing_price",
         "missing_location",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2225,7 +2083,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажба на апартаменти в Логари, Гърция",
@@ -2236,13 +2093,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2256,7 +2112,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажба на апартаменти в гр.Сандански",
@@ -2266,13 +2121,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2287,7 +2141,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажба на луксозна къща в гр. Сандански",
@@ -2298,13 +2151,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
-      "missing_alt_text_assets": 13,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2318,7 +2170,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажба на магазин в гр.Благоевград",
@@ -2328,13 +2179,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
-      "missing_alt_text_assets": 19,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2348,7 +2198,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажба на парцел в Струмяни – 3000 кв.м",
@@ -2358,13 +2207,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 7,
-      "missing_alt_text_assets": 6,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2379,7 +2227,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Светъл южен апартамент до парка на гр. Сандански",
@@ -2390,13 +2237,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2410,7 +2256,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажба на тристаен апартамент в гр.Сандански",
@@ -2420,13 +2265,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 11,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2440,7 +2284,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Тристаен апартамент в центъра на гр.Сандански",
@@ -2450,13 +2293,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 19,
-      "missing_alt_text_assets": 18,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2468,7 +2310,6 @@
       "review_status": "needs_media_review",
       "required_editor_fields": [
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Тристаен апартамент под наем в с.Поленица",
@@ -2476,13 +2317,12 @@
       "description": "Отдава се обзаведен тристаен апартамент под наем в с. Поленица, близо до Сандански. 120 кв.м, две спални, три тераси, панорамна гледка и паркомясто. 450Евро",
       "issues": [
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 450,
       "bedrooms": 2,
       "public_gallery_assets": 28,
-      "missing_alt_text_assets": 27,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2495,7 +2335,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Недвижими имоти в Сандански. Продава парцел в с.Струмяни",
@@ -2504,13 +2343,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2523,7 +2361,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "public_gallery",
         "tour_review"
       ],
@@ -2533,14 +2370,13 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2555,7 +2391,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Център за профилактика, рехабилитация и разкрасителни процедури",
@@ -2566,13 +2401,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 17,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2586,7 +2420,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Тристаен апартамент в Сандански",
@@ -2596,13 +2429,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 17,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2616,7 +2448,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен апартамент в Сандански. Наем",
@@ -2626,13 +2457,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2646,7 +2476,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава апартаменти в Парк Хотел Пирин",
@@ -2656,13 +2485,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2674,7 +2502,6 @@
       "review_status": "needs_media_review",
       "required_editor_fields": [
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава земя и сгради в близост до Сандански",
@@ -2682,13 +2509,12 @@
       "description": "Big plot of land 20 740 sq.m., buildings 720 sq.m., asphalt road - price 75 000 Euro.",
       "issues": [
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 75000,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 6,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2702,7 +2528,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава парцел в Сандански",
@@ -2712,13 +2537,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2732,7 +2556,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава двустаен апартамент в ПАРК ХОТЕЛ ПИРИН САНДАНСКИ",
@@ -2742,13 +2565,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2763,7 +2585,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Апартамент на първа линия в Пасалимани, Пиреус -Гърция",
@@ -2774,13 +2595,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 50,
-      "missing_alt_text_assets": 49,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2795,7 +2615,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в с.Виногради, 3 км от Мелник",
@@ -2806,13 +2625,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2827,7 +2645,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в парка на Сандански",
@@ -2838,13 +2655,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 13,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2859,7 +2675,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава къща в с. Лешница",
@@ -2870,13 +2685,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 9,
-      "missing_alt_text_assets": 6,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2890,7 +2704,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Индустриална сграда под наем в Петрич",
@@ -2900,13 +2713,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2920,7 +2732,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава индустриална сграда. Община Петрич",
@@ -2930,13 +2741,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2950,7 +2760,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Индустриална сграда под наем",
@@ -2960,13 +2769,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -2980,7 +2788,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Индустриално помещение под наем в гр.Петрич",
@@ -2990,13 +2797,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3011,7 +2817,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава индустриална база около Сандански",
@@ -3022,13 +2827,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3043,7 +2847,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава луксозна къща в Сандански",
@@ -3054,13 +2857,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
-      "missing_alt_text_assets": 7,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3074,7 +2876,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен луксозен апартамент под наем в Сандански",
@@ -3084,13 +2885,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3104,7 +2904,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен апартамент под наем в Сандански",
@@ -3114,13 +2913,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 21,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3134,7 +2932,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен апартамент в парка на гр.Сандански",
@@ -3144,13 +2941,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 8,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3165,7 +2961,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава мезонет на ул.Пирин, гр.Сандански",
@@ -3176,13 +2971,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3197,7 +2991,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава имение в Гърция, гр.Нафлио",
@@ -3208,13 +3001,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 61,
-      "missing_alt_text_assets": 60,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3228,7 +3020,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава СПА Хотел в гр.Сандански",
@@ -3238,13 +3029,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 32,
-      "missing_alt_text_assets": 8,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3258,7 +3048,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Едностаен апартамент под наем",
@@ -3268,13 +3057,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 0,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 9,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3288,7 +3076,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава тристаен апартамент в комплек “Арена 1”, Св.Влас",
@@ -3298,13 +3085,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 14,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3319,7 +3105,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава вила в Малешевска планина",
@@ -3330,13 +3115,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
-      "missing_alt_text_assets": 3,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3350,7 +3134,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Двустаен апартамент под наем в Сандански",
@@ -3360,13 +3143,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 1,
       "public_gallery_assets": 19,
-      "missing_alt_text_assets": 13,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3381,7 +3163,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Апартамент под наем в комплекс Медите",
@@ -3392,13 +3173,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
-      "missing_alt_text_assets": 5,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3412,7 +3192,6 @@
         "bedrooms",
         "location",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава работещ бизнес – производство на пелети",
@@ -3422,13 +3201,12 @@
         "missing_bedrooms",
         "missing_location",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 750000,
       "bedrooms": null,
       "public_gallery_assets": 24,
-      "missing_alt_text_assets": 4,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3442,7 +3220,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Земеделска земя в землището на с.Джигурово",
@@ -3452,13 +3229,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 3,
-      "missing_alt_text_assets": 2,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3472,7 +3248,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продава тристаен апартамент в Парк Хотел Пирин",
@@ -3482,13 +3257,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": 2,
       "public_gallery_assets": 22,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 16
     },
     {
@@ -3502,7 +3276,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Апартаменты в Парк отеле Пирин — г.Сандански",
@@ -3512,13 +3285,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3533,7 +3305,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Аренда панорамной двушки в Сандански",
@@ -3544,13 +3315,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 25,
-      "missing_alt_text_assets": 24,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3563,7 +3333,6 @@
       "required_editor_fields": [
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Земля и здания на продажу недалеко от Сандански",
@@ -3572,13 +3341,12 @@
       "issues": [
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 75000,
       "bedrooms": null,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 17,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3593,7 +3361,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Дом в деревне Спатово, муниципалитет Сандански",
@@ -3604,13 +3371,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 17,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3625,7 +3391,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Дом на продажу в селе Петрово, муниципалитет Сандански",
@@ -3636,13 +3401,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
-      "missing_alt_text_assets": 19,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3656,7 +3420,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Трехкомнатная квартира в Парк Отеле Пирин — Сандански",
@@ -3666,13 +3429,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 30,
-      "missing_alt_text_assets": 16,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3686,7 +3448,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа отеля с рестораном в г.Сандански",
@@ -3696,13 +3457,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 33,
-      "missing_alt_text_assets": 24,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3716,7 +3476,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Офис на продажу в Сандански",
@@ -3726,13 +3485,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3747,7 +3505,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продается особняк в районе города Сандански",
@@ -3758,13 +3515,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 52,
-      "missing_alt_text_assets": 19,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3777,7 +3533,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продается производственное здание oколо г. Петрич",
@@ -3786,13 +3541,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
-      "missing_alt_text_assets": 18,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3806,7 +3560,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продается элитный дом в Сандански",
@@ -3816,13 +3569,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 32,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3837,7 +3589,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа большого дома недалеко от города Сандански",
@@ -3848,13 +3599,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
-      "missing_alt_text_assets": 22,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3869,7 +3619,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа большого, панорамного участка в Сандански",
@@ -3880,13 +3629,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3900,7 +3648,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа большого участка рядом с мин.водой",
@@ -3910,13 +3657,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3930,7 +3676,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа виноградника рядом с Сандански. Сорт Мерло",
@@ -3940,13 +3685,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3959,7 +3703,6 @@
       "required_editor_fields": [
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа дома в поселке Виногради ( Мелник)",
@@ -3968,13 +3711,12 @@
       "issues": [
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 79900,
       "bedrooms": null,
       "public_gallery_assets": 23,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -3988,7 +3730,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа дома в Сандански",
@@ -3998,13 +3739,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
-      "missing_alt_text_assets": 16,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4018,7 +3758,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа дома в центре г. Сандански",
@@ -4028,13 +3767,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
-      "missing_alt_text_assets": 19,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4049,7 +3787,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа дома рядом со СПА-курортом Сандански",
@@ -4060,13 +3797,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
-      "missing_alt_text_assets": 22,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4081,7 +3817,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа дома с участком в городе Сандански",
@@ -4092,13 +3827,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4112,7 +3846,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански",
@@ -4122,13 +3855,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4143,7 +3875,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа меблированной студии в жилом комплексе Сапфир в Банско",
@@ -4154,13 +3885,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4175,7 +3905,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа недвижимости в центре села Левуново, Сандански",
@@ -4186,13 +3915,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4207,7 +3935,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа недвижимости в селе Ласкарево, г.Сандански",
@@ -4218,13 +3945,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4239,7 +3965,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа новостройки в Сандански",
@@ -4250,13 +3975,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4269,7 +3993,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа производственной базы около Сандански",
@@ -4278,13 +4001,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 14,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4299,7 +4021,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа СПА Отеля в г.Сандански",
@@ -4310,13 +4031,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 39,
-      "missing_alt_text_assets": 23,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4329,7 +4049,6 @@
       "required_editor_fields": [
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа участка в поселке Дербере, Сандански",
@@ -4338,13 +4057,12 @@
       "issues": [
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 14000,
       "bedrooms": null,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4359,7 +4077,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански",
@@ -4370,13 +4087,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
-      "missing_alt_text_assets": 17,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4391,7 +4107,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа участка на международной трассе София — Салоники",
@@ -4402,13 +4117,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 13
     },
     {
@@ -4423,7 +4137,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа участка с видом на Сандански",
@@ -4434,13 +4147,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 13,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4453,7 +4165,6 @@
       "required_editor_fields": [
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа участка 2 гка в районе г.Сандански",
@@ -4462,13 +4173,12 @@
       "issues": [
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 25000,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4482,7 +4192,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа ресторана с отелем в г.Сандански",
@@ -4492,13 +4201,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4512,7 +4220,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Посуточная аренда в центре города Сандански",
@@ -4522,13 +4229,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
-      "missing_alt_text_assets": 14,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4540,7 +4246,6 @@
       "review_status": "needs_media_review",
       "required_editor_fields": [
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Сдается дом в селе Виногради, 3 км от Мельника",
@@ -4548,13 +4253,12 @@
       "description": "Новый дом в 15 км от СПА курорта Сандански. Две спальни, зал с кухней, санузел, большой подвал. Застроенная площадь 90 кв.м., цена 330 Евро в месяц",
       "issues": [
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 330,
       "bedrooms": 2,
       "public_gallery_assets": 23,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4568,7 +4272,6 @@
         "price_eur",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Сдается производственное помещение в Сандански",
@@ -4578,13 +4281,12 @@
         "missing_price",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 22,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4599,7 +4301,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Сельхоз земля в районе деревни Лешница, Сандански",
@@ -4610,13 +4311,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 13,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4630,7 +4330,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продается теплица в городе Сандански",
@@ -4640,13 +4339,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4659,7 +4357,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Участок в поселке Лешница — район города Сандански",
@@ -4668,13 +4365,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4687,7 +4383,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Участок в поселке Струмяни. Недвижимость в районе Сандански",
@@ -4696,13 +4391,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4715,7 +4409,6 @@
       "required_editor_fields": [
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа участка в поселке Струмяни. Недвижимость в районе Сандански",
@@ -4724,13 +4417,12 @@
       "issues": [
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 11000,
       "bedrooms": null,
       "public_gallery_assets": 20,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4743,7 +4435,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Участок под застройку в Сандански",
@@ -4752,13 +4443,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4771,7 +4461,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Участок под застройку в поселке Ласкарево / Сандански",
@@ -4780,13 +4469,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4799,7 +4487,6 @@
       "required_editor_fields": [
         "price_eur",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Участок под строительство отеля",
@@ -4808,13 +4495,12 @@
       "issues": [
         "missing_price",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
-      "missing_alt_text_assets": 11,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4828,7 +4514,6 @@
         "price_eur",
         "location",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Участок под строительство",
@@ -4838,13 +4523,12 @@
         "missing_price",
         "missing_location",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4857,7 +4541,6 @@
       "required_editor_fields": [
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Центр профилактики, реабилитации и косметических процедур — продажа",
@@ -4866,13 +4549,12 @@
       "issues": [
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": 185000,
       "bedrooms": null,
       "public_gallery_assets": 25,
-      "missing_alt_text_assets": 24,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4887,7 +4569,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Этаж дома с земельным участком в селе Левуново, Сандански",
@@ -4898,13 +4579,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
-      "missing_alt_text_assets": 12,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4919,7 +4599,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Этаж дома с участком в г.Сандански — продажа",
@@ -4930,13 +4609,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
-      "missing_alt_text_assets": 14,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4951,7 +4629,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Aренда двухкомнатной квартиры в г.Сандански",
@@ -4962,13 +4639,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 29,
-      "missing_alt_text_assets": 10,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -4982,7 +4658,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Большая двухкомнатная квартира в аренду в Сандански + гараж",
@@ -4992,13 +4667,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
-      "missing_alt_text_assets": 20,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -5013,7 +4687,6 @@
         "bedrooms",
         "description",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа трехкомнатной квартиры в Паралия Офринио, Греция",
@@ -5024,13 +4697,12 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 29,
-      "missing_alt_text_assets": 28,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     },
     {
@@ -5044,7 +4716,6 @@
         "price_eur",
         "bedrooms",
         "media_review",
-        "media_alt_text",
         "tour_review"
       ],
       "title": "Продажа участка в Струмяни. Недвижимость в Сандански",
@@ -5054,13 +4725,12 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
-        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
-      "missing_alt_text_assets": 15,
+      "missing_alt_text_assets": 0,
       "review_gated_assets": 12
     }
   ]

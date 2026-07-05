@@ -39,10 +39,11 @@ function countBy(rows, keyFn) {
   return counts;
 }
 
-function mediaEntry(row) {
+function mediaEntry(row, fallbackAlt = "") {
   return normalizeMediaAsset(row, {
     width: numberOrNull(row.width),
     height: numberOrNull(row.height),
+    fallbackAlt,
   });
 }
 
@@ -63,7 +64,8 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
       };
     });
 
-    const media = (mediaByUrl.get(listing.url) || []).map(mediaEntry);
+    const fallbackAlt = listing.h1 || listing.title || listing.id;
+    const media = (mediaByUrl.get(listing.url) || []).map((row) => mediaEntry(row, fallbackAlt));
 
     return {
       id: listing.id,

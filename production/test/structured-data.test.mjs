@@ -43,7 +43,7 @@ test("structured data warnings use reviewed listing edits", () => {
 
 test("structured data warnings do not require bedrooms for land listings", () => {
   const report = buildStructuredDataReport({ generatedAt: "2026-07-05T00:00:00Z" });
-  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0111");
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0158");
 
   assert.ok(row);
   assert.equal(row.warnings.includes("missing_bedrooms"), false);

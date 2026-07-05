@@ -34,3 +34,17 @@ test("reviewed private media no longer blocks media review", () => {
 
   assert.equal(library.review.review_gated_assets, 0);
 });
+
+test("imported public photos use listing fallback alt text", () => {
+  const photo = normalizeMediaAsset(
+    { image_url: "https://makler-realty.com/wp-content/uploads/2025/04/front.jpg", alt: "" },
+    { fallbackAlt: "Reviewed listing title" },
+  );
+  const floorPlan = normalizeMediaAsset(
+    { image_url: "https://makler-realty.com/wp-content/uploads/2025/04/floor-plan.jpg", alt: "" },
+    { fallbackAlt: "Reviewed listing title" },
+  );
+
+  assert.equal(photo.alt, "Reviewed listing title");
+  assert.equal(floorPlan.alt, "");
+});

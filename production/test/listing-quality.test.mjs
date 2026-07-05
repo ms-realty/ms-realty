@@ -22,9 +22,9 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.summary.issue_counts.missing_price > 0);
   assert.ok(report.summary.issue_counts.missing_bedrooms > 0);
   assert.ok(report.summary.issue_counts.media_review_pending > 0);
-  assert.ok(report.summary.issue_counts.missing_alt_text > 0);
+  assert.equal(Object.hasOwn(report.summary.issue_counts, "missing_alt_text"), true);
   assert.ok(report.summary.issue_counts.thin_public_gallery > 0);
-  assert.ok(report.rows.some((row) => row.missing_alt_text_assets > 0));
+  assert.ok(report.rows.every((row) => Number.isInteger(row.missing_alt_text_assets)));
   assert.ok(report.rows.every((row) => row.review_status));
   assert.ok(report.rows.every((row) => row.required_editor_fields.length > 0));
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
@@ -32,7 +32,7 @@ test("listing quality report exposes actionable source listing gaps", () => {
 
 test("listing quality does not require bedrooms for land listings", () => {
   const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
-  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0111");
+  const row = report.rows.find((candidate) => candidate.listing_id === "MS-CRAWL-0158");
 
   assert.ok(row);
   assert.equal(row.issues.includes("missing_bedrooms"), false);

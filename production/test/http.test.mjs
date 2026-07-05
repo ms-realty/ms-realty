@@ -525,6 +525,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const redirectApprovalPath = tempRedirectApprovals();
   const deployableRedirectOutputPath = tempDeployableRedirects();
   const listingEditLedgerPath = tempListingEdits();
+  const translationLedgerPath = tempTranslations();
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -540,6 +541,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     redirectApprovalPath,
     deployableRedirectOutputPath,
     listingEditLedgerPath,
+    translationLedgerPath,
     reviewedAt: "2026-07-05T00:00:00Z",
     editedAt: "2026-07-05T00:03:00Z",
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
@@ -737,8 +739,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.listingQuality.generated_at, "2026-07-05T00:09:00Z");
   assert.equal(review.body.listingQuality.summary.listings, 165);
   assert.ok(review.body.listingQuality.summary.issue_counts.missing_price > 0);
-  assert.ok(review.body.listingQuality.summary.issue_counts.missing_alt_text > 0);
-  assert.ok(review.body.listingQuality.rows.some((row) => row.missing_alt_text_assets > 0));
+  assert.equal(Object.hasOwn(review.body.listingQuality.summary.issue_counts, "missing_alt_text"), true);
+  assert.ok(review.body.listingQuality.rows.every((row) => Number.isInteger(row.missing_alt_text_assets)));
   assert.ok(review.body.listingQuality.rows.some((row) => row.editor_path.includes("/admin/listings/edit?listingId=")));
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);

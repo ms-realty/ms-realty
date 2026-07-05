@@ -706,9 +706,9 @@ if (listingQuality.summary.listings !== 165 || listingQuality.summary.affected_l
 if (
   !listingQuality.summary.issue_counts.missing_price ||
   !listingQuality.summary.issue_counts.media_review_pending ||
-  !listingQuality.summary.issue_counts.missing_alt_text
+  !Object.hasOwn(listingQuality.summary.issue_counts, "missing_alt_text")
 ) {
-  throw new Error("Listing quality report must keep price, media review, and alt text gaps actionable");
+  throw new Error("Listing quality report must keep price, media review, and alt text metrics actionable");
 }
 
 const mobileQa = JSON.parse(fs.readFileSync(fromRoot("production", "data", "mobile-elderly-qa-report.json"), "utf8"));

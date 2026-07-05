@@ -2,64 +2,54 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
-import { assertLeadLedger, DEFAULT_LEAD_LEDGER_PATH, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import {
   assertLanguageRequests,
-  DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
   readLanguageRequests,
   resetLanguageRequests,
 } from "../lib/language-requests.mjs";
 import {
   assertTranslationLedger,
-  DEFAULT_TRANSLATION_LEDGER_PATH,
   readTranslationLedger,
   resetTranslationLedger,
 } from "../lib/translation-ledger.mjs";
 import {
   assertListingEdits,
-  DEFAULT_LISTING_EDIT_LEDGER_PATH,
   readListingEdits,
   resetListingEdits,
 } from "../lib/listing-edits.mjs";
 import {
   assertReplyOutbox,
-  DEFAULT_REPLY_OUTBOX_PATH,
   readReplyOutbox,
   resetReplyOutbox,
 } from "../lib/lead-replies.mjs";
 import {
   assertViewingLedger,
-  DEFAULT_VIEWING_LEDGER_PATH,
   readViewings,
   resetViewingLedger,
 } from "../lib/viewing-ledger.mjs";
 import {
   assertSavedSearches,
-  DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   readSavedSearches,
   resetSavedSearches,
 } from "../lib/saved-searches.mjs";
 import {
   assertSellerPipeline,
-  DEFAULT_SELLER_PIPELINE_PATH,
   readSellerPipeline,
   resetSellerPipeline,
 } from "../lib/seller-pipeline.mjs";
 import {
   assertBrokerContacts,
-  DEFAULT_BROKER_CONTACT_LEDGER_PATH,
   readBrokerContacts,
   resetBrokerContacts,
 } from "../lib/broker-contacts.mjs";
 import {
   assertTourApprovals,
-  DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
   readTourApprovals,
   resetTourApprovals,
 } from "../lib/tours.mjs";
 import {
   assertEventLedger,
-  DEFAULT_EVENT_LEDGER_PATH,
   readEventLedger,
   resetEventLedger,
 } from "../lib/events.mjs";
@@ -86,33 +76,43 @@ function compactAdminLocaleResponse(response, { includeLocales = false } = {}) {
 }
 
 const smokeDir = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-http-smoke-"));
+const leadLedgerPath = path.join(smokeDir, "leads.jsonl");
+const replyOutboxPath = path.join(smokeDir, "replies.jsonl");
+const languageRequestPath = path.join(smokeDir, "language-requests.jsonl");
+const translationLedgerPath = path.join(smokeDir, "translation-tasks.jsonl");
 const listingEditLedgerPath = path.join(smokeDir, "listing-edits.jsonl");
+const viewingLedgerPath = path.join(smokeDir, "viewings.jsonl");
+const savedSearchLedgerPath = path.join(smokeDir, "saved-searches.jsonl");
+const sellerPipelinePath = path.join(smokeDir, "seller-pipeline.jsonl");
+const brokerContactLedgerPath = path.join(smokeDir, "broker-contacts.jsonl");
+const tourApprovalLedgerPath = path.join(smokeDir, "tour-approvals.jsonl");
+const eventLedgerPath = path.join(smokeDir, "events.jsonl");
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 
-resetLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
-resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
-resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
-resetTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
+resetLeadLedger(leadLedgerPath);
+resetReplyOutbox(replyOutboxPath);
+resetLanguageRequests(languageRequestPath);
+resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
-resetViewingLedger(DEFAULT_VIEWING_LEDGER_PATH);
-resetSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
-resetSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
-resetBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
-resetTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
-resetEventLedger(DEFAULT_EVENT_LEDGER_PATH);
+resetViewingLedger(viewingLedgerPath);
+resetSavedSearches(savedSearchLedgerPath);
+resetSellerPipeline(sellerPipelinePath);
+resetBrokerContacts(brokerContactLedgerPath);
+resetTourApprovals(tourApprovalLedgerPath);
+resetEventLedger(eventLedgerPath);
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
-  leadLedgerPath: DEFAULT_LEAD_LEDGER_PATH,
-  replyOutboxPath: DEFAULT_REPLY_OUTBOX_PATH,
-  languageRequestPath: DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
-  translationLedgerPath: DEFAULT_TRANSLATION_LEDGER_PATH,
+  leadLedgerPath,
+  replyOutboxPath,
+  languageRequestPath,
+  translationLedgerPath,
   listingEditLedgerPath,
-  viewingLedgerPath: DEFAULT_VIEWING_LEDGER_PATH,
-  savedSearchLedgerPath: DEFAULT_SAVED_SEARCH_LEDGER_PATH,
-  sellerPipelinePath: DEFAULT_SELLER_PIPELINE_PATH,
-  brokerContactLedgerPath: DEFAULT_BROKER_CONTACT_LEDGER_PATH,
-  tourApprovalLedgerPath: DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
-  eventLedgerPath: DEFAULT_EVENT_LEDGER_PATH,
+  viewingLedgerPath,
+  savedSearchLedgerPath,
+  sellerPipelinePath,
+  brokerContactLedgerPath,
+  tourApprovalLedgerPath,
+  eventLedgerPath,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
@@ -424,37 +424,37 @@ smoke.adminHtml = await dispatchHttp(app, {
 });
 
 assertHttpSmoke(smoke);
-const ledger = readLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
+const ledger = readLeadLedger(leadLedgerPath);
 assertLeadLedger(ledger);
 smoke.leadLedger = { rows: ledger.length };
-const outbox = readReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
+const outbox = readReplyOutbox(replyOutboxPath);
 assertReplyOutbox(outbox);
 smoke.replyOutbox = { rows: outbox.length };
-const languageRequests = readLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
+const languageRequests = readLanguageRequests(languageRequestPath);
 assertLanguageRequests(languageRequests);
 smoke.languageRequestLedger = { rows: languageRequests.length };
-const translations = readTranslationLedger(DEFAULT_TRANSLATION_LEDGER_PATH);
+const translations = readTranslationLedger(translationLedgerPath);
 assertTranslationLedger(translations);
 smoke.translationLedger = { rows: translations.length };
 const listingEdits = readListingEdits(listingEditLedgerPath);
 assertListingEdits(listingEdits);
 smoke.listingEditLedger = { rows: listingEdits.length };
-const viewings = readViewings(DEFAULT_VIEWING_LEDGER_PATH);
+const viewings = readViewings(viewingLedgerPath);
 assertViewingLedger(viewings);
 smoke.viewingLedger = { rows: viewings.length };
-const savedSearches = readSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
+const savedSearches = readSavedSearches(savedSearchLedgerPath);
 assertSavedSearches(savedSearches);
 smoke.savedSearchLedger = { rows: savedSearches.length };
-const sellerPipeline = readSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
+const sellerPipeline = readSellerPipeline(sellerPipelinePath);
 assertSellerPipeline(sellerPipeline);
 smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
-const brokerContacts = readBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
+const brokerContacts = readBrokerContacts(brokerContactLedgerPath);
 assertBrokerContacts(brokerContacts);
 smoke.brokerContactLedger = { rows: brokerContacts.length };
-const tourApprovals = readTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
+const tourApprovals = readTourApprovals(tourApprovalLedgerPath);
 assertTourApprovals(tourApprovals);
 smoke.tourApprovalLedger = { rows: tourApprovals.length };
-const events = readEventLedger(DEFAULT_EVENT_LEDGER_PATH);
+const events = readEventLedger(eventLedgerPath);
 assertEventLedger(events);
 smoke.eventLedger = {
   rows: events.length,

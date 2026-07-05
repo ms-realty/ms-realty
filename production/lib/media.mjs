@@ -31,7 +31,7 @@ export function classifyMediaAsset(item = {}) {
   return "photo";
 }
 
-export function normalizeMediaAsset(row, { width = null, height = null } = {}) {
+export function normalizeMediaAsset(row, { width = null, height = null, fallbackAlt = "" } = {}) {
   const url = row.image_url || row.url || "";
   const assetUrl = imageUrlFromMediaItem({ url });
   const kind = classifyMediaAsset({ url, alt: row.alt });
@@ -40,7 +40,7 @@ export function normalizeMediaAsset(row, { width = null, height = null } = {}) {
   return {
     url,
     asset_url: assetUrl,
-    alt: row.alt || "",
+    alt: row.alt || (publicImportedPhoto ? fallbackAlt : ""),
     width,
     height,
     kind,
