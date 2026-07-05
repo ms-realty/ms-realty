@@ -4,6 +4,7 @@ import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { assertHtmlPage, renderHtmlPage } from "../lib/html.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { loadCmsSeed, renderRuntimePath } from "../lib/runtime.mjs";
 import {
   renderLanguageFallback,
   renderContactPage,
@@ -17,10 +18,12 @@ import {
 const registry = loadLocaleRegistry();
 const listings = loadListings();
 const listing = findListingById(listings, "MS-CRAWL-0001");
+const seed = loadCmsSeed();
 
 test("HTML renderer emits SEO-safe listing, search, and fallback documents", () => {
   const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));
+  const runtimeListingHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"));
   const listingPrintHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }), { print: true });
   const approvedListingHtml = renderHtmlPage(
     renderListingPage({
@@ -47,6 +50,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(homeHtml, /data-action="seller"/);
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
   assert.match(listingHtml, /application\/ld\+json/);
+  assert.match(listingHtml, /property="og:type" content="article"/);
+  assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/makler-realty\.com\/wp-content\/uploads\//);
   assert.match(listingHtml, /hreflang="el"/);
   assert.doesNotMatch(listingHtml, /tel:\+359880000000/);
   assert.equal(assertHtmlPage(listingPrintHtml, { lang: "he", dir: "rtl", kind: "listing-print" }), true);
@@ -54,6 +59,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.doesNotMatch(listingPrintHtml, /tel:\+359880000000/);
   assert.match(approvedListingHtml, /tel:\+359880000000/);
   assert.equal(assertHtmlPage(searchHtml, { lang: "he", dir: "rtl", kind: "search" }), true);
+  assert.match(searchHtml, /property="og:type" content="website"/);
   assert.match(searchHtml, /data-total-matches=/);
   assert.equal(assertHtmlPage(locationHtml, { lang: "he", dir: "rtl", kind: "location" }), true);
   assert.match(locationHtml, /data-location="Sandanski"/);

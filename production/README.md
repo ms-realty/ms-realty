@@ -42,6 +42,7 @@ What it proves now:
 - Runtime smoke fixture for listing route, search route, contact route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, contact, fallback, and lead endpoints.
 - Server-rendered HTML adapter for listing, search, contact, and fallback pages with SEO metadata.
+- Open Graph metadata in server-rendered public HTML, including listing `og:image` from reviewed gallery media.
 - Locale-prefixed seller valuation page backed by the existing seller lead pipeline.
 - Locale-prefixed contact callback page backed by the existing gated CRM lead intake.
 - Live Node HTTP server smoke fixture on an ephemeral local port.

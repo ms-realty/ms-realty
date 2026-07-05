@@ -172,6 +172,7 @@ Date: 2026-07-04
   - `GET /he/sell` serves a Hebrew RTL seller valuation page backed by `POST /api/leads`
   - `GET /he/contact` serves a Hebrew RTL callback page backed by `POST /api/leads`
   - HTML includes `lang`, `dir`, canonical, robots, hreflang, and listing schema metadata
+  - HTML includes Open Graph title, description, URL, locale, type, and listing image metadata
   - direct phone, WhatsApp, and Viber links stay absent until broker contact approval exists
 - Added live Node server smoke fixture:
   - starts a stdlib HTTP server on an ephemeral local port

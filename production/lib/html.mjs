@@ -8,6 +8,24 @@ function escapeHtml(value) {
   });
 }
 
+function openGraph(page) {
+  const title = page.metadata?.title || "MS Realty";
+  const description = page.metadata?.description || "";
+  const url = page.canonical || page.path || "/";
+  const image = page.body?.media?.gallery?.find((item) => item.url)?.url || null;
+  return [
+    ["og:type", page.kind === "listing" ? "article" : "website"],
+    ["og:site_name", "MS Realty"],
+    ["og:title", title],
+    ["og:description", description],
+    ["og:url", url],
+    ["og:locale", page.lang || page.locale || "en"],
+    image ? ["og:image", image] : null,
+  ]
+    .filter(Boolean)
+    .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`);
+}
+
 function meta(page) {
   const links = [
     `<link rel="canonical" href="${escapeHtml(page.canonical || page.path || "/")}">`,
@@ -24,6 +42,7 @@ function meta(page) {
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,
     `<meta name="robots" content="${escapeHtml(page.metadata?.robots || (page.indexable ? "index,follow" : "noindex,follow"))}">`,
+    ...openGraph(page),
     ...links,
     schema,
   ]
@@ -389,5 +408,6 @@ export function assertHtmlPage(html, { lang, dir, kind }) {
   if (!html.includes(`<html lang="${lang}" dir="${dir}">`)) throw new Error("HTML response must set lang and dir");
   if (!html.includes(`data-kind="${kind}"`)) throw new Error("HTML response must render the expected page kind");
   if (!html.includes("<link rel=\"canonical\"")) throw new Error("HTML response must include canonical metadata");
+  if (!html.includes("property=\"og:title\"")) throw new Error("HTML response must include Open Graph metadata");
   return true;
 }
