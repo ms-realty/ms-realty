@@ -56,6 +56,12 @@ ${["search_console", "yandex_webmaster", "backlinks"].map((source) => sourceLine
 - Optional analytics: \`migration/external/seo/analytics.csv\`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
 
+## Content Quality Warnings
+
+- Workbook: \`production/data/listing-quality-workbook.csv\`
+- Scope: 165 source listing rows; warning counts below include indexable localized listing entries.
+${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
+
 ## Validate After Inputs
 
 \`\`\`bash

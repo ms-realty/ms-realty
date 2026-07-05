@@ -24,6 +24,15 @@ Blockers: redirect_reviews, external_seo_exports
 - Optional analytics: `migration/external/seo/analytics.csv`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both `makler-realty.com` and `makler-realty.ru`.
 
+## Content Quality Warnings
+
+- Workbook: `production/data/listing-quality-workbook.csv`
+- Scope: 165 source listing rows; warning counts below include indexable localized listing entries.
+- missing_price: 167
+- missing_bedrooms: 167
+- media_review_pending: 167
+- missing_location: 5
+
 ## Validate After Inputs
 
 ```bash

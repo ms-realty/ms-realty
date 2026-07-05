@@ -4,6 +4,7 @@ import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LISTING_QUALITY_REPORT = fromRoot("production", "data", "listing-quality-report.json");
+export const DEFAULT_LISTING_QUALITY_WORKBOOK = fromRoot("production", "data", "listing-quality-workbook.csv");
 
 function filled(value) {
   return value !== null && value !== undefined && value !== "";
@@ -22,6 +23,11 @@ function countBy(rows, keyFn) {
     counts[key] = (counts[key] || 0) + 1;
     return counts;
   }, {});
+}
+
+function csvCell(value) {
+  const text = Array.isArray(value) ? value.join("|") : String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
 }
 
 function qualityRow(record) {
@@ -83,9 +89,38 @@ export function assertListingQualityReport(report) {
   return true;
 }
 
+export function renderListingQualityWorkbook(report) {
+  const headers = [
+    "listing_id",
+    "target_path",
+    "source_locale",
+    "source_domain",
+    "issues",
+    "title",
+    "location",
+    "price_eur",
+    "bedrooms",
+    "public_gallery_assets",
+    "missing_alt_text_assets",
+    "review_gated_assets",
+    "facts_reviewer",
+    "media_reviewer",
+    "review_notes",
+    "editor_path",
+  ];
+  return `${[headers.join(","), ...report.rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
+}
+
 export function writeListingQualityReport(report, outPath = DEFAULT_LISTING_QUALITY_REPORT) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   assertListingQualityReport(report);
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
+  return outPath;
+}
+
+export function writeListingQualityWorkbook(report, outPath = DEFAULT_LISTING_QUALITY_WORKBOOK) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  assertListingQualityReport(report);
+  fs.writeFileSync(outPath, renderListingQualityWorkbook(report));
   return outPath;
 }

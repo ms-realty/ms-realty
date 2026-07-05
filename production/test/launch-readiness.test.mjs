@@ -72,4 +72,5 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/backlinks\.csv`: missing_export/);
+  assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
 });
