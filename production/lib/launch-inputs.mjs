@@ -84,6 +84,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Review input path: \`migration/reviews/listing-quality.csv\`
 - Example input: \`migration/reviews/listing-quality.csv.example\`
 - Review columns: \`review_status\`, \`required_editor_fields\`, \`price_eur\`, \`bedrooms\`, \`location\`, \`description\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`
+- Admin import endpoint: \`POST /api/admin/listing-quality/import\`
 - Admin editor endpoint: \`POST /api/admin/listings/edit\`
 ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
 

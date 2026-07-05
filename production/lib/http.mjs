@@ -43,7 +43,7 @@ import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
-import { buildListingQualityReport, renderListingQualityWorkbook } from "./listing-quality.mjs";
+import { buildListingQualityReport, renderListingQualityWorkbook, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 
 const SECURITY_HEADERS = {
@@ -169,7 +169,7 @@ function redirectApprovalInput(request) {
   };
 }
 
-function redirectApprovalCsvInput(request) {
+function csvInput(request) {
   const contentType = request.headers?.["content-type"] || request.headers?.["Content-Type"] || "";
   if (contentType.includes("application/x-www-form-urlencoded")) return parseBody(request).csv || "";
   return request.body || "";
@@ -310,6 +310,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     seoEvidence: seoEvidencePayload(seoEvidence),
     listingQuality: buildListingQualityReport({ seed, generatedAt: listingQualityGeneratedAt, limit: 20 }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
+    listingQualityImportEndpoint: "/api/admin/listing-quality/import",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
@@ -660,7 +661,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const imported = importRedirectApprovalsCsv(routeMap, redirectApprovalCsvInput(request), {
+        const imported = importRedirectApprovalsCsv(routeMap, csvInput(request), {
           filePath: redirectApprovalPath || undefined,
           approvedAt: reviewedAt,
         });
@@ -707,6 +708,50 @@ export function createHttpApp({
         "text/csv; charset=utf-8",
         { "content-disposition": 'attachment; filename="listing-quality-workbook.csv"' },
       );
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed }), csvInput(request));
+        const translationTasks = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined));
+        const edits = review.reviews
+          .filter((row) => Object.keys(row.patch).length)
+          .map((row) => {
+            const result = createListingEdit(
+              seed,
+              {
+                id: `listing-quality-${row.listing_id}`,
+                listingId: row.listing_id,
+                editor: row.editor,
+                patch: row.patch,
+              },
+              translationTasks,
+              editedAt,
+            );
+            const edit = appendListingEdit(
+              {
+                ...result.edit,
+                review_source: "listing_quality_csv",
+                media_reviewer: row.media_reviewer || undefined,
+                review_notes: row.review_notes || undefined,
+              },
+              { filePath: listingEditLedgerPath || undefined },
+            );
+            const persistedStaleTranslations = result.staleTranslations
+              .filter((translation) => translation.id)
+              .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
+            return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
+          });
+        return adminJson(201, {
+          imported: review.summary.review_rows,
+          edited: edits.length,
+          mediaReviewRows: review.summary.media_review_rows,
+          edits,
+        });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {

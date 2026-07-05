@@ -523,6 +523,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
 test("HTTP admin can append reviewed redirect approvals without broad homepage mappings", async () => {
   const redirectApprovalPath = tempRedirectApprovals();
   const deployableRedirectOutputPath = tempDeployableRedirects();
+  const listingEditLedgerPath = tempListingEdits();
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -537,7 +538,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     routeMap,
     redirectApprovalPath,
     deployableRedirectOutputPath,
+    listingEditLedgerPath,
     reviewedAt: "2026-07-05T00:00:00Z",
+    editedAt: "2026-07-05T00:03:00Z",
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
   });
 
@@ -604,6 +607,21 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const qualityWorkbook = await dispatchHttp(app, {
     url: "/api/admin/listing-quality-workbook",
     headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  const qualityImportUnauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/listing-quality/import",
+    headers: { "content-type": "text/csv" },
+    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0001,123000,2,Sandanski,Reviewed source description,editor_bg,media_editor,Reviewed\n",
+  });
+  const qualityImported = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/listing-quality/import",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "text/csv",
+    },
+    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0001,123000,2,Sandanski,Reviewed source description,editor_bg,media_editor,Reviewed\n",
   });
   const launchChecklistUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/launch-input-checklist",
@@ -674,11 +692,20 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityWorkbook.status, 200);
   assert.equal(qualityWorkbook.headers["content-type"], "text/csv; charset=utf-8");
   assert.equal(parseCsv(qualityWorkbook.body).length, 165);
+  assert.equal(qualityImportUnauthorized.status, 401);
+  assert.equal(qualityImported.status, 201);
+  assert.equal(qualityImported.body.imported, 1);
+  assert.equal(qualityImported.body.edited, 1);
+  assert.equal(qualityImported.body.mediaReviewRows, 1);
+  assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
+  assert.equal(readListingEdits(listingEditLedgerPath)[0].patch.price_eur, 123000);
+  assert.equal(readListingEdits(listingEditLedgerPath)[0].media_reviewer, "media_editor");
   assert.equal(launchChecklistUnauthorized.status, 401);
   assert.equal(launchChecklist.status, 200);
   assert.equal(launchChecklist.headers["content-type"], "text/markdown; charset=utf-8");
   assert.match(launchChecklist.body, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(launchChecklist.body, /POST \/api\/admin\/seo-evidence\/import/);
+  assert.match(launchChecklist.body, /POST \/api\/admin\/listing-quality\/import/);
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
@@ -702,6 +729,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.redirectApprovalImport.workbookEndpoint, "/api/admin/redirect-approval-workbook");
   assert.equal(review.body.redirectApprovalImport.pendingWorkbookEndpoint, "/api/admin/redirect-approval-workbook?pending=1");
   assert.equal(review.body.listingQualityWorkbookEndpoint, "/api/admin/listing-quality-workbook");
+  assert.equal(review.body.listingQualityImportEndpoint, "/api/admin/listing-quality/import");
   assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
   assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
   assert.equal(review.body.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
@@ -721,6 +749,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-launch-readiness-export-endpoint="/api/admin/launch-readiness/export"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-input-checklist-endpoint="/api/admin/launch-input-checklist"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-workbook-endpoint="/api/admin/listing-quality-workbook"'), true);
+  assert.equal(reviewHtml.body.includes('data-quality-import-endpoint="/api/admin/listing-quality/import"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-affected-listings="165"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-listing="true"'), true);
 });

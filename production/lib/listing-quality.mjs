@@ -187,6 +187,10 @@ export function validateListingQualityReviewCsv(report, csvText) {
       listing_id: listingId,
       fact_issues: factIssues.length,
       media_issues: mediaIssues.length,
+      editor: row.facts_reviewer || row.media_reviewer,
+      media_reviewer: row.media_reviewer || "",
+      review_notes: row.review_notes || "",
+      patch: Object.fromEntries(factIssues.map((issue) => [FACT_FIELDS_BY_ISSUE[issue], row[FACT_FIELDS_BY_ISSUE[issue]]])),
     };
   });
 
