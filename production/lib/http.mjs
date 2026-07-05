@@ -21,6 +21,7 @@ import {
   loadDeployableRedirects,
   readRedirectApprovals,
   renderRedirectApprovalWorkbook,
+  summarizeDeployableRedirects,
 } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
@@ -31,6 +32,7 @@ import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } fr
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
+import { buildLaunchReadinessReport } from "./launch-readiness.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -244,6 +246,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
     seoEvidence: seoEvidencePayload(seoEvidence),
+    launchReadinessEndpoint: "/api/admin/launch-readiness",
     deployablePreview: buildDeployableRedirects(routes, approvals),
   };
 }
@@ -284,6 +287,19 @@ export function createHttpApp({
       events: readEventLedger(eventLedgerPath || undefined),
       generatedAt: reviewedAt || new Date().toISOString(),
     });
+  const currentLaunchReadiness = () => {
+    const redirectRows = buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
+    return buildLaunchReadinessReport({
+      generatedAt: reviewedAt || new Date().toISOString(),
+      routeMap: {
+        summary: {
+          mappedListings: routeMap.filter((route) => route.url_type === "listing" && route.target_path).length,
+        },
+      },
+      deployableRedirects: { summary: summarizeDeployableRedirects(redirectRows), redirects: redirectRows },
+      seoEvidence: currentSeoEvidence(),
+    });
+  };
   const recordEvent = (input) =>
     eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
   return async function handle(request) {
@@ -482,6 +498,13 @@ export function createHttpApp({
         return json(401, { kind: "unauthorized" });
       }
       return json(200, seoEvidencePayload(currentSeoEvidence()));
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      return json(200, currentLaunchReadiness());
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
@@ -1031,7 +1054,8 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-pending-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook?pending=1\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"")
+    !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-endpoint=\"/api/admin/launch-readiness\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
   }

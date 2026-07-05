@@ -596,11 +596,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.redirectApprovalImport.endpoint, "/api/admin/redirect-approvals/import");
   assert.equal(review.body.redirectApprovalImport.workbookEndpoint, "/api/admin/redirect-approval-workbook");
   assert.equal(review.body.redirectApprovalImport.pendingWorkbookEndpoint, "/api/admin/redirect-approval-workbook?pending=1");
+  assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);
   assert.equal(reviewHtml.body.includes('data-redirect-import-endpoint="/api/admin/redirect-approvals/import"'), true);
   assert.equal(reviewHtml.body.includes('data-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-pending-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook?pending=1"'), true);
+  assert.equal(reviewHtml.body.includes('data-launch-readiness-endpoint="/api/admin/launch-readiness"'), true);
 });
 
 test("HTTP app rejects invalid language requests", async () => {
@@ -681,6 +683,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     url: "/admin/migration/review?locale=en",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const launchUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/launch-readiness",
+  });
+  const launch = await dispatchHttp(app, {
+    url: "/api/admin/launch-readiness",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(unauthorized.status, 401);
   assert.equal(templateUnauthorized.status, 401);
@@ -704,6 +713,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.deepEqual(review.body.seoEvidence.missingRequiredSources, []);
   assert.equal(reviewHtml.body.includes('data-seo-import-endpoint="/api/admin/seo-evidence/import"'), true);
   assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);
+  assert.equal(launchUnauthorized.status, 401);
+  assert.equal(launch.status, 200);
+  assert.deepEqual(launch.body.blockers, ["redirect_reviews"]);
+  assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {

@@ -262,8 +262,9 @@ function renderAdminMigrationReview(page) {
   return `
 <main data-kind="admin-migration-review" data-admin-locale="${escapeHtml(page.workspace.locale)}" data-review-required="${escapeHtml(
     page.routeMap.reviewRequired,
-  )}">
+  )}" data-launch-readiness-endpoint="${escapeHtml(page.launchReadinessEndpoint)}">
   <h1>Migration review</h1>
+  <p><a href="${escapeHtml(page.launchReadinessEndpoint)}">Launch readiness JSON</a></p>
   <dl>${metrics}</dl>
   <section aria-label="Approvable listing redirects">
     <h2>Approvable listing redirects</h2>
