@@ -15,6 +15,7 @@ import {
 import {
   appendRedirectApproval,
   buildDeployableRedirects,
+  importRedirectApprovalsCsv,
   loadDeployableRedirects,
   readRedirectApprovals,
 } from "./redirect-approvals.mjs";
@@ -436,6 +437,26 @@ export function createHttpApp({
         const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
         return json(201, {
           approval,
+          deployablePreview: buildDeployableRedirects(routeMap, approvals),
+        });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const imported = importRedirectApprovalsCsv(routeMap, request.body || "", {
+          filePath: redirectApprovalPath || undefined,
+          approvedAt: reviewedAt,
+        });
+        const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
+        return json(201, {
+          imported: imported.length,
+          approvals: imported,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
         });
       } catch (error) {

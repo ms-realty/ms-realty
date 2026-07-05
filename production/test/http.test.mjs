@@ -461,6 +461,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const redirectApprovalPath = tempRedirectApprovals();
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
+  const importListing = routeMap.find(
+    (route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path && route.old_url !== listing.old_url,
+  );
   const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
   const app = createHttpApp({ routeMap, redirectApprovalPath, reviewedAt: "2026-07-05T00:00:00Z" });
 
@@ -508,6 +511,21 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
       reviewer: "editor_bg",
     },
   });
+  const importUnauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals/import",
+    headers: { "content-type": "text/csv" },
+    body: `old_url,equivalent_content,reviewer,reason\n${importListing.old_url},true,editor_bg,Reviewed via CSV\n`,
+  });
+  const imported = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals/import",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "text/csv",
+    },
+    body: `old_url,equivalent_content,reviewer,approved_at,reason\n${importListing.old_url},true,editor_bg,2026-07-05T00:01:00Z,Reviewed via CSV\n`,
+  });
   const review = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -523,9 +541,14 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(rejected.status, 400);
   assert.match(rejected.body.message, /Only mapped 301 routes/);
   assert.equal(unauthorized.status, 401);
+  assert.equal(importUnauthorized.status, 401);
+  assert.equal(imported.status, 201);
+  assert.equal(imported.body.imported, 1);
+  assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
+  assert.equal(imported.body.deployablePreview.length, 3);
   assert.equal(review.body.workspace.locale, "ru");
-  assert.equal(review.body.redirectApprovals.length, 2);
-  assert.equal(review.body.deployablePreview.length, 2);
+  assert.equal(review.body.redirectApprovals.length, 3);
+  assert.equal(review.body.deployablePreview.length, 3);
 });
 
 test("HTTP app rejects invalid language requests", async () => {
