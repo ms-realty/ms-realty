@@ -113,8 +113,8 @@ test("listing quality workbook gives editors importable review rows without appr
 
 test("listing quality review CSV preflight validates reviewer fixes without applying edits", () => {
   const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
-  const row = report.rows.find((candidate) => candidate.issues.includes("missing_description"));
-  assert.ok(row, "expected a listing quality row that still requires description review");
+  const row = report.rows.find((candidate) => candidate.review_status.includes("facts"));
+  assert.ok(row, "expected a listing quality row that still requires facts review");
   const csv = [
     "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
     `${row.listing_id},123000,2,Sandanski,Reviewed listing description,editor_bg,media_editor,Reviewed from source evidence`,
@@ -142,8 +142,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
 
 test("listing quality preflight CLI fails missing CSV and passes valid CSV", () => {
   const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
-  const row = report.rows.find((candidate) => candidate.issues.includes("missing_description"));
-  assert.ok(row, "expected a listing quality row that still requires description review");
+  const row = report.rows.find((candidate) => candidate.review_status.includes("facts"));
+  assert.ok(row, "expected a listing quality row that still requires facts review");
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-quality-`);
   const csvPath = `${dir}/listing-quality.csv`;
   fs.writeFileSync(

@@ -6,7 +6,7 @@
     "entries_with_offer": 97,
     "warnings": {
       "missing_price": 70,
-      "missing_bedrooms": 32
+      "missing_bedrooms": 26
     },
     "by_locale": {
       "bg": 113,
@@ -412,9 +412,7 @@
       "image_count": 6,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0033",
@@ -436,9 +434,7 @@
       "image_count": 8,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0035",
@@ -449,9 +445,7 @@
       "image_count": 13,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0036",
@@ -1565,8 +1559,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ]
     },
     {
@@ -1605,8 +1598,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ]
     },
     {
@@ -1850,8 +1842,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ]
     },
     {

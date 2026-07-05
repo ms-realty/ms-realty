@@ -2,23 +2,23 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
     "listings": 165,
-    "affected_listings": 91,
+    "affected_listings": 87,
     "issue_counts": {
       "missing_price": 68,
-      "missing_bedrooms": 32,
+      "missing_bedrooms": 26,
       "missing_location": 0,
-      "missing_description": 2,
+      "missing_description": 0,
       "media_review_pending": 0,
       "missing_alt_text": 0,
       "thin_public_gallery": 7,
       "tour_review_pending": 0
     },
     "by_source_locale": {
-      "bg": 46,
+      "bg": 42,
       "ru": 45
     },
     "by_source_domain": {
-      "makler-realty.com": 46,
+      "makler-realty.com": 42,
       "makler-realty.ru": 45
     }
   },
@@ -246,72 +246,6 @@
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0032",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0032",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0032",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава етаж от къща в Сандански",
-      "location": "Sandanski",
-      "description": "Апартамента представлява целия втори жилищен етаж от двуетажна къща. Състои се от 3 помещения – кухня, 2 стаи, баня и тоалетна и входно антре. Ведно с етажа се продава и 77 кв.м. идеална част от парцела. Както и правото на строеж. Имота се намира на ул. Чудомир Кантарджиев, в близост до две училища и детска градина.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 86000,
-      "bedrooms": null,
-      "public_gallery_assets": 6,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0034",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0034",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0034",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава етаж от къща в широкия център на гр.Сандански",
-      "location": "Sandanski",
-      "description": "Имота се намира в широкия център на град Сандански / улица Солунска/, в непосредствена близост до училище и детска градина. Представлява първи жилищен етаж, като се състои от коридор, кухня /дневна, 3 големи стаи и тераса. Дограмите на етажа са дървени, двойни. Подовете в двете стаи са паркет /който е в много добро състояние/, кухнята е с плочки. Стените са варова мазилка.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 93000,
-      "bedrooms": null,
-      "public_gallery_assets": 8,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0035",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0035",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0035",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава етаж от къща с парцел в с.Левуново",
-      "location": "Sandanski",
-      "description": "Имота се намира в центъра на с.Левуново. Представлява първи етаж от къща. Площта му е 90 кв.м., ведно с мазе и таван, както и 2/3 идеална част от парцела, върху който е построена къщата, а именно 421 кв.м. Къщата е монолитна /бетон и тухла/. Етажа има нужда от освежаващ ремонт. Подовете са на дюшеме. Стените са варова мазилка.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 31000,
-      "bedrooms": null,
-      "public_gallery_assets": 13,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -896,28 +830,6 @@
       "review_gated_assets": 0
     },
     {
-      "listing_id": "MS-CRAWL-0097",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0097",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0097",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "description"
-      ],
-      "title": "Индустриално помещение под наем в гр.Петрич",
-      "location": "Sandanski",
-      "description": "",
-      "issues": [
-        "missing_description"
-      ],
-      "price_eur": 750,
-      "bedrooms": null,
-      "public_gallery_assets": 5,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
       "listing_id": "MS-CRAWL-0100",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -1013,15 +925,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0110",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "description"
+        "price_eur"
       ],
       "title": "Апартамент под наем в комплекс Медите",
       "location": "Sandanski",
-      "description": "",
+      "description": "Апартамент под наем в комплекс Медите, Сандански, 73,73 m2, 2 стаи, 1 тераса, цена по договаряне.",
       "issues": [
-        "missing_price",
-        "missing_description"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": 1,
@@ -1353,15 +1263,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0128",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа виноградника рядом с Сандански. Сорт Мерло",
       "location": "Sandanski",
       "description": "Продажа виноградника рядом с Сандански. Сорт Мерло. Общая площадь 10 000 кв.м. 2 600 корней.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,
@@ -1421,18 +1329,16 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0131",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Продажа дома в центре г. Сандански",
       "location": "Sandanski",
       "description": "Продажа дома в центре г. Сандански. Продажа недвижимости в городе Сандански. Купить дом в Болгарии",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 3,
       "public_gallery_assets": 14,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1781,15 +1687,13 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0150",
       "review_status": "needs_facts_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms"
+        "price_eur"
       ],
       "title": "Сельхоз земля в районе деревни Лешница, Сандански",
       "location": "Sandanski",
       "description": "Участок находится рядом с поселком Лешница. Категория земли 6. Тип: сельскохозяйственная.",
       "issues": [
-        "missing_price",
-        "missing_bedrooms"
+        "missing_price"
       ],
       "price_eur": null,
       "bedrooms": null,

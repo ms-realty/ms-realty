@@ -1930,7 +1930,7 @@
       "contact": {
         "name": "Noa Levi"
       },
-      "match_count": 41,
+      "match_count": 44,
       "alert_frequency": "weekly",
       "status": "active",
       "alert_task": {
@@ -1951,7 +1951,7 @@
         "contact": {
           "name": "Noa Levi"
         },
-        "match_count": 41,
+        "match_count": 44,
         "alert_frequency": "weekly",
         "status": "active",
         "alert_task": {
@@ -2656,7 +2656,7 @@
           "contact": {
             "name": "Noa Levi"
           },
-          "match_count": 41,
+          "match_count": 44,
           "alert_frequency": "weekly",
           "status": "active",
           "alert_task": {
