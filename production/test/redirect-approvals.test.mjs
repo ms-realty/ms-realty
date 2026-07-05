@@ -130,6 +130,9 @@ test("redirect approval workbook includes all mapped listings without approving 
   assert.equal(rows.length, 165);
   assert.equal(parsed.length, 165);
   assert.equal(parsed.every((row) => row.equivalent_content === "false"), true);
+  assert.equal(parsed.every((row) => /^MS-/.test(row.target_listing_id)), true);
+  assert.equal(parsed.every((row) => row.review_status === "pending_same_content_review"), true);
+  assert.match(parsed[0].same_content_checklist, /same property/);
   assert.equal(parsed.every((row) => row.old_url && row.target_path && row.reviewer === ""), true);
 });
 

@@ -14,7 +14,8 @@ Blockers: redirect_reviews, external_seo_exports
 - Import path: `migration/reviews/redirect-approvals.csv`
 - Admin import endpoint: `POST /api/admin/redirect-approvals/import`
 - Admin workbook endpoint: `GET /api/admin/redirect-approval-workbook?pending=1`
-- Required columns: `old_url,target_path,target_locale,source_domain,equivalent_content,reviewer,approved_at,reason`
+- Review helper columns: `target_listing_id`, `review_status`, `same_content_checklist`
+- Approval import columns: `old_url`, `equivalent_content`, `reviewer`, optional `approved_at`, optional `reason`
 - Launch rule: set `equivalent_content=true` only after same-content human review. Homepage targets stay blocked.
 
 ## External SEO Exports

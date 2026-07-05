@@ -99,8 +99,12 @@ export function buildRedirectApprovalWorkbook(routeMap) {
     .map((route) => ({
       old_url: route.old_url,
       target_path: route.target_path,
+      target_listing_id: route.target_path.split("/").filter(Boolean).at(-1),
       target_locale: route.target_locale,
       source_domain: route.source_domain,
+      review_status: "pending_same_content_review",
+      same_content_checklist:
+        "Confirm old URL and target listing describe the same property; no homepage or search fallback.",
       equivalent_content: false,
       reviewer: "",
       approved_at: "",
@@ -109,7 +113,19 @@ export function buildRedirectApprovalWorkbook(routeMap) {
 }
 
 export function renderRedirectApprovalWorkbook(rows) {
-  const headers = ["old_url", "target_path", "target_locale", "source_domain", "equivalent_content", "reviewer", "approved_at", "reason"];
+  const headers = [
+    "old_url",
+    "target_path",
+    "target_listing_id",
+    "target_locale",
+    "source_domain",
+    "review_status",
+    "same_content_checklist",
+    "equivalent_content",
+    "reviewer",
+    "approved_at",
+    "reason",
+  ];
   return `${[headers.join(","), ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
 }
 

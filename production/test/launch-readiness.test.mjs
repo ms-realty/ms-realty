@@ -122,6 +122,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /Remaining approvals required: 163/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
   assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
+  assert.match(markdown, /target_listing_id/);
+  assert.match(markdown, /same_content_checklist/);
+  assert.match(markdown, /Approval import columns: `old_url`, `equivalent_content`, `reviewer`/);
   assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/backlinks\.csv`: missing_export/);
