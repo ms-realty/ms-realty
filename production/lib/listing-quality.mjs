@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
+import { parseCsv } from "./csv.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LISTING_QUALITY_REPORT = fromRoot("production", "data", "listing-quality-report.json");
 export const DEFAULT_LISTING_QUALITY_WORKBOOK = fromRoot("production", "data", "listing-quality-workbook.csv");
+export const DEFAULT_LISTING_QUALITY_REVIEW_INPUT = fromRoot("migration", "reviews", "listing-quality.csv");
 
 const FACT_FIELDS_BY_ISSUE = {
   missing_price: "price_eur",
@@ -20,7 +22,7 @@ const MEDIA_FIELDS_BY_ISSUE = {
 };
 
 function filled(value) {
-  return value !== null && value !== undefined && value !== "";
+  return value !== null && value !== undefined && String(value).trim() !== "";
 }
 
 function issueCounts(rows) {
@@ -80,6 +82,7 @@ function qualityRow(record) {
     required_editor_fields: requiredEditorFields(issues),
     title: facts.h1 || facts.title || record.id,
     location: facts.location || "",
+    description: facts.description || "",
     issues,
     price_eur: facts.price_eur,
     bedrooms: facts.bedrooms,
@@ -127,6 +130,7 @@ export function renderListingQualityWorkbook(report) {
     "required_editor_fields",
     "title",
     "location",
+    "description",
     "price_eur",
     "bedrooms",
     "public_gallery_assets",
@@ -138,6 +142,62 @@ export function renderListingQualityWorkbook(report) {
     "editor_path",
   ];
   return `${[headers.join(","), ...report.rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
+}
+
+function assertReviewFactValue(listingId, field, value) {
+  if (!filled(value)) throw new Error(`Listing ${listingId} requires ${field}`);
+  if (field === "price_eur") {
+    const price = Number(value);
+    if (!Number.isFinite(price) || price <= 0) throw new Error(`Listing ${listingId} requires a positive price_eur`);
+  }
+  if (field === "bedrooms") {
+    const bedrooms = Number(value);
+    if (!Number.isInteger(bedrooms) || bedrooms < 0) {
+      throw new Error(`Listing ${listingId} requires bedrooms as a non-negative integer`);
+    }
+  }
+}
+
+export function validateListingQualityReviewCsv(report, csvText) {
+  const rows = parseCsv(csvText);
+  if (!rows.length) throw new Error("Listing quality review CSV has no rows");
+
+  const byListing = new Map(report.rows.map((row) => [row.listing_id, row]));
+  const seen = new Set();
+  const reviews = rows.map((row) => {
+    const listingId = row.listing_id || row.listingId;
+    const quality = byListing.get(listingId);
+    if (!quality) throw new Error(`Listing quality review requires a known listing_id: ${listingId || ""}`);
+    if (seen.has(listingId)) throw new Error(`Duplicate listing quality review row: ${listingId}`);
+    seen.add(listingId);
+
+    const factIssues = quality.issues.filter((issue) => FACT_FIELDS_BY_ISSUE[issue]);
+    const mediaIssues = quality.issues.filter((issue) => MEDIA_FIELDS_BY_ISSUE[issue]);
+    if (factIssues.length && !filled(row.facts_reviewer)) {
+      throw new Error(`Listing ${listingId} requires facts_reviewer`);
+    }
+    for (const issue of factIssues) {
+      assertReviewFactValue(listingId, FACT_FIELDS_BY_ISSUE[issue], row[FACT_FIELDS_BY_ISSUE[issue]]);
+    }
+    if (mediaIssues.length && !filled(row.media_reviewer)) {
+      throw new Error(`Listing ${listingId} requires media_reviewer`);
+    }
+
+    return {
+      listing_id: listingId,
+      fact_issues: factIssues.length,
+      media_issues: mediaIssues.length,
+    };
+  });
+
+  return {
+    reviews,
+    summary: {
+      review_rows: reviews.length,
+      facts_review_rows: reviews.filter((row) => row.fact_issues > 0).length,
+      media_review_rows: reviews.filter((row) => row.media_issues > 0).length,
+    },
+  };
 }
 
 export function writeListingQualityReport(report, outPath = DEFAULT_LISTING_QUALITY_REPORT) {

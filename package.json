@@ -18,6 +18,7 @@
     "structured:data": "node production/scripts/build-structured-data-report.mjs",
     "cms:build": "node production/scripts/build-cms-seed.mjs",
     "listing:quality": "node production/scripts/build-listing-quality-report.mjs",
+    "listing:preflight": "node production/scripts/validate-listing-quality-review.mjs",
     "public:build": "node production/scripts/render-public-fixtures.mjs",
     "admin:build": "node production/scripts/build-admin-fixtures.mjs",
     "runtime:build": "node production/scripts/build-runtime-smoke.mjs",

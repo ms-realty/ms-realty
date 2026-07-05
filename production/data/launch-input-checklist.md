@@ -36,7 +36,9 @@ Blockers: redirect_reviews, external_seo_exports
 
 - Workbook: `production/data/listing-quality-workbook.csv`
 - Scope: 165 source listing rows; warning counts below include indexable localized listing entries.
-- Review columns: `review_status`, `required_editor_fields`, `facts_reviewer`, `media_reviewer`, `review_notes`
+- Review input path: `migration/reviews/listing-quality.csv`
+- Example input: `migration/reviews/listing-quality.csv.example`
+- Review columns: `review_status`, `required_editor_fields`, `price_eur`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - missing_price: 167
 - missing_bedrooms: 167
@@ -50,6 +52,7 @@ npm run redirects:preflight
 npm run redirects:build
 npm run seo:preflight
 npm run seo:evidence
+npm run listing:preflight
 npm run launch:readiness
 npm run launch:inputs
 npm run launch:preflight
