@@ -5,7 +5,7 @@
     "affected_listings": 165,
     "issue_counts": {
       "missing_price": 68,
-      "missing_bedrooms": 87,
+      "missing_bedrooms": 77,
       "missing_location": 0,
       "missing_description": 122,
       "media_review_pending": 2,
@@ -105,7 +105,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -113,12 +112,11 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
       "price_eur": 355,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -132,7 +130,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -141,12 +138,11 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -603,7 +599,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0024",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -611,12 +606,11 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
       "price_eur": 125000,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 12,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1013,7 +1007,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0040",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -1021,7 +1014,6 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
@@ -1819,7 +1811,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0072",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -1827,12 +1818,11 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
       "price_eur": 160000,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1943,7 +1933,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0077",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -1951,12 +1940,11 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
       "price_eur": 62000,
-      "bedrooms": null,
+      "bedrooms": 0,
       "public_gallery_assets": 11,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2087,7 +2075,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0083",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -2095,7 +2082,6 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
@@ -2465,7 +2451,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0098",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -2473,7 +2458,6 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
@@ -2591,7 +2575,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0103",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -2599,12 +2582,11 @@
       "location": "Sandanski",
       "description": "",
       "issues": [
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
       "price_eur": 155000,
-      "bedrooms": null,
+      "bedrooms": 2,
       "public_gallery_assets": 11,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2770,7 +2752,6 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
         "tour_review"
       ],
@@ -2779,12 +2760,11 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
         "tour_review_pending"
       ],
       "price_eur": null,
-      "bedrooms": null,
+      "bedrooms": 1,
       "public_gallery_assets": 13,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
