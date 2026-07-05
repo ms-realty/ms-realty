@@ -21,7 +21,7 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.summary.affected_listings > 0);
   assert.ok(report.summary.issue_counts.missing_price > 0);
   assert.ok(report.summary.issue_counts.missing_bedrooms > 0);
-  assert.ok(report.summary.issue_counts.media_review_pending > 0);
+  assert.equal(Object.hasOwn(report.summary.issue_counts, "media_review_pending"), true);
   assert.equal(Object.hasOwn(report.summary.issue_counts, "missing_alt_text"), true);
   assert.ok(report.summary.issue_counts.thin_public_gallery > 0);
   assert.ok(report.rows.every((row) => Number.isInteger(row.missing_alt_text_assets)));

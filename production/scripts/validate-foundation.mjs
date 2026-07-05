@@ -712,7 +712,7 @@ if (listingQuality.summary.listings !== 165 || listingQuality.summary.affected_l
 }
 if (
   !listingQuality.summary.issue_counts.missing_price ||
-  !listingQuality.summary.issue_counts.media_review_pending ||
+  !Object.hasOwn(listingQuality.summary.issue_counts, "media_review_pending") ||
   !Object.hasOwn(listingQuality.summary.issue_counts, "missing_alt_text")
 ) {
   throw new Error("Listing quality report must keep price, media review, and alt text metrics actionable");

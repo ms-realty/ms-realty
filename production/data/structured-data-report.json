@@ -6,8 +6,7 @@
     "entries_with_offer": 97,
     "warnings": {
       "missing_price": 70,
-      "missing_bedrooms": 77,
-      "media_review_pending": 2
+      "missing_bedrooms": 76
     },
     "by_locale": {
       "bg": 113,
@@ -485,8 +484,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "media_review_pending"
+        "missing_price"
       ]
     },
     {
@@ -1813,9 +1811,7 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms",
-        "media_review_pending"
+        "missing_price"
       ]
     },
     {

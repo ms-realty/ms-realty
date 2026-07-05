@@ -5,10 +5,10 @@
     "affected_listings": 165,
     "issue_counts": {
       "missing_price": 68,
-      "missing_bedrooms": 77,
+      "missing_bedrooms": 76,
       "missing_location": 0,
       "missing_description": 122,
-      "media_review_pending": 2,
+      "media_review_pending": 0,
       "missing_alt_text": 0,
       "thin_public_gallery": 5,
       "tour_review_pending": 164
@@ -927,7 +927,6 @@
       "required_editor_fields": [
         "price_eur",
         "description",
-        "media_review",
         "tour_review"
       ],
       "title": "Продава земя на Е79 в Сандански",
@@ -936,14 +935,13 @@
       "issues": [
         "missing_price",
         "missing_description",
-        "media_review_pending",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
       "missing_alt_text_assets": 0,
-      "review_gated_assets": 1
+      "review_gated_assets": 0
     },
     {
       "listing_id": "MS-CRAWL-0038",
@@ -3620,9 +3618,7 @@
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
         "price_eur",
-        "bedrooms",
         "description",
-        "media_review",
         "tour_review"
       ],
       "title": "Продажа участка на международной трассе София — Салоники",
@@ -3630,16 +3626,14 @@
       "description": "",
       "issues": [
         "missing_price",
-        "missing_bedrooms",
         "missing_description",
-        "media_review_pending",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
       "missing_alt_text_assets": 0,
-      "review_gated_assets": 1
+      "review_gated_assets": 0
     },
     {
       "listing_id": "MS-CRAWL-0144",

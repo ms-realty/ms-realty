@@ -123,7 +123,9 @@ export function buildListingQualityReport({
 export function assertListingQualityReport(report) {
   if (report.summary.listings !== 165) throw new Error("Listing quality report must cover CMS listing inventory");
   if (!report.summary.issue_counts.missing_price) throw new Error("Listing quality report must expose missing prices");
-  if (!report.summary.issue_counts.media_review_pending) throw new Error("Listing quality report must expose pending media review");
+  if (!Object.hasOwn(report.summary.issue_counts, "media_review_pending")) {
+    throw new Error("Listing quality report must expose pending media review");
+  }
   if (!Object.hasOwn(report.summary.issue_counts, "missing_alt_text")) {
     throw new Error("Listing quality report must expose missing media alt text");
   }

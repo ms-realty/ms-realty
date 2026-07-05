@@ -12,11 +12,7 @@
     },
     {
       "id": "missing_bedrooms",
-      "count": 77
-    },
-    {
-      "id": "media_review_pending",
-      "count": 2
+      "count": 76
     }
   ],
   "gates": [
@@ -92,8 +88,7 @@
         "entries_with_offer": 97,
         "warnings": {
           "missing_price": 70,
-          "missing_bedrooms": 77,
-          "media_review_pending": 2
+          "missing_bedrooms": 76
         },
         "by_locale": {
           "bg": 113,
