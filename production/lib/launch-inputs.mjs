@@ -18,6 +18,7 @@ const SEO_EXPORTS = {
     columns: "target_url,source_url,referring_domain",
   },
 };
+const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"];
 
 function rowCount(csvText) {
   return parseCsv(csvText).length;
@@ -32,6 +33,13 @@ function sourceLine(source, summary) {
 
 function importLine(source) {
   return `- \`POST /api/admin/seo-evidence/import?source=${source}\`: \`${SEO_EXPORTS[source].columns}\``;
+}
+
+function sourceDomainSampleLines(seoEvidence) {
+  return REQUIRED_SOURCE_DOMAINS.map((domain) => {
+    const sample = (seoEvidence.url_evidence || []).find((row) => row.source_domain === domain)?.old_url || "missing";
+    return `- ${domain}: \`${sample}\``;
+  }).join("\n");
 }
 
 export function renderLaunchInputChecklist({
@@ -71,6 +79,8 @@ Blockers: ${launchReadiness.blockers.join(", ") || "none"}
 
 ${["search_console", "yandex_webmaster", "backlinks"].map((source) => sourceLine(source, seoEvidence.summary)).join("\n")}
 
+- Minimum required domain coverage:
+${sourceDomainSampleLines(seoEvidence)}
 - Admin import endpoints:
 ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")}
 - Template endpoints: \`GET /api/admin/seo-evidence/template?source=search_console\`, \`?source=yandex_webmaster\`, \`?source=backlinks\`

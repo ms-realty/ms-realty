@@ -245,6 +245,9 @@ test("external SEO export templates are present but real CSVs stay local", () =>
   const dir = fromRoot("migration", "external", "seo");
   for (const file of ["search-console.csv", "yandex-webmaster.csv", "backlinks.csv"]) {
     assert.equal(fs.existsSync(`${dir}/${file}.example`), true);
+    const template = fs.readFileSync(`${dir}/${file}.example`, "utf8");
+    assert.match(template, /makler-realty\.com/);
+    assert.match(template, /makler-realty\.ru/);
   }
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /migration\/external\/seo\/\*\.csv/);
 });

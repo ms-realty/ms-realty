@@ -24,6 +24,9 @@ Blockers: external_seo_exports
 - `migration/external/seo/yandex-webmaster.csv`: missing_export, 0 matched rows, domains: none
 - `migration/external/seo/backlinks.csv`: missing_export, 0 matched rows, domains: none
 
+- Minimum required domain coverage:
+- makler-realty.com: `https://makler-realty.com`
+- makler-realty.ru: `https://makler-realty.ru`
 - Admin import endpoints:
 - `POST /api/admin/seo-evidence/import?source=search_console`: `url,clicks,impressions,position`
 - `POST /api/admin/seo-evidence/import?source=yandex_webmaster`: `url,indexed,issue`

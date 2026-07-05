@@ -1,2 +1,3 @@
 target_url,source_url,referring_domain
-https://makler-realty.com/listing/example/,https://example.com/link,example.com
+https://makler-realty.com/,https://example.com/ms-realty-com,example.com
+https://makler-realty.ru/,https://example.com/ms-realty-ru,example.com
