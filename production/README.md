@@ -87,6 +87,7 @@ What it proves now:
 - Booked viewings create post-viewing feedback request tasks using the lead contact preference.
 - Closed-deal ledger with testimonial and referral request tasks from existing CRM leads.
 - Saved-search ledger with open alert tasks from public search criteria.
+- Saved-search alert report that compares persisted search criteria with current runtime inventory and opens broker alert tasks only for increased match counts.
 - Seller valuation pipeline ledger with callback/appraisal tasks from seller leads.
 - Privacy-safe analytics event ledger for page views, searches, lead submissions, and CTA clicks.
 - SEO evidence join artifact for Search Console, Yandex Webmaster, backlinks, and privacy analytics.
@@ -167,6 +168,7 @@ Generated production data:
 - `production/data/viewings.jsonl`
 - `production/data/deals.jsonl`
 - `production/data/saved-searches.jsonl`
+- `production/data/saved-search-alert-report.json`
 - `production/data/seller-pipeline.jsonl`
 - `production/data/broker-contacts.jsonl`
 - `production/data/tour-approvals.jsonl`

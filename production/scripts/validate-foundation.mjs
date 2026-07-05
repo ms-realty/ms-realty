@@ -10,6 +10,7 @@ import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
 import { assertSlugHistory } from "../lib/slug-history.mjs";
 import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
+import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -763,6 +764,16 @@ if (JSON.parse(viewings[0]).feedback_request?.status !== "open") {
 }
 const savedSearches = fs.readFileSync(fromRoot("production", "data", "saved-searches.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (savedSearches.length !== 1) throw new Error("Saved search artifact must contain one deterministic smoke row");
+const savedSearchAlerts = JSON.parse(fs.readFileSync(fromRoot("production", "data", "saved-search-alert-report.json"), "utf8"));
+assertSavedSearchAlertReport(savedSearchAlerts);
+if (
+  savedSearchAlerts.summary.saved_searches !== 1 ||
+  savedSearchAlerts.rows[0].saved_search_id !== "saved-search-he-0001" ||
+  savedSearchAlerts.rows[0].current_match_count !== 41 ||
+  savedSearchAlerts.rows[0].status !== "no_new_matches"
+) {
+  throw new Error("Saved-search alert report must evaluate the persisted Hebrew search without duplicate alerts");
+}
 const sellerPipeline = fs.readFileSync(fromRoot("production", "data", "seller-pipeline.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (sellerPipeline.length !== 1) throw new Error("Seller pipeline artifact must contain one deterministic smoke row");
 const deals = fs.readFileSync(fromRoot("production", "data", "deals.jsonl"), "utf8").trim().split("\n").filter(Boolean);
