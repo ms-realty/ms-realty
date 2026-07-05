@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { normalizeMediaAsset, publicMediaLibrary } from "../lib/media.mjs";
+import { mediaWorkflow, normalizeMediaAsset, publicMediaLibrary } from "../lib/media.mjs";
 
 test("media library exposes imported photos and gates plans or videos for review", () => {
   const media = [
@@ -20,6 +20,7 @@ test("media library exposes imported photos and gates plans or videos for review
   assert.equal(media[0].kind, "site_chrome");
   assert.equal(media[0].review_status, "reviewed_private");
   assert.equal(library.gallery_count, 1);
+  assert.equal(mediaWorkflow(media).public_gallery_assets, 1);
   assert.equal(library.gallery[0].url, "https://makler-realty.com/wp-content/uploads/2025/04/front.jpg");
   assert.equal(library.floor_plans.length, 0);
   assert.equal(library.videos.length, 0);

@@ -64,6 +64,7 @@ function qualityRow(record, approvedTour = null) {
   const facts = record.facts || {};
   const tour = approvedTour || record.tour;
   const publicPhotos = (record.media || []).filter((media) => media.kind === "photo" && media.is_public);
+  const publicGalleryAssets = record.media_workflow?.public_gallery_assets ?? publicPhotos.length;
   const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
   if (!filled(facts.price_eur)) issues.push("missing_price");
@@ -72,7 +73,7 @@ function qualityRow(record, approvedTour = null) {
   if (!filled(facts.description)) issues.push("missing_description");
   if (record.media_workflow?.review_gated_assets) issues.push("media_review_pending");
   if (missingAltTextAssets) issues.push("missing_alt_text");
-  if (publicPhotos.length < 3) issues.push("thin_public_gallery");
+  if (publicGalleryAssets < 3) issues.push("thin_public_gallery");
   if (tour && !tour.is_public) issues.push("tour_review_pending");
   if (!issues.length) return null;
 
@@ -90,7 +91,7 @@ function qualityRow(record, approvedTour = null) {
     issues,
     price_eur: facts.price_eur,
     bedrooms: facts.bedrooms,
-    public_gallery_assets: record.media_workflow?.public_gallery_assets || 0,
+    public_gallery_assets: publicGalleryAssets,
     missing_alt_text_assets: missingAltTextAssets,
     review_gated_assets: record.media_workflow?.review_gated_assets || 0,
   };

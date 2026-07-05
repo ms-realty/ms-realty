@@ -60,9 +60,12 @@ function publicAsset(item) {
 }
 
 export function mediaWorkflow(media = []) {
+  const publicGalleryAssets = new Set(
+    media.filter((item) => item.kind === "photo" && item.is_public).map((item) => item.asset_url).filter(Boolean),
+  ).size;
   return {
     total_assets: media.length,
-    public_gallery_assets: media.filter((item) => item.kind === "photo" && item.is_public).length,
+    public_gallery_assets: publicGalleryAssets,
     floor_plan_candidates: media.filter((item) => item.kind === "floor_plan").length,
     video_candidates: media.filter((item) => item.kind === "video").length,
     review_gated_assets: media.filter((item) => !item.is_public && item.review_status !== "reviewed_private").length,

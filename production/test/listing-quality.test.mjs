@@ -97,11 +97,11 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   assert.equal(result.summary.facts_review_rows, 1);
   assert.equal(result.summary.media_review_rows, 1);
   assert.equal(result.reviews[0].listing_id, row.listing_id);
-  assert.deepEqual(result.reviews[0].patch, {
-    price_eur: "123000",
-    bedrooms: "2",
-    description: "Reviewed listing description",
-  });
+  const reviewValues = { price_eur: "123000", bedrooms: "2", description: "Reviewed listing description" };
+  const expectedPatch = Object.fromEntries(
+    Object.entries(reviewValues).filter(([field]) => row.required_editor_fields.includes(field)),
+  );
+  assert.deepEqual(result.reviews[0].patch, expectedPatch);
   assert.equal(result.reviews[0].editor, "editor_bg");
   assert.throws(
     () => validateListingQualityReviewCsv(report, `listing_id,price_eur,bedrooms\n${row.listing_id},,2\n`),
