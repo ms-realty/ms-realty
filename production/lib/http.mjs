@@ -108,6 +108,7 @@ const LISTING_EDIT_FIELDS = [
   "property_type",
   "offer_type",
   "bedrooms",
+  "bedrooms_not_applicable",
   "price_eur",
   "price_on_request",
 ];
@@ -727,7 +728,7 @@ export function createHttpApp({
         const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed() }), csvInput(request));
         const translationTasks = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined));
         const edits = review.reviews
-          .filter((row) => Object.keys(row.patch).length)
+          .filter((row) => Object.keys(row.patch).length || row.media_reviewer)
           .map((row) => {
             const result = createListingEdit(
               currentSeed(),
@@ -736,6 +737,7 @@ export function createHttpApp({
                 listingId: row.listing_id,
                 editor: row.editor,
                 patch: row.patch,
+                mediaReviewer: row.media_reviewer,
               },
               translationTasks,
               editedAt,

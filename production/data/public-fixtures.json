@@ -111,6 +111,7 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 35
@@ -129,6 +130,7 @@
         "property_type": "multi_unit",
         "offer_type": "sale",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 20
@@ -147,6 +149,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 2,
+        "bedrooms_not_applicable": false,
         "price_eur": 600,
         "price_on_request": false,
         "image_count": 32
@@ -165,6 +168,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 1,
+        "bedrooms_not_applicable": false,
         "price_eur": 355,
         "price_on_request": false,
         "image_count": 26
@@ -183,6 +187,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 2,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 26
@@ -201,6 +206,7 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": 1,
         "price_on_request": false,
         "image_count": 18
@@ -290,6 +296,9 @@
         "price_eur": null,
         "price_on_request": true,
         "image_count": 35
+      },
+      "quality_flags": {
+        "bedrooms_not_applicable": false
       },
       "media": {
         "gallery": [],
@@ -500,6 +509,9 @@
         "price_on_request": true,
         "image_count": 35
       },
+      "quality_flags": {
+        "bedrooms_not_applicable": false
+      },
       "media": {
         "gallery": [],
         "gallery_count": 0,
@@ -709,6 +721,9 @@
         "price_on_request": true,
         "image_count": 35
       },
+      "quality_flags": {
+        "bedrooms_not_applicable": false
+      },
       "media": {
         "gallery": [],
         "gallery_count": 0,
@@ -900,6 +915,9 @@
         "price_eur": null,
         "price_on_request": true,
         "image_count": 35
+      },
+      "quality_flags": {
+        "bedrooms_not_applicable": false
       },
       "media": {
         "gallery": [],
@@ -1099,6 +1117,7 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 35
@@ -1117,6 +1136,7 @@
         "property_type": "multi_unit",
         "offer_type": "sale",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 20
@@ -1135,6 +1155,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 2,
+        "bedrooms_not_applicable": false,
         "price_eur": 600,
         "price_on_request": false,
         "image_count": 32
@@ -1153,6 +1174,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 1,
+        "bedrooms_not_applicable": false,
         "price_eur": 355,
         "price_on_request": false,
         "image_count": 26
@@ -1171,6 +1193,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 2,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 26
@@ -1189,6 +1212,7 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": 1,
         "price_on_request": false,
         "image_count": 18
@@ -1207,6 +1231,7 @@
         "property_type": "apartment",
         "offer_type": "sale",
         "bedrooms": 1,
+        "bedrooms_not_applicable": false,
         "price_eur": 53289,
         "price_on_request": false,
         "image_count": 24
@@ -1225,6 +1250,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 1,
+        "bedrooms_not_applicable": false,
         "price_eur": 350,
         "price_on_request": false,
         "image_count": 35
@@ -1243,6 +1269,7 @@
         "property_type": "apartment",
         "offer_type": "rent",
         "bedrooms": 1,
+        "bedrooms_not_applicable": false,
         "price_eur": 400,
         "price_on_request": false,
         "image_count": 26
@@ -1261,6 +1288,7 @@
         "property_type": "apartment",
         "offer_type": "sale",
         "bedrooms": 1,
+        "bedrooms_not_applicable": false,
         "price_eur": 130000,
         "price_on_request": false,
         "image_count": 34
@@ -1279,6 +1307,7 @@
         "property_type": "hotel",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 38
@@ -1297,6 +1326,7 @@
         "property_type": "hotel",
         "offer_type": "sale",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": 950000,
         "price_on_request": false,
         "image_count": 19
@@ -1360,6 +1390,7 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
         "image_count": 35

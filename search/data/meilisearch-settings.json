@@ -23,6 +23,7 @@
     "property_type",
     "offer_type",
     "bedrooms",
+    "bedrooms_not_applicable",
     "price_on_request"
   ],
   "sortableAttributes": [

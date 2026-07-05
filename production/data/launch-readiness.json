@@ -5,12 +5,7 @@
   "blockers": [
     "external_seo_exports"
   ],
-  "warnings": [
-    {
-      "id": "missing_bedrooms",
-      "count": 4
-    }
-  ],
+  "warnings": [],
   "gates": [
     {
       "id": "crawl_inventory",
@@ -85,7 +80,7 @@
         "warnings": {
           "missing_location": 0,
           "missing_price": 0,
-          "missing_bedrooms": 4,
+          "missing_bedrooms": 0,
           "media_review_pending": 0
         },
         "by_locale": {

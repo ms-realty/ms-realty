@@ -2,10 +2,10 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
     "listings": 165,
-    "affected_listings": 11,
+    "affected_listings": 7,
     "issue_counts": {
       "missing_price": 0,
-      "missing_bedrooms": 4,
+      "missing_bedrooms": 0,
       "missing_location": 0,
       "missing_description": 0,
       "media_review_pending": 0,
@@ -14,12 +14,10 @@
       "tour_review_pending": 0
     },
     "by_source_locale": {
-      "bg": 10,
-      "ru": 1
+      "bg": 7
     },
     "by_source_domain": {
-      "makler-realty.com": 10,
-      "makler-realty.ru": 1
+      "makler-realty.com": 7
     }
   },
   "rows": [
@@ -42,6 +40,7 @@
       "price_eur": 1,
       "price_on_request": false,
       "bedrooms": null,
+      "bedrooms_not_applicable": false,
       "public_gallery_assets": 1,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -65,53 +64,8 @@
       "price_eur": 950000,
       "price_on_request": false,
       "bedrooms": null,
+      "bedrooms_not_applicable": false,
       "public_gallery_assets": 2,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0041",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0041",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0041",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава имот в центъра на с.Левуново",
-      "location": "Sandanski",
-      "description": "Имота се намира в самия център на селото. Върху парцела има построена паянтова жилищна сграда. Има всичките необходими комуникации, а също така и трифазен ток. Допълнителна информация при запитване.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 18000,
-      "price_on_request": false,
-      "bedrooms": null,
-      "public_gallery_assets": 7,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0044",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0044",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0044",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава къща в с. Кулата",
-      "location": "Sandanski",
-      "description": "Имота се намира в центъра на с.Кулата. Парцела е с правилна правоъгълна форма, ъглов – на две асфалтирани улици. Парцела е ограден с метална мрежа, но бетоновия фундамент е достатъчно здрав за изграждане и на плътна ограда. Къщата е със застроена площ от 50 кв.м., на 2 етажа. Построена е в единия край на парцела, което дава възможност при необходимост имота да бъде разделен на два по-малки. Къщата има нужда от основен ремонт.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 37000,
-      "price_on_request": false,
-      "bedrooms": null,
-      "public_gallery_assets": 5,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -134,30 +88,8 @@
       "price_eur": 594000,
       "price_on_request": false,
       "bedrooms": null,
+      "bedrooms_not_applicable": false,
       "public_gallery_assets": 1,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0064",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "target_path": "/bg/imoti/MS-CRAWL-0064",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0064",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продава стара къща в с.Хотово",
-      "location": "Hotovo",
-      "description": "Къщата се намира в центъра на с.Хотово. Къщата е гредоред, на 2 нива, като всеки етаж е по 80 кв.м. или общо 160 кв.м. Парцела е равен, с площ 218 кв.м., от две страни граничи с път. До тази къща има залепена на калкан още една, която е със същите параметри и същия като квадратура парцел. Къщите могат да бъдат продадени както заедно, така и поотделно. Цената за двете къщи е 35 000 Евро",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 18500,
-      "price_on_request": false,
-      "bedrooms": null,
-      "public_gallery_assets": 4,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -180,6 +112,7 @@
       "price_eur": 16000,
       "price_on_request": false,
       "bedrooms": null,
+      "bedrooms_not_applicable": false,
       "public_gallery_assets": 1,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -203,6 +136,7 @@
       "price_eur": 748900,
       "price_on_request": false,
       "bedrooms": null,
+      "bedrooms_not_applicable": false,
       "public_gallery_assets": 1,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -226,6 +160,7 @@
       "price_eur": null,
       "price_on_request": true,
       "bedrooms": null,
+      "bedrooms_not_applicable": false,
       "public_gallery_assets": 1,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -249,30 +184,8 @@
       "price_eur": 11500,
       "price_on_request": false,
       "bedrooms": null,
+      "bedrooms_not_applicable": false,
       "public_gallery_assets": 2,
-      "missing_alt_text_assets": 0,
-      "review_gated_assets": 0
-    },
-    {
-      "listing_id": "MS-CRAWL-0142",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "target_path": "/ru/properties/MS-CRAWL-0142",
-      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0142",
-      "review_status": "needs_facts_review",
-      "required_editor_fields": [
-        "bedrooms"
-      ],
-      "title": "Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански",
-      "location": "Sandanski",
-      "description": "Дом расположен в деревне Лиляново, в 6,5 км от города Сандански, у подножия гор Пирин. Дом расположен на холме, на окраине деревни, благодаря чему с участка открывается невероятная панорама. Площадь участка составляет 1180 кв.м. Дом старый, фундамент каменный, стены – саманные.",
-      "issues": [
-        "missing_bedrooms"
-      ],
-      "price_eur": 35000,
-      "price_on_request": false,
-      "bedrooms": null,
-      "public_gallery_assets": 12,
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     }

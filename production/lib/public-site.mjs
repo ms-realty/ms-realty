@@ -318,6 +318,7 @@ function listingCard(registry, listing, locale) {
     property_type: view.property_type,
     offer_type: view.offer_type,
     bedrooms: view.bedrooms,
+    bedrooms_not_applicable: view.bedrooms_not_applicable,
     price_eur: view.price_eur,
     price_on_request: view.price_on_request,
     image_count: Number(listing.image_count || 0),
@@ -495,6 +496,9 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         price_eur: view.price_eur,
         price_on_request: view.price_on_request,
         image_count: view.image_count,
+      },
+      quality_flags: {
+        bedrooms_not_applicable: view.bedrooms_not_applicable === true,
       },
       media: {
         ...publicMedia,

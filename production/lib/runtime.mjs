@@ -42,6 +42,7 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     property_type: record.facts.property_type,
     offer_type: record.facts.offer_type,
     bedrooms: record.facts.bedrooms,
+    bedrooms_not_applicable: record.facts.bedrooms_not_applicable === true,
     price_eur: record.facts.price_eur,
     price_on_request: record.facts.price_on_request === true,
     image_count: record.facts.image_count,

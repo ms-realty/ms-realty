@@ -24,7 +24,13 @@ function reportRow(registry, seed, entry) {
   const warnings = [];
   if (!filled(page.body?.facts?.location)) warnings.push("missing_location");
   if (!filled(page.body?.facts?.price_eur) && page.body?.facts?.price_on_request !== true) warnings.push("missing_price");
-  if (bedroomsRequired(page.body?.facts) && !filled(page.body?.facts?.bedrooms)) warnings.push("missing_bedrooms");
+  if (
+    bedroomsRequired(page.body?.facts) &&
+    !filled(page.body?.facts?.bedrooms) &&
+    page.body?.quality_flags?.bedrooms_not_applicable !== true
+  ) {
+    warnings.push("missing_bedrooms");
+  }
   if (page.body?.media?.review?.review_gated_assets) warnings.push("media_review_pending");
 
   return {

@@ -68,7 +68,9 @@ function qualityRow(record, approvedTour = null) {
   const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
   if (!filled(facts.price_eur) && facts.price_on_request !== true) issues.push("missing_price");
-  if (bedroomsRequired(facts) && !filled(facts.bedrooms)) issues.push("missing_bedrooms");
+  if (bedroomsRequired(facts) && !filled(facts.bedrooms) && facts.bedrooms_not_applicable !== true) {
+    issues.push("missing_bedrooms");
+  }
   if (!filled(facts.location)) issues.push("missing_location");
   if (!filled(facts.description)) issues.push("missing_description");
   if (record.media_workflow?.review_gated_assets) issues.push("media_review_pending");
@@ -92,6 +94,7 @@ function qualityRow(record, approvedTour = null) {
     price_eur: facts.price_eur,
     price_on_request: facts.price_on_request === true,
     bedrooms: facts.bedrooms,
+    bedrooms_not_applicable: facts.bedrooms_not_applicable === true,
     public_gallery_assets: publicGalleryAssets,
     missing_alt_text_assets: missingAltTextAssets,
     review_gated_assets: record.media_workflow?.review_gated_assets || 0,

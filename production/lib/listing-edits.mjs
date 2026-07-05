@@ -13,11 +13,12 @@ const EDITABLE_FACT_FIELDS = new Set([
   "property_type",
   "offer_type",
   "bedrooms",
+  "bedrooms_not_applicable",
   "price_eur",
   "price_on_request",
 ]);
 const TEXT_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type"]);
-const BOOLEAN_FACT_FIELDS = new Set(["price_on_request"]);
+const BOOLEAN_FACT_FIELDS = new Set(["bedrooms_not_applicable", "price_on_request"]);
 
 export function resetListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -75,8 +76,9 @@ function findListing(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
 }
 
-function normalizePatch(patch = {}) {
+function normalizePatch(patch = {}, { allowEmpty = false } = {}) {
   const entries = Object.entries(patch).filter(([field]) => EDITABLE_FACT_FIELDS.has(field));
+  if (!entries.length && allowEmpty) return {};
   if (!entries.length) throw new Error("Listing edit patch must include editable listing facts");
   return Object.fromEntries(entries.map(([field, value]) => [field, normalizePatchValue(field, value)]));
 }
@@ -125,7 +127,7 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
   const record = findListing(seed, input.listingId);
   if (!record) throw new Error("Known listingId is required");
   if (!input.editor) throw new Error("Listing edit requires an editor");
-  const patch = normalizePatch(input.patch);
+  const patch = normalizePatch(input.patch, { allowEmpty: Boolean(input.mediaReviewer) });
   const factsAfter = { ...record.facts, ...patch };
   const sourceHashBefore = contentHash(record.facts);
   const sourceHashAfter = contentHash(factsAfter);

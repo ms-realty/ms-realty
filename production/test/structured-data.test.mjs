@@ -34,6 +34,8 @@ test("structured data warnings use reviewed listing edits", () => {
     records: seed.records.map((record) =>
       record.id === "MS-CRAWL-0001"
         ? { ...record, facts: { ...record.facts, price_eur: null, price_on_request: false } }
+        : record.id === "MS-CRAWL-0044"
+          ? { ...record, facts: { ...record.facts, bedrooms: null, bedrooms_not_applicable: false } }
         : record,
     ),
   };
@@ -61,6 +63,17 @@ test("structured data warnings treat price-on-request as reviewed pricing withou
   assert.ok(rows.length > 0);
   assert.equal(rows.every((row) => !row.warnings.includes("missing_price")), true);
   assert.equal(rows.every((row) => row.has_offer === false), true);
+});
+
+test("structured data warnings treat bedroom-not-applicable as reviewed", () => {
+  const report = buildStructuredDataReport({
+    listingEdits: [{ listing_id: "MS-CRAWL-0044", patch: { bedrooms_not_applicable: true } }],
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const rows = report.rows.filter((row) => row.listing_id === "MS-CRAWL-0044");
+
+  assert.ok(rows.length > 0);
+  assert.equal(rows.every((row) => !row.warnings.includes("missing_bedrooms")), true);
 });
 
 test("structured data warnings do not require bedrooms for land listings", () => {

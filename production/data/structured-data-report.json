@@ -7,7 +7,7 @@
     "warnings": {
       "missing_location": 0,
       "missing_price": 0,
-      "missing_bedrooms": 4,
+      "missing_bedrooms": 0,
       "media_review_pending": 0
     },
     "by_locale": {
@@ -489,9 +489,7 @@
       "image_count": 7,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0042",
@@ -524,9 +522,7 @@
       "image_count": 5,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0045",
@@ -746,9 +742,7 @@
       "image_count": 4,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/bg/imoti/MS-CRAWL-0065",
@@ -1606,9 +1600,7 @@
       "image_count": 12,
       "has_offer": true,
       "issues": [],
-      "warnings": [
-        "missing_bedrooms"
-      ]
+      "warnings": []
     },
     {
       "loc": "/ru/properties/MS-CRAWL-0143",
