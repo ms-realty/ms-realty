@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { loadLocaleRegistry, assertLocaleRegistry, publicIndexableLocales } from "../lib/locales.mjs";
 import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
+import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
@@ -639,6 +640,14 @@ const languageRequests = fs.readFileSync(fromRoot("production", "data", "languag
 if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
 const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");
+const hermesAudit = fs
+  .readFileSync(fromRoot("production", "data", "hermes-audit.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+if (hermesAudit.length !== 3) throw new Error("Hermes audit artifact must contain draft, published, and stale smoke rows");
+assertHermesAuditLedger(hermesAudit);
 const listingEdits = fs.readFileSync(fromRoot("production", "data", "listing-edits.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (listingEdits.length !== 1) throw new Error("Listing edit artifact must contain one deterministic smoke row");
 const viewings = fs.readFileSync(fromRoot("production", "data", "viewings.jsonl"), "utf8").trim().split("\n").filter(Boolean);
