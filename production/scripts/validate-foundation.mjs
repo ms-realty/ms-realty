@@ -12,6 +12,7 @@ import { assertSlugHistory } from "../lib/slug-history.mjs";
 import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
 import { assertListingVerificationReport } from "../lib/listing-verification.mjs";
 import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
+import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -737,6 +738,17 @@ const languageRequests = fs.readFileSync(fromRoot("production", "data", "languag
 if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
 const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");
+const translationCoverage = JSON.parse(fs.readFileSync(fromRoot("production", "data", "translation-coverage-report.json"), "utf8"));
+assertTranslationCoverageReport(translationCoverage);
+if (
+  translationCoverage.summary.open_translation_tasks !== 989 ||
+  translationCoverage.summary.stale_translation_tasks !== 1 ||
+  translationCoverage.summary.by_task_type.hermes_draft_required !== 658 ||
+  translationCoverage.rows.find((row) => row.listing_id === "MS-CRAWL-0001" && row.target_locale === "el")?.task_type !==
+    "stale_review_required"
+) {
+  throw new Error("Translation coverage report must open missing and stale translation review tasks");
+}
 const hermesAudit = fs
   .readFileSync(fromRoot("production", "data", "hermes-audit.jsonl"), "utf8")
   .trim()

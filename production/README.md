@@ -41,6 +41,7 @@ What it proves now:
   including Hebrew RTL metadata.
 - Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
 - Authenticated admin translation draft and human-approved publish endpoints.
+- Translation coverage report that turns missing/stale listing locale coverage into open non-indexable reviewer tasks.
 - Authenticated listing edit endpoint that marks dependent translations stale.
 - Authenticated listing editor HTML workbench backed by the same stale-translation edit endpoint.
 - Authenticated listing slug-change endpoint that creates path-only automatic 301s to the current canonical listing route.
@@ -181,6 +182,7 @@ Generated production data:
 - `production/data/launch-input-checklist.md`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
+- `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`
 
 The next production slice can consume these contracts from a Next.js App Router
