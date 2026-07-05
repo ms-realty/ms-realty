@@ -71,6 +71,7 @@ What it proves now:
 - Search API returns reviewed translation cards for admin-added approved locales.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
+- Locale rollout report that turns requested disabled locales into approval tasks and public Hermes locales into draft queue summaries.
 - Authenticated launch input checklist endpoint for the remaining redirect/SEO handoff gates.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
@@ -181,6 +182,7 @@ Generated production data:
 - `production/data/launch-readiness.json`
 - `production/data/launch-input-checklist.md`
 - `production/data/language-requests.jsonl`
+- `production/data/locale-rollout-report.json`
 - `production/data/translation-tasks.jsonl`
 - `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`

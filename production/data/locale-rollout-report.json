@@ -1,0 +1,85 @@
+{
+  "generated_at": "2026-07-05T00:00:00Z",
+  "summary": {
+    "requested_locales": 1,
+    "activation_tasks": 1,
+    "hermes_queue_locales": 4,
+    "open_hermes_tasks": 659
+  },
+  "activation_tasks": [
+    {
+      "locale": "fr",
+      "requested_count": 1,
+      "request_ids": [
+        "language-request-fr-0001"
+      ],
+      "fallback_locale": "en",
+      "public_indexable": false,
+      "status": "needs_locale_approval",
+      "admin_path": "/admin/locales?locale=fr",
+      "task": {
+        "id": "activate-locale-fr",
+        "owner": "translator_fr",
+        "status": "open"
+      }
+    }
+  ],
+  "hermes_draft_queues": [
+    {
+      "locale": "de",
+      "reviewer_role": "translator_de",
+      "open_task_count": 165,
+      "status": "open",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "can_publish": false,
+      "task": {
+        "id": "hermes-draft-queue-de",
+        "owner": "translator_de",
+        "status": "open"
+      }
+    },
+    {
+      "locale": "nl",
+      "reviewer_role": "translator_nl",
+      "open_task_count": 165,
+      "status": "open",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "can_publish": false,
+      "task": {
+        "id": "hermes-draft-queue-nl",
+        "owner": "translator_nl",
+        "status": "open"
+      }
+    },
+    {
+      "locale": "el",
+      "reviewer_role": "translator_el",
+      "open_task_count": 165,
+      "status": "open",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "can_publish": false,
+      "task": {
+        "id": "hermes-draft-queue-el",
+        "owner": "translator_el",
+        "status": "open"
+      }
+    },
+    {
+      "locale": "he",
+      "reviewer_role": "translator_he",
+      "open_task_count": 164,
+      "status": "open",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "can_publish": false,
+      "task": {
+        "id": "hermes-draft-queue-he",
+        "owner": "translator_he",
+        "status": "open"
+      }
+    }
+  ]
+}

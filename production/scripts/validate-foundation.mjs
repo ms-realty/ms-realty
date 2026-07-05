@@ -13,6 +13,7 @@ import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
 import { assertListingVerificationReport } from "../lib/listing-verification.mjs";
 import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
 import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs";
+import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -736,6 +737,17 @@ const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox
 if (replyOutbox.length !== 2) throw new Error("Reply outbox artifact must contain two deterministic smoke rows");
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
+const localeRollout = JSON.parse(fs.readFileSync(fromRoot("production", "data", "locale-rollout-report.json"), "utf8"));
+assertLocaleRolloutReport(localeRollout);
+if (
+  localeRollout.summary.activation_tasks !== 1 ||
+  localeRollout.activation_tasks[0].locale !== "fr" ||
+  localeRollout.summary.hermes_queue_locales !== 4 ||
+  localeRollout.summary.open_hermes_tasks !== 659 ||
+  localeRollout.hermes_draft_queues.find((row) => row.locale === "he")?.open_task_count !== 164
+) {
+  throw new Error("Locale rollout report must connect language requests and Hermes draft queues");
+}
 const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");
 const translationCoverage = JSON.parse(fs.readFileSync(fromRoot("production", "data", "translation-coverage-report.json"), "utf8"));
