@@ -15,6 +15,7 @@ import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from ".
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function tempLedger() {
@@ -525,6 +526,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     headers: { "content-type": "text/csv" },
     body: `old_url,equivalent_content,reviewer,reason\n${importListing.old_url},true,editor_bg,Reviewed via CSV\n`,
   });
+  const workbookUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/redirect-approval-workbook",
+  });
+  const workbook = await dispatchHttp(app, {
+    url: "/api/admin/redirect-approval-workbook",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const imported = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/redirect-approvals/import",
@@ -565,6 +573,10 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.match(rejected.body.message, /Only mapped 301 routes/);
   assert.equal(unauthorized.status, 401);
   assert.equal(importUnauthorized.status, 401);
+  assert.equal(workbookUnauthorized.status, 401);
+  assert.equal(workbook.status, 200);
+  assert.equal(workbook.headers["content-type"], "text/csv; charset=utf-8");
+  assert.equal(parseCsv(workbook.body).length, 165);
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
@@ -574,9 +586,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(formImported.body.deployablePreview.length, 4);
   assert.equal(review.body.workspace.locale, "ru");
   assert.equal(review.body.redirectApprovalImport.endpoint, "/api/admin/redirect-approvals/import");
+  assert.equal(review.body.redirectApprovalImport.workbookEndpoint, "/api/admin/redirect-approval-workbook");
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);
   assert.equal(reviewHtml.body.includes('data-redirect-import-endpoint="/api/admin/redirect-approvals/import"'), true);
+  assert.equal(reviewHtml.body.includes('data-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook"'), true);
 });
 
 test("HTTP app rejects invalid language requests", async () => {

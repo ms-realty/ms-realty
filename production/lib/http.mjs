@@ -14,10 +14,12 @@ import {
 } from "./admin-workflows.mjs";
 import {
   appendRedirectApproval,
+  buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
   importRedirectApprovalsCsv,
   loadDeployableRedirects,
   readRedirectApprovals,
+  renderRedirectApprovalWorkbook,
 } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
@@ -234,6 +236,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     redirectApprovalImport: {
       method: "POST",
       endpoint: "/api/admin/redirect-approvals/import",
+      workbookEndpoint: "/api/admin/redirect-approval-workbook",
       contentType: "text/csv",
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
@@ -534,6 +537,18 @@ export function createHttpApp({
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/redirect-approval-workbook") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      return response(
+        200,
+        renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap)),
+        "text/csv; charset=utf-8",
+        { "content-disposition": 'attachment; filename="redirect-approval-workbook.csv"' },
+      );
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
@@ -993,6 +1008,7 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
