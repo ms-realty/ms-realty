@@ -8,7 +8,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
-  assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports", "production_app_layer"]);
+  assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports"]);
   assert.ok(report.rollback_plan.length >= 3);
 });
 

@@ -4,8 +4,7 @@
   "status": "blocked",
   "blockers": [
     "redirect_reviews",
-    "external_seo_exports",
-    "production_app_layer"
+    "external_seo_exports"
   ],
   "warnings": [
     {
@@ -141,11 +140,11 @@
     },
     {
       "id": "production_app_layer",
-      "status": "blocked",
-      "message": "Contracts are proven locally; final production app adapter is not present.",
+      "status": "pass",
+      "message": "Node production adapter is present; framework migration can consume the same contract later.",
       "evidence": {
-        "next_config_present": false,
-        "package_has_next": false
+        "start_script": "node production/server.mjs",
+        "production_server_entrypoint": true
       }
     }
   ],

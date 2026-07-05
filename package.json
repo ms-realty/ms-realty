@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "node production/server.mjs",
     "test": "node --test production/test/*.test.mjs",
     "search:validate": "python3 search/validate_search_imports.py",
     "migration:build": "node production/scripts/build-migration-records.mjs",

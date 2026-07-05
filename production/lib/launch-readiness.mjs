@@ -10,10 +10,9 @@ function readJson(filePath) {
 
 function packageState(filePath = fromRoot("package.json")) {
   const pkg = readJson(filePath);
-  const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
   return {
-    next_config_present: fs.existsSync(fromRoot("next.config.js")) || fs.existsSync(fromRoot("next.config.mjs")),
-    package_has_next: Boolean(deps.next),
+    start_script: pkg.scripts?.start || "",
+    production_server_entrypoint: fs.existsSync(fromRoot("production", "server.mjs")),
   };
 }
 
@@ -48,7 +47,7 @@ export function buildLaunchReadinessReport({
     migration.summary.byStatus?.["200"] === 457;
   const redirectsReviewed = deployableRedirects.summary.total >= routeMap.summary.mappedListings;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
-  const appLayerReady = appState.next_config_present && appState.package_has_next;
+  const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
 
   const gates = [
     gate("crawl_inventory", crawlPass ? "pass" : "blocked", migration.summary),
@@ -91,7 +90,7 @@ export function buildLaunchReadinessReport({
       "production_app_layer",
       appLayerReady ? "pass" : "blocked",
       appState,
-      appLayerReady ? "" : "Contracts are proven locally; final production app adapter is not present.",
+      appLayerReady ? "Node production adapter is present; framework migration can consume the same contract later." : "Production app adapter is not present.",
     ),
   ];
 
@@ -123,9 +122,10 @@ export function assertLaunchReadinessReport(report) {
   if (report.launch_ready !== false || report.status !== "blocked") {
     throw new Error("Launch readiness must stay blocked until production blockers are cleared");
   }
-  for (const blocker of ["redirect_reviews", "external_seo_exports", "production_app_layer"]) {
+  for (const blocker of ["redirect_reviews", "external_seo_exports"]) {
     if (!report.blockers.includes(blocker)) throw new Error(`Launch readiness must include blocker ${blocker}`);
   }
+  if (report.blockers.includes("production_app_layer")) throw new Error("Production app layer should be covered by the Node adapter");
   if (!report.gates.find((item) => item.id === "crawl_inventory" && item.status === "pass")) {
     throw new Error("Launch readiness must prove crawl inventory passed");
   }

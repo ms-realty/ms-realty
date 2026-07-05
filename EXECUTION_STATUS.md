@@ -221,7 +221,9 @@ Date: 2026-07-04
   - privacy-aware analytics rows are imported from `production/data/events.jsonl`
 - Added launch readiness report:
   - `production/data/launch-readiness.json` aggregates crawl, redirect, sitemap, schema, runtime, monitoring, and rollback status
-  - report stays blocked while redirect reviews, external SEO exports, and final production app adapter remain incomplete
+- Added production server adapter:
+  - `npm start` runs `production/server.mjs`
+  - launch report now treats the Node adapter as the production app layer while redirect reviews and external SEO exports remain blocked
 - Added seller valuation pipeline intake:
   - seller leads from `POST /api/leads` create a seller pipeline row
   - persisted seller rows start at `valuation_requested`

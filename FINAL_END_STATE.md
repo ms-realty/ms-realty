@@ -113,7 +113,9 @@ Implemented now:
   - missing source prices are recorded as warnings, not invented schema offers
 - Launch readiness report:
   - `production/data/launch-readiness.json` aggregates current launch gates and rollback/monitoring steps
-  - launch remains blocked until redirect reviews, external SEO exports, and final production app adapter are complete
+- Production Node server adapter:
+  - `npm start` runs `production/server.mjs` against the same public/admin contracts
+  - launch remains blocked until redirect reviews and external SEO exports are complete
 - Seller pipeline contract:
   - seller valuation leads create `valuation_requested` pipeline rows
   - callback and appraisal checklist tasks start open

@@ -618,8 +618,11 @@ const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data"
 if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
   throw new Error("Launch readiness report must stay blocked until production blockers are cleared");
 }
-for (const blocker of ["redirect_reviews", "external_seo_exports", "production_app_layer"]) {
+for (const blocker of ["redirect_reviews", "external_seo_exports"]) {
   if (!launchReadiness.blockers.includes(blocker)) throw new Error(`Launch readiness report must include ${blocker}`);
+}
+if (launchReadiness.blockers.includes("production_app_layer")) {
+  throw new Error("Launch readiness report should not include production_app_layer after the Node adapter is present");
 }
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

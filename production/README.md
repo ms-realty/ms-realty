@@ -72,6 +72,7 @@ What it proves now:
 - Privacy-safe analytics event ledger for page views, searches, lead submissions, and CTA clicks.
 - SEO evidence join artifact for Search Console, Yandex Webmaster, backlinks, and privacy analytics.
 - Launch readiness report that aggregates crawl, redirect, sitemap, schema, monitoring, and rollback gates.
+- Production Node server adapter exposed by `npm start`.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
 
 Run:
