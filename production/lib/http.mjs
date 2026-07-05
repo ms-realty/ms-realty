@@ -41,6 +41,7 @@ import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } fr
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
+import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
@@ -350,6 +351,7 @@ export function createHttpApp({
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
+  slugHistoryPath = null,
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
   launchReadinessOutputPath = null,
@@ -364,6 +366,7 @@ export function createHttpApp({
   savedAt,
   sellerPipelineCreatedAt,
   dealClosedAt,
+  slugChangedAt,
   listingQualityGeneratedAt,
 } = {}) {
   let activeRegistry = registry;
@@ -421,6 +424,17 @@ export function createHttpApp({
         { kind: "legacy_redirect", location: legacyRedirect.target_path },
         "application/json; charset=utf-8",
         { location: legacyRedirect.target_path },
+      );
+    }
+
+    const slugRedirect =
+      request.method === "GET" ? slugRedirectForPath(readSlugHistory(slugHistoryPath || undefined), url.pathname) : null;
+    if (slugRedirect) {
+      return response(
+        301,
+        { kind: "slug_redirect", location: slugRedirect.new_path, listing_id: slugRedirect.listing_id, locale: slugRedirect.locale },
+        "application/json; charset=utf-8",
+        { location: slugRedirect.new_path },
       );
     }
 
@@ -833,6 +847,21 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/slug") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        return adminJson(
+          201,
+          appendSlugChange(activeRegistry, currentSeed(), parseBody(request), {
+            filePath: slugHistoryPath || undefined,
+            changedAt: slugChangedAt || editedAt,
+          }),
+        );
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
@@ -1013,6 +1042,16 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
     throw new Error("HTTP smoke must serve approved legacy redirect");
+  }
+  if (
+    smoke.slugChange?.status !== 201 ||
+    smoke.slugChange.body.status !== 301 ||
+    smoke.slugChange.body.old_path !== "/he/properties/old-sandanski-slug" ||
+    smoke.slugChange.body.new_path !== "/he/properties/MS-CRAWL-0001" ||
+    smoke.slugRedirect?.status !== 301 ||
+    smoke.slugRedirect.headers.location !== "/he/properties/MS-CRAWL-0001"
+  ) {
+    throw new Error("HTTP smoke must create path-only slug-change 301 redirects");
   }
   if (
     smoke.home.status !== 200 ||

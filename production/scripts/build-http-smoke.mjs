@@ -58,6 +58,11 @@ import {
   readEventLedger,
   resetEventLedger,
 } from "../lib/events.mjs";
+import {
+  assertSlugHistory,
+  readSlugHistory,
+  resetSlugHistory,
+} from "../lib/slug-history.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -93,6 +98,7 @@ const dealLedgerPath = path.join(smokeDir, "deals.jsonl");
 const brokerContactLedgerPath = path.join(smokeDir, "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(smokeDir, "tour-approvals.jsonl");
 const eventLedgerPath = path.join(smokeDir, "events.jsonl");
+const slugHistoryPath = path.join(smokeDir, "slug-history.jsonl");
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 
 resetLeadLedger(leadLedgerPath);
@@ -107,6 +113,7 @@ resetDealLedger(dealLedgerPath);
 resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
+resetSlugHistory(slugHistoryPath);
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
   leadLedgerPath,
@@ -121,6 +128,7 @@ const app = createHttpApp({
   brokerContactLedgerPath,
   tourApprovalLedgerPath,
   eventLedgerPath,
+  slugHistoryPath,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
@@ -130,6 +138,7 @@ const app = createHttpApp({
   savedAt: "2026-07-04T00:07:00Z",
   sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
   dealClosedAt: "2026-07-10T10:00:00Z",
+  slugChangedAt: "2026-07-04T00:09:00Z",
   listingQualityGeneratedAt: "2026-07-05T03:01:09.839Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
@@ -170,6 +179,19 @@ const smoke = {
     },
   }),
   listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+  slugChange: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/listings/slug",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      id: "slug-change-MS-CRAWL-0001",
+      listingId: "MS-CRAWL-0001",
+      locale: "he",
+      oldPath: "/he/properties/old-sandanski-slug",
+      editor: "editor_bg",
+    },
+  }),
+  slugRedirect: await dispatchHttp(app, { url: "/he/properties/old-sandanski-slug" }),
   search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
   searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
   location: await dispatchHttp(app, { url: "/he/locations/sandanski" }),
@@ -487,6 +509,9 @@ smoke.eventLedger = {
   rows: events.length,
   byType: events.reduce((counts, row) => ({ ...counts, [row.type]: (counts[row.type] || 0) + 1 }), {}),
 };
+const slugHistory = readSlugHistory(slugHistoryPath);
+assertSlugHistory(slugHistory);
+smoke.slugHistoryLedger = { rows: slugHistory.length };
 smoke.localeRegistry = { locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");

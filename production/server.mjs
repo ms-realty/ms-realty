@@ -12,6 +12,7 @@ import { DEFAULT_DEAL_LEDGER_PATH } from "./lib/deal-ledger.mjs";
 import { fromRoot } from "./lib/paths.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
+import { DEFAULT_SLUG_HISTORY_PATH } from "./lib/slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./lib/tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./lib/translation-ledger.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH } from "./lib/viewing-ledger.mjs";
@@ -53,6 +54,7 @@ export function productionServerConfig(env = process.env) {
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
+    slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH || fromRoot("locales", "registry.json"),
@@ -71,6 +73,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     savedSearchLedgerPath: config.savedSearchLedgerPath,
     sellerPipelinePath: config.sellerPipelinePath,
     dealLedgerPath: config.dealLedgerPath,
+    slugHistoryPath: config.slugHistoryPath,
     brokerContactLedgerPath: config.brokerContactLedgerPath,
     tourApprovalLedgerPath: config.tourApprovalLedgerPath,
     localeRegistryPath: config.localeRegistryPath,

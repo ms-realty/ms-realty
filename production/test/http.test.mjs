@@ -15,6 +15,7 @@ import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
+import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -91,6 +92,12 @@ function tempEvents() {
   return file;
 }
 
+function tempSlugHistory() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-slug-history-`)}/slug-history.jsonl`;
+  resetSlugHistory(file);
+  return file;
+}
+
 function tempRedirectApprovals() {
   return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-redirect-approvals-`)}/redirect-approvals.jsonl`;
 }
@@ -126,6 +133,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const brokerContactLedgerPath = tempBrokerContacts();
   const tourApprovalLedgerPath = tempTourApprovals();
   const eventLedgerPath = tempEvents();
+  const slugHistoryPath = tempSlugHistory();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
@@ -139,6 +147,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
     eventLedgerPath,
+    slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -147,6 +156,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
     dealClosedAt: "2026-07-10T10:00:00Z",
+    slugChangedAt: "2026-07-04T00:09:00Z",
   });
   const redirect = deployableRedirect();
   const smoke = {
@@ -185,6 +195,29 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       },
     }),
     listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+    slugChange: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/listings/slug",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        id: "slug-change-http-test",
+        listingId: "MS-CRAWL-0001",
+        locale: "he",
+        oldPath: "/he/properties/old-sandanski-slug",
+        editor: "editor_bg",
+      },
+    }),
+    slugChangeUnauthorized: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/listings/slug",
+      body: {
+        listingId: "MS-CRAWL-0001",
+        locale: "he",
+        oldPath: "/he/properties/no-auth-old-slug",
+        editor: "editor_bg",
+      },
+    }),
+    slugRedirect: await dispatchHttp(app, { url: "/he/properties/old-sandanski-slug" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
     searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
     location: await dispatchHttp(app, { url: "/he/locations/sandanski" }),
@@ -485,6 +518,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.tourApproval.body.is_public, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
+  assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-CRAWL-0001");
+  assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
+  assert.equal(smoke.slugChangeUnauthorized.status, 401);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
@@ -497,6 +533,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
   assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
+  assert.equal(assertSlugHistory(readSlugHistory(slugHistoryPath)), true);
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");

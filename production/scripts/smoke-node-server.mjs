@@ -14,6 +14,7 @@ import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
+import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -48,6 +49,7 @@ const dealLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realt
 const brokerContactLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-broker-contacts-")), "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-tour-approvals-")), "tour-approvals.jsonl");
 const eventLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-events-")), "events.jsonl");
+const slugHistoryPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-slug-history-")), "slug-history.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
@@ -60,6 +62,7 @@ resetDealLedger(dealLedgerPath);
 resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
+resetSlugHistory(slugHistoryPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
@@ -74,6 +77,7 @@ const server = createNodeServer(
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
     eventLedgerPath,
+    slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -82,6 +86,7 @@ const server = createNodeServer(
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
     dealClosedAt: "2026-07-10T10:00:00Z",
+    slugChangedAt: "2026-07-04T00:09:00Z",
   }),
 );
 const address = await listen(server);
@@ -134,6 +139,21 @@ try {
       }),
     }),
     listingAfterTourApproval: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+    slugChange: await jsonFetch(baseUrl, "/api/admin/listings/slug", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        id: "slug-change-server-MS-CRAWL-0001",
+        listingId: "MS-CRAWL-0001",
+        locale: "he",
+        oldPath: "/he/properties/old-sandanski-slug",
+        editor: "editor_bg",
+      }),
+    }),
+    slugRedirect: await textFetch(baseUrl, "/he/properties/old-sandanski-slug", {
+      redirect: "manual",
+      captureHeaders: true,
+    }),
     search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
     searchHtml: await textFetch(baseUrl, "/he/search?q=Sandanski", {
       headers: { accept: "text/html" },
@@ -376,6 +396,7 @@ try {
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   smoke.legacyRedirect.headers = { location: smoke.legacyRedirect.headers.location };
+  smoke.slugRedirect.headers = { location: smoke.slugRedirect.headers.location };
   for (const name of ["languageRequest", "savedSearch", "lead", "viewingLead", "contactLead", "sellerLead", "badLead"]) {
     smoke[name].headers = { "cache-control": smoke[name].headers["cache-control"] };
   }
@@ -425,6 +446,9 @@ try {
     rows: events.length,
     byType: events.reduce((counts, row) => ({ ...counts, [row.type]: (counts[row.type] || 0) + 1 }), {}),
   };
+  const slugHistory = readSlugHistory(slugHistoryPath);
+  assertSlugHistory(slugHistory);
+  smoke.slugHistoryLedger = { rows: slugHistory.length };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);

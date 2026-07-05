@@ -106,6 +106,16 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must serve approved legacy redirect");
   }
   if (
+    smoke.slugChange?.status !== 201 ||
+    smoke.slugChange.body.status !== 301 ||
+    smoke.slugChange.body.old_path !== "/he/properties/old-sandanski-slug" ||
+    smoke.slugChange.body.new_path !== "/he/properties/MS-CRAWL-0001" ||
+    smoke.slugRedirect?.status !== 301 ||
+    smoke.slugRedirect.headers.location !== "/he/properties/MS-CRAWL-0001"
+  ) {
+    throw new Error("Server must create path-only slug-change 301 redirects");
+  }
+  if (
     smoke.home.status !== 200 ||
     smoke.home.body.kind !== "home" ||
     smoke.home.body.body.search.path !== "/he/search" ||

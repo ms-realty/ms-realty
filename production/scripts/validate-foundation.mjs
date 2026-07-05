@@ -6,6 +6,7 @@ import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
+import { assertSlugHistory } from "../lib/slug-history.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -304,6 +305,15 @@ if (httpSmoke.legacyRedirect.status !== 301 || httpSmoke.legacyRedirect.headers.
   throw new Error("HTTP smoke must serve approved legacy redirect");
 }
 if (
+  httpSmoke.slugChange.status !== 201 ||
+  httpSmoke.slugChange.body.old_path !== "/he/properties/old-sandanski-slug" ||
+  httpSmoke.slugChange.body.new_path !== "/he/properties/MS-CRAWL-0001" ||
+  httpSmoke.slugRedirect.status !== 301 ||
+  httpSmoke.slugRedirect.headers.location !== "/he/properties/MS-CRAWL-0001"
+) {
+  throw new Error("HTTP smoke must create and serve listing slug-change redirects");
+}
+if (
   httpSmoke.home.status !== 200 ||
   httpSmoke.home.body.body.search.path !== "/he/search" ||
   !httpSmoke.homeHtml.body.includes("data-kind=\"home\"")
@@ -529,10 +539,20 @@ if (!httpSmoke.eventLedger.byType.cta_click) throw new Error("HTTP smoke must pe
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
 if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, published, and stale translation rows");
 if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
+if (httpSmoke.slugHistoryLedger.rows !== 1) throw new Error("HTTP smoke must persist one slug-history row");
 
 const nodeServerSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "node-server-smoke.json"), "utf8"));
 if (nodeServerSmoke.legacyRedirect.status !== 301 || nodeServerSmoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
   throw new Error("Node server smoke must serve approved legacy redirect");
+}
+if (
+  nodeServerSmoke.slugChange.status !== 201 ||
+  nodeServerSmoke.slugChange.body.old_path !== "/he/properties/old-sandanski-slug" ||
+  nodeServerSmoke.slugChange.body.new_path !== "/he/properties/MS-CRAWL-0001" ||
+  nodeServerSmoke.slugRedirect.status !== 301 ||
+  nodeServerSmoke.slugRedirect.headers.location !== "/he/properties/MS-CRAWL-0001"
+) {
+  throw new Error("Node server smoke must create and serve listing slug-change redirects");
 }
 if (
   nodeServerSmoke.home.status !== 200 ||
@@ -691,6 +711,7 @@ if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node serve
 if (nodeServerSmoke.dealLedger.rows !== 1) throw new Error("Node server smoke must persist one closed deal row");
 if (nodeServerSmoke.tourApprovalLedger.rows !== 1) throw new Error("Node server smoke must persist one tour approval row");
 if (!nodeServerSmoke.eventLedger.byType.cta_click) throw new Error("Node server smoke must persist one CTA analytics event row");
+if (nodeServerSmoke.slugHistoryLedger.rows !== 1) throw new Error("Node server smoke must persist one slug-history row");
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 4) throw new Error("Lead ledger artifact must contain buyer, viewing, contact, and seller smoke rows");
@@ -740,6 +761,20 @@ const tourApprovals = fs.readFileSync(fromRoot("production", "data", "tour-appro
 if (tourApprovals.length !== 1) throw new Error("Tour approval artifact must contain one deterministic smoke row");
 const events = fs.readFileSync(fromRoot("production", "data", "events.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (events.length < 1) throw new Error("Event artifact must contain deterministic smoke rows");
+const slugHistory = fs
+  .readFileSync(fromRoot("production", "data", "slug-history.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+assertSlugHistory(slugHistory);
+if (
+  slugHistory.length !== 1 ||
+  slugHistory[0].old_path !== "/he/properties/old-sandanski-slug" ||
+  slugHistory[0].new_path !== "/he/properties/MS-CRAWL-0001"
+) {
+  throw new Error("Slug history artifact must contain the deterministic listing 301 row");
+}
 
 const seoEvidence = JSON.parse(fs.readFileSync(fromRoot("production", "data", "seo-evidence.json"), "utf8"));
 if (seoEvidence.summary.crawl_urls !== 457 || seoEvidence.url_evidence.length !== 457) {

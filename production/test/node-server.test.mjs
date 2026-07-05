@@ -15,6 +15,7 @@ import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
+import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -31,6 +32,7 @@ async function withServer(fn) {
   const brokerContactLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-broker-contacts-`)}/broker-contacts.jsonl`;
   const tourApprovalLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-tour-approvals-`)}/tour-approvals.jsonl`;
   const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-events-`)}/events.jsonl`;
+  const slugHistoryPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-slug-history-`)}/slug-history.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
@@ -43,6 +45,7 @@ async function withServer(fn) {
   resetBrokerContacts(brokerContactLedgerPath);
   resetTourApprovals(tourApprovalLedgerPath);
   resetEventLedger(eventLedgerPath);
+  resetSlugHistory(slugHistoryPath);
   const server = createNodeServer(
     createHttpApp({
       leadLedgerPath,
@@ -57,6 +60,7 @@ async function withServer(fn) {
       brokerContactLedgerPath,
       tourApprovalLedgerPath,
       eventLedgerPath,
+      slugHistoryPath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
       editedAt: "2026-07-04T00:03:00Z",
@@ -65,6 +69,7 @@ async function withServer(fn) {
       savedAt: "2026-07-04T00:07:00Z",
       sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
       dealClosedAt: "2026-07-10T10:00:00Z",
+      slugChangedAt: "2026-07-04T00:09:00Z",
     }),
   );
   const address = await listen(server);
@@ -83,6 +88,7 @@ async function withServer(fn) {
       brokerContactLedgerPath,
       tourApprovalLedgerPath,
       eventLedgerPath,
+      slugHistoryPath,
     );
   } finally {
     await close(server);
@@ -117,6 +123,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       brokerContactLedgerPath,
       tourApprovalLedgerPath,
       eventLedgerPath,
+      slugHistoryPath,
     ) => {
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
@@ -162,6 +169,21 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           }),
         }),
         listingAfterTourApproval: await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001"),
+        slugChange: await jsonFetch(baseUrl, "/api/admin/listings/slug", {
+          method: "POST",
+          headers: { authorization: "Bearer local-admin-smoke" },
+          body: JSON.stringify({
+            id: "node-server-slug-change-test",
+            listingId: "MS-CRAWL-0001",
+            locale: "he",
+            oldPath: "/he/properties/old-sandanski-slug",
+            editor: "editor_bg",
+          }),
+        }),
+        slugRedirect: await textFetch(baseUrl, "/he/properties/old-sandanski-slug", {
+          redirect: "manual",
+          captureHeaders: true,
+        }),
         search: await jsonFetch(baseUrl, "/api/search?locale=he&q=Sandanski"),
         searchHtml: await textFetch(baseUrl, "/he/search?q=Sandanski", {
           headers: { accept: "text/html" },
@@ -396,6 +418,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.tourApproval.body.is_public, true);
       assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
       assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
+      assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
       assert.equal(smoke.location.body.cards.length, 1);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
       assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
@@ -424,6 +447,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
       assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
       assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
+      assert.equal(assertSlugHistory(readSlugHistory(slugHistoryPath)), true);
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
       assert.deepEqual(
         [

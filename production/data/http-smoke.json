@@ -1715,6 +1715,45 @@
       }
     }
   },
+  "slugChange": {
+    "status": 201,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    },
+    "body": {
+      "id": "slug-change-MS-CRAWL-0001",
+      "listing_id": "MS-CRAWL-0001",
+      "locale": "he",
+      "old_path": "/he/properties/old-sandanski-slug",
+      "new_path": "/he/properties/MS-CRAWL-0001",
+      "status": 301,
+      "reason": "listing_slug_changed",
+      "changed_by": "editor_bg",
+      "changed_at": "2026-07-04T00:09:00Z"
+    }
+  },
+  "slugRedirect": {
+    "status": 301,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "content-type": "application/json; charset=utf-8",
+      "location": "/he/properties/MS-CRAWL-0001"
+    },
+    "body": {
+      "kind": "slug_redirect",
+      "location": "/he/properties/MS-CRAWL-0001",
+      "listing_id": "MS-CRAWL-0001",
+      "locale": "he"
+    }
+  },
   "search": {
     "status": 200,
     "headers": {
@@ -11282,6 +11321,9 @@
       "lead_submitted": 4,
       "cta_click": 1
     }
+  },
+  "slugHistoryLedger": {
+    "rows": 1
   },
   "localeRegistry": {
     "locales": 9

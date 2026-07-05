@@ -43,6 +43,7 @@ What it proves now:
 - Authenticated admin translation draft and human-approved publish endpoints.
 - Authenticated listing edit endpoint that marks dependent translations stale.
 - Authenticated listing editor HTML workbench backed by the same stale-translation edit endpoint.
+- Authenticated listing slug-change endpoint that creates path-only automatic 301s to the current canonical listing route.
 - Listing status edits keep sold/rented/archived pages live for SEO while removing them from active search and location inventory.
 - Public listing routes overlay translation ledger state before indexability.
 - Runtime smoke fixture for listing route, search route, contact route, fallback route, and lead intake.
@@ -56,6 +57,7 @@ What it proves now:
 - Locale-prefixed contact callback page backed by the existing gated CRM lead intake.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
 - Runtime 301 handling for reviewed legacy redirects only.
+- Runtime 301 handling for reviewed CMS listing slug changes without homepage/search-page assumptions.
 - Runtime locale roots serve public homepages for approved locales and keep disabled locales in the fallback/request flow.
 - Runtime search query/facet filtering before pagination, with total match counts.
 - Runtime location routes expose only locale-indexable listing cards and return noindex/404 for empty locale-location pairs.
@@ -165,6 +167,7 @@ Generated production data:
 - `production/data/broker-contacts.jsonl`
 - `production/data/tour-approvals.jsonl`
 - `production/data/events.jsonl`
+- `production/data/slug-history.jsonl`
 - `production/data/seo-evidence.json`
 - `production/data/launch-readiness.json`
 - `production/data/launch-input-checklist.md`
