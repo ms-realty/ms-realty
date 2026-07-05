@@ -5,6 +5,7 @@ import {
   importRedirectApprovalsCsv,
   readRedirectApprovals,
   resetRedirectApprovals,
+  writeRedirectApprovalWorkbook,
   writeDeployableRedirects,
 } from "../lib/redirect-approvals.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -18,6 +19,7 @@ if (!bgListing || !ruListing) {
   throw new Error("Expected BG and RU listing route rows before redirect export");
 }
 
+const workbook = writeRedirectApprovalWorkbook(routeMap);
 resetRedirectApprovals();
 if (fs.existsSync(importPath)) {
   importRedirectApprovalsCsv(routeMap, fs.readFileSync(importPath, "utf8"), {
@@ -40,5 +42,6 @@ const approvals = readRedirectApprovals();
 const redirects = buildDeployableRedirects(routeMap, approvals);
 const { outPath, summary } = writeDeployableRedirects(redirects);
 
+console.log(`Wrote ${workbook.rows.length} redirect approval workbook rows to ${workbook.outPath}`);
 console.log(`Wrote ${summary.total} deployable redirects to ${outPath}`);
 console.log(`Target locales: ${JSON.stringify(summary.byTargetLocale)}`);

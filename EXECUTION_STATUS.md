@@ -225,6 +225,7 @@ Date: 2026-07-04
   - `npm start` runs `production/server.mjs`
   - launch report now treats the Node adapter as the production app layer while redirect reviews and external SEO exports remain blocked
 - Added production redirect review import path:
+  - `production/data/redirect-approval-workbook.csv` is generated with all 165 mapped listing rows and no pre-approvals
   - `migration/reviews/redirect-approvals.csv` can feed human-approved same-content redirect rows into the existing deployable 301 export
   - without that CSV, validation keeps the two-row BG/RU smoke export and leaves the full redirect review blocker intact
 - Added external SEO export intake templates:

@@ -6,12 +6,15 @@ import path from "node:path";
 import {
   appendRedirectApproval,
   assertDeployableRedirects,
+  buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
   importRedirectApprovalsCsv,
   readRedirectApprovals,
+  renderRedirectApprovalWorkbook,
   resetRedirectApprovals,
   summarizeDeployableRedirects,
 } from "../lib/redirect-approvals.mjs";
+import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function loadRouteMap() {
@@ -100,6 +103,16 @@ test("CSV redirect approval import validates rows before appending", () => {
   );
   assert.equal(approvals.length, 1);
   assert.equal(readRedirectApprovals(filePath).length, 1);
+});
+
+test("redirect approval workbook includes all mapped listings without approving them", () => {
+  const rows = buildRedirectApprovalWorkbook(loadRouteMap());
+  const parsed = parseCsv(renderRedirectApprovalWorkbook(rows));
+
+  assert.equal(rows.length, 165);
+  assert.equal(parsed.length, 165);
+  assert.equal(parsed.every((row) => row.equivalent_content === "false"), true);
+  assert.equal(parsed.every((row) => row.old_url && row.target_path && row.reviewer === ""), true);
 });
 
 test("generated deployable redirect file is valid when present", () => {

@@ -91,6 +91,13 @@ if (redirectSummary.total !== 2) throw new Error("Deployable redirect smoke must
 if (redirectSummary.byTargetLocale.bg !== 1 || redirectSummary.byTargetLocale.ru !== 1) {
   throw new Error("Deployable redirect smoke must include one BG and one RU route");
 }
+const redirectWorkbook = fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8").trim().split("\n");
+if (redirectWorkbook.length !== 166 || !redirectWorkbook[0].includes("equivalent_content")) {
+  throw new Error("Redirect approval workbook must include header plus 165 mapped listing rows");
+}
+if (redirectWorkbook.slice(1).some((row) => !row.includes(",false,"))) {
+  throw new Error("Redirect approval workbook rows must default to not approved");
+}
 const redirectApprovals = fs
   .readFileSync(fromRoot("production", "data", "redirect-approvals.jsonl"), "utf8")
   .trim()

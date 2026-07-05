@@ -117,6 +117,7 @@ Implemented now:
   - `npm start` runs `production/server.mjs` against the same public/admin contracts
   - launch remains blocked until redirect reviews and external SEO exports are complete
 - Production redirect review import:
+  - `production/data/redirect-approval-workbook.csv` lists all 165 mapped listing redirects for human review
   - human-approved rows from `migration/reviews/redirect-approvals.csv` feed the deployable 301 export
   - the importer still rejects non-mapped rows, homepage targets, and missing same-content confirmation
 - External SEO export intake:

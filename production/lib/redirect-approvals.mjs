@@ -5,6 +5,7 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_REDIRECT_APPROVALS_PATH = fromRoot("production", "data", "redirect-approvals.jsonl");
 export const DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT = fromRoot("production", "data", "deployable-redirects.json");
+export const DEFAULT_REDIRECT_APPROVAL_WORKBOOK_OUTPUT = fromRoot("production", "data", "redirect-approval-workbook.csv");
 
 function routeByOldUrl(routeMap, oldUrl) {
   return routeMap.find((route) => route.old_url === oldUrl);
@@ -55,6 +56,11 @@ function approvalInputFromRow(row) {
   };
 }
 
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
+}
+
 export function resetRedirectApprovals(filePath = DEFAULT_REDIRECT_APPROVALS_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, "");
@@ -85,6 +91,36 @@ export function importRedirectApprovalsCsv(
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${approvals.map((approval) => JSON.stringify(approval)).join("\n")}\n`);
   return approvals;
+}
+
+export function buildRedirectApprovalWorkbook(routeMap) {
+  return routeMap
+    .filter((route) => route.url_type === "listing" && route.target_path && route.planned_status === 301)
+    .map((route) => ({
+      old_url: route.old_url,
+      target_path: route.target_path,
+      target_locale: route.target_locale,
+      source_domain: route.source_domain,
+      equivalent_content: false,
+      reviewer: "",
+      approved_at: "",
+      reason: "Review same-content listing route before setting equivalent_content true.",
+    }));
+}
+
+export function renderRedirectApprovalWorkbook(rows) {
+  const headers = ["old_url", "target_path", "target_locale", "source_domain", "equivalent_content", "reviewer", "approved_at", "reason"];
+  return `${[headers.join(","), ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
+}
+
+export function writeRedirectApprovalWorkbook(
+  routeMap,
+  outPath = DEFAULT_REDIRECT_APPROVAL_WORKBOOK_OUTPUT,
+) {
+  const rows = buildRedirectApprovalWorkbook(routeMap);
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, renderRedirectApprovalWorkbook(rows));
+  return { outPath, rows };
 }
 
 export function readRedirectApprovals(filePath = DEFAULT_REDIRECT_APPROVALS_PATH) {

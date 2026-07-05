@@ -19,6 +19,7 @@ What it proves now:
 - Migration review dashboard for metadata gaps, media reconciliation, and redirect safety.
 - Legacy route map for reviewed listing redirects and unmapped review queues.
 - Migration review queue with BG/RU admin owners for every crawled URL.
+- Generated 165-row redirect approval workbook for mapped listings.
 - Separate reviewed redirect approval ledger and deployable 301 export.
 - Optional human-reviewed redirect approval CSV import at `migration/reviews/redirect-approvals.csv`.
 - Authenticated admin migration review endpoint for the dashboard, route worklist, and redirect approval preview.
