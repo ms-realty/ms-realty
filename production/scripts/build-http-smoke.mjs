@@ -65,6 +65,25 @@ import {
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
+function compactAdminLocaleResponse(response, { includeLocales = false } = {}) {
+  return {
+    ...response,
+    body: {
+      workspace: response.body.workspace,
+      ...(includeLocales
+        ? {
+            locales: response.body.locales.map((locale) => ({
+              code: locale.code,
+              direction: locale.direction,
+              public_enabled: locale.public_enabled,
+              indexable: locale.indexable,
+            })),
+          }
+        : {}),
+    },
+  };
+}
+
 resetLeadLedger(DEFAULT_LEAD_LEDGER_PATH);
 resetReplyOutbox(DEFAULT_REPLY_OUTBOX_PATH);
 resetLanguageRequests(DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH);
@@ -104,6 +123,7 @@ const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data",
 const smoke = {
   fixture_id: "http-smoke-20260704",
   health: await dispatchHttp(app, { url: "/api/health" }),
+  ready: await dispatchHttp(app, { url: "/api/ready" }),
   legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
   home: await dispatchHttp(app, { url: "/he/" }),
   homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
@@ -340,6 +360,33 @@ smoke.listingEdit = await dispatchHttp(app, {
 });
 smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
 smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
+smoke.adminLocales = {
+  bg: compactAdminLocaleResponse(
+    await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=bg",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+  ),
+  ru: compactAdminLocaleResponse(
+    await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=ru",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+  ),
+  en: compactAdminLocaleResponse(
+    await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=en",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+  ),
+  heFallback: compactAdminLocaleResponse(
+    await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=he",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    { includeLocales: true },
+  ),
+};
 smoke.localeCreate = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/locales",

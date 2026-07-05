@@ -429,6 +429,17 @@ export function createHttpApp({
       });
     }
 
+    if (request.method === "GET" && url.pathname === "/api/ready") {
+      const readiness = currentLaunchReadiness();
+      return json(readiness.launch_ready ? 200 : 503, {
+        kind: "readiness",
+        service: "ms-realty",
+        status: readiness.launch_ready ? "ready" : "blocked",
+        launch_ready: readiness.launch_ready,
+        blockers: readiness.blockers,
+      });
+    }
+
     if (request.method === "GET" && url.pathname === "/api/search") {
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
@@ -912,6 +923,13 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must expose liveness without hiding launch blockers");
   }
+  if (
+    smoke.ready?.status !== 503 ||
+    smoke.ready.body.status !== "blocked" ||
+    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"])
+  ) {
+    throw new Error("HTTP smoke must fail readiness while launch blockers remain");
+  }
   if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
     throw new Error("HTTP smoke must serve approved legacy redirect");
   }
@@ -1060,6 +1078,21 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.staleListing.status !== 200 || smoke.staleListing.body.indexable !== false) {
     throw new Error("HTTP smoke must noindex stale public translation");
+  }
+  if (
+    smoke.adminLocales?.bg?.status !== 200 ||
+    smoke.adminLocales?.ru?.status !== 200 ||
+    smoke.adminLocales?.en?.status !== 200 ||
+    smoke.adminLocales?.heFallback?.status !== 200 ||
+    smoke.adminLocales.bg.body.workspace.locale !== "bg" ||
+    smoke.adminLocales.ru.body.workspace.locale !== "ru" ||
+    smoke.adminLocales.en.body.workspace.locale !== "en" ||
+    smoke.adminLocales.heFallback.body.workspace.locale !== "en" ||
+    JSON.stringify(smoke.adminLocales.ru.body.workspace.interface_locales) !== JSON.stringify(["bg", "ru", "en"]) ||
+    smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "he")?.direction !== "rtl" ||
+    smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "el")?.public_enabled !== true
+  ) {
+    throw new Error("HTTP smoke must expose BG, RU, EN admin workspaces and Greek/Hebrew website locales");
   }
   const staleSearchCard = smoke.staleSearch.body.cards.find((card) => card.id === "MS-CRAWL-0001");
   if (

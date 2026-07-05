@@ -16,6 +16,25 @@ import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/eve
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
+function compactAdminLocaleResponse(response, { includeLocales = false } = {}) {
+  return {
+    ...response,
+    body: {
+      workspace: response.body.workspace,
+      ...(includeLocales
+        ? {
+            locales: response.body.locales.map((locale) => ({
+              code: locale.code,
+              direction: locale.direction,
+              public_enabled: locale.public_enabled,
+              indexable: locale.indexable,
+            })),
+          }
+        : {}),
+    },
+  };
+}
+
 const leadLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-leads-")), "leads.jsonl");
 const replyOutboxPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-replies-")), "replies.jsonl");
 const languageRequestPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-language-")), "requests.jsonl");
@@ -70,6 +89,7 @@ try {
     fixture_id: "node-server-smoke-20260704",
     baseUrl: "http://127.0.0.1:0",
     health: await jsonFetch(baseUrl, "/api/health"),
+    ready: await jsonFetch(baseUrl, "/api/ready"),
     legacyRedirect: await textFetch(baseUrl, legacyUrl.pathname, {
       headers: { "x-forwarded-host": legacyRedirect.source_domain },
       redirect: "manual",
@@ -307,6 +327,29 @@ try {
       action: "sticky_inquiry",
     }),
   });
+  smoke.adminLocales = {
+    bg: compactAdminLocaleResponse(
+      await jsonFetch(baseUrl, "/api/admin/locales?locale=bg", {
+        headers: { authorization: "Bearer local-admin-smoke" },
+      }),
+    ),
+    ru: compactAdminLocaleResponse(
+      await jsonFetch(baseUrl, "/api/admin/locales?locale=ru", {
+        headers: { authorization: "Bearer local-admin-smoke" },
+      }),
+    ),
+    en: compactAdminLocaleResponse(
+      await jsonFetch(baseUrl, "/api/admin/locales?locale=en", {
+        headers: { authorization: "Bearer local-admin-smoke" },
+      }),
+    ),
+    heFallback: compactAdminLocaleResponse(
+      await jsonFetch(baseUrl, "/api/admin/locales?locale=he", {
+        headers: { authorization: "Bearer local-admin-smoke" },
+      }),
+      { includeLocales: true },
+    ),
+  };
   smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
     headers: { authorization: "Bearer local-admin-smoke" },
   });

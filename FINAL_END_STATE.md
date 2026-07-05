@@ -116,6 +116,7 @@ Implemented now:
 - Production Node server adapter:
   - `npm start` runs `production/server.mjs` against the same public/admin contracts
   - production writes use the same append-only lead, CRM, translation, viewing, saved-search, seller, broker-contact, tour, and analytics ledgers as the smoke contracts
+  - `/api/health` is liveness; `/api/ready` fails with `503` while launch blockers remain
   - launch remains blocked until redirect reviews and external SEO exports are complete
 - Production redirect review import:
   - `production/data/redirect-approval-workbook.csv` lists all 165 mapped listing redirects for human review

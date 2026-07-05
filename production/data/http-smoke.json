@@ -20,6 +20,26 @@
       ]
     }
   },
+  "ready": {
+    "status": 503,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "readiness",
+      "service": "ms-realty",
+      "status": "blocked",
+      "launch_ready": false,
+      "blockers": [
+        "redirect_reviews",
+        "external_seo_exports"
+      ]
+    }
+  },
   "legacyRedirect": {
     "status": 301,
     "headers": {
@@ -5708,6 +5728,206 @@
           "image_count": 19
         }
       ]
+    }
+  },
+  "adminLocales": {
+    "bg": {
+      "status": 200,
+      "headers": {
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-frame-options": "DENY",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      },
+      "body": {
+        "workspace": {
+          "kind": "admin_workspace",
+          "requested_locale": "bg",
+          "locale": "bg",
+          "lang": "bg",
+          "dir": "ltr",
+          "interface_locales": [
+            "bg",
+            "ru",
+            "en"
+          ],
+          "modules": [
+            {
+              "id": "crm",
+              "label": "CRM",
+              "primary_view": "Входящи запитвания"
+            },
+            {
+              "id": "cms",
+              "label": "CMS",
+              "primary_view": "Преводи за преглед"
+            }
+          ]
+        }
+      }
+    },
+    "ru": {
+      "status": 200,
+      "headers": {
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-frame-options": "DENY",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      },
+      "body": {
+        "workspace": {
+          "kind": "admin_workspace",
+          "requested_locale": "ru",
+          "locale": "ru",
+          "lang": "ru",
+          "dir": "ltr",
+          "interface_locales": [
+            "bg",
+            "ru",
+            "en"
+          ],
+          "modules": [
+            {
+              "id": "crm",
+              "label": "CRM",
+              "primary_view": "Входящие заявки"
+            },
+            {
+              "id": "cms",
+              "label": "CMS",
+              "primary_view": "Переводы на проверку"
+            }
+          ]
+        }
+      }
+    },
+    "en": {
+      "status": 200,
+      "headers": {
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-frame-options": "DENY",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      },
+      "body": {
+        "workspace": {
+          "kind": "admin_workspace",
+          "requested_locale": "en",
+          "locale": "en",
+          "lang": "en",
+          "dir": "ltr",
+          "interface_locales": [
+            "bg",
+            "ru",
+            "en"
+          ],
+          "modules": [
+            {
+              "id": "crm",
+              "label": "CRM",
+              "primary_view": "Lead inbox"
+            },
+            {
+              "id": "cms",
+              "label": "CMS",
+              "primary_view": "Translation review"
+            }
+          ]
+        }
+      }
+    },
+    "heFallback": {
+      "status": 200,
+      "headers": {
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "x-frame-options": "DENY",
+        "permissions-policy": "camera=(), microphone=(), geolocation=()",
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      },
+      "body": {
+        "workspace": {
+          "kind": "admin_workspace",
+          "requested_locale": "he",
+          "locale": "en",
+          "lang": "en",
+          "dir": "ltr",
+          "interface_locales": [
+            "bg",
+            "ru",
+            "en"
+          ],
+          "modules": [
+            {
+              "id": "crm",
+              "label": "CRM",
+              "primary_view": "Lead inbox"
+            },
+            {
+              "id": "cms",
+              "label": "CMS",
+              "primary_view": "Translation review"
+            }
+          ]
+        },
+        "locales": [
+          {
+            "code": "bg",
+            "direction": "ltr",
+            "public_enabled": true,
+            "indexable": true
+          },
+          {
+            "code": "en",
+            "direction": "ltr",
+            "public_enabled": true,
+            "indexable": true
+          },
+          {
+            "code": "de",
+            "direction": "ltr",
+            "public_enabled": true,
+            "indexable": true
+          },
+          {
+            "code": "nl",
+            "direction": "ltr",
+            "public_enabled": true,
+            "indexable": true
+          },
+          {
+            "code": "ru",
+            "direction": "ltr",
+            "public_enabled": true,
+            "indexable": true
+          },
+          {
+            "code": "el",
+            "direction": "ltr",
+            "public_enabled": true,
+            "indexable": true
+          },
+          {
+            "code": "he",
+            "direction": "rtl",
+            "public_enabled": true,
+            "indexable": true
+          },
+          {
+            "code": "fr",
+            "direction": "ltr",
+            "public_enabled": false,
+            "indexable": false
+          }
+        ]
+      }
     }
   },
   "localeCreate": {

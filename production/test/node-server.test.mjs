@@ -115,6 +115,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       const oldUrl = new URL(redirect.old_url);
       const smoke = {
         health: await jsonFetch(baseUrl, "/api/health"),
+        ready: await jsonFetch(baseUrl, "/api/ready"),
         legacyRedirect: await textFetch(baseUrl, oldUrl.pathname, {
           headers: { "x-forwarded-host": redirect.source_domain },
           redirect: "manual",
@@ -348,12 +349,28 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           action: "sticky_inquiry",
         }),
       });
+      smoke.adminLocales = {
+        bg: await jsonFetch(baseUrl, "/api/admin/locales?locale=bg", {
+          headers: { authorization: "Bearer local-admin-smoke" },
+        }),
+        ru: await jsonFetch(baseUrl, "/api/admin/locales?locale=ru", {
+          headers: { authorization: "Bearer local-admin-smoke" },
+        }),
+        en: await jsonFetch(baseUrl, "/api/admin/locales?locale=en", {
+          headers: { authorization: "Bearer local-admin-smoke" },
+        }),
+        heFallback: await jsonFetch(baseUrl, "/api/admin/locales?locale=he", {
+          headers: { authorization: "Bearer local-admin-smoke" },
+        }),
+      };
       smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
         headers: { authorization: "Bearer local-admin-smoke" },
       });
       assert.equal(assertServerSmoke(smoke), true);
       assert.equal(smoke.health.body.status, "ok");
       assert.deepEqual(smoke.health.body.blockers, ["redirect_reviews", "external_seo_exports"]);
+      assert.equal(smoke.ready.status, 503);
+      assert.equal(smoke.ready.body.status, "blocked");
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
       assert.equal(smoke.home.body.body.search.path, "/he/search");
       assert.equal(smoke.listingPrint.body.includes("data-kind=\"listing-print\""), true);
@@ -382,6 +399,18 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
       assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
+      assert.deepEqual(
+        [
+          smoke.adminLocales.bg.body.workspace.locale,
+          smoke.adminLocales.ru.body.workspace.locale,
+          smoke.adminLocales.en.body.workspace.locale,
+          smoke.adminLocales.heFallback.body.workspace.locale,
+        ],
+        ["bg", "ru", "en", "en"],
+      );
+      assert.deepEqual(smoke.adminLocales.ru.body.workspace.interface_locales, ["bg", "ru", "en"]);
+      assert.equal(smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "he").direction, "rtl");
+      assert.equal(smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "el").public_enabled, true);
     },
   );
 });

@@ -141,6 +141,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const redirect = deployableRedirect();
   const smoke = {
     health: await dispatchHttp(app, { url: "/api/health" }),
+    ready: await dispatchHttp(app, { url: "/api/ready" }),
     legacyRedirect: await dispatchHttp(app, { url: redirect.old_url }),
     home: await dispatchHttp(app, { url: "/he/" }),
     homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
@@ -367,6 +368,24 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   });
   smoke.staleListing = await dispatchHttp(app, { url: "/el/akinita/MS-CRAWL-0001" });
   smoke.staleSearch = await dispatchHttp(app, { url: "/api/search?locale=el&q=Sandanski" });
+  smoke.adminLocales = {
+    bg: await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=bg",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    ru: await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=ru",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    en: await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=en",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+    heFallback: await dispatchHttp(app, {
+      url: "/api/admin/locales?locale=he",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    }),
+  };
   smoke.localeCreate = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/locales",
@@ -410,6 +429,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
   assert.deepEqual(smoke.health.body.blockers, ["redirect_reviews", "external_seo_exports"]);
+  assert.equal(smoke.ready.status, 503);
+  assert.equal(smoke.ready.body.status, "blocked");
   assert.equal(smoke.health.headers["referrer-policy"], "strict-origin-when-cross-origin");
   assert.equal(smoke.homeHtml.headers["x-frame-options"], "DENY");
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
@@ -471,6 +492,26 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminMigrationReviewUnauthorized.status, 401);
   assert.equal(smoke.adminMigrationReviewUnauthorized.headers["cache-control"], "no-store");
   assert.equal(smoke.adminMigrationReviewUnauthorized.headers["www-authenticate"], 'Bearer realm="ms-realty-admin"');
+  assert.deepEqual(
+    Object.values(smoke.adminLocales).map((response) => response.body.workspace.interface_locales),
+    [
+      ["bg", "ru", "en"],
+      ["bg", "ru", "en"],
+      ["bg", "ru", "en"],
+      ["bg", "ru", "en"],
+    ],
+  );
+  assert.deepEqual(
+    [
+      smoke.adminLocales.bg.body.workspace.locale,
+      smoke.adminLocales.ru.body.workspace.locale,
+      smoke.adminLocales.en.body.workspace.locale,
+      smoke.adminLocales.heFallback.body.workspace.locale,
+    ],
+    ["bg", "ru", "en", "en"],
+  );
+  assert.equal(smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "he").direction, "rtl");
+  assert.equal(smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "el").public_enabled, true);
   assert.equal(smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR"), true);
   assert.equal(smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z"), true);
   assert.equal(smoke.admin.body.leads.some((lead) => lead.lead_type === "seller" && lead.original_language === "el"), true);

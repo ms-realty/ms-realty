@@ -80,6 +80,7 @@ What it proves now:
 - Local-only external SEO export templates under `migration/external/seo/`.
 - Launch readiness report that aggregates crawl, redirect, sitemap, schema, monitoring, and rollback gates.
 - Public health endpoint that reports liveness while still exposing launch blockers.
+- Public readiness endpoint that returns `503` until launch gates pass.
 - Production Node server adapter exposed by `npm start`.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
 - Generated mobile/elderly QA report over rendered public HTML, including Hebrew RTL, search form, sticky listing actions, phone-first forms, fallback noindex, and BG/RU/EN admin language policy.
@@ -99,6 +100,7 @@ MS_REALTY_ADMIN_TOKEN=replace-me npm start
 Useful operator endpoints:
 
 - `GET /api/health` returns `status: ok` plus current launch blockers.
+- `GET /api/ready` returns `503` with blockers until launch readiness is clear.
 - `GET /api/admin/launch-readiness` returns the launch gate report.
 - `GET /api/admin/launch-input-checklist` returns the remaining operator inputs as Markdown.
 - `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
