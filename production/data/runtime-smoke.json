@@ -101,7 +101,13 @@
         "bedrooms": null,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
         "image_count": 35
+      },
+      "lifecycle": {
+        "status": "available",
+        "active_in_search": true,
+        "seo_kept_live": true
       },
       "quality_flags": {
         "bedrooms_not_applicable": false
@@ -357,6 +363,71 @@
           }
         ]
       },
+      "related_listings": [
+        {
+          "id": "MS-CRAWL-0002",
+          "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0002",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "multi_unit",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "price_eur": null,
+          "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 20
+        },
+        {
+          "id": "MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0003",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": 2,
+          "bedrooms_not_applicable": false,
+          "price_eur": 600,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 32
+        },
+        {
+          "id": "MS-CRAWL-0004",
+          "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0004",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": 1,
+          "bedrooms_not_applicable": false,
+          "price_eur": 355,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 26
+        }
+      ],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
         "source_domain": "makler-realty.com",
@@ -451,7 +522,13 @@
         "bedrooms": null,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
         "image_count": 33
+      },
+      "lifecycle": {
+        "status": "available",
+        "active_in_search": true,
+        "seo_kept_live": true
       },
       "quality_flags": {
         "bedrooms_not_applicable": false
@@ -689,6 +766,71 @@
           }
         ]
       },
+      "related_listings": [
+        {
+          "id": "MS-CRAWL-0001",
+          "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански",
+          "path": "/ru/properties/MS-CRAWL-0001",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "ru",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "price_eur": null,
+          "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 35
+        },
+        {
+          "id": "MS-CRAWL-0002",
+          "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+          "path": "/ru/properties/MS-CRAWL-0002",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "ru",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "multi_unit",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "price_eur": null,
+          "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 20
+        },
+        {
+          "id": "MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+          "path": "/ru/properties/MS-CRAWL-0003",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "ru",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": 2,
+          "bedrooms_not_applicable": false,
+          "price_eur": 600,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 32
+        }
+      ],
       "source": {
         "old_url": "https://makler-realty.ru/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%8b-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/",
         "source_domain": "makler-realty.ru",
@@ -789,6 +931,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       },
       {
@@ -808,6 +952,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 20
       },
       {
@@ -827,6 +973,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 600,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 32
       },
       {
@@ -846,6 +994,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 355,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -865,6 +1015,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -884,6 +1036,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 1,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 18
       }
     ]
@@ -1105,9 +1259,764 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       }
     ]
+  },
+  "sold_listing_he": {
+    "kind": "listing",
+    "status": 200,
+    "requested_locale": "he",
+    "locale": "he",
+    "lang": "he",
+    "dir": "rtl",
+    "path": "/he/properties/MS-CRAWL-0001",
+    "canonical": "/he/properties/MS-CRAWL-0001",
+    "indexable": true,
+    "fallback": {
+      "active": false,
+      "requested_locale": "he",
+      "resolved_locale": "he"
+    },
+    "metadata": {
+      "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "robots": "index,follow"
+    },
+    "hreflang": [
+      {
+        "hreflang": "bg",
+        "href": "/bg/imoti/MS-CRAWL-0001"
+      },
+      {
+        "hreflang": "el",
+        "href": "/el/akinita/MS-CRAWL-0001"
+      },
+      {
+        "hreflang": "he",
+        "href": "/he/properties/MS-CRAWL-0001"
+      },
+      {
+        "hreflang": "x-default",
+        "href": "/bg/imoti/MS-CRAWL-0001"
+      }
+    ],
+    "schema": {
+      "@context": "https://schema.org",
+      "@type": "RealEstateListing",
+      "@id": "/he/properties/MS-CRAWL-0001#listing",
+      "url": "/he/properties/MS-CRAWL-0001",
+      "identifier": "MS-CRAWL-0001",
+      "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "category": "commercial",
+      "image": [
+        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg"
+      ],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "rent"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "source_locale",
+          "value": "bg"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
+    },
+    "translation": {
+      "locale": "he",
+      "status": "approved",
+      "human_approved": true,
+      "reviewer": "translator_he"
+    },
+    "body": {
+      "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+      "description": "Updated approved source description.",
+      "facts": {
+        "id": "MS-CRAWL-0001",
+        "location": "Sandanski",
+        "property_type": "commercial",
+        "offer_type": "rent",
+        "bedrooms": null,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "sold",
+        "image_count": 35
+      },
+      "lifecycle": {
+        "status": "sold",
+        "active_in_search": false,
+        "seo_kept_live": true
+      },
+      "quality_flags": {
+        "bedrooms_not_applicable": false
+      },
+      "media": {
+        "gallery": [
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 45,
+            "height": 45
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": null,
+            "height": null
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          },
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 72,
+            "height": 72
+          }
+        ],
+        "gallery_count": 18,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 35,
+          "public_gallery_assets": 18,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 0
+        },
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "needs_panorama_upload",
+          "fallback_gallery": [
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            }
+          ]
+        }
+      },
+      "ctas": {
+        "inquiry": "פנייה",
+        "seller_valuation": "הערכת מוכר"
+      },
+      "actions": {
+        "sticky_mobile": true,
+        "minimum_tap_target_px": 44,
+        "primary": [
+          {
+            "id": "inquiry",
+            "label": "פנייה",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_listing_detail"
+            }
+          },
+          {
+            "id": "callback",
+            "label": "שיחה חוזרת",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          },
+          {
+            "id": "request_viewing",
+            "label": "תיאום סיור",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_viewing_request",
+              "contact_preference": "phone"
+            }
+          }
+        ],
+        "direct_contact": {
+          "review_status": "needs_broker_contact_review",
+          "broker": null,
+          "reviewer": null,
+          "channels": [
+            {
+              "id": "phone",
+              "label": "טלפון",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "whatsapp",
+              "label": "WhatsApp",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "viber",
+              "label": "Viber",
+              "enabled": false,
+              "href": null
+            }
+          ]
+        },
+        "secondary": [
+          {
+            "id": "save",
+            "label": "שמירה",
+            "kind": "client_saved_listing",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          },
+          {
+            "id": "share_family",
+            "label": "שיתוף",
+            "kind": "share",
+            "url": "/he/properties/MS-CRAWL-0001"
+          },
+          {
+            "id": "print",
+            "label": "הדפסה/PDF",
+            "kind": "print",
+            "url": "/he/properties/MS-CRAWL-0001?print=1",
+            "pdf_status": "browser_print_ready"
+          }
+        ]
+      },
+      "related_listings": [
+        {
+          "id": "MS-CRAWL-0002",
+          "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0002",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "multi_unit",
+          "offer_type": "sale",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "price_eur": null,
+          "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 20
+        },
+        {
+          "id": "MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0003",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": 2,
+          "bedrooms_not_applicable": false,
+          "price_eur": 600,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 32
+        },
+        {
+          "id": "MS-CRAWL-0004",
+          "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0004",
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "he",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "rent",
+          "bedrooms": 1,
+          "bedrooms_not_applicable": false,
+          "price_eur": 355,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 26
+        }
+      ],
+      "source": {
+        "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
+        "source_domain": "makler-realty.com",
+        "source_locale": "bg",
+        "source_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+      }
+    }
+  },
+  "sold_search_he": {
+    "kind": "search",
+    "status": 200,
+    "requested_locale": "he",
+    "locale": "he",
+    "lang": "he",
+    "dir": "rtl",
+    "path": "/he/search",
+    "canonical": "/he/search",
+    "indexable": true,
+    "metadata": {
+      "title": "MS Realty property search",
+      "description": "Locale-scoped property search backed by reviewed MS Realty inventory.",
+      "robots": "index,follow"
+    },
+    "mobile_policy": {
+      "list_first_mobile": true,
+      "sticky_contact_actions": true,
+      "minimum_tap_target_px": 44
+    },
+    "search": {
+      "engines": [
+        "typesense",
+        "meilisearch"
+      ],
+      "query": "Sandanski",
+      "filters": {
+        "locale": "he",
+        "public_enabled": true,
+        "indexable": true
+      },
+      "total_matches": 108,
+      "returned": 12,
+      "fallback": {
+        "enabled": true,
+        "locale": "en",
+        "label": "fallback_source_locale"
+      }
+    },
+    "cards": [
+      {
+        "id": "MS-CRAWL-0002",
+        "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0002",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "multi_unit",
+        "offer_type": "sale",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 20
+      },
+      {
+        "id": "MS-CRAWL-0003",
+        "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0003",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "rent",
+        "bedrooms": 2,
+        "bedrooms_not_applicable": false,
+        "price_eur": 600,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 32
+      },
+      {
+        "id": "MS-CRAWL-0004",
+        "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0004",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "rent",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "price_eur": 355,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 26
+      },
+      {
+        "id": "MS-CRAWL-0005",
+        "title": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0005",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "rent",
+        "bedrooms": 2,
+        "bedrooms_not_applicable": false,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 26
+      },
+      {
+        "id": "MS-CRAWL-0006",
+        "title": "Industrieel gebouw te huur in Sandanski",
+        "path": "/he/properties/MS-CRAWL-0006",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "commercial",
+        "offer_type": "rent",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "price_eur": 1,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 18
+      },
+      {
+        "id": "MS-CRAWL-0007",
+        "title": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0007",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "sale",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "price_eur": 53289,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 24
+      },
+      {
+        "id": "MS-CRAWL-0008",
+        "title": "Двустаен апартамент в центъра на Сандански - наем - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0008",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "rent",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "price_eur": 350,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 35
+      },
+      {
+        "id": "MS-CRAWL-0009",
+        "title": "Двустаен апартамент под наем в парка на Сандански - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0009",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "rent",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "price_eur": 400,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 26
+      },
+      {
+        "id": "MS-CRAWL-0010",
+        "title": "Двустаен апартамент в идеалния център на гр. Сандански - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0010",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "sale",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "price_eur": 130000,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 34
+      },
+      {
+        "id": "MS-CRAWL-0011",
+        "title": "Дългосрочен наем в Парк Хотел Пирин - гр.Сандански - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0011",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "hotel",
+        "offer_type": "rent",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 38
+      },
+      {
+        "id": "MS-CRAWL-0012",
+        "title": "Инвестиционен проект в Сандански - хотел ресторант - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0012",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "hotel",
+        "offer_type": "sale",
+        "bedrooms": null,
+        "bedrooms_not_applicable": false,
+        "price_eur": 950000,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 19
+      },
+      {
+        "id": "MS-CRAWL-0014",
+        "title": "Наем - Двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
+        "path": "/he/properties/MS-CRAWL-0014",
+        "translation_display": "fallback_source_locale",
+        "translation_locale": "he",
+        "translation_status": "missing",
+        "translation_indexable": false,
+        "translation_human_approved": false,
+        "source_locale": "bg",
+        "location": "Sandanski",
+        "property_type": "apartment",
+        "offer_type": "rent",
+        "bedrooms": 1,
+        "bedrooms_not_applicable": false,
+        "price_eur": 230,
+        "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
+        "image_count": 23
+      }
+    ]
+  },
+  "sold_location_he": {
+    "kind": "location",
+    "status": 404,
+    "requested_locale": "he",
+    "locale": "he",
+    "lang": "he",
+    "dir": "rtl",
+    "path": "/he/locations/sandanski",
+    "canonical": "/he/locations/sandanski",
+    "indexable": false,
+    "metadata": {
+      "title": "MS Realty properties in Sandanski",
+      "description": "Reviewed MS Realty property inventory for Sandanski.",
+      "robots": "noindex,follow"
+    },
+    "hreflang": [],
+    "body": {
+      "h1": "Properties in Sandanski",
+      "location": "Sandanski",
+      "listing_count": 0
+    },
+    "cards": []
   },
   "fallback_fr": {
     "kind": "language_fallback",
@@ -1185,6 +2094,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       },
       {
@@ -1204,6 +2115,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 20
       },
       {
@@ -1223,6 +2136,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 600,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 32
       },
       {
@@ -1242,6 +2157,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 355,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -1261,6 +2178,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -1280,6 +2199,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 1,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 18
       },
       {
@@ -1299,6 +2220,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 53289,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 24
       },
       {
@@ -1318,6 +2241,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 350,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       },
       {
@@ -1337,6 +2262,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 400,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -1356,6 +2283,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 130000,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 34
       },
       {
@@ -1375,6 +2304,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 38
       },
       {
@@ -1394,6 +2325,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 950000,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 19
       }
     ]

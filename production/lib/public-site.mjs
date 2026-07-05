@@ -283,6 +283,12 @@ function translationsForSearchListing(registry, listing) {
   return listing.translations || approvedTranslationRecordsForListing(registry, listing);
 }
 
+const ACTIVE_LISTING_STATUSES = new Set(["available", "reserved"]);
+
+export function isActiveListing(listing) {
+  return ACTIVE_LISTING_STATUSES.has(listingToPublicViewModel(listing).listing_status || "available");
+}
+
 function searchTranslationState(registry, listing, locale) {
   const translation = translationFor(translationsForSearchListing(registry, listing), locale.code);
   const indexable = translation ? isTranslationIndexable(registry, translation) : false;
@@ -321,6 +327,8 @@ function listingCard(registry, listing, locale) {
     bedrooms_not_applicable: view.bedrooms_not_applicable,
     price_eur: view.price_eur,
     price_on_request: view.price_on_request,
+    listing_status: view.listing_status,
+    listing_active: isActiveListing(listing),
     image_count: Number(listing.image_count || 0),
   };
 }
@@ -361,6 +369,7 @@ function matchesSearch(view, query, filters = {}) {
   if (filters.location && !norm(view.location).includes(norm(filters.location))) return false;
   if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
   if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
+  if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;
   if (!numberFilter(view.price_eur, filters.price_min, filters.price_max)) return false;
   if (!numberFilter(view.bedrooms, filters.bedrooms_min, undefined)) return false;
   return true;
@@ -442,7 +451,7 @@ function listingActions(locale, view, path, labels, brokerContact = null) {
   };
 }
 
-export function renderListingPage({ registry, listing, localeCode, translations, brokerContact = null }) {
+export function renderListingPage({ registry, listing, localeCode, translations, brokerContact = null, relatedListings = [] }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const view = listingToPublicViewModel(listing);
@@ -495,7 +504,13 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         bedrooms: view.bedrooms,
         price_eur: view.price_eur,
         price_on_request: view.price_on_request,
+        listing_status: view.listing_status,
         image_count: view.image_count,
+      },
+      lifecycle: {
+        status: view.listing_status,
+        active_in_search: isActiveListing(listing),
+        seo_kept_live: true,
       },
       quality_flags: {
         bedrooms_not_applicable: view.bedrooms_not_applicable === true,
@@ -509,6 +524,10 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         seller_valuation: labels.valuation,
       },
       actions: listingActions(locale, view, path, labels, brokerContact),
+      related_listings: relatedListings
+        .filter((candidate) => candidate.id !== listing.id && isActiveListing(candidate))
+        .slice(0, 3)
+        .map((candidate) => listingCard(registry, candidate, locale)),
       source: {
         old_url: view.source_url,
         source_domain: view.source_domain,
@@ -522,8 +541,9 @@ export function renderListingPage({ registry, listing, localeCode, translations,
 export function renderSearchPage({ registry, localeCode, listings, query = "", filters = {} }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
-  const localeMatches = listings.filter((listing) => listing.locale === locale.code);
-  const fallbackMatches = listings.filter(
+  const activeListings = listings.filter(isActiveListing);
+  const localeMatches = activeListings.filter((listing) => listing.locale === locale.code);
+  const fallbackMatches = activeListings.filter(
     (listing) => listing.locale === (locale.fallback_locale || registry.source_locale) || listing.locale === registry.source_locale,
   );
   const matchedListings = (localeMatches.length ? localeMatches : fallbackMatches).filter((listing) =>
@@ -678,7 +698,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   const locale = resolved.locale;
   const matchedListings = listings.filter((listing) => {
     const view = listingToPublicViewModel(listing);
-    return norm(view.location) === norm(location) && indexableListingForLocale(registry, listing, locale);
+    return norm(view.location) === norm(location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, locale);
   });
   const path = locationPath(registry, locale.code, location);
   const indexable = resolved.available && matchedListings.length > 0;
@@ -686,7 +706,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
     .filter((candidate) =>
       listings.some((listing) => {
         const view = listingToPublicViewModel(listing);
-        return norm(view.location) === norm(location) && indexableListingForLocale(registry, listing, candidate);
+        return norm(view.location) === norm(location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, candidate);
       }),
     )
     .map((candidate) => candidate.code);

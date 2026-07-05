@@ -12,6 +12,7 @@ const EDITABLE_FACT_FIELDS = new Set([
   "location",
   "property_type",
   "offer_type",
+  "listing_status",
   "bedrooms",
   "bedrooms_not_applicable",
   "price_eur",
@@ -19,6 +20,7 @@ const EDITABLE_FACT_FIELDS = new Set([
 ]);
 const TEXT_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type"]);
 const BOOLEAN_FACT_FIELDS = new Set(["bedrooms_not_applicable", "price_on_request"]);
+const LISTING_STATUSES = new Set(["available", "reserved", "sold", "rented", "archived"]);
 
 export function resetListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -85,6 +87,11 @@ function normalizePatch(patch = {}, { allowEmpty = false } = {}) {
 
 function normalizePatchValue(field, value) {
   if (TEXT_FACT_FIELDS.has(field)) return typeof value === "string" ? value.trim() : value;
+  if (field === "listing_status") {
+    const status = String(value || "").trim().toLowerCase();
+    if (!LISTING_STATUSES.has(status)) throw new Error("listing_status must be available, reserved, sold, rented, or archived");
+    return status;
+  }
   if (BOOLEAN_FACT_FIELDS.has(field)) return value === true || value === "true" || value === "on" || value === "1";
   if (value === "" || value === null) return "";
   const number = Number(value);

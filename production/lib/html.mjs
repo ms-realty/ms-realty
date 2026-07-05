@@ -73,12 +73,18 @@ function renderListing(page) {
   const primary = page.body.actions.primary
     .map((action) => `<button type="button" data-endpoint="${escapeHtml(action.endpoint)}">${escapeHtml(action.label)}</button>`)
     .join("");
+  const related = (page.body.related_listings || [])
+    .map((card) => `<article data-related-listing="true"><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2></article>`)
+    .join("");
   return `
-<main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}" data-min-touch-target="44">
+<main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}" data-listing-status="${escapeHtml(
+    page.body.lifecycle?.status || "available",
+  )}" data-active-in-search="${escapeHtml(page.body.lifecycle?.active_in_search ? "true" : "false")}" data-min-touch-target="44">
   <h1>${escapeHtml(page.body.h1)}</h1>
   <p>${escapeHtml(page.body.description || "")}</p>
   <dl>${renderFacts(page.body.facts)}</dl>
   <section aria-label="Gallery">${gallery}</section>
+  <section aria-label="Related listings">${related}</section>
   <nav aria-label="Listing actions" data-mobile-sticky-actions="${escapeHtml(page.body.actions.sticky_mobile ? "true" : "false")}">${primary}</nav>
   <nav aria-label="Broker contact">${direct}</nav>
 </main>`;

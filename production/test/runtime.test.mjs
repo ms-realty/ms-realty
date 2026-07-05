@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
+import { applyListingEdits } from "../lib/listing-edits.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
@@ -169,6 +170,27 @@ test("runtime search uses CMS seed listings and keeps mobile-first contract", ()
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.ok(apartmentSearch.cards.every((card) => card.property_type === "apartment"));
   assert.ok(apartmentSearch.search.total_matches > apartmentSearch.cards.length);
+});
+
+test("runtime keeps sold listing pages live while removing them from active inventory", () => {
+  const soldSeed = applyListingEdits(seed, [
+    {
+      listing_id: "MS-CRAWL-0001",
+      patch: { listing_status: "sold" },
+    },
+  ]);
+  const listing = renderRuntimePath(registry, soldSeed, "/he/properties/MS-CRAWL-0001");
+  const search = searchRuntimeListings(registry, soldSeed, { localeCode: "he", query: "Sandanski" });
+  const location = renderRuntimePath(registry, soldSeed, "/he/locations/sandanski");
+
+  assert.equal(listing.status, 200);
+  assert.equal(listing.indexable, true);
+  assert.equal(listing.body.facts.listing_status, "sold");
+  assert.equal(listing.body.lifecycle.active_in_search, false);
+  assert.equal(listing.body.lifecycle.seo_kept_live, true);
+  assert.equal(listing.body.related_listings.length > 0, true);
+  assert.equal(search.cards.some((card) => card.id === "MS-CRAWL-0001"), false);
+  assert.equal((location.cards || []).some((card) => card.id === "MS-CRAWL-0001"), false);
 });
 
 test("runtime search overlays stale translation ledger rows before card rendering", () => {

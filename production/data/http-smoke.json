@@ -154,6 +154,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 35
         },
         {
@@ -173,6 +175,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 20
         },
         {
@@ -192,6 +196,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 600,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 32
         },
         {
@@ -211,6 +217,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 355,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -230,6 +238,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -249,6 +259,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 1,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 18
         }
       ]
@@ -375,7 +387,13 @@
           "bedrooms": null,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
           "image_count": 35
+        },
+        "lifecycle": {
+          "status": "available",
+          "active_in_search": true,
+          "seo_kept_live": true
         },
         "quality_flags": {
           "bedrooms_not_applicable": false
@@ -631,6 +649,71 @@
             }
           ]
         },
+        "related_listings": [
+          {
+            "id": "MS-CRAWL-0002",
+            "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0002",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "multi_unit",
+            "offer_type": "sale",
+            "bedrooms": null,
+            "bedrooms_not_applicable": false,
+            "price_eur": null,
+            "price_on_request": true,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 20
+          },
+          {
+            "id": "MS-CRAWL-0003",
+            "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0003",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 2,
+            "bedrooms_not_applicable": false,
+            "price_eur": 600,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 32
+          },
+          {
+            "id": "MS-CRAWL-0004",
+            "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0004",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 1,
+            "bedrooms_not_applicable": false,
+            "price_eur": 355,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 26
+          }
+        ],
         "source": {
           "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
           "source_domain": "makler-realty.com",
@@ -649,7 +732,7 @@
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
       "content-type": "text/html; charset=utf-8"
     },
-    "body": "<!doctype html>\n<html lang=\"he\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<style>button,input,textarea,select{min-height:44px}nav[data-mobile-sticky-actions=\"true\"]{position:sticky;bottom:0;background:#fff}</style>\n<title>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</title>\n<meta name=\"description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta name=\"robots\" content=\"index,follow\">\n<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:site_name\" content=\"MS Realty\">\n<meta property=\"og:title\" content=\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\">\n<meta property=\"og:description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta property=\"og:url\" content=\"/he/properties/MS-CRAWL-0001\">\n<meta property=\"og:locale\" content=\"he\">\n<meta property=\"og:image\" content=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\">\n<link rel=\"canonical\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"bg\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"el\" href=\"/el/akinita/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"he\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"x-default\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"RealEstateListing\",\"@id\":\"/he/properties/MS-CRAWL-0001#listing\",\"url\":\"/he/properties/MS-CRAWL-0001\",\"identifier\":\"MS-CRAWL-0001\",\"name\":\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\",\"description\":\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\",\"category\":\"commercial\",\"image\":[\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg\"],\"additionalProperty\":[{\"@type\":\"PropertyValue\",\"name\":\"offer_type\",\"value\":\"rent\"},{\"@type\":\"PropertyValue\",\"name\":\"source_locale\",\"value\":\"bg\"}],\"areaServed\":{\"@type\":\"Place\",\"name\":\"Sandanski\"}}</script>\n</head>\n<body>\n\n<main data-kind=\"listing\" data-review-status=\"needs_broker_contact_review\" data-min-touch-target=\"44\">\n  <h1>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</h1>\n  <p>Updated approved source description.</p>\n  <dl><dt>id</dt><dd>MS-CRAWL-0001</dd><dt>location</dt><dd>Sandanski</dd><dt>property type</dt><dd>commercial</dd><dt>offer type</dt><dd>rent</dd><dt>price on request</dt><dd>true</dd><dt>image count</dt><dd>35</dd></dl>\n  <section aria-label=\"Gallery\"><img src=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"></section>\n  <nav aria-label=\"Listing actions\" data-mobile-sticky-actions=\"true\"><button type=\"button\" data-endpoint=\"/api/leads\">פנייה</button><button type=\"button\" data-endpoint=\"/api/leads\">שיחה חוזרת</button><button type=\"button\" data-endpoint=\"/api/leads\">תיאום סיור</button></nav>\n  <nav aria-label=\"Broker contact\"><span aria-disabled=\"true\">טלפון</span><span aria-disabled=\"true\">WhatsApp</span><span aria-disabled=\"true\">Viber</span></nav>\n</main>\n</body>\n</html>"
+    "body": "<!doctype html>\n<html lang=\"he\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<style>button,input,textarea,select{min-height:44px}nav[data-mobile-sticky-actions=\"true\"]{position:sticky;bottom:0;background:#fff}</style>\n<title>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</title>\n<meta name=\"description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta name=\"robots\" content=\"index,follow\">\n<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:site_name\" content=\"MS Realty\">\n<meta property=\"og:title\" content=\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\">\n<meta property=\"og:description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta property=\"og:url\" content=\"/he/properties/MS-CRAWL-0001\">\n<meta property=\"og:locale\" content=\"he\">\n<meta property=\"og:image\" content=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\">\n<link rel=\"canonical\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"bg\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"el\" href=\"/el/akinita/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"he\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"x-default\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"RealEstateListing\",\"@id\":\"/he/properties/MS-CRAWL-0001#listing\",\"url\":\"/he/properties/MS-CRAWL-0001\",\"identifier\":\"MS-CRAWL-0001\",\"name\":\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\",\"description\":\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\",\"category\":\"commercial\",\"image\":[\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg\"],\"additionalProperty\":[{\"@type\":\"PropertyValue\",\"name\":\"offer_type\",\"value\":\"rent\"},{\"@type\":\"PropertyValue\",\"name\":\"source_locale\",\"value\":\"bg\"}],\"areaServed\":{\"@type\":\"Place\",\"name\":\"Sandanski\"}}</script>\n</head>\n<body>\n\n<main data-kind=\"listing\" data-review-status=\"needs_broker_contact_review\" data-listing-status=\"available\" data-active-in-search=\"true\" data-min-touch-target=\"44\">\n  <h1>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</h1>\n  <p>Updated approved source description.</p>\n  <dl><dt>id</dt><dd>MS-CRAWL-0001</dd><dt>location</dt><dd>Sandanski</dd><dt>property type</dt><dd>commercial</dd><dt>offer type</dt><dd>rent</dd><dt>price on request</dt><dd>true</dd><dt>listing status</dt><dd>available</dd><dt>image count</dt><dd>35</dd></dl>\n  <section aria-label=\"Gallery\"><img src=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\" loading=\"lazy\"></section>\n  <section aria-label=\"Related listings\"><article data-related-listing=\"true\"><h2><a href=\"/he/properties/MS-CRAWL-0002\">Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански</a></h2></article><article data-related-listing=\"true\"><h2><a href=\"/he/properties/MS-CRAWL-0003\">Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански</a></h2></article><article data-related-listing=\"true\"><h2><a href=\"/he/properties/MS-CRAWL-0004\">Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански</a></h2></article></section>\n  <nav aria-label=\"Listing actions\" data-mobile-sticky-actions=\"true\"><button type=\"button\" data-endpoint=\"/api/leads\">פנייה</button><button type=\"button\" data-endpoint=\"/api/leads\">שיחה חוזרת</button><button type=\"button\" data-endpoint=\"/api/leads\">תיאום סיור</button></nav>\n  <nav aria-label=\"Broker contact\"><span aria-disabled=\"true\">טלפון</span><span aria-disabled=\"true\">WhatsApp</span><span aria-disabled=\"true\">Viber</span></nav>\n</main>\n</body>\n</html>"
   },
   "listingPrint": {
     "status": 200,
@@ -660,7 +743,7 @@
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
       "content-type": "text/html; charset=utf-8"
     },
-    "body": "<!doctype html>\n<html lang=\"he\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<style>button,input,textarea,select{min-height:44px}nav[data-mobile-sticky-actions=\"true\"]{position:sticky;bottom:0;background:#fff}</style>\n<title>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</title>\n<meta name=\"description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta name=\"robots\" content=\"index,follow\">\n<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:site_name\" content=\"MS Realty\">\n<meta property=\"og:title\" content=\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\">\n<meta property=\"og:description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta property=\"og:url\" content=\"/he/properties/MS-CRAWL-0001\">\n<meta property=\"og:locale\" content=\"he\">\n<meta property=\"og:image\" content=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\">\n<link rel=\"canonical\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"bg\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"el\" href=\"/el/akinita/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"he\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"x-default\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"RealEstateListing\",\"@id\":\"/he/properties/MS-CRAWL-0001#listing\",\"url\":\"/he/properties/MS-CRAWL-0001\",\"identifier\":\"MS-CRAWL-0001\",\"name\":\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\",\"description\":\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\",\"category\":\"commercial\",\"image\":[\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg\"],\"additionalProperty\":[{\"@type\":\"PropertyValue\",\"name\":\"offer_type\",\"value\":\"rent\"},{\"@type\":\"PropertyValue\",\"name\":\"source_locale\",\"value\":\"bg\"}],\"areaServed\":{\"@type\":\"Place\",\"name\":\"Sandanski\"}}</script>\n</head>\n<body>\n\n<style>\n@media print {\n  a[href]::after { content: \" (\" attr(href) \")\"; font-size: 10pt; }\n  nav, section, dl { break-inside: avoid; }\n  img { max-width: 48%; height: auto; }\n}\n</style>\n<main data-kind=\"listing-print\" data-print-status=\"browser-pdf-ready\" data-review-status=\"needs_broker_contact_review\">\n  <h1>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</h1>\n  <p>פרטי נכס מאושרים של MS Realty עבור Sandanski.</p>\n  <dl><dt>id</dt><dd>MS-CRAWL-0001</dd><dt>location</dt><dd>Sandanski</dd><dt>property type</dt><dd>commercial</dd><dt>offer type</dt><dd>rent</dd><dt>price on request</dt><dd>true</dd><dt>image count</dt><dd>35</dd></dl>\n  <section aria-label=\"Listing photos\"><img src=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"></section>\n  <nav aria-label=\"Broker contact\"><span aria-disabled=\"true\">טלפון</span><span aria-disabled=\"true\">WhatsApp</span><span aria-disabled=\"true\">Viber</span></nav>\n  <p><a href=\"/he/properties/MS-CRAWL-0001\">/he/properties/MS-CRAWL-0001</a></p>\n  <p>makler-realty.com https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/</p>\n</main>\n</body>\n</html>"
+    "body": "<!doctype html>\n<html lang=\"he\" dir=\"rtl\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<style>button,input,textarea,select{min-height:44px}nav[data-mobile-sticky-actions=\"true\"]{position:sticky;bottom:0;background:#fff}</style>\n<title>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</title>\n<meta name=\"description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta name=\"robots\" content=\"index,follow\">\n<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:site_name\" content=\"MS Realty\">\n<meta property=\"og:title\" content=\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\">\n<meta property=\"og:description\" content=\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\">\n<meta property=\"og:url\" content=\"/he/properties/MS-CRAWL-0001\">\n<meta property=\"og:locale\" content=\"he\">\n<meta property=\"og:image\" content=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\">\n<link rel=\"canonical\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"bg\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"el\" href=\"/el/akinita/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"he\" href=\"/he/properties/MS-CRAWL-0001\">\n<link rel=\"alternate\" hreflang=\"x-default\" href=\"/bg/imoti/MS-CRAWL-0001\">\n<script type=\"application/ld+json\">{\"@context\":\"https://schema.org\",\"@type\":\"RealEstateListing\",\"@id\":\"/he/properties/MS-CRAWL-0001#listing\",\"url\":\"/he/properties/MS-CRAWL-0001\",\"identifier\":\"MS-CRAWL-0001\",\"name\":\"נכס MS Realty MS-CRAWL-0001 ב-Sandanski\",\"description\":\"פרטי נכס מאושרים של MS Realty עבור Sandanski.\",\"category\":\"commercial\",\"image\":[\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg\",\"https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg\"],\"additionalProperty\":[{\"@type\":\"PropertyValue\",\"name\":\"offer_type\",\"value\":\"rent\"},{\"@type\":\"PropertyValue\",\"name\":\"source_locale\",\"value\":\"bg\"}],\"areaServed\":{\"@type\":\"Place\",\"name\":\"Sandanski\"}}</script>\n</head>\n<body>\n\n<style>\n@media print {\n  a[href]::after { content: \" (\" attr(href) \")\"; font-size: 10pt; }\n  nav, section, dl { break-inside: avoid; }\n  img { max-width: 48%; height: auto; }\n}\n</style>\n<main data-kind=\"listing-print\" data-print-status=\"browser-pdf-ready\" data-review-status=\"needs_broker_contact_review\">\n  <h1>נכס MS Realty MS-CRAWL-0001 ב-Sandanski</h1>\n  <p>פרטי נכס מאושרים של MS Realty עבור Sandanski.</p>\n  <dl><dt>id</dt><dd>MS-CRAWL-0001</dd><dt>location</dt><dd>Sandanski</dd><dt>property type</dt><dd>commercial</dd><dt>offer type</dt><dd>rent</dd><dt>price on request</dt><dd>true</dd><dt>listing status</dt><dd>available</dd><dt>image count</dt><dd>35</dd></dl>\n  <section aria-label=\"Listing photos\"><img src=\"https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"><img src=\"https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg\" alt=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"></section>\n  <nav aria-label=\"Broker contact\"><span aria-disabled=\"true\">טלפון</span><span aria-disabled=\"true\">WhatsApp</span><span aria-disabled=\"true\">Viber</span></nav>\n  <p><a href=\"/he/properties/MS-CRAWL-0001\">/he/properties/MS-CRAWL-0001</a></p>\n  <p>makler-realty.com https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/</p>\n</main>\n</body>\n</html>"
   },
   "brokerContact": {
     "status": 201,
@@ -797,7 +880,13 @@
           "bedrooms": null,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
           "image_count": 35
+        },
+        "lifecycle": {
+          "status": "available",
+          "active_in_search": true,
+          "seo_kept_live": true
         },
         "quality_flags": {
           "bedrooms_not_applicable": false
@@ -1053,6 +1142,71 @@
             }
           ]
         },
+        "related_listings": [
+          {
+            "id": "MS-CRAWL-0002",
+            "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0002",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "multi_unit",
+            "offer_type": "sale",
+            "bedrooms": null,
+            "bedrooms_not_applicable": false,
+            "price_eur": null,
+            "price_on_request": true,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 20
+          },
+          {
+            "id": "MS-CRAWL-0003",
+            "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0003",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 2,
+            "bedrooms_not_applicable": false,
+            "price_eur": 600,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 32
+          },
+          {
+            "id": "MS-CRAWL-0004",
+            "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0004",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 1,
+            "bedrooms_not_applicable": false,
+            "price_eur": 355,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 26
+          }
+        ],
         "source": {
           "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
           "source_domain": "makler-realty.com",
@@ -1222,7 +1376,13 @@
           "bedrooms": null,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
           "image_count": 35
+        },
+        "lifecycle": {
+          "status": "available",
+          "active_in_search": true,
+          "seo_kept_live": true
         },
         "quality_flags": {
           "bedrooms_not_applicable": false
@@ -1481,6 +1641,71 @@
             }
           ]
         },
+        "related_listings": [
+          {
+            "id": "MS-CRAWL-0002",
+            "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0002",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "multi_unit",
+            "offer_type": "sale",
+            "bedrooms": null,
+            "bedrooms_not_applicable": false,
+            "price_eur": null,
+            "price_on_request": true,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 20
+          },
+          {
+            "id": "MS-CRAWL-0003",
+            "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0003",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 2,
+            "bedrooms_not_applicable": false,
+            "price_eur": 600,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 32
+          },
+          {
+            "id": "MS-CRAWL-0004",
+            "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+            "path": "/he/properties/MS-CRAWL-0004",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "he",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 1,
+            "bedrooms_not_applicable": false,
+            "price_eur": 355,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 26
+          }
+        ],
         "source": {
           "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
           "source_domain": "makler-realty.com",
@@ -1556,6 +1781,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 35
         },
         {
@@ -1575,6 +1802,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 20
         },
         {
@@ -1594,6 +1823,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 600,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 32
         },
         {
@@ -1613,6 +1844,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 355,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -1632,6 +1865,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -1651,6 +1886,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 1,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 18
         },
         {
@@ -1670,6 +1907,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 53289,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 24
         },
         {
@@ -1689,6 +1928,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 350,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 35
         },
         {
@@ -1708,6 +1949,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 400,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -1727,6 +1970,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 130000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 34
         },
         {
@@ -1746,6 +1991,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 38
         },
         {
@@ -1765,6 +2012,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 950000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 19
         }
       ]
@@ -1850,6 +2099,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 35
         }
       ]
@@ -1933,6 +2184,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 600,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 32
         },
         {
@@ -1952,6 +2205,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 355,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -1971,6 +2226,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -1990,6 +2247,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 53289,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 24
         },
         {
@@ -2009,6 +2268,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 350,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 35
         },
         {
@@ -2028,6 +2289,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 400,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -2047,6 +2310,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 130000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 34
         },
         {
@@ -2066,6 +2331,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 230,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 23
         },
         {
@@ -2085,6 +2352,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 117000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 29
         },
         {
@@ -2104,6 +2373,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 165000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 44
         },
         {
@@ -2123,6 +2394,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 125000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 28
         },
         {
@@ -2142,6 +2415,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 53307,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 24
         }
       ]
@@ -8944,7 +9219,7 @@
       "content-type": "text/html; charset=utf-8",
       "cache-control": "no-store"
     },
-    "body": "<!doctype html>\n<html lang=\"bg\" dir=\"ltr\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<style>button,input,textarea,select{min-height:44px}nav[data-mobile-sticky-actions=\"true\"]{position:sticky;bottom:0;background:#fff}</style>\n<title>MS Realty property editor</title>\n<meta name=\"description\" content=\"Admin-only listing fact editor with stale translation review state.\">\n<meta name=\"robots\" content=\"noindex,nofollow\">\n<meta property=\"og:type\" content=\"website\">\n<meta property=\"og:site_name\" content=\"MS Realty\">\n<meta property=\"og:title\" content=\"MS Realty property editor\">\n<meta property=\"og:description\" content=\"Admin-only listing fact editor with stale translation review state.\">\n<meta property=\"og:url\" content=\"/admin/listings/edit\">\n<meta property=\"og:locale\" content=\"bg\">\n<link rel=\"canonical\" href=\"/admin/listings/edit\">\n</head>\n<body>\n\n<main data-kind=\"admin-listing-editor\" data-listing-id=\"MS-CRAWL-0001\" data-admin-locale=\"bg\">\n  <h1>Property editor</h1>\n  <p>makler-realty.com bg</p>\n  <form method=\"post\" action=\"/api/admin/listings/edit\" data-editor-form=\"listing\">\n    <input type=\"hidden\" name=\"listingId\" value=\"MS-CRAWL-0001\">\n    <label>Editor <input name=\"editor\" required autocomplete=\"name\"></label>\n    <label>title <input name=\"title\" value=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\"></label><label>h1 <input name=\"h1\" value=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"></label><label>description <textarea name=\"description\">Updated approved source description.</textarea></label><label>location <input name=\"location\" value=\"Sandanski\"></label><label>property type <input name=\"property_type\" value=\"commercial\"></label><label>offer type <input name=\"offer_type\" value=\"rent\"></label><label>bedrooms <input name=\"bedrooms\" value=\"\"></label><label>bedrooms not applicable <input name=\"bedrooms_not_applicable\" value=\"false\"></label><label>price eur <input name=\"price_eur\" value=\"\"></label><label>price on request <input name=\"price_on_request\" value=\"true\"></label>\n    <button type=\"submit\">Save source edit</button>\n  </form>\n  <section aria-label=\"Translation state\">\n    <h2>Translation state</h2>\n    <ul><li data-translation-locale=\"bg\">bg: published</li><li data-translation-locale=\"el\">el: approved</li><li data-translation-locale=\"he\">he: approved</li></ul>\n  </section>\n  <section aria-label=\"Quality\">\n    <h2>Quality</h2>\n    <dl>\n      <dt>CMS status</dt><dd>source_imported_review_required</dd>\n      <dt>Schema</dt><dd>missing</dd>\n      <dt>Media assets</dt><dd>35</dd>\n      <dt>Public tour</dt><dd>review required</dd>\n    </dl>\n  </section>\n</main>\n</body>\n</html>"
+    "body": "<!doctype html>\n<html lang=\"bg\" dir=\"ltr\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<style>button,input,textarea,select{min-height:44px}nav[data-mobile-sticky-actions=\"true\"]{position:sticky;bottom:0;background:#fff}</style>\n<title>MS Realty property editor</title>\n<meta name=\"description\" content=\"Admin-only listing fact editor with stale translation review state.\">\n<meta name=\"robots\" content=\"noindex,nofollow\">\n<meta property=\"og:type\" content=\"website\">\n<meta property=\"og:site_name\" content=\"MS Realty\">\n<meta property=\"og:title\" content=\"MS Realty property editor\">\n<meta property=\"og:description\" content=\"Admin-only listing fact editor with stale translation review state.\">\n<meta property=\"og:url\" content=\"/admin/listings/edit\">\n<meta property=\"og:locale\" content=\"bg\">\n<link rel=\"canonical\" href=\"/admin/listings/edit\">\n</head>\n<body>\n\n<main data-kind=\"admin-listing-editor\" data-listing-id=\"MS-CRAWL-0001\" data-admin-locale=\"bg\">\n  <h1>Property editor</h1>\n  <p>makler-realty.com bg</p>\n  <form method=\"post\" action=\"/api/admin/listings/edit\" data-editor-form=\"listing\">\n    <input type=\"hidden\" name=\"listingId\" value=\"MS-CRAWL-0001\">\n    <label>Editor <input name=\"editor\" required autocomplete=\"name\"></label>\n    <label>title <input name=\"title\" value=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\"></label><label>h1 <input name=\"h1\" value=\"Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\"></label><label>description <textarea name=\"description\">Updated approved source description.</textarea></label><label>location <input name=\"location\" value=\"Sandanski\"></label><label>property type <input name=\"property_type\" value=\"commercial\"></label><label>offer type <input name=\"offer_type\" value=\"rent\"></label><label>listing status <input name=\"listing_status\" value=\"\"></label><label>bedrooms <input name=\"bedrooms\" value=\"\"></label><label>bedrooms not applicable <input name=\"bedrooms_not_applicable\" value=\"false\"></label><label>price eur <input name=\"price_eur\" value=\"\"></label><label>price on request <input name=\"price_on_request\" value=\"true\"></label>\n    <button type=\"submit\">Save source edit</button>\n  </form>\n  <section aria-label=\"Translation state\">\n    <h2>Translation state</h2>\n    <ul><li data-translation-locale=\"bg\">bg: published</li><li data-translation-locale=\"el\">el: approved</li><li data-translation-locale=\"he\">he: approved</li></ul>\n  </section>\n  <section aria-label=\"Quality\">\n    <h2>Quality</h2>\n    <dl>\n      <dt>CMS status</dt><dd>source_imported_review_required</dd>\n      <dt>Schema</dt><dd>missing</dd>\n      <dt>Media assets</dt><dd>35</dd>\n      <dt>Public tour</dt><dd>review required</dd>\n    </dl>\n  </section>\n</main>\n</body>\n</html>"
   },
   "listingEdit": {
     "status": 201,
@@ -9176,7 +9451,13 @@
           "bedrooms": null,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
           "image_count": 35
+        },
+        "lifecycle": {
+          "status": "available",
+          "active_in_search": true,
+          "seo_kept_live": true
         },
         "quality_flags": {
           "bedrooms_not_applicable": false
@@ -9435,6 +9716,71 @@
             }
           ]
         },
+        "related_listings": [
+          {
+            "id": "MS-CRAWL-0002",
+            "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+            "path": "/el/akinita/MS-CRAWL-0002",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "el",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "multi_unit",
+            "offer_type": "sale",
+            "bedrooms": null,
+            "bedrooms_not_applicable": false,
+            "price_eur": null,
+            "price_on_request": true,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 20
+          },
+          {
+            "id": "MS-CRAWL-0003",
+            "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+            "path": "/el/akinita/MS-CRAWL-0003",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "el",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 2,
+            "bedrooms_not_applicable": false,
+            "price_eur": 600,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 32
+          },
+          {
+            "id": "MS-CRAWL-0004",
+            "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+            "path": "/el/akinita/MS-CRAWL-0004",
+            "translation_display": "fallback_source_locale",
+            "translation_locale": "el",
+            "translation_status": "missing",
+            "translation_indexable": false,
+            "translation_human_approved": false,
+            "source_locale": "bg",
+            "location": "Sandanski",
+            "property_type": "apartment",
+            "offer_type": "rent",
+            "bedrooms": 1,
+            "bedrooms_not_applicable": false,
+            "price_eur": 355,
+            "price_on_request": false,
+            "listing_status": "available",
+            "listing_active": true,
+            "image_count": 26
+          }
+        ],
         "source": {
           "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
           "source_domain": "makler-realty.com",
@@ -9510,6 +9856,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 35
         },
         {
@@ -9529,6 +9877,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 20
         },
         {
@@ -9548,6 +9898,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 600,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 32
         },
         {
@@ -9567,6 +9919,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 355,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -9586,6 +9940,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -9605,6 +9961,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 1,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 18
         },
         {
@@ -9624,6 +9982,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 53289,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 24
         },
         {
@@ -9643,6 +10003,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 350,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 35
         },
         {
@@ -9662,6 +10024,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 400,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 26
         },
         {
@@ -9681,6 +10045,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 130000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 34
         },
         {
@@ -9700,6 +10066,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": null,
           "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 38
         },
         {
@@ -9719,6 +10087,8 @@
           "bedrooms_not_applicable": false,
           "price_eur": 950000,
           "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
           "image_count": 19
         }
       ]

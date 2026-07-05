@@ -255,6 +255,20 @@ if (
 ) {
   throw new Error("Runtime smoke must expose conversion actions without unreviewed broker contact data");
 }
+if (
+  runtimeSmoke.sold_listing_he.status !== 200 ||
+  runtimeSmoke.sold_listing_he.body.lifecycle?.active_in_search !== false ||
+  runtimeSmoke.sold_listing_he.body.facts?.listing_status !== "sold" ||
+  runtimeSmoke.sold_listing_he.body.related_listings.length < 1
+) {
+  throw new Error("Runtime smoke must keep sold listing pages live with related active listings");
+}
+if (
+  runtimeSmoke.sold_search_he.cards.some((card) => card.id === "MS-CRAWL-0001") ||
+  runtimeSmoke.sold_location_he.cards.some((card) => card.id === "MS-CRAWL-0001")
+) {
+  throw new Error("Runtime smoke must remove sold listings from active search and location inventory");
+}
 if (runtimeSmoke.fallback_fr.indexable !== false) throw new Error("Runtime smoke must keep French fallback non-indexable");
 if (
   runtimeSmoke.contact_he.status !== 200 ||

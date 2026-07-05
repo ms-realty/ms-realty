@@ -43,6 +43,7 @@ What it proves now:
 - Authenticated admin translation draft and human-approved publish endpoints.
 - Authenticated listing edit endpoint that marks dependent translations stale.
 - Authenticated listing editor HTML workbench backed by the same stale-translation edit endpoint.
+- Listing status edits keep sold/rented/archived pages live for SEO while removing them from active search and location inventory.
 - Public listing routes overlay translation ledger state before indexability.
 - Runtime smoke fixture for listing route, search route, contact route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, contact, fallback, and lead endpoints.

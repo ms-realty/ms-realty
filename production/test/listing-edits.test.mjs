@@ -19,6 +19,7 @@ test("listing edits persist and stale dependent translations", () => {
         bedrooms: "2",
         bedrooms_not_applicable: "1",
         price_on_request: "on",
+        listing_status: "sold",
       },
     },
     [],
@@ -34,6 +35,7 @@ test("listing edits persist and stale dependent translations", () => {
   assert.equal(rows[0].patch.bedrooms, 2);
   assert.equal(rows[0].patch.bedrooms_not_applicable, true);
   assert.equal(rows[0].patch.price_on_request, true);
+  assert.equal(rows[0].patch.listing_status, "sold");
   assert.equal(result.staleTranslations.some((translation) => translation.locale === "el" && translation.status === "stale"), true);
   assert.equal(result.staleTranslations.every((translation) => translation.public_indexable === false), true);
   assert.equal(assertListingEdits(rows), true);
@@ -86,6 +88,15 @@ test("listing edits reject invalid numeric facts before persistence", () => {
         patch: { bedrooms: "1.5" },
       }),
     /bedrooms must be a non-negative integer/,
+  );
+  assert.throws(
+    () =>
+      createListingEdit(seed, {
+        listingId: "MS-CRAWL-0001",
+        editor: "editor_bg",
+        patch: { listing_status: "deleted" },
+      }),
+    /listing_status must be/,
   );
 });
 

@@ -81,6 +81,7 @@ export function listingToPublicViewModel(listing) {
     location: snapshot.location,
     property_type: snapshot.property_type,
     offer_type: snapshot.offer_type,
+    listing_status: listing.listing_status || "available",
     bedrooms: snapshot.bedrooms,
     bedrooms_not_applicable: snapshot.bedrooms_not_applicable,
     price_eur: snapshot.price_eur,

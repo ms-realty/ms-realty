@@ -100,7 +100,7 @@ function publicResponse(request, url, rendered) {
   return json(rendered.status || 200, rendered);
 }
 
-const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min"];
+const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "status", "price_min", "price_max", "bedrooms_min"];
 const LISTING_EDIT_FIELDS = [
   "title",
   "h1",
@@ -108,6 +108,7 @@ const LISTING_EDIT_FIELDS = [
   "location",
   "property_type",
   "offer_type",
+  "listing_status",
   "bedrooms",
   "bedrooms_not_applicable",
   "price_eur",

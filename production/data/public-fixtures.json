@@ -114,6 +114,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       },
       {
@@ -133,6 +135,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 20
       },
       {
@@ -152,6 +156,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 600,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 32
       },
       {
@@ -171,6 +177,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 355,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -190,6 +198,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -209,6 +219,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 1,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 18
       }
     ]
@@ -295,7 +307,13 @@
         "bedrooms": null,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
         "image_count": 35
+      },
+      "lifecycle": {
+        "status": "available",
+        "active_in_search": true,
+        "seo_kept_live": true
       },
       "quality_flags": {
         "bedrooms_not_applicable": false
@@ -417,6 +435,7 @@
           }
         ]
       },
+      "related_listings": [],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
         "source_domain": "makler-realty.com",
@@ -507,7 +526,13 @@
         "bedrooms": null,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
         "image_count": 35
+      },
+      "lifecycle": {
+        "status": "available",
+        "active_in_search": true,
+        "seo_kept_live": true
       },
       "quality_flags": {
         "bedrooms_not_applicable": false
@@ -629,6 +654,7 @@
           }
         ]
       },
+      "related_listings": [],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
         "source_domain": "makler-realty.com",
@@ -719,7 +745,13 @@
         "bedrooms": null,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
         "image_count": 35
+      },
+      "lifecycle": {
+        "status": "available",
+        "active_in_search": true,
+        "seo_kept_live": true
       },
       "quality_flags": {
         "bedrooms_not_applicable": false
@@ -841,6 +873,7 @@
           }
         ]
       },
+      "related_listings": [],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
         "source_domain": "makler-realty.com",
@@ -914,7 +947,13 @@
         "bedrooms": null,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
         "image_count": 35
+      },
+      "lifecycle": {
+        "status": "available",
+        "active_in_search": true,
+        "seo_kept_live": true
       },
       "quality_flags": {
         "bedrooms_not_applicable": false
@@ -1036,6 +1075,7 @@
           }
         ]
       },
+      "related_listings": [],
       "source": {
         "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
         "source_domain": "makler-realty.com",
@@ -1120,6 +1160,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       },
       {
@@ -1139,6 +1181,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 20
       },
       {
@@ -1158,6 +1202,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 600,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 32
       },
       {
@@ -1177,6 +1223,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 355,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -1196,6 +1244,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -1215,6 +1265,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 1,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 18
       },
       {
@@ -1234,6 +1286,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 53289,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 24
       },
       {
@@ -1253,6 +1307,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 350,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       },
       {
@@ -1272,6 +1328,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 400,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 26
       },
       {
@@ -1291,6 +1349,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 130000,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 34
       },
       {
@@ -1310,6 +1370,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 38
       },
       {
@@ -1329,6 +1391,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": 950000,
         "price_on_request": false,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 19
       }
     ]
@@ -1393,6 +1457,8 @@
         "bedrooms_not_applicable": false,
         "price_eur": null,
         "price_on_request": true,
+        "listing_status": "available",
+        "listing_active": true,
         "image_count": 35
       }
     ]

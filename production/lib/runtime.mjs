@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
+import { applyListingEdits } from "./listing-edits.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   renderHomePage,
@@ -11,6 +12,7 @@ import {
   renderSearchPage,
   renderContactPage,
   renderSellerPage,
+  isActiveListing,
 } from "./public-site.mjs";
 import { contactPath, locationPath, listingPath, sellerPath } from "./seo.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
@@ -41,6 +43,7 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     location: record.facts.location,
     property_type: record.facts.property_type,
     offer_type: record.facts.offer_type,
+    listing_status: record.facts.listing_status || "available",
     bedrooms: record.facts.bedrooms,
     bedrooms_not_applicable: record.facts.bedrooms_not_applicable === true,
     price_eur: record.facts.price_eur,
@@ -81,6 +84,13 @@ function translationPathMatches(registry, record, translation, normalized) {
 
 function locationNames(seed) {
   return [...new Set(listingRecords(seed).map((record) => String(record.facts.location || "").trim()).filter(Boolean))];
+}
+
+function runtimeListings(seed, translationTasks = []) {
+  return listingRecords(seed).map((record) => ({
+    ...listingFromCmsRecord(record),
+    translations: mergeRuntimeTranslations(record, translationTasks),
+  }));
 }
 
 export function resolveRuntimePath(registry, seed, pathname, translationTasks = [], tourApprovals = []) {
@@ -135,13 +145,19 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
 
 export function renderRuntimePath(registry, seed, pathname, translationTasks = [], brokerContacts = [], tourApprovals = []) {
   const resolved = resolveRuntimePath(registry, seed, pathname, translationTasks, tourApprovals);
+  const listings = () => runtimeListings(seed, translationTasks);
   if (resolved.type === "listing") {
+    const view = listingFromCmsRecord(resolved.record);
     return renderListingPage({
       registry,
       listing: resolved.listing,
       localeCode: resolved.localeCode,
       translations: mergeRuntimeTranslations(resolved.record, translationTasks),
       brokerContact: latestApprovedBrokerContact(brokerContacts, resolved.record.id),
+      relatedListings: listings().filter((candidate) => {
+        const sameLocation = candidate.location && candidate.location === view.location;
+        return sameLocation && candidate.id !== view.id && isActiveListing(candidate);
+      }),
     });
   }
   if (resolved.type === "language_fallback") {
@@ -151,10 +167,7 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
     return renderHomePage({
       registry,
       localeCode: resolved.localeCode,
-      listings: listingRecords(seed).map((record) => ({
-        ...listingFromCmsRecord(record),
-        translations: mergeRuntimeTranslations(record, translationTasks),
-      })),
+      listings: listings(),
     });
   }
   if (resolved.type === "seller") {
@@ -168,21 +181,14 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
       registry,
       localeCode: resolved.localeCode,
       location: resolved.location,
-      listings: listingRecords(seed).map((record) => ({
-        ...listingFromCmsRecord(record),
-        translations: mergeRuntimeTranslations(record, translationTasks),
-      })),
+      listings: listings(),
     });
   }
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
 
 export function searchRuntimeListings(registry, seed, { localeCode, query = "", filters = {}, translationTasks = [] }) {
-  const listings = listingRecords(seed).map((record) => ({
-    ...listingFromCmsRecord(record),
-    translations: mergeRuntimeTranslations(record, translationTasks),
-  }));
-  return renderSearchPage({ registry, localeCode, listings, query, filters });
+  return renderSearchPage({ registry, localeCode, listings: runtimeListings(seed, translationTasks), query, filters });
 }
 
 export function submitRuntimeLead(registry, seed, input) {
@@ -201,6 +207,7 @@ export function buildRuntimeSmoke(registry, seed) {
   const listing = listingRecords(seed).find((record) => record.id === "MS-CRAWL-0001");
   const ruListing = listingRecords(seed).find((record) => record.source_locale === "ru");
   const runtimeListing = listingFromCmsRecord(listing);
+  const soldSeed = applyListingEdits(seed, [{ listing_id: listing.id, patch: { listing_status: "sold" } }]);
 
   return {
     fixture_id: "runtime-smoke-20260704",
@@ -210,6 +217,9 @@ export function buildRuntimeSmoke(registry, seed) {
     seller_he: renderRuntimePath(registry, seed, "/he/sell"),
     contact_he: renderRuntimePath(registry, seed, "/he/contact"),
     location_he: renderRuntimePath(registry, seed, "/he/locations/sandanski"),
+    sold_listing_he: renderRuntimePath(registry, soldSeed, "/he/properties/MS-CRAWL-0001"),
+    sold_search_he: searchRuntimeListings(registry, soldSeed, { localeCode: "he", query: "Sandanski" }),
+    sold_location_he: renderRuntimePath(registry, soldSeed, "/he/locations/sandanski"),
     fallback_fr: renderRuntimePath(registry, seed, "/fr/"),
     search_he: searchRuntimeListings(registry, seed, { localeCode: "he", query: "Sandanski" }),
     lead_he: submitRuntimeLead(registry, seed, {
@@ -284,6 +294,20 @@ export function assertRuntimeSmoke(smoke) {
   }
   if (!smoke.location_he.cards.length || smoke.location_he.cards.some((card) => card.translation_indexable !== true)) {
     throw new Error("Runtime location page must only expose indexable locale cards");
+  }
+  if (
+    smoke.sold_listing_he.status !== 200 ||
+    smoke.sold_listing_he.body.lifecycle.active_in_search !== false ||
+    smoke.sold_listing_he.body.facts.listing_status !== "sold" ||
+    !smoke.sold_listing_he.body.related_listings.length
+  ) {
+    throw new Error("Runtime sold listing must stay live with related active listings");
+  }
+  if (
+    smoke.sold_search_he.cards.some((card) => card.id === "MS-CRAWL-0001") ||
+    smoke.sold_location_he.cards.some((card) => card.id === "MS-CRAWL-0001")
+  ) {
+    throw new Error("Runtime sold listing must be removed from active search and location inventory");
   }
   if (smoke.search_he.mobile_policy.list_first_mobile !== true) throw new Error("Runtime search must preserve mobile policy");
   if (smoke.lead_he.admin_locale !== "en" || smoke.lead_he.hermes_reply_draft.can_send_without_approval !== false) {

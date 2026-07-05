@@ -462,6 +462,7 @@ approved-translation-gated localized sitemap (`sitemap.xml` + `robots.txt`), `Re
 JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with OG
 + hreflang + schema, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only
 lead/reply/viewing/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
+listing-status workflow that keeps sold pages live while removing them from active inventory,
 mobile/elderly QA report, and a live Node server (`npm start`) exposing the same contracts.
 
 **Blocked until launch:** human redirect reviews (`migration/reviews/redirect-approvals.csv`) and real
