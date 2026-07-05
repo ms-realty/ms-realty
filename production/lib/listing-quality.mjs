@@ -74,7 +74,7 @@ function qualityRow(record, approvedTour = null) {
   if (record.media_workflow?.review_gated_assets) issues.push("media_review_pending");
   if (missingAltTextAssets) issues.push("missing_alt_text");
   if (publicGalleryAssets < 3) issues.push("thin_public_gallery");
-  if (tour && !tour.is_public) issues.push("tour_review_pending");
+  if (tour?.panorama_url && !tour.is_public) issues.push("tour_review_pending");
   if (!issues.length) return null;
 
   return {

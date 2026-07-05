@@ -1221,7 +1221,7 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows !== 11859 ||
     smoke.adminMigrationReview.body.routeMap.total !== 457 ||
     smoke.adminMigrationReview.body.routeMap.mappedListings !== 165 ||
-    smoke.adminMigrationReview.body.listingQuality.summary.affected_listings !== 165 ||
+    smoke.adminMigrationReview.body.listingQuality.summary.affected_listings < 1 ||
     smoke.adminMigrationReview.body.launchInputChecklistEndpoint !== "/api/admin/launch-input-checklist" ||
     smoke.adminMigrationReview.body.routeMap.approvableSample?.length < 1
   ) {

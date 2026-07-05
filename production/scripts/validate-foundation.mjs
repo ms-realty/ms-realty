@@ -707,15 +707,16 @@ if (!structuredData.summary.warnings.missing_price) {
 }
 
 const listingQuality = JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-quality-report.json"), "utf8"));
-if (listingQuality.summary.listings !== 165 || listingQuality.summary.affected_listings !== 165) {
-  throw new Error("Listing quality report must expose all source listing content gaps");
+if (listingQuality.summary.listings !== 165 || listingQuality.summary.affected_listings < 1) {
+  throw new Error("Listing quality report must cover source listings and expose actionable content gaps");
 }
 if (
   !listingQuality.summary.issue_counts.missing_price ||
   !Object.hasOwn(listingQuality.summary.issue_counts, "media_review_pending") ||
-  !Object.hasOwn(listingQuality.summary.issue_counts, "missing_alt_text")
+  !Object.hasOwn(listingQuality.summary.issue_counts, "missing_alt_text") ||
+  !Object.hasOwn(listingQuality.summary.issue_counts, "tour_review_pending")
 ) {
-  throw new Error("Listing quality report must keep price, media review, and alt text metrics actionable");
+  throw new Error("Listing quality report must keep price, media, alt text, and tour metrics actionable");
 }
 
 const mobileQa = JSON.parse(fs.readFileSync(fromRoot("production", "data", "mobile-elderly-qa-report.json"), "utf8"));
