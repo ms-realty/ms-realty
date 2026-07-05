@@ -28,3 +28,20 @@ test("production server entrypoint serves runtime routes with env config", async
     await close(server);
   }
 });
+
+test("production server config prefers explicit MS Realty env and rejects ambiguous numbers", () => {
+  const config = productionServerConfig({
+    PORT: "3000",
+    HOST: "0.0.0.0",
+    MS_REALTY_PORT: "8080",
+    MS_REALTY_MAX_BODY_BYTES: "1024",
+  });
+
+  assert.equal(config.port, 8080);
+  assert.equal(config.host, "0.0.0.0");
+  assert.equal(config.maxBodyBytes, 1024);
+  assert.throws(() => productionServerConfig({ PORT: " 0" }), /PORT must be an integer/);
+  assert.throws(() => productionServerConfig({ MS_REALTY_PORT: "3000.5" }), /PORT must be an integer/);
+  assert.throws(() => productionServerConfig({ MS_REALTY_MAX_BODY_BYTES: "0" }), /positive integer/);
+  assert.throws(() => productionServerConfig({ MS_REALTY_MAX_BODY_BYTES: "64kb" }), /positive integer/);
+});

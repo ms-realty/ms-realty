@@ -6,14 +6,18 @@ import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
 import { fromRoot } from "./lib/paths.mjs";
 
 function portFrom(value) {
-  const port = Number(value || 3000);
-  if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error("PORT must be an integer from 0 to 65535");
+  const raw = value === undefined || value === "" ? "3000" : String(value);
+  if (!/^\d+$/.test(raw)) throw new Error("PORT must be an integer from 0 to 65535");
+  const port = Number(raw);
+  if (port > 65535) throw new Error("PORT must be an integer from 0 to 65535");
   return port;
 }
 
 function bytesFrom(value) {
-  const bytes = Number(value || 10 * 1024 * 1024);
-  if (!Number.isInteger(bytes) || bytes < 1) throw new Error("MS_REALTY_MAX_BODY_BYTES must be a positive integer");
+  const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
+  if (!/^\d+$/.test(raw)) throw new Error("MS_REALTY_MAX_BODY_BYTES must be a positive integer");
+  const bytes = Number(raw);
+  if (bytes < 1) throw new Error("MS_REALTY_MAX_BODY_BYTES must be a positive integer");
   return bytes;
 }
 
