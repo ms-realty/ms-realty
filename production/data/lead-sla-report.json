@@ -1,0 +1,60 @@
+{
+  "generated_at": "2026-07-04T01:30:00Z",
+  "summary": {
+    "total_leads": 4,
+    "broker_replied": 2,
+    "reminder_required": 0,
+    "manager_escalation_required": 2,
+    "pending": 0
+  },
+  "rows": [
+    {
+      "lead_id": "http-lead-he-0001",
+      "source": "website_listing_detail",
+      "assigned_broker": "broker_international",
+      "sla_due_at": "2026-07-04T00:15:00.000Z",
+      "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "status": "broker_replied",
+      "reminder_task": null,
+      "manager_escalation": null
+    },
+    {
+      "lead_id": "http-viewing-lead-he-0001",
+      "source": "website_viewing_request",
+      "assigned_broker": "broker_international",
+      "sla_due_at": "2026-07-04T00:15:00.000Z",
+      "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "status": "manager_escalation_required",
+      "reminder_task": null,
+      "manager_escalation": {
+        "id": "manager-escalation-http-viewing-lead-he-0001",
+        "owner": "manager",
+        "status": "open"
+      }
+    },
+    {
+      "lead_id": "http-lead-contact-he-0001",
+      "source": "website_contact_callback",
+      "assigned_broker": "broker_international",
+      "sla_due_at": "2026-07-04T00:15:00.000Z",
+      "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "status": "broker_replied",
+      "reminder_task": null,
+      "manager_escalation": null
+    },
+    {
+      "lead_id": "http-lead-seller-el-0001",
+      "source": "website_seller_valuation",
+      "assigned_broker": "broker_international",
+      "sla_due_at": "2026-07-04T00:15:00.000Z",
+      "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+      "status": "manager_escalation_required",
+      "reminder_task": null,
+      "manager_escalation": {
+        "id": "manager-escalation-http-lead-seller-el-0001",
+        "owner": "manager",
+        "status": "open"
+      }
+    }
+  ]
+}

@@ -4,6 +4,8 @@ import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
 import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
+import { assertLeadLedger } from "../lib/lead-ledger.mjs";
+import { assertLeadSlaReport } from "../lib/lead-sla.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
 import { assertSlugHistory } from "../lib/slug-history.mjs";
@@ -714,8 +716,19 @@ if (nodeServerSmoke.tourApprovalLedger.rows !== 1) throw new Error("Node server 
 if (!nodeServerSmoke.eventLedger.byType.cta_click) throw new Error("Node server smoke must persist one CTA analytics event row");
 if (nodeServerSmoke.slugHistoryLedger.rows !== 1) throw new Error("Node server smoke must persist one slug-history row");
 
-const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+const leadLedger = fs
+  .readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+assertLeadLedger(leadLedger);
 if (leadLedger.length !== 4) throw new Error("Lead ledger artifact must contain buyer, viewing, contact, and seller smoke rows");
+const leadSla = JSON.parse(fs.readFileSync(fromRoot("production", "data", "lead-sla-report.json"), "utf8"));
+assertLeadSlaReport(leadSla);
+if (leadSla.summary.manager_escalation_required !== 2 || leadSla.summary.broker_replied !== 2) {
+  throw new Error("Lead SLA report must create manager escalations only for unreplied missed leads");
+}
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (replyOutbox.length !== 2) throw new Error("Reply outbox artifact must contain two deterministic smoke rows");
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);

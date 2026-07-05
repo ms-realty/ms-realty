@@ -76,6 +76,7 @@ What it proves now:
 - Append-only lead ledger for persisted buyer inquiry, viewing request, contact callback, and seller valuation smoke rows, including source classification.
 - Lead intake returns a deterministic instant-confirmation contract without sending unreviewed messages.
 - Lead ledger rows create an immediate broker follow-up SLA task and manager escalation timestamp.
+- Lead SLA report creates broker reminders and manager escalations from unreplied missed leads.
 - Broker assignment is rules-based by language plus listing location/type, with validated manual override.
 - Lead ledger duplicate detection stores privacy-safe contact fingerprints instead of raw contact fields.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
@@ -161,6 +162,7 @@ Generated production data:
 - `production/data/node-server-smoke.json`
 - `production/data/mobile-elderly-qa-report.json`
 - `production/data/lead-ledger.jsonl`
+- `production/data/lead-sla-report.json`
 - `production/data/reply-outbox.jsonl`
 - `production/data/viewings.jsonl`
 - `production/data/deals.jsonl`

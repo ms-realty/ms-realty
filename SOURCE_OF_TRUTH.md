@@ -462,6 +462,7 @@ approved-translation-gated localized sitemap (`sitemap.xml` + `robots.txt`), `Re
 JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with OG
 + hreflang + schema, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only
 lead/reply/viewing/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
+missed-SLA report that creates broker reminders and manager escalations from unreplied leads,
 listing-status workflow that keeps sold pages live while removing them from active inventory,
 CMS slug-history workflow that creates path-only automatic 301s to canonical listing routes,
 listing-publication workflow that proves sitemap paths and internal-link suggestions,
