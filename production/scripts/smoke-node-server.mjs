@@ -119,6 +119,7 @@ try {
     }),
     languageRequest: await jsonFetch(baseUrl, "/api/language-requests", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         id: "server-language-request-fr-0001",
         requestedLocale: "fr",
@@ -139,6 +140,7 @@ try {
     }),
     savedSearch: await jsonFetch(baseUrl, "/api/saved-searches", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         id: "saved-search-server-he-0001",
         locale: "he",
@@ -149,6 +151,7 @@ try {
     }),
     lead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         id: "server-lead-he-0001",
         leadType: "buyer",
@@ -160,6 +163,7 @@ try {
     }),
     viewingLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         id: "server-viewing-lead-he-0001",
         source: "website_viewing_request",
@@ -173,6 +177,7 @@ try {
     }),
     contactLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         id: "server-lead-contact-he-0001",
         source: "website_contact_callback",
@@ -185,6 +190,7 @@ try {
     }),
     sellerLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         id: "server-lead-seller-el-0001",
         source: "website_seller_valuation",
@@ -196,6 +202,7 @@ try {
     }),
     badLead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         id: "server-lead-bad-0001",
         leadType: "buyer",
@@ -302,6 +309,9 @@ try {
     headers: { authorization: "Bearer local-admin-smoke" },
   });
   smoke.legacyRedirect.headers = { location: smoke.legacyRedirect.headers.location };
+  for (const name of ["languageRequest", "savedSearch", "lead", "viewingLead", "contactLead", "sellerLead", "badLead"]) {
+    smoke[name].headers = { "cache-control": smoke[name].headers["cache-control"] };
+  }
   assertServerSmoke(smoke);
   const ledger = readLeadLedger(leadLedgerPath);
   assertLeadLedger(ledger);

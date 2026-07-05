@@ -525,6 +525,19 @@ if (nodeServerSmoke.languageRequest.status !== 201 || nodeServerSmoke.languageRe
 if (nodeServerSmoke.savedSearch.status !== 201 || nodeServerSmoke.savedSearch.body.alert_task?.status !== "open") {
   throw new Error("Node server smoke must store one saved search alert task");
 }
+for (const response of [
+  nodeServerSmoke.languageRequest,
+  nodeServerSmoke.savedSearch,
+  nodeServerSmoke.lead,
+  nodeServerSmoke.viewingLead,
+  nodeServerSmoke.contactLead,
+  nodeServerSmoke.sellerLead,
+  nodeServerSmoke.badLead,
+]) {
+  if (response.headers?.["cache-control"] !== "no-store") {
+    throw new Error("Node server smoke must mark visitor form responses no-store");
+  }
+}
 if (nodeServerSmoke.languageRequestLedger.rows !== 1) {
   throw new Error("Node server smoke must persist one language request row");
 }

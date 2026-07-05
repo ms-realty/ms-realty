@@ -1717,6 +1717,9 @@
         },
         "message": "Please notify me when French property pages are reviewed."
       }
+    },
+    "headers": {
+      "cache-control": "no-store"
     }
   },
   "sitemap": {
@@ -1943,6 +1946,9 @@
           "owner": "broker_en"
         }
       }
+    },
+    "headers": {
+      "cache-control": "no-store"
     }
   },
   "lead": {
@@ -1998,6 +2004,9 @@
         "broker_approval_required": true
       },
       "sellerPipeline": null
+    },
+    "headers": {
+      "cache-control": "no-store"
     }
   },
   "viewingLead": {
@@ -2053,6 +2062,9 @@
         "broker_approval_required": true
       },
       "sellerPipeline": null
+    },
+    "headers": {
+      "cache-control": "no-store"
     }
   },
   "contactLead": {
@@ -2108,6 +2120,9 @@
         "broker_approval_required": true
       },
       "sellerPipeline": null
+    },
+    "headers": {
+      "cache-control": "no-store"
     }
   },
   "sellerLead": {
@@ -2186,6 +2201,9 @@
           "status": "open"
         }
       }
+    },
+    "headers": {
+      "cache-control": "no-store"
     }
   },
   "badLead": {
@@ -2193,6 +2211,9 @@
     "body": {
       "kind": "bad_request",
       "message": "Buyer lead requires a known listingReference"
+    },
+    "headers": {
+      "cache-control": "no-store"
     }
   },
   "admin": {

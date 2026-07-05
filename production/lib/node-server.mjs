@@ -51,17 +51,20 @@ export function close(server) {
 }
 
 export async function jsonFetch(baseUrl, path, options = {}) {
+  const { captureHeaders = false, ...fetchOptions } = options;
   const response = await fetch(`${baseUrl}${path}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       "content-type": "application/json",
-      ...(options.headers || {}),
+      ...(fetchOptions.headers || {}),
     },
   });
-  return {
+  const result = {
     status: response.status,
     body: await response.json(),
   };
+  if (captureHeaders) result.headers = Object.fromEntries(response.headers.entries());
+  return result;
 }
 
 export async function textFetch(baseUrl, path, options = {}) {
@@ -134,6 +137,17 @@ export function assertServerSmoke(smoke) {
   }
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("Server must store saved search alert tasks");
+  }
+  for (const response of [
+    smoke.languageRequest,
+    smoke.savedSearch,
+    smoke.lead,
+    smoke.viewingLead,
+    smoke.contactLead,
+    smoke.sellerLead,
+    smoke.badLead,
+  ]) {
+    if (response?.headers?.["cache-control"] !== "no-store") throw new Error("Server must mark visitor form responses no-store");
   }
   if (smoke.ctaClick && (smoke.ctaClick.status !== 201 || smoke.ctaClick.body.type !== "cta_click")) {
     throw new Error("Server must accept privacy-safe CTA click events");
