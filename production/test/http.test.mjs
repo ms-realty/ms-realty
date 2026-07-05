@@ -87,6 +87,10 @@ function tempRedirectApprovals() {
   return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-redirect-approvals-`)}/redirect-approvals.jsonl`;
 }
 
+function tempSeoEvidenceDir() {
+  return fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-evidence-`);
+}
+
 function tempRegistry() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
   fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
@@ -584,6 +588,80 @@ test("HTTP app rejects invalid language requests", async () => {
 
   assert.equal(response.status, 400);
   assert.match(response.body.message, /BCP 47/);
+});
+
+test("HTTP admin can import external SEO evidence without broad launch assumptions", async () => {
+  const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
+  const com = routeMap.find((route) => route.url_type === "listing" && route.source_domain === "makler-realty.com");
+  const ru = routeMap.find((route) => route.url_type === "listing" && route.source_domain === "makler-realty.ru");
+  const seoEvidenceInputDir = tempSeoEvidenceDir();
+  const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
+  const app = createHttpApp({
+    routeMap,
+    seoEvidenceInputDir,
+    seoEvidenceOutputPath,
+    reviewedAt: "2026-07-05T00:00:00Z",
+  });
+
+  const unauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/seo-evidence/import",
+    body: { source: "search_console", csv: "url,clicks\n" },
+  });
+  const searchConsole = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/seo-evidence/import",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      source: "search_console",
+      csv: `url,clicks,impressions,position\n${com.old_url},3,30,7\n${ru.old_url},2,20,8\n`,
+    },
+  });
+  const yandex = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/seo-evidence/import",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      source: "yandex_webmaster",
+      csv: `url,indexed,issue\n${com.old_url},yes,\n${ru.old_url},yes,\n`,
+    }).toString(),
+  });
+  const backlinks = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/seo-evidence/import?source=backlinks",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "text/csv",
+    },
+    body: `target_url,source_url,referring_domain\n${com.old_url},https://example.com/a,example.com\n${ru.old_url},https://example.com/b,example.com\n`,
+  });
+  const review = await dispatchHttp(app, {
+    url: "/api/admin/migration/review?locale=en",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  const reviewHtml = await dispatchHttp(app, {
+    url: "/admin/migration/review?locale=en",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+
+  assert.equal(unauthorized.status, 401);
+  assert.equal(searchConsole.status, 201);
+  assert.deepEqual(searchConsole.body.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
+  assert.deepEqual(searchConsole.body.sources.search_console.matched_source_domains, [
+    "makler-realty.com",
+    "makler-realty.ru",
+  ]);
+  assert.equal(yandex.status, 201);
+  assert.deepEqual(yandex.body.missingRequiredSources, ["backlinks"]);
+  assert.equal(backlinks.status, 201);
+  assert.deepEqual(backlinks.body.missingRequiredSources, []);
+  assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
+  assert.equal(review.body.seoEvidence.importEndpoint, "/api/admin/seo-evidence/import");
+  assert.deepEqual(review.body.seoEvidence.missingRequiredSources, []);
+  assert.equal(reviewHtml.body.includes('data-seo-import-endpoint="/api/admin/seo-evidence/import"'), true);
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {

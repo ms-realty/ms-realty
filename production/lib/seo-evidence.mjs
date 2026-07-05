@@ -7,7 +7,7 @@ import { fromRoot } from "./paths.mjs";
 export const DEFAULT_SEO_EVIDENCE_INPUT_DIR = fromRoot("migration", "external", "seo");
 export const DEFAULT_SEO_EVIDENCE_OUTPUT = fromRoot("production", "data", "seo-evidence.json");
 
-const EXPORTS = {
+export const SEO_EXPORTS = {
   search_console: "search-console.csv",
   yandex_webmaster: "yandex-webmaster.csv",
   backlinks: "backlinks.csv",
@@ -89,7 +89,7 @@ function normalizeExternalRow(source, row) {
 }
 
 function readExternalSource(source, inputDir) {
-  const inputPath = path.join(inputDir, EXPORTS[source]);
+  const inputPath = path.join(inputDir, SEO_EXPORTS[source]);
   if (!fs.existsSync(inputPath)) {
     return { source, input_path: inputPath, status: "missing_export", rows: [], row_count: 0 };
   }
@@ -242,7 +242,7 @@ export function buildSeoEvidence({
   const { evidence, byKey, byListingReference } = indexEvidence(records, routeMap);
   const sourceSummaries = {};
 
-  for (const source of Object.keys(EXPORTS)) {
+  for (const source of Object.keys(SEO_EXPORTS)) {
     const sourceData = readExternalSource(source, inputDir);
     sourceSummaries[source] = { ...sourceData, rows: undefined, ...joinExternal(source, sourceData, byKey) };
   }
@@ -259,6 +259,15 @@ export function buildSeoEvidence({
     summary: summarize(records, sourceSummaries, evidence),
     url_evidence: evidence,
   };
+}
+
+export function writeExternalSeoExport(source, csvText, { inputDir = DEFAULT_SEO_EVIDENCE_INPUT_DIR } = {}) {
+  const filename = SEO_EXPORTS[source];
+  if (!filename) throw new Error(`Unknown SEO export source: ${source}`);
+  fs.mkdirSync(inputDir, { recursive: true });
+  const outPath = path.join(inputDir, filename);
+  fs.writeFileSync(outPath, csvText || "");
+  return { source, outPath, row_count: parseCsv(csvText || "").length };
 }
 
 export function assertSeoEvidence(evidence) {

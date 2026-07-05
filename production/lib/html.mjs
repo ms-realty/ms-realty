@@ -248,6 +248,16 @@ function renderAdminMigrationReview(page) {
   const approvals = page.redirectApprovals
     .map((approval) => `<li><code>${escapeHtml(approval.old_url)}</code> -> <code>${escapeHtml(approval.target_path)}</code></li>`)
     .join("");
+  const seoSources = ["search_console", "yandex_webmaster", "backlinks"]
+    .map((source) => {
+      const status = page.seoEvidence.sources[source];
+      return `
+      <li>
+        <strong>${escapeHtml(source)}</strong>:
+        ${escapeHtml(status.status)} · matched ${escapeHtml(status.matched_rows)} / ${escapeHtml(status.row_count)}
+      </li>`;
+    })
+    .join("");
   return `
 <main data-kind="admin-migration-review" data-admin-locale="${escapeHtml(page.workspace.locale)}" data-review-required="${escapeHtml(
     page.routeMap.reviewRequired,
@@ -267,6 +277,22 @@ function renderAdminMigrationReview(page) {
     <form method="post" action="${escapeHtml(page.redirectApprovalImport.endpoint)}">
       <textarea name="csv" rows="5" required></textarea>
       <button type="submit">Import CSV</button>
+    </form>
+  </section>
+  <section aria-label="External SEO evidence" data-seo-import-endpoint="${escapeHtml(page.seoEvidence.importEndpoint)}">
+    <h2>External SEO evidence</h2>
+    <p>Missing required sources: ${escapeHtml(page.seoEvidence.missingRequiredSources.join(", ") || "none")}</p>
+    <ul>${seoSources}</ul>
+    <form method="post" action="${escapeHtml(page.seoEvidence.importEndpoint)}">
+      <label>Source
+        <select name="source" required>
+          <option value="search_console">Search Console</option>
+          <option value="yandex_webmaster">Yandex Webmaster</option>
+          <option value="backlinks">Backlinks</option>
+        </select>
+      </label>
+      <textarea name="csv" rows="5" required></textarea>
+      <button type="submit">Import SEO CSV</button>
     </form>
   </section>
   <section aria-label="Approved redirects">

@@ -26,7 +26,8 @@ import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-le
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
-import { appendEvent, createEvent } from "./events.mjs";
+import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
+import { buildSeoEvidence, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -108,6 +109,15 @@ function redirectApprovalCsvInput(request) {
   return request.body || "";
 }
 
+function seoExportInput(request, url) {
+  const contentType = request.headers?.["content-type"] || request.headers?.["Content-Type"] || "";
+  if (contentType.includes("text/csv")) {
+    return { source: url.searchParams.get("source"), csv: request.body || "" };
+  }
+  const input = parseBody(request);
+  return { source: input.source || url.searchParams.get("source"), csv: input.csv || "" };
+}
+
 function reviewedReplyInput(request) {
   const input = parseBody(request);
   return {
@@ -185,7 +195,15 @@ function renderAdminLeadsPayload(registry, requestedLocale, data) {
   };
 }
 
-function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals) {
+function seoEvidencePayload(seoEvidence) {
+  return {
+    missingRequiredSources: seoEvidence.summary.missing_required_sources,
+    sources: seoEvidence.summary.sources,
+    importEndpoint: "/api/admin/seo-evidence/import",
+  };
+}
+
+function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const reviewRequired = routes.filter((route) => route.review_required);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
@@ -219,6 +237,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       contentType: "text/csv",
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
+    seoEvidence: seoEvidencePayload(seoEvidence),
     deployablePreview: buildDeployableRedirects(routes, approvals),
   };
 }
@@ -241,6 +260,8 @@ export function createHttpApp({
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
   redirectApprovalPath = null,
+  seoEvidenceInputDir = null,
+  seoEvidenceOutputPath = null,
   localeRegistryPath = null,
   receivedAt,
   requestedAt,
@@ -251,6 +272,12 @@ export function createHttpApp({
   sellerPipelineCreatedAt,
 } = {}) {
   let activeRegistry = registry;
+  const currentSeoEvidence = () =>
+    buildSeoEvidence({
+      inputDir: seoEvidenceInputDir || undefined,
+      events: readEventLedger(eventLedgerPath || undefined),
+      generatedAt: reviewedAt || new Date().toISOString(),
+    });
   const recordEvent = (input) =>
     eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
   return async function handle(request) {
@@ -421,6 +448,7 @@ export function createHttpApp({
         migrationReviewDashboard,
         routeMap,
         readRedirectApprovals(redirectApprovalPath || undefined),
+        currentSeoEvidence(),
       );
       return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
     }
@@ -431,9 +459,41 @@ export function createHttpApp({
       }
       const requestedLocale = url.searchParams.get("locale") || "en";
       const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
-      const payload = renderMigrationReviewPayload(activeRegistry, requestedLocale, migrationReviewDashboard, routeMap, approvals);
+      const payload = renderMigrationReviewPayload(
+        activeRegistry,
+        requestedLocale,
+        migrationReviewDashboard,
+        routeMap,
+        approvals,
+        currentSeoEvidence(),
+      );
       if (wantsHtml(request, url)) return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
       return json(200, payload);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      return json(200, seoEvidencePayload(currentSeoEvidence()));
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
+      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
+        return json(401, { kind: "unauthorized" });
+      }
+      try {
+        const input = seoExportInput(request, url);
+        const imported = writeExternalSeoExport(input.source, input.csv, { inputDir: seoEvidenceInputDir || undefined });
+        const evidence = currentSeoEvidence();
+        writeSeoEvidence(evidence, seoEvidenceOutputPath || undefined);
+        return json(201, {
+          imported,
+          ...seoEvidencePayload(evidence),
+        });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
@@ -932,7 +992,8 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReviewHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"")
+    !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
   }

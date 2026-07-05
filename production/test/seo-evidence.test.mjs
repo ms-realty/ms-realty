@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { assertSeoEvidence, buildSeoEvidence } from "../lib/seo-evidence.mjs";
+import { assertSeoEvidence, buildSeoEvidence, writeExternalSeoExport } from "../lib/seo-evidence.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 test("SEO evidence joins external exports and privacy events to crawled URLs", () => {
@@ -131,4 +131,13 @@ test("external SEO export templates are present but real CSVs stay local", () =>
     assert.equal(fs.existsSync(`${dir}/${file}.example`), true);
   }
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /migration\/external\/seo\/\*\.csv/);
+});
+
+test("external SEO export writer only writes known source files", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-write-seo-export-`);
+  const result = writeExternalSeoExport("search_console", "url,clicks\nhttps://makler-realty.com/,1\n", { inputDir: dir });
+
+  assert.equal(result.row_count, 1);
+  assert.equal(fs.existsSync(`${dir}/search-console.csv`), true);
+  assert.throws(() => writeExternalSeoExport("../bad", "url\n", { inputDir: dir }), /Unknown SEO export source/);
 });
