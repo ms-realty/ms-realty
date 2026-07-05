@@ -261,6 +261,14 @@ function renderAdminMigrationReview(page) {
       <tbody>${rows}</tbody>
     </table>
   </section>
+  <section aria-label="Redirect approval CSV import" data-redirect-import-endpoint="${escapeHtml(page.redirectApprovalImport.endpoint)}">
+    <h2>Import reviewed redirect CSV</h2>
+    <p>Paste reviewed rows from <code>${escapeHtml(page.redirectApprovalImport.workbookPath)}</code>.</p>
+    <form method="post" action="${escapeHtml(page.redirectApprovalImport.endpoint)}">
+      <textarea name="csv" rows="5" required></textarea>
+      <button type="submit">Import CSV</button>
+    </form>
+  </section>
   <section aria-label="Approved redirects">
     <h2>Approved redirects</h2>
     <ul>${approvals}</ul>

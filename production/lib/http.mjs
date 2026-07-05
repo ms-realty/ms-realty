@@ -102,6 +102,12 @@ function redirectApprovalInput(request) {
   };
 }
 
+function redirectApprovalCsvInput(request) {
+  const contentType = request.headers?.["content-type"] || request.headers?.["Content-Type"] || "";
+  if (contentType.includes("application/x-www-form-urlencoded")) return parseBody(request).csv || "";
+  return request.body || "";
+}
+
 function reviewedReplyInput(request) {
   const input = parseBody(request);
   return {
@@ -207,6 +213,12 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       approvableSample: mappedListings.filter((route) => route.review_required && route.planned_status === 301).slice(0, 20),
     },
     redirectApprovals: approvals,
+    redirectApprovalImport: {
+      method: "POST",
+      endpoint: "/api/admin/redirect-approvals/import",
+      contentType: "text/csv",
+      workbookPath: "production/data/redirect-approval-workbook.csv",
+    },
     deployablePreview: buildDeployableRedirects(routes, approvals),
   };
 }
@@ -449,7 +461,7 @@ export function createHttpApp({
         return json(401, { kind: "unauthorized" });
       }
       try {
-        const imported = importRedirectApprovalsCsv(routeMap, request.body || "", {
+        const imported = importRedirectApprovalsCsv(routeMap, redirectApprovalCsvInput(request), {
           filePath: redirectApprovalPath || undefined,
           approvedAt: reviewedAt,
         });
@@ -919,7 +931,8 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReviewHtml?.status !== 200 ||
     smoke.adminMigrationReviewHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"")
+    !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
   }

@@ -464,6 +464,10 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const importListing = routeMap.find(
     (route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path && route.old_url !== listing.old_url,
   );
+  const ruListing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "ru" && route.target_path);
+  const importRuListing = routeMap.find(
+    (route) => route.url_type === "listing" && route.target_locale === "ru" && route.target_path && route.old_url !== ruListing.old_url,
+  );
   const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
   const app = createHttpApp({ routeMap, redirectApprovalPath, reviewedAt: "2026-07-05T00:00:00Z" });
 
@@ -486,7 +490,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
       "content-type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
-      oldUrl: routeMap.find((route) => route.url_type === "listing" && route.target_locale === "ru" && route.target_path).old_url,
+      oldUrl: ruListing.old_url,
       equivalentContent: "true",
       reviewer: "ru_preservation_editor",
       reason: "Reviewed same-content Russian route mapping.",
@@ -526,8 +530,23 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     },
     body: `old_url,equivalent_content,reviewer,approved_at,reason\n${importListing.old_url},true,editor_bg,2026-07-05T00:01:00Z,Reviewed via CSV\n`,
   });
+  const formImported = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/redirect-approvals/import",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      csv: `old_url,equivalent_content,reviewer,approved_at,reason\n${importRuListing.old_url},true,ru_preservation_editor,2026-07-05T00:02:00Z,Reviewed via pasted CSV\n`,
+    }).toString(),
+  });
   const review = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  const reviewHtml = await dispatchHttp(app, {
+    url: "/admin/migration/review?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
 
@@ -546,9 +565,14 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
   assert.equal(imported.body.deployablePreview.length, 3);
+  assert.equal(formImported.status, 201);
+  assert.equal(formImported.body.imported, 1);
+  assert.equal(formImported.body.deployablePreview.length, 4);
   assert.equal(review.body.workspace.locale, "ru");
-  assert.equal(review.body.redirectApprovals.length, 3);
-  assert.equal(review.body.deployablePreview.length, 3);
+  assert.equal(review.body.redirectApprovalImport.endpoint, "/api/admin/redirect-approvals/import");
+  assert.equal(review.body.redirectApprovals.length, 4);
+  assert.equal(review.body.deployablePreview.length, 4);
+  assert.equal(reviewHtml.body.includes('data-redirect-import-endpoint="/api/admin/redirect-approvals/import"'), true);
 });
 
 test("HTTP app rejects invalid language requests", async () => {
