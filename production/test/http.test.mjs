@@ -679,6 +679,17 @@ test("HTTP app rejects invalid language requests", async () => {
   assert.match(response.body.message, /BCP 47/);
 });
 
+test("HTTP app rejects malformed JSON request bodies", async () => {
+  const response = await dispatchHttp(createHttpApp(), {
+    method: "POST",
+    url: "/api/leads",
+    body: "{bad",
+  });
+
+  assert.equal(response.status, 400);
+  assert.equal(response.body.message, "Invalid JSON request body");
+});
+
 test("HTTP admin auth does not accept local smoke token in production without configured secret", async () => {
   const oldNodeEnv = process.env.NODE_ENV;
   const oldAdminToken = process.env.MS_REALTY_ADMIN_TOKEN;

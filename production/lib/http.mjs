@@ -94,6 +94,14 @@ function adminUnauthorized() {
   return json(401, { kind: "unauthorized" });
 }
 
+function parseJsonBody(request) {
+  try {
+    return JSON.parse(request.body || "{}");
+  } catch {
+    throw new Error("Invalid JSON request body");
+  }
+}
+
 function loadLegacyRouteMap(filePath = fromRoot("production", "data", "legacy-route-map.json")) {
   return JSON.parse(fs.readFileSync(filePath, "utf8")).routes || [];
 }
@@ -120,7 +128,7 @@ function parseBody(request) {
   if (contentType.includes("application/x-www-form-urlencoded")) {
     return Object.fromEntries(new URLSearchParams(request.body || ""));
   }
-  return JSON.parse(request.body || "{}");
+  return parseJsonBody(request);
 }
 
 function redirectApprovalInput(request) {
@@ -664,7 +672,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const result = addLocaleToRegistry(activeRegistry, JSON.parse(request.body || "{}"));
+        const result = addLocaleToRegistry(activeRegistry, parseJsonBody(request));
         activeRegistry = result.registry;
         if (localeRegistryPath) writeLocaleRegistry(activeRegistry, localeRegistryPath);
         return json(201, {
@@ -682,7 +690,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const task = createTranslationReviewTask(activeRegistry, JSON.parse(request.body || "{}"));
+        const task = createTranslationReviewTask(activeRegistry, parseJsonBody(request));
         return json(201, appendTranslationTask(task, { filePath: translationLedgerPath || undefined }));
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
@@ -692,7 +700,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = parseJsonBody(request);
         const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
         const published = publishApprovedTranslation(activeRegistry, approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt));
@@ -736,7 +744,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = parseJsonBody(request);
         return json(
           201,
           appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
@@ -752,7 +760,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const contact = createBrokerContact(JSON.parse(request.body || "{}"), { reviewedAt });
+        const contact = createBrokerContact(parseJsonBody(request), { reviewedAt });
         return json(201, appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined }));
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
@@ -775,7 +783,7 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = parseJsonBody(request);
         const lead = submitRuntimeLead(activeRegistry, seed, input);
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         const sellerPipeline =
@@ -809,7 +817,7 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/language-requests") {
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = parseJsonBody(request);
         const requestRow = createLanguageRequest(activeRegistry, input, requestedAt);
         const ledger = languageRequestPath ? appendLanguageRequest(requestRow, { filePath: languageRequestPath }) : null;
         return json(201, { ...requestRow, ledger });
@@ -820,7 +828,7 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
       try {
-        const input = JSON.parse(request.body || "{}");
+        const input = parseJsonBody(request);
         const filters = searchFiltersFromObject(input.filters);
         const search = searchRuntimeListings(activeRegistry, seed, {
           localeCode: input.locale || activeRegistry.source_locale,
