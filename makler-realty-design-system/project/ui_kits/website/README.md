@@ -11,7 +11,7 @@ Open `index.html`. It loads `../../styles.css` + `../../_ds_bundle.js` (the comp
 | File | Screen | Notes |
 |---|---|---|
 | `data.js` | Sample content | 8 listings across the six focus locations + 6 resorts + 3 agents. Prices via `money()`. Photography is represented by `.mk-photo` tones. |
-| `SiteChrome.jsx` | `Wordmark`, `Header`, `Footer` | Sticky translucent header with nav, BG/EN/DE/NL/RU language switch and a Clay “Call an agent” CTA; dark Sea footer. |
+| `SiteChrome.jsx` | `Wordmark`, `Header`, `Footer` | Sticky translucent header with nav, BG/EN/DE/NL/RU/EL/HE public language switch and a Clay “Call an agent” CTA; dark Sea footer. |
 | `HomePage.jsx` | Homepage | Full-bleed hero with the `SearchBar`, browse-by-resort grid, featured `PropertyCard` grid, value props, sell CTA band. |
 | `SearchResults.jsx` | Search results | Sticky compact `SearchBar`, sticky filter sidebar (deal / price / beds / type / amenities), removable filter `Tag`s, horizontal `PropertyCard` rows, `Pagination`. |
 | `ListingDetail.jsx` | Listing detail | `Breadcrumb`, photo gallery with overlaid `Badge`s + save/share, spec strip, description, feature `Tag`s, what’s-nearby, sticky agent `Card`, similar homes. |

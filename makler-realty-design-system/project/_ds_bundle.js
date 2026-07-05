@@ -2228,19 +2228,32 @@ try { (() => {
 function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 const DEFAULT_LANGS = [{
   code: 'BG',
-  label: 'Български'
+  label: 'Български',
+  dir: 'ltr'
 }, {
   code: 'EN',
-  label: 'English'
+  label: 'English',
+  dir: 'ltr'
 }, {
   code: 'DE',
-  label: 'Deutsch'
+  label: 'Deutsch',
+  dir: 'ltr'
 }, {
   code: 'NL',
-  label: 'Nederlands'
+  label: 'Nederlands',
+  dir: 'ltr'
 }, {
   code: 'RU',
-  label: 'Русский'
+  label: 'Русский',
+  dir: 'ltr'
+}, {
+  code: 'EL',
+  label: 'Ελληνικά',
+  dir: 'ltr'
+}, {
+  code: 'HE',
+  label: 'עברית',
+  dir: 'rtl'
 }];
 const CSS = `
 .mk-lang { position: relative; display: inline-block; font-family: var(--font-sans); }
@@ -2276,6 +2289,7 @@ const CSS = `
 }
 .mk-lang__item:hover { background: var(--surface-hover); }
 .mk-lang__item[aria-current="true"] { color: var(--text-strong); font-weight: var(--fw-semibold); }
+.mk-lang__label { min-width: 0; }
 .mk-lang__code {
   display: inline-grid; place-items: center; min-width: 26px; height: 20px; padding: 0 5px;
   border-radius: var(--radius-xs); background: var(--stone-200); color: var(--stone-700);
@@ -2295,7 +2309,7 @@ if (typeof document !== 'undefined' && !document.getElementById('mk-lang-css')) 
 }
 
 /**
- * Language switcher for the 5 brand languages (BG EN DE NL RU).
+ * Language switcher for approved public website locales.
  * Globe + current code trigger, popover menu with native-name labels.
  */
 function LangSwitcher({
@@ -2358,7 +2372,10 @@ function LangSwitcher({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "mk-lang__code"
-  }, l.code), l.label, value === l.code && /*#__PURE__*/React.createElement("span", {
+  }, l.code), /*#__PURE__*/React.createElement("span", {
+    className: "mk-lang__label",
+    dir: l.dir || 'auto'
+  }, l.label), value === l.code && /*#__PURE__*/React.createElement("span", {
     className: "mk-lang__check"
   }, /*#__PURE__*/React.createElement(__ds_scope.Icon, {
     name: "check",

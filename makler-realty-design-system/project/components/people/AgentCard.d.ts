@@ -8,7 +8,7 @@ export interface AgentCardProps extends React.HTMLAttributes<HTMLDivElement> {
   /** e.g. "Свети Влас". Joined to role with a middot. */
   office?: string;
   phone?: string;
-  /** Language codes shown as chips — subset of BG EN DE NL RU. */
+  /** Language codes shown as chips — public website or broker language codes, e.g. BG EN RU EL HE. */
   langs?: string[];
   /** Photo URL for the avatar. */
   src?: string;

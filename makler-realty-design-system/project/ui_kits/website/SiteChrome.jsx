@@ -51,6 +51,8 @@ const NAV = [
   { key: 'contact', label: 'Контакти' },
 ];
 
+const PUBLIC_LANGS = ['BG', 'EN', 'DE', 'NL', 'RU', 'EL', 'HE'];
+
 function Header({ onNavigate, active }) {
   const [lang, setLang] = React.useState('BG');
   return (
@@ -67,7 +69,7 @@ function Header({ onNavigate, active }) {
         </nav>
         <div className="site-hd__right">
           <div className="site-hd__lang" role="group" aria-label="Език">
-            {['BG', 'EN', 'DE', 'NL', 'RU'].map(l => (
+            {PUBLIC_LANGS.map(l => (
               <button key={l} aria-pressed={lang === l} onClick={() => setLang(l)}>{l}</button>
             ))}
           </div>

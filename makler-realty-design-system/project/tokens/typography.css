@@ -2,17 +2,19 @@
    MS Realty — Typography
    ------------------------------------------------------------
    Display : Source Serif 4  — editorial headlines, property
-             names, prices. Warm, literary, multi-script.
+             names, prices. Warm, literary, multi-script,
+             with Noto Serif Hebrew fallback.
    Sans    : Commissioner    — UI, body, labels. Low-contrast
-             humanist grotesque, full Latin/Cyrillic/Greek.
+             humanist grotesque, full Latin/Cyrillic/Greek,
+             with Noto Sans Hebrew fallback.
    Mono    : IBM Plex Mono    — reference codes, m² specs,
              tabular data.
    ============================================================ */
 
 :root {
   /* ---- Families ---- */
-  --font-display: 'Source Serif 4', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
-  --font-sans:    'Commissioner', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-display: 'Source Serif 4', 'Noto Serif Hebrew', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-sans:    'Commissioner', 'Noto Sans Hebrew', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
   --font-mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
 
   /* ---- Weights ---- */

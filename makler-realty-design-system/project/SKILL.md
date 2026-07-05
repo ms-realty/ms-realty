@@ -1,6 +1,6 @@
 ---
 name: ms-realty-design
-description: Use this skill to generate well-branded interfaces and assets for MS Realty, a multilingual (BG/EN/DE/NL/RU) real-estate agency for property in Bulgaria and nearby Greece — either for production or throwaway prototypes/mocks. Contains essential design guidelines, colors, type, fonts, assets, and UI kit components for prototyping property search, listings, resort browsing and contact flows.
+description: Use this skill to generate well-branded interfaces and assets for MS Realty, a multilingual real-estate agency with seeded public website locales BG/EN/DE/NL/RU/EL/HE and admin CRM/CMS locales BG/RU/EN — either for production or throwaway prototypes/mocks. Contains essential design guidelines, colors, type, fonts, assets, and UI kit components for prototyping property search, listings, resort browsing and contact flows.
 user-invocable: true
 ---
 

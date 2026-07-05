@@ -15,8 +15,8 @@ const CRM_AGENTS = {
 };
 const ME = 'elena';
 
-/* Language flags shown on multilingual leads */
-const LANGS = { BG: 'Български', EN: 'English', DE: 'Deutsch', NL: 'Nederlands', RU: 'Русский' };
+/* Language flags shown on multilingual leads. Admin UI itself is BG/RU/EN. */
+const LANGS = { BG: 'Български', EN: 'English', DE: 'Deutsch', NL: 'Nederlands', RU: 'Русский', EL: 'Ελληνικά', HE: 'עברית' };
 
 /* ---- Pipeline stages (kanban order) ---- */
 const STAGES = [
@@ -62,7 +62,7 @@ const LEADS = [
     budget: 90000, interest: 'Ски студио, Банско', location: 'Банско', agent: 'dimitar',
     phone: '+31 6 2044 7781', email: 'bakker@post.nl', created: '2026-06-20', lastAct: 'преди 4 часа',
     matched: ['ms-937'], tasks: 3, notes: 4 },
-  { id: 'L-2081', name: 'Georgios Pappas', stage: 'offer', temp: 'warm', lang: 'EN', deal: 'sale', source: 'referral',
+  { id: 'L-2081', name: 'Georgios Pappas', stage: 'offer', temp: 'warm', lang: 'EL', deal: 'sale', source: 'referral',
     budget: 150000, interest: 'Апартамент до плажа, Гърция', location: 'Офринио, Гърция', agent: 'mila',
     phone: '+30 694 55 20 118', email: 'g.pappas@greece.gr', created: '2026-06-12', lastAct: 'вчера',
     matched: ['ms-893'], tasks: 1, notes: 6, offer: 132000 },
@@ -78,9 +78,9 @@ const LEADS = [
     budget: 170000, interest: 'Панорамен двустаен', location: 'Сандански', agent: 'elena',
     phone: '+49 151 220 7788', email: 'k.berger@de.de', created: '2026-05-22', lastAct: 'преди 5 дни',
     matched: ['ms-944'], tasks: 0, notes: 7, offer: 162000 },
-  { id: 'L-2101', name: 'Emma Johansson', stage: 'new', temp: 'warm', lang: 'EN', deal: 'rent', source: 'whatsapp',
+  { id: 'L-2101', name: 'Noa Levi', stage: 'new', temp: 'warm', lang: 'HE', deal: 'rent', source: 'whatsapp',
     budget: 450, interest: 'Дългосрочен наем, обзаведен', location: 'Сандански', agent: 'elena',
-    phone: '+46 70 118 4420', email: 'e.johansson@se.se', created: '2026-07-04', lastAct: 'преди 45 мин',
+    phone: '+972 52 118 4420', email: 'noa.levi@example.co.il', created: '2026-07-04', lastAct: 'преди 45 мин',
     matched: ['ms-957'], tasks: 0, notes: 0 },
   { id: 'L-2069', name: 'Николай Тодоров', stage: 'offer', temp: 'hot', lang: 'BG', deal: 'sale', source: 'phone',
     budget: 250000, interest: 'Апартамент в Парк Хотел Пирин', location: 'Сандански', agent: 'radoslav',
@@ -156,7 +156,7 @@ const ACTIVITY = [
   { type: 'note',   agent: 'elena',    text: 'Бележка към Willem de Vries: търси изглед към Пирин', time: 'вчера' },
   { type: 'won',    agent: 'elena',    text: 'Сделка спечелена: James Whitfield · MS-939 · капаро внесено', time: 'вчера' },
   { type: 'call',   agent: 'dimitar',  text: 'Обаждане до Familie Bakker (12 мин) — потвърден оглед', time: 'преди 4 часа' },
-  { type: 'lead',   agent: 'elena',    text: 'Нов лийд: Emma Johansson (EN) от WhatsApp', time: 'преди 45 мин' },
+  { type: 'lead',   agent: 'elena',    text: 'Нов лийд: Noa Levi (HE) от WhatsApp', time: 'преди 45 мин' },
 ];
 const ACT_ICON = {
   offer:   { icon: 'file-text',   tone: 'brick' },

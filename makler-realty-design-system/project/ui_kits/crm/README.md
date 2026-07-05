@@ -14,13 +14,14 @@ component library), Lucide, React + Babel, then the files below in order.
 ## Chrome & theme
 Dark **Ink** sidebar (the brand charcoal, with the reversed logo) + light warm-Stone
 content area — the classic back-office split, kept firmly on-brand. **Brick** red is
-the single accent (active nav, hot leads, alerts); Ink is the workhorse. Bulgarian,
-agent-facing voice, moderately compact tables.
+the single accent (active nav, hot leads, alerts); Ink is the workhorse. Admin
+chrome is available in Bulgarian, Russian and English; this static kit shows the
+Bulgarian agent-facing voice with moderately compact tables.
 
 ## Files
 | File | What |
 |---|---|
-| `crm-data.js` | Sample content: 12 leads (5 languages, real Sandanski/Pirin/coast/Greece interest), 10 stock items, 10 contacts, this week's 9 viewings, tasks, activity, KPIs, reports data. Money via `eur()`. |
+| `crm-data.js` | Sample content: 12 leads with dynamic lead languages including Greek and Hebrew/Israel, real Sandanski/Pirin/coast/Greece interest, 10 stock items, 10 contacts, this week's 9 viewings, tasks, activity, KPIs, reports data. Money via `eur()`. |
 | `CrmKit.jsx` | Chrome + primitives: `Sidebar`, `Topbar`, `Avatar`, `StatTile`, `DataTable` (sortable), `StatusPill`, `Timeline`, `TaskList`, `KanbanCard`, `Segmented`, `PageHeader`, `Panel`, `Temp`, `Lang`. Kit-local CSS (`crmCss`). |
 | `Dashboard.jsx` | KPIs, today's viewings, new leads, today's tasks, activity feed. |
 | `Pipeline.jsx` | Kanban board — Нови → Оглед насрочен → Оферта → Спечелени, with per-column totals and a deal-type filter. |

@@ -1,6 +1,6 @@
 # MS Realty — Design System
 
-A design system for **MS Realty** (full name *Makler Realty* — “makler real estate”), a **multilingual** real-estate agency based in **Sandanski, Bulgaria** (the “land of Spartacus”), serving local and international buyers in **Bulgarian, English, German, Dutch and Russian**. It sells and rents the full property range — apartments, villas, houses, commercial and industrial space, hotels, agricultural land and luxury estates — across Sandanski and the wider region (**Bansko, Blagoevgrad and the Black Sea coast**). It powers the public website: property search, resort/category browsing, listing detail pages, and the contact / call-back flows that connect buyers to a local agent.
+A design system for **MS Realty** (full name *Makler Realty* — “makler real estate”), a **multilingual** real-estate agency based in **Sandanski, Bulgaria** (the “land of Spartacus”), serving local and international buyers in **Bulgarian, English, German, Dutch, Russian, Greek and Hebrew for Israel**. The admin CRM/CMS interface is limited to **Bulgarian, Russian and English**. It sells and rents the full property range — apartments, villas, houses, commercial and industrial space, hotels, agricultural land and luxury estates — across Sandanski and the wider region (**Bansko, Blagoevgrad and the Black Sea coast**). It powers the public website: property search, resort/category browsing, listing detail pages, and the contact / call-back flows that connect buyers to a local agent.
 
 Everything a design agent needs to produce on-brand MS work: the CSS token foundation, reusable React components, foundation specimen cards for the Design System tab, and a full website UI kit.
 
@@ -10,7 +10,7 @@ Everything a design agent needs to produce on-brand MS work: the CSS token found
 
 This system began from the brand brief and now also references the live company site, **[makler-realty.com](https://makler-realty.com)**:
 
-> **MS Realty** (*Makler Realty*): a Sandanski-based, multilingual (BG/EN/DE/NL/RU) real-estate agency for property **sale and rent** — apartments through luxury estates — across Sandanski, Bansko, Blagoevgrad and the Black Sea coast. The agency adds buying assistance, property transfers and relocation, with call-back, viewing and phone/Skype/form contact. The public experience: a real-estate website, property search, resort/category browsing, listing detail pages, and the contact/call flows for interested buyers. (Sample listings in the kits also include a few coastal / cross-border items for illustration.)
+> **MS Realty** (*Makler Realty*): a Sandanski-based, multilingual real-estate agency for property **sale and rent** — apartments through luxury estates — across Sandanski, Bansko, Blagoevgrad and the Black Sea coast. The public website starts with BG/EN/DE/NL/RU/EL/HE and can grow through the approved locale registry; the admin CRM/CMS starts with BG/RU/EN. The agency adds buying assistance, property transfers and relocation, with call-back, viewing and phone/Skype/form contact. The public experience: a real-estate website, property search, resort/category browsing, listing detail pages, and the contact/call flows for interested buyers. (Sample listings in the kits also include a few coastal / cross-border items for illustration.)
 
 The brand is **MS Realty** (its live domain is `makler-realty.com`). The visual language, component inventory and website screens are an **original interpretation** — the live site is a light WordPress theme, so this is a from-scratch design, not a reconstruction of it. Substitutions flagged in **Caveats** below: **fonts** (Google Fonts stand-ins) and **photography** (CSS placeholder tones); **icons** use Lucide. The real **logo** is now **embedded locally** (red MS + charcoal REAL·TY, plus a reversed variant for dark surfaces), and the palette is anchored on the brand's **official colours** — Jasper `#DB3E3E`, Apple Valley `#ED8484`, Bauhaus `#3F3F3F`.
 
@@ -27,7 +27,7 @@ One product — the **public website** (`ui_kits/website/`). Core surfaces:
 - **Listing detail** — gallery, specs, description, features, what’s-nearby, a sticky agent panel, similar homes.
 - **Contact / call flows** — a “Book a viewing” modal launched from a listing, and a full contact page with the three offices.
 
-Focus locations: **St Vlas, Sunny Beach, Nesebar** (Burgas coast) · **Bansko** (Pirin) · **Sandanski** (Struma valley) · **Nafplio** (Peloponnese, Greece). The audience is largely **international buyers**, so every surface is **multilingual — Bulgarian, English, German, Dutch and Russian (BG / EN / DE / NL / RU)**.
+Focus locations: **St Vlas, Sunny Beach, Nesebar** (Burgas coast) · **Bansko** (Pirin) · **Sandanski** (Struma valley) · **Nafplio** (Peloponnese, Greece). The audience is largely **international buyers**, so every public website surface is **multilingual — Bulgarian, English, German, Dutch, Russian, Greek and Hebrew for Israel (BG / EN / DE / NL / RU / EL / HE)**, while internal CRM/CMS chrome is available in **BG / RU / EN**.
 
 ---
 
@@ -35,7 +35,7 @@ Focus locations: **St Vlas, Sunny Beach, Nesebar** (Burgas coast) · **Bansko** 
 
 **Vibe.** Warm, grounded, quietly confident. MS sounds like a knowledgeable local who happens to speak your language — not a hype-driven portal. Estate-agent-professional, never breathless.
 
-**Person.** Speak to the reader as **“you”**; refer to the agency as **“we / our offices / our team.”** e.g. *“Find your place by the sea.”* · *“We speak your language.”* · *“Tell us what you’re after and we’ll take it from there.”*
+**Person.** Speak to the reader as **“you”**; refer to the agency as **“we / our offices / our team.”** e.g. *“Find your place in Sandanski.”* · *“We speak your language.”* · *“Tell us what you’re after and we’ll take it from there.”*
 
 **Casing.** **Sentence case** for headings, buttons and labels (*“Book a viewing”*, *“Browse by resort”*). Reserve ALL-CAPS for tiny eyebrows, status badges and field labels, always with wide letter-spacing. Never Title Case whole headlines.
 
@@ -43,11 +43,11 @@ Focus locations: **St Vlas, Sunny Beach, Nesebar** (Burgas coast) · **Bansko** 
 
 **Numbers & money.** Prices are **€ with thous-separators, no decimals** — `€245,000`, `€900/mo`. Specs are numerals with units — `68 m²`, `2 bed`, `1 bath`, `floor 4 / 8`. Reference codes are `MS-####`.
 
-**Punctuation & length.** No exclamation marks. Headlines are short and often end with a full stop (*“Find your place by the sea.”*). Body copy is 1–2 plain sentences; describe the home and the walk to the beach, not adjectives about “luxury lifestyle”.
+**Punctuation & length.** No exclamation marks. Headlines are short and often end with a full stop (*“Find your place in Sandanski.”*). Body copy is 1–2 plain sentences; describe the home and its real context — spa park, mountain, town centre, beach or border access only where true — not adjectives about “luxury lifestyle”.
 
 **Emoji.** **Never.** Status and meaning come from icons and badges, not emoji.
 
-**Multilingual.** Copy must survive translation between BG / EN / DE / NL / RU — keep sentences self-contained, avoid idioms and puns, and never bake meaning into word order or into an icon alone.
+**Multilingual.** Copy must survive translation between BG / EN / DE / NL / RU / EL / HE and future approved locales — keep sentences self-contained, avoid idioms and puns, never bake meaning into word order or into an icon alone, and preserve `dir="rtl"` behavior for Hebrew.
 
 ---
 
@@ -64,8 +64,8 @@ Focus locations: **St Vlas, Sunny Beach, Nesebar** (Burgas coast) · **Bansko** 
 Always reach for the **semantic aliases** (`--brand`, `--accent`, `--surface`, `--text-body`, `--price`, `--rating`, `--border`) in components — not the raw ramps.
 
 **Typography** (`tokens/typography.css`).
-- **Display — Source Serif 4.** Editorial serif for headlines, property names and **prices**. Warm and literary; multi-script (Latin/Cyrillic/Greek). Semibold, tight tracking, tight leading.
-- **Sans — Commissioner.** Low-contrast humanist grotesque for all UI, body and labels. Full Latin/Cyrillic/Greek — the same voice in Sofia, Bansko and Nafplio.
+- **Display — Source Serif 4.** Editorial serif for headlines, property names and **prices**. Warm and literary; multi-script (Latin/Cyrillic/Greek) with Noto Serif Hebrew fallback. Semibold, tight tracking, tight leading.
+- **Sans — Commissioner.** Low-contrast humanist grotesque for all UI, body and labels. Full Latin/Cyrillic/Greek with Noto Sans Hebrew fallback — the same voice in Sofia, Bansko, Nafplio and Hebrew/Israel pages.
 - **Mono — IBM Plex Mono.** Reference codes, m² specs, tabular data.
 - Fixed UI ramp `--text-2xs`→`--text-5xl` (11→64px) plus fluid `--display-*` for hero type.
 
@@ -144,7 +144,7 @@ Reusable React primitives (`components/<group>/`). Import from the compiled bund
 - **Breadcrumb** — location trail for listing/resort pages.
 - **Pagination** — search-results paging with ellipsis collapse.
 - **Tabs** — charcoal-underline section tabs + segmented view toggle (Grid/List/Map).
-- **LangSwitcher** — the five-language switcher (BG EN DE NL RU), globe + native-name popover; `onDark` for the footer.
+- **LangSwitcher** — the approved public website language switcher (BG EN DE NL RU EL HE), globe + native-name popover with Hebrew RTL label support; `onDark` for the footer.
 
 **General** (`components/general/`)
 - **Icon** — Lucide glyph renderer (see Iconography).
@@ -217,7 +217,7 @@ _ds_bundle.js / _ds_manifest.json / _adherence.oxlintrc.json  (generated — do 
 
 **Two open substitutions (fonts, photography) and a couple of choices:**
 
-1. **Fonts are Google-Fonts stand-ins.** Source Serif 4 (display), Commissioner (sans), IBM Plex Mono — all chosen for full **Latin + Cyrillic + Greek** coverage. **Do you have licensed brand fonts?** If so, drop the `.woff2` files into `assets/fonts/`, replace the `@import` in `tokens/fonts.css` with `@font-face` rules, and I’ll rewire it. If not, tell me the personality you want (more editorial? more modern-grotesque?) and I’ll re-pick.
+1. **Fonts are Google-Fonts stand-ins.** Source Serif 4 (display), Commissioner (sans), IBM Plex Mono, plus Noto Serif Hebrew / Noto Sans Hebrew fallbacks — chosen for **Latin + Cyrillic + Greek + Hebrew** coverage. **Do you have licensed brand fonts?** If so, drop the `.woff2` files into `assets/fonts/`, replace the `@import` in `tokens/fonts.css` with `@font-face` rules, and I’ll rewire it. If not, tell me the personality you want (more editorial? more modern-grotesque?) and I’ll re-pick.
 2. **Logo — real MS Realty mark, now embedded.** ✅ The mark (172×88) was fetched from the live site and **embedded locally** as a data URI in the `Logo` component — originals saved at `assets/logo-ms-realty.png` plus a `-reversed` white-text variant for dark surfaces. It now renders **offline and in PPTX/PDF export**, everywhere including the dark footer. **If you have a vector (SVG) master**, drop it in and I’ll point `LOGO_SRC` at it for crisp scaling.
 3. **No photography, so imagery is CSS placeholder “tones.”** `.mk-photo--sea/sky/sand/…` are warm coastal-light gradients standing in for real photos. `PropertyCard` and the gallery already accept a real `image` URL that overrides the tone. **Share a photo library** (or approve a stock direction) and I’ll swap them in.
 4. **Colour direction — anchored on the official brand palette.** ✅ Confirmed against the brand's official colours and re-anchored exactly: **Jasper `#DB3E3E`** is the accent red (`--brick-500`), **Apple Valley `#ED8484`** its light tint (`--brick-300`), and **Bauhaus `#3F3F3F`** the brand charcoal (`--ink-600`). Ink (charcoal) is the brand workhorse, Brick (Jasper red) the sparing accent, over warm Stone — with Sea demoted to a supporting / “for sale” role, and error-red nudged cooler so it never reads like the CTA. If you'd rather push further (a louder red, or a more monochrome charcoal look) \u2014 done: the palette is now **pushed monochrome**. Charcoal carries the UI (links, rating stars, buy/rent/new chips) and red is reserved for just the call CTA and the reduced-price flag; gold and teal are retired to opt-in ramps. Easy to dial back toward coloured statuses if you want.
