@@ -382,11 +382,17 @@ test("Node server rejects oversized request bodies", async () => {
   try {
     const response = await jsonFetch(`http://${address.address}:${address.port}`, "/api/leads", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({ id: "too-large" }),
     });
 
     assert.equal(response.status, 413);
     assert.equal(response.body.kind, "request_too_large");
+    assert.equal(response.headers["cache-control"], "no-store");
+    assert.equal(response.headers["x-content-type-options"], "nosniff");
+    assert.equal(response.headers["referrer-policy"], "strict-origin-when-cross-origin");
+    assert.equal(response.headers["x-frame-options"], "DENY");
+    assert.equal(response.headers["permissions-policy"], "camera=(), microphone=(), geolocation=()");
   } finally {
     await close(server);
   }

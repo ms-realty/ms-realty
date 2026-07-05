@@ -2,6 +2,14 @@ import http from "node:http";
 import { createHttpApp } from "./http.mjs";
 
 const DEFAULT_MAX_BODY_BYTES = 10 * 1024 * 1024;
+const ERROR_HEADERS = {
+  "content-type": "application/json; charset=utf-8",
+  "cache-control": "no-store",
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "x-frame-options": "DENY",
+  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+};
 
 async function readBody(req, maxBodyBytes = DEFAULT_MAX_BODY_BYTES) {
   const chunks = [];
@@ -31,7 +39,7 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
       res.end(typeof response.body === "string" ? response.body : JSON.stringify(response.body));
     } catch (error) {
       const status = error.status || 500;
-      res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
+      res.writeHead(status, ERROR_HEADERS);
       res.end(JSON.stringify({ kind: status === 413 ? "request_too_large" : "server_error" }));
     }
   });
