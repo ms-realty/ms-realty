@@ -34,6 +34,7 @@ import { appendTourApproval, createTourApproval, readTourApprovals } from "./tou
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
+import { buildListingQualityReport } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -210,7 +211,7 @@ function seoEvidencePayload(seoEvidence) {
   };
 }
 
-function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence) {
+function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, seed) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const reviewRequired = routes.filter((route) => route.review_required);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
@@ -248,6 +249,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
     seoEvidence: seoEvidencePayload(seoEvidence),
+    listingQuality: buildListingQualityReport({ seed, limit: 20 }),
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     deployablePreview: buildDeployableRedirects(routes, approvals),
@@ -476,6 +478,7 @@ export function createHttpApp({
         routeMap,
         readRedirectApprovals(redirectApprovalPath || undefined),
         currentSeoEvidence(),
+        seed,
       );
       return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
     }
@@ -493,6 +496,7 @@ export function createHttpApp({
         routeMap,
         approvals,
         currentSeoEvidence(),
+        seed,
       );
       if (wantsHtml(request, url)) return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
       return json(200, payload);
@@ -1068,6 +1072,7 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows !== 11859 ||
     smoke.adminMigrationReview.body.routeMap.total !== 457 ||
     smoke.adminMigrationReview.body.routeMap.mappedListings !== 165 ||
+    smoke.adminMigrationReview.body.listingQuality.summary.affected_listings !== 165 ||
     smoke.adminMigrationReview.body.routeMap.approvableSample?.length < 1
   ) {
     throw new Error("HTTP smoke must serve admin migration review workbench contract");
@@ -1084,7 +1089,8 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-endpoint=\"/api/admin/launch-readiness\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-export-endpoint=\"/api/admin/launch-readiness/export\"")
+    !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-export-endpoint=\"/api/admin/launch-readiness/export\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-quality-listing=\"true\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");
   }

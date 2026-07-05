@@ -621,6 +621,14 @@ if (!structuredData.summary.warnings.missing_price) {
   throw new Error("Structured data report must preserve listing price gaps as launch warnings");
 }
 
+const listingQuality = JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-quality-report.json"), "utf8"));
+if (listingQuality.summary.listings !== 165 || listingQuality.summary.affected_listings !== 165) {
+  throw new Error("Listing quality report must expose all source listing content gaps");
+}
+if (!listingQuality.summary.issue_counts.missing_price || !listingQuality.summary.issue_counts.media_review_pending) {
+  throw new Error("Listing quality report must keep price and media review gaps actionable");
+}
+
 const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data", "launch-readiness.json"), "utf8"));
 if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
   throw new Error("Launch readiness report must stay blocked until production blockers are cleared");

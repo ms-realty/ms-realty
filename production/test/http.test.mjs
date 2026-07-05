@@ -619,6 +619,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.redirectApprovalImport.pendingWorkbookEndpoint, "/api/admin/redirect-approval-workbook?pending=1");
   assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
   assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
+  assert.equal(review.body.listingQuality.summary.listings, 165);
+  assert.ok(review.body.listingQuality.summary.issue_counts.missing_price > 0);
+  assert.ok(review.body.listingQuality.rows.some((row) => row.editor_path.includes("/admin/listings/edit?listingId=")));
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);
   assert.equal(reviewHtml.body.includes('data-redirect-import-endpoint="/api/admin/redirect-approvals/import"'), true);
@@ -627,6 +630,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-pending-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook?pending=1"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-endpoint="/api/admin/launch-readiness"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-export-endpoint="/api/admin/launch-readiness/export"'), true);
+  assert.equal(reviewHtml.body.includes('data-quality-affected-listings="165"'), true);
+  assert.equal(reviewHtml.body.includes('data-quality-listing="true"'), true);
 });
 
 test("HTTP app rejects invalid language requests", async () => {

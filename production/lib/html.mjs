@@ -259,6 +259,18 @@ function renderAdminMigrationReview(page) {
       </li>`;
     })
     .join("");
+  const qualityRows = (page.listingQuality?.rows || [])
+    .map(
+      (row) => `
+      <tr data-quality-listing="true">
+        <td><a href="${escapeHtml(row.editor_path)}">${escapeHtml(row.listing_id)}</a></td>
+        <td>${escapeHtml(row.source_locale)}</td>
+        <td>${escapeHtml(row.location || "missing")}</td>
+        <td>${escapeHtml(row.issues.join(", "))}</td>
+        <td>${escapeHtml(row.review_gated_assets)}</td>
+      </tr>`,
+    )
+    .join("");
   return `
 <main data-kind="admin-migration-review" data-admin-locale="${escapeHtml(page.workspace.locale)}" data-review-required="${escapeHtml(
     page.routeMap.reviewRequired,
@@ -312,6 +324,16 @@ function renderAdminMigrationReview(page) {
       <textarea name="csv" rows="5" required></textarea>
       <button type="submit">Import SEO CSV</button>
     </form>
+  </section>
+  <section aria-label="Listing quality queue" data-quality-affected-listings="${escapeHtml(
+    page.listingQuality?.summary?.affected_listings || 0,
+  )}">
+    <h2>Listing quality queue</h2>
+    <p>Issues: ${escapeHtml(JSON.stringify(page.listingQuality?.summary?.issue_counts || {}))}</p>
+    <table>
+      <thead><tr><th>Listing</th><th>Locale</th><th>Location</th><th>Issues</th><th>Review-gated media</th></tr></thead>
+      <tbody>${qualityRows}</tbody>
+    </table>
   </section>
   <section aria-label="Approved redirects">
     <h2>Approved redirects</h2>

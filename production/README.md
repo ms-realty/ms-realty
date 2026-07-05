@@ -46,6 +46,7 @@ What it proves now:
 - Server-rendered HTML adapter for listing, search, contact, and fallback pages with SEO metadata.
 - Open Graph metadata in server-rendered public HTML, including listing `og:image` from reviewed gallery media.
 - Structured-data launch report for every indexable listing sitemap entry.
+- Listing quality report that turns missing price, bedroom, location, media review, and tour review warnings into admin editor links.
 - Locale-prefixed seller valuation page backed by the existing seller lead pipeline.
 - Locale-prefixed contact callback page backed by the existing gated CRM lead intake.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
@@ -98,6 +99,7 @@ Generated production data:
 - `production/data/sitemap.xml`
 - `production/data/robots.txt`
 - `production/data/structured-data-report.json`
+- `production/data/listing-quality-report.json`
 - `production/data/cms-seed.json`
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`

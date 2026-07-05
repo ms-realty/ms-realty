@@ -1,0 +1,3288 @@
+{
+  "generated_at": "2026-07-05T00:00:00Z",
+  "summary": {
+    "listings": 165,
+    "affected_listings": 165,
+    "issue_counts": {
+      "missing_price": 165,
+      "missing_bedrooms": 165,
+      "missing_description": 123,
+      "media_review_pending": 165,
+      "tour_review_pending": 165,
+      "missing_location": 5
+    },
+    "by_source_locale": {
+      "bg": 113,
+      "ru": 52
+    },
+    "by_source_domain": {
+      "makler-realty.com": 113,
+      "makler-realty.ru": 52
+    }
+  },
+  "rows": [
+    {
+      "listing_id": "MS-CRAWL-0001",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0001",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0001",
+      "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 19,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0002",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0002",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
+      "title": "Апартаменти в парка на Сандански. Затворен комплекс",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 4,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0003",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0003",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0003",
+      "title": "Тристаен апартамент под наем в Сандански + паркомясто",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0004",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0004",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
+      "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0005",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0005",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0005",
+      "title": "Апартамент под наем в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0006",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0006",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
+      "title": "Дава под наем промишлена сграда в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 2,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0007",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0007",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0007",
+      "title": "Продава двустаен апартамент в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0008",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0008",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0008",
+      "title": "Двустаен апартамент в центъра на Сандански – наем",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 19,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0009",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0009",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0009",
+      "title": "Двустаен апартамент под наем в парка на Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0010",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0010",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0010",
+      "title": "Двустаен апартамент в идеалния център на гр. Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0011",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0011",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0011",
+      "title": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 22,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0012",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0012",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0012",
+      "title": "Инвестиционен проект в Сандански – хотел ресторант",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 3,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0013",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0013",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0013",
+      "title": "Къща за продажба в с. Хотово – имот с парцел и отличен потенциал",
+      "location": "",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_location",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0014",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0014",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0014",
+      "title": "Наем – Двустаен апартамент в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 7,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0015",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0015",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0015",
+      "title": "Нова къща под наем в с.Микрево",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 23,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0016",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0016",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0016",
+      "title": "Новостроящи се къщи в с.Джигурово",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 22,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0017",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0017",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0017",
+      "title": "Нов двустаен апартамент в гр.Сандански – продажба",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 13,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0018",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0018",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0018",
+      "title": "Оборудвана оранжерия в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 30,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0019",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0019",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0019",
+      "title": "Офиси/магазини под наем в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0020",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0020",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0020",
+      "title": "Офис под наем в центъра на гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 5,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0021",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0021",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0021",
+      "title": "Панорамен двустаен апартамент с гараж – паркова зона",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 28,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0022",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0022",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0022",
+      "title": "Дава под наем производствено помещение в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0023",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0023",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0023",
+      "title": "Прекрасна къща в близост до СПА курорт Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0024",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0024",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0024",
+      "title": "Продава апартамент в Солун",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0025",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0025",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0025",
+      "title": "Продава вила в Пирин планина",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 21,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0026",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0026",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0026",
+      "title": "Продава голяма къща в близост до гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0027",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0027",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0027",
+      "title": "Продава двустаен апартамент в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0028",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0028",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0028",
+      "title": "Продава двустаен апартамент в центъра на гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0029",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0029",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0029",
+      "title": "Продава едностаен апартамент/студио в центъра на Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 9,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0030",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0030",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0030",
+      "title": "Продава едностаен апартамент",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0031",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0031",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0031",
+      "title": "Продава етаж от къща в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 13,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0032",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0032",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0032",
+      "title": "Продава етаж от къща в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 7,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0033",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0033",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0033",
+      "title": "Продава етаж от къща в с.Поленица",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 14,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0034",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0034",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0034",
+      "title": "Продава етаж от къща в широкия център на гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 9,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0035",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0035",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0035",
+      "title": "Продава етаж от къща с парцел в с.Левуново",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 14,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0036",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0036",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0036",
+      "title": "Продава земеделска земя – с.Джигурово",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0037",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0037",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0037",
+      "title": "Продава земя на Е79 в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 17
+    },
+    {
+      "listing_id": "MS-CRAWL-0038",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0038",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0038",
+      "title": "Продава имение в района на гр. Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 45,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0039",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0039",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0039",
+      "title": "Продава имот в м.Ранковец, гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 4,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0040",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0040",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0040",
+      "title": "Продава имот в с.Ласкарево",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 4,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0041",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0041",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0041",
+      "title": "Продава имот в центъра на с.Левуново",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0042",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0042",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0042",
+      "title": "Продава имот на гл.път Е79 в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 9,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0043",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0043",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0043",
+      "title": "Продава къща в Гърция, Еретрия – Котрони",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 17,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0044",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0044",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0044",
+      "title": "Продава къща в с. Кулата",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0045",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0045",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0045",
+      "title": "Продава къща в с.Пирин",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0046",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0046",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0046",
+      "title": "Продава къща в с.Поленица",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 11,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0047",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0047",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0047",
+      "title": "Продава къща в с. Спатово, община Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0048",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0048",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0048",
+      "title": "Продава къща в с.Цапарево",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 17,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0049",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0049",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0049",
+      "title": "Продава къща с двор в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 2,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0050",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0050",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0050",
+      "title": "Продава мезонет в Халкидики, р-н Елани Сани",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0051",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0051",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0051",
+      "title": "Продава нова къща в община Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0052",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0052",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0052",
+      "title": "Продава оранжерия в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 14,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0053",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0053",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0053",
+      "title": "Продава офис в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0054",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0054",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0054",
+      "title": "Продава панорамен двустаен апартамент в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0055",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0055",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0055",
+      "title": "Продава парцел в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0056",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0056",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0056",
+      "title": "Продава парцел в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 4,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0057",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0057",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0057",
+      "title": "Продава парцел в с.Микрево",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0058",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0058",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0058",
+      "title": "Продава парцел в с.Поленица",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0059",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0059",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0059",
+      "title": "Продава парцел в с.Хотово",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0060",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0060",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0060",
+      "title": "Продава парцел за строителство в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0061",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0061",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0061",
+      "title": "Продава парцел за строителство в с.Струмяни",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0062",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0062",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0062",
+      "title": "Продава промишлени халета в близост до гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0063",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0063",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0063",
+      "title": "Продава се вила в с. Игралище, община Струмяни",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 7,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0064",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0064",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0064",
+      "title": "Продава стара къща в с.Хотово",
+      "location": "",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_location",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 5,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0065",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0065",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0065",
+      "title": "Продава обзаведено студио в Сапфир Резиденс Банско",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0066",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0066",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0066",
+      "title": "Продава тристаен апартамент в Паралия Офринио, Гърция",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 26,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0067",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0067",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0067",
+      "title": "Продава тристаен апартамент в центъра на гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0068",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0068",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0068",
+      "title": "Продава 15дка земя в района на с.Капатово",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 2,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0069",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0069",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0069",
+      "title": "Продава 8дка земя в землището на с.Лешница",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 5,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0070",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0070",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0070",
+      "title": "Продава бизнес сграда в центъра на Петрич",
+      "location": "Petrich",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 2,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0071",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0071",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0071",
+      "title": "Продажба на 38дка земя в близост до минерална вода",
+      "location": "",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_location",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0072",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0072",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0072",
+      "title": "Продажба на апартаменти в Логари, Гърция",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0073",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0073",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0073",
+      "title": "Продажба на апартаменти в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0074",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0074",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0074",
+      "title": "Продажба на луксозна къща в гр. Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 24,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0075",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0075",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0075",
+      "title": "Продажба на магазин в гр.Благоевград",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 20,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-3000",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-3000",
+      "editor_path": "/admin/listings/edit?listingId=MS-3000",
+      "title": "Продажба на парцел в Струмяни – 3000 кв.м",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 7,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0077",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0077",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0077",
+      "title": "Светъл южен апартамент до парка на гр. Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 11,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0078",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0078",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0078",
+      "title": "Продажба на тристаен апартамент в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 11,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0079",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0079",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0079",
+      "title": "Тристаен апартамент в центъра на гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 19,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0080",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0080",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0080",
+      "title": "Тристаен апартамент под наем в с.Поленица",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 28,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0081",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0081",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0081",
+      "title": "Недвижими имоти в Сандански. Продава парцел в с.Струмяни",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0082",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0082",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0082",
+      "title": "Стопански двор",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 2,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0083",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0083",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0083",
+      "title": "Център за профилактика, рехабилитация и разкрасителни процедури",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0084",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0084",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0084",
+      "title": "Тристаен апартамент в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0085",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0085",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0085",
+      "title": "Двустаен апартамент в Сандански. Наем",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0086",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0086",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0086",
+      "title": "Продава апартаменти в Парк Хотел Пирин",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 13,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0087",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0087",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0087",
+      "title": "Продава земя и сгради в близост до Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0088",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0088",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0088",
+      "title": "Продава парцел в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 5,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0089",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0089",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0089",
+      "title": "Продава двустаен апартамент в ПАРК ХОТЕЛ ПИРИН САНДАНСКИ",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0090",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0090",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0090",
+      "title": "Апартамент на първа линия в Пасалимани, Пиреус -Гърция",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 50,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0091",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0091",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0091",
+      "title": "Продава къща в с.Виногради, 3 км от Мелник",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 14,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0092",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0092",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0092",
+      "title": "Продава къща в парка на Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0093",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0093",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0093",
+      "title": "Продава къща в с. Лешница",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 9,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0094",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0094",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0094",
+      "title": "Индустриална сграда под наем в Петрич",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0095",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0095",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0095",
+      "title": "Продава индустриална сграда. Община Петрич",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 11,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0096",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0096",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0096",
+      "title": "Индустриална сграда под наем",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0097",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0097",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0097",
+      "title": "Индустриално помещение под наем в гр.Петрич",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 6,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0098",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0098",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0098",
+      "title": "Продава индустриална база около Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0099",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0099",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0099",
+      "title": "Продава луксозна къща в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 24,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0100",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0100",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0100",
+      "title": "Двустаен луксозен апартамент под наем в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0101",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0101",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0101",
+      "title": "Двустаен апартамент под наем в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 21,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0102",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0102",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0102",
+      "title": "Двустаен апартамент в парка на гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0103",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0103",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0103",
+      "title": "Продава мезонет на ул.Пирин, гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 11,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0104",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0104",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0104",
+      "title": "Продава имение в Гърция, гр.Нафлио",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 61,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0105",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0105",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0105",
+      "title": "Продава СПА Хотел в гр.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 32,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0106",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0106",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0106",
+      "title": "Едностаен апартамент под наем",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0107",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0107",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0107",
+      "title": "Продава тристаен апартамент в комплек “Арена 1”, Св.Влас",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0108",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0108",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0108",
+      "title": "Продава вила в Малешевска планина",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 8,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0109",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0109",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0109",
+      "title": "Двустаен апартамент под наем в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 19,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0110",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0110",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0110",
+      "title": "Апартамент под наем в комплекс Медите",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 13,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0111",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0111",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0111",
+      "title": "Продава работещ бизнес – производство на пелети",
+      "location": "",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_location",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 24,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0112",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0112",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0112",
+      "title": "Земеделска земя в землището на с.Джигурово",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 3,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0113",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "target_path": "/bg/imoti/MS-CRAWL-0113",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0113",
+      "title": "Продава тристаен апартамент в Парк Хотел Пирин",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 22,
+      "review_gated_assets": 16
+    },
+    {
+      "listing_id": "MS-CRAWL-0114",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0114",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0114",
+      "title": "Апартаменты в Парк отеле Пирин — г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 21,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0115",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0115",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0115",
+      "title": "Аренда панорамной двушки в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 25,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0116",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0116",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0116",
+      "title": "Земля и здания на продажу недалеко от Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0117",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0117",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0117",
+      "title": "Дом в деревне Спатово, муниципалитет Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0118",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0118",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0118",
+      "title": "Дом на продажу в селе Петрово, муниципалитет Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 20,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0119",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0119",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0119",
+      "title": "Трехкомнатная квартира в Парк Отеле Пирин — Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 30,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0120",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0120",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0120",
+      "title": "Продажа отеля с рестораном в г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 33,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0121",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0121",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0121",
+      "title": "Офис на продажу в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0122",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0122",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0122",
+      "title": "Продается особняк в районе города Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 52,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0123",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0123",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0123",
+      "title": "Продается производственное здание oколо г. Петрич",
+      "location": "Petrich",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 19,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0124",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0124",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0124",
+      "title": "Продается элитный дом в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 32,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0125",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0125",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0125",
+      "title": "Продажа большого дома недалеко от города Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 23,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0126",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0126",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0126",
+      "title": "Продажа большого, панорамного участка в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 13,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0127",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0127",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0127",
+      "title": "Продажа большого участка рядом с мин.водой",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 14,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0128",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0128",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0128",
+      "title": "Продажа виноградника рядом с Сандански. Сорт Мерло",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 17,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0129",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0129",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0129",
+      "title": "Продажа дома в поселке Виногради ( Мелник)",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 23,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0130",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0130",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0130",
+      "title": "Продажа дома в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 21,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0131",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0131",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0131",
+      "title": "Продажа дома в центре г. Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 20,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0132",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0132",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0132",
+      "title": "Продажа дома рядом со СПА-курортом Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 23,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0133",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0133",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0133",
+      "title": "Продажа дома с участком в городе Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0134",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0134",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0134",
+      "title": "Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0135",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0135",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0135",
+      "title": "Продажа меблированной студии в жилом комплексе Сапфир в Банско",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 20,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0136",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0136",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0136",
+      "title": "Продажа недвижимости в центре села Левуново, Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0137",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0137",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0137",
+      "title": "Продажа недвижимости в селе Ласкарево, г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0138",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0138",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0138",
+      "title": "Продажа новостройки в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0139",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0139",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0139",
+      "title": "Продажа производственной базы около Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0140",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0140",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0140",
+      "title": "Продажа СПА Отеля в г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 39,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0141",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0141",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0141",
+      "title": "Продажа участка в поселке Дербере, Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0142",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0142",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0142",
+      "title": "Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 18,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0143",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0143",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0143",
+      "title": "Продажа участка на международной трассе София — Салоники",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 19,
+      "review_gated_assets": 13
+    },
+    {
+      "listing_id": "MS-CRAWL-0144",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0144",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0144",
+      "title": "Продажа участка с видом на Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 14,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0145",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0145",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0145",
+      "title": "Продажа участка 2 гка в районе г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0146",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0146",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0146",
+      "title": "Продажа ресторана с отелем в г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 10,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0147",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0147",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0147",
+      "title": "Посуточная аренда в центре города Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 24,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0148",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0148",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0148",
+      "title": "Сдается дом в селе Виногради, 3 км от Мельника",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 23,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0149",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0149",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0149",
+      "title": "Сдается производственное помещение в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 22,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0150",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0150",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0150",
+      "title": "Сельхоз земля в районе деревни Лешница, Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 14,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0151",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0151",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0151",
+      "title": "Продается теплица в городе Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0152",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0152",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0152",
+      "title": "Участок в поселке Лешница — район города Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0153",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0153",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0153",
+      "title": "Участок в поселке Струмяни. Недвижимость в районе Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0154",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0154",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0154",
+      "title": "Продажа участка в поселке Струмяни. Недвижимость в районе Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 20,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0155",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0155",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0155",
+      "title": "Участок под застройку в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0156",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0156",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0156",
+      "title": "Участок под застройку в поселке Ласкарево / Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0157",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0157",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0157",
+      "title": "Участок под строительство отеля",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 12,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0158",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0158",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0158",
+      "title": "Участок под строительство",
+      "location": "",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_location",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 16,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0159",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0159",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0159",
+      "title": "Центр профилактики, реабилитации и косметических процедур — продажа",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 25,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0160",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0160",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0160",
+      "title": "Этаж дома с земельным участком в селе Левуново, Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 17,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0161",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0161",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0161",
+      "title": "Этаж дома с участком в г.Сандански — продажа",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 15,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0162",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0162",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0162",
+      "title": "Aренда двухкомнатной квартиры в г.Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 29,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0163",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0163",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0163",
+      "title": "Большая двухкомнатная квартира в аренду в Сандански + гараж",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 24,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0164",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0164",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0164",
+      "title": "Продажа трехкомнатной квартиры в Паралия Офринио, Греция",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "missing_description",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 29,
+      "review_gated_assets": 12
+    },
+    {
+      "listing_id": "MS-CRAWL-0165",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "target_path": "/ru/properties/MS-CRAWL-0165",
+      "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0165",
+      "title": "Продажа участка в Струмяни. Недвижимость в Сандански",
+      "location": "Sandanski",
+      "issues": [
+        "missing_price",
+        "missing_bedrooms",
+        "media_review_pending",
+        "tour_review_pending"
+      ],
+      "price_eur": null,
+      "bedrooms": null,
+      "public_gallery_assets": 21,
+      "review_gated_assets": 12
+    }
+  ]
+}
