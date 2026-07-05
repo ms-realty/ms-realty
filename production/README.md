@@ -70,6 +70,7 @@ What it proves now:
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
 - Served sitemap XML includes approved home and location pages without unapproved French routes.
 - Append-only lead ledger for persisted buyer inquiry, viewing request, contact callback, and seller valuation smoke rows, including source classification.
+- Lead intake returns a deterministic instant-confirmation contract without sending unreviewed messages.
 - Lead ledger rows create an immediate broker follow-up SLA task and manager escalation timestamp.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Gated admin lead inbox HTML endpoint with BG/RU/EN interface locale support.

@@ -32,6 +32,8 @@ export function appendLead(
     admin_locale: lead.admin_locale,
     contact_preference: lead.contact_preference,
     broker_approval_required: lead.hermes_reply_draft?.broker_approval_required === true,
+    confirmation_status: lead.confirmation?.status || null,
+    confirmation_message_key: lead.confirmation?.message_key || null,
     sla_due_at: slaDueAt,
     manager_escalation_due_at: minutesAfter(receivedAt, escalationMinutes),
     follow_up_task: {
@@ -63,6 +65,9 @@ export function assertLeadLedger(rows) {
       throw new Error("Lead ledger row is missing routing data");
     }
     if (row.broker_approval_required !== true) throw new Error("Lead ledger must preserve broker approval gate");
+    if (row.confirmation_status !== "ready" || row.confirmation_message_key !== "lead_received") {
+      throw new Error("Lead ledger must preserve the instant confirmation contract");
+    }
     if (!row.sla_due_at || row.follow_up_task?.status !== "open") {
       throw new Error("Lead ledger must create an immediate broker follow-up SLA task");
     }

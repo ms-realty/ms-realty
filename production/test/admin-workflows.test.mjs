@@ -131,10 +131,18 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
   assert.equal(hebrew.original_direction, "rtl");
   assert.equal(hebrew.admin_locale, "en");
   assert.equal(hebrew.contact_preference, "whatsapp");
+  assert.deepEqual(hebrew.confirmation, {
+    status: "ready",
+    message_key: "lead_received",
+    locale: "he",
+    channel: "whatsapp",
+    requires_broker_follow_up: true,
+  });
   assert.equal(hebrew.hermes_reply_draft.can_send_without_approval, false);
   assert.equal(greek.original_language, "el");
   assert.equal(greek.admin_locale, "en");
   assert.equal(greek.lead.leadType, "seller");
+  assert.equal(greek.confirmation.channel, "broker_follow_up");
 });
 
 test("admin workflow fixture combines CMS translation review and CRM lead intake", () => {
@@ -157,5 +165,6 @@ test("admin workflow fixture combines CMS translation review and CRM lead intake
   assert.equal(fixture.translation_tasks.el_published.status, "published");
   assert.equal(fixture.crm_inbox.buyer_he.original_language, "he");
   assert.equal(fixture.crm_inbox.buyer_he.contact_preference, "whatsapp");
+  assert.equal(fixture.crm_inbox.buyer_he.confirmation.message_key, "lead_received");
   assert.equal(fixture.crm_inbox.seller_el.lead.leadType, "seller");
 });

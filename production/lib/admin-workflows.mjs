@@ -286,6 +286,13 @@ export function createCrmInboxItem(registry, input) {
     requires_translation: lead.language.requiresTranslation,
     contact_preference: lead.contact_preference,
     message_original: lead.message,
+    confirmation: {
+      status: "ready",
+      message_key: "lead_received",
+      locale: lead.language.language,
+      channel: lead.contact_preference || "broker_follow_up",
+      requires_broker_follow_up: true,
+    },
     hermes_reply_draft: {
       status: "draft",
       language: lead.language.language,

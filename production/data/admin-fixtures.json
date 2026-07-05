@@ -1162,6 +1162,13 @@
       "requires_translation": true,
       "contact_preference": "whatsapp",
       "message_original": "Interested in this listing.",
+      "confirmation": {
+        "status": "ready",
+        "message_key": "lead_received",
+        "locale": "he",
+        "channel": "whatsapp",
+        "requires_broker_follow_up": true
+      },
       "hermes_reply_draft": {
         "status": "draft",
         "language": "he",
@@ -1201,6 +1208,13 @@
       "requires_translation": true,
       "contact_preference": null,
       "message_original": "I want a valuation for my property.",
+      "confirmation": {
+        "status": "ready",
+        "message_key": "lead_received",
+        "locale": "el",
+        "channel": "broker_follow_up",
+        "requires_broker_follow_up": true
+      },
       "hermes_reply_draft": {
         "status": "draft",
         "language": "el",

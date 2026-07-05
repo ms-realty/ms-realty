@@ -1426,6 +1426,13 @@
     "requires_translation": true,
     "contact_preference": "whatsapp",
     "message_original": "Interested in this property.",
+    "confirmation": {
+      "status": "ready",
+      "message_key": "lead_received",
+      "locale": "he",
+      "channel": "whatsapp",
+      "requires_broker_follow_up": true
+    },
     "hermes_reply_draft": {
       "status": "draft",
       "language": "he",
@@ -1465,6 +1472,13 @@
     "requires_translation": true,
     "contact_preference": "phone",
     "message_original": "I would like to view this property.",
+    "confirmation": {
+      "status": "ready",
+      "message_key": "lead_received",
+      "locale": "he",
+      "channel": "phone",
+      "requires_broker_follow_up": true
+    },
     "hermes_reply_draft": {
       "status": "draft",
       "language": "he",
@@ -1504,6 +1518,13 @@
     "requires_translation": true,
     "contact_preference": "phone",
     "message_original": "Please call me about buying in Sandanski.",
+    "confirmation": {
+      "status": "ready",
+      "message_key": "lead_received",
+      "locale": "he",
+      "channel": "phone",
+      "requires_broker_follow_up": true
+    },
     "hermes_reply_draft": {
       "status": "draft",
       "language": "he",

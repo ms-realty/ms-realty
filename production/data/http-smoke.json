@@ -2529,6 +2529,13 @@
       "requires_translation": true,
       "contact_preference": "whatsapp",
       "message_original": "Interested in this property.",
+      "confirmation": {
+        "status": "ready",
+        "message_key": "lead_received",
+        "locale": "he",
+        "channel": "whatsapp",
+        "requires_broker_follow_up": true
+      },
       "hermes_reply_draft": {
         "status": "draft",
         "language": "he",
@@ -2550,6 +2557,8 @@
         "admin_locale": "en",
         "contact_preference": "whatsapp",
         "broker_approval_required": true,
+        "confirmation_status": "ready",
+        "confirmation_message_key": "lead_received",
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -2601,6 +2610,13 @@
       "requires_translation": true,
       "contact_preference": "phone",
       "message_original": "I would like to view this property.",
+      "confirmation": {
+        "status": "ready",
+        "message_key": "lead_received",
+        "locale": "he",
+        "channel": "phone",
+        "requires_broker_follow_up": true
+      },
       "hermes_reply_draft": {
         "status": "draft",
         "language": "he",
@@ -2622,6 +2638,8 @@
         "admin_locale": "en",
         "contact_preference": "phone",
         "broker_approval_required": true,
+        "confirmation_status": "ready",
+        "confirmation_message_key": "lead_received",
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -2673,6 +2691,13 @@
       "requires_translation": true,
       "contact_preference": "phone",
       "message_original": "Please call me about buying in Sandanski.",
+      "confirmation": {
+        "status": "ready",
+        "message_key": "lead_received",
+        "locale": "he",
+        "channel": "phone",
+        "requires_broker_follow_up": true
+      },
       "hermes_reply_draft": {
         "status": "draft",
         "language": "he",
@@ -2694,6 +2719,8 @@
         "admin_locale": "en",
         "contact_preference": "phone",
         "broker_approval_required": true,
+        "confirmation_status": "ready",
+        "confirmation_message_key": "lead_received",
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -2745,6 +2772,13 @@
       "requires_translation": true,
       "contact_preference": null,
       "message_original": "I want a valuation for my property.",
+      "confirmation": {
+        "status": "ready",
+        "message_key": "lead_received",
+        "locale": "el",
+        "channel": "broker_follow_up",
+        "requires_broker_follow_up": true
+      },
       "hermes_reply_draft": {
         "status": "draft",
         "language": "el",
@@ -2766,6 +2800,8 @@
         "admin_locale": "en",
         "contact_preference": null,
         "broker_approval_required": true,
+        "confirmation_status": "ready",
+        "confirmation_message_key": "lead_received",
         "sla_due_at": "2026-07-04T00:15:00.000Z",
         "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
         "follow_up_task": {
@@ -3061,6 +3097,8 @@
           "admin_locale": "en",
           "contact_preference": "whatsapp",
           "broker_approval_required": true,
+          "confirmation_status": "ready",
+          "confirmation_message_key": "lead_received",
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
@@ -3082,6 +3120,8 @@
           "admin_locale": "en",
           "contact_preference": "phone",
           "broker_approval_required": true,
+          "confirmation_status": "ready",
+          "confirmation_message_key": "lead_received",
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
@@ -3103,6 +3143,8 @@
           "admin_locale": "en",
           "contact_preference": "phone",
           "broker_approval_required": true,
+          "confirmation_status": "ready",
+          "confirmation_message_key": "lead_received",
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
@@ -3124,6 +3166,8 @@
           "admin_locale": "en",
           "contact_preference": null,
           "broker_approval_required": true,
+          "confirmation_status": "ready",
+          "confirmation_message_key": "lead_received",
           "sla_due_at": "2026-07-04T00:15:00.000Z",
           "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
           "follow_up_task": {
