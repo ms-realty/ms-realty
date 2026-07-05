@@ -6,6 +6,7 @@ import { contentHash, markStaleWhenSourceChanges } from "./translations.mjs";
 export const DEFAULT_LISTING_EDIT_LEDGER_PATH = fromRoot("production", "data", "listing-edits.jsonl");
 
 const EDITABLE_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type", "bedrooms", "price_eur"]);
+const TEXT_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type"]);
 
 export function resetListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -35,7 +36,23 @@ function findListing(seed, listingId) {
 function normalizePatch(patch = {}) {
   const entries = Object.entries(patch).filter(([field]) => EDITABLE_FACT_FIELDS.has(field));
   if (!entries.length) throw new Error("Listing edit patch must include editable listing facts");
-  return Object.fromEntries(entries);
+  return Object.fromEntries(entries.map(([field, value]) => [field, normalizePatchValue(field, value)]));
+}
+
+function normalizePatchValue(field, value) {
+  if (TEXT_FACT_FIELDS.has(field)) return typeof value === "string" ? value.trim() : value;
+  if (value === "" || value === null) return "";
+  const number = Number(value);
+  if (!Number.isFinite(number)) throw new Error(`${field} must be numeric`);
+  if (field === "price_eur") {
+    if (number <= 0) throw new Error("price_eur must be positive");
+    return number;
+  }
+  if (field === "bedrooms") {
+    if (!Number.isInteger(number) || number < 0) throw new Error("bedrooms must be a non-negative integer");
+    return number;
+  }
+  return value;
 }
 
 export function staleTranslationsForListing(record, sourceHashAfter, translationTasks = []) {
