@@ -7,6 +7,7 @@ Rules:
 - Public website locales are dynamic and admin-managed.
 - Only `public_enabled: true` and `indexable: true` locales generate public
   indexable pages, hreflang entries, and localized sitemap URLs.
+- `fallback_locale` must point to an existing public/indexable locale.
 - Hermes Agent may create translation drafts for any enabled locale, but cannot
   publish or mark content indexable.
 - BG is the default source locale.

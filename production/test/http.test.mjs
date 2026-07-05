@@ -911,6 +911,16 @@ test("HTTP admin can add a non-indexable website locale without changing admin l
     url: "/api/admin/locales?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const invalidFallback = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/locales",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      code: "it",
+      native_name: "Italiano",
+      fallback_locale: "fr",
+    },
+  });
   const fallback = await dispatchHttp(app, { url: "/es/" });
   const stored = loadLocaleRegistry(localeRegistryPath);
 
@@ -923,6 +933,8 @@ test("HTTP admin can add a non-indexable website locale without changing admin l
   assert.deepEqual(created.body.required_public_locales, ["bg", "en", "de", "nl", "ru", "el", "he"]);
   assert.equal(created.body.website_language_coverage.find((item) => item.market === "Israel").locale, "he");
   assert.equal(created.body.website_language_coverage.find((item) => item.market === "Greece").locale, "el");
+  assert.equal(invalidFallback.status, 400);
+  assert.match(invalidFallback.body.message, /must be public and indexable/);
   assert.equal(listed.body.workspace.locale, "ru");
   assert.equal(listed.body.locales.some((locale) => locale.code === "es"), true);
   assert.equal(fallback.body.locale, "en");

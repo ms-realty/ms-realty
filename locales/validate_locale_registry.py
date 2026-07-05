@@ -53,6 +53,8 @@ def main() -> int:
         fallback = locale.get("fallback_locale")
         if fallback and fallback not in by_code:
             fail(f"{code} fallback does not exist: {fallback}")
+        if fallback and not (by_code[fallback].get("public_enabled") and by_code[fallback].get("indexable")):
+            fail(f"{code} fallback must be public and indexable: {fallback}")
         if locale.get("translation_provider_mode") not in {"human", "hermes_draft", "external_import"}:
             fail(f"invalid provider mode for {code}")
         segments = locale.get("route_segments") or {}

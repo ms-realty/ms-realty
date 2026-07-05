@@ -70,8 +70,14 @@ export function assertLocaleRegistry(registry) {
     if (!PROVIDERS.has(locale.translation_provider_mode)) {
       throw new Error(`Invalid translation provider for ${locale.code}`);
     }
-    if (locale.fallback_locale && !registry.locales.some((candidate) => candidate.code === locale.fallback_locale)) {
+    const fallback = locale.fallback_locale
+      ? registry.locales.find((candidate) => candidate.code === locale.fallback_locale)
+      : null;
+    if (locale.fallback_locale && !fallback) {
       throw new Error(`Missing fallback ${locale.fallback_locale} for ${locale.code}`);
+    }
+    if (fallback && (!fallback.public_enabled || !fallback.indexable)) {
+      throw new Error(`Fallback ${locale.fallback_locale} for ${locale.code} must be public and indexable`);
     }
     if (
       !locale.route_segments?.listing ||

@@ -101,6 +101,19 @@ test("admin-added locales are valid but not public indexable by default", () => 
   assert.equal(resolvePublicLocale(updated, "es").locale.code, "en");
 });
 
+test("locale fallbacks must resolve to approved public languages", () => {
+  assert.throws(
+    () =>
+      addLocaleToRegistry(registry, {
+        code: "it",
+        native_name: "Italiano",
+        admin_name: "Italian",
+        fallback_locale: "fr",
+      }),
+    /must be public and indexable/,
+  );
+});
+
 test("translation workflow marks stale content and human approval explicitly", () => {
   const oldHash = contentHash({ title: "Old" });
   const newHash = contentHash({ title: "New" });
