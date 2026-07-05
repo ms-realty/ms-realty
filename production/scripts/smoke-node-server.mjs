@@ -12,6 +12,7 @@ import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../l
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
+import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -25,6 +26,7 @@ const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "m
 const sellerPipelinePath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-seller-pipeline-")), "seller-pipeline.jsonl");
 const brokerContactLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-broker-contacts-")), "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-tour-approvals-")), "tour-approvals.jsonl");
+const eventLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-events-")), "events.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
 resetLanguageRequests(languageRequestPath);
@@ -35,6 +37,7 @@ resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
 resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
+resetEventLedger(eventLedgerPath);
 const server = createNodeServer(
   createHttpApp({
     leadLedgerPath,
@@ -47,6 +50,7 @@ const server = createNodeServer(
     sellerPipelinePath,
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
+    eventLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -283,6 +287,16 @@ try {
   });
   smoke.staleListing = await jsonFetch(baseUrl, "/el/akinita/MS-CRAWL-0001");
   smoke.staleSearch = await jsonFetch(baseUrl, "/api/search?locale=el&q=Sandanski");
+  smoke.ctaClick = await jsonFetch(baseUrl, "/api/events", {
+    method: "POST",
+    body: JSON.stringify({
+      type: "cta_click",
+      path: "/he/properties/MS-CRAWL-0001",
+      locale: "he",
+      listingReference: "MS-CRAWL-0001",
+      action: "sticky_inquiry",
+    }),
+  });
   smoke.admin = await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
     headers: { authorization: "Bearer local-admin-smoke" },
   });
@@ -318,6 +332,12 @@ try {
   const tourApprovals = readTourApprovals(tourApprovalLedgerPath);
   assertTourApprovals(tourApprovals);
   smoke.tourApprovalLedger = { rows: tourApprovals.length };
+  const events = readEventLedger(eventLedgerPath);
+  assertEventLedger(events);
+  smoke.eventLedger = {
+    rows: events.length,
+    byType: events.reduce((counts, row) => ({ ...counts, [row.type]: (counts[row.type] || 0) + 1 }), {}),
+  };
   const outPath = fromRoot("production", "data", "node-server-smoke.json");
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, `${JSON.stringify(smoke, null, 2)}\n`);

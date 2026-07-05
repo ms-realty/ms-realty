@@ -111,6 +111,9 @@ export function assertServerSmoke(smoke) {
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("Server must store saved search alert tasks");
   }
+  if (smoke.ctaClick && (smoke.ctaClick.status !== 201 || smoke.ctaClick.body.type !== "cta_click")) {
+    throw new Error("Server must accept privacy-safe CTA click events");
+  }
   if (smoke.translationDraft.status !== 201 || smoke.translationDraft.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable Hermes translation draft");
   }

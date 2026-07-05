@@ -3211,6 +3211,29 @@
       ]
     }
   },
+  "ctaClick": {
+    "status": 201,
+    "body": {
+      "recorded_at": "2026-07-04T00:00:00Z",
+      "type": "cta_click",
+      "path": "/he/properties/MS-CRAWL-0001",
+      "locale": "he",
+      "listing_reference": "MS-CRAWL-0001",
+      "action": "sticky_inquiry",
+      "query": null,
+      "filters": {},
+      "ledger": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "type": "cta_click",
+        "path": "/he/properties/MS-CRAWL-0001",
+        "locale": "he",
+        "listing_reference": "MS-CRAWL-0001",
+        "action": "sticky_inquiry",
+        "query": null,
+        "filters": {}
+      }
+    }
+  },
   "leadLedger": {
     "rows": 4
   },
@@ -3240,5 +3263,14 @@
   },
   "tourApprovalLedger": {
     "rows": 1
+  },
+  "eventLedger": {
+    "rows": 22,
+    "byType": {
+      "page_view": 14,
+      "search": 3,
+      "lead_submitted": 4,
+      "cta_click": 1
+    }
   }
 }

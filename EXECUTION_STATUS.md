@@ -207,6 +207,10 @@ Date: 2026-07-04
   - current match count is calculated from the runtime search renderer
   - persisted rows create open alert tasks for broker follow-up
   - authenticated admin inbox returns persisted saved searches
+- Added privacy-safe analytics intake:
+  - page views, searches, lead submissions, and CTA clicks append to `production/data/events.jsonl`
+  - `POST /api/events` accepts CTA events without contact/message payloads
+  - search queries are scrubbed before analytics persistence
 - Added seller valuation pipeline intake:
   - seller leads from `POST /api/leads` create a seller pipeline row
   - persisted seller rows start at `valuation_requested`

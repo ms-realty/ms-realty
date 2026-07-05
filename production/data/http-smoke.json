@@ -4685,6 +4685,32 @@
       "public_translation_available": false
     }
   },
+  "ctaClick": {
+    "status": 201,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "recorded_at": "2026-07-04T00:00:00Z",
+      "type": "cta_click",
+      "path": "/he/properties/MS-CRAWL-0001",
+      "locale": "he",
+      "listing_reference": "MS-CRAWL-0001",
+      "action": "sticky_inquiry",
+      "query": null,
+      "filters": {},
+      "ledger": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "type": "cta_click",
+        "path": "/he/properties/MS-CRAWL-0001",
+        "locale": "he",
+        "listing_reference": "MS-CRAWL-0001",
+        "action": "sticky_inquiry",
+        "query": null,
+        "filters": {}
+      }
+    }
+  },
   "adminHtml": {
     "status": 200,
     "headers": {
@@ -4731,6 +4757,16 @@
   "tourApprovalLedger": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/tour-approvals.jsonl",
     "rows": 1
+  },
+  "eventLedger": {
+    "path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
+    "rows": 25,
+    "byType": {
+      "page_view": 16,
+      "search": 4,
+      "lead_submitted": 4,
+      "cta_click": 1
+    }
   },
   "localeRegistry": {
     "path": "/Users/ivan/Code/MS-Realty/production/data/admin-locale-registry-smoke.json",

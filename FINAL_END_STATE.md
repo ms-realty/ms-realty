@@ -102,6 +102,9 @@ Implemented now:
 - Saved search/alert contract:
   - `POST /api/saved-searches`
   - saved searches persist search criteria, match count, and an open alert task
+- Privacy-safe analytics contract:
+  - `production/data/events.jsonl`
+  - page views, searches, lead submissions, and CTA clicks are persisted without contact/message payloads
 - Seller pipeline contract:
   - seller valuation leads create `valuation_requested` pipeline rows
   - callback and appraisal checklist tasks start open

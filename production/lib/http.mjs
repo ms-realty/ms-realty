@@ -25,6 +25,7 @@ import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-le
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
+import { appendEvent, createEvent } from "./events.mjs";
 import { fromRoot } from "./paths.mjs";
 
 function response(status, body, contentType, headers = {}) {
@@ -225,6 +226,7 @@ export function createHttpApp({
   sellerPipelinePath = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
+  eventLedgerPath = null,
   redirectApprovalPath = null,
   localeRegistryPath = null,
   receivedAt,
@@ -236,6 +238,8 @@ export function createHttpApp({
   sellerPipelineCreatedAt,
 } = {}) {
   let activeRegistry = registry;
+  const recordEvent = (input) =>
+    eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
@@ -271,15 +275,15 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/search") {
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
-      return json(
-        200,
-        searchRuntimeListings(activeRegistry, seed, {
-          localeCode,
-          query,
-          filters: searchFiltersFromParams(url.searchParams),
-          translationTasks: readTranslationLedger(translationLedgerPath || undefined),
-        }),
-      );
+      const filters = searchFiltersFromParams(url.searchParams);
+      const result = searchRuntimeListings(activeRegistry, seed, {
+        localeCode,
+        query,
+        filters,
+        translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+      });
+      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters });
+      return json(200, result);
     }
 
     if (request.method === "GET") {
@@ -288,13 +292,16 @@ export function createHttpApp({
         (locale) => locale.route_segments?.search && `/${locale.code}/${locale.route_segments.search}` === normalized,
       );
       if (searchLocale) {
+        const query = url.searchParams.get("q") || "";
+        const filters = searchFiltersFromParams(url.searchParams);
+        recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters });
         return publicResponse(
           request,
           url,
           searchRuntimeListings(activeRegistry, seed, {
             localeCode: searchLocale.code,
-            query: url.searchParams.get("q") || "",
-            filters: searchFiltersFromParams(url.searchParams),
+            query,
+            filters,
             translationTasks: readTranslationLedger(translationLedgerPath || undefined),
           }),
         );
@@ -575,7 +582,24 @@ export function createHttpApp({
                 filePath: sellerPipelinePath,
               })
             : null;
+        recordEvent({
+          type: "lead_submitted",
+          path: "/api/leads",
+          locale: lead.original_language,
+          listingReference: lead.lead?.listingReference,
+          action: lead.lead?.source,
+        });
         return json(201, { ...lead, ledger, sellerPipeline });
+      } catch (error) {
+        return json(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/events") {
+      try {
+        const event = createEvent(parseBody(request), receivedAt || new Date().toISOString());
+        const ledger = eventLedgerPath ? appendEvent(event, { filePath: eventLedgerPath }) : null;
+        return json(201, { ...event, ledger });
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }
@@ -620,6 +644,14 @@ export function createHttpApp({
       readBrokerContacts(brokerContactLedgerPath || undefined),
       readTourApprovals(tourApprovalLedgerPath || undefined),
     );
+    if (rendered.status === 200) {
+      recordEvent({
+        type: "page_view",
+        path: rendered.path || url.pathname,
+        locale: rendered.locale,
+        listingReference: rendered.body?.facts?.id,
+      });
+    }
     return publicResponse(request, url, rendered);
   };
 }
@@ -736,6 +768,9 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("HTTP smoke must store saved search alert tasks");
+  }
+  if (smoke.ctaClick && (smoke.ctaClick.status !== 201 || smoke.ctaClick.body.type !== "cta_click")) {
+    throw new Error("HTTP smoke must accept privacy-safe CTA click events");
   }
   if (smoke.savedSearch.body.match_count <= 12) {
     throw new Error("HTTP smoke must store full saved-search match count");

@@ -13,6 +13,7 @@ import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../l
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
+import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -76,6 +77,12 @@ function tempTourApprovals() {
   return file;
 }
 
+function tempEvents() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-events-`)}/events.jsonl`;
+  resetEventLedger(file);
+  return file;
+}
+
 function tempRedirectApprovals() {
   return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-redirect-approvals-`)}/redirect-approvals.jsonl`;
 }
@@ -101,6 +108,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const sellerPipelinePath = tempSellerPipeline();
   const brokerContactLedgerPath = tempBrokerContacts();
   const tourApprovalLedgerPath = tempTourApprovals();
+  const eventLedgerPath = tempEvents();
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
@@ -112,6 +120,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     sellerPipelinePath,
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
+    eventLedgerPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
     editedAt: "2026-07-04T00:03:00Z",
@@ -360,6 +369,17 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     },
   });
   smoke.localeFallback = await dispatchHttp(app, { url: "/es/" });
+  smoke.ctaClick = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/events",
+    body: {
+      type: "cta_click",
+      path: "/he/properties/MS-CRAWL-0001",
+      locale: "he",
+      listingReference: "MS-CRAWL-0001",
+      action: "sticky_inquiry",
+    },
+  });
   smoke.admin = await dispatchHttp(app, {
     url: "/api/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -408,6 +428,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
+  assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
+  assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 4);
   assert.equal(smoke.admin.body.languageRequests.length, 1);

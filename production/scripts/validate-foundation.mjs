@@ -322,6 +322,16 @@ if (httpSmoke.savedSearch.status !== 201 || httpSmoke.savedSearch.body.alert_tas
   throw new Error("HTTP smoke must store one saved search alert task");
 }
 if (
+  httpSmoke.ctaClick.status !== 201 ||
+  httpSmoke.eventLedger.rows < 1 ||
+  !httpSmoke.eventLedger.byType.page_view ||
+  !httpSmoke.eventLedger.byType.search ||
+  !httpSmoke.eventLedger.byType.lead_submitted ||
+  !httpSmoke.eventLedger.byType.cta_click
+) {
+  throw new Error("HTTP smoke must persist privacy-safe page, search, lead, and CTA analytics events");
+}
+if (
   httpSmoke.searchFiltered.status !== 200 ||
   httpSmoke.searchFiltered.body.search.filters.property_type !== "apartment" ||
   httpSmoke.savedSearch.body.match_count <= 12
@@ -435,6 +445,7 @@ if (httpSmoke.viewingLedger.rows !== 1) throw new Error("HTTP smoke must persist
 if (httpSmoke.savedSearchLedger.rows !== 1) throw new Error("HTTP smoke must persist one saved search row");
 if (httpSmoke.sellerPipelineLedger.rows !== 1) throw new Error("HTTP smoke must persist one seller pipeline row");
 if (httpSmoke.tourApprovalLedger.rows !== 1) throw new Error("HTTP smoke must persist one tour approval row");
+if (!httpSmoke.eventLedger.byType.cta_click) throw new Error("HTTP smoke must persist one CTA analytics event row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
 if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, published, and stale translation rows");
 if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
@@ -462,6 +473,16 @@ if (
   throw new Error("Node server smoke must expose approved Photo Sphere Viewer tour only after review");
 }
 if (nodeServerSmoke.badLead.status !== 400) throw new Error("Node server smoke must reject unknown buyer listing");
+if (
+  nodeServerSmoke.ctaClick.status !== 201 ||
+  nodeServerSmoke.eventLedger.rows < 1 ||
+  !nodeServerSmoke.eventLedger.byType.page_view ||
+  !nodeServerSmoke.eventLedger.byType.search ||
+  !nodeServerSmoke.eventLedger.byType.lead_submitted ||
+  !nodeServerSmoke.eventLedger.byType.cta_click
+) {
+  throw new Error("Node server smoke must persist privacy-safe page, search, lead, and CTA analytics events");
+}
 if (
   nodeServerSmoke.viewingLead.status !== 201 ||
   nodeServerSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
@@ -549,6 +570,7 @@ if (nodeServerSmoke.viewingLedger.rows !== 1) throw new Error("Node server smoke
 if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server smoke must persist one saved search row");
 if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node server smoke must persist one seller pipeline row");
 if (nodeServerSmoke.tourApprovalLedger.rows !== 1) throw new Error("Node server smoke must persist one tour approval row");
+if (!nodeServerSmoke.eventLedger.byType.cta_click) throw new Error("Node server smoke must persist one CTA analytics event row");
 
 const leadLedger = fs.readFileSync(fromRoot("production", "data", "lead-ledger.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (leadLedger.length !== 4) throw new Error("Lead ledger artifact must contain buyer, viewing, contact, and seller smoke rows");
@@ -568,5 +590,7 @@ const sellerPipeline = fs.readFileSync(fromRoot("production", "data", "seller-pi
 if (sellerPipeline.length !== 1) throw new Error("Seller pipeline artifact must contain one deterministic smoke row");
 const tourApprovals = fs.readFileSync(fromRoot("production", "data", "tour-approvals.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (tourApprovals.length !== 1) throw new Error("Tour approval artifact must contain one deterministic smoke row");
+const events = fs.readFileSync(fromRoot("production", "data", "events.jsonl"), "utf8").trim().split("\n").filter(Boolean);
+if (events.length < 1) throw new Error("Event artifact must contain deterministic smoke rows");
 
 console.log("PASS: production foundation locale, SEO, Hermes, lead, search, migration, and public route contracts");

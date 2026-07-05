@@ -56,6 +56,12 @@ import {
   readTourApprovals,
   resetTourApprovals,
 } from "../lib/tours.mjs";
+import {
+  assertEventLedger,
+  DEFAULT_EVENT_LEDGER_PATH,
+  readEventLedger,
+  resetEventLedger,
+} from "../lib/events.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -69,6 +75,7 @@ resetSavedSearches(DEFAULT_SAVED_SEARCH_LEDGER_PATH);
 resetSellerPipeline(DEFAULT_SELLER_PIPELINE_PATH);
 resetBrokerContacts(DEFAULT_BROKER_CONTACT_LEDGER_PATH);
 resetTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
+resetEventLedger(DEFAULT_EVENT_LEDGER_PATH);
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -82,6 +89,7 @@ const app = createHttpApp({
   sellerPipelinePath: DEFAULT_SELLER_PIPELINE_PATH,
   brokerContactLedgerPath: DEFAULT_BROKER_CONTACT_LEDGER_PATH,
   tourApprovalLedgerPath: DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
+  eventLedgerPath: DEFAULT_EVENT_LEDGER_PATH,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
@@ -342,6 +350,17 @@ smoke.localeCreate = await dispatchHttp(app, {
   },
 });
 smoke.localeFallback = await dispatchHttp(app, { url: "/es/" });
+smoke.ctaClick = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/events",
+  body: {
+    type: "cta_click",
+    path: "/he/properties/MS-CRAWL-0001",
+    locale: "he",
+    listingReference: "MS-CRAWL-0001",
+    action: "sticky_inquiry",
+  },
+});
 smoke.admin = await dispatchHttp(app, {
   url: "/api/admin/leads?locale=ru",
   headers: { authorization: "Bearer local-admin-smoke" },
@@ -382,6 +401,13 @@ smoke.brokerContactLedger = { path: DEFAULT_BROKER_CONTACT_LEDGER_PATH, rows: br
 const tourApprovals = readTourApprovals(DEFAULT_TOUR_APPROVAL_LEDGER_PATH);
 assertTourApprovals(tourApprovals);
 smoke.tourApprovalLedger = { path: DEFAULT_TOUR_APPROVAL_LEDGER_PATH, rows: tourApprovals.length };
+const events = readEventLedger(DEFAULT_EVENT_LEDGER_PATH);
+assertEventLedger(events);
+smoke.eventLedger = {
+  path: DEFAULT_EVENT_LEDGER_PATH,
+  rows: events.length,
+  byType: events.reduce((counts, row) => ({ ...counts, [row.type]: (counts[row.type] || 0) + 1 }), {}),
+};
 smoke.localeRegistry = { path: localeRegistryPath, locales: loadLocaleRegistry(localeRegistryPath).locales.length };
 
 const outPath = fromRoot("production", "data", "http-smoke.json");
