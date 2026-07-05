@@ -47,6 +47,7 @@ What it proves now:
 - Open Graph metadata in server-rendered public HTML, including listing `og:image` from reviewed gallery media.
 - Structured-data launch report for every indexable listing sitemap entry.
 - Listing quality report that turns missing price, bedroom, location, alt text, thin gallery, media review, and tour review warnings into admin editor links.
+- 165-row listing quality workbook for editor import/review.
 - Locale-prefixed seller valuation page backed by the existing seller lead pipeline.
 - Locale-prefixed contact callback page backed by the existing gated CRM lead intake.
 - Live Node HTTP server smoke fixture on an ephemeral local port.
@@ -61,6 +62,7 @@ What it proves now:
 - Search API returns reviewed translation cards for admin-added approved locales.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
+- Authenticated launch input checklist endpoint for the remaining redirect/SEO handoff gates.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
 - Served sitemap XML includes approved home and location pages without unapproved French routes.
@@ -76,6 +78,7 @@ What it proves now:
 - SEO evidence join artifact for Search Console, Yandex Webmaster, backlinks, and privacy analytics.
 - Local-only external SEO export templates under `migration/external/seo/`.
 - Launch readiness report that aggregates crawl, redirect, sitemap, schema, monitoring, and rollback gates.
+- Public health endpoint that reports liveness while still exposing launch blockers.
 - Production Node server adapter exposed by `npm start`.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
 
@@ -84,6 +87,19 @@ Run:
 ```bash
 npm run check
 ```
+
+Start the local production adapter:
+
+```bash
+MS_REALTY_ADMIN_TOKEN=replace-me npm start
+```
+
+Useful operator endpoints:
+
+- `GET /api/health` returns `status: ok` plus current launch blockers.
+- `GET /api/admin/launch-readiness` returns the launch gate report.
+- `GET /api/admin/launch-input-checklist` returns the remaining operator inputs as Markdown.
+- `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
 
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.
 Set `MS_REALTY_ADMIN_TOKEN` before running the production server.
@@ -97,12 +113,14 @@ Generated production data:
 - `production/data/legacy-route-map.json`
 - `production/data/migration-review-queue.json`
 - `production/data/redirect-approvals.jsonl`
+- `production/data/redirect-approval-workbook.csv`
 - `production/data/deployable-redirects.json`
 - `production/data/localized-sitemap.json`
 - `production/data/sitemap.xml`
 - `production/data/robots.txt`
 - `production/data/structured-data-report.json`
 - `production/data/listing-quality-report.json`
+- `production/data/listing-quality-workbook.csv`
 - `production/data/cms-seed.json`
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`
@@ -120,6 +138,7 @@ Generated production data:
 - `production/data/events.jsonl`
 - `production/data/seo-evidence.json`
 - `production/data/launch-readiness.json`
+- `production/data/launch-input-checklist.md`
 - `production/data/language-requests.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/listing-edits.jsonl`

@@ -225,13 +225,22 @@ Date: 2026-07-04
   - privacy-aware analytics rows are imported from `production/data/events.jsonl`
 - Added launch readiness report:
   - `production/data/launch-readiness.json` aggregates crawl, redirect, sitemap, schema, runtime, monitoring, and rollback status
+- Added launch input handoff:
+  - `production/data/launch-input-checklist.md` names remaining redirect-review and external SEO inputs
+  - `GET /api/admin/launch-input-checklist` serves the same checklist to authenticated operators
+  - admin migration review HTML links to launch readiness and the launch input checklist
 - Added production server adapter:
   - `npm start` runs `production/server.mjs`
   - launch report now treats the Node adapter as the production app layer while redirect reviews and external SEO exports remain blocked
+  - `GET /api/health` returns liveness and current launch blockers without marking launch ready
 - Added production redirect review import path:
   - `production/data/redirect-approval-workbook.csv` is generated with all 165 mapped listing rows and no pre-approvals
   - `migration/reviews/redirect-approvals.csv` can feed human-approved same-content redirect rows into the existing deployable 301 export
   - without that CSV, validation keeps the two-row BG/RU smoke export and leaves the full redirect review blocker intact
+- Added listing quality handoff:
+  - `production/data/listing-quality-workbook.csv` is generated with 165 source listing rows for editor review
+  - `GET /api/admin/listing-quality-workbook` serves the workbook to authenticated operators
+  - admin migration review exposes the listing-quality queue next to redirect and SEO launch gates
 - Added external SEO export intake templates:
   - `migration/external/seo/*.csv.example` documents Search Console, Yandex Webmaster, and backlink imports
   - real external `.csv` files are ignored locally and still required to clear the SEO launch blocker
