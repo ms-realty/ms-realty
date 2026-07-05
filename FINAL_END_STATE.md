@@ -119,6 +119,9 @@ Implemented now:
 - Production redirect review import:
   - human-approved rows from `migration/reviews/redirect-approvals.csv` feed the deployable 301 export
   - the importer still rejects non-mapped rows, homepage targets, and missing same-content confirmation
+- External SEO export intake:
+  - Search Console, Yandex Webmaster, and backlink CSV templates live under `migration/external/seo/`
+  - real export CSVs stay local and are still required before the SEO launch gate can pass
 - Seller pipeline contract:
   - seller valuation leads create `valuation_requested` pipeline rows
   - callback and appraisal checklist tasks start open

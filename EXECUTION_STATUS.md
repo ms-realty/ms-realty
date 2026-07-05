@@ -227,6 +227,9 @@ Date: 2026-07-04
 - Added production redirect review import path:
   - `migration/reviews/redirect-approvals.csv` can feed human-approved same-content redirect rows into the existing deployable 301 export
   - without that CSV, validation keeps the two-row BG/RU smoke export and leaves the full redirect review blocker intact
+- Added external SEO export intake templates:
+  - `migration/external/seo/*.csv.example` documents Search Console, Yandex Webmaster, and backlink imports
+  - real external `.csv` files are ignored locally and still required to clear the SEO launch blocker
 - Added seller valuation pipeline intake:
   - seller leads from `POST /api/leads` create a seller pipeline row
   - persisted seller rows start at `valuation_requested`

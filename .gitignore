@@ -7,3 +7,5 @@ node_modules/
 .next/
 dist/
 coverage/
+migration/external/seo/*.csv
+!migration/external/seo/*.csv.example

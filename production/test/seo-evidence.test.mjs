@@ -38,3 +38,11 @@ test("generated SEO evidence file records missing external launch exports", () =
   assert.deepEqual(evidence.summary.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
   assert.equal(evidence.summary.sources.privacy_events.status, "imported");
 });
+
+test("external SEO export templates are present but real CSVs stay local", () => {
+  const dir = fromRoot("migration", "external", "seo");
+  for (const file of ["search-console.csv", "yandex-webmaster.csv", "backlinks.csv"]) {
+    assert.equal(fs.existsSync(`${dir}/${file}.example`), true);
+  }
+  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /migration\/external\/seo\/\*\.csv/);
+});
