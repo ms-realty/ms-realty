@@ -14,6 +14,7 @@ import { assertListingVerificationReport } from "../lib/listing-verification.mjs
 import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
 import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs";
 import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
+import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -769,6 +770,17 @@ const hermesAudit = fs
   .map((line) => JSON.parse(line));
 if (hermesAudit.length !== 3) throw new Error("Hermes audit artifact must contain draft, published, and stale smoke rows");
 assertHermesAuditLedger(hermesAudit);
+const hermesDraftDispatch = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-dispatch.json"), "utf8"));
+assertHermesDraftDispatch(hermesDraftDispatch);
+if (
+  hermesDraftDispatch.summary.eligible_tasks !== 659 ||
+  hermesDraftDispatch.summary.batch_size !== 25 ||
+  hermesDraftDispatch.summary.remaining_after_batch !== 634 ||
+  hermesDraftDispatch.rows[0].task_type !== "stale_review_required" ||
+  hermesDraftDispatch.rows.some((row) => row.can_publish || row.public_indexable)
+) {
+  throw new Error("Hermes draft dispatch must batch safe non-publishing translation tasks");
+}
 const listingEdits = fs
   .readFileSync(fromRoot("production", "data", "listing-edits.jsonl"), "utf8")
   .trim()
