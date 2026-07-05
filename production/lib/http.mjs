@@ -68,6 +68,21 @@ function publicResponse(request, url, rendered) {
 
 const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min"];
 const LISTING_EDIT_FIELDS = ["title", "h1", "description", "location", "property_type", "offer_type", "bedrooms", "price_eur"];
+const LOCAL_ADMIN_TOKEN = "local-admin-smoke";
+
+function adminBearerToken() {
+  const token = process.env.MS_REALTY_ADMIN_TOKEN || (process.env.NODE_ENV === "production" ? "" : LOCAL_ADMIN_TOKEN);
+  return token ? `Bearer ${token}` : "";
+}
+
+function isAdminAuthorized(auth) {
+  const expected = adminBearerToken();
+  return Boolean(expected) && auth === expected;
+}
+
+function adminUnauthorized() {
+  return json(401, { kind: "unauthorized" });
+}
 
 function loadLegacyRouteMap(filePath = fromRoot("production", "data", "legacy-route-map.json")) {
   return JSON.parse(fs.readFileSync(filePath, "utf8")).routes || [];
@@ -378,9 +393,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
       const payload = renderAdminLeadsPayload(activeRegistry, requestedLocale, {
         leads: readLeadLedger(leadLedgerPath || undefined),
@@ -398,9 +411,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/admin/leads") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return response(
         200,
         renderHtmlPage(
@@ -421,9 +432,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return response(
         200,
         renderViewingCalendar(readViewings(viewingLedgerPath || undefined), { now: bookedAt || receivedAt }),
@@ -433,9 +442,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
       return json(200, {
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
@@ -444,9 +451,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         return response(
           200,
@@ -468,9 +473,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/admin/migration/review") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = renderMigrationReviewPayload(
         activeRegistry,
         url.searchParams.get("locale") || "en",
@@ -484,9 +487,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
       const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
       const payload = renderMigrationReviewPayload(
@@ -503,32 +504,24 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return json(200, seoEvidencePayload(currentSeoEvidence()));
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return json(200, currentLaunchReadiness());
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const report = currentLaunchReadiness();
       const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined);
       return json(201, { outPath, report });
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = seoExportInput(request, url);
         const imported = writeExternalSeoExport(input.source, input.csv, { inputDir: seoEvidenceInputDir || undefined });
@@ -544,9 +537,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/template") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const template = readSeoExportTemplate(url.searchParams.get("source"));
         return response(200, template.csv, "text/csv; charset=utf-8", {
@@ -558,9 +549,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = redirectApprovalInput(request);
         const approval = appendRedirectApproval(routeMap, input, {
@@ -578,9 +567,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const imported = importRedirectApprovalsCsv(routeMap, redirectApprovalCsvInput(request), {
           filePath: redirectApprovalPath || undefined,
@@ -598,9 +585,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const rows = buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
         const written = writeDeployableRedirects(rows, deployableRedirectOutputPath || undefined);
@@ -611,9 +596,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/redirect-approval-workbook") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const rows = url.searchParams.get("pending")
         ? buildPendingRedirectApprovalWorkbook(routeMap, readRedirectApprovals(redirectApprovalPath || undefined))
         : buildRedirectApprovalWorkbook(routeMap);
@@ -626,9 +609,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const result = addLocaleToRegistry(activeRegistry, JSON.parse(request.body || "{}"));
         activeRegistry = result.registry;
@@ -646,9 +627,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const task = createTranslationReviewTask(activeRegistry, JSON.parse(request.body || "{}"));
         return json(201, appendTranslationTask(task, { filePath: translationLedgerPath || undefined }));
@@ -658,9 +637,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = JSON.parse(request.body || "{}");
         const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
@@ -673,9 +650,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = listingEditInput(request);
         const result = createListingEdit(seed, input, latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)), editedAt);
@@ -690,9 +665,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = reviewedReplyInput(request);
         return json(
@@ -708,9 +681,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = JSON.parse(request.body || "{}");
         return json(
@@ -726,9 +697,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const contact = createBrokerContact(JSON.parse(request.body || "{}"), { reviewedAt });
         return json(201, appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined }));
@@ -738,9 +707,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
-      if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
-        return json(401, { kind: "unauthorized" });
-      }
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         return json(
           201,

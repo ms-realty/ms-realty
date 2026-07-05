@@ -647,6 +647,40 @@ test("HTTP app rejects invalid language requests", async () => {
   assert.match(response.body.message, /BCP 47/);
 });
 
+test("HTTP admin auth does not accept local smoke token in production without configured secret", async () => {
+  const oldNodeEnv = process.env.NODE_ENV;
+  const oldAdminToken = process.env.MS_REALTY_ADMIN_TOKEN;
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.MS_REALTY_ADMIN_TOKEN;
+    const app = createHttpApp();
+
+    const defaultToken = await dispatchHttp(app, {
+      url: "/api/admin/leads",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
+
+    process.env.MS_REALTY_ADMIN_TOKEN = "real-admin-token";
+    const wrongToken = await dispatchHttp(app, {
+      url: "/api/admin/leads",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
+    const configuredToken = await dispatchHttp(app, {
+      url: "/api/admin/leads",
+      headers: { authorization: "Bearer real-admin-token" },
+    });
+
+    assert.equal(defaultToken.status, 401);
+    assert.equal(wrongToken.status, 401);
+    assert.equal(configuredToken.status, 200);
+  } finally {
+    if (oldNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = oldNodeEnv;
+    if (oldAdminToken === undefined) delete process.env.MS_REALTY_ADMIN_TOKEN;
+    else process.env.MS_REALTY_ADMIN_TOKEN = oldAdminToken;
+  }
+});
+
 test("HTTP admin can import external SEO evidence without broad launch assumptions", async () => {
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const com = routeMap.find((route) => route.url_type === "listing" && route.source_domain === "makler-realty.com");

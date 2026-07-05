@@ -85,6 +85,9 @@ Run:
 npm run check
 ```
 
+Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.
+Set `MS_REALTY_ADMIN_TOKEN` before running the production server.
+
 Generated production data:
 
 - `production/data/migration-records.json`
