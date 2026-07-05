@@ -45,7 +45,10 @@ export function buildLaunchReadinessReport({
     migration.summary.byDomain?.["makler-realty.com"] === 278 &&
     migration.summary.byDomain?.["makler-realty.ru"] === 179 &&
     migration.summary.byStatus?.["200"] === 457;
-  const redirectsReviewed = deployableRedirects.summary.total >= routeMap.summary.mappedListings;
+  const redirectsReviewed =
+    deployableRedirects.summary.total >= routeMap.summary.mappedListings &&
+    deployableRedirects.summary.homepageTargets === 0 &&
+    deployableRedirects.summary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
 
@@ -58,8 +61,9 @@ export function buildLaunchReadinessReport({
         mapped_listings: routeMap.summary.mappedListings,
         deployable_redirects: deployableRedirects.summary.total,
         homepage_targets: deployableRedirects.summary.homepageTargets,
+        duplicate_old_urls: deployableRedirects.summary.duplicateOldUrls,
       },
-      redirectsReviewed ? "" : "Only reviewed same-content redirects may launch.",
+      redirectsReviewed ? "" : "Only reviewed same-content redirects with no homepage targets or duplicate old URLs may launch.",
     ),
     gate("localized_sitemap", sitemap.summary.entries === 194 && sitemap.summary.listing_entries === 167 ? "pass" : "blocked", sitemap.summary),
     gate(

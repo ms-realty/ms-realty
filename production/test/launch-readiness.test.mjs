@@ -49,6 +49,37 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(report.blockers, []);
 });
 
+test("launch readiness blocks broad or duplicate deployable redirect exports", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  deployableRedirects.summary.homepageTargets = 1;
+  deployableRedirects.summary.duplicateOldUrls = 0;
+  seoEvidence.summary.missing_required_sources = [];
+
+  const homepageReport = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+  });
+  assert.equal(homepageReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.deepEqual(homepageReport.blockers, ["redirect_reviews"]);
+
+  deployableRedirects.summary.homepageTargets = 0;
+  deployableRedirects.summary.duplicateOldUrls = 1;
+  const duplicateReport = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+  });
+  assert.equal(duplicateReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+  assert.deepEqual(duplicateReport.blockers, ["redirect_reviews"]);
+});
+
 test("generated launch readiness report is valid when present", () => {
   const file = fromRoot("production", "data", "launch-readiness.json");
   if (!fs.existsSync(file)) return;

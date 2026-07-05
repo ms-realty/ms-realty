@@ -55,11 +55,12 @@
     {
       "id": "redirect_reviews",
       "status": "blocked",
-      "message": "Only reviewed same-content redirects may launch.",
+      "message": "Only reviewed same-content redirects with no homepage targets or duplicate old URLs may launch.",
       "evidence": {
         "mapped_listings": 165,
         "deployable_redirects": 2,
-        "homepage_targets": 0
+        "homepage_targets": 0,
+        "duplicate_old_urls": 0
       }
     },
     {
