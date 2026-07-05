@@ -446,8 +446,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.admin.body.leads.length, 4);
+  assert.equal(smoke.admin.headers["cache-control"], "no-store");
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
+  assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
   assert.equal(smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\""), true);
   assert.equal(smoke.listingEditorHtml.body.includes("data-listing-id=\"MS-CRAWL-0001\""), true);
@@ -460,6 +462,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows, 11859);
   assert.equal(smoke.adminMigrationReview.body.routeMap.total, 457);
   assert.equal(smoke.adminMigrationReview.body.routeMap.mappedListings, 165);
+  assert.equal(smoke.adminMigrationReview.headers["cache-control"], "no-store");
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\""), true);
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\""), true);
   assert.equal(smoke.adminMigrationReviewUnauthorized.status, 401);
@@ -614,6 +617,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(importUnauthorized.status, 401);
   assert.equal(workbookUnauthorized.status, 401);
   assert.equal(workbook.status, 200);
+  assert.equal(workbook.headers["cache-control"], "no-store");
   assert.equal(workbook.headers["content-type"], "text/csv; charset=utf-8");
   assert.equal(parseCsv(workbook.body).length, 165);
   assert.equal(qualityWorkbookUnauthorized.status, 401);

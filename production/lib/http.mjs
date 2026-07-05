@@ -45,6 +45,7 @@ const SECURITY_HEADERS = {
   "x-frame-options": "DENY",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
 };
+const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
 function response(status, body, contentType, headers = {}) {
   return {
@@ -56,6 +57,14 @@ function response(status, body, contentType, headers = {}) {
 
 function json(status, body) {
   return response(status, body, "application/json; charset=utf-8");
+}
+
+function adminResponse(status, body, contentType, headers = {}) {
+  return response(status, body, contentType, { ...PRIVATE_HEADERS, ...headers });
+}
+
+function adminJson(status, body) {
+  return adminResponse(status, body, "application/json; charset=utf-8");
 }
 
 function wantsHtml(request, url) {
@@ -91,8 +100,7 @@ function isAdminAuthorized(auth) {
 }
 
 function adminUnauthorized() {
-  return response(401, { kind: "unauthorized" }, "application/json; charset=utf-8", {
-    "cache-control": "no-store",
+  return adminResponse(401, { kind: "unauthorized" }, "application/json; charset=utf-8", {
     "www-authenticate": 'Bearer realm="ms-realty-admin"',
   });
 }
@@ -455,13 +463,13 @@ export function createHttpApp({
         sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
         brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
       });
-      if (wantsHtml(request, url)) return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
-      return json(200, payload);
+      if (wantsHtml(request, url)) return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && url.pathname === "/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return response(
+      return adminResponse(
         200,
         renderHtmlPage(
           renderAdminLeadsPayload(activeRegistry, url.searchParams.get("locale") || "en", {
@@ -482,7 +490,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return response(
+      return adminResponse(
         200,
         renderViewingCalendar(readViewings(viewingLedgerPath || undefined), { now: bookedAt || receivedAt }),
         "text/calendar; charset=utf-8",
@@ -493,7 +501,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
-      return json(200, {
+      return adminJson(200, {
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
         locales: activeRegistry.locales,
       });
@@ -502,7 +510,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return response(
+        return adminResponse(
           200,
           renderHtmlPage(
             renderAdminListingEditorPayload(
@@ -517,7 +525,7 @@ export function createHttpApp({
           "text/html; charset=utf-8",
         );
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -532,7 +540,7 @@ export function createHttpApp({
         currentSeoEvidence(),
         seed,
       );
-      return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
@@ -548,30 +556,30 @@ export function createHttpApp({
         currentSeoEvidence(),
         seed,
       );
-      if (wantsHtml(request, url)) return response(200, renderHtmlPage(payload), "text/html; charset=utf-8");
-      return json(200, payload);
+      if (wantsHtml(request, url)) return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return json(200, seoEvidencePayload(currentSeoEvidence()));
+      return adminJson(200, seoEvidencePayload(currentSeoEvidence()));
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return json(200, currentLaunchReadiness());
+      return adminJson(200, currentLaunchReadiness());
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return response(200, currentLaunchInputChecklist(), "text/markdown; charset=utf-8");
+      return adminResponse(200, currentLaunchInputChecklist(), "text/markdown; charset=utf-8");
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const report = currentLaunchReadiness();
       const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined);
-      return json(201, { outPath, report });
+      return adminJson(201, { outPath, report });
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
@@ -581,12 +589,12 @@ export function createHttpApp({
         const imported = writeExternalSeoExport(input.source, input.csv, { inputDir: seoEvidenceInputDir || undefined });
         const evidence = currentSeoEvidence();
         writeSeoEvidence(evidence, seoEvidenceOutputPath || undefined);
-        return json(201, {
+        return adminJson(201, {
           imported,
           ...seoEvidencePayload(evidence),
         });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -594,11 +602,11 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const template = readSeoExportTemplate(url.searchParams.get("source"));
-        return response(200, template.csv, "text/csv; charset=utf-8", {
+        return adminResponse(200, template.csv, "text/csv; charset=utf-8", {
           "content-disposition": `attachment; filename="${template.filename}"`,
         });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -611,12 +619,12 @@ export function createHttpApp({
           approvedAt: reviewedAt,
         });
         const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
-        return json(201, {
+        return adminJson(201, {
           approval,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
         });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -628,13 +636,13 @@ export function createHttpApp({
           approvedAt: reviewedAt,
         });
         const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
-        return json(201, {
+        return adminJson(201, {
           imported: imported.length,
           approvals: imported,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
         });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -643,9 +651,9 @@ export function createHttpApp({
       try {
         const rows = buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
         const written = writeDeployableRedirects(rows, deployableRedirectOutputPath || undefined);
-        return json(201, { exported: rows.length, ...written });
+        return adminJson(201, { exported: rows.length, ...written });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -654,7 +662,7 @@ export function createHttpApp({
       const rows = url.searchParams.get("pending")
         ? buildPendingRedirectApprovalWorkbook(routeMap, readRedirectApprovals(redirectApprovalPath || undefined))
         : buildRedirectApprovalWorkbook(routeMap);
-      return response(
+      return adminResponse(
         200,
         renderRedirectApprovalWorkbook(rows),
         "text/csv; charset=utf-8",
@@ -664,7 +672,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      return response(
+      return adminResponse(
         200,
         renderListingQualityWorkbook(buildListingQualityReport({ seed })),
         "text/csv; charset=utf-8",
@@ -678,7 +686,7 @@ export function createHttpApp({
         const result = addLocaleToRegistry(activeRegistry, parseJsonBody(request));
         activeRegistry = result.registry;
         if (localeRegistryPath) writeLocaleRegistry(activeRegistry, localeRegistryPath);
-        return json(201, {
+        return adminJson(201, {
           locale: result.locale,
           admin_locales: activeRegistry.admin_locales,
           public_indexable_locales: activeRegistry.locales
@@ -686,7 +694,7 @@ export function createHttpApp({
             .map((locale) => locale.code),
         });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -694,9 +702,9 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const task = createTranslationReviewTask(activeRegistry, parseJsonBody(request));
-        return json(201, appendTranslationTask(task, { filePath: translationLedgerPath || undefined }));
+        return adminJson(201, appendTranslationTask(task, { filePath: translationLedgerPath || undefined }));
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -707,9 +715,9 @@ export function createHttpApp({
         const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
         const published = publishApprovedTranslation(activeRegistry, approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt));
-        return json(201, appendTranslationTask(published, { filePath: translationLedgerPath || undefined }));
+        return adminJson(201, appendTranslationTask(published, { filePath: translationLedgerPath || undefined }));
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -722,9 +730,9 @@ export function createHttpApp({
         const persistedStaleTranslations = result.staleTranslations
           .filter((translation) => translation.id)
           .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
-        return json(201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
+        return adminJson(201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -732,7 +740,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = reviewedReplyInput(request);
-        return json(
+        return adminJson(
           201,
           appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
             filePath: replyOutboxPath || undefined,
@@ -740,7 +748,7 @@ export function createHttpApp({
           }),
         );
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -748,7 +756,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
-        return json(
+        return adminJson(
           201,
           appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
             filePath: viewingLedgerPath || undefined,
@@ -756,7 +764,7 @@ export function createHttpApp({
           }),
         );
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
@@ -764,23 +772,23 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const contact = createBrokerContact(parseJsonBody(request), { reviewedAt });
-        return json(201, appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined }));
+        return adminJson(201, appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined }));
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return json(
+        return adminJson(
           201,
           appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
             filePath: tourApprovalLedgerPath || undefined,
           }),
         );
       } catch (error) {
-        return json(400, { kind: "bad_request", message: error.message });
+        return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
 
