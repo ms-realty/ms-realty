@@ -91,6 +91,14 @@ Run:
 npm run check
 ```
 
+Fail closed before launch:
+
+```bash
+npm run launch:preflight
+```
+
+This exits non-zero until redirect reviews and external SEO exports are complete.
+
 Start the local production adapter:
 
 ```bash

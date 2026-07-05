@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
 import { assertLaunchReadinessReport, buildLaunchReadinessReport } from "../lib/launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -108,6 +109,16 @@ test("generated launch readiness report is valid when present", () => {
   assert.equal(assertLaunchReadinessReport(report), true);
 });
 
+test("launch preflight fails closed while launch blockers remain", () => {
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /LAUNCH BLOCKED: redirect_reviews, external_seo_exports/);
+});
+
 test("launch input checklist names remaining operator-owned blockers", () => {
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -137,4 +148,5 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /required_editor_fields/);
   assert.match(markdown, /POST \/api\/admin\/listings\/edit/);
   assert.match(markdown, /npm run launch:inputs/);
+  assert.match(markdown, /npm run launch:preflight/);
 });

@@ -92,6 +92,7 @@ npm run redirects:build
 npm run seo:evidence
 npm run launch:readiness
 npm run launch:inputs
+npm run launch:preflight
 \`\`\`
 `;
 }
