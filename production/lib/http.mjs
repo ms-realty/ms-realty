@@ -14,6 +14,7 @@ import {
 } from "./admin-workflows.mjs";
 import {
   appendRedirectApproval,
+  buildPendingRedirectApprovalWorkbook,
   buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
   importRedirectApprovalsCsv,
@@ -237,6 +238,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       method: "POST",
       endpoint: "/api/admin/redirect-approvals/import",
       workbookEndpoint: "/api/admin/redirect-approval-workbook",
+      pendingWorkbookEndpoint: "/api/admin/redirect-approval-workbook?pending=1",
       contentType: "text/csv",
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
@@ -543,9 +545,12 @@ export function createHttpApp({
       if (auth !== `Bearer ${process.env.MS_REALTY_ADMIN_TOKEN || "local-admin-smoke"}`) {
         return json(401, { kind: "unauthorized" });
       }
+      const rows = url.searchParams.get("pending")
+        ? buildPendingRedirectApprovalWorkbook(routeMap, readRedirectApprovals(redirectApprovalPath || undefined))
+        : buildRedirectApprovalWorkbook(routeMap);
       return response(
         200,
-        renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap)),
+        renderRedirectApprovalWorkbook(rows),
         "text/csv; charset=utf-8",
         { "content-disposition": 'attachment; filename="redirect-approval-workbook.csv"' },
       );
@@ -1009,6 +1014,7 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-pending-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook?pending=1\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-import-endpoint=\"/api/admin/seo-evidence/import\"")
   ) {
     throw new Error("HTTP smoke must serve admin migration review HTML");

@@ -157,6 +157,11 @@ export function buildDeployableRedirects(routeMap, approvals) {
     .filter(Boolean);
 }
 
+export function buildPendingRedirectApprovalWorkbook(routeMap, approvals) {
+  const approved = new Set(buildDeployableRedirects(routeMap, approvals).map((row) => row.old_url));
+  return buildRedirectApprovalWorkbook(routeMap).filter((row) => !approved.has(row.old_url));
+}
+
 export function summarizeDeployableRedirects(rows) {
   const summary = {
     total: rows.length,

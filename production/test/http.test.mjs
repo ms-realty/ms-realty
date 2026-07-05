@@ -553,6 +553,10 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
       csv: `old_url,equivalent_content,reviewer,approved_at,reason\n${importRuListing.old_url},true,ru_preservation_editor,2026-07-05T00:02:00Z,Reviewed via pasted CSV\n`,
     }).toString(),
   });
+  const pendingWorkbook = await dispatchHttp(app, {
+    url: "/api/admin/redirect-approval-workbook?pending=1",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const review = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -584,13 +588,19 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(formImported.status, 201);
   assert.equal(formImported.body.imported, 1);
   assert.equal(formImported.body.deployablePreview.length, 4);
+  const pendingRows = parseCsv(pendingWorkbook.body);
+  assert.equal(pendingRows.length, 161);
+  assert.equal(pendingRows.some((row) => row.old_url === listing.old_url), false);
+  assert.equal(pendingRows.some((row) => row.old_url === importRuListing.old_url), false);
   assert.equal(review.body.workspace.locale, "ru");
   assert.equal(review.body.redirectApprovalImport.endpoint, "/api/admin/redirect-approvals/import");
   assert.equal(review.body.redirectApprovalImport.workbookEndpoint, "/api/admin/redirect-approval-workbook");
+  assert.equal(review.body.redirectApprovalImport.pendingWorkbookEndpoint, "/api/admin/redirect-approval-workbook?pending=1");
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);
   assert.equal(reviewHtml.body.includes('data-redirect-import-endpoint="/api/admin/redirect-approvals/import"'), true);
   assert.equal(reviewHtml.body.includes('data-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook"'), true);
+  assert.equal(reviewHtml.body.includes('data-pending-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook?pending=1"'), true);
 });
 
 test("HTTP app rejects invalid language requests", async () => {
