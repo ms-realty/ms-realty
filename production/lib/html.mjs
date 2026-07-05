@@ -267,6 +267,8 @@ function renderAdminMigrationReview(page) {
         <td>${escapeHtml(row.source_locale)}</td>
         <td>${escapeHtml(row.location || "missing")}</td>
         <td>${escapeHtml(row.issues.join(", "))}</td>
+        <td>${escapeHtml(row.public_gallery_assets)}</td>
+        <td>${escapeHtml(row.missing_alt_text_assets)}</td>
         <td>${escapeHtml(row.review_gated_assets)}</td>
       </tr>`,
     )
@@ -331,7 +333,7 @@ function renderAdminMigrationReview(page) {
     <h2>Listing quality queue</h2>
     <p>Issues: ${escapeHtml(JSON.stringify(page.listingQuality?.summary?.issue_counts || {}))}</p>
     <table>
-      <thead><tr><th>Listing</th><th>Locale</th><th>Location</th><th>Issues</th><th>Review-gated media</th></tr></thead>
+      <thead><tr><th>Listing</th><th>Locale</th><th>Location</th><th>Issues</th><th>Public photos</th><th>Missing alt</th><th>Review-gated media</th></tr></thead>
       <tbody>${qualityRows}</tbody>
     </table>
   </section>

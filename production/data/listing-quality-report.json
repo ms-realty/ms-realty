@@ -8,7 +8,9 @@
       "missing_bedrooms": 165,
       "missing_description": 123,
       "media_review_pending": 165,
+      "missing_alt_text": 165,
       "tour_review_pending": 165,
+      "thin_public_gallery": 5,
       "missing_location": 5
     },
     "by_source_locale": {
@@ -34,11 +36,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
+      "missing_alt_text_assets": 18,
       "review_gated_assets": 16
     },
     {
@@ -54,11 +58,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -74,11 +80,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 6,
       "review_gated_assets": 16
     },
     {
@@ -94,11 +102,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -114,11 +124,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -133,11 +145,14 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
+        "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -153,11 +168,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -173,11 +190,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 16
     },
     {
@@ -193,11 +212,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -213,11 +234,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 17,
       "review_gated_assets": 16
     },
     {
@@ -233,11 +256,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 22,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 16
     },
     {
@@ -253,11 +278,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 3,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -273,11 +300,13 @@
         "missing_bedrooms",
         "missing_location",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 6,
       "review_gated_assets": 16
     },
     {
@@ -293,11 +322,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 7,
+      "missing_alt_text_assets": 6,
       "review_gated_assets": 16
     },
     {
@@ -313,11 +344,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
+      "missing_alt_text_assets": 22,
       "review_gated_assets": 16
     },
     {
@@ -333,11 +366,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 22,
+      "missing_alt_text_assets": 17,
       "review_gated_assets": 16
     },
     {
@@ -353,11 +388,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -373,11 +410,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 30,
+      "missing_alt_text_assets": 28,
       "review_gated_assets": 16
     },
     {
@@ -393,11 +432,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 14,
       "review_gated_assets": 16
     },
     {
@@ -413,11 +454,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -433,11 +476,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 28,
+      "missing_alt_text_assets": 27,
       "review_gated_assets": 16
     },
     {
@@ -453,11 +498,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 8,
       "review_gated_assets": 16
     },
     {
@@ -472,11 +519,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 16
     },
     {
@@ -492,11 +541,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 16
     },
     {
@@ -512,11 +563,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
+      "missing_alt_text_assets": 19,
       "review_gated_assets": 16
     },
     {
@@ -532,11 +585,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 14,
       "review_gated_assets": 16
     },
     {
@@ -552,11 +607,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -572,11 +629,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 14,
       "review_gated_assets": 16
     },
     {
@@ -592,11 +651,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 9,
+      "missing_alt_text_assets": 8,
       "review_gated_assets": 16
     },
     {
@@ -612,11 +673,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -632,11 +695,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 16
     },
     {
@@ -652,11 +717,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 7,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -672,11 +739,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
+      "missing_alt_text_assets": 13,
       "review_gated_assets": 16
     },
     {
@@ -692,11 +761,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 9,
+      "missing_alt_text_assets": 8,
       "review_gated_assets": 16
     },
     {
@@ -712,11 +783,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -732,11 +805,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -752,11 +827,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 7,
       "review_gated_assets": 17
     },
     {
@@ -772,11 +849,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 45,
+      "missing_alt_text_assets": 44,
       "review_gated_assets": 16
     },
     {
@@ -792,11 +871,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -812,11 +893,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -832,11 +915,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 7,
       "review_gated_assets": 16
     },
     {
@@ -852,11 +937,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 9,
+      "missing_alt_text_assets": 8,
       "review_gated_assets": 16
     },
     {
@@ -872,11 +959,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 16
     },
     {
@@ -892,11 +981,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -912,11 +1003,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -932,11 +1025,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 16
     },
     {
@@ -952,11 +1047,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -972,11 +1069,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
+      "missing_alt_text_assets": 16,
       "review_gated_assets": 16
     },
     {
@@ -992,11 +1091,14 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
+        "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1012,11 +1114,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 16
     },
     {
@@ -1032,11 +1136,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 16
     },
     {
@@ -1052,11 +1158,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1072,11 +1180,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -1092,11 +1202,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 16
     },
     {
@@ -1112,11 +1224,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 7,
       "review_gated_assets": 16
     },
     {
@@ -1132,11 +1246,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 4,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1152,11 +1268,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -1172,11 +1290,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1191,11 +1311,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -1211,11 +1333,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -1231,11 +1355,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -1251,11 +1377,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 8,
       "review_gated_assets": 16
     },
     {
@@ -1271,11 +1399,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 7,
+      "missing_alt_text_assets": 6,
       "review_gated_assets": 16
     },
     {
@@ -1292,11 +1422,13 @@
         "missing_location",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -1312,11 +1444,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -1332,11 +1466,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 26,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 16
     },
     {
@@ -1352,11 +1488,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 7,
       "review_gated_assets": 16
     },
     {
@@ -1372,11 +1510,14 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
+        "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1392,11 +1533,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -1411,11 +1554,14 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
+        "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1431,11 +1577,13 @@
         "missing_bedrooms",
         "missing_location",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -1451,11 +1599,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -1470,11 +1620,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -1490,11 +1642,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
+      "missing_alt_text_assets": 13,
       "review_gated_assets": 16
     },
     {
@@ -1510,11 +1664,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
+      "missing_alt_text_assets": 19,
       "review_gated_assets": 16
     },
     {
@@ -1530,11 +1686,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 7,
+      "missing_alt_text_assets": 6,
       "review_gated_assets": 16
     },
     {
@@ -1550,11 +1708,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 16
     },
     {
@@ -1570,11 +1730,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -1590,11 +1752,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
+      "missing_alt_text_assets": 18,
       "review_gated_assets": 16
     },
     {
@@ -1609,11 +1773,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 28,
+      "missing_alt_text_assets": 27,
       "review_gated_assets": 16
     },
     {
@@ -1628,11 +1794,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -1647,11 +1815,14 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
+        "thin_public_gallery",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 2,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1667,11 +1838,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 17,
       "review_gated_assets": 16
     },
     {
@@ -1687,11 +1860,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 17,
       "review_gated_assets": 16
     },
     {
@@ -1707,11 +1882,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -1726,11 +1903,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -1745,11 +1924,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 6,
       "review_gated_assets": 16
     },
     {
@@ -1765,11 +1946,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 5,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1785,11 +1968,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -1805,11 +1990,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 50,
+      "missing_alt_text_assets": 49,
       "review_gated_assets": 16
     },
     {
@@ -1825,11 +2012,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -1845,11 +2034,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 13,
       "review_gated_assets": 16
     },
     {
@@ -1865,11 +2056,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 9,
+      "missing_alt_text_assets": 6,
       "review_gated_assets": 16
     },
     {
@@ -1885,11 +2078,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -1905,11 +2100,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -1925,11 +2122,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 16
     },
     {
@@ -1945,11 +2144,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 6,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -1965,11 +2166,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 16
     },
     {
@@ -1985,11 +2188,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
+      "missing_alt_text_assets": 7,
       "review_gated_assets": 16
     },
     {
@@ -2005,11 +2210,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 16
     },
     {
@@ -2025,11 +2232,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -2045,11 +2254,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 8,
       "review_gated_assets": 16
     },
     {
@@ -2065,11 +2276,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 11,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 16
     },
     {
@@ -2085,11 +2298,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 61,
+      "missing_alt_text_assets": 60,
       "review_gated_assets": 16
     },
     {
@@ -2105,11 +2320,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 32,
+      "missing_alt_text_assets": 8,
       "review_gated_assets": 16
     },
     {
@@ -2125,11 +2342,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 9,
       "review_gated_assets": 16
     },
     {
@@ -2145,11 +2364,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 14,
       "review_gated_assets": 16
     },
     {
@@ -2165,11 +2386,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 8,
+      "missing_alt_text_assets": 3,
       "review_gated_assets": 16
     },
     {
@@ -2185,11 +2408,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
+      "missing_alt_text_assets": 13,
       "review_gated_assets": 16
     },
     {
@@ -2205,11 +2430,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
+      "missing_alt_text_assets": 5,
       "review_gated_assets": 16
     },
     {
@@ -2225,11 +2452,13 @@
         "missing_bedrooms",
         "missing_location",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
+      "missing_alt_text_assets": 4,
       "review_gated_assets": 16
     },
     {
@@ -2245,11 +2474,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 3,
+      "missing_alt_text_assets": 2,
       "review_gated_assets": 16
     },
     {
@@ -2265,11 +2496,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 22,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 16
     },
     {
@@ -2284,11 +2517,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 12
     },
     {
@@ -2304,11 +2539,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 25,
+      "missing_alt_text_assets": 24,
       "review_gated_assets": 12
     },
     {
@@ -2323,11 +2560,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 17,
       "review_gated_assets": 12
     },
     {
@@ -2343,11 +2582,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 17,
       "review_gated_assets": 12
     },
     {
@@ -2363,11 +2604,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
+      "missing_alt_text_assets": 19,
       "review_gated_assets": 12
     },
     {
@@ -2382,11 +2625,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 30,
+      "missing_alt_text_assets": 16,
       "review_gated_assets": 12
     },
     {
@@ -2401,11 +2646,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 33,
+      "missing_alt_text_assets": 24,
       "review_gated_assets": 12
     },
     {
@@ -2421,11 +2668,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2441,11 +2690,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 52,
+      "missing_alt_text_assets": 19,
       "review_gated_assets": 12
     },
     {
@@ -2460,11 +2711,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
+      "missing_alt_text_assets": 18,
       "review_gated_assets": 12
     },
     {
@@ -2479,11 +2732,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 32,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 12
     },
     {
@@ -2499,11 +2754,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
+      "missing_alt_text_assets": 22,
       "review_gated_assets": 12
     },
     {
@@ -2519,11 +2776,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 13,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2538,11 +2797,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 12
     },
     {
@@ -2557,11 +2818,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 12
     },
     {
@@ -2576,11 +2839,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 12
     },
     {
@@ -2595,11 +2860,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
+      "missing_alt_text_assets": 16,
       "review_gated_assets": 12
     },
     {
@@ -2614,11 +2881,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
+      "missing_alt_text_assets": 19,
       "review_gated_assets": 12
     },
     {
@@ -2634,11 +2903,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
+      "missing_alt_text_assets": 22,
       "review_gated_assets": 12
     },
     {
@@ -2654,11 +2925,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2673,11 +2946,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2693,11 +2968,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2713,11 +2990,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 12
     },
     {
@@ -2733,11 +3012,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 12
     },
     {
@@ -2753,11 +3034,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2772,11 +3055,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 14,
       "review_gated_assets": 12
     },
     {
@@ -2792,11 +3077,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 39,
+      "missing_alt_text_assets": 23,
       "review_gated_assets": 12
     },
     {
@@ -2811,11 +3098,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 12
     },
     {
@@ -2831,11 +3120,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 18,
+      "missing_alt_text_assets": 17,
       "review_gated_assets": 12
     },
     {
@@ -2851,11 +3142,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 19,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 13
     },
     {
@@ -2871,11 +3164,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
+      "missing_alt_text_assets": 13,
       "review_gated_assets": 12
     },
     {
@@ -2890,11 +3185,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2909,11 +3206,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 10,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -2928,11 +3227,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
+      "missing_alt_text_assets": 14,
       "review_gated_assets": 12
     },
     {
@@ -2947,11 +3248,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 23,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 12
     },
     {
@@ -2967,11 +3270,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 22,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 12
     },
     {
@@ -2987,11 +3292,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 14,
+      "missing_alt_text_assets": 13,
       "review_gated_assets": 12
     },
     {
@@ -3006,11 +3313,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 12
     },
     {
@@ -3025,11 +3334,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 12
     },
     {
@@ -3044,11 +3355,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 12
     },
     {
@@ -3063,11 +3376,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 20,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 12
     },
     {
@@ -3082,11 +3397,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 12
     },
     {
@@ -3101,11 +3418,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -3120,11 +3439,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 12,
+      "missing_alt_text_assets": 11,
       "review_gated_assets": 12
     },
     {
@@ -3140,11 +3461,13 @@
         "missing_bedrooms",
         "missing_location",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 16,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 12
     },
     {
@@ -3159,11 +3482,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 25,
+      "missing_alt_text_assets": 24,
       "review_gated_assets": 12
     },
     {
@@ -3179,11 +3504,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 17,
+      "missing_alt_text_assets": 12,
       "review_gated_assets": 12
     },
     {
@@ -3199,11 +3526,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 15,
+      "missing_alt_text_assets": 14,
       "review_gated_assets": 12
     },
     {
@@ -3219,11 +3548,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 29,
+      "missing_alt_text_assets": 10,
       "review_gated_assets": 12
     },
     {
@@ -3238,11 +3569,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 24,
+      "missing_alt_text_assets": 20,
       "review_gated_assets": 12
     },
     {
@@ -3258,11 +3591,13 @@
         "missing_bedrooms",
         "missing_description",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 29,
+      "missing_alt_text_assets": 28,
       "review_gated_assets": 12
     },
     {
@@ -3277,11 +3612,13 @@
         "missing_price",
         "missing_bedrooms",
         "media_review_pending",
+        "missing_alt_text",
         "tour_review_pending"
       ],
       "price_eur": null,
       "bedrooms": null,
       "public_gallery_assets": 21,
+      "missing_alt_text_assets": 15,
       "review_gated_assets": 12
     }
   ]

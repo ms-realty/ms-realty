@@ -625,8 +625,12 @@ const listingQuality = JSON.parse(fs.readFileSync(fromRoot("production", "data",
 if (listingQuality.summary.listings !== 165 || listingQuality.summary.affected_listings !== 165) {
   throw new Error("Listing quality report must expose all source listing content gaps");
 }
-if (!listingQuality.summary.issue_counts.missing_price || !listingQuality.summary.issue_counts.media_review_pending) {
-  throw new Error("Listing quality report must keep price and media review gaps actionable");
+if (
+  !listingQuality.summary.issue_counts.missing_price ||
+  !listingQuality.summary.issue_counts.media_review_pending ||
+  !listingQuality.summary.issue_counts.missing_alt_text
+) {
+  throw new Error("Listing quality report must keep price, media review, and alt text gaps actionable");
 }
 
 const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data", "launch-readiness.json"), "utf8"));

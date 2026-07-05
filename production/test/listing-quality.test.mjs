@@ -14,6 +14,9 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.summary.issue_counts.missing_price > 0);
   assert.ok(report.summary.issue_counts.missing_bedrooms > 0);
   assert.ok(report.summary.issue_counts.media_review_pending > 0);
+  assert.ok(report.summary.issue_counts.missing_alt_text > 0);
+  assert.ok(report.summary.issue_counts.thin_public_gallery > 0);
+  assert.ok(report.rows.some((row) => row.missing_alt_text_assets > 0));
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });
 

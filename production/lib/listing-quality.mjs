@@ -26,12 +26,16 @@ function countBy(rows, keyFn) {
 
 function qualityRow(record) {
   const facts = record.facts || {};
+  const publicPhotos = (record.media || []).filter((media) => media.kind === "photo" && media.is_public);
+  const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
   if (!filled(facts.price_eur)) issues.push("missing_price");
   if (!filled(facts.bedrooms)) issues.push("missing_bedrooms");
   if (!filled(facts.location)) issues.push("missing_location");
   if (!filled(facts.description)) issues.push("missing_description");
   if (record.media_workflow?.review_gated_assets) issues.push("media_review_pending");
+  if (missingAltTextAssets) issues.push("missing_alt_text");
+  if (publicPhotos.length < 3) issues.push("thin_public_gallery");
   if (record.tour && !record.tour.is_public) issues.push("tour_review_pending");
   if (!issues.length) return null;
 
@@ -47,6 +51,7 @@ function qualityRow(record) {
     price_eur: facts.price_eur,
     bedrooms: facts.bedrooms,
     public_gallery_assets: record.media_workflow?.public_gallery_assets || 0,
+    missing_alt_text_assets: missingAltTextAssets,
     review_gated_assets: record.media_workflow?.review_gated_assets || 0,
   };
 }
@@ -71,6 +76,7 @@ export function assertListingQualityReport(report) {
   if (report.summary.listings !== 165) throw new Error("Listing quality report must cover CMS listing inventory");
   if (!report.summary.issue_counts.missing_price) throw new Error("Listing quality report must expose missing prices");
   if (!report.summary.issue_counts.media_review_pending) throw new Error("Listing quality report must expose pending media review");
+  if (!report.summary.issue_counts.missing_alt_text) throw new Error("Listing quality report must expose missing media alt text");
   if (report.rows.some((row) => !row.editor_path.startsWith("/admin/listings/edit?listingId="))) {
     throw new Error("Listing quality rows must link to the admin listing editor");
   }

@@ -147,7 +147,7 @@ Date: 2026-07-04
   - missing source prices stay visible as launch warnings rather than invented facts
 - Added listing quality review report:
   - `production/data/listing-quality-report.json` turns source listing gaps into admin editor links
-  - missing price, bedroom, location, description, media review, and 360 tour review gaps remain actionable without invented facts
+  - missing price, bedroom, location, description, media alt text, thin gallery, media review, and 360 tour review gaps remain actionable without invented facts
   - admin migration review HTML exposes the first quality rows next to redirect and SEO evidence work
 - Added canonical CMS seed fixture:
   - 165 listing records composed from crawl/search evidence

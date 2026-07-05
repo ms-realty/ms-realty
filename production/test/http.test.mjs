@@ -621,6 +621,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
   assert.equal(review.body.listingQuality.summary.listings, 165);
   assert.ok(review.body.listingQuality.summary.issue_counts.missing_price > 0);
+  assert.ok(review.body.listingQuality.summary.issue_counts.missing_alt_text > 0);
+  assert.ok(review.body.listingQuality.rows.some((row) => row.missing_alt_text_assets > 0));
   assert.ok(review.body.listingQuality.rows.some((row) => row.editor_path.includes("/admin/listings/edit?listingId=")));
   assert.equal(review.body.redirectApprovals.length, 4);
   assert.equal(review.body.deployablePreview.length, 4);
