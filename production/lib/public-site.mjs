@@ -1,4 +1,10 @@
-import { adminLocales, getLocale, publicIndexableLocales, resolvePublicLocale } from "./locales.mjs";
+import {
+  adminLocales,
+  getLocale,
+  publicIndexableLocales,
+  resolvePublicLocale,
+  websiteLanguageCoverage,
+} from "./locales.mjs";
 import {
   contactPath,
   hreflangForListing,
@@ -803,6 +809,7 @@ export function renderAdminShell({ registry, requestedLocale = "en" }) {
       };
     }),
     website_locales: publicIndexableLocales(registry).map((locale) => locale.code),
+    website_language_coverage: websiteLanguageCoverage(registry),
     language_policy: {
       lead_language: "dynamic_bcp47",
       broker_assignment_uses_language_skills: true,

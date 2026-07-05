@@ -79,6 +79,17 @@ test("CRM inbox keeps original Greek and Hebrew lead language while routing admi
 test("admin workflow fixture combines CMS translation review and CRM lead intake", () => {
   const fixture = buildAdminWorkflowFixture(registry, listing);
 
+  assert.deepEqual(fixture.locale_contract.required_admin_locales, ["bg", "ru", "en"]);
+  assert.deepEqual(fixture.locale_contract.admin_locales, ["bg", "ru", "en"]);
+  assert.deepEqual(fixture.locale_contract.required_public_locales, ["bg", "en", "de", "nl", "ru", "el", "he"]);
+  assert.equal(
+    fixture.locale_contract.website_language_coverage.find((item) => item.market === "Israel").locale,
+    "he",
+  );
+  assert.equal(
+    fixture.locale_contract.website_language_coverage.find((item) => item.market === "Greece").locale,
+    "el",
+  );
   assert.equal(fixture.workspaces.ru.locale, "ru");
   assert.equal(fixture.workspaces.he_fallback.locale, "en");
   assert.equal(fixture.translation_tasks.he_draft.status, "hermes_drafted");

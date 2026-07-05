@@ -11,6 +11,9 @@ not a fixed BG/EN/DE/NL/RU list.
 - Admin CMS/CRM locales: BG, RU, EN.
 - Seeded public website locales: BG, EN, DE, NL, RU, EL, HE.
 - Greek (`el`) and Hebrew for Israel (`he`) are public website locales.
+- `required_admin_locales`, `required_public_locales`, and
+  `website_language_coverage` make those launch commitments executable in the
+  registry.
 - Hebrew is RTL and must pass layout QA.
 - Locale-prefixed URLs are the production standard.
 - Hermes Agent may draft translations, but cannot publish them or mark pages

@@ -1,5 +1,47 @@
 {
   "fixture_id": "admin-workflow-fixtures-20260704",
+  "locale_contract": {
+    "required_admin_locales": [
+      "bg",
+      "ru",
+      "en"
+    ],
+    "admin_locales": [
+      "bg",
+      "ru",
+      "en"
+    ],
+    "required_public_locales": [
+      "bg",
+      "en",
+      "de",
+      "nl",
+      "ru",
+      "el",
+      "he"
+    ],
+    "website_language_coverage": [
+      {
+        "id": "greece_greek",
+        "market": "Greece",
+        "country_code": "GR",
+        "locale": "el",
+        "language": "Greek",
+        "public_route_prefix": "/el/",
+        "status": "approved_public_seed"
+      },
+      {
+        "id": "israel_hebrew",
+        "market": "Israel",
+        "country_code": "IL",
+        "locale": "he",
+        "language": "Hebrew",
+        "public_route_prefix": "/he/",
+        "status": "approved_public_seed",
+        "requires_rtl_qa": true
+      }
+    ]
+  },
   "workspaces": {
     "bg": {
       "kind": "admin_workspace",

@@ -35,7 +35,8 @@ What it proves now:
 - Locale homepages with search, seller, contact, location, and featured listing paths.
 - Crawlable location pages generated from reviewed listing inventory.
 - Admin CRM/CMS shell language availability in BG, RU, and EN.
-- Website route coverage for Greek and Hebrew, including Hebrew RTL metadata.
+- Website route coverage for Greek `/el/` and Israel-facing Hebrew `/he/`,
+  including Hebrew RTL metadata.
 - Admin workflow fixtures for Hermes CMS translation review and CRM lead reply drafts.
 - Authenticated admin translation draft and human-approved publish endpoints.
 - Authenticated listing edit endpoint that marks dependent translations stale.

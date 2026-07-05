@@ -1,6 +1,27 @@
 {
   "fixture_id": "public-route-fixtures-20260704",
   "source_listing_id": "MS-CRAWL-0001",
+  "website_language_coverage": [
+    {
+      "id": "greece_greek",
+      "market": "Greece",
+      "country_code": "GR",
+      "locale": "el",
+      "language": "Greek",
+      "public_route_prefix": "/el/",
+      "status": "approved_public_seed"
+    },
+    {
+      "id": "israel_hebrew",
+      "market": "Israel",
+      "country_code": "IL",
+      "locale": "he",
+      "language": "Hebrew",
+      "public_route_prefix": "/he/",
+      "status": "approved_public_seed",
+      "requires_rtl_qa": true
+    }
+  ],
   "home_he": {
     "kind": "home",
     "status": 200,
@@ -1516,6 +1537,27 @@
       "el",
       "he"
     ],
+    "website_language_coverage": [
+      {
+        "id": "greece_greek",
+        "market": "Greece",
+        "country_code": "GR",
+        "locale": "el",
+        "language": "Greek",
+        "public_route_prefix": "/el/",
+        "status": "approved_public_seed"
+      },
+      {
+        "id": "israel_hebrew",
+        "market": "Israel",
+        "country_code": "IL",
+        "locale": "he",
+        "language": "Hebrew",
+        "public_route_prefix": "/he/",
+        "status": "approved_public_seed",
+        "requires_rtl_qa": true
+      }
+    ],
     "language_policy": {
       "lead_language": "dynamic_bcp47",
       "broker_assignment_uses_language_skills": true,
@@ -1563,6 +1605,27 @@
       "ru",
       "el",
       "he"
+    ],
+    "website_language_coverage": [
+      {
+        "id": "greece_greek",
+        "market": "Greece",
+        "country_code": "GR",
+        "locale": "el",
+        "language": "Greek",
+        "public_route_prefix": "/el/",
+        "status": "approved_public_seed"
+      },
+      {
+        "id": "israel_hebrew",
+        "market": "Israel",
+        "country_code": "IL",
+        "locale": "he",
+        "language": "Hebrew",
+        "public_route_prefix": "/he/",
+        "status": "approved_public_seed",
+        "requires_rtl_qa": true
+      }
     ],
     "language_policy": {
       "lead_language": "dynamic_bcp47",

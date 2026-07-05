@@ -1,6 +1,13 @@
 import fs from "node:fs";
 import { timingSafeEqual } from "node:crypto";
-import { addLocaleToRegistry, loadLocaleRegistry, writeLocaleRegistry } from "./locales.mjs";
+import {
+  addLocaleToRegistry,
+  loadLocaleRegistry,
+  requiredAdminLocales,
+  requiredPublicLocales,
+  websiteLanguageCoverage,
+  writeLocaleRegistry,
+} from "./locales.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
@@ -699,7 +706,10 @@ export function createHttpApp({
         if (localeRegistryPath) writeLocaleRegistry(activeRegistry, localeRegistryPath);
         return adminJson(201, {
           locale: result.locale,
+          required_admin_locales: requiredAdminLocales(activeRegistry),
           admin_locales: activeRegistry.admin_locales,
+          required_public_locales: requiredPublicLocales(activeRegistry),
+          website_language_coverage: websiteLanguageCoverage(activeRegistry),
           public_indexable_locales: activeRegistry.locales
             .filter((locale) => locale.public_enabled && locale.indexable)
             .map((locale) => locale.code),

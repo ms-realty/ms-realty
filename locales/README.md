@@ -12,8 +12,11 @@ Rules:
 - BG is the default source locale.
 - Admin CMS/CRM UI is available in exactly BG, RU, and EN for the first
   production implementation.
-- Greek (`el`) and Hebrew for Israel (`he`) are seeded as public website
-  locales. Hebrew is RTL and must pass layout QA before launch.
+- `required_admin_locales` locks the admin CRM/CMS shell to BG, RU, and EN.
+- `required_public_locales` locks the first public website set to BG, EN, DE,
+  NL, RU, Greek (`el`), and Hebrew for Israel (`he`).
+- `website_language_coverage` explicitly maps Greece to Greek `/el/` and
+  Israel to Hebrew `/he/`. Hebrew is RTL and must pass layout QA before launch.
 - French (`fr`) is included as a disabled example for the fallback/request flow.
 
 Locale-prefixed URLs are the standard:

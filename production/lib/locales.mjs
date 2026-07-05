@@ -5,6 +5,8 @@ const BCP47 = /^[a-z]{2,3}(-[A-Z]{2})?$/;
 const ROUTE_SEGMENT = /^[a-z0-9-]+$/;
 const PROVIDERS = new Set(["human", "hermes_draft", "external_import"]);
 const DIRECTIONS = new Set(["ltr", "rtl"]);
+const FALLBACK_REQUIRED_ADMIN_LOCALES = ["bg", "ru", "en"];
+const FALLBACK_REQUIRED_PUBLIC_LOCALES = ["bg", "en", "de", "nl", "ru", "el", "he"];
 
 export function loadLocaleRegistry(path = fromRoot("locales", "registry.json")) {
   return JSON.parse(fs.readFileSync(path, "utf8"));
@@ -23,8 +25,20 @@ export function publicIndexableLocales(registry) {
   return registry.locales.filter((locale) => locale.public_enabled && locale.indexable);
 }
 
+export function requiredAdminLocales(registry) {
+  return registry.required_admin_locales || FALLBACK_REQUIRED_ADMIN_LOCALES;
+}
+
 export function adminLocales(registry) {
   return registry.admin_locales;
+}
+
+export function requiredPublicLocales(registry) {
+  return registry.required_public_locales || registry.initial_public_locales || FALLBACK_REQUIRED_PUBLIC_LOCALES;
+}
+
+export function websiteLanguageCoverage(registry) {
+  return registry.website_language_coverage || [];
 }
 
 export function getLocale(registry, code) {
@@ -37,8 +51,14 @@ export function assertLocaleRegistry(registry) {
   if (registry.policy !== "dynamic_approved") throw new Error("Locale policy must be dynamic_approved");
   if (registry.source_locale !== "bg") throw new Error("Source locale must be bg");
   if (registry.url_strategy !== "locale_prefix") throw new Error("URL strategy must be locale_prefix");
-  if (JSON.stringify(registry.admin_locales) !== JSON.stringify(["bg", "ru", "en"])) {
+  if (JSON.stringify(requiredAdminLocales(registry)) !== JSON.stringify(["bg", "ru", "en"])) {
+    throw new Error("Required admin CMS/CRM locales must be bg, ru, en");
+  }
+  if (JSON.stringify(registry.admin_locales) !== JSON.stringify(requiredAdminLocales(registry))) {
     throw new Error("Admin CMS/CRM locales must be bg, ru, en");
+  }
+  if (JSON.stringify(requiredPublicLocales(registry)) !== JSON.stringify(FALLBACK_REQUIRED_PUBLIC_LOCALES)) {
+    throw new Error("Required public website locales must be bg, en, de, nl, ru, el, he");
   }
 
   const seen = new Set();
@@ -73,12 +93,33 @@ export function assertLocaleRegistry(registry) {
     }
   }
 
-  for (const code of ["bg", "en", "de", "nl", "ru", "el", "he"]) {
+  for (const code of requiredPublicLocales(registry)) {
     const locale = getLocale(registry, code);
     if (!locale.public_enabled || !locale.indexable) throw new Error(`${code} must be public and indexable`);
   }
   if (getLocale(registry, "he").direction !== "rtl") throw new Error("Hebrew must be RTL");
   if (getLocale(registry, "el").direction !== "ltr") throw new Error("Greek must be LTR");
+
+  const coverage = websiteLanguageCoverage(registry);
+  const greece = coverage.find((item) => item.id === "greece_greek");
+  const israel = coverage.find((item) => item.id === "israel_hebrew");
+  if (greece?.locale !== "el" || greece.country_code !== "GR" || greece.public_route_prefix !== "/el/") {
+    throw new Error("Website language coverage must map Greece to Greek /el/");
+  }
+  if (
+    israel?.locale !== "he" ||
+    israel.country_code !== "IL" ||
+    israel.public_route_prefix !== "/he/" ||
+    israel.requires_rtl_qa !== true
+  ) {
+    throw new Error("Website language coverage must map Israel to Hebrew /he/ with RTL QA");
+  }
+  for (const item of coverage) {
+    const locale = getLocale(registry, item.locale);
+    if (!locale.public_enabled || !locale.indexable) {
+      throw new Error(`Website language coverage locale must be public and indexable: ${item.locale}`);
+    }
+  }
   return true;
 }
 

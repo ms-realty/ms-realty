@@ -918,7 +918,11 @@ test("HTTP admin can add a non-indexable website locale without changing admin l
   assert.equal(created.body.locale.code, "es");
   assert.equal(created.body.locale.public_enabled, false);
   assert.equal(created.body.locale.indexable, false);
+  assert.deepEqual(created.body.required_admin_locales, ["bg", "ru", "en"]);
   assert.deepEqual(created.body.admin_locales, ["bg", "ru", "en"]);
+  assert.deepEqual(created.body.required_public_locales, ["bg", "en", "de", "nl", "ru", "el", "he"]);
+  assert.equal(created.body.website_language_coverage.find((item) => item.market === "Israel").locale, "he");
+  assert.equal(created.body.website_language_coverage.find((item) => item.market === "Greece").locale, "el");
   assert.equal(listed.body.workspace.locale, "ru");
   assert.equal(listed.body.locales.some((locale) => locale.code === "es"), true);
   assert.equal(fallback.body.locale, "en");

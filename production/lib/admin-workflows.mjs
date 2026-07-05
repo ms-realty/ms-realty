@@ -1,4 +1,4 @@
-import { adminLocales, getLocale } from "./locales.mjs";
+import { adminLocales, getLocale, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage } from "./locales.mjs";
 import { assertHermesActionAllowed, translationPrompt } from "./hermes.mjs";
 import { createLeadDraft } from "./leads.mjs";
 import { contentHash } from "./translations.mjs";
@@ -187,6 +187,12 @@ export function buildAdminWorkflowFixture(registry, listing) {
 
   return {
     fixture_id: "admin-workflow-fixtures-20260704",
+    locale_contract: {
+      required_admin_locales: requiredAdminLocales(registry),
+      admin_locales: adminLocales(registry),
+      required_public_locales: requiredPublicLocales(registry),
+      website_language_coverage: websiteLanguageCoverage(registry),
+    },
     workspaces: {
       bg: renderAdminWorkspace({ registry, requestedLocale: "bg" }),
       ru: renderAdminWorkspace({ registry, requestedLocale: "ru" }),

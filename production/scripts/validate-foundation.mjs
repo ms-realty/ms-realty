@@ -155,6 +155,12 @@ if (cmsSeed.summary.deployableRoutes !== 0) throw new Error("CMS seed routes mus
 if (cmsSeed.summary.translationLocales.fr) throw new Error("CMS seed must not include unapproved French translations");
 
 const publicFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "public-fixtures.json"), "utf8"));
+if (
+  publicFixtures.website_language_coverage?.find((item) => item.market === "Israel")?.locale !== "he" ||
+  publicFixtures.website_language_coverage?.find((item) => item.market === "Greece")?.locale !== "el"
+) {
+  throw new Error("Public fixtures must expose Greece and Israel website language coverage");
+}
 if (publicFixtures.listing_he.dir !== "rtl") throw new Error("Hebrew public fixture must render RTL");
 if (publicFixtures.listing_el.path !== `/el/akinita/${publicFixtures.source_listing_id}`) {
   throw new Error("Greek listing fixture route missing");
@@ -175,6 +181,18 @@ if (JSON.stringify(publicFixtures.admin_ru.interface_locales.map((locale) => loc
 }
 
 const adminFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "admin-fixtures.json"), "utf8"));
+if (
+  JSON.stringify(adminFixtures.locale_contract.required_admin_locales) !== JSON.stringify(["bg", "ru", "en"]) ||
+  JSON.stringify(adminFixtures.locale_contract.admin_locales) !== JSON.stringify(["bg", "ru", "en"])
+) {
+  throw new Error("Admin fixture locale contract must expose BG, RU, EN admin locales");
+}
+if (
+  adminFixtures.locale_contract.website_language_coverage?.find((item) => item.market === "Israel")?.locale !== "he" ||
+  adminFixtures.locale_contract.website_language_coverage?.find((item) => item.market === "Greece")?.locale !== "el"
+) {
+  throw new Error("Admin fixture locale contract must expose Greece and Israel website language coverage");
+}
 if (JSON.stringify(adminFixtures.workspaces.ru.interface_locales) !== JSON.stringify(["bg", "ru", "en"])) {
   throw new Error("Admin workspace must expose BG, RU, EN");
 }
@@ -349,9 +367,17 @@ if (
   httpSmoke.localeCreate.status !== 201 ||
   httpSmoke.localeCreate.body.locale.code !== "es" ||
   httpSmoke.localeCreate.body.locale.indexable !== false ||
+  JSON.stringify(httpSmoke.localeCreate.body.required_admin_locales) !== JSON.stringify(["bg", "ru", "en"]) ||
   JSON.stringify(httpSmoke.localeCreate.body.admin_locales) !== JSON.stringify(["bg", "ru", "en"])
 ) {
   throw new Error("HTTP smoke must add non-indexable website locale without changing admin locales");
+}
+if (
+  JSON.stringify(httpSmoke.localeCreate.body.required_public_locales) !== JSON.stringify(["bg", "en", "de", "nl", "ru", "el", "he"]) ||
+  httpSmoke.localeCreate.body.website_language_coverage?.find((item) => item.market === "Israel")?.locale !== "he" ||
+  httpSmoke.localeCreate.body.website_language_coverage?.find((item) => item.market === "Greece")?.locale !== "el"
+) {
+  throw new Error("HTTP smoke must preserve required public Greek and Israel Hebrew coverage");
 }
 if (httpSmoke.localeFallback.status !== 200 || httpSmoke.localeFallback.body.locale !== "en") {
   throw new Error("HTTP smoke must keep newly added locale fallback non-indexable");

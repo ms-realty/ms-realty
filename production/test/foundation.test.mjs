@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { addLocaleToRegistry, loadLocaleRegistry, assertLocaleRegistry, resolvePublicLocale } from "../lib/locales.mjs";
+import {
+  addLocaleToRegistry,
+  loadLocaleRegistry,
+  assertLocaleRegistry,
+  requiredAdminLocales,
+  requiredPublicLocales,
+  resolvePublicLocale,
+  websiteLanguageCoverage,
+} from "../lib/locales.mjs";
 import {
   contactPath,
   homePath,
@@ -18,9 +26,18 @@ const registry = loadLocaleRegistry();
 
 test("locale registry supports dynamic approved website languages and admin language limits", () => {
   assert.equal(assertLocaleRegistry(registry), true);
+  assert.deepEqual(requiredAdminLocales(registry), ["bg", "ru", "en"]);
   assert.deepEqual(registry.admin_locales, ["bg", "ru", "en"]);
+  assert.deepEqual(requiredPublicLocales(registry), ["bg", "en", "de", "nl", "ru", "el", "he"]);
   assert.equal(registry.locales.find((locale) => locale.code === "he").direction, "rtl");
   assert.equal(registry.locales.find((locale) => locale.code === "el").indexable, true);
+  assert.deepEqual(
+    websiteLanguageCoverage(registry).map((item) => [item.market, item.country_code, item.locale, item.public_route_prefix]),
+    [
+      ["Greece", "GR", "el", "/el/"],
+      ["Israel", "IL", "he", "/he/"],
+    ],
+  );
 });
 
 test("locale routes and hreflang only include human-approved translations", () => {
@@ -79,6 +96,8 @@ test("admin-added locales are valid but not public indexable by default", () => 
   assert.equal(locale.route_segments.contact, "contact");
   assert.equal(locale.route_segments.location, "locations");
   assert.deepEqual(updated.admin_locales, ["bg", "ru", "en"]);
+  assert.deepEqual(requiredAdminLocales(updated), ["bg", "ru", "en"]);
+  assert.deepEqual(requiredPublicLocales(updated), ["bg", "en", "de", "nl", "ru", "el", "he"]);
   assert.equal(resolvePublicLocale(updated, "es").locale.code, "en");
 });
 

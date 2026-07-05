@@ -204,6 +204,13 @@ test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {
   );
   assert.deepEqual(adminRu.modules, ["crm", "cms"]);
   assert.equal(adminEl.locale, "en");
+  assert.deepEqual(
+    adminRu.website_language_coverage.map((item) => [item.market, item.locale, item.public_route_prefix]),
+    [
+      ["Greece", "el", "/el/"],
+      ["Israel", "he", "/he/"],
+    ],
+  );
   assert.equal(adminRu.language_policy.hermes_reply_drafts_require_broker_approval, true);
 });
 
