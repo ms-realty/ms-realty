@@ -4,8 +4,8 @@
     "listings": 165,
     "affected_listings": 165,
     "issue_counts": {
-      "missing_price": 165,
-      "missing_bedrooms": 165,
+      "missing_price": 155,
+      "missing_bedrooms": 163,
       "media_review_pending": 165,
       "missing_alt_text": 165,
       "tour_review_pending": 165,
@@ -2551,10 +2551,8 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0080",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0080",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -2563,14 +2561,12 @@
       "location": "Sandanski",
       "description": "Отдава се обзаведен тристаен апартамент под наем в с. Поленица, близо до Сандански. 120 кв.м, две спални, три тераси, панорамна гледка и паркомясто. 450Евро",
       "issues": [
-        "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
-      "bedrooms": null,
+      "price_eur": 450,
+      "bedrooms": 2,
       "public_gallery_assets": 28,
       "missing_alt_text_assets": 27,
       "review_gated_assets": 16
@@ -2771,7 +2767,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0087",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "media_review",
         "media_alt_text",
@@ -2781,13 +2776,12 @@
       "location": "Sandanski",
       "description": "Big plot of land 20 740 sq.m., buildings 720 sq.m., asphalt road - price 75 000 Euro.",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 75000,
       "bedrooms": null,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 6,
@@ -3537,7 +3531,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0111",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "location",
         "media_review",
@@ -3548,14 +3541,13 @@
       "location": "",
       "description": "Private land covering 24,416 m2, three massive buildings with a total area of 2,200 m2, 2 solar panels, each with a capacity of 500 kilowatts. €750,000",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "missing_location",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 750000,
       "bedrooms": null,
       "public_gallery_assets": 24,
       "missing_alt_text_assets": 4,
@@ -3695,7 +3687,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0116",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "media_review",
         "media_alt_text",
@@ -3705,13 +3696,12 @@
       "location": "Sandanski",
       "description": "Продажа земли 20 740 м2 вместе с построенными на участке зданиями общей застроенной площадью 720 м2 - новая цена 75 000 Евро",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 75000,
       "bedrooms": null,
       "public_gallery_assets": 18,
       "missing_alt_text_assets": 17,
@@ -4097,7 +4087,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0129",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "media_review",
         "media_alt_text",
@@ -4107,13 +4096,12 @@
       "location": "Sandanski",
       "description": "Новый дом в 15 км от СПА курорта Сандански и 3 км от города музея Мелник Общая площадь дома 180 м2, участок 90 м2. Цена 79 900 Евро",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 79900,
       "bedrooms": null,
       "public_gallery_assets": 23,
       "missing_alt_text_assets": 15,
@@ -4471,7 +4459,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0141",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "media_review",
         "media_alt_text",
@@ -4481,13 +4468,12 @@
       "location": "Sandanski",
       "description": "Продажа участка в поселке Дербере, Сандански. Общая площадь участка 2 000 кв.м., цена 14 000 Евро. Отличная панорама. Удобный доступ. Все коммунукации рядом",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 14000,
       "bedrooms": null,
       "public_gallery_assets": 16,
       "missing_alt_text_assets": 11,
@@ -4597,7 +4583,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0145",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "media_review",
         "media_alt_text",
@@ -4607,13 +4592,12 @@
       "location": "Sandanski",
       "description": "Продажа участка 2 гка в районе г.Сандански. Общая площадь участка 21 400 кв.м., огорожен, подведен кабель для електричества, цена 25 000 Евро",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 25000,
       "bedrooms": null,
       "public_gallery_assets": 10,
       "missing_alt_text_assets": 10,
@@ -4685,10 +4669,8 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0148",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0148",
-      "review_status": "needs_facts_and_media_review",
+      "review_status": "needs_media_review",
       "required_editor_fields": [
-        "price_eur",
-        "bedrooms",
         "media_review",
         "media_alt_text",
         "tour_review"
@@ -4697,14 +4679,12 @@
       "location": "Sandanski",
       "description": "Новый дом в 15 км от СПА курорта Сандански. Две спальни, зал с кухней, санузел, большой подвал. Застроенная площадь 90 кв.м., цена 330 Евро в месяц",
       "issues": [
-        "missing_price",
-        "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
-      "bedrooms": null,
+      "price_eur": 330,
+      "bedrooms": 2,
       "public_gallery_assets": 23,
       "missing_alt_text_assets": 15,
       "review_gated_assets": 12
@@ -4871,7 +4851,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0154",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "media_review",
         "media_alt_text",
@@ -4881,13 +4860,12 @@
       "location": "Sandanski",
       "description": "Продажа участка в поселке Струмяни.Недвижимость в 10 км от Сандански.Панорамный участок с видом на горы и р.Струма. 677 м2 цена 11 000 Евро.Все коммуникации",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 11000,
       "bedrooms": null,
       "public_gallery_assets": 20,
       "missing_alt_text_assets": 11,
@@ -5023,7 +5001,6 @@
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0159",
       "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "price_eur",
         "bedrooms",
         "media_review",
         "media_alt_text",
@@ -5033,13 +5010,12 @@
       "location": "Sandanski",
       "description": "Продажа центра профилактики, реабилитации и косметических процедур в бальнеологическом курорте Сандански, Болгария. Площадь 165 кв.м., цена 185 000 Евро",
       "issues": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending",
         "missing_alt_text",
         "tour_review_pending"
       ],
-      "price_eur": null,
+      "price_eur": 185000,
       "bedrooms": null,
       "public_gallery_assets": 25,
       "missing_alt_text_assets": 24,

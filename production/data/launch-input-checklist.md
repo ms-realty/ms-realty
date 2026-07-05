@@ -41,8 +41,8 @@ Blockers: redirect_reviews, external_seo_exports
 - Review columns: `review_status`, `required_editor_fields`, `price_eur`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
 - Admin import endpoint: `POST /api/admin/listing-quality/import`
 - Admin editor endpoint: `POST /api/admin/listings/edit`
-- missing_price: 167
-- missing_bedrooms: 167
+- missing_price: 157
+- missing_bedrooms: 165
 - media_review_pending: 167
 - missing_location: 3
 

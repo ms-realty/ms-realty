@@ -3,10 +3,10 @@
     "generated_at": "2026-07-05T00:00:00Z",
     "listing_entries": 167,
     "failing_entries": 0,
-    "entries_with_offer": 0,
+    "entries_with_offer": 10,
     "warnings": {
-      "missing_price": 167,
-      "missing_bedrooms": 167,
+      "missing_price": 157,
+      "missing_bedrooms": 165,
       "media_review_pending": 167,
       "missing_location": 3
     },
@@ -1241,11 +1241,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 27,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -1346,10 +1344,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 9,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -1706,11 +1703,10 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 23,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
         "missing_location",
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -1782,10 +1778,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 12,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -1977,10 +1972,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 17,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -2157,10 +2151,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 10,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -2217,10 +2210,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 4,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -2262,11 +2254,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 17,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
-        "missing_bedrooms",
         "media_review_pending"
       ]
     },
@@ -2352,10 +2342,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 14,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
@@ -2428,10 +2417,9 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 19,
-      "has_offer": false,
+      "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_price",
         "missing_bedrooms",
         "media_review_pending"
       ]
