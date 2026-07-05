@@ -105,6 +105,24 @@ test("CSV redirect approval import validates rows before appending", () => {
   assert.equal(readRedirectApprovals(filePath).length, 1);
 });
 
+test("duplicate approval imports keep one deployable redirect per old URL", () => {
+  const routeMap = loadRouteMap();
+  const filePath = tempApprovalFile();
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg");
+  const csv = `old_url,equivalent_content,reviewer,approved_at,reason\n${listing.old_url},true,editor_bg,2026-07-04T00:00:00Z,Reviewed\n`;
+
+  resetRedirectApprovals(filePath);
+  importRedirectApprovalsCsv(routeMap, csv, { filePath });
+  importRedirectApprovalsCsv(routeMap, csv, { filePath });
+
+  const rows = buildDeployableRedirects(routeMap, readRedirectApprovals(filePath));
+  const summary = assertDeployableRedirects(rows);
+
+  assert.equal(readRedirectApprovals(filePath).length, 2);
+  assert.equal(rows.length, 1);
+  assert.equal(summary.duplicateOldUrls, 0);
+});
+
 test("redirect approval workbook includes all mapped listings without approving them", () => {
   const rows = buildRedirectApprovalWorkbook(loadRouteMap());
   const parsed = parseCsv(renderRedirectApprovalWorkbook(rows));

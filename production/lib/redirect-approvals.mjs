@@ -139,7 +139,9 @@ export function loadDeployableRedirects(filePath = DEFAULT_DEPLOYABLE_REDIRECTS_
 
 export function buildDeployableRedirects(routeMap, approvals) {
   const routes = new Map(routeMap.map((route) => [route.old_url, route]));
-  return approvals
+  const latest = new Map();
+  for (const approval of approvals) latest.set(approval.old_url, approval);
+  return [...latest.values()]
     .map((approval) => {
       const route = routes.get(approval.old_url);
       if (!route || route.target_path !== approval.target_path || route.planned_status !== 301) return null;
