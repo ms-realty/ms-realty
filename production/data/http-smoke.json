@@ -1,5 +1,21 @@
 {
   "fixture_id": "http-smoke-20260704",
+  "health": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    },
+    "body": {
+      "kind": "health",
+      "service": "ms-realty",
+      "status": "ok",
+      "launch_ready": false,
+      "blockers": [
+        "redirect_reviews",
+        "external_seo_exports"
+      ]
+    }
+  },
   "legacyRedirect": {
     "status": 301,
     "headers": {

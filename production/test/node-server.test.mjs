@@ -106,6 +106,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
       const smoke = {
+        health: await jsonFetch(baseUrl, "/api/health"),
         legacyRedirect: await textFetch(baseUrl, oldUrl.pathname, {
           headers: { "x-forwarded-host": redirect.source_domain },
           redirect: "manual",
@@ -334,6 +335,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         headers: { authorization: "Bearer local-admin-smoke" },
       });
       assert.equal(assertServerSmoke(smoke), true);
+      assert.equal(smoke.health.body.status, "ok");
+      assert.deepEqual(smoke.health.body.blockers, ["redirect_reviews", "external_seo_exports"]);
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
       assert.equal(smoke.home.body.body.search.path, "/he/search");
       assert.equal(smoke.listingPrint.body.includes("data-kind=\"listing-print\""), true);

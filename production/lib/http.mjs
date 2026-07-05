@@ -374,6 +374,17 @@ export function createHttpApp({
       return response(200, renderRobotsTxt(), "text/plain; charset=utf-8");
     }
 
+    if (request.method === "GET" && url.pathname === "/api/health") {
+      const readiness = currentLaunchReadiness();
+      return json(200, {
+        kind: "health",
+        service: "ms-realty",
+        status: "ok",
+        launch_ready: readiness.launch_ready,
+        blockers: readiness.blockers,
+      });
+    }
+
     if (request.method === "GET" && url.pathname === "/api/search") {
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
@@ -843,6 +854,13 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
+  if (
+    smoke.health?.status !== 200 ||
+    smoke.health.body.status !== "ok" ||
+    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"])
+  ) {
+    throw new Error("HTTP smoke must expose liveness without hiding launch blockers");
+  }
   if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
     throw new Error("HTTP smoke must serve approved legacy redirect");
   }

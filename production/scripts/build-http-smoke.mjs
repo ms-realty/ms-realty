@@ -102,6 +102,7 @@ const app = createHttpApp({
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 const smoke = {
   fixture_id: "http-smoke-20260704",
+  health: await dispatchHttp(app, { url: "/api/health" }),
   legacyRedirect: await dispatchHttp(app, { url: legacyRedirect.old_url }),
   home: await dispatchHttp(app, { url: "/he/" }),
   homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),

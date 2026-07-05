@@ -59,6 +59,13 @@ export async function textFetch(baseUrl, path, options = {}) {
 }
 
 export function assertServerSmoke(smoke) {
+  if (
+    smoke.health?.status !== 200 ||
+    smoke.health.body.status !== "ok" ||
+    JSON.stringify(smoke.health.body.blockers) !== JSON.stringify(["redirect_reviews", "external_seo_exports"])
+  ) {
+    throw new Error("Server must expose liveness without hiding launch blockers");
+  }
   if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
     throw new Error("Server must serve approved legacy redirect");
   }

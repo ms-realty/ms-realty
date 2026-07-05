@@ -1,6 +1,19 @@
 {
   "fixture_id": "node-server-smoke-20260704",
   "baseUrl": "http://127.0.0.1:0",
+  "health": {
+    "status": 200,
+    "body": {
+      "kind": "health",
+      "service": "ms-realty",
+      "status": "ok",
+      "launch_ready": false,
+      "blockers": [
+        "redirect_reviews",
+        "external_seo_exports"
+      ]
+    }
+  },
   "legacyRedirect": {
     "status": 301,
     "body": "{\"kind\":\"legacy_redirect\",\"location\":\"/bg/imoti/MS-CRAWL-0001\"}",

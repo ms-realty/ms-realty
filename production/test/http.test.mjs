@@ -140,6 +140,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   });
   const redirect = deployableRedirect();
   const smoke = {
+    health: await dispatchHttp(app, { url: "/api/health" }),
     legacyRedirect: await dispatchHttp(app, { url: redirect.old_url }),
     home: await dispatchHttp(app, { url: "/he/" }),
     homeHtml: await dispatchHttp(app, { url: "/he/?format=html" }),
@@ -407,6 +408,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   });
 
   assert.equal(assertHttpSmoke(smoke), true);
+  assert.equal(smoke.health.body.status, "ok");
+  assert.deepEqual(smoke.health.body.blockers, ["redirect_reviews", "external_seo_exports"]);
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
