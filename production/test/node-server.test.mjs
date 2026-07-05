@@ -251,7 +251,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         admin: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
           headers: { authorization: "Bearer local-admin-smoke" },
         }),
-        adminUnauthorized: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru"),
+        adminUnauthorized: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", { captureHeaders: true }),
         reply: await jsonFetch(baseUrl, "/api/admin/replies", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
@@ -264,6 +264,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         }),
         replyUnauthorized: await jsonFetch(baseUrl, "/api/admin/replies", {
           method: "POST",
+          captureHeaders: true,
           body: JSON.stringify({
             leadId: "node-server-lead-test",
             reviewedReply: "No auth",
@@ -282,6 +283,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         }),
         viewingUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings", {
           method: "POST",
+          captureHeaders: true,
           body: JSON.stringify({
             leadId: "node-server-lead-test",
             startsAt: "2026-07-06T10:00:00Z",
@@ -291,7 +293,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         viewingCalendar: await textFetch(baseUrl, "/api/admin/viewings.ics", {
           headers: { authorization: "Bearer local-admin-smoke" },
         }),
-        viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics"),
+        viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics", { captureHeaders: true }),
       };
       smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
         method: "POST",

@@ -573,6 +573,19 @@ if (nodeServerSmoke.robots.status !== 200 || !nodeServerSmoke.robots.body.includ
 if (nodeServerSmoke.admin.status !== 200 || nodeServerSmoke.admin.body.workspace.locale !== "ru") {
   throw new Error("Node server smoke must serve RU admin lead inbox");
 }
+for (const response of [
+  nodeServerSmoke.adminUnauthorized,
+  nodeServerSmoke.replyUnauthorized,
+  nodeServerSmoke.viewingUnauthorized,
+  nodeServerSmoke.viewingCalendarUnauthorized,
+]) {
+  if (
+    response.headers?.["cache-control"] !== "no-store" ||
+    response.headers["www-authenticate"] !== 'Bearer realm="ms-realty-admin"'
+  ) {
+    throw new Error("Node server smoke must mark admin 401 responses private with a bearer challenge");
+  }
+}
 if (nodeServerSmoke.reply.status !== 201 || nodeServerSmoke.reply.body.status !== "queued_for_manual_send") {
   throw new Error("Node server smoke must queue broker-approved reply");
 }

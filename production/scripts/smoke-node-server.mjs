@@ -214,7 +214,7 @@ try {
     admin: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", {
       headers: { authorization: "Bearer local-admin-smoke" },
     }),
-    adminUnauthorized: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru"),
+    adminUnauthorized: await jsonFetch(baseUrl, "/api/admin/leads?locale=ru", { captureHeaders: true }),
     reply: await jsonFetch(baseUrl, "/api/admin/replies", {
       method: "POST",
       headers: { authorization: "Bearer local-admin-smoke" },
@@ -230,6 +230,7 @@ try {
     }),
     replyUnauthorized: await jsonFetch(baseUrl, "/api/admin/replies", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         leadId: "server-lead-he-0001",
         reviewedReply: "No auth",
@@ -249,6 +250,7 @@ try {
     }),
     viewingUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings", {
       method: "POST",
+      captureHeaders: true,
       body: JSON.stringify({
         leadId: "server-lead-he-0001",
         startsAt: "2026-07-06T10:00:00Z",
@@ -258,7 +260,7 @@ try {
     viewingCalendar: await textFetch(baseUrl, "/api/admin/viewings.ics", {
       headers: { authorization: "Bearer local-admin-smoke" },
     }),
-    viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics"),
+    viewingCalendarUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings.ics", { captureHeaders: true }),
   };
   smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
     method: "POST",
@@ -311,6 +313,12 @@ try {
   smoke.legacyRedirect.headers = { location: smoke.legacyRedirect.headers.location };
   for (const name of ["languageRequest", "savedSearch", "lead", "viewingLead", "contactLead", "sellerLead", "badLead"]) {
     smoke[name].headers = { "cache-control": smoke[name].headers["cache-control"] };
+  }
+  for (const name of ["adminUnauthorized", "replyUnauthorized", "viewingUnauthorized", "viewingCalendarUnauthorized"]) {
+    smoke[name].headers = {
+      "cache-control": smoke[name].headers["cache-control"],
+      "www-authenticate": smoke[name].headers["www-authenticate"],
+    };
   }
   assertServerSmoke(smoke);
   const ledger = readLeadLedger(leadLedgerPath);

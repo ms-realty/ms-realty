@@ -2502,6 +2502,10 @@
     "status": 401,
     "body": {
       "kind": "unauthorized"
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     }
   },
   "reply": {
@@ -2524,6 +2528,10 @@
     "status": 401,
     "body": {
       "kind": "unauthorized"
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     }
   },
   "viewing": {
@@ -2551,6 +2559,10 @@
     "status": 401,
     "body": {
       "kind": "unauthorized"
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     }
   },
   "viewingCalendar": {
@@ -2561,6 +2573,10 @@
     "status": 401,
     "body": {
       "kind": "unauthorized"
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "www-authenticate": "Bearer realm=\"ms-realty-admin\""
     }
   },
   "translationDraft": {

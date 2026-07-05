@@ -260,6 +260,14 @@ export function assertServerSmoke(smoke) {
   if (smoke.admin.status !== 200 || smoke.admin.body.workspace.locale !== "ru") throw new Error("Server must serve RU admin leads");
   if (smoke.admin.body.leads.length < 4) throw new Error("Server must show buyer, viewing, contact, and seller leads");
   if (smoke.adminUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated admin leads");
+  for (const response of [smoke.adminUnauthorized, smoke.replyUnauthorized, smoke.viewingUnauthorized, smoke.viewingCalendarUnauthorized]) {
+    if (
+      response?.headers?.["cache-control"] !== "no-store" ||
+      response.headers["www-authenticate"] !== 'Bearer realm="ms-realty-admin"'
+    ) {
+      throw new Error("Server must mark admin 401 responses private with a bearer challenge");
+    }
+  }
   if (smoke.reply.status !== 201 || smoke.reply.body.status !== "queued_for_manual_send") {
     throw new Error("Server must queue broker-approved replies");
   }
