@@ -34,6 +34,7 @@ import {
 } from "./redirect-approvals.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
+import { DEFAULT_SLUG_HISTORY_PATH, appendSlugChange } from "./slug-history.mjs";
 import {
   DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
   appendTourApproval,
@@ -84,6 +85,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
@@ -369,6 +371,13 @@ function appendPublishedTranslation(registry, input, config) {
   return appendTranslationTask(publishApprovedTranslation(registry, approved), { filePath: config.translationLedgerPath });
 }
 
+function appendListingSlugChange(registry, input, config) {
+  return appendSlugChange(registry, currentSeed(config), input, {
+    filePath: config.slugHistoryPath,
+    changedAt: config.editedAt,
+  });
+}
+
 function appendRedirectApprovalRow(input, config) {
   const approval = appendRedirectApproval(routeMapRows(), redirectApprovalInput(input), {
     filePath: config.redirectApprovalPath,
@@ -451,6 +460,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       return jsonResponse(201, appendEditorChange(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/slug") {
+      return jsonResponse(201, appendListingSlugChange(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
       return jsonResponse(201, appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));

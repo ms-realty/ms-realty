@@ -51,6 +51,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
       MS_REALTY_SELLER_PIPELINE_PATH: tempJsonl("app-admin-seller-pipeline"),
+      MS_REALTY_SLUG_HISTORY_PATH: tempJsonl("app-admin-slug-history"),
       MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: tempJsonl("app-admin-tour-approvals"),
       MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-translations"),
       MS_REALTY_VIEWING_LEDGER_PATH: tempJsonl("app-admin-viewings"),
@@ -69,6 +70,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const replyRoute = await import("../../app/api/admin/replies/route.js");
       const seoEvidenceRoute = await import("../../app/api/admin/seo-evidence/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
+      const listingSlugRoute = await import("../../app/api/admin/listings/slug/route.js");
       const translationDraftRoute = await import("../../app/api/admin/translations/draft/route.js");
       const translationPublishRoute = await import("../../app/api/admin/translations/publish/route.js");
       const tourApprovalRoute = await import("../../app/api/admin/tours/approve/route.js");
@@ -317,6 +319,24 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
       assert.match(await updatedEditor.text(), /value="Updated title for Next admin"/);
+
+      const slugChange = await listingSlugRoute.POST(
+        new Request("https://example.test/api/admin/listings/slug", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            listingId: "MS-CRAWL-0001",
+            locale: "he",
+            oldPath: "/he/properties/old-sandanski-slug",
+            editor: "seo_editor",
+          }),
+        }),
+      );
+      const slugChangeBody = await slugChange.json();
+      assert.equal(slugChange.status, 201);
+      assert.equal(slugChangeBody.status, 301);
+      assert.equal(slugChangeBody.old_path, "/he/properties/old-sandanski-slug");
+      assert.equal(slugChangeBody.new_path, "/he/properties/MS-CRAWL-0001");
 
       const tourApproval = await tourApprovalRoute.POST(
         new Request("https://example.test/api/admin/tours/approve", {
