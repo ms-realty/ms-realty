@@ -51,12 +51,24 @@ function reportStatus(source, filePath, assertReport) {
   }
 }
 
-function liveServiceReports() {
+export function liveServiceReports({
+  syncReportPath = DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
+  queryReportPath = DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
+  hermesReportPath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+} = {}) {
   return [
-    reportStatus("typesense_meilisearch_sync", DEFAULT_SEARCH_ENGINE_SYNC_REPORT, assertSearchEngineSyncReport),
-    reportStatus("typesense_meilisearch_query", DEFAULT_SEARCH_ENGINE_QUERY_REPORT, assertSearchEngineQueryReport),
-    reportStatus("hermes_draft_worker", DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH, assertHermesDraftWorkerReport),
+    reportStatus("typesense_meilisearch_sync", syncReportPath, assertSearchEngineSyncReport),
+    reportStatus("typesense_meilisearch_query", queryReportPath, assertSearchEngineQueryReport),
+    reportStatus("hermes_draft_worker", hermesReportPath, assertHermesDraftWorkerReport),
   ];
+}
+
+export function validateLiveServiceReports(options = {}) {
+  const reports = liveServiceReports(options);
+  return {
+    ready: reports.every((item) => item.status === "pass"),
+    reports,
+  };
 }
 
 export function buildLaunchReadinessReport({

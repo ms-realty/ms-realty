@@ -93,6 +93,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Hermes worker: set \`HERMES_CHAT_COMPLETIONS_URL\`; set \`HERMES_API_KEY\` when the endpoint requires auth.
 - Search sync smoke: \`npm run search:sync && npm run search:query\`.
 - Hermes draft smoke: \`npm run hermes:worker\`.
+- Report preflight: \`npm run live:preflight\`.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
 
 ## Content Quality Warnings
@@ -113,6 +114,7 @@ npm run redirects:preflight
 npm run redirects:build
 npm run seo:preflight
 npm run seo:evidence
+npm run live:preflight
 npm run listing:preflight
 npm run launch:readiness
 npm run launch:inputs

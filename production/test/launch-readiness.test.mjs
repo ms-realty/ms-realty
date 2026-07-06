@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import { spawnSync } from "node:child_process";
-import { assertLaunchReadinessReport, buildLaunchReadinessReport } from "../lib/launch-readiness.mjs";
+import { assertLaunchReadinessReport, buildLaunchReadinessReport, validateLiveServiceReports } from "../lib/launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -15,6 +16,41 @@ const readyLiveServices = [
   { source: "typesense_meilisearch_query", status: "pass", path: "production/data/search-engine-query-report.json", summary: {} },
   { source: "hermes_draft_worker", status: "pass", path: "production/data/hermes-draft-worker-report.json", summary: {} },
 ];
+
+function writeLiveReportFixtures(dir) {
+  const syncReportPath = `${dir}/search-engine-sync-report.json`;
+  const queryReportPath = `${dir}/search-engine-query-report.json`;
+  const hermesReportPath = `${dir}/hermes-draft-worker-report.json`;
+  fs.writeFileSync(
+    syncReportPath,
+    `${JSON.stringify({
+      summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 4 },
+      engines: [
+        { engine: "typesense", documents: 167, operations: [{ bytes: 1 }, { bytes: 1 }] },
+        { engine: "meilisearch", documents: 167, operations: [{ bytes: 1 }, { bytes: 1 }] },
+      ],
+    })}\n`,
+  );
+  fs.writeFileSync(
+    queryReportPath,
+    `${JSON.stringify({
+      summary: { engines: 2, total_hits: 2, first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"] },
+      engines: [
+        { engine: "typesense", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
+        { engine: "meilisearch", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
+      ],
+    })}\n`,
+  );
+  fs.writeFileSync(
+    hermesReportPath,
+    `${JSON.stringify({
+      summary: { attempted: 1, persisted: 1, rejected: 0 },
+      persisted: [{ status: "hermes_drafted", public_indexable: false }],
+      rejected: [],
+    })}\n`,
+  );
+  return { syncReportPath, queryReportPath, hermesReportPath };
+}
 
 test("launch readiness stays blocked until production launch blockers are cleared", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
@@ -146,6 +182,46 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services/);
 });
 
+test("live service report preflight fails missing reports and passes valid reports", () => {
+  const missingDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-missing-live-reports-`);
+  const missingEnv = {
+    ...process.env,
+    MS_REALTY_SEARCH_SYNC_REPORT_PATH: `${missingDir}/search-engine-sync-report.json`,
+    MS_REALTY_SEARCH_QUERY_REPORT_PATH: `${missingDir}/search-engine-query-report.json`,
+    MS_REALTY_HERMES_WORKER_REPORT_PATH: `${missingDir}/hermes-draft-worker-report.json`,
+  };
+  const missing = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-live-service-reports.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: missingEnv,
+  });
+
+  assert.notEqual(missing.status, 0);
+  assert.match(missing.stderr, /typesense_meilisearch_sync: missing_report/);
+  assert.match(missing.stderr, /LIVE SERVICE PREFLIGHT FAILED/);
+
+  const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-valid-live-reports-`);
+  const paths = writeLiveReportFixtures(validDir);
+  const result = validateLiveServiceReports(paths);
+  assert.equal(result.ready, true);
+  assert.equal(result.reports.every((report) => report.status === "pass"), true);
+
+  const valid = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-live-service-reports.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
+    },
+  });
+
+  assert.equal(valid.status, 0, valid.stderr);
+  assert.match(valid.stdout, /typesense_meilisearch_sync: pass/);
+  assert.match(valid.stdout, /Live service reports valid/);
+});
+
 test("launch input checklist names remaining operator-owned blockers", () => {
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -179,6 +255,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
   assert.match(markdown, /npm run search:sync && npm run search:query/);
   assert.match(markdown, /npm run hermes:worker/);
+  assert.match(markdown, /npm run live:preflight/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /review_status/);

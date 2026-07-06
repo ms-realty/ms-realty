@@ -39,6 +39,7 @@
     "saved-search:alerts": "node production/scripts/build-saved-search-alert-report.mjs",
     "seo:evidence": "node production/scripts/build-seo-evidence.mjs",
     "seo:preflight": "node production/scripts/validate-seo-evidence-inputs.mjs",
+    "live:preflight": "node production/scripts/validate-live-service-reports.mjs",
     "server:smoke": "node production/scripts/smoke-node-server.mjs",
     "qa:mobile": "node production/scripts/build-mobile-elderly-qa-report.mjs",
     "launch:readiness": "node production/scripts/build-launch-readiness.mjs",
