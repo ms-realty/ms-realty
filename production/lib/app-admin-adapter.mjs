@@ -12,6 +12,7 @@ import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorP
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { renderHtmlPage } from "./html.mjs";
+import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import {
@@ -139,7 +140,10 @@ function adminBadRequest(error) {
 }
 
 function htmlResponse(payload) {
-  return new Response(renderHtmlPage(payload), { status: payload.status || 200, headers: PRIVATE_HTML_HEADERS });
+  return new Response(renderHtmlPage(payload, { bodyHtml: renderReactAdminBody(payload) }), {
+    status: payload.status || 200,
+    headers: PRIVATE_HTML_HEADERS,
+  });
 }
 
 function jsonResponse(status, body) {

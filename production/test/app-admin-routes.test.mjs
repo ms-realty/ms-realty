@@ -199,6 +199,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(inbox.headers.get("cache-control"), "no-store");
       assert.match(inboxHtml, /<html lang="ru" dir="ltr">/);
       assert.match(inboxHtml, /data-kind="admin-lead-inbox"/);
+      assert.match(inboxHtml, /data-react-admin-ui="lead-inbox"/);
       assert.match(inboxHtml, /data-admin-workbench="crm"/);
       assert.match(inboxHtml, /data-inbox-layout="list-detail-action"/);
       assert.match(inboxHtml, /data-lead-queue-tabs="true"/);
@@ -207,7 +208,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-reply-approval-required="true"/);
       assert.match(inboxHtml, /data-hermes-reply-draft="broker_review_required"/);
       assert.match(inboxHtml, /data-show-original-toggle="true"/);
-      assert.match(inboxHtml, /he -> en/);
+      assert.match(inboxHtml, /he -&gt; en/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
@@ -345,6 +346,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
+      assert.doesNotMatch(migrationReviewHtmlBody, /data-react-admin-ui=/);
       assert.match(migrationReviewHtmlBody, /data-approvable-listing="true"/);
       assert.match(migrationReviewHtmlBody, /data-seo-import-endpoint="\/api\/admin\/seo-evidence\/import"/);
       assert.match(migrationReviewHtmlBody, /data-launch-readiness-export-endpoint="\/api\/admin\/launch-readiness\/export"/);
@@ -568,6 +570,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(editor.status, 200);
       assert.match(editorHtml, /<html lang="bg" dir="ltr">/);
       assert.match(editorHtml, /data-kind="admin-listing-editor"/);
+      assert.match(editorHtml, /data-react-admin-ui="listing-editor"/);
       assert.match(editorHtml, /data-admin-workbench="cms"/);
       assert.match(editorHtml, /data-editor-layout="facts-translations-quality"/);
       assert.match(editorHtml, /data-editor-tabs="true"/);
