@@ -140,6 +140,8 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 
 ## Validate After Inputs
 
+- Admin status endpoint: \`GET /api/admin/preflight-reports\`
+
 \`\`\`bash
 npm run redirects:preflight
 npm run redirects:build

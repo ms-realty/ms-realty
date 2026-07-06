@@ -80,6 +80,8 @@ Blockers: external_seo_exports, listing_quality_review, live_services
 
 ## Validate After Inputs
 
+- Admin status endpoint: `GET /api/admin/preflight-reports`
+
 ```bash
 npm run redirects:preflight
 npm run redirects:build
