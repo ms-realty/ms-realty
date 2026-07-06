@@ -2085,6 +2085,17 @@
           "name": "Claire Martin"
         },
         "message": "Please notify me when French property pages are reviewed."
+      },
+      "consent": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "consent_type": "language_request",
+        "source": "website_language_request",
+        "subject_id": "server-language-request-fr-0001",
+        "locale": "fr",
+        "contact_fingerprint": null,
+        "granted": true,
+        "legal_basis": "legitimate_interest",
+        "marketing_opt_in": false
       }
     },
     "headers": {
@@ -2342,6 +2353,17 @@
           "status": "open",
           "owner": "broker_en"
         }
+      },
+      "consent": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "consent_type": "saved_search_alerts",
+        "source": "website_saved_search",
+        "subject_id": "saved-search-server-he-0001",
+        "locale": "he",
+        "contact_fingerprint": null,
+        "granted": true,
+        "legal_basis": "consent",
+        "marketing_opt_in": false
       }
     },
     "headers": {
@@ -2434,6 +2456,17 @@
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         }
+      },
+      "consent": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "consent_type": "inquiry_follow_up",
+        "source": "website_listing_detail",
+        "subject_id": "server-lead-he-0001",
+        "locale": "he",
+        "contact_fingerprint": null,
+        "granted": true,
+        "legal_basis": "legitimate_interest",
+        "marketing_opt_in": false
       },
       "sellerPipeline": null
     },
@@ -2528,6 +2561,17 @@
           "action": "broker_response_required"
         }
       },
+      "consent": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "consent_type": "inquiry_follow_up",
+        "source": "website_viewing_request",
+        "subject_id": "server-viewing-lead-he-0001",
+        "locale": "he",
+        "contact_fingerprint": null,
+        "granted": true,
+        "legal_basis": "legitimate_interest",
+        "marketing_opt_in": false
+      },
       "sellerPipeline": null
     },
     "headers": {
@@ -2621,6 +2665,17 @@
           "action": "broker_response_required"
         }
       },
+      "consent": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "consent_type": "inquiry_follow_up",
+        "source": "website_contact_callback",
+        "subject_id": "server-lead-contact-he-0001",
+        "locale": "he",
+        "contact_fingerprint": null,
+        "granted": true,
+        "legal_basis": "legitimate_interest",
+        "marketing_opt_in": false
+      },
       "sellerPipeline": null
     },
     "headers": {
@@ -2713,6 +2768,17 @@
           "due_at": "2026-07-04T00:15:00.000Z",
           "action": "broker_response_required"
         }
+      },
+      "consent": {
+        "recorded_at": "2026-07-04T00:00:00Z",
+        "consent_type": "inquiry_follow_up",
+        "source": "website_seller_valuation",
+        "subject_id": "server-lead-seller-el-0001",
+        "locale": "el",
+        "contact_fingerprint": null,
+        "granted": true,
+        "legal_basis": "legitimate_interest",
+        "marketing_opt_in": false
       },
       "sellerPipeline": {
         "created_at": "2026-07-04T00:08:00Z",
@@ -5528,6 +5594,14 @@
       "search": 3,
       "lead_submitted": 4,
       "cta_click": 1
+    }
+  },
+  "consentLedger": {
+    "rows": 6,
+    "byType": {
+      "language_request": 1,
+      "saved_search_alerts": 1,
+      "inquiry_follow_up": 4
     }
   },
   "slugHistoryLedger": {

@@ -4,6 +4,7 @@ import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
 import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
+import { assertConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertLeadMatchingReport } from "../lib/lead-matching.mjs";
 import { assertLeadSlaReport } from "../lib/lead-sla.mjs";
@@ -439,6 +440,14 @@ if (
   throw new Error("HTTP smoke must persist privacy-safe page, search, lead, and CTA analytics events");
 }
 if (
+  httpSmoke.consentLedger.rows !== 6 ||
+  httpSmoke.consentLedger.byType.language_request !== 1 ||
+  httpSmoke.consentLedger.byType.saved_search_alerts !== 1 ||
+  httpSmoke.consentLedger.byType.inquiry_follow_up !== 4
+) {
+  throw new Error("HTTP smoke must persist privacy-safe consent rows for public form submissions");
+}
+if (
   httpSmoke.searchFiltered.status !== 200 ||
   httpSmoke.searchFiltered.body.search.filters.property_type !== "apartment" ||
   httpSmoke.savedSearch.body.match_count <= 12
@@ -628,6 +637,14 @@ if (
   throw new Error("Node server smoke must persist privacy-safe page, search, lead, and CTA analytics events");
 }
 if (
+  nodeServerSmoke.consentLedger.rows !== 6 ||
+  nodeServerSmoke.consentLedger.byType.language_request !== 1 ||
+  nodeServerSmoke.consentLedger.byType.saved_search_alerts !== 1 ||
+  nodeServerSmoke.consentLedger.byType.inquiry_follow_up !== 4
+) {
+  throw new Error("Node server smoke must persist privacy-safe consent rows for public form submissions");
+}
+if (
   nodeServerSmoke.viewingLead.status !== 201 ||
   nodeServerSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
   nodeServerSmoke.viewingLead.body.contact_preference !== "phone" ||
@@ -779,6 +796,25 @@ const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox
 if (replyOutbox.length !== 2) throw new Error("Reply outbox artifact must contain two deterministic smoke rows");
 const languageRequests = fs.readFileSync(fromRoot("production", "data", "language-requests.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (languageRequests.length !== 1) throw new Error("Language request artifact must contain one deterministic smoke row");
+const consentLedger = fs
+  .readFileSync(fromRoot("production", "data", "consent-ledger.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+assertConsentLedger(consentLedger);
+const consentCounts = consentLedger.reduce((counts, row) => {
+  counts[row.consent_type] = (counts[row.consent_type] || 0) + 1;
+  return counts;
+}, {});
+if (
+  consentLedger.length !== 6 ||
+  consentCounts.language_request !== 1 ||
+  consentCounts.saved_search_alerts !== 1 ||
+  consentCounts.inquiry_follow_up !== 4
+) {
+  throw new Error("Consent ledger artifact must contain deterministic privacy-safe public form rows");
+}
 const localeRollout = JSON.parse(fs.readFileSync(fromRoot("production", "data", "locale-rollout-report.json"), "utf8"));
 assertLocaleRolloutReport(localeRollout);
 if (

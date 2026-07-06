@@ -15,6 +15,7 @@ import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
+import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { parseCsv } from "../lib/csv.mjs";
@@ -98,6 +99,12 @@ function tempEvents() {
   return file;
 }
 
+function tempConsents() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-consents-`)}/consents.jsonl`;
+  resetConsentLedger(file);
+  return file;
+}
+
 function tempSlugHistory() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-slug-history-`)}/slug-history.jsonl`;
   resetSlugHistory(file);
@@ -170,6 +177,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const brokerContactLedgerPath = tempBrokerContacts();
   const tourApprovalLedgerPath = tempTourApprovals();
   const eventLedgerPath = tempEvents();
+  const consentLedgerPath = tempConsents();
   const slugHistoryPath = tempSlugHistory();
   const app = createHttpApp({
     leadLedgerPath,
@@ -184,6 +192,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
     eventLedgerPath,
+    consentLedgerPath,
     slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
@@ -577,7 +586,15 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
   assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
+  assert.equal(assertConsentLedger(readConsentLedger(consentLedgerPath)), true);
   assert.equal(assertSlugHistory(readSlugHistory(slugHistoryPath)), true);
+  assert.deepEqual(
+    readConsentLedger(consentLedgerPath).reduce((counts, row) => {
+      counts[row.consent_type] = (counts[row.consent_type] || 0) + 1;
+      return counts;
+    }, {}),
+    { language_request: 1, saved_search_alerts: 1, inquiry_follow_up: 4 },
+  );
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");

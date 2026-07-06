@@ -60,6 +60,12 @@ import {
   resetEventLedger,
 } from "../lib/events.mjs";
 import {
+  DEFAULT_CONSENT_LEDGER_PATH,
+  assertConsentLedger,
+  readConsentLedger,
+  resetConsentLedger,
+} from "../lib/consent-ledger.mjs";
+import {
   assertSlugHistory,
   readSlugHistory,
   resetSlugHistory,
@@ -99,6 +105,7 @@ const dealLedgerPath = path.join(smokeDir, "deals.jsonl");
 const brokerContactLedgerPath = path.join(smokeDir, "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(smokeDir, "tour-approvals.jsonl");
 const eventLedgerPath = path.join(smokeDir, "events.jsonl");
+const consentLedgerPath = path.join(smokeDir, "consent.jsonl");
 const slugHistoryPath = path.join(smokeDir, "slug-history.jsonl");
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 
@@ -114,6 +121,7 @@ resetDealLedger(dealLedgerPath);
 resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
+resetConsentLedger(consentLedgerPath);
 resetSlugHistory(slugHistoryPath);
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -129,6 +137,7 @@ const app = createHttpApp({
   brokerContactLedgerPath,
   tourApprovalLedgerPath,
   eventLedgerPath,
+  consentLedgerPath,
   slugHistoryPath,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
@@ -512,6 +521,13 @@ assertEventLedger(events);
 smoke.eventLedger = {
   rows: events.length,
   byType: events.reduce((counts, row) => ({ ...counts, [row.type]: (counts[row.type] || 0) + 1 }), {}),
+};
+const consents = readConsentLedger(consentLedgerPath);
+assertConsentLedger(consents);
+fs.copyFileSync(consentLedgerPath, DEFAULT_CONSENT_LEDGER_PATH);
+smoke.consentLedger = {
+  rows: consents.length,
+  byType: consents.reduce((counts, row) => ({ ...counts, [row.consent_type]: (counts[row.consent_type] || 0) + 1 }), {}),
 };
 const slugHistory = readSlugHistory(slugHistoryPath);
 assertSlugHistory(slugHistory);

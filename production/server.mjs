@@ -8,6 +8,7 @@ import { DEFAULT_REPLY_OUTBOX_PATH } from "./lib/lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
+import { DEFAULT_CONSENT_LEDGER_PATH } from "./lib/consent-ledger.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH } from "./lib/deal-ledger.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
@@ -44,6 +45,7 @@ export function productionServerConfig(env = process.env) {
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
+    consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
@@ -72,6 +74,7 @@ export function productionServerConfig(env = process.env) {
 export function createProductionHttpApp(config = productionServerConfig()) {
   return createHttpApp({
     eventLedgerPath: config.eventLedgerPath,
+    consentLedgerPath: config.consentLedgerPath,
     leadLedgerPath: config.leadLedgerPath,
     replyOutboxPath: config.replyOutboxPath,
     languageRequestPath: config.languageRequestPath,

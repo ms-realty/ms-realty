@@ -42,6 +42,7 @@ import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } fr
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
+import { appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import {
   buildSeoEvidence,
@@ -286,6 +287,7 @@ export function createHttpApp({
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
+  consentLedgerPath = null,
   slugHistoryPath = null,
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
@@ -382,6 +384,10 @@ export function createHttpApp({
   const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
   const recordEvent = (input) =>
     eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
+  const recordConsent = (input) =>
+    consentLedgerPath
+      ? appendConsentRecord(createConsentRecord(input, receivedAt || new Date().toISOString()), { filePath: consentLedgerPath })
+      : null;
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
@@ -974,6 +980,14 @@ export function createHttpApp({
         const input = parseJsonBody(request);
         const lead = submitRuntimeLead(activeRegistry, currentSeed(), input);
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
+        const consent = recordConsent({
+          consentType: "inquiry_follow_up",
+          source: lead.lead?.source,
+          subjectId: lead.lead?.id,
+          locale: lead.original_language,
+          contact: lead.lead?.contact,
+          marketingOptIn: input.marketingOptIn === true,
+        });
         const sellerPipeline =
           sellerPipelinePath && lead.lead?.leadType === "seller"
             ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: sellerPipelineCreatedAt }), {
@@ -987,7 +1001,7 @@ export function createHttpApp({
           listingReference: lead.lead?.listingReference,
           action: lead.lead?.source,
         });
-        return privateJson(201, { ...lead, ledger, sellerPipeline });
+        return privateJson(201, { ...lead, ledger, consent, sellerPipeline });
       } catch (error) {
         return privateJson(400, { kind: "bad_request", message: error.message });
       }
@@ -1008,7 +1022,15 @@ export function createHttpApp({
         const input = parseJsonBody(request);
         const requestRow = createLanguageRequest(activeRegistry, input, requestedAt);
         const ledger = languageRequestPath ? appendLanguageRequest(requestRow, { filePath: languageRequestPath }) : null;
-        return privateJson(201, { ...requestRow, ledger });
+        const consent = recordConsent({
+          consentType: "language_request",
+          source: "website_language_request",
+          subjectId: requestRow.id,
+          locale: requestRow.requested_locale,
+          contact: requestRow.contact,
+          marketingOptIn: input.marketingOptIn === true,
+        });
+        return privateJson(201, { ...requestRow, ledger, consent });
       } catch (error) {
         return privateJson(400, { kind: "bad_request", message: error.message });
       }
@@ -1029,7 +1051,16 @@ export function createHttpApp({
         );
         const savedSearch = createSavedSearch(activeRegistry, { ...input, filters, priceSnapshot }, { matchCount: search.search.total_matches, savedAt });
         const ledger = savedSearchLedgerPath ? appendSavedSearch(savedSearch, { filePath: savedSearchLedgerPath }) : null;
-        return privateJson(201, { ...savedSearch, ledger });
+        const consent = recordConsent({
+          consentType: "saved_search_alerts",
+          source: "website_saved_search",
+          subjectId: savedSearch.id,
+          locale: savedSearch.requested_locale,
+          contact: savedSearch.contact,
+          legalBasis: "consent",
+          marketingOptIn: input.marketingOptIn === true,
+        });
+        return privateJson(201, { ...savedSearch, ledger, consent });
       } catch (error) {
         return privateJson(400, { kind: "bad_request", message: error.message });
       }

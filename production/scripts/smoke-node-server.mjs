@@ -14,6 +14,7 @@ import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
+import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -49,6 +50,7 @@ const dealLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realt
 const brokerContactLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-broker-contacts-")), "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-tour-approvals-")), "tour-approvals.jsonl");
 const eventLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-events-")), "events.jsonl");
+const consentLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-consent-")), "consent.jsonl");
 const slugHistoryPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-slug-history-")), "slug-history.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
@@ -62,6 +64,7 @@ resetDealLedger(dealLedgerPath);
 resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
+resetConsentLedger(consentLedgerPath);
 resetSlugHistory(slugHistoryPath);
 const server = createNodeServer(
   createHttpApp({
@@ -77,6 +80,7 @@ const server = createNodeServer(
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
     eventLedgerPath,
+    consentLedgerPath,
     slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
@@ -446,6 +450,12 @@ try {
   smoke.eventLedger = {
     rows: events.length,
     byType: events.reduce((counts, row) => ({ ...counts, [row.type]: (counts[row.type] || 0) + 1 }), {}),
+  };
+  const consents = readConsentLedger(consentLedgerPath);
+  assertConsentLedger(consents);
+  smoke.consentLedger = {
+    rows: consents.length,
+    byType: consents.reduce((counts, row) => ({ ...counts, [row.consent_type]: (counts[row.consent_type] || 0) + 1 }), {}),
   };
   const slugHistory = readSlugHistory(slugHistoryPath);
   assertSlugHistory(slugHistory);

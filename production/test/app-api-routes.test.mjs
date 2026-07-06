@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
+import { readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
@@ -32,6 +33,7 @@ async function withEnv(env, fn) {
 
 test("Next API routes reuse health, readiness, search, and lead HTTP contracts", async () => {
   const eventLedgerPath = tempLedger("app-api-events", resetEventLedger);
+  const consentLedgerPath = tempLedger("app-api-consent", resetConsentLedger);
   const languageRequestPath = tempLedger("app-api-language-requests", resetLanguageRequests);
   const leadLedgerPath = tempLedger("app-api-leads", resetLeadLedger);
   const launchReadinessPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-readiness-`)}/launch-readiness.json`;
@@ -69,6 +71,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   );
   await withEnv(
     {
+      MS_REALTY_CONSENT_LEDGER_PATH: consentLedgerPath,
       MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: languageRequestPath,
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessPath,
@@ -198,6 +201,10 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   assert.equal(readLeadLedger(leadLedgerPath).length, 1);
   assert.equal(readLanguageRequests(languageRequestPath).length, 1);
   assert.equal(readSavedSearches(savedSearchLedgerPath).length, 1);
+  assert.deepEqual(
+    readConsentLedger(consentLedgerPath).map((row) => row.consent_type),
+    ["inquiry_follow_up", "language_request", "saved_search_alerts"],
+  );
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "search").length, 1);
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "lead_submitted").length, 1);
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "cta_click").length, 1);

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { close, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
+import { readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -10,6 +11,7 @@ import { createProductionServer, productionServerConfig } from "../server.mjs";
 
 test("production server entrypoint serves runtime routes with env config", async () => {
   const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-events-`)}/events.jsonl`;
+  const consentLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-consents-`)}/consents.jsonl`;
   const operatorDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-operator-`);
   const seoEvidenceInputDir = `${operatorDir}/seo`;
   const seoEvidenceOutputPath = `${operatorDir}/seo-evidence.json`;
@@ -45,6 +47,7 @@ test("production server entrypoint serves runtime routes with env config", async
     PORT: "0",
     HOST: "127.0.0.1",
     MS_REALTY_MAX_BODY_BYTES: "4096",
+    MS_REALTY_CONSENT_LEDGER_PATH: consentLedgerPath,
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
     MS_REALTY_REDIRECT_APPROVALS_PATH: redirectApprovalPath,
     MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
@@ -60,6 +63,7 @@ test("production server entrypoint serves runtime routes with env config", async
   assert.equal(config.port, 0);
   assert.equal(config.host, "127.0.0.1");
   assert.equal(config.maxBodyBytes, 4096);
+  assert.equal(config.consentLedgerPath, consentLedgerPath);
   assert.equal(config.redirectApprovalPath, redirectApprovalPath);
   assert.equal(config.deployableRedirectOutputPath, deployableRedirectOutputPath);
   assert.equal(config.launchReadinessOutputPath, launchReadinessOutputPath);
@@ -202,15 +206,18 @@ test("production server keeps admin locale additions in memory without mounted r
 test("production server persists public leads and reviewed admin replies", async () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-ledgers-`);
   const eventLedgerPath = `${dir}/events.jsonl`;
+  const consentLedgerPath = `${dir}/consents.jsonl`;
   const leadLedgerPath = `${dir}/leads.jsonl`;
   const replyOutboxPath = `${dir}/replies.jsonl`;
   fs.writeFileSync(eventLedgerPath, "");
+  resetConsentLedger(consentLedgerPath);
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
 
   const config = productionServerConfig({
     PORT: "0",
     HOST: "127.0.0.1",
+    MS_REALTY_CONSENT_LEDGER_PATH: consentLedgerPath,
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
     MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
     MS_REALTY_REPLY_OUTBOX_PATH: replyOutboxPath,
@@ -234,6 +241,10 @@ test("production server persists public leads and reviewed admin replies", async
     assert.equal(lead.status, 201);
     assert.equal(lead.body.broker_assignment.broker_id, "broker_international");
     assert.equal(readLeadLedger(leadLedgerPath).length, 1);
+    assert.deepEqual(
+      readConsentLedger(consentLedgerPath).map((row) => row.consent_type),
+      ["inquiry_follow_up"],
+    );
 
     const reply = await jsonFetch(baseUrl, "/api/admin/replies", {
       method: "POST",

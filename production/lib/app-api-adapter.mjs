@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, appendLanguageRequest, createLanguageRequest } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
@@ -37,6 +38,7 @@ function bytesFrom(value) {
 export function appApiConfigFromEnv(env = process.env) {
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
+    consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
@@ -129,6 +131,12 @@ function recordEvent(input, config) {
   return appendEvent(createEvent(input, config.receivedAt || new Date().toISOString()), { filePath: config.eventLedgerPath });
 }
 
+function recordConsent(input, config) {
+  return appendConsentRecord(createConsentRecord(input, config.receivedAt || new Date().toISOString()), {
+    filePath: config.consentLedgerPath,
+  });
+}
+
 function routeSearch(requestUrl, registry, seed, config) {
   const localeCode = requestUrl.searchParams.get("locale") || "bg";
   const query = requestUrl.searchParams.get("q") || "";
@@ -145,8 +153,20 @@ function routeSearch(requestUrl, registry, seed, config) {
 
 function routeLead(body, registry, seed, config) {
   try {
-    const lead = submitRuntimeLead(registry, seed, parseJsonBody(body));
+    const input = parseJsonBody(body);
+    const lead = submitRuntimeLead(registry, seed, input);
     const ledger = appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: config.receivedAt });
+    const consent = recordConsent(
+      {
+        consentType: "inquiry_follow_up",
+        source: lead.lead?.source,
+        subjectId: lead.lead?.id,
+        locale: lead.original_language,
+        contact: lead.lead?.contact,
+        marketingOptIn: input.marketingOptIn === true,
+      },
+      config,
+    );
     const sellerPipeline =
       lead.lead?.leadType === "seller"
         ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: config.sellerPipelineCreatedAt }), {
@@ -163,7 +183,7 @@ function routeLead(body, registry, seed, config) {
       },
       config,
     );
-    return privateJson(201, { ...lead, ledger, sellerPipeline });
+    return privateJson(201, { ...lead, ledger, consent, sellerPipeline });
   } catch (error) {
     return privateJson(400, { kind: "bad_request", message: error.message });
   }
@@ -181,9 +201,21 @@ function routeEvent(request, body, config) {
 
 function routeLanguageRequest(body, registry, config) {
   try {
-    const requestRow = createLanguageRequest(registry, parseJsonBody(body), config.requestedAt);
+    const input = parseJsonBody(body);
+    const requestRow = createLanguageRequest(registry, input, config.requestedAt);
     const ledger = appendLanguageRequest(requestRow, { filePath: config.languageRequestPath });
-    return privateJson(201, { ...requestRow, ledger });
+    const consent = recordConsent(
+      {
+        consentType: "language_request",
+        source: "website_language_request",
+        subjectId: requestRow.id,
+        locale: requestRow.requested_locale,
+        contact: requestRow.contact,
+        marketingOptIn: input.marketingOptIn === true,
+      },
+      config,
+    );
+    return privateJson(201, { ...requestRow, ledger, consent });
   } catch (error) {
     return privateJson(400, { kind: "bad_request", message: error.message });
   }
@@ -199,9 +231,24 @@ function routeSavedSearch(body, registry, seed, config) {
       filters,
       translationTasks: readTranslationLedger(config.translationLedgerPath),
     });
-    const savedSearch = createSavedSearch(registry, { ...input, filters }, { matchCount: search.search.total_matches, savedAt: config.savedAt });
+    const priceSnapshot = Object.fromEntries(
+      search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
+    );
+    const savedSearch = createSavedSearch(registry, { ...input, filters, priceSnapshot }, { matchCount: search.search.total_matches, savedAt: config.savedAt });
     const ledger = appendSavedSearch(savedSearch, { filePath: config.savedSearchLedgerPath });
-    return privateJson(201, { ...savedSearch, ledger });
+    const consent = recordConsent(
+      {
+        consentType: "saved_search_alerts",
+        source: "website_saved_search",
+        subjectId: savedSearch.id,
+        locale: savedSearch.requested_locale,
+        contact: savedSearch.contact,
+        legalBasis: "consent",
+        marketingOptIn: input.marketingOptIn === true,
+      },
+      config,
+    );
+    return privateJson(201, { ...savedSearch, ledger, consent });
   } catch (error) {
     return privateJson(400, { kind: "bad_request", message: error.message });
   }
