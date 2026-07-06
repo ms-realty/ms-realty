@@ -2,7 +2,7 @@ import { runSearchEngineQuerySmoke, writeSearchEngineQueryReport } from "../lib/
 
 try {
   const report = await runSearchEngineQuerySmoke();
-  writeSearchEngineQueryReport(report);
+  writeSearchEngineQueryReport(report, process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined);
   console.log(`Queried ${report.summary.engines} search engines; first hits: ${report.summary.first_hit_ids.join(", ")}`);
 } catch (error) {
   console.error(`SEARCH ENGINE QUERY FAILED: ${error.message}`);

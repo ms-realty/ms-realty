@@ -2,7 +2,7 @@ import { runSearchEngineSync, writeSearchEngineSyncReport } from "../lib/search-
 
 try {
   const report = await runSearchEngineSync();
-  writeSearchEngineSyncReport(report);
+  writeSearchEngineSyncReport(report, process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined);
   console.log(`Synced ${report.summary.documents_per_engine.join("/")} search documents to configured engines`);
 } catch (error) {
   console.error(`SEARCH ENGINE SYNC FAILED: ${error.message}`);

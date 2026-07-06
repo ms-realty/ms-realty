@@ -1,7 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { spawnSync } from "node:child_process";
+import http from "node:http";
+import os from "node:os";
+import { spawn, spawnSync } from "node:child_process";
 import {
   assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
@@ -17,6 +19,61 @@ function fakeFetch(calls, statuses = []) {
     calls.push({ url, options, body: options.body });
     return { ok: status >= 200 && status < 300, status };
   };
+}
+
+function runScript(script, env) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, [fromRoot("production", "scripts", script)], {
+      cwd: fromRoot(),
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.on("close", (status) => resolve({ status, stdout, stderr }));
+  });
+}
+
+async function withSearchServer(fn) {
+  const calls = [];
+  const hit = {
+    id: "MS-CRAWL-0001:bg",
+    source_listing_id: "MS-CRAWL-0001",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    title: "Reviewed listing",
+  };
+  const server = http.createServer((request, response) => {
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
+    request.on("end", () => {
+      calls.push({ method: request.method, url: request.url, body });
+      response.setHeader("content-type", "application/json");
+      if (request.url.includes("/documents/search?")) {
+        response.end(JSON.stringify({ found: 1, hits: [{ document: hit }] }));
+      } else if (request.url.endsWith("/search")) {
+        response.end(JSON.stringify({ estimatedTotalHits: 1, hits: [hit] }));
+      } else {
+        response.statusCode = 201;
+        response.end(JSON.stringify({ ok: true }));
+      }
+    });
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  try {
+    await fn(`http://${address.address}:${address.port}`, calls);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
 }
 
 test("search engine sync posts existing fixtures to Typesense and Meilisearch", async () => {
@@ -111,4 +168,29 @@ test("live search engine CLIs fail closed when provisioning env is missing", () 
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, message);
   }
+});
+
+test("live search engine CLIs write reports to configured paths", async () => {
+  await withSearchServer(async (baseUrl) => {
+    const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-search-cli-reports-`);
+    const syncReportPath = `${dir}/search-engine-sync-report.json`;
+    const queryReportPath = `${dir}/search-engine-query-report.json`;
+    const env = {
+      ...process.env,
+      TYPESENSE_URL: baseUrl,
+      TYPESENSE_API_KEY: "typesense-test",
+      MEILI_URL: baseUrl,
+      MEILI_API_KEY: "meili-test",
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: syncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: queryReportPath,
+    };
+
+    const sync = await runScript("run-search-engine-sync.mjs", env);
+    const query = await runScript("run-search-engine-query.mjs", env);
+
+    assert.equal(sync.status, 0, sync.stderr);
+    assert.equal(query.status, 0, query.stderr);
+    assert.equal(assertSearchEngineSyncReport(JSON.parse(fs.readFileSync(syncReportPath, "utf8"))), true);
+    assert.equal(assertSearchEngineQueryReport(JSON.parse(fs.readFileSync(queryReportPath, "utf8"))), true);
+  });
 });

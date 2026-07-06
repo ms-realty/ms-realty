@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import http from "node:http";
 import os from "node:os";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
   assertHermesDraftWorkerReport,
   openAiCompatibleHermesProvider,
@@ -57,6 +58,49 @@ function validDraft() {
     meta_description: "MS-TEST-1 Sandanski 50000 draft",
     citations: [{ source: "cms_seed", object_id: "MS-TEST-1" }],
   };
+}
+
+function runScript(script, env) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, [fromRoot("production", "scripts", script)], {
+      cwd: fromRoot(),
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.on("close", (status) => resolve({ status, stdout, stderr }));
+  });
+}
+
+async function withHermesServer(fn) {
+  const draft = {
+    title: "MS-CRAWL-0001 Sandanski commercial rent",
+    body: "MS-CRAWL-0001 Sandanski commercial rent draft",
+    seo_title: "MS-CRAWL-0001 Sandanski commercial rent",
+    meta_description: "MS-CRAWL-0001 Sandanski commercial rent draft",
+    citations: [{ source: "cms_seed", object_id: "MS-CRAWL-0001" }],
+  };
+  const server = http.createServer((request, response) => {
+    request.resume();
+    request.on("end", () => {
+      response.setHeader("content-type", "application/json");
+      response.end(JSON.stringify({ choices: [{ message: { content: JSON.stringify(draft) } }] }));
+    });
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  try {
+    await fn(`http://${address.address}:${address.port}/v1/chat/completions`);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
 }
 
 test("Hermes draft worker persists validated drafts to the requested ledger", async () => {
@@ -128,4 +172,26 @@ test("live Hermes draft worker CLI fails closed when provider env is missing", (
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /HERMES DRAFT WORKER FAILED: HERMES_CHAT_COMPLETIONS_URL is required/);
+});
+
+test("live Hermes draft worker CLI writes report and ledger to configured paths", async () => {
+  await withHermesServer(async (endpoint) => {
+    const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-cli-`);
+    const reportPath = `${dir}/hermes-draft-worker-report.json`;
+    const ledgerPath = `${dir}/translation-tasks.jsonl`;
+    const result = await runScript("run-hermes-draft-worker.mjs", {
+      ...process.env,
+      HERMES_CHAT_COMPLETIONS_URL: endpoint,
+      HERMES_API_KEY: "test-key",
+      HERMES_DRAFT_LIMIT: "1",
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: reportPath,
+      MS_REALTY_TRANSLATION_LEDGER_PATH: ledgerPath,
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+    assert.equal(assertHermesDraftWorkerReport(report), true);
+    assert.equal(report.summary.persisted, 1);
+    assert.equal(readTranslationLedger(ledgerPath).length, 1);
+  });
 });
