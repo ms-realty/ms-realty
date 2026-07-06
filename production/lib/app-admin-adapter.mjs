@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
 import {
   approveTranslationTask,
@@ -10,11 +11,15 @@ import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerCo
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
+import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
+import { buildLaunchReadinessReport } from "./launch-readiness.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
+import { fromRoot } from "./paths.mjs";
+import { buildRedirectApprovalWorkbook, renderRedirectApprovalWorkbook, summarizeDeployableRedirects } from "./redirect-approvals.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
 import {
@@ -42,6 +47,7 @@ const PRIVATE_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
 };
+const PRIVATE_MARKDOWN_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store" };
 
 function bytesFrom(value) {
   const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
@@ -93,6 +99,10 @@ function htmlResponse(payload) {
 
 function jsonResponse(status, body) {
   return new Response(JSON.stringify(body), { status, headers: PRIVATE_JSON_HEADERS });
+}
+
+function markdownResponse(body) {
+  return new Response(body, { status: 200, headers: PRIVATE_MARKDOWN_HEADERS });
 }
 
 function calendarResponse(body) {
@@ -193,6 +203,53 @@ function listingEditorPayload(registry, url, config) {
   );
 }
 
+function readJsonData(filename) {
+  return JSON.parse(fs.readFileSync(fromRoot("production", "data", filename), "utf8"));
+}
+
+function routeMapRows() {
+  return readJsonData("legacy-route-map.json").routes;
+}
+
+function deployableRedirects() {
+  return readJsonData("deployable-redirects.json").redirects;
+}
+
+function seoEvidence() {
+  return readJsonData("seo-evidence.json");
+}
+
+function seoEvidencePayload(seoEvidence) {
+  return {
+    missingRequiredSources: seoEvidence.summary.missing_required_sources,
+    sources: seoEvidence.summary.sources,
+    importEndpoint: "/api/admin/seo-evidence/import",
+    templateEndpoint: "/api/admin/seo-evidence/template",
+  };
+}
+
+function launchReadiness(config) {
+  return buildLaunchReadinessReport({ generatedAt: config.reviewedAt || new Date().toISOString() });
+}
+
+function launchInputChecklist(config) {
+  const routes = routeMapRows();
+  const redirects = deployableRedirects();
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  return renderLaunchInputChecklist({
+    generatedAt,
+    launchReadiness: launchReadiness(config),
+    seoEvidence: seoEvidence(),
+    redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routes)),
+    deployableRedirects: { summary: summarizeDeployableRedirects(redirects) },
+    routeMap: {
+      summary: {
+        mappedListings: routes.filter((route) => route.url_type === "listing" && route.target_path).length,
+      },
+    },
+  });
+}
+
 function localePayload(registry, url) {
   return {
     workspace: renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" }),
@@ -280,6 +337,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       return jsonResponse(200, localePayload(registry, url));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
+      return jsonResponse(200, launchReadiness(config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
+      return markdownResponse(launchInputChecklist(config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
+      return jsonResponse(200, seoEvidencePayload(seoEvidence()));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));

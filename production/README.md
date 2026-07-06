@@ -88,6 +88,7 @@ What it proves now:
 - Next App Router admin CRM lifecycle handlers for viewing bookings, viewing calendar export, and deal close tasks.
 - Next App Router admin media/contact handlers for reviewed broker contacts and approved 360 tours.
 - Next App Router admin locale and translation handlers for dynamic language rollout without AI auto-publish.
+- Next App Router admin launch-readiness, launch-input checklist, and SEO evidence read endpoints.
 - `next build` gate over the App Router handlers, pinned to Next 16 and React 19.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.

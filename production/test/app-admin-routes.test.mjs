@@ -53,8 +53,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const publicLeadRoute = await import("../../app/api/leads/route.js");
       const brokerContactRoute = await import("../../app/api/admin/broker-contacts/route.js");
       const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
+      const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
+      const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const localeRoute = await import("../../app/api/admin/locales/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
+      const seoEvidenceRoute = await import("../../app/api/admin/seo-evidence/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
       const translationDraftRoute = await import("../../app/api/admin/translations/draft/route.js");
       const translationPublishRoute = await import("../../app/api/admin/translations/publish/route.js");
@@ -119,6 +122,29 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(addedLocale.status, 201);
       assert.equal(addedLocaleBody.locale.code, "es");
       assert.ok(addedLocaleBody.public_indexable_locales.includes("es"));
+
+      const launchReadiness = await launchReadinessRoute.GET(
+        new Request("https://example.test/api/admin/launch-readiness", { headers: auth }),
+      );
+      const launchReadinessBody = await launchReadiness.json();
+      assert.equal(launchReadiness.status, 200);
+      assert.equal(launchReadinessBody.status, "blocked");
+      assert.ok(launchReadinessBody.blockers.includes("external_seo_exports"));
+
+      const launchChecklist = await launchInputChecklistRoute.GET(
+        new Request("https://example.test/api/admin/launch-input-checklist", { headers: auth }),
+      );
+      const launchChecklistBody = await launchChecklist.text();
+      assert.equal(launchChecklist.status, 200);
+      assert.equal(launchChecklist.headers.get("content-type"), "text/markdown; charset=utf-8");
+      assert.match(launchChecklistBody, /# Launch Input Checklist/);
+      assert.match(launchChecklistBody, /External SEO Exports/);
+
+      const seoEvidence = await seoEvidenceRoute.GET(new Request("https://example.test/api/admin/seo-evidence", { headers: auth }));
+      const seoEvidenceBody = await seoEvidence.json();
+      assert.equal(seoEvidence.status, 200);
+      assert.ok(seoEvidenceBody.missingRequiredSources.includes("search_console"));
+      assert.equal(seoEvidenceBody.sources.privacy_events.status, "imported");
 
       const draft = await translationDraftRoute.POST(
         new Request("https://example.test/api/admin/translations/draft", {
