@@ -81,6 +81,7 @@ What it proves now:
 - App Router manifest that maps every approved public route to a Next-compatible route handler, renderer, cache policy, and `lang`/`dir`.
 - Minimal App Router route-handler bridge under `app/` for homepage, search, and catch-all content routes, reusing the server-rendered HTML contracts.
 - Next App Router `sitemap.xml` and `robots.txt` handlers backed by the same approved localized sitemap contract.
+- Next App Router public API handlers for health, readiness, search, and lead intake backed by the same HTTP contracts.
 - `next build` gate over the App Router handlers, pinned to Next 16 and React 19.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
