@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
 import { assertAppRouteFiles, assertAppRouteManifest, buildAppRouteManifest } from "../lib/app-route-manifest.mjs";
-import { renderAppRobots, renderAppRoute, renderAppSitemap } from "../lib/app-router-adapter.mjs";
+import { appRouterConfigFromEnv, renderAppRobots, renderAppRoute, renderAppSitemap } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -63,6 +64,28 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.kind, "listing");
   assert.match(listing.html, /MS-CRAWL-0001/);
+});
+
+test("App Router adapter honors mounted public listing edit ledger", () => {
+  const editPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-router-edits-`)}/listing-edits.jsonl`;
+  fs.writeFileSync(
+    editPath,
+    `${JSON.stringify({
+      listing_id: "MS-CRAWL-0001",
+      editor: "content_editor",
+      patch: { title: "Operator edited Sandanski listing", h1: "Operator edited Sandanski listing" },
+      source_hash_after: "mounted-edit",
+      stale_translation_count: 1,
+    })}\n`,
+  );
+  const listing = renderAppRoute({
+    pathname: "/bg/imoti/MS-CRAWL-0001",
+    url: "https://example.test/bg/imoti/MS-CRAWL-0001",
+    config: appRouterConfigFromEnv({ MS_REALTY_LISTING_EDIT_LEDGER_PATH: editPath }),
+  });
+
+  assert.equal(listing.status, 200);
+  assert.match(listing.html, /Operator edited Sandanski listing/);
 });
 
 test("App Router adapter serves approved sitemap and robots text", async () => {

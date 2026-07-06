@@ -1,27 +1,50 @@
 import { renderHtmlPage } from "./html.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
-import { readBrokerContacts } from "./broker-contacts.mjs";
+import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
+import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { searchFiltersFromParams } from "./search-filters.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
-import { readTourApprovals } from "./tours.mjs";
-import { readTranslationLedger } from "./translation-ledger.mjs";
+import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
+import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 
 const PUBLIC_CACHE = "public, max-age=300, s-maxage=3600";
 const HTML = "text/html; charset=utf-8";
+
+export function appRouterConfigFromEnv(env = process.env) {
+  return {
+    brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+    listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
+    tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
+    translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
+  };
+}
 
 function searchLocaleFor(registry, pathname) {
   const normalized = pathname.replace(/\/$/, "");
   return registry.locales.find((locale) => `/${locale.code}/${locale.route_segments?.search}` === normalized) || null;
 }
 
-export function renderAppRoute({ pathname, url = pathname } = {}) {
+function currentRegistry(config) {
+  return loadLocaleRegistry(config.localeRegistryPath);
+}
+
+function currentSeed(config) {
+  return applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath));
+}
+
+function currentTranslationTasks(config) {
+  return readTranslationLedger(config.translationLedgerPath);
+}
+
+export function renderAppRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
   if (!pathname) throw new Error("App route pathname is required");
 
-  const registry = loadLocaleRegistry();
-  const seed = loadCmsSeed();
+  const registry = currentRegistry(config);
+  const seed = currentSeed(config);
   const requestUrl = new URL(url, "http://localhost");
-  const translationTasks = readTranslationLedger();
+  const translationTasks = currentTranslationTasks(config);
   const searchLocale = searchLocaleFor(registry, pathname);
   const rendered = searchLocale
     ? searchRuntimeListings(registry, seed, {
@@ -30,7 +53,14 @@ export function renderAppRoute({ pathname, url = pathname } = {}) {
         filters: searchFiltersFromParams(requestUrl.searchParams),
         translationTasks,
       })
-    : renderRuntimePath(registry, seed, pathname, translationTasks, readBrokerContacts(), readTourApprovals());
+    : renderRuntimePath(
+        registry,
+        seed,
+        pathname,
+        translationTasks,
+        readBrokerContacts(config.brokerContactLedgerPath),
+        readTourApprovals(config.tourApprovalLedgerPath),
+      );
   const html = renderHtmlPage(rendered, { print: requestUrl.searchParams.get("print") === "1" });
 
   return {
@@ -44,13 +74,13 @@ export function renderAppRoute({ pathname, url = pathname } = {}) {
   };
 }
 
-export function renderAppRouteResponse({ pathname, url = pathname } = {}) {
-  const result = renderAppRoute({ pathname, url });
+export function renderAppRouteResponse({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
+  const result = renderAppRoute({ pathname, url, config });
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
 
-export function renderAppSitemap() {
-  const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), loadCmsSeed(), readTranslationLedger());
+export function renderAppSitemap({ config = appRouterConfigFromEnv() } = {}) {
+  const sitemap = buildRuntimeLocalizedSitemap(currentRegistry(config), currentSeed(config), currentTranslationTasks(config));
   return {
     status: 200,
     headers: { "content-type": "application/xml; charset=utf-8", "cache-control": PUBLIC_CACHE },
@@ -67,8 +97,8 @@ export function renderAppRobots() {
   };
 }
 
-export function renderAppSitemapResponse() {
-  const result = renderAppSitemap();
+export function renderAppSitemapResponse({ config = appRouterConfigFromEnv() } = {}) {
+  const result = renderAppSitemap({ config });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }
 
