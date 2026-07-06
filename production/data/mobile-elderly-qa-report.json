@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 7,
-    "passed": 7,
+    "checks": 8,
+    "passed": 8,
     "failed": 0
   },
   "checks": [
@@ -19,6 +19,11 @@
     },
     {
       "id": "mobile_search_form",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "mobile_search_actions",
       "status": "pass",
       "evidence": {}
     },

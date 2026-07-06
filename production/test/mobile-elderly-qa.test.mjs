@@ -12,6 +12,7 @@ test("mobile elderly QA report covers rendered public pages and language policy"
   assert.equal(assertMobileElderlyQaReport(report), true);
   assert.equal(report.summary.failed, 0);
   assert.equal(report.checks.find((check) => check.id === "mobile_search_form").status, "pass");
+  assert.equal(report.checks.find((check) => check.id === "mobile_search_actions").status, "pass");
   assert.equal(report.checks.find((check) => check.id === "admin_and_market_languages").status, "pass");
 });
 

@@ -368,6 +368,7 @@
           "id": "MS-CRAWL-0002",
           "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
           "path": "/he/properties/MS-CRAWL-0002",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
           "translation_status": "missing",
@@ -383,12 +384,36 @@
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 20
+          "image_count": 20,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/he/properties/MS-CRAWL-0002"
+            },
+            "inquiry": {
+              "label": "פנייה",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0002",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "שמירה",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0002"
+            }
+          }
         },
         {
           "id": "MS-CRAWL-0003",
           "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
           "path": "/he/properties/MS-CRAWL-0003",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
           "translation_status": "missing",
@@ -404,12 +429,36 @@
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 32
+          "image_count": 32,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/he/properties/MS-CRAWL-0003"
+            },
+            "inquiry": {
+              "label": "פנייה",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0003",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "שמירה",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0003"
+            }
+          }
         },
         {
           "id": "MS-CRAWL-0004",
           "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
           "path": "/he/properties/MS-CRAWL-0004",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
           "translation_status": "missing",
@@ -425,7 +474,30 @@
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 26
+          "image_count": 26,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/he/properties/MS-CRAWL-0004"
+            },
+            "inquiry": {
+              "label": "פנייה",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0004",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "שמירה",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0004"
+            }
+          }
         }
       ],
       "source": {
@@ -771,6 +843,7 @@
           "id": "MS-CRAWL-0001",
           "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански",
           "path": "/ru/properties/MS-CRAWL-0001",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "ru",
           "translation_status": "missing",
@@ -786,12 +859,36 @@
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 35
+          "image_count": 35,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/ru/properties/MS-CRAWL-0001"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0001",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0001"
+            }
+          }
         },
         {
           "id": "MS-CRAWL-0002",
           "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
           "path": "/ru/properties/MS-CRAWL-0002",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "ru",
           "translation_status": "missing",
@@ -807,12 +904,36 @@
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 20
+          "image_count": 20,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/ru/properties/MS-CRAWL-0002"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0002",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0002"
+            }
+          }
         },
         {
           "id": "MS-CRAWL-0003",
           "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
           "path": "/ru/properties/MS-CRAWL-0003",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "ru",
           "translation_status": "missing",
@@ -828,7 +949,30 @@
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 32
+          "image_count": 32,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/ru/properties/MS-CRAWL-0003"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0003",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0003"
+            }
+          }
         }
       ],
       "source": {
@@ -918,6 +1062,7 @@
         "id": "MS-CRAWL-0001",
         "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
         "path": "/he/properties/MS-CRAWL-0001",
+        "review_badge": "verified_inventory",
         "translation_display": "reviewed_translation",
         "translation_locale": "he",
         "translation_status": "approved",
@@ -933,12 +1078,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35
+        "image_count": 35,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0001"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0002",
         "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0002",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -954,12 +1123,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 20
+        "image_count": 20,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0002"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0002",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0002"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0003",
         "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0003",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -975,12 +1168,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 32
+        "image_count": 32,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0003"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0003",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0003"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0004",
         "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0004",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -996,12 +1213,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0004"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0004",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0004"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0005",
         "title": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0005",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1017,12 +1258,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0005"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0005",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0005"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0006",
         "title": "Industrieel gebouw te huur in Sandanski",
         "path": "/he/properties/MS-CRAWL-0006",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1038,7 +1303,30 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 18
+        "image_count": 18,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0006"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0006",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0006"
+          }
+        }
       }
     ]
   },
@@ -1319,6 +1607,7 @@
         "id": "MS-CRAWL-0001",
         "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
         "path": "/he/properties/MS-CRAWL-0001",
+        "review_badge": "verified_inventory",
         "translation_display": "reviewed_translation",
         "translation_locale": "he",
         "translation_status": "approved",
@@ -1334,7 +1623,30 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35
+        "image_count": 35,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0001"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          }
+        }
       }
     ]
   },
@@ -1706,6 +2018,7 @@
           "id": "MS-CRAWL-0002",
           "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
           "path": "/he/properties/MS-CRAWL-0002",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
           "translation_status": "missing",
@@ -1721,12 +2034,36 @@
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 20
+          "image_count": 20,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/he/properties/MS-CRAWL-0002"
+            },
+            "inquiry": {
+              "label": "פנייה",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0002",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "שמירה",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0002"
+            }
+          }
         },
         {
           "id": "MS-CRAWL-0003",
           "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
           "path": "/he/properties/MS-CRAWL-0003",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
           "translation_status": "missing",
@@ -1742,12 +2079,36 @@
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 32
+          "image_count": 32,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/he/properties/MS-CRAWL-0003"
+            },
+            "inquiry": {
+              "label": "פנייה",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0003",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "שמירה",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0003"
+            }
+          }
         },
         {
           "id": "MS-CRAWL-0004",
           "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
           "path": "/he/properties/MS-CRAWL-0004",
+          "review_badge": "source_locale_fallback",
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
           "translation_status": "missing",
@@ -1763,7 +2124,30 @@
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 26
+          "image_count": 26,
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/he/properties/MS-CRAWL-0004"
+            },
+            "inquiry": {
+              "label": "פנייה",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "he",
+                "listingReference": "MS-CRAWL-0004",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "שמירה",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0004"
+            }
+          }
         }
       ],
       "source": {
@@ -1791,6 +2175,7 @@
     },
     "mobile_policy": {
       "list_first_mobile": true,
+      "map_optional": true,
       "sticky_contact_actions": true,
       "minimum_tap_target_px": 44
     },
@@ -1807,6 +2192,50 @@
       },
       "total_matches": 108,
       "returned": 12,
+      "controls": {
+        "view_modes": [
+          {
+            "id": "list",
+            "label": "List",
+            "default": true
+          },
+          {
+            "id": "map",
+            "label": "Map",
+            "optional": true
+          }
+        ],
+        "sort_options": [
+          {
+            "id": "recommended",
+            "label": "Recommended",
+            "default": true
+          },
+          {
+            "id": "newest",
+            "label": "Newest"
+          },
+          {
+            "id": "price_asc",
+            "label": "Price low to high"
+          },
+          {
+            "id": "price_desc",
+            "label": "Price high to low"
+          }
+        ],
+        "save_search": {
+          "endpoint": "/api/saved-searches",
+          "method": "POST",
+          "payload": {
+            "language": "he",
+            "query": "Sandanski",
+            "filters": {},
+            "source": "website_search"
+          }
+        },
+        "active_filter_chips": []
+      },
       "fallback": {
         "enabled": true,
         "locale": "en",
@@ -1818,6 +2247,7 @@
         "id": "MS-CRAWL-0002",
         "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0002",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1833,12 +2263,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 20
+        "image_count": 20,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0002"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0002",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0002"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0003",
         "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0003",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1854,12 +2308,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 32
+        "image_count": 32,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0003"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0003",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0003"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0004",
         "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0004",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1875,12 +2353,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0004"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0004",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0004"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0005",
         "title": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0005",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1896,12 +2398,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0005"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0005",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0005"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0006",
         "title": "Industrieel gebouw te huur in Sandanski",
         "path": "/he/properties/MS-CRAWL-0006",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1917,12 +2443,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 18
+        "image_count": 18,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0006"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0006",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0006"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0007",
         "title": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0007",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1938,12 +2488,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 24
+        "image_count": 24,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0007"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0007",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0007"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0008",
         "title": "Двустаен апартамент в центъра на Сандански - наем - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0008",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1959,12 +2533,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35
+        "image_count": 35,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0008"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0008",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0008"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0009",
         "title": "Двустаен апартамент под наем в парка на Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0009",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -1980,12 +2578,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0009"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0009",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0009"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0010",
         "title": "Двустаен апартамент в идеалния център на гр. Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0010",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2001,12 +2623,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 34
+        "image_count": 34,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0010"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0010",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0010"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0011",
         "title": "Дългосрочен наем в Парк Хотел Пирин - гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0011",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2022,12 +2668,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 38
+        "image_count": 38,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0011"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0011",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0011"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0012",
         "title": "Инвестиционен проект в Сандански - хотел ресторант - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0012",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2043,12 +2713,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 19
+        "image_count": 19,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0012"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0012",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0012"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0014",
         "title": "Наем - Двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0014",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2064,7 +2758,30 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 23
+        "image_count": 23,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0014"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0014",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0014"
+          }
+        }
       }
     ]
   },
@@ -2127,6 +2844,7 @@
     },
     "mobile_policy": {
       "list_first_mobile": true,
+      "map_optional": true,
       "sticky_contact_actions": true,
       "minimum_tap_target_px": 44
     },
@@ -2143,6 +2861,50 @@
       },
       "total_matches": 109,
       "returned": 12,
+      "controls": {
+        "view_modes": [
+          {
+            "id": "list",
+            "label": "List",
+            "default": true
+          },
+          {
+            "id": "map",
+            "label": "Map",
+            "optional": true
+          }
+        ],
+        "sort_options": [
+          {
+            "id": "recommended",
+            "label": "Recommended",
+            "default": true
+          },
+          {
+            "id": "newest",
+            "label": "Newest"
+          },
+          {
+            "id": "price_asc",
+            "label": "Price low to high"
+          },
+          {
+            "id": "price_desc",
+            "label": "Price high to low"
+          }
+        ],
+        "save_search": {
+          "endpoint": "/api/saved-searches",
+          "method": "POST",
+          "payload": {
+            "language": "he",
+            "query": "Sandanski",
+            "filters": {},
+            "source": "website_search"
+          }
+        },
+        "active_filter_chips": []
+      },
       "fallback": {
         "enabled": true,
         "locale": "en",
@@ -2154,6 +2916,7 @@
         "id": "MS-CRAWL-0001",
         "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
         "path": "/he/properties/MS-CRAWL-0001",
+        "review_badge": "verified_inventory",
         "translation_display": "reviewed_translation",
         "translation_locale": "he",
         "translation_status": "approved",
@@ -2169,12 +2932,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35
+        "image_count": 35,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0001"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0002",
         "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0002",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2190,12 +2977,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 20
+        "image_count": 20,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0002"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0002",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0002"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0003",
         "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0003",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2211,12 +3022,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 32
+        "image_count": 32,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0003"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0003",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0003"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0004",
         "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0004",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2232,12 +3067,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0004"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0004",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0004"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0005",
         "title": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0005",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2253,12 +3112,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0005"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0005",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0005"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0006",
         "title": "Industrieel gebouw te huur in Sandanski",
         "path": "/he/properties/MS-CRAWL-0006",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2274,12 +3157,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 18
+        "image_count": 18,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0006"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0006",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0006"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0007",
         "title": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0007",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2295,12 +3202,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 24
+        "image_count": 24,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0007"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0007",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0007"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0008",
         "title": "Двустаен апартамент в центъра на Сандански - наем - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0008",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2316,12 +3247,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35
+        "image_count": 35,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0008"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0008",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0008"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0009",
         "title": "Двустаен апартамент под наем в парка на Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0009",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2337,12 +3292,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26
+        "image_count": 26,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0009"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0009",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0009"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0010",
         "title": "Двустаен апартамент в идеалния център на гр. Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0010",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2358,12 +3337,36 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 34
+        "image_count": 34,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0010"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0010",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0010"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0011",
         "title": "Дългосрочен наем в Парк Хотел Пирин - гр.Сандански - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0011",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2379,12 +3382,36 @@
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 38
+        "image_count": 38,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0011"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0011",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0011"
+          }
+        }
       },
       {
         "id": "MS-CRAWL-0012",
         "title": "Инвестиционен проект в Сандански - хотел ресторант - Недвижими имоти в Сандански",
         "path": "/he/properties/MS-CRAWL-0012",
+        "review_badge": "source_locale_fallback",
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2400,7 +3427,30 @@
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 19
+        "image_count": 19,
+        "actions": {
+          "detail": {
+            "label": "Details",
+            "href": "/he/properties/MS-CRAWL-0012"
+          },
+          "inquiry": {
+            "label": "פנייה",
+            "endpoint": "/api/leads",
+            "method": "POST",
+            "payload": {
+              "leadType": "buyer",
+              "language": "he",
+              "listingReference": "MS-CRAWL-0012",
+              "source": "website_search_result"
+            }
+          },
+          "save": {
+            "label": "שמירה",
+            "endpoint": "/api/saved-searches",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0012"
+          }
+        }
       }
     ]
   },

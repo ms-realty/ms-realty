@@ -104,13 +104,21 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.path, "/he/search");
   assert.equal(search.dir, "rtl");
   assert.equal(search.mobile_policy.list_first_mobile, true);
+  assert.equal(search.mobile_policy.map_optional, true);
   assert.deepEqual(search.search.engines, ["typesense", "meilisearch"]);
   assert.equal(search.search.filters.locale, "he");
+  assert.equal(search.search.controls.save_search.endpoint, "/api/saved-searches");
+  assert.equal(search.search.controls.save_search.payload.language, "he");
+  assert.equal(search.search.controls.view_modes.find((mode) => mode.id === "list").default, true);
+  assert.equal(search.search.controls.view_modes.find((mode) => mode.id === "map").optional, true);
   assert.ok(search.search.total_matches > search.cards.length);
   assert.equal(search.search.returned, search.cards.length);
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
+  assert.equal(search.cards.every((card) => card.actions.inquiry.endpoint === "/api/leads"), true);
+  assert.equal(search.cards.every((card) => card.actions.save.storage_key === "ms-realty:saved-listings"), true);
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
+  assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").review_badge, "verified_inventory");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
 });
 
@@ -129,6 +137,7 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_type, "apartment");
+  assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_type", value: "apartment", active: true }]);
 });
 
 test("home page exposes search, seller, location, and featured listing paths", () => {

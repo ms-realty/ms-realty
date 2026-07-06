@@ -332,10 +332,12 @@ function listingCard(registry, listing, locale) {
   const state = searchTranslationState(registry, listing, locale);
   const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
   const copy = localizedCopy(copyLocale, view);
+  const verified = state.indexable || view.source_locale === locale.code || listing.locale === locale.code;
   return {
     id: listing.id,
     title: copy.title,
     path: listingPath(registry, locale.code, listing.id),
+    review_badge: verified ? "verified_inventory" : "source_locale_fallback",
     translation_display: state.display,
     translation_locale: state.translation?.locale || locale.code,
     translation_status: state.translation?.status || "missing",
@@ -352,6 +354,26 @@ function listingCard(registry, listing, locale) {
     listing_status: view.listing_status,
     listing_active: isActiveListing(listing),
     image_count: Number(listing.image_count || 0),
+    actions: {
+      detail: { label: "Details", href: listingPath(registry, locale.code, listing.id) },
+      inquiry: {
+        label: labelsFor(locale.code).inquiry,
+        endpoint: "/api/leads",
+        method: "POST",
+        payload: {
+          leadType: "buyer",
+          language: locale.code,
+          listingReference: listing.id,
+          source: "website_search_result",
+        },
+      },
+      save: {
+        label: labelsFor(locale.code).save,
+        endpoint: "/api/saved-searches",
+        storage_key: "ms-realty:saved-listings",
+        listing_id: listing.id,
+      },
+    },
   };
 }
 
@@ -572,6 +594,9 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
     matchesSearch(listingToPublicViewModel(listing), query, filters),
   );
   const cards = matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale));
+  const activeFilterChips = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "status"]
+    .map((key) => ({ key, value: filters[key] || "", active: Boolean(filters[key]) }))
+    .filter((chip) => chip.active);
 
   return {
     kind: "search",
@@ -590,6 +615,7 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
     },
     mobile_policy: {
       list_first_mobile: true,
+      map_optional: true,
       sticky_contact_actions: true,
       minimum_tap_target_px: 44,
     },
@@ -604,6 +630,29 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       },
       total_matches: matchedListings.length,
       returned: cards.length,
+      controls: {
+        view_modes: [
+          { id: "list", label: "List", default: true },
+          { id: "map", label: "Map", optional: true },
+        ],
+        sort_options: [
+          { id: "recommended", label: "Recommended", default: true },
+          { id: "newest", label: "Newest" },
+          { id: "price_asc", label: "Price low to high" },
+          { id: "price_desc", label: "Price high to low" },
+        ],
+        save_search: {
+          endpoint: "/api/saved-searches",
+          method: "POST",
+          payload: {
+            language: locale.code,
+            query,
+            filters: { ...filters },
+            source: "website_search",
+          },
+        },
+        active_filter_chips: activeFilterChips,
+      },
       fallback: {
         enabled: true,
         locale: locale.fallback_locale || registry.source_locale,

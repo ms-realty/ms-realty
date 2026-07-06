@@ -63,6 +63,14 @@ export function buildMobileElderlyQaReport({
         includes(pages.search, "data-list-first-mobile=\"true\""),
     ),
     check(
+      "mobile_search_actions",
+      includes(pages.search, "data-map-optional=\"true\"") &&
+        includes(pages.search, "data-save-search-endpoint=\"/api/saved-searches\"") &&
+        includes(pages.search, "data-search-card=\"true\"") &&
+        includes(pages.search, "data-client-save-listing=") &&
+        includes(pages.search, "data-endpoint=\"/api/leads\""),
+    ),
+    check(
       "listing_sticky_actions",
       includes(pages.listing, "data-mobile-sticky-actions=\"true\"") && includes(pages.listing, "aria-label=\"Listing actions\""),
     ),
@@ -93,7 +101,7 @@ export function buildMobileElderlyQaReport({
 export function assertMobileElderlyQaReport(report) {
   if (report.status !== "pass") throw new Error("Mobile/elderly QA report must pass");
   if (!report.summary || report.summary.failed !== 0) throw new Error("Mobile/elderly QA report must have zero failures");
-  for (const id of ["mobile_search_form", "listing_sticky_actions", "admin_and_market_languages"]) {
+  for (const id of ["mobile_search_form", "mobile_search_actions", "listing_sticky_actions", "admin_and_market_languages"]) {
     if (!report.checks.some((check) => check.id === id && check.status === "pass")) {
       throw new Error(`Mobile/elderly QA missing ${id}`);
     }

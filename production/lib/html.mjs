@@ -58,6 +58,20 @@ function renderFacts(facts = {}) {
     .join("");
 }
 
+function formatPrice(card) {
+  if (card.price_on_request) return "Price on request";
+  if (card.price_eur === null || card.price_eur === undefined || card.price_eur === "") return "Price pending review";
+  const price = Number(card.price_eur);
+  if (!Number.isFinite(price)) return "Price pending review";
+  return new Intl.NumberFormat("en", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(price);
+}
+
+function cardSummary(card) {
+  return [card.location, card.property_type, card.bedrooms ? `${card.bedrooms} bedrooms` : null, card.listing_status]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 function renderListing(page) {
   const gallery = (page.body.media.gallery || [])
     .slice(0, 12)
@@ -152,23 +166,73 @@ function renderSearch(page) {
     const value = page.search.filters?.[name] || "";
     return `<label>${escapeHtml(label)} <input name="${escapeHtml(name)}" value="${escapeHtml(value)}"></label>`;
   };
+  const controls = page.search.controls || {};
+  const viewModes = (controls.view_modes || [])
+    .map(
+      (mode) =>
+        `<button type="submit" name="view" value="${escapeHtml(mode.id)}" aria-pressed="${escapeHtml(
+          mode.default ? "true" : "false",
+        )}" data-view-mode="${escapeHtml(mode.id)}">${escapeHtml(mode.label)}</button>`,
+    )
+    .join("");
+  const sortOptions = (controls.sort_options || [])
+    .map(
+      (option) =>
+        `<option value="${escapeHtml(option.id)}"${option.default ? " selected" : ""}>${escapeHtml(option.label)}</option>`,
+    )
+    .join("");
+  const chips = (controls.active_filter_chips || [])
+    .map((chip) => `<span data-filter-chip="${escapeHtml(chip.key)}">${escapeHtml(chip.value)}</span>`)
+    .join("");
   const cards = page.cards
     .map(
       (card) =>
-        `<article><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2><p>${escapeHtml(card.location)}</p></article>`,
+        `<article data-search-card="true" data-listing-id="${escapeHtml(card.id)}" data-translation-display="${escapeHtml(
+          card.translation_display,
+        )}" data-review-badge="${escapeHtml(card.review_badge)}" data-listing-status="${escapeHtml(card.listing_status)}">
+          <p data-card-badge="true">${escapeHtml(card.review_badge.replaceAll("_", " "))}</p>
+          <h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2>
+          <p data-card-price="true">${escapeHtml(formatPrice(card))}</p>
+          <p data-search-card-meta="true">${escapeHtml(cardSummary(card))}</p>
+          <p data-card-media-count="${escapeHtml(card.image_count)}">${escapeHtml(card.image_count)} photos</p>
+          <nav aria-label="Search result actions">
+            <a href="${escapeHtml(card.actions.detail.href)}">${escapeHtml(card.actions.detail.label)}</a>
+            <button type="button" data-endpoint="${escapeHtml(card.actions.inquiry.endpoint)}" data-listing-reference="${escapeHtml(
+              card.actions.inquiry.payload.listingReference,
+            )}">${escapeHtml(card.actions.inquiry.label)}</button>
+            <button type="button" data-client-save-listing="${escapeHtml(card.actions.save.listing_id)}">${escapeHtml(
+              card.actions.save.label,
+            )}</button>
+          </nav>
+        </article>`,
     )
     .join("");
   return `
 <main data-kind="search" data-total-matches="${escapeHtml(page.search.total_matches)}" data-list-first-mobile="${escapeHtml(
     page.mobile_policy?.list_first_mobile ? "true" : "false",
-  )}" data-min-touch-target="${escapeHtml(page.mobile_policy?.minimum_tap_target_px || 44)}">
+  )}" data-map-optional="${escapeHtml(page.mobile_policy?.map_optional ? "true" : "false")}" data-min-touch-target="${escapeHtml(
+    page.mobile_policy?.minimum_tap_target_px || 44,
+  )}">
   <h1>${escapeHtml(page.metadata.title)}</h1>
   <form action="${escapeHtml(page.path)}" method="get" role="search">
     <label>Search <input name="q" type="search" value="${escapeHtml(page.search.query || "")}" autocomplete="off"></label>
     ${filter("location", "Location")}
     ${filter("property_type", "Type")}
+    <label>Sort <select name="sort">${sortOptions}</select></label>
+    <fieldset data-view-mode-control="true" data-map-optional="${escapeHtml(page.mobile_policy?.map_optional ? "true" : "false")}">
+      <legend>View</legend>
+      ${viewModes}
+    </fieldset>
     <button type="submit">Search</button>
   </form>
+  <form method="${escapeHtml(controls.save_search?.method || "POST")}" action="${escapeHtml(
+    controls.save_search?.endpoint || "/api/saved-searches",
+  )}" data-save-search-endpoint="${escapeHtml(controls.save_search?.endpoint || "/api/saved-searches")}">
+    <input type="hidden" name="language" value="${escapeHtml(page.locale)}">
+    <input type="hidden" name="query" value="${escapeHtml(page.search.query || "")}">
+    <button type="submit">Save search</button>
+  </form>
+  <section aria-label="Active filters" data-active-filter-count="${escapeHtml((controls.active_filter_chips || []).length)}">${chips}</section>
   <p>${escapeHtml(page.search.total_matches)} matches</p>
   <section aria-label="Search results">${cards}</section>
 </main>`;

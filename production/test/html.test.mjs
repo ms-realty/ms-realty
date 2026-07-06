@@ -62,6 +62,12 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.equal(assertHtmlPage(searchHtml, { lang: "he", dir: "rtl", kind: "search" }), true);
   assert.match(searchHtml, /property="og:type" content="website"/);
   assert.match(searchHtml, /data-total-matches=/);
+  assert.match(searchHtml, /data-map-optional="true"/);
+  assert.match(searchHtml, /data-save-search-endpoint="\/api\/saved-searches"/);
+  assert.match(searchHtml, /data-search-card="true"/);
+  assert.match(searchHtml, /data-view-mode="list"/);
+  assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
+  assert.match(searchHtml, /data-endpoint="\/api\/leads"/);
   assert.equal(assertHtmlPage(locationHtml, { lang: "he", dir: "rtl", kind: "location" }), true);
   assert.match(locationHtml, /data-location="Sandanski"/);
   assert.equal(assertHtmlPage(sellerHtml, { lang: "he", dir: "rtl", kind: "seller" }), true);
