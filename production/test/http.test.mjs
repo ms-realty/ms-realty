@@ -898,11 +898,20 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const seoEvidenceInputDir = tempSeoEvidenceDir();
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
   const launchReadinessOutputPath = `${seoEvidenceInputDir}/launch-readiness.json`;
+  const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
+  const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
+  const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
+  const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-report.json.example"), "utf8"));
+  const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-report.json.example"), "utf8"));
+  const hermesReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-worker-report.json.example"), "utf8"));
   const app = createHttpApp({
     routeMap,
     seoEvidenceInputDir,
     seoEvidenceOutputPath,
     launchReadinessOutputPath,
+    searchSyncReportPath,
+    searchQueryReportPath,
+    hermesWorkerReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
   });
 
@@ -983,6 +992,33 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     url: "/api/admin/live-service-report-template?source=typesense_meilisearch_sync",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const liveImportUnauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
+    body: syncReport,
+  });
+  const liveSyncImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: syncReport,
+  });
+  const liveQueryImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_query",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: queryReport,
+  });
+  const liveHermesImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/live-service-reports/import?source=hermes_draft_worker",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: hermesReport,
+  });
+  const launchAfterLive = await dispatchHttp(app, {
+    url: "/api/admin/launch-readiness",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(unauthorized.status, 401);
   assert.equal(templateUnauthorized.status, 401);
@@ -1020,6 +1056,16 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveTemplate.status, 200);
   assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="search-engine-sync-report.json.example"');
   assert.equal(JSON.parse(liveTemplate.body).summary.engines, 2);
+  assert.equal(liveImportUnauthorized.status, 401);
+  assert.equal(liveSyncImport.status, 201);
+  assert.equal(liveSyncImport.body.imported.outPath, searchSyncReportPath);
+  assert.equal(liveQueryImport.status, 201);
+  assert.equal(liveHermesImport.status, 201);
+  assert.equal(fs.existsSync(searchSyncReportPath), true);
+  assert.equal(fs.existsSync(searchQueryReportPath), true);
+  assert.equal(fs.existsSync(hermesWorkerReportPath), true);
+  assert.deepEqual(launchAfterLive.body.blockers, []);
+  assert.equal(launchAfterLive.body.status, "ready");
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {

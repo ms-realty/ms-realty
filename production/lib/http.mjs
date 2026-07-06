@@ -44,7 +44,13 @@ import { appendTourApproval, createTourApproval, readTourApprovals } from "./tou
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
-import { buildLaunchReadinessReport, readLiveServiceReportTemplate, writeLaunchReadinessReport } from "./launch-readiness.mjs";
+import {
+  buildLaunchReadinessReport,
+  liveServiceReports,
+  readLiveServiceReportTemplate,
+  writeLaunchReadinessReport,
+  writeLiveServiceReport,
+} from "./launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { buildListingQualityReport, renderListingQualityWorkbook, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -160,6 +166,14 @@ function seoExportInput(request, url) {
   return { source: input.source || url.searchParams.get("source"), csv: input.csv || "" };
 }
 
+function liveServiceReportInput(request, url) {
+  const input = parseBody(request);
+  return {
+    source: input.source || url.searchParams.get("source"),
+    report: input.report || input,
+  };
+}
+
 function reviewedReplyInput(request) {
   const input = parseBody(request);
   return {
@@ -257,6 +271,9 @@ export function createHttpApp({
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
   launchReadinessOutputPath = null,
+  searchSyncReportPath = null,
+  searchQueryReportPath = null,
+  hermesWorkerReportPath = null,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
@@ -291,6 +308,11 @@ export function createHttpApp({
       },
       deployableRedirects: { summary: summarizeDeployableRedirects(redirectRows), redirects: redirectRows },
       seoEvidence: currentSeoEvidence(),
+      liveServices: liveServiceReports({
+        syncReportPath: searchSyncReportPath || undefined,
+        queryReportPath: searchQueryReportPath || undefined,
+        hermesReportPath: hermesWorkerReportPath || undefined,
+      }),
     });
   };
   const currentLaunchInputChecklist = () =>
@@ -547,6 +569,21 @@ export function createHttpApp({
         return adminResponse(200, template.json, "application/json; charset=utf-8", {
           "content-disposition": `attachment; filename="${template.filename}"`,
         });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/live-service-reports/import") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = liveServiceReportInput(request, url);
+        const imported = writeLiveServiceReport(input.source, input.report, {
+          syncReportPath: searchSyncReportPath || undefined,
+          queryReportPath: searchQueryReportPath || undefined,
+          hermesReportPath: hermesWorkerReportPath || undefined,
+        });
+        return adminJson(201, { imported, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

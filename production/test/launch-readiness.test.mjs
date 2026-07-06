@@ -8,6 +8,7 @@ import {
   buildLaunchReadinessReport,
   readLiveServiceReportTemplate,
   validateLiveServiceReports,
+  writeLiveServiceReport,
 } from "../lib/launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -246,6 +247,20 @@ test("live service report examples validate but do not replace real launch evide
   assert.throws(() => readLiveServiceReportTemplate("../bad"), /Unknown live service report source/);
 });
 
+test("live service report import writes only validated source reports", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-import-live-reports-`);
+  const paths = writeLiveReportFixtures(dir);
+  const queryReport = JSON.parse(fs.readFileSync(paths.queryReportPath, "utf8"));
+  const outPath = `${dir}/imported-query-report.json`;
+
+  const imported = writeLiveServiceReport("typesense_meilisearch_query", queryReport, { queryReportPath: outPath });
+
+  assert.equal(imported.outPath, outPath);
+  assert.equal(JSON.parse(fs.readFileSync(outPath, "utf8")).summary.engines, 2);
+  assert.throws(() => writeLiveServiceReport("typesense_meilisearch_query", { summary: { engines: 1 }, engines: [] }, { queryReportPath: outPath }), /cover Typesense and Meilisearch/);
+  assert.throws(() => writeLiveServiceReport("../bad", queryReport), /Unknown live service report source/);
+});
+
 test("launch input checklist names remaining operator-owned blockers", () => {
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -282,6 +297,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /npm run live:preflight/);
   assert.match(markdown, /search-engine-sync-report\.json\.example/);
   assert.match(markdown, /live-service-report-template\?source=typesense_meilisearch_sync/);
+  assert.match(markdown, /live-service-reports\/import\?source=typesense_meilisearch_sync/);
   assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);

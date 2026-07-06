@@ -44,6 +44,7 @@ Blockers: external_seo_exports, live_services
 - Report preflight: `npm run live:preflight`.
 - Report examples: `production/data/search-engine-sync-report.json.example`, `production/data/search-engine-query-report.json.example`, `production/data/hermes-draft-worker-report.json.example`.
 - Admin template endpoint: `GET /api/admin/live-service-report-template?source=typesense_meilisearch_sync`, `?source=typesense_meilisearch_query`, `?source=hermes_draft_worker`.
+- Admin import endpoint: `POST /api/admin/live-service-reports/import?source=typesense_meilisearch_sync`, `?source=typesense_meilisearch_query`, `?source=hermes_draft_worker`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
 

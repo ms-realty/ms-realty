@@ -5,6 +5,7 @@ import os from "node:os";
 import { close, jsonFetch, listen } from "../lib/node-server.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
+import { fromRoot } from "../lib/paths.mjs";
 import { createProductionServer, productionServerConfig } from "../server.mjs";
 
 test("production server entrypoint serves runtime routes with env config", async () => {
@@ -14,18 +15,31 @@ test("production server entrypoint serves runtime routes with env config", async
     HOST: "127.0.0.1",
     MS_REALTY_MAX_BODY_BYTES: "64",
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
+    MS_REALTY_SEARCH_SYNC_REPORT_PATH: fromRoot("production", "data", "search-engine-sync-report.json.example"),
+    MS_REALTY_SEARCH_QUERY_REPORT_PATH: fromRoot("production", "data", "search-engine-query-report.json.example"),
+    MS_REALTY_HERMES_WORKER_REPORT_PATH: fromRoot("production", "data", "hermes-draft-worker-report.json.example"),
   });
   assert.equal(config.port, 0);
   assert.equal(config.host, "127.0.0.1");
   assert.equal(config.maxBodyBytes, 64);
+  assert.match(config.searchSyncReportPath, /search-engine-sync-report\.json\.example$/);
+  assert.match(config.searchQueryReportPath, /search-engine-query-report\.json\.example$/);
+  assert.match(config.hermesWorkerReportPath, /hermes-draft-worker-report\.json\.example$/);
 
   const server = createProductionServer(config);
   const address = await listen(server, 0, "127.0.0.1");
   try {
-    const response = await jsonFetch(`http://${address.address}:${address.port}`, "/he/properties/MS-CRAWL-0001");
+    const baseUrl = `http://${address.address}:${address.port}`;
+    const response = await jsonFetch(baseUrl, "/he/properties/MS-CRAWL-0001");
     assert.equal(response.status, 200);
     assert.equal(response.body.kind, "listing");
     assert.equal(response.body.lang, "he");
+
+    const readiness = await jsonFetch(baseUrl, "/api/admin/launch-readiness", {
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
+    assert.equal(readiness.status, 200);
+    assert.equal(readiness.body.blockers.includes("live_services"), false);
   } finally {
     await close(server);
   }

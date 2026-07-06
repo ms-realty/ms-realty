@@ -58,6 +58,9 @@ export function productionServerConfig(env = process.env) {
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH || fromRoot("locales", "registry.json"),
+    searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
+    searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+    hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
   };
 }
 
@@ -77,6 +80,9 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     brokerContactLedgerPath: config.brokerContactLedgerPath,
     tourApprovalLedgerPath: config.tourApprovalLedgerPath,
     localeRegistryPath: config.localeRegistryPath,
+    searchSyncReportPath: config.searchSyncReportPath,
+    searchQueryReportPath: config.searchQueryReportPath,
+    hermesWorkerReportPath: config.hermesWorkerReportPath,
   });
 }
 

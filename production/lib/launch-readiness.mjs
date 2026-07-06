@@ -5,10 +5,13 @@ import {
   assertSearchEngineSyncReport,
   DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
   DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
+  writeSearchEngineQueryReport,
+  writeSearchEngineSyncReport,
 } from "./search-engine-sync.mjs";
 import {
   assertHermesDraftWorkerReport,
   DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+  writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -18,6 +21,12 @@ const LIVE_SERVICE_REPORT_TEMPLATES = {
   typesense_meilisearch_sync: "search-engine-sync-report.json.example",
   typesense_meilisearch_query: "search-engine-query-report.json.example",
   hermes_draft_worker: "hermes-draft-worker-report.json.example",
+};
+
+const LIVE_SERVICE_REPORT_WRITERS = {
+  typesense_meilisearch_sync: { write: writeSearchEngineSyncReport, pathKey: "syncReportPath" },
+  typesense_meilisearch_query: { write: writeSearchEngineQueryReport, pathKey: "queryReportPath" },
+  hermes_draft_worker: { write: writeHermesDraftWorkerReport, pathKey: "hermesReportPath" },
 };
 
 function readJson(filePath) {
@@ -85,6 +94,13 @@ export function readLiveServiceReportTemplate(source) {
     filename,
     json: fs.readFileSync(fromRoot("production", "data", filename), "utf8"),
   };
+}
+
+export function writeLiveServiceReport(source, report, options = {}) {
+  const writer = LIVE_SERVICE_REPORT_WRITERS[source];
+  if (!writer) throw new Error(`Unknown live service report source: ${source}`);
+  const outPath = writer.write(report, options[writer.pathKey]);
+  return { source, outPath, summary: report.summary };
 }
 
 export function buildLaunchReadinessReport({

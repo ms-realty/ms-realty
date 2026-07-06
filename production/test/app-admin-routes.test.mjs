@@ -46,6 +46,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   }
   const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
   const launchReadinessOutputPath = tempJson("app-admin-launch-readiness", "{}\n");
+  const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
+  const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
+  const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
@@ -56,6 +59,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: tempJsonl("app-admin-listing-edits"),
       MS_REALTY_REDIRECT_APPROVALS_PATH: tempJsonl("app-admin-redirect-approvals"),
@@ -76,6 +82,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const deployableRedirectExportRoute = await import("../../app/api/admin/deployable-redirects/export/route.js");
       const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
       const liveServiceReportTemplateRoute = await import("../../app/api/admin/live-service-report-template/route.js");
+      const liveServiceReportImportRoute = await import("../../app/api/admin/live-service-reports/import/route.js");
       const launchReadinessExportRoute = await import("../../app/api/admin/launch-readiness/export/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
@@ -195,6 +202,18 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveTemplate.headers.get("content-type"), "application/json; charset=utf-8");
       assert.equal(liveTemplate.headers.get("content-disposition"), 'attachment; filename="hermes-draft-worker-report.json.example"');
       assert.equal(liveTemplateBody.summary.attempted, 1);
+
+      const liveImport = await liveServiceReportImportRoute.POST(
+        new Request("https://example.test/api/admin/live-service-reports/import?source=hermes_draft_worker", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: fs.readFileSync("production/data/hermes-draft-worker-report.json.example", "utf8"),
+        }),
+      );
+      const liveImportBody = await liveImport.json();
+      assert.equal(liveImport.status, 201);
+      assert.equal(liveImportBody.imported.outPath, hermesWorkerReportPath);
+      assert.equal(fs.existsSync(hermesWorkerReportPath), true);
 
       const migrationReviewUnauthorized = await migrationReviewRoute.GET(
         new Request("https://example.test/api/admin/migration/review?locale=bg"),

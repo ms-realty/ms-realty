@@ -13,7 +13,13 @@ import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-le
 import { renderHtmlPage } from "./html.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
-import { buildLaunchReadinessReport, readLiveServiceReportTemplate, writeLaunchReadinessReport } from "./launch-readiness.mjs";
+import {
+  buildLaunchReadinessReport,
+  liveServiceReports,
+  readLiveServiceReportTemplate,
+  writeLaunchReadinessReport,
+  writeLiveServiceReport,
+} from "./launch-readiness.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
@@ -83,6 +89,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
+    searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
+    hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
@@ -223,6 +232,11 @@ function seoExportInput(request, url, body) {
   return { source: url.searchParams.get("source"), csv: body || "" };
 }
 
+function liveServiceReportInput(request, url, body) {
+  const input = parseBody(request, body);
+  return { source: input.source || url.searchParams.get("source"), report: input.report || input };
+}
+
 function reviewedReplyInput(input) {
   return {
     ...input,
@@ -300,7 +314,14 @@ function seoEvidencePayload(seoEvidence) {
 }
 
 function launchReadiness(config) {
-  return buildLaunchReadinessReport({ generatedAt: config.reviewedAt || new Date().toISOString() });
+  return buildLaunchReadinessReport({
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    liveServices: liveServiceReports({
+      syncReportPath: config.searchSyncReportPath || undefined,
+      queryReportPath: config.searchQueryReportPath || undefined,
+      hermesReportPath: config.hermesWorkerReportPath || undefined,
+    }),
+  });
 }
 
 function launchInputChecklist(config) {
@@ -487,6 +508,15 @@ function exportLaunchReadiness(config) {
   return { outPath, report };
 }
 
+function importLiveServiceReport(input, config) {
+  const imported = writeLiveServiceReport(input.source, input.report, {
+    syncReportPath: config.searchSyncReportPath || undefined,
+    queryReportPath: config.searchQueryReportPath || undefined,
+    hermesReportPath: config.hermesWorkerReportPath || undefined,
+  });
+  return { imported, report: launchReadiness(config) };
+}
+
 function redirectApprovalWorkbook(url, config) {
   const routes = routeMapRows();
   const approvals = readRedirectApprovals(config.redirectApprovalPath);
@@ -600,6 +630,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
       return jsonResponse(201, exportLaunchReadiness(config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/live-service-reports/import") {
+      return jsonResponse(
+        201,
+        importLiveServiceReport(liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config),
+      );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
       return jsonResponse(201, importAppSeoEvidenceRows(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config));
