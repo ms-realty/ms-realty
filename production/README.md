@@ -135,6 +135,7 @@ Fail closed before launch:
 
 ```bash
 npm run redirects:preflight
+npm run seo:preflight:report
 npm run seo:preflight
 npm run listing:preflight:report
 npm run listing:preflight
@@ -143,7 +144,8 @@ npm run live:preflight
 npm run launch:preflight
 ```
 
-`redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight` still exits
+`redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight:report` writes the current
+SEO export status without clearing the launch gate, and `seo:preflight` still exits
 non-zero until real external SEO exports are complete. `listing:preflight:report` writes the current
 listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
 the reviewed listing-quality CSV is present. `launch:preflight` also requires live Typesense/Meilisearch
@@ -179,6 +181,7 @@ outside the running process; otherwise locale additions are in-memory only.
 Set these path overrides when operator evidence is mounted outside the repo:
 `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`,
 `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`,
+`MS_REALTY_SEO_PREFLIGHT_REPORT_PATH`,
 `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`,
 `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`,
 `MS_REALTY_LISTING_QUALITY_REVIEW_PATH`, `MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH`,
@@ -226,6 +229,7 @@ Generated production data:
 - `production/data/events.jsonl`
 - `production/data/slug-history.jsonl`
 - `production/data/seo-evidence.json`
+- `production/data/seo-evidence-preflight-report.json`
 - `production/data/search-engine-sync-smoke.json`
 - `production/data/search-engine-query-smoke.json`
 - `production/data/live-service-preflight-report.json`

@@ -7,6 +7,7 @@ const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 
 export const DEFAULT_SEO_EVIDENCE_INPUT_DIR = path.resolve(MODULE_DIR, "../../migration/external/seo");
 export const DEFAULT_SEO_EVIDENCE_OUTPUT = path.resolve(MODULE_DIR, "../data/seo-evidence.json");
+export const DEFAULT_SEO_PREFLIGHT_REPORT = path.resolve(MODULE_DIR, "../data/seo-evidence-preflight-report.json");
 const DEFAULT_MIGRATION_RECORDS_PATH = path.resolve(MODULE_DIR, "../data/migration-records.json");
 const DEFAULT_LEGACY_ROUTE_MAP_PATH = path.resolve(MODULE_DIR, "../data/legacy-route-map.json");
 const DEFAULT_EVENT_LEDGER_PATH = path.resolve(MODULE_DIR, "../data/events.jsonl");
@@ -330,6 +331,47 @@ export function validateSeoEvidenceInputs(options = {}) {
     missing_required_sources: evidence.summary.missing_required_sources,
     sources: Object.fromEntries(REQUIRED_EXPORTS.map((source) => [source, evidence.summary.sources[source]])),
   };
+}
+
+export function buildSeoEvidencePreflightReport(options = {}) {
+  const evidence = buildSeoEvidence(options);
+  assertSeoEvidence(evidence);
+  const missing = evidence.summary.missing_required_sources;
+  return {
+    generated_at: evidence.generated_at,
+    ready: missing.length === 0,
+    status: missing.length ? "blocked" : "ready",
+    summary: {
+      crawl_urls: evidence.summary.crawl_urls,
+      urls_with_any_evidence: evidence.summary.urls_with_any_evidence,
+      missing_required_sources: missing,
+      sources: Object.fromEntries(REQUIRED_EXPORTS.map((source) => [source, evidence.summary.sources[source]])),
+    },
+    next_actions: missing.length
+      ? [
+          "Export Search Console, Yandex Webmaster, and backlink CSVs for both legacy domains.",
+          "Place them in migration/external/seo or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR.",
+          "Run npm run seo:preflight before launch:preflight.",
+        ]
+      : ["Run npm run launch:preflight with the same SEO evidence input path."],
+  };
+}
+
+export function assertSeoEvidencePreflightReport(report) {
+  const ready = report.summary?.missing_required_sources?.length === 0;
+  if (report.ready !== ready) throw new Error("SEO preflight ready flag must match missing required sources");
+  if (report.status !== (ready ? "ready" : "blocked")) throw new Error("SEO preflight status must match ready flag");
+  for (const source of REQUIRED_EXPORTS) {
+    if (!report.summary.sources[source]) throw new Error(`SEO preflight report missing ${source} source status`);
+  }
+  return true;
+}
+
+export function writeSeoEvidencePreflightReport(report, outPath = DEFAULT_SEO_PREFLIGHT_REPORT) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  assertSeoEvidencePreflightReport(report);
+  fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
+  return outPath;
 }
 
 export function writeSeoEvidence(evidence, outPath = DEFAULT_SEO_EVIDENCE_OUTPUT) {

@@ -33,7 +33,8 @@ Blockers: external_seo_exports, listing_quality_review, live_services
 - `POST /api/admin/seo-evidence/import?source=yandex_webmaster`: `url,indexed,issue`
 - `POST /api/admin/seo-evidence/import?source=backlinks`: `target_url,source_url,referring_domain`
 - Template endpoints: `GET /api/admin/seo-evidence/template?source=search_console`, `?source=yandex_webmaster`, `?source=backlinks`
-- Production/CLI path overrides: `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`, `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`
+- Status report: `npm run seo:preflight:report` writes current missing/invalid SEO export state without clearing the launch gate.
+- Production/CLI path overrides: `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`, `MS_REALTY_SEO_PREFLIGHT_REPORT_PATH`, `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`
 - Optional analytics: `migration/external/seo/analytics.csv`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both `makler-realty.com` and `makler-realty.ru`.
 

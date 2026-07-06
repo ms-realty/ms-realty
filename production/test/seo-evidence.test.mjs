@@ -4,7 +4,9 @@ import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import {
+  assertSeoEvidencePreflightReport,
   assertSeoEvidence,
+  buildSeoEvidencePreflightReport,
   buildSeoEvidence,
   loadMigrationRecords,
   readSeoExportTemplate,
@@ -186,6 +188,39 @@ test("SEO evidence preflight CLI fails missing exports and passes complete expor
   assert.match(valid.stdout, /search_console: 2 rows, 2 matched, 0 unmatched, 0 duplicates, status imported/);
   assert.equal(validFromEnv.status, 0, validFromEnv.stderr);
   assert.match(validFromEnv.stdout, /SEO evidence inputs valid/);
+});
+
+test("SEO evidence preflight report records missing and valid export state", () => {
+  const missingDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-preflight-report-missing-`);
+  const missingReport = buildSeoEvidencePreflightReport({
+    inputDir: missingDir,
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertSeoEvidencePreflightReport(missingReport), true);
+  assert.equal(missingReport.ready, false);
+  assert.equal(missingReport.status, "blocked");
+  assert.deepEqual(missingReport.summary.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
+
+  const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-preflight-report-valid-`);
+  const outputPath = `${validDir}/seo-evidence-preflight-report.json`;
+  writeCompleteSeoInputFixture(validDir);
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence-preflight-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_SEO_EVIDENCE_INPUT_DIR: validDir,
+      MS_REALTY_SEO_PREFLIGHT_REPORT_PATH: outputPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.includes(outputPath));
+  const readyReport = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(assertSeoEvidencePreflightReport(readyReport), true);
+  assert.equal(readyReport.ready, true);
+  assert.deepEqual(readyReport.summary.missing_required_sources, []);
 });
 
 test("SEO evidence build CLI honors mounted input and output paths", () => {
