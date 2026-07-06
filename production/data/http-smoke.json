@@ -2945,6 +2945,55 @@
       ]
     }
   },
+  "hermesProcessChat": {
+    "status": 200,
+    "headers": {
+      "x-content-type-options": "nosniff",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "x-frame-options": "DENY",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store"
+    },
+    "body": {
+      "kind": "hermes_public_chat",
+      "mode": "retrieval_only",
+      "can_publish": false,
+      "can_send_customer_message": false,
+      "requested_locale": "he",
+      "response_locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "fallback_used": true,
+      "query": "Can a non-EU buyer own land in Bulgaria through an OOD?",
+      "answer": "I answer only from approved MS Realty listing/CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet. Non-EU buyers cannot own Bulgarian land directly in their own name. [foreign-buyers-bg-land-ownership] For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD. [foreign-buyers-bg-land-ownership] EU and EEA buyers are handled differently and should confirm the current purchase structure with a lawyer before signing. [foreign-buyers-bg-land-ownership]",
+      "disclosure": "I answer only from approved MS Realty listing/CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet.",
+      "citations": [
+        {
+          "type": "cms_page",
+          "id": "foreign-buyers-bg-land-ownership",
+          "title": "Foreign buyers and Bulgarian land ownership",
+          "path": "/en/guides/foreign-buyers",
+          "reviewed_translation": true,
+          "translation_status": "approved",
+          "translation_display": "approved_cms_source"
+        }
+      ],
+      "suggested_actions": [
+        {
+          "id": "search",
+          "label": "View search results",
+          "href": "/he/search"
+        },
+        {
+          "id": "contact_broker",
+          "label": "Ask a broker",
+          "endpoint": "/api/leads",
+          "method": "POST"
+        }
+      ]
+    }
+  },
   "lead": {
     "status": 201,
     "headers": {
@@ -7425,9 +7474,9 @@
             "source": "privacy_events",
             "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
             "status": "imported",
-            "row_count": 22,
+            "row_count": 23,
             "matched_rows": 8,
-            "unmatched_rows": 14
+            "unmatched_rows": 15
           }
         },
         "importEndpoint": "/api/admin/seo-evidence/import",
@@ -11576,11 +11625,11 @@
     "rows": 1
   },
   "eventLedger": {
-    "rows": 26,
+    "rows": 27,
     "byType": {
       "page_view": 16,
       "search": 4,
-      "hermes_chat": 1,
+      "hermes_chat": 2,
       "lead_submitted": 4,
       "cta_click": 1
     }

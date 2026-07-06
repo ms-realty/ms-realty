@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-07-06T00:00:00Z",
+  "documents": [
+    {
+      "id": "foreign-buyers-bg-land-ownership",
+      "type": "guide",
+      "locale": "en",
+      "status": "approved",
+      "reviewer": "editor_bg",
+      "title": "Foreign buyers and Bulgarian land ownership",
+      "path": "/en/guides/foreign-buyers",
+      "keywords": ["foreign", "non-eu", "non eu", "land", "company", "ood", "ownership"],
+      "facts": [
+        "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+        "For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD.",
+        "EU and EEA buyers are handled differently and should confirm the current purchase structure with a lawyer before signing."
+      ]
+    },
+    {
+      "id": "foreign-buyers-financing-gap",
+      "type": "guide",
+      "locale": "en",
+      "status": "approved",
+      "reviewer": "editor_bg",
+      "title": "Foreign-buyer financing checks",
+      "path": "/en/guides/foreign-buyers",
+      "keywords": ["foreign", "mortgage", "bank", "financing", "loan"],
+      "facts": [
+        "Foreign-national mortgage availability can be limited in Bulgaria.",
+        "MS Realty treats financing as an early qualification item, not a late-stage surprise."
+      ]
+    },
+    {
+      "id": "buyer-due-diligence-liens",
+      "type": "guide",
+      "locale": "en",
+      "status": "approved",
+      "reviewer": "editor_bg",
+      "title": "Title and encumbrance checks",
+      "path": "/en/guides/buying-process",
+      "keywords": ["title", "lien", "liens", "mortgage", "encumbrance", "deposit", "due diligence"],
+      "facts": [
+        "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
+        "MS Realty treats title and encumbrance checks as part of the buying process before a buyer relies on the deal."
+      ]
+    }
+  ]
+}

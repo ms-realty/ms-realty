@@ -23,6 +23,23 @@ test("Hermes public chat answers only from approved listing sources with fallbac
   assert.match(response.disclosure, /not reviewed/);
 });
 
+test("Hermes public chat cites approved CMS process facts for foreign-buyer questions", () => {
+  const response = buildHermesPublicChat(
+    loadLocaleRegistry(),
+    loadCmsSeed(),
+    { locale: "he", query: "Can a non-EU buyer own land in Bulgaria through an OOD?" },
+    { translationTasks: readTranslationLedger() },
+  );
+
+  assert.equal(assertHermesPublicChat(response), true);
+  assert.equal(response.citations[0].type, "cms_page");
+  assert.equal(response.citations[0].id, "foreign-buyers-bg-land-ownership");
+  assert.match(response.answer, /Non-EU buyers cannot own Bulgarian land directly/);
+  assert.match(response.answer, /lawyer before signing/);
+  assert.equal(response.can_publish, false);
+  assert.equal(response.fallback_used, true);
+});
+
 test("Hermes public chat rejects missing or invalid public questions", () => {
   const registry = loadLocaleRegistry();
   const seed = loadCmsSeed();

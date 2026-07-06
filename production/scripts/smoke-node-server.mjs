@@ -208,6 +208,11 @@ try {
       captureHeaders: true,
       body: JSON.stringify({ locale: "he", query: "Sandanski" }),
     }),
+    hermesProcessChat: await jsonFetch(baseUrl, "/api/hermes/chat", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({ locale: "he", query: "Can a non-EU buyer own land in Bulgaria through an OOD?" }),
+    }),
     lead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,

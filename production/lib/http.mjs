@@ -1414,6 +1414,14 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must answer public Hermes chat from approved listing sources only");
   }
+  if (
+    smoke.hermesProcessChat?.status !== 200 ||
+    smoke.hermesProcessChat.body.citations?.[0]?.type !== "cms_page" ||
+    !smoke.hermesProcessChat.body.answer.includes("Non-EU buyers cannot own Bulgarian land directly") ||
+    smoke.hermesProcessChat.body.can_publish !== false
+  ) {
+    throw new Error("HTTP smoke must answer foreign-buyer process chat from approved CMS content only");
+  }
   if (smoke.ctaClick && (smoke.ctaClick.status !== 201 || smoke.ctaClick.body.type !== "cta_click")) {
     throw new Error("HTTP smoke must accept privacy-safe CTA click events");
   }

@@ -2440,6 +2440,58 @@
       "x-frame-options": "DENY"
     }
   },
+  "hermesProcessChat": {
+    "status": 200,
+    "body": {
+      "kind": "hermes_public_chat",
+      "mode": "retrieval_only",
+      "can_publish": false,
+      "can_send_customer_message": false,
+      "requested_locale": "he",
+      "response_locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "fallback_used": true,
+      "query": "Can a non-EU buyer own land in Bulgaria through an OOD?",
+      "answer": "I answer only from approved MS Realty listing/CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet. Non-EU buyers cannot own Bulgarian land directly in their own name. [foreign-buyers-bg-land-ownership] For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD. [foreign-buyers-bg-land-ownership] EU and EEA buyers are handled differently and should confirm the current purchase structure with a lawyer before signing. [foreign-buyers-bg-land-ownership]",
+      "disclosure": "I answer only from approved MS Realty listing/CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet.",
+      "citations": [
+        {
+          "type": "cms_page",
+          "id": "foreign-buyers-bg-land-ownership",
+          "title": "Foreign buyers and Bulgarian land ownership",
+          "path": "/en/guides/foreign-buyers",
+          "reviewed_translation": true,
+          "translation_status": "approved",
+          "translation_display": "approved_cms_source"
+        }
+      ],
+      "suggested_actions": [
+        {
+          "id": "search",
+          "label": "View search results",
+          "href": "/he/search"
+        },
+        {
+          "id": "contact_broker",
+          "label": "Ask a broker",
+          "endpoint": "/api/leads",
+          "method": "POST"
+        }
+      ]
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-type": "application/json; charset=utf-8",
+      "keep-alive": "timeout=5",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
   "lead": {
     "status": 201,
     "body": {
@@ -5658,11 +5710,11 @@
     "rows": 1
   },
   "eventLedger": {
-    "rows": 23,
+    "rows": 24,
     "byType": {
       "page_view": 14,
       "search": 3,
-      "hermes_chat": 1,
+      "hermes_chat": 2,
       "lead_submitted": 4,
       "cta_click": 1
     }

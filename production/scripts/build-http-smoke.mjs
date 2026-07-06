@@ -254,6 +254,14 @@ const smoke = {
       query: "Sandanski",
     },
   }),
+  hermesProcessChat: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/hermes/chat",
+    body: {
+      locale: "he",
+      query: "Can a non-EU buyer own land in Bulgaria through an OOD?",
+    },
+  }),
   lead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",

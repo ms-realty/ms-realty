@@ -238,6 +238,11 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           captureHeaders: true,
           body: JSON.stringify({ locale: "he", query: "Sandanski" }),
         }),
+        hermesProcessChat: await jsonFetch(baseUrl, "/api/hermes/chat", {
+          method: "POST",
+          captureHeaders: true,
+          body: JSON.stringify({ locale: "he", query: "Can a non-EU buyer own land in Bulgaria through an OOD?" }),
+        }),
         sitemap: await textFetch(baseUrl, "/sitemap.xml"),
         robots: await textFetch(baseUrl, "/robots.txt"),
         sellerPage: await jsonFetch(baseUrl, "/he/sell"),
@@ -453,6 +458,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.hermesChat.body.kind, "hermes_public_chat");
       assert.equal(smoke.hermesChat.body.can_publish, false);
       assert.equal(smoke.hermesChat.headers["cache-control"], "no-store");
+      assert.equal(smoke.hermesProcessChat.body.citations[0].type, "cms_page");
+      assert.match(smoke.hermesProcessChat.body.answer, /Non-EU buyers cannot own Bulgarian land directly/);
       assert.equal(smoke.lead.body.contact_preference, "whatsapp");
       assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
       assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");

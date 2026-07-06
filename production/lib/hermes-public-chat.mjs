@@ -1,3 +1,4 @@
+import { approvedContentMatches, readApprovedCmsContent } from "./approved-content.mjs";
 import { resolvePublicLocale } from "./locales.mjs";
 import { searchRuntimeListings } from "./runtime.mjs";
 
@@ -30,10 +31,33 @@ function answer(cards, totalMatches, note) {
   return `${note} I found ${totalMatches} approved matching listing${totalMatches === 1 ? "" : "s"}. First options: ${options}.`;
 }
 
-export function buildHermesPublicChat(registry, seed, input = {}, { translationTasks = [] } = {}) {
+function contentAnswer(docs, note) {
+  const facts = docs.flatMap((doc) => doc.facts.map((fact) => `${fact} [${doc.id}]`)).join(" ");
+  return `${note} ${facts}`;
+}
+
+function contentCitations(docs) {
+  return docs.map((doc) => ({
+    type: "cms_page",
+    id: doc.id,
+    title: doc.title,
+    path: doc.path,
+    reviewed_translation: doc.status === "approved",
+    translation_status: doc.status,
+    translation_display: "approved_cms_source",
+  }));
+}
+
+export function buildHermesPublicChat(
+  registry,
+  seed,
+  input = {},
+  { translationTasks = [], approvedContent = readApprovedCmsContent() } = {},
+) {
   const localeCode = requestedLocale(registry, input);
   const query = queryText(input);
   const resolved = resolvePublicLocale(registry, localeCode);
+  const cmsMatches = approvedContentMatches(approvedContent, query);
   const search = searchRuntimeListings(registry, seed, {
     localeCode,
     query,
@@ -41,7 +65,19 @@ export function buildHermesPublicChat(registry, seed, input = {}, { translationT
     translationTasks,
   });
   const cards = search.cards.slice(0, 3);
-  const note = disclosure({ available: resolved.available, cards });
+  const contentFallback = cmsMatches.some((doc) => doc.locale !== resolved.locale.code);
+  const note = disclosure({ available: resolved.available && !contentFallback, cards });
+  const citations = cmsMatches.length
+    ? contentCitations(cmsMatches)
+    : cards.map((card) => ({
+        type: "listing",
+        id: card.id,
+        title: card.title,
+        path: card.path,
+        reviewed_translation: card.translation_indexable === true,
+        translation_status: card.translation_status,
+        translation_display: card.translation_display,
+      }));
 
   return {
     kind: "hermes_public_chat",
@@ -52,19 +88,11 @@ export function buildHermesPublicChat(registry, seed, input = {}, { translationT
     response_locale: search.locale,
     lang: search.lang,
     dir: search.dir,
-    fallback_used: !resolved.available || cards.some((card) => !card.translation_indexable),
+    fallback_used: !resolved.available || contentFallback || cards.some((card) => !card.translation_indexable),
     query,
-    answer: answer(cards, search.search.total_matches, note),
+    answer: cmsMatches.length ? contentAnswer(cmsMatches, note) : answer(cards, search.search.total_matches, note),
     disclosure: note,
-    citations: cards.map((card) => ({
-      type: "listing",
-      id: card.id,
-      title: card.title,
-      path: card.path,
-      reviewed_translation: card.translation_indexable === true,
-      translation_status: card.translation_status,
-      translation_display: card.translation_display,
-    })),
+    citations,
     suggested_actions: [
       { id: "search", label: "View search results", href: search.path },
       { id: "contact_broker", label: "Ask a broker", endpoint: "/api/leads", method: "POST" },
@@ -83,8 +111,8 @@ export function assertHermesPublicChat(response) {
     throw new Error("Hermes public chat must disclose approved-source grounding");
   }
   for (const citation of response.citations || []) {
-    if (citation.type !== "listing" || !citation.id || !citation.path?.startsWith(`/${response.response_locale}/`)) {
-      throw new Error("Hermes public chat citations must point to locale-scoped listing pages");
+    if (!["listing", "cms_page"].includes(citation.type) || !citation.id || !citation.path?.startsWith("/")) {
+      throw new Error("Hermes public chat citations must point to approved listing or CMS sources");
     }
   }
   return true;
