@@ -170,6 +170,8 @@ Set `MS_REALTY_MAX_BODY_BYTES` to tune the Node adapter request-body limit
 for large admin CSV imports. The default is 10 MiB.
 Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers
 need to live outside `production/data/`.
+Set `MS_REALTY_LOCALE_REGISTRY_PATH` when admin-added locales must persist
+outside the running process; otherwise locale additions are in-memory only.
 Set these path overrides when operator evidence is mounted outside the repo:
 `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`,
 `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`,
