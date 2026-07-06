@@ -96,6 +96,8 @@ const readyAppState = {
   payload_dependency: true,
   payload_config: true,
   payload_collection_export: true,
+  payload_secret_configured: true,
+  payload_database_url_configured: true,
 };
 
 function writeLiveReportFixtures(dir) {
@@ -363,6 +365,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
+  assert.match(result.stderr, /payload_runtime missing: PAYLOAD_SECRET, DATABASE_URL/);
   assert.match(result.stderr, /npm run launch:inputs/);
 
   const partialReviewPath = writePartialListingQualityReviewFixture(

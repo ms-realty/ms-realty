@@ -16,6 +16,13 @@ function blockerDetails(report) {
           `listing_quality_review: ${gate.evidence.status} ${gate.evidence.path || ""} ${gate.evidence.error || ""}`.trim(),
         ];
       }
+      if (gate.id === "payload_runtime") {
+        const missing = [
+          gate.evidence.payload_secret_configured ? "" : "PAYLOAD_SECRET",
+          gate.evidence.payload_database_url_configured ? "" : "DATABASE_URL",
+        ].filter(Boolean);
+        return [`payload_runtime missing: ${missing.join(", ") || "runtime proof"}`];
+      }
       return [gate.message ? `${gate.id}: ${gate.message}` : `${gate.id}: blocked`];
     });
 }

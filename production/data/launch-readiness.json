@@ -187,9 +187,11 @@
       "evidence": {
         "start_script": "node production/server.mjs",
         "production_server_entrypoint": true,
-        "payload_dependency": false,
-        "payload_config": false,
-        "payload_collection_export": true
+        "payload_dependency": true,
+        "payload_config": true,
+        "payload_collection_export": true,
+        "payload_secret_configured": false,
+        "payload_database_url_configured": false
       }
     },
     {
@@ -199,9 +201,11 @@
       "evidence": {
         "start_script": "node production/server.mjs",
         "production_server_entrypoint": true,
-        "payload_dependency": false,
-        "payload_config": false,
-        "payload_collection_export": true
+        "payload_dependency": true,
+        "payload_config": true,
+        "payload_collection_export": true,
+        "payload_secret_configured": false,
+        "payload_database_url_configured": false
       }
     }
   ],

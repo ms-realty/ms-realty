@@ -47,6 +47,8 @@ function packageState(filePath = fromRoot("package.json")) {
     payload_dependency: hasPayload,
     payload_config: hasPayloadConfig,
     payload_collection_export: fs.existsSync(fromRoot("production", "data", "payload-collections.json")),
+    payload_secret_configured: Boolean(process.env.PAYLOAD_SECRET),
+    payload_database_url_configured: Boolean(process.env.DATABASE_URL),
   };
 }
 
@@ -239,7 +241,12 @@ export function buildLaunchReadinessReport({
   const listingQualityReady = listingQualityReview.status === "pass";
   const liveServicesReady = liveServices.every((item) => item.status === "pass");
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
-  const payloadRuntimeReady = appState.payload_dependency && appState.payload_config && appState.payload_collection_export;
+  const payloadRuntimeReady =
+    appState.payload_dependency &&
+    appState.payload_config &&
+    appState.payload_collection_export &&
+    appState.payload_secret_configured &&
+    appState.payload_database_url_configured;
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
     { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
