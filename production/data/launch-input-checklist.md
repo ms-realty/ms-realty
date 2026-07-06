@@ -59,6 +59,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services
 - Review input path: `migration/reviews/listing-quality.csv`
 - Example input: `migration/reviews/listing-quality.csv.example`
 - Production/CLI path override: `MS_REALTY_LISTING_QUALITY_REVIEW_PATH`
+- Build path overrides: `MS_REALTY_LISTING_EDIT_LEDGER_PATH`, `MS_REALTY_TOUR_APPROVAL_LEDGER_PATH`, `MS_REALTY_LISTING_QUALITY_REPORT_PATH`, `MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH`
 - Review columns: `review_status`, `required_editor_fields`, `price_eur`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
 - Admin import endpoint: `POST /api/admin/listing-quality/import`
 - Admin editor endpoint: `POST /api/admin/listings/edit`

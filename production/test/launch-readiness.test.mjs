@@ -516,6 +516,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
+  assert.match(markdown, /MS_REALTY_LISTING_EDIT_LEDGER_PATH/);
+  assert.match(markdown, /MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH/);
   assert.match(markdown, /review_status/);
   assert.match(markdown, /required_editor_fields/);
   assert.match(markdown, /POST \/api\/admin\/listings\/edit/);

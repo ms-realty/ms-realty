@@ -259,6 +259,45 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
   assert.match(validFromEnv.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
 });
 
+test("listing quality build honors mounted ledgers and output paths", () => {
+  const sourceReport = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const row = sourceReport.rows.find((candidate) => candidate.review_status.includes("media"));
+  assert.ok(row, "expected a listing quality row that still requires media review");
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-quality-build-`);
+  const editPath = `${dir}/listing-edits.jsonl`;
+  const tourPath = `${dir}/tour-approvals.jsonl`;
+  const reportPath = `${dir}/listing-quality-report.json`;
+  const workbookPath = `${dir}/listing-quality-workbook.csv`;
+  fs.writeFileSync(
+    editPath,
+    `${JSON.stringify({ listing_id: row.listing_id, patch: { description: "Mounted quality description." } })}\n`,
+  );
+  fs.writeFileSync(tourPath, "");
+
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-listing-quality-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_LISTING_EDIT_LEDGER_PATH: editPath,
+      MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: tourPath,
+      MS_REALTY_LISTING_QUALITY_REPORT_PATH: reportPath,
+      MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH: workbookPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.includes(reportPath));
+  assert.ok(result.stdout.includes(workbookPath));
+  const reportRow = JSON.parse(fs.readFileSync(reportPath, "utf8")).rows.find((candidate) => candidate.listing_id === row.listing_id);
+  const workbookRow = parseCsv(fs.readFileSync(workbookPath, "utf8")).find((candidate) => candidate.listing_id === row.listing_id);
+  assert.equal(reportRow.description, "Mounted quality description.");
+  assert.equal(workbookRow.description, "Mounted quality description.");
+});
+
 test("generated listing quality report is valid when present", () => {
   const file = fromRoot("production", "data", "listing-quality-report.json");
   if (!fs.existsSync(file)) return;
