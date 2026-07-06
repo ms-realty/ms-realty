@@ -576,6 +576,11 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /broker_bg: 113, broker_ru: 52/);
   assert.match(markdown, /MS_REALTY_LISTING_PUBLICATION_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LISTING_VERIFICATION_REPORT_PATH/);
+  assert.match(markdown, /Monitoring And Rollback/);
+  assert.match(markdown, /GET \/api\/admin\/launch-readiness/);
+  assert.match(markdown, /privacy_events: imported/);
+  assert.match(markdown, /search_console: missing_export/);
+  assert.match(markdown, /Rollback steps: 4/);
   assert.match(markdown, /GET \/api\/admin\/preflight-reports/);
   assert.match(markdown, /npm run launch:inputs/);
   assert.match(markdown, /npm run launch:preflight/);
