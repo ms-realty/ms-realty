@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -73,6 +74,10 @@ def load_listing_edits(path: Path = LISTING_EDITS_LEDGER) -> list[dict[str, obje
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def path_from_env(name: str, default: Path) -> Path:
+    return Path(os.environ.get(name) or default)
 
 
 def public_indexable_locales(registry: dict[str, object]) -> set[str]:
@@ -369,8 +374,10 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, default=OUT_DIR)
     args = parser.parse_args()
 
-    registry = load_locale_registry()
-    listing_edits = load_listing_edits()
+    locale_registry_path = path_from_env("MS_REALTY_LOCALE_REGISTRY_PATH", LOCALE_REGISTRY)
+    listing_edits_path = path_from_env("MS_REALTY_LISTING_EDIT_LEDGER_PATH", LISTING_EDITS_LEDGER)
+    registry = load_locale_registry(locale_registry_path)
+    listing_edits = load_listing_edits(listing_edits_path)
     source_docs = apply_listing_edits(load_listing_docs(args.artifact_dir, registry), listing_edits)
     if not source_docs:
         raise SystemExit(f"No listing records found in {args.artifact_dir}")
@@ -386,6 +393,8 @@ def main() -> int:
 
     summary = {
         "artifact_dir": str(args.artifact_dir),
+        "locale_registry_path": str(locale_registry_path),
+        "listing_edits_path": str(listing_edits_path),
         "source_listing_count": len(source_docs),
         "index_document_count": len(index_docs),
         "domains": sorted({str(doc["domain"]) for doc in source_docs}),

@@ -18,6 +18,9 @@ npm run search:sync:smoke
 npm run search:query:smoke
 ```
 
+Set `MS_REALTY_LOCALE_REGISTRY_PATH` and `MS_REALTY_LISTING_EDIT_LEDGER_PATH`
+when building fixtures from mounted production locale/listing-review state.
+
 Generated files:
 
 - `search/data/listings.json` - 165 source listings used by CMS/import prototypes.

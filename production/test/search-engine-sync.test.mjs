@@ -116,6 +116,46 @@ test("generated search sync smoke report is valid when present", () => {
   assert.equal(assertSearchEngineSyncReport(JSON.parse(fs.readFileSync(file, "utf8"))), true);
 });
 
+test("search fixture builder honors mounted locale registry and listing edits", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-search-fixtures-`);
+  const outDir = `${dir}/out`;
+  const registryPath = `${dir}/registry.json`;
+  const listingEditPath = `${dir}/listing-edits.jsonl`;
+  const registry = JSON.parse(fs.readFileSync(fromRoot("locales", "registry.json"), "utf8"));
+  const hebrew = registry.locales.find((locale) => locale.code === "he");
+  hebrew.public_enabled = false;
+  hebrew.indexable = false;
+  fs.writeFileSync(registryPath, `${JSON.stringify(registry, null, 2)}\n`);
+  fs.writeFileSync(
+    listingEditPath,
+    `${JSON.stringify({
+      listing_id: "MS-CRAWL-0001",
+      patch: { description: "Mounted search description." },
+    })}\n`,
+  );
+
+  const result = spawnSync("python3", [fromRoot("search", "build_search_indexes.py"), "--out-dir", outDir], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_LOCALE_REGISTRY_PATH: registryPath,
+      MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const docs = JSON.parse(fs.readFileSync(`${outDir}/index-listings.json`, "utf8"));
+  const summary = JSON.parse(fs.readFileSync(`${outDir}/search-fixture-summary.json`, "utf8"));
+  const reviewed = docs.filter((doc) => doc.source_listing_id === "MS-CRAWL-0001");
+
+  assert.equal(summary.locale_registry_path, registryPath);
+  assert.equal(summary.listing_edits_path, listingEditPath);
+  assert.equal(summary.public_indexable_locales.includes("he"), false);
+  assert.deepEqual(new Set(reviewed.map((doc) => doc.locale)), new Set(["bg", "el"]));
+  assert.equal(reviewed.every((doc) => doc.description === "Mounted search description."), true);
+});
+
 test("search engine query smoke normalizes Typesense and Meilisearch hits", async () => {
   const calls = [];
   const hit = {

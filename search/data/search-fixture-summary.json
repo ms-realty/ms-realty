@@ -1,5 +1,7 @@
 {
   "artifact_dir": "/Users/ivan/Code/MS-Realty/migration/artifacts/20260704-211155",
+  "locale_registry_path": "/Users/ivan/Code/MS-Realty/locales/registry.json",
+  "listing_edits_path": "/Users/ivan/Code/MS-Realty/production/data/listing-edits.jsonl",
   "source_listing_count": 165,
   "index_document_count": 167,
   "domains": [
