@@ -192,16 +192,18 @@ if (
   sitemap.summary.listing_entries !== 167 ||
   sitemap.summary.location_pages < 6 ||
   sitemap.summary.seller_pages !== 7 ||
-  sitemap.summary.contact_pages !== 7
+  sitemap.summary.contact_pages !== 7 ||
+  sitemap.summary.guide_pages !== 2
 ) {
-  throw new Error("Localized sitemap must include approved home, listing, location, seller, and contact pages");
+  throw new Error("Localized sitemap must include approved home, listing, location, seller, contact, and guide pages");
 }
 const expectedSitemapEntries =
   sitemap.summary.home_pages +
   sitemap.summary.listing_entries +
   sitemap.summary.location_pages +
   sitemap.summary.seller_pages +
-  sitemap.summary.contact_pages;
+  sitemap.summary.contact_pages +
+  sitemap.summary.guide_pages;
 if (sitemap.summary.entries !== expectedSitemapEntries) {
   throw new Error("Localized sitemap route count must match approved route buckets");
 }
@@ -216,9 +218,10 @@ const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data
 assertAppRouteManifest(appRouteManifest);
 assertAppRouteFiles(appRouteManifest);
 if (
-  appRouteManifest.summary.routes !== 202 ||
+  appRouteManifest.summary.routes !== 204 ||
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
+  appRouteManifest.summary.by_type.guide !== 2 ||
   appRouteManifest.routes.find((route) => route.path === "/he/")?.dir !== "rtl"
 ) {
   throw new Error("App Router manifest must map sitemap routes plus no-store search routes");
@@ -232,9 +235,10 @@ if (
   !sitemapXml.includes("/he/locations/sandanski") ||
   !sitemapXml.includes("/he/sell") ||
   !sitemapXml.includes("/he/contact") ||
+  !sitemapXml.includes("/en/guides/foreign-buyers") ||
   sitemapXml.includes("/fr/")
 ) {
-  throw new Error("Sitemap XML must include approved Hebrew and exclude French");
+  throw new Error("Sitemap XML must include approved Hebrew/guide routes and exclude French");
 }
 if (!robotsTxt.includes("Sitemap:")) throw new Error("Robots must include sitemap URL");
 

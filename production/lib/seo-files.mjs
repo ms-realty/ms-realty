@@ -1,9 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
+import { approvedContentGuideGroups, readApprovedCmsContent } from "./approved-content.mjs";
 import { fromRoot } from "./paths.mjs";
 import { mergeRuntimeTranslations } from "./runtime.mjs";
 import {
   sitemapEntriesForContact,
+  sitemapEntriesForGuides,
   sitemapEntriesForHome,
   sitemapEntriesForListing,
   sitemapEntriesForLocations,
@@ -39,7 +41,8 @@ export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = 
   const sellerEntries = sitemapEntriesForSeller(registry);
   const homeEntries = sitemapEntriesForHome(registry);
   const contactEntries = sitemapEntriesForContact(registry);
-  const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries, ...contactEntries];
+  const guideEntries = sitemapEntriesForGuides(registry, approvedContentGuideGroups(readApprovedCmsContent()));
+  const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries, ...contactEntries, ...guideEntries];
   return {
     artifact_id: "runtime-localized-sitemap",
     summary: {
@@ -49,6 +52,7 @@ export function buildRuntimeLocalizedSitemap(registry, seed, translationTasks = 
       location_pages: locationEntries.length,
       seller_pages: sellerEntries.length,
       contact_pages: contactEntries.length,
+      guide_pages: guideEntries.length,
       entries: entries.length,
       byLocale: countBy(entries, (entry) => entry.locale),
     },
@@ -96,6 +100,7 @@ export function assertSeoFiles({ sitemapXml, robotsTxt }) {
   if (!sitemapXml.includes("/he/locations/sandanski")) throw new Error("Sitemap XML must include approved Hebrew location route");
   if (!sitemapXml.includes("/he/sell")) throw new Error("Sitemap XML must include Hebrew seller route");
   if (!sitemapXml.includes("/he/contact")) throw new Error("Sitemap XML must include Hebrew contact route");
+  if (!sitemapXml.includes("/en/guides/foreign-buyers")) throw new Error("Sitemap XML must include approved CMS guide route");
   if (sitemapXml.includes("/fr/")) throw new Error("Sitemap XML must not include unapproved French routes");
   if (!sitemapXml.includes('hreflang="x-default"')) throw new Error("Sitemap XML must include x-default links");
   if (!robotsTxt.includes("User-agent: *")) throw new Error("Robots must declare user agent");

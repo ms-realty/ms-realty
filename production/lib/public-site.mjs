@@ -263,6 +263,28 @@ function localizedCopy(localeCode, view) {
   };
 }
 
+function guideDescription(documents) {
+  return documents
+    .flatMap((doc) => doc.facts || [])
+    .join(" ")
+    .slice(0, 240);
+}
+
+function guideSchema({ path, locale, documents }) {
+  const first = documents[0];
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: first.title,
+    inLanguage: locale.code,
+    url: path,
+    publisher: {
+      "@type": "Organization",
+      name: "MS Realty",
+    },
+  };
+}
+
 function translationFor(translations, localeCode) {
   return translations.find((translation) => translation.locale === localeCode) || null;
 }
@@ -688,6 +710,55 @@ export function renderContactPage({ registry, localeCode }) {
       },
       seller: {
         path: sellerPath(registry, locale.code),
+      },
+    },
+  };
+}
+
+export function renderGuidePage({ registry, localeCode, path, documents }) {
+  const resolved = resolvePublicLocale(registry, localeCode);
+  const locale = resolved.locale;
+  const docs = documents.filter((doc) => doc.status === "approved" && doc.locale === locale.code);
+  const first = docs[0];
+  if (!first) return { kind: "not_found", status: 404, path, indexable: false };
+  const indexable = resolved.available && locale.public_enabled && locale.indexable;
+  const description = guideDescription(docs);
+
+  return {
+    kind: "guide",
+    status: indexable ? 200 : 404,
+    requested_locale: localeCode,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable,
+    metadata: {
+      title: first.title,
+      description,
+      robots: indexable ? "index,follow" : "noindex,follow",
+    },
+    hreflang: indexable
+      ? [
+          { hreflang: locale.code, href: path },
+          { hreflang: "x-default", href: path },
+        ]
+      : [],
+    schema: indexable ? guideSchema({ path, locale, documents: docs }) : null,
+    body: {
+      h1: first.title,
+      intro: description,
+      sections: docs.map((doc) => ({
+        id: doc.id,
+        title: doc.title,
+        facts: doc.facts,
+        reviewer: doc.reviewer,
+      })),
+      ctas: {
+        search: { path: `/${locale.code}/${locale.route_segments.search}` },
+        seller: { path: sellerPath(registry, locale.code) },
+        contact: { path: contactPath(registry, locale.code) },
       },
     },
   };

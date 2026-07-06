@@ -23,6 +23,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   const home = renderRuntimePath(registry, seed, "/he/");
   const seller = renderRuntimePath(registry, seed, "/he/sell");
   const contact = renderRuntimePath(registry, seed, "/he/contact");
+  const guide = renderRuntimePath(registry, seed, "/en/guides/foreign-buyers");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
 
@@ -50,6 +51,12 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(contact.path, "/he/contact");
   assert.equal(contact.body.callback.payload.source, "website_contact_callback");
   assert.equal(contact.body.callback.payload.leadType, "general");
+  assert.equal(guide.kind, "guide");
+  assert.equal(guide.status, 200);
+  assert.equal(guide.indexable, true);
+  assert.equal(guide.body.sections.length, 2);
+  assert.match(guide.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
+  assert.equal(renderRuntimePath(registry, seed, "/he/guides/foreign-buyers").status, 404);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").kind, "location");
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length, 1);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/petrich").status, 404);

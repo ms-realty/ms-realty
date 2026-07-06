@@ -1199,6 +1199,79 @@
       }
     }
   },
+  "guide_en": {
+    "kind": "guide",
+    "status": 200,
+    "requested_locale": "en",
+    "locale": "en",
+    "lang": "en",
+    "dir": "ltr",
+    "path": "/en/guides/foreign-buyers",
+    "canonical": "/en/guides/foreign-buyers",
+    "indexable": true,
+    "metadata": {
+      "title": "Foreign buyers and Bulgarian land ownership",
+      "description": "Non-EU buyers cannot own Bulgarian land directly in their own name. For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD. EU and EEA buyers are handled differently and should confirm the current pur",
+      "robots": "index,follow"
+    },
+    "hreflang": [
+      {
+        "hreflang": "en",
+        "href": "/en/guides/foreign-buyers"
+      },
+      {
+        "hreflang": "x-default",
+        "href": "/en/guides/foreign-buyers"
+      }
+    ],
+    "schema": {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Foreign buyers and Bulgarian land ownership",
+      "inLanguage": "en",
+      "url": "/en/guides/foreign-buyers",
+      "publisher": {
+        "@type": "Organization",
+        "name": "MS Realty"
+      }
+    },
+    "body": {
+      "h1": "Foreign buyers and Bulgarian land ownership",
+      "intro": "Non-EU buyers cannot own Bulgarian land directly in their own name. For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD. EU and EEA buyers are handled differently and should confirm the current pur",
+      "sections": [
+        {
+          "id": "foreign-buyers-bg-land-ownership",
+          "title": "Foreign buyers and Bulgarian land ownership",
+          "facts": [
+            "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+            "For land ownership, a Non-EU buyer normally needs a Bulgarian company structure such as an OOD.",
+            "EU and EEA buyers are handled differently and should confirm the current purchase structure with a lawyer before signing."
+          ],
+          "reviewer": "editor_bg"
+        },
+        {
+          "id": "foreign-buyers-financing-gap",
+          "title": "Foreign-buyer financing checks",
+          "facts": [
+            "Foreign-national mortgage availability can be limited in Bulgaria.",
+            "MS Realty treats financing as an early qualification item, not a late-stage surprise."
+          ],
+          "reviewer": "editor_bg"
+        }
+      ],
+      "ctas": {
+        "search": {
+          "path": "/en/search"
+        },
+        "seller": {
+          "path": "/en/sell"
+        },
+        "contact": {
+          "path": "/en/contact"
+        }
+      }
+    }
+  },
   "location_he": {
     "kind": "location",
     "status": 200,

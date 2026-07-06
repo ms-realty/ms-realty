@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { approvedContentDocumentsForPath, readApprovedCmsContent } from "./approved-content.mjs";
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
@@ -6,6 +7,7 @@ import { applyListingEdits } from "./listing-edits.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   renderHomePage,
+  renderGuidePage,
   renderLanguageFallback,
   renderListingPage,
   renderLocationPage,
@@ -128,6 +130,16 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   });
   if (contactLocale) return { type: "contact", localeCode: contactLocale.code };
 
+  const guideDocuments = approvedContentDocumentsForPath(readApprovedCmsContent(), normalized);
+  if (guideDocuments.length) {
+    return {
+      type: "guide",
+      localeCode: guideDocuments[0].locale,
+      path: normalized,
+      documents: guideDocuments,
+    };
+  }
+
   for (const locale of registry.locales) {
     const location = locationNames(seed).find((candidate) => locationPath(registry, locale.code, candidate) === normalized);
     if (location) return { type: "location", localeCode: locale.code, location };
@@ -176,6 +188,14 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   if (resolved.type === "contact") {
     return renderContactPage({ registry, localeCode: resolved.localeCode });
   }
+  if (resolved.type === "guide") {
+    return renderGuidePage({
+      registry,
+      localeCode: resolved.localeCode,
+      path: resolved.path,
+      documents: resolved.documents,
+    });
+  }
   if (resolved.type === "location") {
     return renderLocationPage({
       registry,
@@ -216,6 +236,7 @@ export function buildRuntimeSmoke(registry, seed) {
     home_he: renderRuntimePath(registry, seed, "/he/"),
     seller_he: renderRuntimePath(registry, seed, "/he/sell"),
     contact_he: renderRuntimePath(registry, seed, "/he/contact"),
+    guide_en: renderRuntimePath(registry, seed, "/en/guides/foreign-buyers"),
     location_he: renderRuntimePath(registry, seed, "/he/locations/sandanski"),
     sold_listing_he: renderRuntimePath(registry, soldSeed, "/he/properties/MS-CRAWL-0001"),
     sold_search_he: searchRuntimeListings(registry, soldSeed, { localeCode: "he", query: "Sandanski" }),
@@ -288,6 +309,14 @@ export function assertRuntimeSmoke(smoke) {
     smoke.contact_he.body.callback.payload.leadType !== "general"
   ) {
     throw new Error("Runtime contact page must expose generic callback lead action");
+  }
+  if (
+    smoke.guide_en.status !== 200 ||
+    smoke.guide_en.kind !== "guide" ||
+    smoke.guide_en.body.sections.length < 2 ||
+    !smoke.guide_en.body.sections[0].facts.join(" ").includes("Non-EU buyers cannot own Bulgarian land directly")
+  ) {
+    throw new Error("Runtime guide page must render approved CMS facts cited by Hermes");
   }
   if (smoke.location_he.status !== 200 || smoke.location_he.kind !== "location" || smoke.location_he.body.location !== "Sandanski") {
     throw new Error("Runtime location page must render reviewed Sandanski inventory");

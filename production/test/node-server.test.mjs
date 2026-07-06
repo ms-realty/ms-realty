@@ -253,6 +253,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         contactHtml: await textFetch(baseUrl, "/he/contact", {
           headers: { accept: "text/html" },
         }),
+        guidePage: await jsonFetch(baseUrl, "/en/guides/foreign-buyers"),
+        guideHtml: await textFetch(baseUrl, "/en/guides/foreign-buyers", {
+          headers: { accept: "text/html" },
+        }),
         lead: await jsonFetch(baseUrl, "/api/leads", {
           method: "POST",
           captureHeaders: true,
@@ -473,6 +477,10 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
       assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
       assert.equal(smoke.contactLead.body.lead.leadType, "general");
+      assert.equal(smoke.guidePage.body.kind, "guide");
+      assert.equal(smoke.guidePage.body.indexable, true);
+      assert.match(smoke.guidePage.body.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
+      assert.match(smoke.guideHtml.body, /data-kind="guide"/);
       assert.equal(smoke.viewingCalendar.body.includes("BEGIN:VCALENDAR"), true);
       assert.equal(smoke.viewingCalendar.body.includes("DTSTART:20260706T100000Z"), true);
       assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);

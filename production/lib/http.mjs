@@ -1395,6 +1395,17 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must accept contact callback leads into the gated CRM flow");
   }
+  if (
+    smoke.guidePage?.status !== 200 ||
+    smoke.guidePage.body.kind !== "guide" ||
+    smoke.guidePage.body.indexable !== true ||
+    !smoke.guidePage.body.body.sections?.some((section) =>
+      section.facts.join(" ").includes("Non-EU buyers cannot own Bulgarian land directly"),
+    ) ||
+    !smoke.guideHtml?.body.includes("data-kind=\"guide\"")
+  ) {
+    throw new Error("HTTP smoke must serve approved CMS guide pages cited by Hermes");
+  }
   if (smoke.fallback.status !== 200 || smoke.fallback.body.indexable !== false) {
     throw new Error("HTTP smoke must serve non-indexable fallback");
   }

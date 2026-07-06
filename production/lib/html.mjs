@@ -225,6 +225,29 @@ function renderContact(page) {
 </main>`;
 }
 
+function renderGuide(page) {
+  const sections = (page.body.sections || [])
+    .map(
+      (section) => `
+      <section id="${escapeHtml(section.id)}" data-reviewer="${escapeHtml(section.reviewer)}">
+        <h2>${escapeHtml(section.title)}</h2>
+        <ul>${section.facts.map((fact) => `<li>${escapeHtml(fact)}</li>`).join("")}</ul>
+      </section>`,
+    )
+    .join("");
+  return `
+<main data-kind="guide" data-approved-source="cms" data-min-touch-target="44">
+  <h1>${escapeHtml(page.body.h1)}</h1>
+  <p>${escapeHtml(page.body.intro)}</p>
+  ${sections}
+  <nav aria-label="Guide actions">
+    <a href="${escapeHtml(page.body.ctas.search.path)}">Search</a>
+    <a href="${escapeHtml(page.body.ctas.seller.path)}">Seller valuation</a>
+    <a href="${escapeHtml(page.body.ctas.contact.path)}">Contact</a>
+  </nav>
+</main>`;
+}
+
 function renderFallback(page) {
   return `
 <main data-kind="language-fallback">
@@ -507,6 +530,7 @@ function renderBody(page, options = {}) {
   if (page.kind === "location") return renderLocation(page);
   if (page.kind === "seller") return renderSeller(page);
   if (page.kind === "contact") return renderContact(page);
+  if (page.kind === "guide") return renderGuide(page);
   if (page.kind === "language_fallback") return renderFallback(page);
   if (page.kind === "admin_migration_review") return renderAdminMigrationReview(page);
   if (page.kind === "admin_lead_inbox") return renderAdminLeadInbox(page);

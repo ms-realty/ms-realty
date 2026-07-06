@@ -14,6 +14,27 @@ export function approvedContentMatches(content, query, limit = 2) {
     .slice(0, limit);
 }
 
+function normalizePath(pathname) {
+  const path = String(pathname || "").trim();
+  if (!path || path === "/") return "/";
+  return path.replace(/\/+$/, "");
+}
+
+export function approvedContentDocumentsForPath(content, pathname) {
+  const normalized = normalizePath(pathname);
+  return (content.documents || []).filter((doc) => doc.status === "approved" && normalizePath(doc.path) === normalized);
+}
+
+export function approvedContentGuideGroups(content) {
+  const groups = new Map();
+  for (const doc of content.documents || []) {
+    if (doc.status !== "approved" || doc.type !== "guide") continue;
+    const path = normalizePath(doc.path);
+    groups.set(path, [...(groups.get(path) || []), { ...doc, path }]);
+  }
+  return [...groups.entries()].map(([path, documents]) => ({ path, documents }));
+}
+
 export function assertApprovedCmsContent(content) {
   if (!Array.isArray(content.documents) || !content.documents.length) throw new Error("Approved CMS content must contain documents");
   for (const doc of content.documents) {

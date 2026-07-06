@@ -1069,4 +1069,14 @@
     <xhtml:link rel="alternate" hreflang="he" href="https://makler-realty.com/he/contact" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/kontakt" />
   </url>
+  <url>
+    <loc>https://makler-realty.com/en/guides/foreign-buyers</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/guides/foreign-buyers" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/en/guides/foreign-buyers" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/en/guides/buying-process</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/guides/buying-process" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/en/guides/buying-process" />
+  </url>
 </urlset>

@@ -183,3 +183,25 @@ export function sitemapEntriesForSeller(registry) {
     hreflang,
   }));
 }
+
+export function sitemapEntriesForGuides(registry, guideGroups) {
+  return guideGroups
+    .map((group) => {
+      const first = group.documents[0];
+      if (!first) return null;
+      const locale = getLocale(registry, first.locale);
+      if (!locale.public_enabled || !locale.indexable) return null;
+      const hreflang = [
+        { hreflang: locale.code, href: group.path },
+        { hreflang: "x-default", href: group.path },
+      ];
+      return {
+        type: "guide",
+        locale: locale.code,
+        loc: group.path,
+        guide_id: first.id,
+        hreflang,
+      };
+    })
+    .filter(Boolean);
+}

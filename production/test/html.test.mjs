@@ -43,6 +43,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   const locationHtml = renderHtmlPage(renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" }));
   const sellerHtml = renderHtmlPage(renderSellerPage({ registry, localeCode: "he" }));
   const contactHtml = renderHtmlPage(renderContactPage({ registry, localeCode: "he" }));
+  const guideHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/en/guides/foreign-buyers"));
   const fallbackHtml = renderHtmlPage(renderLanguageFallback({ registry, requestedLocale: "fr" }));
 
   assert.equal(assertHtmlPage(homeHtml, { lang: "he", dir: "rtl", kind: "home" }), true);
@@ -68,6 +69,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.equal(assertHtmlPage(contactHtml, { lang: "he", dir: "rtl", kind: "contact" }), true);
   assert.match(contactHtml, /data-lead-type="general"/);
   assert.match(contactHtml, /website_contact_callback/);
+  assert.equal(assertHtmlPage(guideHtml, { lang: "en", dir: "ltr", kind: "guide" }), true);
+  assert.match(guideHtml, /data-approved-source="cms"/);
+  assert.match(guideHtml, /Non-EU buyers cannot own Bulgarian land directly/);
   assert.equal(assertHtmlPage(fallbackHtml, { lang: "en", dir: "ltr", kind: "language-fallback" }), true);
   assert.match(fallbackHtml, /noindex,follow/);
 });

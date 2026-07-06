@@ -331,6 +331,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
     contact: await dispatchHttp(app, { url: "/he/contact" }),
     contactHtml: await dispatchHttp(app, { url: "/he/contact?format=html" }),
+    guidePage: await dispatchHttp(app, { url: "/en/guides/foreign-buyers" }),
+    guideHtml: await dispatchHttp(app, { url: "/en/guides/foreign-buyers?format=html" }),
     lead: await dispatchHttp(app, {
       method: "POST",
       url: "/api/leads",
@@ -605,6 +607,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");
+  assert.equal(smoke.guidePage.body.kind, "guide");
+  assert.equal(smoke.guidePage.body.indexable, true);
+  assert.match(smoke.guidePage.body.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
+  assert.match(smoke.guideHtml.body, /data-kind="guide"/);
   assert.equal(smoke.languageRequest.headers["cache-control"], "no-store");
   assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(smoke.tourApproval.body.is_public, true);

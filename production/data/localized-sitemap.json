@@ -7,10 +7,11 @@
     "location_pages": 7,
     "seller_pages": 7,
     "contact_pages": 7,
-    "entries": 195,
+    "guide_pages": 2,
+    "entries": 197,
     "byLocale": {
       "bg": 119,
-      "en": 3,
+      "en": 5,
       "de": 3,
       "nl": 3,
       "ru": 57,
@@ -3324,6 +3325,38 @@
         {
           "hreflang": "x-default",
           "href": "/bg/kontakt"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "en",
+      "loc": "/en/guides/foreign-buyers",
+      "guide_id": "foreign-buyers-bg-land-ownership",
+      "hreflang": [
+        {
+          "hreflang": "en",
+          "href": "/en/guides/foreign-buyers"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/en/guides/foreign-buyers"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "en",
+      "loc": "/en/guides/buying-process",
+      "guide_id": "buyer-due-diligence-liens",
+      "hreflang": [
+        {
+          "hreflang": "en",
+          "href": "/en/guides/buying-process"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/en/guides/buying-process"
         }
       ]
     }

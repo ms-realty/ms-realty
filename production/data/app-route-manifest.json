@@ -1,9 +1,9 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
-  "source_sitemap_entries": 195,
+  "source_sitemap_entries": 197,
   "summary": {
-    "routes": 202,
-    "sitemap_indexable_routes": 195,
+    "routes": 204,
+    "sitemap_indexable_routes": 197,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
@@ -11,13 +11,14 @@
       "contact": 7,
       "location": 7,
       "seller": 7,
-      "search": 7
+      "search": 7,
+      "guide": 2
     },
     "by_locale": {
       "bg": 120,
       "de": 4,
       "el": 6,
-      "en": 4,
+      "en": 6,
       "he": 6,
       "nl": 4,
       "ru": 58
@@ -3309,6 +3310,56 @@
         "locale": "en"
       },
       "hreflang_count": 8
+    },
+    {
+      "type": "guide",
+      "path": "/en/guides/buying-process",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderGuidePage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "en",
+        "guidePath": "guides/buying-process"
+      },
+      "hreflang_count": 2
+    },
+    {
+      "type": "guide",
+      "path": "/en/guides/foreign-buyers",
+      "locale": "en",
+      "lang": "en",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "properties",
+        "search": "search",
+        "location": "locations",
+        "seller": "sell",
+        "contact": "contact"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderGuidePage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "en",
+        "guidePath": "guides/foreign-buyers"
+      },
+      "hreflang_count": 2
     },
     {
       "type": "search",

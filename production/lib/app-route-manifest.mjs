@@ -13,6 +13,7 @@ const ROUTE_MODULES = {
   location: { module: "app/[locale]/[...slug]/route", renderer: "renderLocationPage", dynamic: true },
   seller: { module: "app/[locale]/[...slug]/route", renderer: "renderSellerPage", dynamic: true },
   contact: { module: "app/[locale]/[...slug]/route", renderer: "renderContactPage", dynamic: true },
+  guide: { module: "app/[locale]/[...slug]/route", renderer: "renderGuidePage", dynamic: true },
 };
 
 function loadSitemap(filePath) {
@@ -50,6 +51,7 @@ function entryFromSitemap(registry, entry) {
       locale: locale.code,
       ...(entry.type === "listing" ? { listingId: entry.loc.split("/").filter(Boolean).at(-1) } : {}),
       ...(entry.type === "location" ? { location: entry.loc.split("/").filter(Boolean).at(-1) } : {}),
+      ...(entry.type === "guide" ? { guidePath: entry.loc.split("/").filter(Boolean).slice(1).join("/") } : {}),
     },
     hreflang_count: entry.hreflang?.length || 0,
   };

@@ -137,13 +137,15 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.summary.location_pages >= 6, true);
   assert.equal(data.summary.seller_pages, 7);
   assert.equal(data.summary.contact_pages, 7);
+  assert.equal(data.summary.guide_pages, 2);
   assert.equal(
     data.summary.entries,
     data.summary.home_pages +
       data.summary.listing_entries +
       data.summary.location_pages +
       data.summary.seller_pages +
-      data.summary.contact_pages,
+      data.summary.contact_pages +
+      data.summary.guide_pages,
   );
   assert.equal(data.summary.byLocale.bg >= 118, true);
   assert.equal(data.summary.byLocale.ru, 57);
@@ -154,4 +156,6 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.entries.some((entry) => entry.loc === "/he/locations/sandanski" && entry.type === "location"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/sell" && entry.type === "seller"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/contact" && entry.type === "contact"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/en/guides/foreign-buyers" && entry.type === "guide"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/en/guides/buying-process" && entry.type === "guide"), true);
 });

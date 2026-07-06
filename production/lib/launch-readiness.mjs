@@ -251,13 +251,15 @@ export function buildLaunchReadinessReport({
     sitemap.summary.listing_entries +
     sitemap.summary.location_pages +
     sitemap.summary.seller_pages +
-    sitemap.summary.contact_pages;
+    sitemap.summary.contact_pages +
+    sitemap.summary.guide_pages;
   const localizedSitemapReady =
     sitemap.summary.home_pages === 7 &&
     sitemap.summary.listing_entries === 167 &&
     sitemap.summary.location_pages >= 6 &&
     sitemap.summary.seller_pages === 7 &&
     sitemap.summary.contact_pages === 7 &&
+    sitemap.summary.guide_pages === 2 &&
     sitemap.summary.entries === expectedSitemapEntries;
 
   const gates = [

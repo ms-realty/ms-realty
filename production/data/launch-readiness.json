@@ -63,10 +63,11 @@
         "location_pages": 7,
         "seller_pages": 7,
         "contact_pages": 7,
-        "entries": 195,
+        "guide_pages": 2,
+        "entries": 197,
         "byLocale": {
           "bg": 119,
-          "en": 3,
+          "en": 5,
           "de": 3,
           "nl": 3,
           "ru": 57,

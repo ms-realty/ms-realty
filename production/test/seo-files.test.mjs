@@ -22,6 +22,7 @@ test("SEO files expose only approved localized sitemap routes", () => {
   assert.match(sitemapXml, /https:\/\/makler-realty\.com\/he\/<\/loc>/);
   assert.match(sitemapXml, /https:\/\/makler-realty\.com\/ru\/properties\/MS-CRAWL-/);
   assert.match(sitemapXml, /https:\/\/makler-realty\.com\/he\/contact/);
+  assert.match(sitemapXml, /https:\/\/makler-realty\.com\/en\/guides\/foreign-buyers/);
   assert.doesNotMatch(sitemapXml, /\/fr\//);
   assert.match(robotsTxt, /Sitemap: https:\/\/makler-realty\.com\/sitemap\.xml/);
 });
@@ -50,6 +51,7 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
   assert.equal(sitemap.summary.byLocale.es, 5);
   assert.equal(sitemap.summary.seller_pages, 8);
   assert.equal(sitemap.summary.contact_pages, 8);
+  assert.equal(sitemap.summary.guide_pages, 2);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/" && entry.type === "home"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/propiedades/MS-CRAWL-0001"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/locations/sandanski" && entry.type === "location"), true);

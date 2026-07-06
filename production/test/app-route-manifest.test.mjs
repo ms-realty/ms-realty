@@ -21,16 +21,24 @@ test("App Router manifest maps sitemap entries plus no-store search routes", () 
           loc: "/he/properties/MS-CRAWL-0001",
           hreflang: [{ hreflang: "he", href: "/he/properties/MS-CRAWL-0001" }],
         },
+        {
+          type: "guide",
+          locale: "en",
+          loc: "/en/guides/foreign-buyers",
+          hreflang: [{ hreflang: "en", href: "/en/guides/foreign-buyers" }],
+        },
       ],
     },
     generatedAt: "2026-07-06T00:00:00Z",
   });
 
   assert.equal(assertAppRouteManifest(manifest), true);
-  assert.equal(manifest.summary.sitemap_indexable_routes, 2);
+  assert.equal(manifest.summary.sitemap_indexable_routes, 3);
   assert.equal(manifest.summary.utility_routes, 7);
   assert.equal(manifest.routes.find((route) => route.path === "/he/").dir, "rtl");
   assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-CRAWL-0001").params.listingId, "MS-CRAWL-0001");
+  assert.equal(manifest.routes.find((route) => route.path === "/en/guides/foreign-buyers").renderer, "renderGuidePage");
+  assert.equal(manifest.routes.find((route) => route.path === "/en/guides/foreign-buyers").params.guidePath, "guides/foreign-buyers");
   assert.equal(manifest.routes.find((route) => route.path === "/he/search").cache, "no-store");
   assert.equal(manifest.routes.find((route) => route.path === "/he/search").sitemap_indexable, false);
   assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-CRAWL-0001").app_module, "app/[locale]/[...slug]/route");
@@ -41,9 +49,10 @@ test("generated App Router manifest is valid when present", () => {
   if (!fs.existsSync(file)) return;
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertAppRouteManifest(manifest), true);
-  assert.equal(manifest.summary.routes, 202);
-  assert.equal(manifest.summary.sitemap_indexable_routes, 195);
+  assert.equal(manifest.summary.routes, 204);
+  assert.equal(manifest.summary.sitemap_indexable_routes, 197);
   assert.equal(manifest.summary.by_type.search, 7);
+  assert.equal(manifest.summary.by_type.guide, 2);
   assert.equal(manifest.routes.some((route) => route.path.startsWith("/fr/")), false);
   assert.equal(assertAppRouteFiles(manifest), true);
 });
@@ -64,6 +73,11 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.kind, "listing");
   assert.match(listing.html, /MS-CRAWL-0001/);
+
+  const guide = renderAppRoute({ pathname: "/en/guides/foreign-buyers", url: "https://example.test/en/guides/foreign-buyers" });
+  assert.equal(guide.status, 200);
+  assert.equal(guide.rendered.kind, "guide");
+  assert.match(guide.html, /Non-EU buyers cannot own Bulgarian land directly/);
 });
 
 test("App Router adapter honors mounted public listing edit ledger", () => {
@@ -92,9 +106,10 @@ test("App Router adapter serves approved sitemap and robots text", async () => {
   const sitemap = renderAppSitemap();
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
-  assert.equal(sitemap.sitemap.summary.entries, 193);
+  assert.equal(sitemap.sitemap.summary.entries, 195);
   assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he\/<\/loc>/);
   assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
+  assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);
   assert.doesNotMatch(sitemap.body, /\/el\/akinita\/MS-CRAWL-0001/);
   assert.doesNotMatch(sitemap.body, /\/fr\//);
 

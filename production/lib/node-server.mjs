@@ -270,6 +270,17 @@ export function assertServerSmoke(smoke) {
   ) {
     throw new Error("Server must accept contact callback leads into the gated CRM flow");
   }
+  if (
+    smoke.guidePage?.status !== 200 ||
+    smoke.guidePage.body.kind !== "guide" ||
+    smoke.guidePage.body.indexable !== true ||
+    !smoke.guidePage.body.body.sections?.some((section) =>
+      section.facts.join(" ").includes("Non-EU buyers cannot own Bulgarian land directly"),
+    ) ||
+    !smoke.guideHtml?.body.includes("data-kind=\"guide\"")
+  ) {
+    throw new Error("Server must serve approved CMS guide pages cited by Hermes");
+  }
   if (smoke.badLead.status !== 400) throw new Error("Server must reject unknown buyer listing");
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("Server must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");

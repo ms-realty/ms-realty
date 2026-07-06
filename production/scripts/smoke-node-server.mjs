@@ -192,6 +192,10 @@ try {
     contactHtml: await textFetch(baseUrl, "/he/contact", {
       headers: { accept: "text/html" },
     }),
+    guidePage: await jsonFetch(baseUrl, "/en/guides/foreign-buyers"),
+    guideHtml: await textFetch(baseUrl, "/en/guides/foreign-buyers", {
+      headers: { accept: "text/html" },
+    }),
     savedSearch: await jsonFetch(baseUrl, "/api/saved-searches", {
       method: "POST",
       captureHeaders: true,

@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
+import { approvedContentGuideGroups, readApprovedCmsContent } from "../lib/approved-content.mjs";
 import { approvedTranslationRecordsForListing, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
   sitemapEntriesForContact,
+  sitemapEntriesForGuides,
   sitemapEntriesForHome,
   sitemapEntriesForListing,
   sitemapEntriesForLocations,
@@ -22,7 +24,8 @@ const locationEntries = sitemapEntriesForLocations(registry, listings, (listing)
 const sellerEntries = sitemapEntriesForSeller(registry);
 const homeEntries = sitemapEntriesForHome(registry);
 const contactEntries = sitemapEntriesForContact(registry);
-const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries, ...contactEntries];
+const guideEntries = sitemapEntriesForGuides(registry, approvedContentGuideGroups(readApprovedCmsContent()));
+const entries = [...homeEntries, ...listingEntries, ...locationEntries, ...sellerEntries, ...contactEntries, ...guideEntries];
 const byLocale = {};
 for (const entry of entries) byLocale[entry.locale] = (byLocale[entry.locale] || 0) + 1;
 
@@ -40,6 +43,7 @@ fs.writeFileSync(
         location_pages: locationEntries.length,
         seller_pages: sellerEntries.length,
         contact_pages: contactEntries.length,
+        guide_pages: guideEntries.length,
         entries: entries.length,
         byLocale,
       },

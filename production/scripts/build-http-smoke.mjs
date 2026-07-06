@@ -235,6 +235,8 @@ const smoke = {
   sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
   contact: await dispatchHttp(app, { url: "/he/contact" }),
   contactHtml: await dispatchHttp(app, { url: "/he/contact?format=html" }),
+  guidePage: await dispatchHttp(app, { url: "/en/guides/foreign-buyers" }),
+  guideHtml: await dispatchHttp(app, { url: "/en/guides/foreign-buyers?format=html" }),
   savedSearch: await dispatchHttp(app, {
     method: "POST",
     url: "/api/saved-searches",
