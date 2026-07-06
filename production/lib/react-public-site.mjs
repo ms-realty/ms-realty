@@ -12,7 +12,7 @@ function cardSummary(card) {
 function factsList(facts = {}) {
   return h(
     "dl",
-    null,
+    { "data-listing-facts": "true" },
     ...Object.entries(facts)
       .filter(([, value]) => value !== null && value !== undefined && value !== "")
       .flatMap(([key, value]) => [h("dt", { key: `${key}-term` }, key.replaceAll("_", " ")), h("dd", { key: `${key}-value` }, value)]),
@@ -161,6 +161,27 @@ function ListingBody({ page }) {
   const facts = page.body.facts || {};
   const tour = page.body.media.tour || {};
   const channels = page.body.actions.direct_contact.channels || [];
+  const secondaryActions = h(
+    "nav",
+    { "aria-label": "Save and share", "data-listing-tools": "true" },
+    ...(page.body.actions.secondary || []).map((action) =>
+      action.kind === "share" || action.kind === "print" || action.kind === "link"
+        ? h("a", { key: action.id, href: action.url, "data-listing-action": action.id }, action.label)
+        : h("button", { key: action.id, type: "button", "data-listing-action": action.id, "data-client-save-listing": action.listing_id }, action.label),
+    ),
+  );
+  const primaryActions = h(
+    "nav",
+    { "aria-label": "Listing actions", "data-mobile-sticky-actions": page.body.actions.sticky_mobile ? "true" : "false" },
+    ...(page.body.actions.primary || []).map((action) => h("button", { key: action.id, type: "button", "data-endpoint": action.endpoint }, action.label)),
+  );
+  const brokerContact = h(
+    "nav",
+    { "aria-label": "Broker contact" },
+    ...channels.map((channel) =>
+      channel.enabled ? h("a", { key: channel.label, href: channel.href }, channel.label) : h("span", { key: channel.label, "aria-disabled": "true" }, channel.label),
+    ),
+  );
   return h(
     "main",
     {
@@ -171,6 +192,7 @@ function ListingBody({ page }) {
       "data-active-in-search": page.body.lifecycle?.active_in_search ? "true" : "false",
       "data-min-touch-target": "44",
     },
+    secondaryActions,
     h(
       "section",
       { "aria-label": "Listing summary", "data-listing-summary": "true", "data-source-domain": page.body.source.source_domain, "data-schema-ready": page.schema ? "true" : "false" },
@@ -183,61 +205,47 @@ function ListingBody({ page }) {
         ...["location", "property_type", "offer_type", "bedrooms"].filter((key) => facts[key]).map((key) => h("li", { key }, `${key}: ${facts[key]}`)),
       ),
     ),
-    h("p", null, page.body.description || ""),
-    factsList(facts),
-    h(
-      "nav",
-      {
-        "aria-label": "Listing media",
-        "data-media-gallery-count": page.body.media.gallery_count || 0,
-        "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
-      },
-      h("a", { href: "#listing-gallery" }, "Photos"),
-      h("a", { href: "#listing-tour", "aria-disabled": tour.available ? "false" : "true" }, "360"),
-    ),
     h(
       "section",
-      { id: "listing-gallery", "aria-label": "Gallery", "data-photo-carousel": "true" },
-      ...(page.body.media.gallery || []).slice(0, 12).map((image) => h("img", { key: image.url, src: image.url, alt: image.alt || page.body.h1, loading: "lazy" })),
-    ),
-    h(
-      "section",
-      {
-        id: "listing-tour",
-        "aria-label": "360 tour",
-        "data-photo-sphere-viewer": tour.available ? tour.mount_target : "review_required",
-        "data-tour-provider": tour.provider || "photo-sphere-viewer",
-      },
-      h("p", null, tour.available ? tour.accessibility_caption : tour.review_status || "review required"),
+      { "aria-label": "Listing content", "data-listing-content-grid": "true" },
+      h(
+        "section",
+        { "aria-label": "Listing media and facts", "data-listing-main-column": "true" },
+        h("p", { "data-listing-description": "true" }, page.body.description || ""),
+        factsList(facts),
+        h(
+          "nav",
+          {
+            "aria-label": "Listing media",
+            "data-media-gallery-count": page.body.media.gallery_count || 0,
+            "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
+          },
+          h("a", { href: "#listing-gallery" }, "Photos"),
+          h("a", { href: "#listing-tour", "aria-disabled": tour.available ? "false" : "true" }, "360"),
+        ),
+        h(
+          "section",
+          { id: "listing-gallery", "aria-label": "Gallery", "data-photo-carousel": "true" },
+          ...(page.body.media.gallery || []).slice(0, 12).map((image) => h("img", { key: image.url, src: image.url, alt: image.alt || page.body.h1, loading: "lazy" })),
+        ),
+        h(
+          "section",
+          {
+            id: "listing-tour",
+            "aria-label": "360 tour",
+            "data-photo-sphere-viewer": tour.available ? tour.mount_target : "review_required",
+            "data-tour-provider": tour.provider || "photo-sphere-viewer",
+          },
+          h("p", null, tour.available ? tour.accessibility_caption : tour.review_status || "review required"),
+        ),
+      ),
+      h("aside", { "aria-label": "Contact broker", "data-listing-contact-panel": "true" }, primaryActions, brokerContact),
     ),
     h(
       "section",
       { "aria-label": "Related listings" },
       ...(page.body.related_listings || []).map((card) =>
         h("article", { key: card.id, "data-related-listing": "true" }, h("h2", null, h("a", { href: card.path }, card.title))),
-      ),
-    ),
-    h(
-      "nav",
-      { "aria-label": "Listing actions", "data-mobile-sticky-actions": page.body.actions.sticky_mobile ? "true" : "false" },
-      ...(page.body.actions.primary || []).map((action) => h("button", { key: action.id, type: "button", "data-endpoint": action.endpoint }, action.label)),
-    ),
-    h(
-      "nav",
-      { "aria-label": "Save and share" },
-      ...(page.body.actions.secondary || []).map((action) =>
-        action.kind === "share" || action.kind === "print" || action.kind === "link"
-          ? h("a", { key: action.id, href: action.url, "data-listing-action": action.id }, action.label)
-          : h("button", { key: action.id, type: "button", "data-listing-action": action.id, "data-client-save-listing": action.listing_id }, action.label),
-      ),
-    ),
-    h(
-      "nav",
-      { "aria-label": "Broker contact" },
-      ...channels.map((channel) =>
-        channel.enabled
-          ? h("a", { key: channel.label, href: channel.href }, channel.label)
-          : h("span", { key: channel.label, "aria-disabled": "true" }, channel.label),
       ),
     ),
   );

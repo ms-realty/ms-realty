@@ -81,7 +81,10 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(listing.rendered.kind, "listing");
   assert.match(listing.html, /MS-CRAWL-0001/);
   assert.match(listing.html, /data-react-public-ui="listing"/);
-  assert.match(listing.html, /<dl>/);
+  assert.match(listing.html, /data-listing-tools="true"/);
+  assert.match(listing.html, /data-listing-content-grid="true"/);
+  assert.match(listing.html, /data-listing-contact-panel="true"/);
+  assert.match(listing.html, /<dl data-listing-facts="true">/);
   assert.match(listing.html, /aria-label="Listing media"/);
   assert.match(listing.html, /data-media-gallery-count=/);
   assert.match(listing.html, /data-listing-action="back_to_results"/);

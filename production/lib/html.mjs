@@ -19,10 +19,11 @@ form[role="search"],main[data-kind="seller"] form,main[data-kind="contact"] form
 dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--space-3);margin:0}dt{color:var(--text-muted);font-size:13px;font-weight:600}dd{margin:0;color:var(--text-strong);font-weight:600}table{width:100%;border-collapse:collapse;background:var(--surface)}th,td{padding:.85rem;text-align:start;border-bottom:1px solid var(--border);vertical-align:top}th{background:var(--surface-sunken);color:var(--text-muted);font-size:13px;font-weight:700}section:has(> table){overflow-x:auto}
 article[data-search-card="true"],article[data-related-listing="true"],main[data-kind="home"] section article{display:grid;gap:var(--space-3);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}article[data-search-card="true"]:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}[data-card-badge],[data-listing-verification]{width:max-content;border-radius:var(--radius-pill);background:var(--ink-100);color:var(--ink-800);padding:.25rem .6rem;font-size:13px;font-weight:700}[data-card-price],[data-listing-price]{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--price)}
 main[data-kind="search"] section[aria-label="Search results"],main[data-kind="home"] section[aria-label="Featured listings"],section[aria-label="Related listings"]{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-5)}section[aria-label="Active filters"]{display:flex;flex-wrap:wrap;gap:var(--space-2)}[data-filter-chip]{border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface);padding:.35rem .7rem;color:var(--text-muted);font-weight:600}article[data-search-card] nav,nav[aria-label="Save and share"],nav[aria-label="Broker contact"],nav[aria-label="Locations"]{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
-main[data-kind="listing"]{grid-template-columns:minmax(0,1fr) 320px;align-items:start}main[data-kind="listing"]>[data-listing-summary]{grid-column:1/-1;display:grid;gap:var(--space-3);padding:var(--space-6);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-highlights]{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-listing-highlights] li{border-radius:var(--radius-pill);background:var(--surface-sunken);padding:.35rem .7rem;font-weight:600}#listing-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:var(--space-3)}#listing-gallery img{width:100%;height:180px;object-fit:cover;border-radius:var(--radius-card);background:var(--surface-sunken)}nav[data-mobile-sticky-actions="true"]{position:sticky;bottom:0;z-index:10;display:grid;gap:var(--space-2);padding:var(--space-3);background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
+main[data-kind="listing"]{grid-template-columns:1fr;align-items:start}nav[data-listing-tools="true"]{justify-content:flex-start;padding-block:var(--space-2)}main[data-kind="listing"]>[data-listing-summary]{display:grid;gap:var(--space-3);padding:var(--space-6);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-content-grid]{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:var(--space-6);align-items:start}[data-listing-main-column],[data-listing-contact-panel]{display:grid;gap:var(--space-4)}[data-listing-description]{max-width:72ch;font-size:18px}[data-listing-contact-panel]{position:sticky;top:var(--space-5);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-highlights]{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-listing-highlights] li{border-radius:var(--radius-pill);background:var(--surface-sunken);padding:.35rem .7rem;font-weight:600}#listing-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3)}#listing-gallery img{width:100%;height:180px;object-fit:cover;border-radius:var(--radius-card);background:var(--surface-sunken)}#listing-gallery img:first-child{grid-column:span 2;height:360px}nav[aria-label="Save and share"] a,nav[aria-label="Save and share"] button,nav[aria-label="Broker contact"] a,nav[aria-label="Broker contact"] span{min-height:44px;display:inline-flex;align-items:center;border:1px solid var(--border-strong);border-radius:var(--radius-button);background:var(--surface);padding:.62rem .85rem;font-weight:600}nav[aria-label="Save and share"] button{cursor:pointer}nav[aria-label="Broker contact"] span{opacity:.58}nav[data-mobile-sticky-actions="true"]{position:sticky;bottom:0;z-index:10;display:grid;gap:var(--space-2);padding:var(--space-3);background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
 main[data-kind="seller"]>section,main[data-kind="contact"]>p,main[data-kind="guide"]>section{display:grid;gap:var(--space-3)}[data-seller-steps]{display:grid;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-seller-steps] li{padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
 main[data-admin-workbench]{width:min(100%,1440px)}main[data-admin-workbench] dl,main[data-kind="admin-migration-review"] dl{padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}main[data-admin-workbench]>section,main[data-kind="admin-migration-review"]>section{padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);display:grid;gap:var(--space-4)}nav[data-lead-queue-tabs],nav[data-editor-tabs]{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:var(--space-2);background:var(--surface-sunken);border:1px solid var(--border);border-radius:var(--radius-card)}nav[data-editor-tabs] a,nav[data-lead-queue-tabs] button{background:var(--surface);color:var(--brand);border-color:var(--border);box-shadow:var(--shadow-card)}form[data-reply-approval-required]{display:grid;gap:var(--space-3);min-width:260px}
-@media (max-width:900px){main,main[data-kind="listing"]{display:grid;grid-template-columns:1fr;padding:var(--space-5) var(--space-4) var(--space-10)}h1{font-size:32px}form[role="search"]{grid-template-columns:1fr}fieldset{display:grid}table{min-width:760px}nav[data-mobile-sticky-actions="true"]{margin-inline:calc(var(--space-4) * -1);border-radius:0;border-inline:0}}
+@media (max-width:900px){main,main[data-kind="listing"]{display:grid;grid-template-columns:1fr;padding:var(--space-5) var(--space-4) var(--space-10)}h1{font-size:32px}form[role="search"],[data-listing-content-grid]{grid-template-columns:1fr}[data-listing-contact-panel]{position:static;order:-1;padding:var(--space-4)}#listing-gallery{grid-template-columns:1fr 1fr}#listing-gallery img:first-child{grid-column:1/-1;height:260px}fieldset{display:grid}table{min-width:760px}nav[data-mobile-sticky-actions="true"]{margin-inline:calc(var(--space-4) * -1);border-radius:0;border-inline:0}}
+@media (max-width:560px){#listing-gallery{grid-template-columns:1fr}#listing-gallery img,#listing-gallery img:first-child{grid-column:auto;height:220px}}
 </style>`;
 }
 
@@ -138,6 +139,7 @@ function renderListing(page) {
 <main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}" data-listing-status="${escapeHtml(
     page.body.lifecycle?.status || "available",
   )}" data-active-in-search="${escapeHtml(page.body.lifecycle?.active_in_search ? "true" : "false")}" data-min-touch-target="44">
+  <nav aria-label="Save and share" data-listing-tools="true">${secondary}</nav>
   <section aria-label="Listing summary" data-listing-summary="true" data-source-domain="${escapeHtml(
     page.body.source.source_domain,
   )}" data-schema-ready="${escapeHtml(page.schema ? "true" : "false")}">
@@ -146,24 +148,29 @@ function renderListing(page) {
     <p data-listing-price="true">${escapeHtml(listingPriceLabel(page.body.facts))}</p>
     <ul data-listing-highlights="true">${listingHighlights(page.body.facts)}</ul>
   </section>
-  <p>${escapeHtml(page.body.description || "")}</p>
-  <dl>${renderFacts(page.body.facts)}</dl>
-  <nav aria-label="Listing media" data-media-gallery-count="${escapeHtml(
-    page.body.media.gallery_count || 0,
-  )}" data-tour-status="${escapeHtml(tour.available ? "available" : tour.review_status || "review_required")}">
-    <a href="#listing-gallery">Photos</a>
-    <a href="#listing-tour" aria-disabled="${escapeHtml(tour.available ? "false" : "true")}">360</a>
-  </nav>
-  <section id="listing-gallery" aria-label="Gallery" data-photo-carousel="true">${gallery}</section>
-  <section id="listing-tour" aria-label="360 tour" data-photo-sphere-viewer="${escapeHtml(
-    tour.available ? tour.mount_target : "review_required",
-  )}" data-tour-provider="${escapeHtml(tour.provider || "photo-sphere-viewer")}">
-    ${tour.available ? `<p>${escapeHtml(tour.accessibility_caption)}</p>` : `<p>${escapeHtml(tour.review_status || "review required")}</p>`}
+  <section aria-label="Listing content" data-listing-content-grid="true">
+    <section aria-label="Listing media and facts" data-listing-main-column="true">
+      <p data-listing-description="true">${escapeHtml(page.body.description || "")}</p>
+      <dl data-listing-facts="true">${renderFacts(page.body.facts)}</dl>
+      <nav aria-label="Listing media" data-media-gallery-count="${escapeHtml(
+        page.body.media.gallery_count || 0,
+      )}" data-tour-status="${escapeHtml(tour.available ? "available" : tour.review_status || "review_required")}">
+        <a href="#listing-gallery">Photos</a>
+        <a href="#listing-tour" aria-disabled="${escapeHtml(tour.available ? "false" : "true")}">360</a>
+      </nav>
+      <section id="listing-gallery" aria-label="Gallery" data-photo-carousel="true">${gallery}</section>
+      <section id="listing-tour" aria-label="360 tour" data-photo-sphere-viewer="${escapeHtml(
+        tour.available ? tour.mount_target : "review_required",
+      )}" data-tour-provider="${escapeHtml(tour.provider || "photo-sphere-viewer")}">
+        ${tour.available ? `<p>${escapeHtml(tour.accessibility_caption)}</p>` : `<p>${escapeHtml(tour.review_status || "review required")}</p>`}
+      </section>
+    </section>
+    <aside aria-label="Contact broker" data-listing-contact-panel="true">
+      <nav aria-label="Listing actions" data-mobile-sticky-actions="${escapeHtml(page.body.actions.sticky_mobile ? "true" : "false")}">${primary}</nav>
+      <nav aria-label="Broker contact">${direct}</nav>
+    </aside>
   </section>
   <section aria-label="Related listings">${related}</section>
-  <nav aria-label="Listing actions" data-mobile-sticky-actions="${escapeHtml(page.body.actions.sticky_mobile ? "true" : "false")}">${primary}</nav>
-  <nav aria-label="Save and share">${secondary}</nav>
-  <nav aria-label="Broker contact">${direct}</nav>
 </main>`;
 }
 

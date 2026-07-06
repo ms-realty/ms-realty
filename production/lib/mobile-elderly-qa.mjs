@@ -78,6 +78,10 @@ export function buildMobileElderlyQaReport({
       "listing_detail_media_actions",
       includes(pages.listing, "data-listing-summary=\"true\"") &&
         includes(pages.listing, "data-listing-price=\"true\"") &&
+        includes(pages.listing, "data-listing-tools=\"true\"") &&
+        includes(pages.listing, "data-listing-content-grid=\"true\"") &&
+        includes(pages.listing, "data-listing-contact-panel=\"true\"") &&
+        includes(pages.listing, "data-listing-facts=\"true\"") &&
         includes(pages.listing, "data-photo-carousel=\"true\"") &&
         includes(pages.listing, "data-photo-sphere-viewer=") &&
         includes(pages.listing, "data-listing-action=\"print\"") &&

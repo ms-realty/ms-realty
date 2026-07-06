@@ -54,6 +54,10 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /application\/ld\+json/);
   assert.match(listingHtml, /property="og:type" content="article"/);
   assert.match(listingHtml, /data-listing-summary="true"/);
+  assert.match(listingHtml, /data-listing-tools="true"/);
+  assert.match(listingHtml, /data-listing-content-grid="true"/);
+  assert.match(listingHtml, /data-listing-contact-panel="true"/);
+  assert.match(listingHtml, /data-listing-facts="true"/);
   assert.match(listingHtml, /data-listing-price="true"/);
   assert.match(listingHtml, /data-photo-carousel="true"/);
   assert.match(listingHtml, /data-photo-sphere-viewer="review_required"/);
