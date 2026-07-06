@@ -342,6 +342,12 @@
         },
         "secondary": [
           {
+            "id": "back_to_results",
+            "label": "חזרה לתוצאות",
+            "kind": "link",
+            "url": "/he/search"
+          },
+          {
             "id": "save",
             "label": "שמירה",
             "kind": "client_saved_listing",
@@ -816,6 +822,12 @@
           ]
         },
         "secondary": [
+          {
+            "id": "back_to_results",
+            "label": "Назад к результатам",
+            "kind": "link",
+            "url": "/ru/search"
+          },
           {
             "id": "save",
             "label": "Сохранить",
@@ -1991,6 +2003,12 @@
           ]
         },
         "secondary": [
+          {
+            "id": "back_to_results",
+            "label": "חזרה לתוצאות",
+            "kind": "link",
+            "url": "/he/search"
+          },
           {
             "id": "save",
             "label": "שמירה",

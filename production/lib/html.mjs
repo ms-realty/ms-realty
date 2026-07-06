@@ -122,7 +122,7 @@ function renderListing(page) {
     .join("");
   const secondary = page.body.actions.secondary
     .map((action) => {
-      if (action.kind === "share" || action.kind === "print") {
+      if (action.kind === "share" || action.kind === "print" || action.kind === "link") {
         return `<a href="${escapeHtml(action.url)}" data-listing-action="${escapeHtml(action.id)}">${escapeHtml(action.label)}</a>`;
       }
       return `<button type="button" data-listing-action="${escapeHtml(action.id)}" data-client-save-listing="${escapeHtml(

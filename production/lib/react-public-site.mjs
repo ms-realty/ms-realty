@@ -226,7 +226,7 @@ function ListingBody({ page }) {
       "nav",
       { "aria-label": "Save and share" },
       ...(page.body.actions.secondary || []).map((action) =>
-        action.kind === "share" || action.kind === "print"
+        action.kind === "share" || action.kind === "print" || action.kind === "link"
           ? h("a", { key: action.id, href: action.url, "data-listing-action": action.id }, action.label)
           : h("button", { key: action.id, type: "button", "data-listing-action": action.id, "data-client-save-listing": action.listing_id }, action.label),
       ),

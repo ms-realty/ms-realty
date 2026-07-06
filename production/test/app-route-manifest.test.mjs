@@ -84,6 +84,8 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(listing.html, /<dl>/);
   assert.match(listing.html, /aria-label="Listing media"/);
   assert.match(listing.html, /data-media-gallery-count=/);
+  assert.match(listing.html, /data-listing-action="back_to_results"/);
+  assert.match(listing.html, /href="\/he\/search"/);
   assert.match(listing.html, /aria-label="Related listings"/);
 
   const listingPrint = renderAppRoute({

@@ -34,6 +34,7 @@ const ACTION_LABELS = {
     save: "Запази",
     share: "Сподели",
     print: "Печат/PDF",
+    results: "Назад към резултатите",
   },
   en: {
     inquiry: "Inquiry",
@@ -44,6 +45,7 @@ const ACTION_LABELS = {
     save: "Save",
     share: "Share",
     print: "Print/PDF",
+    results: "Back to results",
   },
   de: {
     inquiry: "Anfrage",
@@ -54,6 +56,7 @@ const ACTION_LABELS = {
     save: "Speichern",
     share: "Teilen",
     print: "Drucken/PDF",
+    results: "Zurück zu den Ergebnissen",
   },
   nl: {
     inquiry: "Aanvraag",
@@ -64,6 +67,7 @@ const ACTION_LABELS = {
     save: "Bewaren",
     share: "Delen",
     print: "Print/PDF",
+    results: "Terug naar resultaten",
   },
   ru: {
     inquiry: "Запрос",
@@ -74,6 +78,7 @@ const ACTION_LABELS = {
     save: "Сохранить",
     share: "Поделиться",
     print: "Печать/PDF",
+    results: "Назад к результатам",
   },
   el: {
     inquiry: "Ερώτηση",
@@ -84,6 +89,7 @@ const ACTION_LABELS = {
     save: "Αποθήκευση",
     share: "Κοινή χρήση",
     print: "Εκτύπωση/PDF",
+    results: "Πίσω στα αποτελέσματα",
   },
   he: {
     inquiry: "פנייה",
@@ -94,6 +100,7 @@ const ACTION_LABELS = {
     save: "שמירה",
     share: "שיתוף",
     print: "הדפסה/PDF",
+    results: "חזרה לתוצאות",
   },
 };
 
@@ -427,6 +434,7 @@ function contactChannelLabel(channel, labels) {
 
 function listingActions(locale, view, path, labels, brokerContact = null) {
   const leadPayload = { leadType: "buyer", language: locale.code, listingReference: view.id };
+  const searchPath = `/${locale.code}/${locale.route_segments?.search || "search"}`;
   return {
     sticky_mobile: true,
     minimum_tap_target_px: 44,
@@ -476,6 +484,7 @@ function listingActions(locale, view, path, labels, brokerContact = null) {
       })),
     },
     secondary: [
+      { id: "back_to_results", label: labels.results || ACTION_LABELS.en.results, kind: "link", url: searchPath },
       {
         id: "save",
         label: labels.save,

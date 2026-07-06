@@ -37,6 +37,12 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.contact_preference, "phone");
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
   assert.ok(he.body.actions.direct_contact.channels.every((channel) => channel.enabled === false && channel.href === null));
+  assert.deepEqual(he.body.actions.secondary.find((action) => action.id === "back_to_results"), {
+    id: "back_to_results",
+    label: "חזרה לתוצאות",
+    kind: "link",
+    url: "/he/search",
+  });
   assert.deepEqual(
     he.body.actions.secondary.find((action) => action.id === "print"),
     {

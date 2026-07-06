@@ -39,6 +39,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.body.actions.primary.find((action) => action.id === "inquiry").endpoint, "/api/leads");
   assert.equal(he.body.actions.primary.find((action) => action.id === "callback").payload.source, "website_callback_request");
   assert.equal(he.body.actions.primary.find((action) => action.id === "request_viewing").payload.source, "website_viewing_request");
+  assert.equal(he.body.actions.secondary.find((action) => action.id === "back_to_results").url, "/he/search");
   assert.equal(he.body.actions.secondary.find((action) => action.id === "share_family").url, he.path);
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
   assert.equal(home.kind, "home");
