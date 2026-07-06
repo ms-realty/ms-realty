@@ -278,6 +278,9 @@ test("listing quality preflight report records missing and valid human review st
   assert.equal(missingReport.ready, false);
   assert.equal(missingReport.review.status, "missing_review");
   assert.equal(missingReport.summary.missing_review_rows, report.rows.length);
+  assert.equal(missingReport.review.pending_review_sample[0].listing_id, report.rows[0].listing_id);
+  assert.equal(missingReport.review.pending_review_sample[0].editor_path, report.rows[0].editor_path);
+  assert.ok(missingReport.review.pending_review_sample[0].required_editor_fields.length > 0);
 
   const partialReport = buildListingQualityPreflightReport({
     report,
@@ -290,6 +293,7 @@ test("listing quality preflight report records missing and valid human review st
   assert.equal(partialReport.ready, false);
   assert.equal(partialReport.review.status, "invalid_review");
   assert.match(partialReport.review.error, /incomplete/);
+  assert.equal(partialReport.review.pending_review_sample[0].listing_id, report.rows[1].listing_id);
 
   const reviewPath = `${dir}/listing-quality.csv`;
   const outputPath = `${dir}/listing-quality-preflight-report.json`;

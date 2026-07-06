@@ -247,17 +247,34 @@ function missingReviewSummary(report) {
   };
 }
 
+function pendingReviewSample(rows) {
+  return rows.slice(0, 10).map((row) => ({
+    listing_id: row.listing_id,
+    target_path: row.target_path,
+    editor_path: row.editor_path,
+    issues: row.issues,
+    required_editor_fields: row.required_editor_fields,
+    public_gallery_assets: row.public_gallery_assets,
+  }));
+}
+
 function reviewState(report, reviewPath, csvText = null) {
   if (csvText === null && !fs.existsSync(reviewPath)) {
-    return { status: "missing_review", path: reviewPath, summary: missingReviewSummary(report) };
+    return {
+      status: "missing_review",
+      path: reviewPath,
+      summary: missingReviewSummary(report),
+      pending_review_sample: pendingReviewSample(report.rows),
+    };
   }
 
   try {
     const text = csvText ?? fs.readFileSync(reviewPath, "utf8");
     const validation = validateListingQualityReviewCsv(report, text);
     if (validation.summary.missing_review_rows > 0) {
-      const sample = report.rows
-        .filter((row) => !validation.reviews.some((review) => review.listing_id === row.listing_id))
+      const reviewed = new Set(validation.reviews.map((review) => review.listing_id));
+      const missingRows = report.rows.filter((row) => !reviewed.has(row.listing_id));
+      const sample = missingRows
         .slice(0, 5)
         .map((row) => row.listing_id)
         .join(", ");
@@ -266,11 +283,18 @@ function reviewState(report, reviewPath, csvText = null) {
         path: reviewPath,
         summary: validation.summary,
         error: `Listing quality review is incomplete: ${validation.summary.missing_review_rows} listing rows missing review (${sample})`,
+        pending_review_sample: pendingReviewSample(missingRows),
       };
     }
     return { status: "pass", path: reviewPath, summary: validation.summary };
   } catch (error) {
-    return { status: "invalid_review", path: reviewPath, summary: missingReviewSummary(report), error: error.message };
+    return {
+      status: "invalid_review",
+      path: reviewPath,
+      summary: missingReviewSummary(report),
+      error: error.message,
+      pending_review_sample: pendingReviewSample(report.rows),
+    };
   }
 }
 
@@ -312,6 +336,14 @@ export function assertListingQualityPreflightReport(report) {
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Listing quality preflight status must match ready flag");
   if (!report.summary || report.summary.expected_review_rows < report.summary.review_rows) {
     throw new Error("Listing quality preflight summary must count expected and reviewed rows");
+  }
+  if (!ready && report.summary.missing_review_rows > 0) {
+    if (!Array.isArray(report.review.pending_review_sample) || report.review.pending_review_sample.length < 1) {
+      throw new Error("Listing quality preflight report must include pending review sample rows");
+    }
+    if (report.review.pending_review_sample.length > 10) {
+      throw new Error("Listing quality preflight pending sample must stay bounded");
+    }
   }
   return true;
 }

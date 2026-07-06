@@ -11,7 +11,93 @@
       "missing_review_rows": 7,
       "facts_review_rows": 0,
       "media_review_rows": 0
-    }
+    },
+    "pending_review_sample": [
+      {
+        "listing_id": "MS-CRAWL-0006",
+        "target_path": "/bg/imoti/MS-CRAWL-0006",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
+        "issues": [
+          "thin_public_gallery"
+        ],
+        "required_editor_fields": [
+          "public_gallery"
+        ],
+        "public_gallery_assets": 1
+      },
+      {
+        "listing_id": "MS-CRAWL-0012",
+        "target_path": "/bg/imoti/MS-CRAWL-0012",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0012",
+        "issues": [
+          "thin_public_gallery"
+        ],
+        "required_editor_fields": [
+          "public_gallery"
+        ],
+        "public_gallery_assets": 2
+      },
+      {
+        "listing_id": "MS-CRAWL-0049",
+        "target_path": "/bg/imoti/MS-CRAWL-0049",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0049",
+        "issues": [
+          "thin_public_gallery"
+        ],
+        "required_editor_fields": [
+          "public_gallery"
+        ],
+        "public_gallery_assets": 1
+      },
+      {
+        "listing_id": "MS-CRAWL-0068",
+        "target_path": "/bg/imoti/MS-CRAWL-0068",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0068",
+        "issues": [
+          "thin_public_gallery"
+        ],
+        "required_editor_fields": [
+          "public_gallery"
+        ],
+        "public_gallery_assets": 1
+      },
+      {
+        "listing_id": "MS-CRAWL-0070",
+        "target_path": "/bg/imoti/MS-CRAWL-0070",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0070",
+        "issues": [
+          "thin_public_gallery"
+        ],
+        "required_editor_fields": [
+          "public_gallery"
+        ],
+        "public_gallery_assets": 1
+      },
+      {
+        "listing_id": "MS-CRAWL-0082",
+        "target_path": "/bg/imoti/MS-CRAWL-0082",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0082",
+        "issues": [
+          "thin_public_gallery"
+        ],
+        "required_editor_fields": [
+          "public_gallery"
+        ],
+        "public_gallery_assets": 1
+      },
+      {
+        "listing_id": "MS-CRAWL-0112",
+        "target_path": "/bg/imoti/MS-CRAWL-0112",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0112",
+        "issues": [
+          "thin_public_gallery"
+        ],
+        "required_editor_fields": [
+          "public_gallery"
+        ],
+        "public_gallery_assets": 2
+      }
+    ]
   },
   "summary": {
     "affected_listings": 7,
