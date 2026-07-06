@@ -1,11 +1,13 @@
 import fs from "node:fs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
+import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, appendLanguageRequest, createLanguageRequest } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead } from "./runtime.mjs";
-import { searchFiltersFromParams } from "./search-filters.mjs";
+import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, appendSavedSearch, createSavedSearch } from "./saved-searches.mjs";
+import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 
@@ -35,11 +37,15 @@ export function appApiConfigFromEnv(env = process.env) {
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
+    languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     receivedAt: env.MS_REALTY_RECEIVED_AT,
+    requestedAt: env.MS_REALTY_REQUESTED_AT,
+    savedAt: env.MS_REALTY_SAVED_AT,
     sellerPipelineCreatedAt: env.MS_REALTY_SELLER_PIPELINE_CREATED_AT,
   };
 }
@@ -91,6 +97,12 @@ function parseJsonBody(body) {
   } catch {
     throw new Error("Invalid JSON request body");
   }
+}
+
+function parseBody(request, body) {
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("application/x-www-form-urlencoded")) return Object.fromEntries(new URLSearchParams(body));
+  return parseJsonBody(body);
 }
 
 function webResponseBody(response) {
@@ -153,6 +165,44 @@ function routeLead(body, registry, seed, config) {
   }
 }
 
+function routeEvent(request, body, config) {
+  try {
+    const event = createEvent(parseBody(request, body), config.receivedAt || new Date().toISOString());
+    const ledger = appendEvent(event, { filePath: config.eventLedgerPath });
+    return json(201, { ...event, ledger });
+  } catch (error) {
+    return json(400, { kind: "bad_request", message: error.message });
+  }
+}
+
+function routeLanguageRequest(body, registry, config) {
+  try {
+    const requestRow = createLanguageRequest(registry, parseJsonBody(body), config.requestedAt);
+    const ledger = appendLanguageRequest(requestRow, { filePath: config.languageRequestPath });
+    return privateJson(201, { ...requestRow, ledger });
+  } catch (error) {
+    return privateJson(400, { kind: "bad_request", message: error.message });
+  }
+}
+
+function routeSavedSearch(body, registry, seed, config) {
+  try {
+    const input = parseJsonBody(body);
+    const filters = searchFiltersFromObject(input.filters);
+    const search = searchRuntimeListings(registry, seed, {
+      localeCode: input.locale || registry.source_locale,
+      query: input.query || "",
+      filters,
+      translationTasks: readTranslationLedger(config.translationLedgerPath),
+    });
+    const savedSearch = createSavedSearch(registry, { ...input, filters }, { matchCount: search.search.total_matches, savedAt: config.savedAt });
+    const ledger = appendSavedSearch(savedSearch, { filePath: config.savedSearchLedgerPath });
+    return privateJson(201, { ...savedSearch, ledger });
+  } catch (error) {
+    return privateJson(400, { kind: "bad_request", message: error.message });
+  }
+}
+
 export async function renderAppApiResponse(request, { config = appApiConfigFromEnv() } = {}) {
   try {
     const url = new URL(request.url, "http://localhost");
@@ -194,6 +244,21 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       const registry = loadLocaleRegistry();
       const seed = currentSeed(config);
       return webResponse(routeLead(body, registry, seed, config));
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/events") {
+      return webResponse(routeEvent(request, body, config));
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/language-requests") {
+      const registry = loadLocaleRegistry();
+      return webResponse(routeLanguageRequest(body, registry, config));
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/saved-searches") {
+      const registry = loadLocaleRegistry();
+      const seed = currentSeed(config);
+      return webResponse(routeSavedSearch(body, registry, seed, config));
     }
 
     return webResponse(json(405, { kind: "method_not_allowed" }));
