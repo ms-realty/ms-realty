@@ -1,0 +1,14 @@
+export const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "status", "price_min", "price_max", "bedrooms_min"];
+
+export function searchFiltersFromObject(input = {}) {
+  const filters = {};
+  for (const field of SEARCH_FILTER_FIELDS) {
+    const value = input[field];
+    if (value) filters[field] = value;
+  }
+  return filters;
+}
+
+export function searchFiltersFromParams(params) {
+  return searchFiltersFromObject(Object.fromEntries(params));
+}

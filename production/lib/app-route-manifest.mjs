@@ -7,12 +7,12 @@ export const DEFAULT_APP_ROUTE_MANIFEST = fromRoot("production", "data", "app-ro
 export const DEFAULT_LOCALIZED_SITEMAP = fromRoot("production", "data", "localized-sitemap.json");
 
 const ROUTE_MODULES = {
-  home: { module: "app/[locale]/page", renderer: "renderHomePage", dynamic: false },
-  search: { module: "app/[locale]/search/page", renderer: "renderSearchPage", dynamic: false },
-  listing: { module: "app/[locale]/[listingSegment]/[listingId]/page", renderer: "renderListingPage", dynamic: true },
-  location: { module: "app/[locale]/[locationSegment]/[location]/page", renderer: "renderLocationPage", dynamic: true },
-  seller: { module: "app/[locale]/[sellerSegment]/page", renderer: "renderSellerPage", dynamic: false },
-  contact: { module: "app/[locale]/[contactSegment]/page", renderer: "renderContactPage", dynamic: false },
+  home: { module: "app/[locale]/route", renderer: "renderHomePage", dynamic: false },
+  search: { module: "app/[locale]/search/route", renderer: "renderSearchPage", dynamic: true },
+  listing: { module: "app/[locale]/[...slug]/route", renderer: "renderListingPage", dynamic: true },
+  location: { module: "app/[locale]/[...slug]/route", renderer: "renderLocationPage", dynamic: true },
+  seller: { module: "app/[locale]/[...slug]/route", renderer: "renderSellerPage", dynamic: true },
+  contact: { module: "app/[locale]/[...slug]/route", renderer: "renderContactPage", dynamic: true },
 };
 
 function loadSitemap(filePath) {
@@ -123,6 +123,16 @@ export function assertAppRouteManifest(manifest) {
   }
   const hebrewHome = manifest.routes.find((route) => route.path === "/he/");
   if (hebrewHome?.dir !== "rtl") throw new Error("Hebrew app route must carry RTL direction");
+  return true;
+}
+
+export function assertAppRouteFiles(manifest, root = fromRoot()) {
+  const modules = new Set(manifest.routes.map((route) => route.app_module));
+  for (const appModule of modules) {
+    const filePath = path.join(root, `${appModule}.js`);
+    if (!fs.existsSync(filePath)) throw new Error(`Missing App Router module file: ${appModule}.js`);
+  }
+  if (!modules.has("app/[locale]/[...slug]/route")) throw new Error("App Router manifest must use one catch-all content route");
   return true;
 }
 

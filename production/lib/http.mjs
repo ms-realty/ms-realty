@@ -47,6 +47,7 @@ import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { buildListingQualityReport, renderListingQualityWorkbook, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
+import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -101,7 +102,6 @@ function publicResponse(request, url, rendered) {
   return json(rendered.status || 200, rendered);
 }
 
-const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "status", "price_min", "price_max", "bedrooms_min"];
 const LISTING_EDIT_FIELDS = [
   "title",
   "h1",
@@ -148,19 +148,6 @@ function loadLegacyRouteMap(filePath = fromRoot("production", "data", "legacy-ro
 
 function loadMigrationReviewDashboard(filePath = fromRoot("production", "data", "migration-review-dashboard.json")) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
-}
-
-function searchFiltersFromObject(input = {}) {
-  const filters = {};
-  for (const field of SEARCH_FILTER_FIELDS) {
-    const value = input[field];
-    if (value) filters[field] = value;
-  }
-  return filters;
-}
-
-function searchFiltersFromParams(params) {
-  return searchFiltersFromObject(Object.fromEntries(params));
 }
 
 function parseBody(request) {

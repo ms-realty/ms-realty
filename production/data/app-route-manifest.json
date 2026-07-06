@@ -37,7 +37,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/page",
+      "app_module": "app/[locale]/route",
       "renderer": "renderHomePage",
       "dynamic": false,
       "sitemap_indexable": true,
@@ -61,7 +61,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -86,7 +86,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -111,7 +111,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -136,7 +136,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -161,7 +161,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -186,7 +186,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -211,7 +211,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -236,7 +236,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -261,7 +261,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -286,7 +286,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -311,7 +311,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -336,7 +336,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -361,7 +361,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -386,7 +386,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -411,7 +411,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -436,7 +436,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -461,7 +461,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -486,7 +486,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -511,7 +511,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -536,7 +536,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -561,7 +561,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -586,7 +586,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -611,7 +611,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -636,7 +636,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -661,7 +661,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -686,7 +686,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -711,7 +711,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -736,7 +736,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -761,7 +761,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -786,7 +786,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -811,7 +811,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -836,7 +836,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -861,7 +861,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -886,7 +886,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -911,7 +911,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -936,7 +936,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -961,7 +961,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -986,7 +986,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1011,7 +1011,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1036,7 +1036,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1061,7 +1061,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1086,7 +1086,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1111,7 +1111,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1136,7 +1136,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1161,7 +1161,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1186,7 +1186,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1211,7 +1211,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1236,7 +1236,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1261,7 +1261,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1286,7 +1286,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1311,7 +1311,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1336,7 +1336,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1361,7 +1361,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1386,7 +1386,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1411,7 +1411,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1436,7 +1436,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1461,7 +1461,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1486,7 +1486,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1511,7 +1511,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1536,7 +1536,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1561,7 +1561,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1586,7 +1586,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1611,7 +1611,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1636,7 +1636,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1661,7 +1661,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1686,7 +1686,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1711,7 +1711,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1736,7 +1736,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1761,7 +1761,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1786,7 +1786,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1811,7 +1811,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1836,7 +1836,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1861,7 +1861,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1886,7 +1886,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1911,7 +1911,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1936,7 +1936,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1961,7 +1961,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -1986,7 +1986,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2011,7 +2011,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2036,7 +2036,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2061,7 +2061,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2086,7 +2086,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2111,7 +2111,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2136,7 +2136,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2161,7 +2161,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2186,7 +2186,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2211,7 +2211,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2236,7 +2236,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2261,7 +2261,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2286,7 +2286,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2311,7 +2311,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2336,7 +2336,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2361,7 +2361,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2386,7 +2386,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2411,7 +2411,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2436,7 +2436,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2461,7 +2461,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2486,7 +2486,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2511,7 +2511,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2536,7 +2536,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2561,7 +2561,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2586,7 +2586,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2611,7 +2611,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2636,7 +2636,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2661,7 +2661,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2686,7 +2686,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2711,7 +2711,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2736,7 +2736,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2761,7 +2761,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2786,7 +2786,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2811,7 +2811,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2836,7 +2836,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2861,7 +2861,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2886,9 +2886,9 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[contactSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderContactPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -2910,7 +2910,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[locationSegment]/[location]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2935,7 +2935,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[locationSegment]/[location]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2960,7 +2960,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[locationSegment]/[location]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -2985,9 +2985,9 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[sellerSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderSellerPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3009,7 +3009,7 @@
         "seller": "prodai",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/search/page",
+      "app_module": "app/[locale]/search/route",
       "renderer": "renderSearchPage",
       "dynamic": false,
       "sitemap_indexable": false,
@@ -3033,7 +3033,7 @@
         "seller": "verkaufen",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/page",
+      "app_module": "app/[locale]/route",
       "renderer": "renderHomePage",
       "dynamic": false,
       "sitemap_indexable": true,
@@ -3057,9 +3057,9 @@
         "seller": "verkaufen",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[contactSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderContactPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3081,7 +3081,7 @@
         "seller": "verkaufen",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/search/page",
+      "app_module": "app/[locale]/search/route",
       "renderer": "renderSearchPage",
       "dynamic": false,
       "sitemap_indexable": false,
@@ -3105,9 +3105,9 @@
         "seller": "verkaufen",
         "contact": "kontakt"
       },
-      "app_module": "app/[locale]/[sellerSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderSellerPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3129,7 +3129,7 @@
         "seller": "polisi",
         "contact": "epikoinonia"
       },
-      "app_module": "app/[locale]/page",
+      "app_module": "app/[locale]/route",
       "renderer": "renderHomePage",
       "dynamic": false,
       "sitemap_indexable": true,
@@ -3153,7 +3153,7 @@
         "seller": "polisi",
         "contact": "epikoinonia"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3178,7 +3178,7 @@
         "seller": "polisi",
         "contact": "epikoinonia"
       },
-      "app_module": "app/[locale]/search/page",
+      "app_module": "app/[locale]/search/route",
       "renderer": "renderSearchPage",
       "dynamic": false,
       "sitemap_indexable": false,
@@ -3202,9 +3202,9 @@
         "seller": "polisi",
         "contact": "epikoinonia"
       },
-      "app_module": "app/[locale]/[contactSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderContactPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3226,9 +3226,9 @@
         "seller": "polisi",
         "contact": "epikoinonia"
       },
-      "app_module": "app/[locale]/[sellerSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderSellerPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3250,7 +3250,7 @@
         "seller": "polisi",
         "contact": "epikoinonia"
       },
-      "app_module": "app/[locale]/[locationSegment]/[location]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3275,7 +3275,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/page",
+      "app_module": "app/[locale]/route",
       "renderer": "renderHomePage",
       "dynamic": false,
       "sitemap_indexable": true,
@@ -3299,9 +3299,9 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[contactSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderContactPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3323,7 +3323,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/search/page",
+      "app_module": "app/[locale]/search/route",
       "renderer": "renderSearchPage",
       "dynamic": false,
       "sitemap_indexable": false,
@@ -3347,9 +3347,9 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[sellerSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderSellerPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3371,7 +3371,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/page",
+      "app_module": "app/[locale]/route",
       "renderer": "renderHomePage",
       "dynamic": false,
       "sitemap_indexable": true,
@@ -3395,9 +3395,9 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[contactSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderContactPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3419,7 +3419,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[locationSegment]/[location]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3444,7 +3444,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3469,7 +3469,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/search/page",
+      "app_module": "app/[locale]/search/route",
       "renderer": "renderSearchPage",
       "dynamic": false,
       "sitemap_indexable": false,
@@ -3493,9 +3493,9 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[sellerSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderSellerPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3517,7 +3517,7 @@
         "seller": "verkopen",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/page",
+      "app_module": "app/[locale]/route",
       "renderer": "renderHomePage",
       "dynamic": false,
       "sitemap_indexable": true,
@@ -3541,9 +3541,9 @@
         "seller": "verkopen",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[contactSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderContactPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3565,9 +3565,9 @@
         "seller": "verkopen",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[sellerSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderSellerPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3589,7 +3589,7 @@
         "seller": "verkopen",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/search/page",
+      "app_module": "app/[locale]/search/route",
       "renderer": "renderSearchPage",
       "dynamic": false,
       "sitemap_indexable": false,
@@ -3613,7 +3613,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/page",
+      "app_module": "app/[locale]/route",
       "renderer": "renderHomePage",
       "dynamic": false,
       "sitemap_indexable": true,
@@ -3637,9 +3637,9 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[contactSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderContactPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",
@@ -3661,7 +3661,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[locationSegment]/[location]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3686,7 +3686,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[locationSegment]/[location]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderLocationPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3711,7 +3711,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3736,7 +3736,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3761,7 +3761,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3786,7 +3786,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3811,7 +3811,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3836,7 +3836,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3861,7 +3861,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3886,7 +3886,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3911,7 +3911,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3936,7 +3936,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3961,7 +3961,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -3986,7 +3986,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4011,7 +4011,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4036,7 +4036,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4061,7 +4061,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4086,7 +4086,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4111,7 +4111,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4136,7 +4136,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4161,7 +4161,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4186,7 +4186,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4211,7 +4211,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4236,7 +4236,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4261,7 +4261,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4286,7 +4286,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4311,7 +4311,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4336,7 +4336,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4361,7 +4361,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4386,7 +4386,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4411,7 +4411,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4436,7 +4436,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4461,7 +4461,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4486,7 +4486,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4511,7 +4511,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4536,7 +4536,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4561,7 +4561,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4586,7 +4586,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4611,7 +4611,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4636,7 +4636,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4661,7 +4661,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4686,7 +4686,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4711,7 +4711,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4736,7 +4736,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4761,7 +4761,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4786,7 +4786,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4811,7 +4811,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4836,7 +4836,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4861,7 +4861,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4886,7 +4886,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4911,7 +4911,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4936,7 +4936,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4961,7 +4961,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -4986,7 +4986,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[listingSegment]/[listingId]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderListingPage",
       "dynamic": true,
       "sitemap_indexable": true,
@@ -5011,7 +5011,7 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/search/page",
+      "app_module": "app/[locale]/search/route",
       "renderer": "renderSearchPage",
       "dynamic": false,
       "sitemap_indexable": false,
@@ -5035,9 +5035,9 @@
         "seller": "sell",
         "contact": "contact"
       },
-      "app_module": "app/[locale]/[sellerSegment]/page",
+      "app_module": "app/[locale]/[...slug]/route",
       "renderer": "renderSellerPage",
-      "dynamic": false,
+      "dynamic": true,
       "sitemap_indexable": true,
       "public_indexable": true,
       "cache": "public, max-age=300, s-maxage=3600",

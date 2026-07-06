@@ -77,7 +77,8 @@ What it proves now:
 - Hermes draft dispatch batch that prepares real crawl-backed listing prompts with citations while keeping drafts non-publishing and reviewer-gated.
 - Hermes draft worker path that calls an OpenAI-compatible vLLM/Hermes endpoint, validates JSON output, and persists only non-indexable review drafts.
 - Authenticated launch input checklist endpoint for the remaining redirect/SEO handoff gates.
-- App Router manifest that maps every approved public route to a Next-compatible module, renderer, cache policy, and `lang`/`dir`.
+- App Router manifest that maps every approved public route to a Next-compatible route handler, renderer, cache policy, and `lang`/`dir`.
+- Minimal App Router route-handler bridge under `app/` for homepage, search, and catch-all content routes, reusing the server-rendered HTML contracts.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
 - Served sitemap XML includes approved home and location pages without unapproved French routes.
@@ -199,6 +200,6 @@ Generated production data:
 - `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`
 
-The next production slice can consume these contracts from a Next.js App Router
-public app and Payload CMS collections without re-deciding URL, locale, AI, or
+The next production slice can install the actual Next.js/React package layer
+and Payload CMS collections without re-deciding URL, locale, AI, or
 lead-language policy.

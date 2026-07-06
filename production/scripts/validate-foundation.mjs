@@ -17,7 +17,7 @@ import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
 import { assertSearchEngineQueryReport, assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
-import { assertAppRouteManifest } from "../lib/app-route-manifest.mjs";
+import { assertAppRouteFiles, assertAppRouteManifest } from "../lib/app-route-manifest.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -167,6 +167,7 @@ if (sitemap.summary.byLocale.el !== 5 || sitemap.summary.byLocale.he !== 5) {
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
 const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
 assertAppRouteManifest(appRouteManifest);
+assertAppRouteFiles(appRouteManifest);
 if (
   appRouteManifest.summary.routes !== 202 ||
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||

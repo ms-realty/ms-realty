@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertAppRouteManifest, buildAppRouteManifest } from "../lib/app-route-manifest.mjs";
+import { assertAppRouteFiles, assertAppRouteManifest, buildAppRouteManifest } from "../lib/app-route-manifest.mjs";
+import { renderAppRoute } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -31,6 +32,7 @@ test("App Router manifest maps sitemap entries plus no-store search routes", () 
   assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-CRAWL-0001").params.listingId, "MS-CRAWL-0001");
   assert.equal(manifest.routes.find((route) => route.path === "/he/search").cache, "no-store");
   assert.equal(manifest.routes.find((route) => route.path === "/he/search").sitemap_indexable, false);
+  assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-CRAWL-0001").app_module, "app/[locale]/[...slug]/route");
 });
 
 test("generated App Router manifest is valid when present", () => {
@@ -42,4 +44,23 @@ test("generated App Router manifest is valid when present", () => {
   assert.equal(manifest.summary.sitemap_indexable_routes, 195);
   assert.equal(manifest.summary.by_type.search, 7);
   assert.equal(manifest.routes.some((route) => route.path.startsWith("/fr/")), false);
+  assert.equal(assertAppRouteFiles(manifest), true);
+});
+
+test("App Router adapter renders home, search, listing, and RTL HTML", () => {
+  const home = renderAppRoute({ pathname: "/he/", url: "https://example.test/he/" });
+  assert.equal(home.status, 200);
+  assert.equal(home.headers["cache-control"], "public, max-age=300, s-maxage=3600");
+  assert.match(home.html, /<html lang="he" dir="rtl">/);
+
+  const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski" });
+  assert.equal(search.status, 200);
+  assert.equal(search.headers["cache-control"], "no-store");
+  assert.equal(search.rendered.kind, "search");
+  assert.equal(search.rendered.search.query, "sandanski");
+
+  const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001" });
+  assert.equal(listing.status, 200);
+  assert.equal(listing.rendered.kind, "listing");
+  assert.match(listing.html, /MS-CRAWL-0001/);
 });
