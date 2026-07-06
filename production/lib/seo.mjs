@@ -1,6 +1,7 @@
 import { getLocale, publicIndexableLocales } from "./locales.mjs";
 
 const PUBLIC_TRANSLATION_STATES = new Set(["approved", "published"]);
+const ACTIVE_LISTING_STATUSES = new Set(["available", "reserved"]);
 
 export function listingPath(registry, localeCode, listingId) {
   const locale = getLocale(registry, localeCode);
@@ -142,9 +143,14 @@ function listingLocation(listing) {
   return String(listing.location || listing.facts?.location || "").trim();
 }
 
+function isActiveListing(listing) {
+  return ACTIVE_LISTING_STATUSES.has(listing.listing_status || listing.facts?.listing_status || "available");
+}
+
 export function sitemapEntriesForLocations(registry, listings, translationsForListing) {
   const byLocation = new Map();
   for (const listing of listings) {
+    if (!isActiveListing(listing)) continue;
     const location = listingLocation(listing);
     if (!location) continue;
     for (const translation of translationsForListing(listing)) {

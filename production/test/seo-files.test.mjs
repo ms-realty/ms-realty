@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
+import { applyListingEdits } from "../lib/listing-edits.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import {
@@ -54,6 +55,19 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/locations/sandanski" && entry.type === "location"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/sell" && entry.type === "seller"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/contact" && entry.type === "contact"), true);
+});
+
+test("runtime sitemap keeps sold listings but not sold-only location pages", () => {
+  const seed = applyListingEdits(loadCmsSeed(), [
+    {
+      listing_id: "MS-CRAWL-0001",
+      patch: { location: "Sold Only Runtime City", listing_status: "sold" },
+    },
+  ]);
+  const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), seed);
+
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/he/properties/MS-CRAWL-0001"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/he/locations/sold-only-runtime-city"), false);
 });
 
 test("generated SEO files are valid when present", () => {
