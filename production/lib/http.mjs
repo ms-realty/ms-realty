@@ -44,7 +44,7 @@ import { appendTourApproval, createTourApproval, readTourApprovals } from "./tou
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
-import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
+import { buildLaunchReadinessReport, readLiveServiceReportTemplate, writeLaunchReadinessReport } from "./launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { buildListingQualityReport, renderListingQualityWorkbook, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -538,6 +538,18 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(200, currentLaunchInputChecklist(), "text/markdown; charset=utf-8");
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const template = readLiveServiceReportTemplate(url.searchParams.get("source"));
+        return adminResponse(200, template.json, "application/json; charset=utf-8", {
+          "content-disposition": `attachment; filename="${template.filename}"`,
+        });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {

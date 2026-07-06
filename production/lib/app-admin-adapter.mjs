@@ -13,7 +13,7 @@ import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-le
 import { renderHtmlPage } from "./html.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
-import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
+import { buildLaunchReadinessReport, readLiveServiceReportTemplate, writeLaunchReadinessReport } from "./launch-readiness.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
@@ -64,6 +64,7 @@ const PRIVATE_JSON_HEADERS = {
 };
 const PRIVATE_MARKDOWN_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_CSV_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/csv; charset=utf-8", "cache-control": "no-store" };
+const PRIVATE_DOWNLOAD_JSON_HEADERS = { ...SECURITY_HEADERS, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" };
 
 function bytesFrom(value) {
   const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
@@ -131,6 +132,13 @@ function csvResponse(body, filename) {
   return new Response(body, {
     status: 200,
     headers: { ...PRIVATE_CSV_HEADERS, "content-disposition": `attachment; filename="${filename}"` },
+  });
+}
+
+function downloadJsonResponse(body, filename) {
+  return new Response(body, {
+    status: 200,
+    headers: { ...PRIVATE_DOWNLOAD_JSON_HEADERS, "content-disposition": `attachment; filename="${filename}"` },
   });
 }
 
@@ -554,6 +562,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
       return markdownResponse(launchInputChecklist(config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
+      const template = readLiveServiceReportTemplate(url.searchParams.get("source"));
+      return downloadJsonResponse(template.json, template.filename);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
       return jsonResponse(200, seoEvidencePayload(seoEvidence()));

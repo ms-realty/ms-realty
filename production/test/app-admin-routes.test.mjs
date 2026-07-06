@@ -75,6 +75,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
       const deployableRedirectExportRoute = await import("../../app/api/admin/deployable-redirects/export/route.js");
       const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
+      const liveServiceReportTemplateRoute = await import("../../app/api/admin/live-service-report-template/route.js");
       const launchReadinessExportRoute = await import("../../app/api/admin/launch-readiness/export/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
@@ -184,6 +185,16 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(launchChecklist.headers.get("content-type"), "text/markdown; charset=utf-8");
       assert.match(launchChecklistBody, /# Launch Input Checklist/);
       assert.match(launchChecklistBody, /External SEO Exports/);
+      assert.match(launchChecklistBody, /live-service-report-template/);
+
+      const liveTemplate = await liveServiceReportTemplateRoute.GET(
+        new Request("https://example.test/api/admin/live-service-report-template?source=hermes_draft_worker", { headers: auth }),
+      );
+      const liveTemplateBody = await liveTemplate.json();
+      assert.equal(liveTemplate.status, 200);
+      assert.equal(liveTemplate.headers.get("content-type"), "application/json; charset=utf-8");
+      assert.equal(liveTemplate.headers.get("content-disposition"), 'attachment; filename="hermes-draft-worker-report.json.example"');
+      assert.equal(liveTemplateBody.summary.attempted, 1);
 
       const migrationReviewUnauthorized = await migrationReviewRoute.GET(
         new Request("https://example.test/api/admin/migration/review?locale=bg"),

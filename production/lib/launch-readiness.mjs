@@ -14,6 +14,12 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
 
+const LIVE_SERVICE_REPORT_TEMPLATES = {
+  typesense_meilisearch_sync: "search-engine-sync-report.json.example",
+  typesense_meilisearch_query: "search-engine-query-report.json.example",
+  hermes_draft_worker: "hermes-draft-worker-report.json.example",
+};
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
@@ -68,6 +74,16 @@ export function validateLiveServiceReports(options = {}) {
   return {
     ready: reports.every((item) => item.status === "pass"),
     reports,
+  };
+}
+
+export function readLiveServiceReportTemplate(source) {
+  const filename = LIVE_SERVICE_REPORT_TEMPLATES[source];
+  if (!filename) throw new Error(`Unknown live service report source: ${source}`);
+  return {
+    source,
+    filename,
+    json: fs.readFileSync(fromRoot("production", "data", filename), "utf8"),
   };
 }
 

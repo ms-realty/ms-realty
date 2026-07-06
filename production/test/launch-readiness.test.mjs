@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
-import { assertLaunchReadinessReport, buildLaunchReadinessReport, validateLiveServiceReports } from "../lib/launch-readiness.mjs";
+import {
+  assertLaunchReadinessReport,
+  buildLaunchReadinessReport,
+  readLiveServiceReportTemplate,
+  validateLiveServiceReports,
+} from "../lib/launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -234,6 +239,11 @@ test("live service report examples validate but do not replace real launch evide
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-sync-report\.json/);
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-query-report\.json/);
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/hermes-draft-worker-report\.json/);
+
+  const template = readLiveServiceReportTemplate("typesense_meilisearch_query");
+  assert.equal(template.filename, "search-engine-query-report.json.example");
+  assert.equal(JSON.parse(template.json).summary.engines, 2);
+  assert.throws(() => readLiveServiceReportTemplate("../bad"), /Unknown live service report source/);
 });
 
 test("launch input checklist names remaining operator-owned blockers", () => {
@@ -271,6 +281,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /npm run hermes:worker/);
   assert.match(markdown, /npm run live:preflight/);
   assert.match(markdown, /search-engine-sync-report\.json\.example/);
+  assert.match(markdown, /live-service-report-template\?source=typesense_meilisearch_sync/);
   assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);

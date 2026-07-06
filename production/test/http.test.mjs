@@ -976,6 +976,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     url: "/api/admin/launch-readiness/export",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const liveTemplateUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/live-service-report-template?source=typesense_meilisearch_sync",
+  });
+  const liveTemplate = await dispatchHttp(app, {
+    url: "/api/admin/live-service-report-template?source=typesense_meilisearch_sync",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(unauthorized.status, 401);
   assert.equal(templateUnauthorized.status, 401);
@@ -1009,6 +1016,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launchExport.status, 201);
   assert.equal(fs.existsSync(launchReadinessOutputPath), true);
   assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, ["live_services"]);
+  assert.equal(liveTemplateUnauthorized.status, 401);
+  assert.equal(liveTemplate.status, 200);
+  assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="search-engine-sync-report.json.example"');
+  assert.equal(JSON.parse(liveTemplate.body).summary.engines, 2);
 });
 
 test("HTTP app only redirects rows in the reviewed deployable export", async () => {
