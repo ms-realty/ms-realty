@@ -250,9 +250,9 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
 }
 
 export function createHttpApp({
-  registry = loadLocaleRegistry(),
+  registry,
   seed = loadCmsSeed(),
-  redirects = loadDeployableRedirects(),
+  redirects,
   routeMap = loadLegacyRouteMap(),
   migrationReviewDashboard = loadMigrationReviewDashboard(),
   leadLedgerPath = null,
@@ -290,7 +290,8 @@ export function createHttpApp({
   listingQualityGeneratedAt,
   leadSlaGeneratedAt,
 } = {}) {
-  let activeRegistry = registry;
+  let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
+  const activeRedirects = redirects ?? loadDeployableRedirects(deployableRedirectOutputPath || undefined);
   const currentSeoEvidence = () =>
     buildSeoEvidence({
       inputDir: seoEvidenceInputDir || undefined,
@@ -343,7 +344,7 @@ export function createHttpApp({
       request.headers?.host ||
       request.headers?.Host;
     const legacyUrl = request.url.startsWith("http") ? url.href : host ? `https://${host}${url.pathname}${url.search}` : "";
-    const legacyRedirect = request.method === "GET" ? redirects.find((row) => row.old_url === legacyUrl) : null;
+    const legacyRedirect = request.method === "GET" ? activeRedirects.find((row) => row.old_url === legacyUrl) : null;
 
     if (legacyRedirect) {
       return response(

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { close, jsonFetch, listen } from "../lib/node-server.mjs";
+import { close, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -17,6 +17,30 @@ test("production server entrypoint serves runtime routes with env config", async
   const listingQualityReviewPath = `${operatorDir}/listing-quality.csv`;
   const redirectApprovalPath = `${operatorDir}/redirect-approvals.jsonl`;
   const deployableRedirectOutputPath = `${operatorDir}/deployable-redirects.json`;
+  const localeRegistryPath = `${operatorDir}/registry.json`;
+  const registry = JSON.parse(fs.readFileSync(fromRoot("locales", "registry.json"), "utf8"));
+  const french = registry.locales.find((locale) => locale.code === "fr");
+  french.public_enabled = true;
+  french.indexable = true;
+  fs.writeFileSync(localeRegistryPath, `${JSON.stringify(registry, null, 2)}\n`);
+  const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_path && route.planned_status === 301);
+  fs.writeFileSync(
+    deployableRedirectOutputPath,
+    `${JSON.stringify({
+      redirects: [
+        {
+          old_url: listing.old_url,
+          source_domain: listing.source_domain,
+          target_path: listing.target_path,
+          status: 301,
+          target_locale: listing.target_locale,
+          reviewer: "operator",
+          approved_at: "2026-07-06T00:00:00Z",
+        },
+      ],
+    })}\n`,
+  );
   const config = productionServerConfig({
     PORT: "0",
     HOST: "127.0.0.1",
@@ -26,6 +50,7 @@ test("production server entrypoint serves runtime routes with env config", async
     MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
     MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
     MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
+    MS_REALTY_LOCALE_REGISTRY_PATH: localeRegistryPath,
     MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoEvidenceInputDir,
     MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoEvidenceOutputPath,
     MS_REALTY_SEARCH_SYNC_REPORT_PATH: fromRoot("production", "data", "search-engine-sync-report.json.example"),
@@ -39,6 +64,7 @@ test("production server entrypoint serves runtime routes with env config", async
   assert.equal(config.deployableRedirectOutputPath, deployableRedirectOutputPath);
   assert.equal(config.launchReadinessOutputPath, launchReadinessOutputPath);
   assert.equal(config.listingQualityReviewPath, listingQualityReviewPath);
+  assert.equal(config.localeRegistryPath, localeRegistryPath);
   assert.equal(config.seoEvidenceInputDir, seoEvidenceInputDir);
   assert.equal(config.seoEvidenceOutputPath, seoEvidenceOutputPath);
   assert.match(config.searchSyncReportPath, /search-engine-sync-report\.json\.example$/);
@@ -54,8 +80,20 @@ test("production server entrypoint serves runtime routes with env config", async
     assert.equal(response.body.kind, "listing");
     assert.equal(response.body.lang, "he");
 
-    const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
-    const listing = routeMap.find((route) => route.url_type === "listing");
+    const frHome = await jsonFetch(baseUrl, "/fr/");
+    assert.equal(frHome.status, 200);
+    assert.equal(frHome.body.kind, "home");
+    assert.equal(frHome.body.locale, "fr");
+
+    const oldUrl = new URL(listing.old_url);
+    const legacyRedirect = await textFetch(baseUrl, oldUrl.pathname, {
+      headers: { "x-forwarded-host": oldUrl.host },
+      redirect: "manual",
+      captureHeaders: true,
+    });
+    assert.equal(legacyRedirect.status, 301);
+    assert.equal(legacyRedirect.headers.location, listing.target_path);
+
     const seoImport = await jsonFetch(baseUrl, "/api/admin/seo-evidence/import", {
       method: "POST",
       headers: { authorization: "Bearer local-admin-smoke" },
