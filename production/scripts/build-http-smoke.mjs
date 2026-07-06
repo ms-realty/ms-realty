@@ -231,6 +231,7 @@ const smoke = {
   }),
   sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
   robots: await dispatchHttp(app, { url: "/robots.txt" }),
+  favicon: await dispatchHttp(app, { url: "/favicon.ico" }),
   sellerPage: await dispatchHttp(app, { url: "/he/sell" }),
   sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
   contact: await dispatchHttp(app, { url: "/he/contact" }),

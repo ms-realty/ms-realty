@@ -327,6 +327,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     }),
     sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
     robots: await dispatchHttp(app, { url: "/robots.txt" }),
+    favicon: await dispatchHttp(app, { url: "/favicon.ico" }),
     sellerPage: await dispatchHttp(app, { url: "/he/sell" }),
     sellerHtml: await dispatchHttp(app, { url: "/he/sell?format=html" }),
     contact: await dispatchHttp(app, { url: "/he/contact" }),
@@ -576,6 +577,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.homeHtml.headers["x-frame-options"], "DENY");
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");
   assert.equal(smoke.sitemap.headers["content-type"], "application/xml; charset=utf-8");
+  assert.equal(smoke.favicon.headers["content-type"], "image/svg+xml; charset=utf-8");
+  assert.match(smoke.favicon.body, /#DB3E3E/);
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
   assert.equal(smoke.home.body.body.search.path, "/he/search");
   assert.equal(smoke.homeHtml.body.includes("data-kind=\"home\""), true);

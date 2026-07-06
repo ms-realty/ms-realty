@@ -1,4 +1,5 @@
 export {
+  renderAppFaviconResponse,
   renderAppRobotsResponse,
   renderAppRouteResponse,
   renderAppSitemapResponse,

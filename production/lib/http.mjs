@@ -46,6 +46,7 @@ import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { buildHermesPublicChat } from "./hermes-public-chat.mjs";
+import { renderFaviconSvg } from "./favicon.mjs";
 import {
   buildSeoEvidence,
   buildSeoEvidencePreflightReport,
@@ -438,6 +439,12 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/robots.txt") {
       return response(200, renderRobotsTxt(), "text/plain; charset=utf-8");
+    }
+
+    if (request.method === "GET" && url.pathname === "/favicon.ico") {
+      return response(200, renderFaviconSvg(), "image/svg+xml; charset=utf-8", {
+        "cache-control": "public, max-age=86400",
+      });
     }
 
     if (request.method === "GET" && url.pathname === "/api/health") {
@@ -1499,6 +1506,13 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("HTTP smoke must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("HTTP smoke must serve robots");
+  if (
+    smoke.favicon?.status !== 200 ||
+    smoke.favicon.headers["content-type"] !== "image/svg+xml; charset=utf-8" ||
+    !smoke.favicon.body.includes("#DB3E3E")
+  ) {
+    throw new Error("HTTP smoke must serve MS Realty favicon");
+  }
   if (
     smoke.homeHtml?.status !== 200 ||
     !smoke.homeHtml.body.includes("data-kind=\"home\"") ||

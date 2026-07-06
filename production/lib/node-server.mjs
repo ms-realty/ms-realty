@@ -285,6 +285,13 @@ export function assertServerSmoke(smoke) {
   if (smoke.sitemap.status !== 200 || smoke.sitemap.body.includes("/fr/")) throw new Error("Server must serve approved sitemap");
   if (smoke.robots.status !== 200 || !smoke.robots.body.includes("Sitemap:")) throw new Error("Server must serve robots");
   if (
+    smoke.favicon?.status !== 200 ||
+    smoke.favicon.headers["content-type"] !== "image/svg+xml; charset=utf-8" ||
+    !smoke.favicon.body.includes("#DB3E3E")
+  ) {
+    throw new Error("Server must serve MS Realty favicon");
+  }
+  if (
     smoke.homeHtml?.status !== 200 ||
     !smoke.homeHtml.body.includes("data-kind=\"home\"") ||
     !smoke.homeHtml.body.includes("role=\"search\"")

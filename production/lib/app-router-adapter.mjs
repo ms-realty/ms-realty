@@ -7,6 +7,7 @@ import { searchFiltersFromParams } from "./search-filters.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
+import { renderFaviconSvg } from "./favicon.mjs";
 
 const PUBLIC_CACHE = "public, max-age=300, s-maxage=3600";
 const HTML = "text/html; charset=utf-8";
@@ -97,6 +98,14 @@ export function renderAppRobots() {
   };
 }
 
+export function renderAppFavicon() {
+  return {
+    status: 200,
+    headers: { "content-type": "image/svg+xml; charset=utf-8", "cache-control": "public, max-age=86400" },
+    body: renderFaviconSvg(),
+  };
+}
+
 export function renderAppSitemapResponse({ config = appRouterConfigFromEnv() } = {}) {
   const result = renderAppSitemap({ config });
   return new Response(result.body, { status: result.status, headers: result.headers });
@@ -104,5 +113,10 @@ export function renderAppSitemapResponse({ config = appRouterConfigFromEnv() } =
 
 export function renderAppRobotsResponse() {
   const result = renderAppRobots();
+  return new Response(result.body, { status: result.status, headers: result.headers });
+}
+
+export function renderAppFaviconResponse() {
+  const result = renderAppFavicon();
   return new Response(result.body, { status: result.status, headers: result.headers });
 }

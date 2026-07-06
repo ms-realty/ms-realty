@@ -2827,6 +2827,21 @@
     "status": 200,
     "body": "User-agent: *\nAllow: /\nSitemap: https://makler-realty.com/sitemap.xml\n"
   },
+  "favicon": {
+    "status": 200,
+    "body": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 64 64\">\n  <rect width=\"64\" height=\"64\" rx=\"12\" fill=\"#FAF7F1\"/>\n  <path d=\"M10 14h44v36H10z\" fill=\"#222\"/>\n  <path d=\"M17 46V20h7l8 12 8-12h7v26h-7V31l-8 12-8-12v15z\" fill=\"#fff\"/>\n  <path d=\"M10 14h44v7H10z\" fill=\"#DB3E3E\"/>\n</svg>",
+    "headers": {
+      "cache-control": "public, max-age=86400",
+      "connection": "keep-alive",
+      "content-type": "image/svg+xml; charset=utf-8",
+      "keep-alive": "timeout=5",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
   "sellerPage": {
     "status": 200,
     "body": {

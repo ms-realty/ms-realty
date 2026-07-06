@@ -184,6 +184,7 @@ try {
     }),
     sitemap: await textFetch(baseUrl, "/sitemap.xml"),
     robots: await textFetch(baseUrl, "/robots.txt"),
+    favicon: await textFetch(baseUrl, "/favicon.ico", { captureHeaders: true }),
     sellerPage: await jsonFetch(baseUrl, "/he/sell"),
     sellerHtml: await textFetch(baseUrl, "/he/sell", {
       headers: { accept: "text/html" },

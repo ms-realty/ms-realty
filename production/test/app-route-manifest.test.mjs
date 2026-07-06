@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { assertAppRouteFiles, assertAppRouteManifest, buildAppRouteManifest } from "../lib/app-route-manifest.mjs";
-import { appRouterConfigFromEnv, renderAppRobots, renderAppRoute, renderAppSitemap } from "../lib/app-router-adapter.mjs";
+import { appRouterConfigFromEnv, renderAppFavicon, renderAppRobots, renderAppRoute, renderAppSitemap } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -102,7 +102,7 @@ test("App Router adapter honors mounted public listing edit ledger", () => {
   assert.match(listing.html, /Operator edited Sandanski listing/);
 });
 
-test("App Router adapter serves approved sitemap and robots text", async () => {
+test("App Router adapter serves approved sitemap, robots text, and favicon", async () => {
   const sitemap = renderAppSitemap();
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
@@ -118,8 +118,16 @@ test("App Router adapter serves approved sitemap and robots text", async () => {
   assert.equal(robots.headers["content-type"], "text/plain; charset=utf-8");
   assert.match(robots.body, /Sitemap: https:\/\/makler-realty.com\/sitemap.xml/);
 
+  const favicon = renderAppFavicon();
+  assert.equal(favicon.status, 200);
+  assert.equal(favicon.headers["content-type"], "image/svg+xml; charset=utf-8");
+  assert.match(favicon.body, /<svg/);
+  assert.match(favicon.body, /#DB3E3E/);
+
   const sitemapRoute = await import("../../app/sitemap.xml/route.js");
   const robotsRoute = await import("../../app/robots.txt/route.js");
+  const faviconRoute = await import("../../app/favicon.ico/route.js");
   assert.equal((await sitemapRoute.GET()).headers.get("content-type"), "application/xml; charset=utf-8");
   assert.equal((await robotsRoute.GET()).headers.get("content-type"), "text/plain; charset=utf-8");
+  assert.equal((await faviconRoute.GET()).headers.get("content-type"), "image/svg+xml; charset=utf-8");
 });
