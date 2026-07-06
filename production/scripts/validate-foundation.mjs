@@ -12,6 +12,7 @@ import { assertSlugHistory } from "../lib/slug-history.mjs";
 import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
 import { assertListingVerificationReport } from "../lib/listing-verification.mjs";
 import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
+import { assertSearchAnalyticsReport } from "../lib/search-analytics.mjs";
 import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs";
 import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
@@ -875,6 +876,11 @@ const tourApprovals = fs.readFileSync(fromRoot("production", "data", "tour-appro
 if (tourApprovals.length !== 1) throw new Error("Tour approval artifact must contain one deterministic smoke row");
 const events = fs.readFileSync(fromRoot("production", "data", "events.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (events.length < 1) throw new Error("Event artifact must contain deterministic smoke rows");
+const searchAnalytics = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-analytics-report.json"), "utf8"));
+assertSearchAnalyticsReport(searchAnalytics);
+if (searchAnalytics.summary.search_events < 1 || searchAnalytics.summary.filtered_search_events < 1) {
+  throw new Error("Search analytics report must summarize privacy-safe search and filter events");
+}
 const slugHistory = fs
   .readFileSync(fromRoot("production", "data", "slug-history.jsonl"), "utf8")
   .trim()
