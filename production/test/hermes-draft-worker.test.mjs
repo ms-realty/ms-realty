@@ -10,6 +10,7 @@ import {
   runHermesDraftWorker,
   taskFromHermesDraft,
 } from "../lib/hermes-draft-worker.mjs";
+import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
@@ -107,16 +108,25 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-worker-`);
   const file = `${dir}/translations.jsonl`;
   const audit = `${dir}/audit.jsonl`;
+  const auditLog = `${dir}/audit-log.jsonl`;
   const report = await runHermesDraftWorker({
     dispatch: { rows: [dispatchRow()] },
     provider: async () => validDraft(),
     filePath: file,
     auditPath: audit,
+    auditLogPath: auditLog,
+    providerMetadata: {
+      mode: "self_hosted",
+      model: "NousResearch/Hermes-4-14B",
+      toolCallParser: "hermes",
+      sensitiveDataAllowed: true,
+    },
   });
 
   assert.equal(assertHermesDraftWorkerReport(report), true);
   assert.equal(report.summary.persisted, 1);
   assert.equal(report.summary.rejected, 0);
+  assert.equal(report.audit_log_rows, 1);
   const rows = readTranslationLedger(file);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].status, "hermes_drafted");
@@ -124,6 +134,14 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.equal(rows[0].hermes.can_publish, false);
   assert.equal(rows[0].hermes.output.human_approved, false);
   assert.equal(readHermesAuditLedger(audit)[0].has_output, true);
+  const auditRows = readAuditLog(auditLog);
+  assert.equal(assertAuditLog(auditRows), true);
+  assert.equal(auditRows[0].action, "hermes_model_call");
+  assert.equal(auditRows[0].metadata.model, "NousResearch/Hermes-4-14B");
+  assert.equal(auditRows[0].metadata.prompt_version, "translation_draft");
+  assert.equal(auditRows[0].metadata.tool_call_parser, "hermes");
+  assert.equal(auditRows[0].metadata.sensitive_data, true);
+  assert.equal(JSON.stringify(auditRows).includes("Sandanski apartment"), false);
 });
 
 test("Hermes draft worker rejects outputs that omit protected facts", () => {
@@ -180,6 +198,7 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
     const reportPath = `${dir}/hermes-draft-worker-report.json`;
     const ledgerPath = `${dir}/translation-tasks.jsonl`;
     const auditPath = `${dir}/hermes-audit.jsonl`;
+    const auditLogPath = `${dir}/audit-log.jsonl`;
     const result = await runScript("run-hermes-draft-worker.mjs", {
       ...process.env,
       HERMES_CHAT_COMPLETIONS_URL: endpoint,
@@ -188,6 +207,7 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
       MS_REALTY_HERMES_WORKER_REPORT_PATH: reportPath,
       MS_REALTY_TRANSLATION_LEDGER_PATH: ledgerPath,
       MS_REALTY_HERMES_AUDIT_PATH: auditPath,
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
     });
 
     assert.equal(result.status, 0, result.stderr);
@@ -195,7 +215,10 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
     assert.equal(assertHermesDraftWorkerReport(report), true);
     assert.equal(report.summary.persisted, 1);
     assert.equal(report.audit_path, auditPath);
+    assert.equal(report.audit_log_path, auditLogPath);
+    assert.equal(report.audit_log_rows, 1);
     assert.equal(readTranslationLedger(ledgerPath).length, 1);
     assert.equal(readHermesAuditLedger(auditPath).length, 1);
+    assert.equal(readAuditLog(auditLogPath)[0].action, "hermes_model_call");
   });
 });

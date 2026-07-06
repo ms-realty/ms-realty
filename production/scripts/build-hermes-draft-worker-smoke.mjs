@@ -1,5 +1,7 @@
+import { resetAuditLog } from "../lib/audit-log.mjs";
 import { resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import {
+  DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH,
   DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH,
   DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH,
   DEFAULT_HERMES_WORKER_SMOKE_REPORT_PATH,
@@ -19,10 +21,18 @@ function smokeProvider(row) {
 }
 
 resetTranslationLedger(DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH, { auditPath: DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH });
+resetAuditLog(DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH);
 const report = await runHermesDraftWorker({
   provider: smokeProvider,
   filePath: DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH,
   auditPath: DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH,
+  auditLogPath: DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH,
+  providerMetadata: {
+    mode: "self_hosted",
+    model: "smoke-hermes-fixture",
+    toolCallParser: "hermes",
+    sensitiveDataAllowed: true,
+  },
   limit: 2,
 });
 writeHermesDraftWorkerReport(report, DEFAULT_HERMES_WORKER_SMOKE_REPORT_PATH);

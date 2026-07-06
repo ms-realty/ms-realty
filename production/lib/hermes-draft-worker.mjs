@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
+import { hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
 import { appendTranslationTask, auditPathFor, DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -9,6 +11,7 @@ export const DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH = fromRoot("production", "d
 export const DEFAULT_HERMES_WORKER_SMOKE_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-smoke.json");
 export const DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH = fromRoot("production", "data", "hermes-worker-smoke-translations.jsonl");
 export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH = fromRoot("production", "data", "hermes-worker-smoke-audit.jsonl");
+export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH = fromRoot("production", "data", "hermes-worker-smoke-audit-log.jsonl");
 
 function parseJsonObject(text) {
   const trimmed = String(text || "")
@@ -94,11 +97,56 @@ export function taskFromHermesDraft(row, draft) {
   };
 }
 
+function providerMetadataFromEnv(env = process.env) {
+  const config = hermesProviderConfigFromEnv(env);
+  return {
+    mode: config.mode,
+    model: config.model,
+    toolCallParser: "hermes",
+    sensitiveDataAllowed: config.mode === "self_hosted",
+  };
+}
+
+function recordHermesAuditLog({ row, auditLogPath, providerMetadata, result, error, recordedAt }) {
+  if (!auditLogPath) return null;
+  return appendAuditLog(
+    createAuditLogEntry(
+      {
+        action: "hermes_model_call",
+        actor: "hermes_worker",
+        objectType: "translation_task",
+        objectId: row.id,
+        locale: row.target_locale,
+        status: result,
+        metadata: {
+          object_id: row.object_id,
+          object_type: row.object_type,
+          provider_mode: row.provider_mode,
+          provider: providerMetadata.mode,
+          model: providerMetadata.model,
+          prompt_version: row.prompt?.version || row.prompt?.role || "translation_draft",
+          tool_call_parser: providerMetadata.toolCallParser || "hermes",
+          tool_calls: providerMetadata.toolCalls ?? 0,
+          input_tokens: providerMetadata.inputTokens ?? null,
+          output_tokens: providerMetadata.outputTokens ?? null,
+          sensitive_data: providerMetadata.sensitiveDataAllowed === true,
+          result,
+          error: error ? error.message : null,
+        },
+      },
+      recordedAt,
+    ),
+    { filePath: auditLogPath },
+  );
+}
+
 export async function runHermesDraftWorker({
   dispatch = readHermesDraftDispatch(),
   provider = openAiCompatibleHermesProvider(),
   filePath = DEFAULT_TRANSLATION_LEDGER_PATH,
   auditPath,
+  auditLogPath,
+  providerMetadata = providerMetadataFromEnv(),
   limit = dispatch.rows.length,
   recordedAt = "2026-07-06T00:00:00Z",
   generatedAt = "2026-07-06T00:00:00Z",
@@ -107,6 +155,7 @@ export async function runHermesDraftWorker({
   const resolvedAuditPath = auditPathFor(filePath, auditPath);
   const persisted = [];
   const rejected = [];
+  const auditLogRows = [];
 
   for (const row of rows) {
     try {
@@ -114,8 +163,12 @@ export async function runHermesDraftWorker({
       const task = taskFromHermesDraft(row, draft);
       appendTranslationTask(task, { filePath, auditPath, recordedAt });
       persisted.push({ id: task.id, target_locale: task.target_locale, status: task.status, public_indexable: false });
+      const auditLogRow = recordHermesAuditLog({ row, auditLogPath, providerMetadata, result: "persisted", recordedAt });
+      if (auditLogRow) auditLogRows.push(auditLogRow);
     } catch (error) {
       rejected.push({ id: row.id, target_locale: row.target_locale, error: error.message });
+      const auditLogRow = recordHermesAuditLog({ row, auditLogPath, providerMetadata, result: "rejected", error, recordedAt });
+      if (auditLogRow) auditLogRows.push(auditLogRow);
     }
   }
 
@@ -123,6 +176,8 @@ export async function runHermesDraftWorker({
     generated_at: generatedAt,
     ledger_path: filePath,
     audit_path: resolvedAuditPath,
+    audit_log_path: auditLogPath || null,
+    audit_log_rows: auditLogRows.length,
     summary: {
       attempted: rows.length,
       persisted: persisted.length,
@@ -136,6 +191,9 @@ export async function runHermesDraftWorker({
 export function assertHermesDraftWorkerReport(report) {
   if (report.summary.attempted !== report.summary.persisted + report.summary.rejected) {
     throw new Error("Hermes worker summary must match persisted and rejected rows");
+  }
+  if (report.audit_log_path && report.audit_log_rows !== report.summary.attempted) {
+    throw new Error("Hermes worker audit log must cover every attempted model call");
   }
   for (const row of report.persisted) {
     if (row.status !== "hermes_drafted" || row.public_indexable !== false) {

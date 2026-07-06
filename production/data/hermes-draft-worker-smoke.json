@@ -2,6 +2,8 @@
   "generated_at": "2026-07-06T00:00:00Z",
   "ledger_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-translations.jsonl",
   "audit_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit.jsonl",
+  "audit_log_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit-log.jsonl",
+  "audit_log_rows": 2,
   "summary": {
     "attempted": 2,
     "persisted": 2,

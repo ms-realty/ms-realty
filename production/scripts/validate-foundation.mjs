@@ -926,7 +926,8 @@ if (
   hermesDraftWorkerSmoke.summary.attempted !== 2 ||
   hermesDraftWorkerSmoke.summary.persisted !== 2 ||
   hermesDraftWorkerSmoke.summary.rejected !== 0 ||
-  hermesDraftWorkerSmoke.persisted.some((row) => row.public_indexable)
+  hermesDraftWorkerSmoke.persisted.some((row) => row.public_indexable) ||
+  hermesDraftWorkerSmoke.audit_log_rows !== 2
 ) {
   throw new Error("Hermes draft worker smoke must persist only reviewer-gated drafts");
 }
@@ -938,6 +939,17 @@ const hermesWorkerSmokeAudit = fs
   .map((line) => JSON.parse(line));
 if (hermesWorkerSmokeAudit.length !== 2) throw new Error("Hermes worker smoke audit must contain two model-output rows");
 assertHermesAuditLedger(hermesWorkerSmokeAudit);
+const hermesWorkerSmokeAuditLog = fs
+  .readFileSync(fromRoot("production", "data", "hermes-worker-smoke-audit-log.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+if (hermesWorkerSmokeAuditLog.length !== 2) throw new Error("Hermes worker generic audit log must contain two model-call rows");
+assertAuditLog(hermesWorkerSmokeAuditLog);
+if (hermesWorkerSmokeAuditLog.some((row) => row.action !== "hermes_model_call" || row.metadata?.tool_call_parser !== "hermes")) {
+  throw new Error("Hermes worker generic audit log must record model-call metadata only");
+}
 const listingEdits = fs
   .readFileSync(fromRoot("production", "data", "listing-edits.jsonl"), "utf8")
   .trim()
