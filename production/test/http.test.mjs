@@ -309,6 +309,14 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         contact: { name: "Noa Levi" },
       },
     }),
+    hermesChat: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/hermes/chat",
+      body: {
+        locale: "he",
+        query: "Sandanski",
+      },
+    }),
     sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
     robots: await dispatchHttp(app, { url: "/robots.txt" }),
     sellerPage: await dispatchHttp(app, { url: "/he/sell" }),
@@ -568,6 +576,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.savedSearch.headers["cache-control"], "no-store");
+  assert.equal(smoke.hermesChat.body.kind, "hermes_public_chat");
+  assert.equal(smoke.hermesChat.body.mode, "retrieval_only");
+  assert.equal(smoke.hermesChat.body.can_publish, false);
+  assert.equal(smoke.hermesChat.body.citations.length > 0, true);
+  assert.equal(smoke.hermesChat.headers["cache-control"], "no-store");
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
   assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
@@ -626,6 +639,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     locale_created: 1,
   });
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
+  assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "hermes_chat" && row.path === "/api/hermes/chat"), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
   assert.equal(smoke.admin.body.leads.length, 4);

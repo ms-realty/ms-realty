@@ -17,6 +17,7 @@ test("analytics events keep routing fields and reject contact payloads", () => {
   assert.equal(event.query.includes("[redacted-phone]"), true);
   assert.equal(event.filters.property_type, "apartment");
   assert.equal(assertEventLedger([event]), true);
+  assert.equal(assertEventLedger([createEvent({ type: "hermes_chat", path: "/api/hermes/chat", locale: "he", query: "Sandanski" })]), true);
   assert.throws(
     () => createEvent({ type: "cta_click", path: "/he/contact", locale: "he", action: "callback", contact: { name: "Noa" } }),
     /must not include contact/,

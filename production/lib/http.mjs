@@ -45,6 +45,7 @@ import { appendTourApproval, createTourApproval, readTourApprovals } from "./tou
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
+import { buildHermesPublicChat } from "./hermes-public-chat.mjs";
 import {
   buildSeoEvidence,
   buildSeoEvidencePreflightReport,
@@ -1211,6 +1212,26 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/hermes/chat") {
+      try {
+        const input = parseJsonBody(request);
+        const filters = searchFiltersFromObject(input.filters);
+        const chat = buildHermesPublicChat(activeRegistry, currentSeed(), { ...input, filters }, {
+          translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+        });
+        recordEvent({
+          type: "hermes_chat",
+          path: "/api/hermes/chat",
+          locale: chat.requested_locale,
+          query: chat.query,
+          filters: { result_count: chat.citations.length, fallback_used: chat.fallback_used },
+        });
+        return privateJson(200, chat);
+      } catch (error) {
+        return privateJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method !== "GET") return json(405, { kind: "method_not_allowed" });
 
     const rendered = renderRuntimePath(
@@ -1382,6 +1403,16 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("HTTP smoke must store saved search alert tasks");
+  }
+  if (
+    smoke.hermesChat?.status !== 200 ||
+    smoke.hermesChat.body.kind !== "hermes_public_chat" ||
+    smoke.hermesChat.body.mode !== "retrieval_only" ||
+    smoke.hermesChat.body.can_publish !== false ||
+    !smoke.hermesChat.body.disclosure.includes("approved MS Realty") ||
+    !smoke.hermesChat.body.citations?.some((citation) => citation.path?.startsWith("/he/"))
+  ) {
+    throw new Error("HTTP smoke must answer public Hermes chat from approved listing sources only");
   }
   if (smoke.ctaClick && (smoke.ctaClick.status !== 201 || smoke.ctaClick.body.type !== "cta_click")) {
     throw new Error("HTTP smoke must accept privacy-safe CTA click events");

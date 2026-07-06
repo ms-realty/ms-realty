@@ -246,6 +246,14 @@ const smoke = {
       contact: { name: "Noa Levi" },
     },
   }),
+  hermesChat: await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/hermes/chat",
+    body: {
+      locale: "he",
+      query: "Sandanski",
+    },
+  }),
   lead: await dispatchHttp(app, {
     method: "POST",
     url: "/api/leads",

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
+import { buildHermesPublicChat } from "./hermes-public-chat.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, appendLanguageRequest, createLanguageRequest } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
 import { publicLaunchReadinessHeaders, publicLaunchReadinessPayload } from "./launch-readiness.mjs";
@@ -254,6 +255,29 @@ function routeSavedSearch(body, registry, seed, config) {
   }
 }
 
+function routeHermesChat(body, registry, seed, config) {
+  try {
+    const input = parseJsonBody(body);
+    const filters = searchFiltersFromObject(input.filters);
+    const chat = buildHermesPublicChat(registry, seed, { ...input, filters }, {
+      translationTasks: readTranslationLedger(config.translationLedgerPath),
+    });
+    recordEvent(
+      {
+        type: "hermes_chat",
+        path: "/api/hermes/chat",
+        locale: chat.requested_locale,
+        query: chat.query,
+        filters: { result_count: chat.citations.length, fallback_used: chat.fallback_used },
+      },
+      config,
+    );
+    return privateJson(200, chat);
+  } catch (error) {
+    return privateJson(400, { kind: "bad_request", message: error.message });
+  }
+}
+
 export async function renderAppApiResponse(request, { config = appApiConfigFromEnv() } = {}) {
   try {
     const url = new URL(request.url, "http://localhost");
@@ -308,6 +332,12 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       const registry = loadLocaleRegistry(config.localeRegistryPath);
       const seed = currentSeed(config);
       return webResponse(routeSavedSearch(body, registry, seed, config));
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/hermes/chat") {
+      const registry = loadLocaleRegistry(config.localeRegistryPath);
+      const seed = currentSeed(config);
+      return webResponse(routeHermesChat(body, registry, seed, config));
     }
 
     return webResponse(json(405, { kind: "method_not_allowed" }));

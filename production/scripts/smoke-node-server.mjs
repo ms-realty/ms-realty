@@ -203,6 +203,11 @@ try {
         contact: { name: "Noa Levi" },
       }),
     }),
+    hermesChat: await jsonFetch(baseUrl, "/api/hermes/chat", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({ locale: "he", query: "Sandanski" }),
+    }),
     lead: await jsonFetch(baseUrl, "/api/leads", {
       method: "POST",
       captureHeaders: true,

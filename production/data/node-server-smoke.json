@@ -2370,6 +2370,76 @@
       "cache-control": "no-store"
     }
   },
+  "hermesChat": {
+    "status": 200,
+    "body": {
+      "kind": "hermes_public_chat",
+      "mode": "retrieval_only",
+      "can_publish": false,
+      "can_send_customer_message": false,
+      "requested_locale": "he",
+      "response_locale": "he",
+      "lang": "he",
+      "dir": "rtl",
+      "fallback_used": true,
+      "query": "Sandanski",
+      "answer": "I answer only from approved MS Realty listing/CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet. I found 109 approved matching listings. First options: נכס MS Realty MS-CRAWL-0001 ב-Sandanski (Sandanski, /he/properties/MS-CRAWL-0001); Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански (Sandanski, /he/properties/MS-CRAWL-0002); Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански (Sandanski, /he/properties/MS-CRAWL-0003).",
+      "disclosure": "I answer only from approved MS Realty listing/CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet.",
+      "citations": [
+        {
+          "type": "listing",
+          "id": "MS-CRAWL-0001",
+          "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+          "path": "/he/properties/MS-CRAWL-0001",
+          "reviewed_translation": true,
+          "translation_status": "approved",
+          "translation_display": "reviewed_translation"
+        },
+        {
+          "type": "listing",
+          "id": "MS-CRAWL-0002",
+          "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0002",
+          "reviewed_translation": false,
+          "translation_status": "missing",
+          "translation_display": "fallback_source_locale"
+        },
+        {
+          "type": "listing",
+          "id": "MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+          "path": "/he/properties/MS-CRAWL-0003",
+          "reviewed_translation": false,
+          "translation_status": "missing",
+          "translation_display": "fallback_source_locale"
+        }
+      ],
+      "suggested_actions": [
+        {
+          "id": "search",
+          "label": "View search results",
+          "href": "/he/search"
+        },
+        {
+          "id": "contact_broker",
+          "label": "Ask a broker",
+          "endpoint": "/api/leads",
+          "method": "POST"
+        }
+      ]
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-type": "application/json; charset=utf-8",
+      "keep-alive": "timeout=5",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
+    }
+  },
   "lead": {
     "status": 201,
     "body": {
@@ -5588,10 +5658,11 @@
     "rows": 1
   },
   "eventLedger": {
-    "rows": 22,
+    "rows": 23,
     "byType": {
       "page_view": 14,
       "search": 3,
+      "hermes_chat": 1,
       "lead_submitted": 4,
       "cta_click": 1
     }

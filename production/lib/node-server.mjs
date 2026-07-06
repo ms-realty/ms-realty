@@ -171,6 +171,16 @@ export function assertServerSmoke(smoke) {
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("Server must store saved search alert tasks");
   }
+  if (
+    smoke.hermesChat?.status !== 200 ||
+    smoke.hermesChat.body.kind !== "hermes_public_chat" ||
+    smoke.hermesChat.body.mode !== "retrieval_only" ||
+    smoke.hermesChat.body.can_publish !== false ||
+    !smoke.hermesChat.body.disclosure.includes("approved MS Realty") ||
+    !smoke.hermesChat.body.citations?.some((citation) => citation.path?.startsWith("/he/"))
+  ) {
+    throw new Error("Server must answer public Hermes chat from approved listing sources only");
+  }
   for (const response of [
     smoke.languageRequest,
     smoke.savedSearch,
