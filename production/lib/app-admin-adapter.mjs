@@ -1,4 +1,10 @@
 import { isAdminAuthorized } from "./admin-auth.mjs";
+import {
+  approveTranslationTask,
+  createTranslationReviewTask,
+  publishApprovedTranslation,
+  renderAdminWorkspace,
+} from "./admin-workflows.mjs";
 import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
@@ -7,7 +13,7 @@ import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./la
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
-import { loadLocaleRegistry } from "./locales.mjs";
+import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
@@ -52,6 +58,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
@@ -186,6 +193,28 @@ function listingEditorPayload(registry, url, config) {
   );
 }
 
+function localePayload(registry, url) {
+  return {
+    workspace: renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" }),
+    locales: registry.locales,
+  };
+}
+
+function addLocale(registry, input, config) {
+  const result = addLocaleToRegistry(registry, input);
+  writeLocaleRegistry(result.registry, config.localeRegistryPath);
+  return {
+    locale: result.locale,
+    required_admin_locales: requiredAdminLocales(result.registry),
+    admin_locales: result.registry.admin_locales,
+    required_public_locales: requiredPublicLocales(result.registry),
+    website_language_coverage: websiteLanguageCoverage(result.registry),
+    public_indexable_locales: result.registry.locales
+      .filter((locale) => locale.public_enabled && locale.indexable)
+      .map((locale) => locale.code),
+  };
+}
+
 function appendReply(input, config) {
   return appendReviewedReply(readLeadLedger(config.leadLedgerPath), reviewedReplyInput(input), {
     filePath: config.replyOutboxPath,
@@ -229,14 +258,37 @@ function appendTourApprovalRow(input, config) {
   });
 }
 
+function appendTranslationDraft(registry, input, config) {
+  return appendTranslationTask(createTranslationReviewTask(registry, input), { filePath: config.translationLedgerPath });
+}
+
+function appendPublishedTranslation(registry, input, config) {
+  const task = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)).find((row) => row.id === input.taskId);
+  if (!task) throw new Error("Known translation task is required");
+  const approved = approveTranslationTask(registry, task, input.reviewer, input.approvedAt || config.reviewedAt);
+  return appendTranslationTask(publishApprovedTranslation(registry, approved), { filePath: config.translationLedgerPath });
+}
+
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
   if (!isAdminAuthorized(request.headers.get("authorization") || "")) return adminUnauthorized();
   try {
     const url = new URL(request.url, "http://localhost");
-    const registry = loadLocaleRegistry();
+    const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       return htmlResponse(listingEditorPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/locales") {
+      return jsonResponse(200, localePayload(registry, url));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/locales") {
+      return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
+      return jsonResponse(201, appendTranslationDraft(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
+      return jsonResponse(201, appendPublishedTranslation(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       return jsonResponse(201, appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));

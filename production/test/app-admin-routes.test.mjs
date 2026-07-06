@@ -9,6 +9,12 @@ function tempJsonl(prefix) {
   return file;
 }
 
+function tempJson(prefix, contents) {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.json`;
+  fs.writeFileSync(file, contents);
+  return file;
+}
+
 async function withEnv(env, fn) {
   const previous = {};
   for (const key of Object.keys(env)) {
@@ -34,6 +40,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_EVENT_LEDGER_PATH: tempJsonl("app-admin-events"),
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
+      MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: tempJsonl("app-admin-listing-edits"),
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
@@ -46,8 +53,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const publicLeadRoute = await import("../../app/api/leads/route.js");
       const brokerContactRoute = await import("../../app/api/admin/broker-contacts/route.js");
       const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
+      const localeRoute = await import("../../app/api/admin/locales/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
+      const translationDraftRoute = await import("../../app/api/admin/translations/draft/route.js");
+      const translationPublishRoute = await import("../../app/api/admin/translations/publish/route.js");
       const tourApprovalRoute = await import("../../app/api/admin/tours/approve/route.js");
       const viewingRoute = await import("../../app/api/admin/viewings/route.js");
       const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
@@ -84,6 +94,70 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-kind="admin-lead-inbox"/);
       assert.match(inboxHtml, /data-lead-row="true"/);
       assert.match(inboxHtml, /he -> en/);
+
+      const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
+      const localesBody = await locales.json();
+      assert.equal(locales.status, 200);
+      assert.equal(localesBody.workspace.locale, "bg");
+      assert.ok(localesBody.locales.some((locale) => locale.code === "he" && locale.direction === "rtl"));
+
+      const addedLocale = await localeRoute.POST(
+        new Request("https://example.test/api/admin/locales", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            code: "es",
+            native_name: "Espanol",
+            admin_name: "Spanish",
+            public_enabled: true,
+            indexable: true,
+            fallback_locale: "en",
+          }),
+        }),
+      );
+      const addedLocaleBody = await addedLocale.json();
+      assert.equal(addedLocale.status, 201);
+      assert.equal(addedLocaleBody.locale.code, "es");
+      assert.ok(addedLocaleBody.public_indexable_locales.includes("es"));
+
+      const draft = await translationDraftRoute.POST(
+        new Request("https://example.test/api/admin/translations/draft", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            targetLocale: "es",
+            objectType: "listing",
+            objectId: "MS-CRAWL-0001",
+            sourceContent: {
+              title: "Reviewed Sandanski apartment",
+              description: "Reviewed source text for a Sandanski property.",
+            },
+            propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski", price: "100000 EUR" },
+          }),
+        }),
+      );
+      const draftBody = await draft.json();
+      assert.equal(draft.status, 201);
+      assert.equal(draftBody.status, "hermes_drafted");
+      assert.equal(draftBody.public_indexable, false);
+      assert.equal(draftBody.hermes.can_publish, false);
+
+      const published = await translationPublishRoute.POST(
+        new Request("https://example.test/api/admin/translations/publish", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            taskId: draftBody.id,
+            reviewer: "translation_editor",
+            approvedAt: "2026-07-06T00:00:00Z",
+          }),
+        }),
+      );
+      const publishedBody = await published.json();
+      assert.equal(published.status, 201);
+      assert.equal(publishedBody.status, "published");
+      assert.equal(publishedBody.human_approved, true);
+      assert.equal(publishedBody.public_indexable, true);
 
       const reply = await replyRoute.POST(
         new Request("https://example.test/api/admin/replies", {
