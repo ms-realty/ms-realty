@@ -94,6 +94,8 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Search sync smoke: \`npm run search:sync && npm run search:query\`.
 - Hermes draft smoke: \`npm run hermes:worker\`.
 - Report preflight: \`npm run live:preflight\`.
+- Report examples: \`production/data/search-engine-sync-report.json.example\`, \`production/data/search-engine-query-report.json.example\`, \`production/data/hermes-draft-worker-report.json.example\`.
+- Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
 
 ## Content Quality Warnings

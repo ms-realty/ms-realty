@@ -144,6 +144,8 @@ npm run launch:preflight
 non-zero until real external SEO exports are complete. `launch:preflight` also requires live
 Typesense/Meilisearch reports from `npm run search:sync && npm run search:query` and a Hermes
 draft-worker report from `npm run hermes:worker`; `live:preflight` checks those report files directly.
+The expected report shapes are committed as `production/data/*-report.json.example`; the real live
+report files are ignored and must be generated from provisioned services.
 
 Start the local production adapter:
 

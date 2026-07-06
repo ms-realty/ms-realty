@@ -1,0 +1,19 @@
+{
+  "generated_at": "2026-07-06T00:00:00Z",
+  "ledger_path": "production/data/translation-tasks.jsonl",
+  "audit_path": "production/data/hermes-audit.jsonl",
+  "summary": {
+    "attempted": 1,
+    "persisted": 1,
+    "rejected": 0
+  },
+  "persisted": [
+    {
+      "id": "listing:MS-CRAWL-0001:el",
+      "target_locale": "el",
+      "status": "hermes_drafted",
+      "public_indexable": false
+    }
+  ],
+  "rejected": []
+}

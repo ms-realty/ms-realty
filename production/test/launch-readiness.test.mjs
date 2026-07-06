@@ -222,6 +222,20 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.match(valid.stdout, /Live service reports valid/);
 });
 
+test("live service report examples validate but do not replace real launch evidence", () => {
+  const result = validateLiveServiceReports({
+    syncReportPath: fromRoot("production", "data", "search-engine-sync-report.json.example"),
+    queryReportPath: fromRoot("production", "data", "search-engine-query-report.json.example"),
+    hermesReportPath: fromRoot("production", "data", "hermes-draft-worker-report.json.example"),
+  });
+
+  assert.equal(result.ready, true);
+  assert.equal(result.reports.every((report) => report.status === "pass"), true);
+  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-sync-report\.json/);
+  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-query-report\.json/);
+  assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/hermes-draft-worker-report\.json/);
+});
+
 test("launch input checklist names remaining operator-owned blockers", () => {
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -256,6 +270,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /npm run search:sync && npm run search:query/);
   assert.match(markdown, /npm run hermes:worker/);
   assert.match(markdown, /npm run live:preflight/);
+  assert.match(markdown, /search-engine-sync-report\.json\.example/);
+  assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /review_status/);

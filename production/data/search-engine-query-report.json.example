@@ -1,0 +1,40 @@
+{
+  "generated_at": "2026-07-06T00:00:00Z",
+  "summary": {
+    "engines": 2,
+    "total_hits": 2,
+    "first_hit_ids": ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"]
+  },
+  "engines": [
+    {
+      "engine": "typesense",
+      "query": "Sandanski",
+      "filter": "translation_indexable:=true && locale:=bg",
+      "total": 1,
+      "hits": [
+        {
+          "id": "MS-CRAWL-0001:bg",
+          "source_listing_id": "MS-CRAWL-0001",
+          "locale": "bg",
+          "locale_path": "/bg/imoti/MS-CRAWL-0001",
+          "title": "Reviewed Sandanski listing"
+        }
+      ]
+    },
+    {
+      "engine": "meilisearch",
+      "query": "Sandanski",
+      "filter": "translation_indexable = true AND locale = bg",
+      "total": 1,
+      "hits": [
+        {
+          "id": "MS-CRAWL-0001:bg",
+          "source_listing_id": "MS-CRAWL-0001",
+          "locale": "bg",
+          "locale_path": "/bg/imoti/MS-CRAWL-0001",
+          "title": "Reviewed Sandanski listing"
+        }
+      ]
+    }
+  ]
+}
