@@ -14,6 +14,7 @@ are BG, RU, and EN.
 ```bash
 python3 search/build_search_indexes.py
 python3 search/validate_search_imports.py
+npm run search:sync:smoke
 ```
 
 Generated files:
@@ -25,6 +26,7 @@ Generated files:
 - `search/data/meilisearch-settings.json` - Meilisearch index settings.
 - `search/data/meilisearch-listings.ndjson` - Meilisearch NDJSON import body.
 - `search/data/search-fixture-summary.json` - corpus counts and inferred facets.
+- `production/data/search-engine-sync-smoke.json` - local proof that the same 167 documents are sent to both engine APIs.
 
 `validate_search_imports.py` checks that the Typesense JSONL and Meilisearch
 NDJSON match `index-listings.json`, have unique IDs, fit the Typesense schema,
@@ -41,6 +43,16 @@ Locale fields in each search index document:
 - `search_document_type` - `source` or `approved_translation`.
 
 ## Typesense Smoke
+
+For configured engines, use the worker path instead of hand-written curl:
+
+```bash
+TYPESENSE_URL=http://localhost:8108 \
+TYPESENSE_API_KEY=dev-ms-realty \
+MEILI_URL=http://localhost:7700 \
+MEILI_API_KEY=dev-ms-realty \
+npm run search:sync
+```
 
 ```bash
 docker run --rm -p 8108:8108 \

@@ -16,6 +16,7 @@ import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs
 import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
+import { assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -72,6 +73,15 @@ for (const code of ["bg", "ru", "el", "he"]) {
 const hebrewSearchDoc = searchIndexDocs.find((doc) => doc.source_listing_id === "MS-CRAWL-0001" && doc.locale === "he");
 if (hebrewSearchDoc?.search_document_type !== "approved_translation" || hebrewSearchDoc.translation_indexable !== true) {
   throw new Error("Search index fixture must include approved Hebrew translation document");
+}
+const searchEngineSyncSmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-smoke.json"), "utf8"));
+assertSearchEngineSyncReport(searchEngineSyncSmoke);
+if (
+  searchEngineSyncSmoke.engines.find((engine) => engine.engine === "typesense")?.documents !== 167 ||
+  searchEngineSyncSmoke.engines.find((engine) => engine.engine === "meilisearch")?.documents !== 167 ||
+  searchEngineSyncSmoke.calls.length !== 4
+) {
+  throw new Error("Search engine sync smoke must cover Typesense and Meilisearch imports");
 }
 
 const migration = JSON.parse(fs.readFileSync(fromRoot("production", "data", "migration-records.json"), "utf8"));
