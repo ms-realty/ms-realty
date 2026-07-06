@@ -90,6 +90,13 @@ const readyListingQualityReview = {
   path: "migration/reviews/listing-quality.csv",
   summary: { review_rows: 7, facts_review_rows: 0, media_review_rows: 7 },
 };
+const readyAppState = {
+  start_script: "node production/server.mjs",
+  production_server_entrypoint: true,
+  payload_dependency: true,
+  payload_config: true,
+  payload_collection_export: true,
+};
 
 function writeLiveReportFixtures(dir) {
   const syncReportPath = `${dir}/search-engine-sync-report.json`;
@@ -189,7 +196,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
-  assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services"]);
+  assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
   assert.equal(report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   assert.equal(report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
   assert.equal(report.gates.find((gate) => gate.id === "live_services").status, "blocked");
@@ -204,7 +211,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const publicPayload = publicLaunchReadinessPayload(report);
   assert.deepEqual(
     publicPayload.blocked_gates.map((gate) => gate.id),
-    ["external_seo_exports", "listing_quality_review", "live_services"],
+    ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
   );
   assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Typesense\/Meilisearch/);
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store", "retry-after": "60" });
@@ -236,6 +243,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    appState: readyAppState,
   });
 
   assert.equal(assertLaunchReadinessReport(report), true);
@@ -276,6 +284,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    appState: readyAppState,
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
@@ -299,6 +308,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    appState: readyAppState,
   });
   assert.equal(homepageReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(homepageReport.blockers, ["redirect_reviews"]);
@@ -312,6 +322,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    appState: readyAppState,
   });
   assert.equal(duplicateReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(duplicateReport.blockers, ["redirect_reviews"]);
@@ -336,7 +347,7 @@ test("launch readiness build honors output path override", () => {
   assert.ok(result.stdout.includes(`Wrote launch readiness report to ${outputPath}`));
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
   assert.equal(assertLaunchReadinessReport(report), true);
-  assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services"]);
+  assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
 });
 
 test("launch preflight fails closed while launch blockers remain", () => {
@@ -347,7 +358,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   });
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports, listing_quality_review, live_services/);
+  assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports, listing_quality_review, live_services, payload_runtime/);
   assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
@@ -376,7 +387,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   });
 
   assert.notEqual(withReviewPath.status, 0);
-  assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services/);
+  assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services, payload_runtime/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
 
   const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-evidence-`);
@@ -396,8 +407,8 @@ test("launch preflight fails closed while launch blockers remain", () => {
     },
   });
 
-  assert.equal(ready.status, 0, ready.stderr);
-  assert.match(ready.stdout, /LAUNCH READY/);
+  assert.notEqual(ready.status, 0);
+  assert.match(ready.stderr, /LAUNCH BLOCKED: payload_runtime/);
 
   const seoOutputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-output-`)}/seo-evidence.json`;
   const seoBuild = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence.mjs")], {
@@ -423,8 +434,8 @@ test("launch preflight fails closed while launch blockers remain", () => {
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
     },
   });
-  assert.equal(readyFromSeoOutput.status, 0, readyFromSeoOutput.stderr);
-  assert.match(readyFromSeoOutput.stdout, /LAUNCH READY/);
+  assert.notEqual(readyFromSeoOutput.status, 0);
+  assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: payload_runtime/);
 });
 
 test("launch preflight and input checklist honor env-mounted redirect and evidence paths", () => {
@@ -463,8 +474,8 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   const markdown = fs.readFileSync(checklistPath, "utf8");
 
   assert.equal(ready.status, 0, ready.stderr);
-  assert.match(markdown, /Status: ready/);
-  assert.match(markdown, /Blockers: none/);
+  assert.match(markdown, /Status: blocked/);
+  assert.match(markdown, /Blockers: payload_runtime/);
   assert.match(markdown, /MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH/);
 });
 
@@ -666,6 +677,11 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /MS_REALTY_HERMES_AUDIT_PATH/);
   assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
+  assert.match(markdown, /Payload Runtime/);
+  assert.match(markdown, /Current gate: blocked/);
+  assert.match(markdown, /production\/data\/payload-collections\.json/);
+  assert.match(markdown, /payload\.config\.ts/);
+  assert.match(markdown, /interim admin workbenches do not count/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);

@@ -1281,7 +1281,7 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
-  const expectedBlockers = ["external_seo_exports", "listing_quality_review", "live_services"];
+  const expectedBlockers = ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"];
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||

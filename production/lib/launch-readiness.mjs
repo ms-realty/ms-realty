@@ -37,9 +37,16 @@ function readJson(filePath) {
 
 function packageState(filePath = fromRoot("package.json")) {
   const pkg = readJson(filePath);
+  const hasPayload = Boolean(pkg.dependencies?.payload || pkg.devDependencies?.payload);
+  const hasPayloadConfig = ["payload.config.ts", "payload.config.js", "src/payload.config.ts"].some((file) =>
+    fs.existsSync(fromRoot(file)),
+  );
   return {
     start_script: pkg.scripts?.start || "",
     production_server_entrypoint: fs.existsSync(fromRoot("production", "server.mjs")),
+    payload_dependency: hasPayload,
+    payload_config: hasPayloadConfig,
+    payload_collection_export: fs.existsSync(fromRoot("production", "data", "payload-collections.json")),
   };
 }
 
@@ -232,6 +239,7 @@ export function buildLaunchReadinessReport({
   const listingQualityReady = listingQualityReview.status === "pass";
   const liveServicesReady = liveServices.every((item) => item.status === "pass");
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
+  const payloadRuntimeReady = appState.payload_dependency && appState.payload_config && appState.payload_collection_export;
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
     { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
@@ -329,6 +337,14 @@ export function buildLaunchReadinessReport({
       appLayerReady ? "pass" : "blocked",
       appState,
       appLayerReady ? "Node production adapter is present; framework migration can consume the same contract later." : "Production app adapter is not present.",
+    ),
+    gate(
+      "payload_runtime",
+      payloadRuntimeReady ? "pass" : "blocked",
+      appState,
+      payloadRuntimeReady
+        ? "Payload runtime is configured against the generated CMS collection export."
+        : "Payload runtime app is required before final production readiness.",
     ),
   ];
 

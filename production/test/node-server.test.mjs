@@ -441,12 +441,17 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       });
       assert.equal(assertServerSmoke(smoke), true);
       assert.equal(smoke.health.body.status, "ok");
-      assert.deepEqual(smoke.health.body.blockers, ["external_seo_exports", "listing_quality_review", "live_services"]);
+      assert.deepEqual(smoke.health.body.blockers, [
+        "external_seo_exports",
+        "listing_quality_review",
+        "live_services",
+        "payload_runtime",
+      ]);
       assert.equal(smoke.ready.status, 503);
       assert.equal(smoke.ready.body.status, "blocked");
       assert.deepEqual(
         smoke.ready.body.blocked_gates.map((gate) => gate.id),
-        ["external_seo_exports", "listing_quality_review", "live_services"],
+        ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
       );
       assert.equal(smoke.ready.headers["cache-control"], "no-store");
       assert.equal(smoke.ready.headers["retry-after"], "60");

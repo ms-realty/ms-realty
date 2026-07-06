@@ -116,6 +116,14 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
 
+## Payload Runtime
+
+- Current gate: ${launchReadiness.gates.find((gate) => gate.id === "payload_runtime")?.status || "unknown"}
+- Collection export: \`production/data/payload-collections.json\`
+- Required before final readiness: install/configure the Payload runtime app against the generated collection export.
+- Expected runtime evidence: \`payload\` dependency present, \`payload.config.ts\` or \`payload.config.js\` present, and the collection export generated.
+- Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
+
 ## Content Quality Warnings
 
 - Workbook: \`production/data/listing-quality-workbook.csv\`

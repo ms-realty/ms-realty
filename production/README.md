@@ -153,8 +153,8 @@ SEO export status without clearing the launch gate, and `seo:preflight` still ex
 non-zero until real external SEO exports are complete. `listing:preflight:report` writes the current
 listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
 the reviewed listing-quality CSV is present. `launch:preflight` also requires live Typesense/Meilisearch
-reports from `npm run search:sync && npm run search:query` and a Hermes draft-worker report from
-`npm run hermes:worker`; `live:preflight` checks those report files directly.
+reports from `npm run search:sync && npm run search:query`, a Hermes draft-worker report from
+`npm run hermes:worker`, and a configured Payload runtime app; `live:preflight` checks those report files directly.
 `live:report` writes the current live-service report status without clearing the launch gate.
 The expected report shapes are committed as `production/data/*-report.json.example`; the real live
 report files are ignored and must be generated from provisioned services.
@@ -175,7 +175,7 @@ Useful operator endpoints:
 - `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
 - `GET /api/admin/payload-collections` returns Payload-compatible collection configs generated from that manifest.
 - `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
-- `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest without a Payload runtime dependency.
+- `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest; launch readiness still blocks until the Payload runtime dependency and config exist.
 
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.
 Set `MS_REALTY_ADMIN_TOKEN` before running the production server.

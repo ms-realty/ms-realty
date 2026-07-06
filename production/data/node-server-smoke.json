@@ -11,7 +11,8 @@
       "blockers": [
         "external_seo_exports",
         "listing_quality_review",
-        "live_services"
+        "live_services",
+        "payload_runtime"
       ]
     }
   },
@@ -25,7 +26,8 @@
       "blockers": [
         "external_seo_exports",
         "listing_quality_review",
-        "live_services"
+        "live_services",
+        "payload_runtime"
       ],
       "blocked_gates": [
         {
@@ -42,6 +44,11 @@
           "id": "live_services",
           "status": "blocked",
           "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning."
+        },
+        {
+          "id": "payload_runtime",
+          "status": "blocked",
+          "message": "Payload runtime app is required before final production readiness."
         }
       ]
     },

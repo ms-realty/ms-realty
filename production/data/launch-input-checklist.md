@@ -3,7 +3,7 @@
 Generated: 2026-07-05T00:00:00Z
 
 Status: blocked
-Blockers: external_seo_exports, listing_quality_review, live_services
+Blockers: external_seo_exports, listing_quality_review, live_services, payload_runtime
 
 ## Redirect Reviews
 
@@ -55,6 +55,14 @@ Blockers: external_seo_exports, listing_quality_review, live_services
 - Hermes ledger path overrides: `MS_REALTY_TRANSLATION_LEDGER_PATH`, `MS_REALTY_HERMES_AUDIT_PATH`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
+
+## Payload Runtime
+
+- Current gate: blocked
+- Collection export: `production/data/payload-collections.json`
+- Required before final readiness: install/configure the Payload runtime app against the generated collection export.
+- Expected runtime evidence: `payload` dependency present, `payload.config.ts` or `payload.config.js` present, and the collection export generated.
+- Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
 
 ## Content Quality Warnings
 
