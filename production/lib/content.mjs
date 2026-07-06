@@ -40,6 +40,8 @@ export function listingSourceSnapshot(listing) {
     price_eur: listing.price_eur ?? null,
     price_on_request: listing.price_on_request === true,
     image_count: Number(listing.image_count || 0),
+    thumbnail_url: listing.thumbnail_url || "",
+    thumbnail_alt: listing.thumbnail_alt || "",
     word_count: Number(listing.word_count || 0),
     canonical: listing.canonical || listing.url,
   };
@@ -87,6 +89,8 @@ export function listingToPublicViewModel(listing) {
     price_eur: snapshot.price_eur,
     price_on_request: snapshot.price_on_request,
     image_count: snapshot.image_count,
+    thumbnail_url: snapshot.thumbnail_url,
+    thumbnail_alt: snapshot.thumbnail_alt,
     media: listing.media || [],
     media_workflow: listing.media_workflow || null,
     tour: listing.tour || null,

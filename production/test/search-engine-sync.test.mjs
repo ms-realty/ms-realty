@@ -154,6 +154,8 @@ test("search fixture builder honors mounted locale registry and listing edits", 
   assert.equal(summary.public_indexable_locales.includes("he"), false);
   assert.deepEqual(new Set(reviewed.map((doc) => doc.locale)), new Set(["bg", "el"]));
   assert.equal(reviewed.every((doc) => doc.description === "Mounted search description."), true);
+  assert.equal(reviewed.every((doc) => doc.thumbnail_url.includes("/wp-content/uploads/")), true);
+  assert.equal(reviewed.every((doc) => doc.thumbnail_alt), true);
 });
 
 test("search engine query smoke normalizes Typesense and Meilisearch hits", async () => {

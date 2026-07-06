@@ -15,7 +15,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,6 +51,48 @@ PUBLIC_TRANSLATION_STATES = {"approved", "published"}
 
 def textish(value: str | None) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
+
+
+def public_upload_image_url(value: str | None) -> str:
+    raw = textish(value)
+    if not raw:
+        return ""
+    try:
+        parsed = urlparse(raw)
+        src = parse_qs(parsed.query).get("src", [""])[0]
+        candidate = src if src.startswith("https://") else raw
+        candidate_path = urlparse(candidate).path
+    except ValueError:
+        return ""
+    if not candidate.startswith("https://"):
+        return ""
+    if not re.search(r"/wp-content/uploads/\d{4}/\d{2}/", candidate_path):
+        return ""
+    if not re.search(r"\.(avif|gif|jpe?g|png|webp)$", candidate_path, re.I):
+        return ""
+    return candidate
+
+
+def load_listing_thumbnails(artifact_dir: Path) -> dict[str, dict[str, str]]:
+    media_path = artifact_dir / "media-inventory.csv"
+    if not media_path.exists():
+        return {}
+
+    thumbnails: dict[str, dict[str, str]] = {}
+    with media_path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            if row.get("page_type") != "listing":
+                continue
+            page_url = textish(row.get("page_url"))
+            image_url = public_upload_image_url(row.get("image_url"))
+            if not page_url or not image_url or page_url in thumbnails:
+                continue
+            thumbnails[page_url] = {
+                "thumbnail_url": image_url,
+                "thumbnail_alt": textish(row.get("alt")),
+            }
+    return thumbnails
 
 
 def infer_location(text: str) -> str:
@@ -237,6 +279,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
         raise FileNotFoundError(f"Missing metadata export: {metadata_path}")
 
     csv.field_size_limit(sys.maxsize)
+    thumbnails = load_listing_thumbnails(artifact_dir)
     docs: list[dict[str, object]] = []
     seen_urls: set[str] = set()
     indexable_locales = public_indexable_locales(registry)
@@ -260,6 +303,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
             type_text = " ".join([title, h1, url])
             locale = infer_language(domain, url, registry)
             locale_is_indexable = locale in indexable_locales
+            thumbnail = thumbnails.get(url, {})
 
             docs.append(
                 {
@@ -283,6 +327,8 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
                     "price_eur": None,
                     "price_on_request": False,
                     "image_count": int(row.get("image_count") or 0),
+                    "thumbnail_url": thumbnail.get("thumbnail_url", ""),
+                    "thumbnail_alt": thumbnail.get("thumbnail_alt", "") or title,
                     "word_count": int(row.get("word_count") or 0),
                     "schema_present": row.get("schema_present") == "true",
                     "source_sitemap": textish(row.get("sitemap_source")),
@@ -330,6 +376,8 @@ def write_typesense_schema(path: Path) -> None:
             {"name": "bedrooms_not_applicable", "type": "bool", "facet": True},
             {"name": "price_on_request", "type": "bool", "facet": True},
             {"name": "image_count", "type": "int32"},
+            {"name": "thumbnail_url", "type": "string", "optional": True},
+            {"name": "thumbnail_alt", "type": "string", "optional": True},
             {"name": "word_count", "type": "int32"},
             {"name": "search_text", "type": "string"},
         ],

@@ -75,6 +75,12 @@ def main() -> int:
         raise SystemExit("Reviewed listing must export BG source plus Greek and Hebrew search docs")
     if any(doc["description"] != reviewed_description or reviewed_description not in doc["search_text"] for doc in reviewed_docs):
         raise SystemExit("Search imports must apply reviewed CMS listing edits before export")
+    if any(not str(doc.get("thumbnail_url") or "").startswith("https://") for doc in reviewed_docs):
+        raise SystemExit("Search imports must carry reviewed public listing thumbnails")
+    if any("/wp-content/uploads/" not in str(doc.get("thumbnail_url") or "") for doc in reviewed_docs):
+        raise SystemExit("Search thumbnails must come from uploaded property media")
+    if any(not doc.get("thumbnail_alt") for doc in reviewed_docs):
+        raise SystemExit("Search thumbnails must carry alt text")
 
     property_types = {doc["id"]: doc["property_type"] for doc in source_docs}
     expected_types = {

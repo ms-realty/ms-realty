@@ -67,6 +67,7 @@ export function buildMobileElderlyQaReport({
       includes(pages.search, "data-map-optional=\"true\"") &&
         includes(pages.search, "data-save-search-endpoint=\"/api/saved-searches\"") &&
         includes(pages.search, "data-search-card=\"true\"") &&
+        includes(pages.search, "data-card-thumbnail=\"true\"") &&
         includes(pages.search, "data-client-save-listing=") &&
         includes(pages.search, "data-endpoint=\"/api/leads\""),
     ),

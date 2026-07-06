@@ -78,6 +78,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /data-map-optional="true"/);
   assert.match(searchHtml, /data-save-search-endpoint="\/api\/saved-searches"/);
   assert.match(searchHtml, /data-search-card="true"/);
+  assert.match(searchHtml, /data-card-thumbnail="true"/);
+  assert.match(searchHtml, /<img src="https:\/\/makler-realty\./);
   assert.match(searchHtml, /data-view-mode="list"/);
   assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);

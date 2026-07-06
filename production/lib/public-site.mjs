@@ -361,6 +361,12 @@ function listingCard(registry, listing, locale) {
     listing_status: view.listing_status,
     listing_active: isActiveListing(listing),
     image_count: Number(listing.image_count || 0),
+    thumbnail: view.thumbnail_url
+      ? {
+          url: view.thumbnail_url,
+          alt: view.thumbnail_alt || copy.title,
+        }
+      : null,
     actions: {
       detail: { label: "Details", href: listingPath(registry, locale.code, listing.id) },
       inquiry: {

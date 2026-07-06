@@ -29,6 +29,13 @@ function SearchCard({ card }) {
       "data-review-badge": card.review_badge,
       "data-listing-status": card.listing_status,
     },
+    card.thumbnail?.url
+      ? h(
+          "a",
+          { href: card.path, "data-card-thumbnail": "true" },
+          h("img", { src: card.thumbnail.url, alt: card.thumbnail.alt || card.title, loading: "lazy" }),
+        )
+      : null,
     h("p", { "data-card-badge": "true" }, (card.review_badge || "").replaceAll("_", " ")),
     h("h2", null, h("a", { href: card.path }, card.title)),
     h("p", { "data-card-price": "true" }, price(card.price_eur)),

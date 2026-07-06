@@ -51,6 +51,8 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     price_eur: record.facts.price_eur,
     price_on_request: record.facts.price_on_request === true,
     image_count: record.facts.image_count,
+    thumbnail_url: record.facts.thumbnail_url || "",
+    thumbnail_alt: record.facts.thumbnail_alt || "",
     media: record.media || [],
     media_workflow: record.media_workflow || null,
     tour: approvedTour || record.tour || null,

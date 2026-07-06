@@ -123,6 +123,8 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
   assert.equal(search.cards.every((card) => card.actions.inquiry.endpoint === "/api/leads"), true);
   assert.equal(search.cards.every((card) => card.actions.save.storage_key === "ms-realty:saved-listings"), true);
+  assert.equal(search.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
+  assert.equal(search.cards.every((card) => card.thumbnail?.alt), true);
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").review_badge, "verified_inventory");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));

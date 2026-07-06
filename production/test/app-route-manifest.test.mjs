@@ -75,6 +75,8 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /<select name="sort">/);
   assert.match(search.html, /data-active-filter-count="1"/);
   assert.match(search.html, /data-filter-chip="property_type"/);
+  assert.match(search.html, /data-card-thumbnail="true"/);
+  assert.match(search.html, /<img src="https:\/\/makler-realty\./);
 
   const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001" });
   assert.equal(listing.status, 200);

@@ -114,6 +114,16 @@
       "type": "int32"
     },
     {
+      "name": "thumbnail_url",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "thumbnail_alt",
+      "type": "string",
+      "optional": true
+    },
+    {
       "name": "word_count",
       "type": "int32"
     },
