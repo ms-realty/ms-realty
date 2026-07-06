@@ -50,6 +50,12 @@ function tempListingEdits() {
   return file;
 }
 
+function tempDefaultListingEdits() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-edits-`)}/edits.jsonl`;
+  fs.copyFileSync(fromRoot("production", "data", "listing-edits.jsonl"), file);
+  return file;
+}
+
 function tempViewings() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewings-`)}/viewings.jsonl`;
   resetViewingLedger(file);
@@ -110,10 +116,41 @@ function tempSeoEvidenceDir() {
   return fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-evidence-`);
 }
 
+function tempListingQualityReviewPath() {
+  return `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-quality-review-`)}/listing-quality.csv`;
+}
+
 function tempRegistry() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-locales-`)}/registry.json`;
   fs.writeFileSync(file, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
   return file;
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
+}
+
+function completeListingQualityReviewCsv(workbookCsv) {
+  const headers = ["listing_id", "price_eur", "bedrooms", "location", "description", "facts_reviewer", "media_reviewer", "review_notes"];
+  const rows = parseCsv(workbookCsv).map((row) => {
+    const fields = (row.required_editor_fields || "").split("|").filter(Boolean);
+    const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+    const needsMedia = fields.some((field) => ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field));
+    return [
+      row.listing_id,
+      fields.includes("price_eur") ? row.price_eur || 123000 : "",
+      fields.includes("bedrooms") ? row.bedrooms || 2 : "",
+      fields.includes("location") ? row.location || "Sandanski" : "",
+      fields.includes("description") ? "Reviewed listing description" : "",
+      needsFacts ? "editor_bg" : "",
+      needsMedia ? "media_editor" : "",
+      "Reviewed from admin listing-quality workbook",
+    ]
+      .map(csvCell)
+      .join(",");
+  });
+  return `${[headers.join(","), ...rows].join("\n")}\n`;
 }
 
 function deployableRedirect() {
@@ -788,6 +825,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.body.imported, 1);
   assert.equal(qualityImported.body.edited, 1);
   assert.equal(qualityImported.body.mediaReviewRows, 1);
+  assert.equal(qualityImported.body.reviewPersisted, false);
+  assert.equal(qualityImported.body.reviewPath, null);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
   assert.deepEqual(readListingEdits(listingEditLedgerPath)[0].patch, {});
   assert.equal(readListingEdits(listingEditLedgerPath)[0].media_reviewer, "media_editor");
@@ -856,6 +895,43 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     true,
   );
   assert.equal(reviewHtml.body.includes('data-quality-listing="true"'), true);
+});
+
+test("HTTP admin persists complete listing quality review CSV as launch evidence", async () => {
+  const listingEditLedgerPath = tempDefaultListingEdits();
+  const translationLedgerPath = tempTranslations();
+  const listingQualityReviewPath = tempListingQualityReviewPath();
+  const app = createHttpApp({
+    listingEditLedgerPath,
+    translationLedgerPath,
+    listingQualityReviewPath,
+    editedAt: "2026-07-05T00:03:00Z",
+  });
+  const workbookCsv = fs.readFileSync(fromRoot("production", "data", "listing-quality-workbook.csv"), "utf8");
+  const reviewCsv = completeListingQualityReviewCsv(workbookCsv);
+
+  const imported = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/listing-quality/import",
+    headers: {
+      authorization: "Bearer local-admin-smoke",
+      "content-type": "text/csv",
+    },
+    body: reviewCsv,
+  });
+  const readiness = await dispatchHttp(app, {
+    url: "/api/admin/launch-readiness",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+
+  assert.equal(imported.status, 201);
+  assert.equal(imported.body.imported, parseCsv(workbookCsv).length);
+  assert.equal(imported.body.reviewPersisted, true);
+  assert.equal(imported.body.reviewPath, listingQualityReviewPath);
+  assert.equal(imported.body.reviewPersistenceError, "");
+  assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
+  assert.equal(readiness.body.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+  assert.equal(readiness.body.blockers.includes("listing_quality_review"), false);
 });
 
 test("HTTP app rejects invalid language requests", async () => {

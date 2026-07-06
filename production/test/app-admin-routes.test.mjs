@@ -2,10 +2,17 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
+import { parseCsv } from "../lib/csv.mjs";
 
 function tempJsonl(prefix) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
   fs.writeFileSync(file, "");
+  return file;
+}
+
+function tempDefaultListingEdits() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-admin-listing-edits-`)}/edits.jsonl`;
+  fs.copyFileSync("production/data/listing-edits.jsonl", file);
   return file;
 }
 
@@ -17,6 +24,33 @@ function tempJson(prefix, contents) {
 
 function tempDir(prefix) {
   return fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`);
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
+}
+
+function completeListingQualityReviewCsv(workbookCsv) {
+  const headers = ["listing_id", "price_eur", "bedrooms", "location", "description", "facts_reviewer", "media_reviewer", "review_notes"];
+  const rows = parseCsv(workbookCsv).map((row) => {
+    const fields = (row.required_editor_fields || "").split("|").filter(Boolean);
+    const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+    const needsMedia = fields.some((field) => ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field));
+    return [
+      row.listing_id,
+      fields.includes("price_eur") ? row.price_eur || 123000 : "",
+      fields.includes("bedrooms") ? row.bedrooms || 2 : "",
+      fields.includes("location") ? row.location || "Sandanski" : "",
+      fields.includes("description") ? "Reviewed listing description" : "",
+      needsFacts ? "editor_bg" : "",
+      needsMedia ? "media_editor" : "",
+      "Reviewed from admin listing-quality workbook",
+    ]
+      .map(csvCell)
+      .join(",");
+  });
+  return `${[headers.join(","), ...rows].join("\n")}\n`;
 }
 
 async function withEnv(env, fn) {
@@ -50,6 +84,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
   const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
+  const listingEditLedgerPath = tempDefaultListingEdits();
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
@@ -65,7 +100,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
-      MS_REALTY_LISTING_EDIT_LEDGER_PATH: tempJsonl("app-admin-listing-edits"),
+      MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
       MS_REALTY_REDIRECT_APPROVALS_PATH: tempJsonl("app-admin-redirect-approvals"),
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
@@ -395,6 +430,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityImportBody.imported, 1);
       assert.equal(listingQualityImportBody.edited, 1);
       assert.equal(listingQualityImportBody.mediaReviewRows, 1);
+      assert.equal(listingQualityImportBody.reviewPersisted, false);
+      assert.equal(listingQualityImportBody.reviewPath, null);
       assert.equal(listingQualityImportBody.edits[0].edit.media_reviewer, "media_editor");
 
       const draft = await translationDraftRoute.POST(
@@ -572,6 +609,48 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(deal.status, 201);
       assert.equal(dealBody.status, "closed");
       assert.equal(dealBody.testimonial_request.status, "open");
+    },
+  );
+});
+
+test("Next admin listing-quality import persists complete launch review CSV", async () => {
+  const listingQualityReviewPath = `${tempDir("app-admin-complete-listing-quality")}/listing-quality.csv`;
+  const listingEditLedgerPath = tempDefaultListingEdits();
+  const auth = { authorization: "Bearer next-admin-test" };
+  await withEnv(
+    {
+      MS_REALTY_ADMIN_TOKEN: "next-admin-test",
+      MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
+      MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-complete-translations"),
+    },
+    async () => {
+      const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
+      const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
+      const workbookCsv = fs.readFileSync("production/data/listing-quality-workbook.csv", "utf8");
+      const reviewCsv = completeListingQualityReviewCsv(workbookCsv);
+
+      const imported = await listingQualityImportRoute.POST(
+        new Request("https://example.test/api/admin/listing-quality/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "text/csv" },
+          body: reviewCsv,
+        }),
+      );
+      const importedBody = await imported.json();
+      const readiness = await launchReadinessRoute.GET(
+        new Request("https://example.test/api/admin/launch-readiness", { headers: auth }),
+      );
+      const readinessBody = await readiness.json();
+
+      assert.equal(imported.status, 201);
+      assert.equal(importedBody.imported, parseCsv(workbookCsv).length);
+      assert.equal(importedBody.reviewPersisted, true);
+      assert.equal(importedBody.reviewPath, listingQualityReviewPath);
+      assert.equal(importedBody.reviewPersistenceError, "");
+      assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
+      assert.equal(readinessBody.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+      assert.equal(readinessBody.blockers.includes("listing_quality_review"), false);
     },
   );
 });

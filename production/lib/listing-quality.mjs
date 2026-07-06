@@ -368,3 +368,14 @@ export function writeListingQualityWorkbook(report, outPath = DEFAULT_LISTING_QU
   fs.writeFileSync(outPath, renderListingQualityWorkbook(report));
   return outPath;
 }
+
+export function writeListingQualityReviewCsv(csvText, outPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, csvText.endsWith("\n") ? csvText : `${csvText}\n`);
+  return outPath;
+}
+
+export function writeCompleteListingQualityReviewCsv(report, csvText, outPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
+  validateListingQualityReviewCsv(report, csvText, { requireComplete: true });
+  return writeListingQualityReviewCsv(csvText, outPath);
+}

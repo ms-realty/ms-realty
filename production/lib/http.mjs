@@ -62,10 +62,12 @@ import {
 } from "./launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import {
+  DEFAULT_LISTING_QUALITY_REPORT,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
+  writeCompleteListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
@@ -750,7 +752,21 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed() }), csvInput(request));
+        const inputCsv = csvInput(request);
+        const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed() }), inputCsv);
+        let reviewPath = null;
+        let reviewPersistenceError = "";
+        if (review.summary.missing_review_rows === 0) {
+          try {
+            reviewPath = writeCompleteListingQualityReviewCsv(
+              JSON.parse(fs.readFileSync(DEFAULT_LISTING_QUALITY_REPORT, "utf8")),
+              inputCsv,
+              listingQualityReviewPath || undefined,
+            );
+          } catch (error) {
+            reviewPersistenceError = error.message;
+          }
+        }
         const translationTasks = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined));
         const edits = review.reviews
           .filter((row) => Object.keys(row.patch).length || row.media_reviewer)
@@ -785,6 +801,9 @@ export function createHttpApp({
           imported: review.summary.review_rows,
           edited: edits.length,
           mediaReviewRows: review.summary.media_review_rows,
+          reviewPersisted: Boolean(reviewPath),
+          reviewPath,
+          reviewPersistenceError,
           edits,
         });
       } catch (error) {

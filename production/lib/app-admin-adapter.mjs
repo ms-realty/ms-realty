@@ -25,10 +25,12 @@ import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import {
+  DEFAULT_LISTING_QUALITY_REPORT,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
+  writeCompleteListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
@@ -608,6 +610,19 @@ function listingQualityWorkbook(config) {
 
 function importListingQualityRows(inputCsv, config) {
   const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed(config) }), inputCsv);
+  let reviewPath = null;
+  let reviewPersistenceError = "";
+  if (review.summary.missing_review_rows === 0) {
+    try {
+      reviewPath = writeCompleteListingQualityReviewCsv(
+        JSON.parse(fs.readFileSync(DEFAULT_LISTING_QUALITY_REPORT, "utf8")),
+        inputCsv,
+        config.listingQualityReviewPath || undefined,
+      );
+    } catch (error) {
+      reviewPersistenceError = error.message;
+    }
+  }
   const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
   const edits = review.reviews
     .filter((row) => Object.keys(row.patch).length || row.media_reviewer)
@@ -642,6 +657,9 @@ function importListingQualityRows(inputCsv, config) {
     imported: review.summary.review_rows,
     edited: edits.length,
     mediaReviewRows: review.summary.media_review_rows,
+    reviewPersisted: Boolean(reviewPath),
+    reviewPath,
+    reviewPersistenceError,
     edits,
   };
 }
