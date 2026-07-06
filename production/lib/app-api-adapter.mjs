@@ -40,6 +40,7 @@ export function appApiConfigFromEnv(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -114,7 +115,8 @@ function webResponse(response) {
 }
 
 function readLaunchReadiness(filePath = LAUNCH_READINESS_PATH) {
-  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  const sourcePath = fs.existsSync(/*turbopackIgnore: true*/ filePath) ? filePath : LAUNCH_READINESS_PATH;
+  return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ sourcePath, "utf8"));
 }
 
 function currentSeed(config) {
@@ -209,7 +211,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     const body = await readRequestBody(request, config.maxBodyBytes);
 
     if (request.method === "GET" && url.pathname === "/api/health") {
-      const readiness = readLaunchReadiness();
+      const readiness = readLaunchReadiness(config.launchReadinessOutputPath);
       return webResponse(
         json(200, {
           kind: "health",
@@ -222,7 +224,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     }
 
     if (request.method === "GET" && url.pathname === "/api/ready") {
-      const readiness = readLaunchReadiness();
+      const readiness = readLaunchReadiness(config.launchReadinessOutputPath);
       return webResponse(
         json(readiness.launch_ready ? 200 : 503, {
           kind: "readiness",

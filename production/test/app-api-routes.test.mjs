@@ -34,12 +34,18 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   const eventLedgerPath = tempLedger("app-api-events", resetEventLedger);
   const languageRequestPath = tempLedger("app-api-language-requests", resetLanguageRequests);
   const leadLedgerPath = tempLedger("app-api-leads", resetLeadLedger);
+  const launchReadinessPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-readiness-`)}/launch-readiness.json`;
   const savedSearchLedgerPath = tempLedger("app-api-saved-searches", resetSavedSearches);
   const sellerPipelinePath = tempLedger("app-api-seller-pipeline", resetSellerPipeline);
+  fs.writeFileSync(
+    launchReadinessPath,
+    `${JSON.stringify({ status: "blocked", launch_ready: false, blockers: ["external_seo_exports"] })}\n`,
+  );
   await withEnv(
     {
       MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: languageRequestPath,
+      MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessPath,
       MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: savedSearchLedgerPath,
       MS_REALTY_SELLER_PIPELINE_PATH: sellerPipelinePath,
@@ -54,12 +60,22 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       const leadRoute = await import("../../app/api/leads/route.js");
 
       const health = await healthRoute.GET(new Request("https://example.test/api/health"));
+      const healthBody = await health.json();
       assert.equal(health.status, 200);
-      assert.equal((await health.json()).status, "ok");
+      assert.equal(healthBody.status, "ok");
+      assert.equal(healthBody.launch_ready, false);
+      assert.deepEqual(healthBody.blockers, ["external_seo_exports"]);
 
       const ready = await readyRoute.GET(new Request("https://example.test/api/ready"));
       assert.equal(ready.status, 503);
       assert.equal((await ready.json()).status, "blocked");
+
+      fs.writeFileSync(launchReadinessPath, `${JSON.stringify({ status: "ready", launch_ready: true, blockers: [] })}\n`);
+      const readyAfterExport = await readyRoute.GET(new Request("https://example.test/api/ready"));
+      const readyAfterExportBody = await readyAfterExport.json();
+      assert.equal(readyAfterExport.status, 200);
+      assert.equal(readyAfterExportBody.status, "ready");
+      assert.equal(readyAfterExportBody.launch_ready, true);
 
       const search = await searchRoute.GET(new Request("https://example.test/api/search?locale=he&q=Sandanski"));
       const searchBody = await search.json();
