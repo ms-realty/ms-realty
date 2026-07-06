@@ -275,6 +275,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /Remaining approvals required: 0/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
   assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
+  assert.match(markdown, /MS_REALTY_REDIRECT_APPROVALS_PATH/);
+  assert.match(markdown, /MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH/);
   assert.match(markdown, /target_listing_id/);
   assert.match(markdown, /same_content_checklist/);
   assert.match(markdown, /Approval import columns: `old_url`, `equivalent_content`, `reviewer`/);
@@ -288,6 +290,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=yandex_webmaster`: `url,indexed,issue/);
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=backlinks`: `target_url,source_url,referring_domain/);
   assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
+  assert.match(markdown, /MS_REALTY_SEO_EVIDENCE_INPUT_DIR/);
+  assert.match(markdown, /MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH/);
   assert.match(markdown, /Live Service Provisioning/);
   assert.match(markdown, /TYPESENSE_URL/);
   assert.match(markdown, /MEILI_API_KEY/);
@@ -298,6 +302,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /search-engine-sync-report\.json\.example/);
   assert.match(markdown, /live-service-report-template\?source=typesense_meilisearch_sync/);
   assert.match(markdown, /live-service-reports\/import\?source=typesense_meilisearch_sync/);
+  assert.match(markdown, /MS_REALTY_SEARCH_SYNC_REPORT_PATH/);
+  assert.match(markdown, /MS_REALTY_HERMES_WORKER_REPORT_PATH/);
   assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);

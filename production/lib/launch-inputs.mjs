@@ -71,6 +71,7 @@ Blockers: ${launchReadiness.blockers.join(", ") || "none"}
 - Import path: \`migration/reviews/redirect-approvals.csv\`
 - Admin import endpoint: \`POST /api/admin/redirect-approvals/import\`
 - Admin workbook endpoint: \`GET /api/admin/redirect-approval-workbook?pending=1\`
+- Production adapter path overrides: \`MS_REALTY_REDIRECT_APPROVALS_PATH\`, \`MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH\`
 - Review helper columns: \`target_listing_id\`, \`review_status\`, \`same_content_checklist\`
 - Approval import columns: \`old_url\`, \`equivalent_content\`, \`reviewer\`, optional \`approved_at\`, optional \`reason\`
 - Launch rule: set \`equivalent_content=true\` only after same-content human review. Homepage targets stay blocked.
@@ -84,6 +85,7 @@ ${sourceDomainSampleLines(seoEvidence)}
 - Admin import endpoints:
 ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")}
 - Template endpoints: \`GET /api/admin/seo-evidence/template?source=search_console\`, \`?source=yandex_webmaster\`, \`?source=backlinks\`
+- Production adapter path overrides: \`MS_REALTY_SEO_EVIDENCE_INPUT_DIR\`, \`MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH\`, \`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH\`
 - Optional analytics: \`migration/external/seo/analytics.csv\`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
 
@@ -97,6 +99,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Report examples: \`production/data/search-engine-sync-report.json.example\`, \`production/data/search-engine-query-report.json.example\`, \`production/data/hermes-draft-worker-report.json.example\`.
 - Admin template endpoint: \`GET /api/admin/live-service-report-template?source=typesense_meilisearch_sync\`, \`?source=typesense_meilisearch_query\`, \`?source=hermes_draft_worker\`.
 - Admin import endpoint: \`POST /api/admin/live-service-reports/import?source=typesense_meilisearch_sync\`, \`?source=typesense_meilisearch_query\`, \`?source=hermes_draft_worker\`.
+- Production adapter report path overrides: \`MS_REALTY_SEARCH_SYNC_REPORT_PATH\`, \`MS_REALTY_SEARCH_QUERY_REPORT_PATH\`, \`MS_REALTY_HERMES_WORKER_REPORT_PATH\`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
 
