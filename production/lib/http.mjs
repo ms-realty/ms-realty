@@ -43,8 +43,15 @@ import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
-import { buildSeoEvidence, readSeoExportTemplate, writeExternalSeoExport, writeSeoEvidence } from "./seo-evidence.mjs";
 import {
+  buildSeoEvidence,
+  buildSeoEvidencePreflightReport,
+  readSeoExportTemplate,
+  writeExternalSeoExport,
+  writeSeoEvidence,
+} from "./seo-evidence.mjs";
+import {
+  buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   liveServiceReports,
   readLiveServiceReportTemplate,
@@ -52,7 +59,12 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
-import { buildListingQualityReport, renderListingQualityWorkbook, validateListingQualityReviewCsv } from "./listing-quality.mjs";
+import {
+  buildListingQualityPreflightReport,
+  buildListingQualityReport,
+  renderListingQualityWorkbook,
+  validateListingQualityReviewCsv,
+} from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
 
@@ -245,6 +257,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
+    preflightReportsEndpoint: "/api/admin/preflight-reports",
     deployablePreview: buildDeployableRedirects(routes, approvals),
   };
 }
@@ -332,6 +345,34 @@ export function createHttpApp({
         },
       },
     });
+  const currentPreflightReports = () => {
+    const listingReport = buildListingQualityReport({
+      seed: currentSeed(),
+      generatedAt: listingQualityGeneratedAt || reviewedAt || new Date().toISOString(),
+    });
+    return {
+      kind: "admin_preflight_reports",
+      generated_at: reviewedAt || new Date().toISOString(),
+      reports: {
+        seo: buildSeoEvidencePreflightReport({
+          inputDir: seoEvidenceInputDir || undefined,
+          events: readEventLedger(eventLedgerPath || undefined),
+          generatedAt: reviewedAt || new Date().toISOString(),
+        }),
+        listing_quality: buildListingQualityPreflightReport({
+          report: listingReport,
+          reviewPath: listingQualityReviewPath || undefined,
+          generatedAt: reviewedAt || new Date().toISOString(),
+        }),
+        live_services: buildLiveServicePreflightReport({
+          generatedAt: reviewedAt || new Date().toISOString(),
+          syncReportPath: searchSyncReportPath || undefined,
+          queryReportPath: searchQueryReportPath || undefined,
+          hermesReportPath: hermesWorkerReportPath || undefined,
+        }),
+      },
+    };
+  };
   const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
   const recordEvent = (input) =>
     eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
@@ -566,6 +607,11 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(200, currentLaunchInputChecklist(), "text/markdown; charset=utf-8");
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, currentPreflightReports());
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {

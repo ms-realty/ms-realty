@@ -14,6 +14,7 @@ import { renderHtmlPage } from "./html.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import {
+  buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   liveServiceReports,
   readLiveServiceReportTemplate,
@@ -23,7 +24,12 @@ import {
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
-import { buildListingQualityReport, renderListingQualityWorkbook, validateListingQualityReviewCsv } from "./listing-quality.mjs";
+import {
+  buildListingQualityPreflightReport,
+  buildListingQualityReport,
+  renderListingQualityWorkbook,
+  validateListingQualityReviewCsv,
+} from "./listing-quality.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -365,6 +371,54 @@ function launchInputChecklist(config) {
   });
 }
 
+function seoPreflightReport(config) {
+  const evidence = currentSeoEvidence(config);
+  const missing = evidence.summary.missing_required_sources;
+  return {
+    generated_at: evidence.generated_at,
+    ready: missing.length === 0,
+    status: missing.length ? "blocked" : "ready",
+    summary: {
+      crawl_urls: evidence.summary.crawl_urls,
+      urls_with_any_evidence: evidence.summary.urls_with_any_evidence,
+      missing_required_sources: missing,
+      sources: Object.fromEntries(
+        ["search_console", "yandex_webmaster", "backlinks"].map((source) => [source, evidence.summary.sources[source]]),
+      ),
+    },
+    next_actions: missing.length
+      ? [
+          "Export Search Console, Yandex Webmaster, and backlink CSVs for both legacy domains.",
+          "Place them in migration/external/seo or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR.",
+          "Run npm run seo:preflight before launch:preflight.",
+        ]
+      : ["Run npm run launch:preflight with the same SEO evidence input path."],
+  };
+}
+
+function preflightReports(config) {
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  const listingReport = buildListingQualityReport({ seed: currentSeed(config), generatedAt });
+  return {
+    kind: "admin_preflight_reports",
+    generated_at: generatedAt,
+    reports: {
+      seo: seoPreflightReport(config),
+      listing_quality: buildListingQualityPreflightReport({
+        report: listingReport,
+        reviewPath: config.listingQualityReviewPath || undefined,
+        generatedAt,
+      }),
+      live_services: buildLiveServicePreflightReport({
+        generatedAt,
+        syncReportPath: config.searchSyncReportPath || undefined,
+        queryReportPath: config.searchQueryReportPath || undefined,
+        hermesReportPath: config.hermesWorkerReportPath || undefined,
+      }),
+    },
+  };
+}
+
 function migrationReviewPayload(registry, url, config) {
   const routes = routeMapRows();
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
@@ -410,6 +464,7 @@ function migrationReviewPayload(registry, url, config) {
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
+    preflightReportsEndpoint: "/api/admin/preflight-reports",
     deployablePreview: currentDeployableRedirects(config),
   };
 }
@@ -615,6 +670,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
       return markdownResponse(launchInputChecklist(config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
+      return jsonResponse(200, preflightReports(config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
       const template = readLiveServiceReportTemplate(url.searchParams.get("source"));

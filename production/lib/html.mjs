@@ -300,10 +300,13 @@ function renderAdminMigrationReview(page) {
     page.launchReadinessExportEndpoint,
   )}" data-launch-input-checklist-endpoint="${escapeHtml(
     page.launchInputChecklistEndpoint,
+  )}" data-preflight-reports-endpoint="${escapeHtml(
+    page.preflightReportsEndpoint,
   )}">
   <h1>Migration review</h1>
   <p><a href="${escapeHtml(page.launchReadinessEndpoint)}">Launch readiness JSON</a></p>
   <p><a href="${escapeHtml(page.launchInputChecklistEndpoint)}">Launch input checklist</a></p>
+  <p><a href="${escapeHtml(page.preflightReportsEndpoint)}">Preflight reports JSON</a></p>
   <form method="post" action="${escapeHtml(page.launchReadinessExportEndpoint)}">
     <button type="submit">Export launch readiness</button>
   </form>

@@ -708,6 +708,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/launch-input-checklist",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const preflightReportsUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/preflight-reports",
+  });
+  const preflightReports = await dispatchHttp(app, {
+    url: "/api/admin/preflight-reports",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const imported = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/redirect-approvals/import",
@@ -784,6 +791,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.match(launchChecklist.body, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(launchChecklist.body, /POST \/api\/admin\/seo-evidence\/import/);
   assert.match(launchChecklist.body, /POST \/api\/admin\/listing-quality\/import/);
+  assert.equal(preflightReportsUnauthorized.status, 401);
+  assert.equal(preflightReports.status, 200);
+  assert.equal(preflightReports.body.kind, "admin_preflight_reports");
+  assert.equal(preflightReports.body.reports.seo.status, "blocked");
+  assert.equal(preflightReports.body.reports.listing_quality.status, "blocked");
+  assert.equal(preflightReports.body.reports.live_services.status, "blocked");
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
@@ -811,6 +824,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.launchReadinessEndpoint, "/api/admin/launch-readiness");
   assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
   assert.equal(review.body.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
+  assert.equal(review.body.preflightReportsEndpoint, "/api/admin/preflight-reports");
   assert.equal(review.body.listingQuality.generated_at, "2026-07-05T00:09:00Z");
   assert.equal(review.body.listingQuality.summary.listings, 165);
   assert.equal(Object.hasOwn(review.body.listingQuality.summary.issue_counts, "missing_price"), true);
@@ -828,6 +842,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-launch-readiness-endpoint="/api/admin/launch-readiness"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-export-endpoint="/api/admin/launch-readiness/export"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-input-checklist-endpoint="/api/admin/launch-input-checklist"'), true);
+  assert.equal(reviewHtml.body.includes('data-preflight-reports-endpoint="/api/admin/preflight-reports"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-workbook-endpoint="/api/admin/listing-quality-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-import-endpoint="/api/admin/listing-quality/import"'), true);
   assert.equal(
