@@ -49,6 +49,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
   const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
+  const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
@@ -59,6 +60,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
@@ -183,6 +185,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(launchReadiness.status, 200);
       assert.equal(launchReadinessBody.status, "blocked");
       assert.ok(launchReadinessBody.blockers.includes("external_seo_exports"));
+      assert.ok(launchReadinessBody.blockers.includes("listing_quality_review"));
 
       const launchChecklist = await launchInputChecklistRoute.GET(
         new Request("https://example.test/api/admin/launch-input-checklist", { headers: auth }),
@@ -192,6 +195,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(launchChecklist.headers.get("content-type"), "text/markdown; charset=utf-8");
       assert.match(launchChecklistBody, /# Launch Input Checklist/);
       assert.match(launchChecklistBody, /External SEO Exports/);
+      assert.match(launchChecklistBody, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
       assert.match(launchChecklistBody, /live-service-report-template/);
 
       const liveTemplate = await liveServiceReportTemplateRoute.GET(

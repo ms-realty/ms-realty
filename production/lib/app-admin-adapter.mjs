@@ -89,6 +89,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
     searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
     searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
@@ -317,6 +318,7 @@ function seoEvidencePayload(seoEvidence) {
 function launchReadiness(config) {
   return buildLaunchReadinessReport({
     generatedAt: config.reviewedAt || new Date().toISOString(),
+    listingQualityReviewPath: config.listingQualityReviewPath || undefined,
     liveServices: liveServiceReports({
       syncReportPath: config.searchSyncReportPath || undefined,
       queryReportPath: config.searchQueryReportPath || undefined,

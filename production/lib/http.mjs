@@ -271,6 +271,7 @@ export function createHttpApp({
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
   launchReadinessOutputPath = null,
+  listingQualityReviewPath = null,
   searchSyncReportPath = null,
   searchQueryReportPath = null,
   hermesWorkerReportPath = null,
@@ -308,6 +309,7 @@ export function createHttpApp({
         },
       },
       deployableRedirects: { summary: summarizeDeployableRedirects(redirectRows), redirects: redirectRows },
+      listingQualityReviewPath: listingQualityReviewPath || undefined,
       seoEvidence: currentSeoEvidence(),
       liveServices: liveServiceReports({
         syncReportPath: searchSyncReportPath || undefined,

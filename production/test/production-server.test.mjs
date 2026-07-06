@@ -14,6 +14,7 @@ test("production server entrypoint serves runtime routes with env config", async
   const seoEvidenceInputDir = `${operatorDir}/seo`;
   const seoEvidenceOutputPath = `${operatorDir}/seo-evidence.json`;
   const launchReadinessOutputPath = `${operatorDir}/launch-readiness.json`;
+  const listingQualityReviewPath = `${operatorDir}/listing-quality.csv`;
   const redirectApprovalPath = `${operatorDir}/redirect-approvals.jsonl`;
   const deployableRedirectOutputPath = `${operatorDir}/deployable-redirects.json`;
   const config = productionServerConfig({
@@ -24,6 +25,7 @@ test("production server entrypoint serves runtime routes with env config", async
     MS_REALTY_REDIRECT_APPROVALS_PATH: redirectApprovalPath,
     MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
     MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
+    MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
     MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoEvidenceInputDir,
     MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoEvidenceOutputPath,
     MS_REALTY_SEARCH_SYNC_REPORT_PATH: fromRoot("production", "data", "search-engine-sync-report.json.example"),
@@ -36,6 +38,7 @@ test("production server entrypoint serves runtime routes with env config", async
   assert.equal(config.redirectApprovalPath, redirectApprovalPath);
   assert.equal(config.deployableRedirectOutputPath, deployableRedirectOutputPath);
   assert.equal(config.launchReadinessOutputPath, launchReadinessOutputPath);
+  assert.equal(config.listingQualityReviewPath, listingQualityReviewPath);
   assert.equal(config.seoEvidenceInputDir, seoEvidenceInputDir);
   assert.equal(config.seoEvidenceOutputPath, seoEvidenceOutputPath);
   assert.match(config.searchSyncReportPath, /search-engine-sync-report\.json\.example$/);
@@ -95,6 +98,7 @@ test("production server entrypoint serves runtime routes with env config", async
       headers: { authorization: "Bearer local-admin-smoke" },
     });
     assert.equal(readiness.status, 200);
+    assert.equal(readiness.body.blockers.includes("listing_quality_review"), true);
     assert.equal(readiness.body.blockers.includes("live_services"), false);
   } finally {
     await close(server);
