@@ -49,8 +49,16 @@ function blockersFrom(gates) {
   return gates.filter((item) => item.status === "blocked").map((item) => item.id);
 }
 
-function warningsFrom(structuredData) {
-  return Object.entries(structuredData.summary.warnings || {})
+function warningsFrom(structuredData, listingQuality) {
+  const warnings = {
+    ...Object.fromEntries(
+      Object.entries(structuredData.summary.warnings || {}).map(([id, count]) => [`structured_data.${id}`, count]),
+    ),
+    ...Object.fromEntries(
+      Object.entries(listingQuality.summary.issue_counts || {}).map(([id, count]) => [`listing_quality.${id}`, count]),
+    ),
+  };
+  return Object.entries(warnings)
     .filter(([, count]) => count > 0)
     .map(([id, count]) => ({ id, count }));
 }
@@ -110,6 +118,7 @@ export function buildLaunchReadinessReport({
   deployableRedirects = readJson(fromRoot("production", "data", "deployable-redirects.json")),
   sitemap = readJson(fromRoot("production", "data", "localized-sitemap.json")),
   structuredData = readJson(fromRoot("production", "data", "structured-data-report.json")),
+  listingQuality = readJson(fromRoot("production", "data", "listing-quality-report.json")),
   seoEvidence = readJson(fromRoot("production", "data", "seo-evidence.json")),
   httpSmoke = readJson(fromRoot("production", "data", "http-smoke.json")),
   nodeServerSmoke = readJson(fromRoot("production", "data", "node-server-smoke.json")),
@@ -226,7 +235,7 @@ export function buildLaunchReadinessReport({
     launch_ready: blockers.length === 0,
     status: blockers.length ? "blocked" : "ready",
     blockers,
-    warnings: warningsFrom(structuredData),
+    warnings: warningsFrom(structuredData, listingQuality),
     gates,
     live_services: liveServices,
     monitoring_plan: monitoringPlan,

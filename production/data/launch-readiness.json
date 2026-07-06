@@ -6,7 +6,12 @@
     "external_seo_exports",
     "live_services"
   ],
-  "warnings": [],
+  "warnings": [
+    {
+      "id": "listing_quality.thin_public_gallery",
+      "count": 7
+    }
+  ],
   "gates": [
     {
       "id": "crawl_inventory",

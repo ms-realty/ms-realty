@@ -67,6 +67,10 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(report.gates.find((gate) => gate.id === "live_services").status, "blocked");
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
+  assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {
+    id: "listing_quality.thin_public_gallery",
+    count: 7,
+  });
   assert.ok(report.rollback_plan.length >= 3);
 });
 
@@ -268,7 +272,7 @@ test("live service report import writes only validated source reports", () => {
 test("launch input checklist names remaining operator-owned blockers", () => {
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
-    launchReadiness: readJson(["production", "data", "launch-readiness.json"]),
+    launchReadiness: buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" }),
     seoEvidence: readJson(["production", "data", "seo-evidence.json"]),
     redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
     deployableRedirects: readJson(["production", "data", "deployable-redirects.json"]),
@@ -311,6 +315,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
+  assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
   assert.match(markdown, /review_status/);
   assert.match(markdown, /required_editor_fields/);
   assert.match(markdown, /POST \/api\/admin\/listings\/edit/);

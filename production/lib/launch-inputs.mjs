@@ -106,7 +106,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 ## Content Quality Warnings
 
 - Workbook: \`production/data/listing-quality-workbook.csv\`
-- Scope: 165 source listing rows; warning counts below include indexable localized listing entries.
+- Scope: 165 source listing rows; warning counts below include structured-data entries and listing-quality source rows.
 - Review input path: \`migration/reviews/listing-quality.csv\`
 - Example input: \`migration/reviews/listing-quality.csv.example\`
 - Review columns: \`review_status\`, \`required_editor_fields\`, \`price_eur\`, \`bedrooms\`, \`location\`, \`description\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`

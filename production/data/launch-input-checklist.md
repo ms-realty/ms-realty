@@ -54,13 +54,13 @@ Blockers: external_seo_exports, live_services
 ## Content Quality Warnings
 
 - Workbook: `production/data/listing-quality-workbook.csv`
-- Scope: 165 source listing rows; warning counts below include indexable localized listing entries.
+- Scope: 165 source listing rows; warning counts below include structured-data entries and listing-quality source rows.
 - Review input path: `migration/reviews/listing-quality.csv`
 - Example input: `migration/reviews/listing-quality.csv.example`
 - Review columns: `review_status`, `required_editor_fields`, `price_eur`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
 - Admin import endpoint: `POST /api/admin/listing-quality/import`
 - Admin editor endpoint: `POST /api/admin/listings/edit`
-
+- listing_quality.thin_public_gallery: 7
 
 ## Validate After Inputs
 
