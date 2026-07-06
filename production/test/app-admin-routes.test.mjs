@@ -281,6 +281,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.ok(!seoImportBody.missingRequiredSources.includes("search_console"));
       assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
 
+      const postSeoReadiness = await launchReadinessRoute.GET(
+        new Request("https://example.test/api/admin/launch-readiness", { headers: auth }),
+      );
+      const postSeoReadinessBody = await postSeoReadiness.json();
+      assert.equal(postSeoReadiness.status, 200);
+      assert.ok(!postSeoReadinessBody.gates.find((gate) => gate.id === "external_seo_exports").evidence.missing_required_sources.includes("search_console"));
+
+      const postSeoChecklist = await launchInputChecklistRoute.GET(
+        new Request("https://example.test/api/admin/launch-input-checklist", { headers: auth }),
+      );
+      const postSeoChecklistBody = await postSeoChecklist.text();
+      assert.equal(postSeoChecklist.status, 200);
+      assert.match(postSeoChecklistBody, /migration\/external\/seo\/search-console\.csv`: imported/);
+
       const readinessExport = await launchReadinessExportRoute.POST(
         new Request("https://example.test/api/admin/launch-readiness/export", { method: "POST", headers: auth }),
       );

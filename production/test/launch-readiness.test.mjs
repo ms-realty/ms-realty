@@ -28,6 +28,22 @@ function writeCompleteSeoInputFixture(dir) {
   fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com.old_url},https://example.com/a\n${ru.old_url},https://example.com/b\n`);
 }
 
+function writeListingQualityReviewFixture(dir) {
+  const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
+  const row = listingQuality.rows.find((candidate) => candidate.review_status.includes("media"));
+  assert.ok(row, "expected a listing quality row that still requires media review");
+  const reviewPath = `${dir}/listing-quality.csv`;
+  fs.writeFileSync(
+    reviewPath,
+    [
+      "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+      `${row.listing_id},,,,,,media_editor,Reviewed public gallery selection`,
+      "",
+    ].join("\n"),
+  );
+  return reviewPath;
+}
+
 const readyLiveServices = [
   { source: "typesense_meilisearch_sync", status: "pass", path: "production/data/search-engine-sync-report.json", summary: {} },
   { source: "typesense_meilisearch_query", status: "pass", path: "production/data/search-engine-query-report.json", summary: {} },
@@ -218,19 +234,8 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
   assert.match(result.stderr, /npm run launch:inputs/);
 
-  const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
-  const row = listingQuality.rows.find((candidate) => candidate.review_status.includes("media"));
-  assert.ok(row, "expected a listing quality row that still requires media review");
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-listing-review-`);
-  const reviewPath = `${dir}/listing-quality.csv`;
-  fs.writeFileSync(
-    reviewPath,
-    [
-      "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
-      `${row.listing_id},,,,,,media_editor,Reviewed public gallery selection`,
-      "",
-    ].join("\n"),
-  );
+  const reviewPath = writeListingQualityReviewFixture(dir);
   const withReviewPath = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
@@ -260,6 +265,74 @@ test("launch preflight fails closed while launch blockers remain", () => {
 
   assert.equal(ready.status, 0, ready.stderr);
   assert.match(ready.stdout, /LAUNCH READY/);
+
+  const seoOutputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-output-`)}/seo-evidence.json`;
+  const seoBuild = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
+      MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoOutputPath,
+    },
+  });
+  assert.equal(seoBuild.status, 0, seoBuild.stderr);
+
+  const readyFromSeoOutput = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
+      MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoOutputPath,
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
+    },
+  });
+  assert.equal(readyFromSeoOutput.status, 0, readyFromSeoOutput.stderr);
+  assert.match(readyFromSeoOutput.stdout, /LAUNCH READY/);
+});
+
+test("launch preflight and input checklist honor env-mounted redirect and evidence paths", () => {
+  const emptyRedirectsPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-empty-redirects-`)}/deployable-redirects.json`;
+  fs.writeFileSync(
+    emptyRedirectsPath,
+    `${JSON.stringify({ summary: { total: 0, homepageTargets: 0, duplicateOldUrls: 0 }, redirects: [] })}\n`,
+  );
+  const blocked = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: emptyRedirectsPath },
+  });
+
+  assert.notEqual(blocked.status, 0);
+  assert.match(blocked.stderr, /LAUNCH BLOCKED: redirect_reviews/);
+
+  const reviewPath = writeListingQualityReviewFixture(fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-review-`));
+  const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-seo-`);
+  writeCompleteSeoInputFixture(seoDir);
+  const livePaths = writeLiveReportFixtures(fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-live-`));
+  const checklistPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-checklist-`)}/launch-inputs.md`;
+  const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-input-checklist.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
+      MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
+      MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH: checklistPath,
+    },
+  });
+  const markdown = fs.readFileSync(checklistPath, "utf8");
+
+  assert.equal(ready.status, 0, ready.stderr);
+  assert.match(markdown, /Status: ready/);
+  assert.match(markdown, /Blockers: none/);
+  assert.match(markdown, /MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH/);
 });
 
 test("live service report preflight fails missing reports and passes valid reports", () => {

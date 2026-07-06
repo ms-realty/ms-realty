@@ -93,7 +93,7 @@ ${sourceDomainSampleLines(seoEvidence)}
 - Admin import endpoints:
 ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")}
 - Template endpoints: \`GET /api/admin/seo-evidence/template?source=search_console\`, \`?source=yandex_webmaster\`, \`?source=backlinks\`
-- Production/CLI path overrides: \`MS_REALTY_SEO_EVIDENCE_INPUT_DIR\`, \`MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH\`, \`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH\`
+- Production/CLI path overrides: \`MS_REALTY_SEO_EVIDENCE_INPUT_DIR\`, \`MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH\`, \`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH\`, \`MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH\`
 - Optional analytics: \`migration/external/seo/analytics.csv\`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
 

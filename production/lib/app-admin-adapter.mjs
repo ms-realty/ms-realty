@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
-import { importAppSeoEvidenceRows, readAppSeoEvidenceTemplate } from "./app-seo-evidence.mjs";
+import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate } from "./app-seo-evidence.mjs";
 import {
   approveTranslationTask,
   createTranslationReviewTask,
@@ -294,16 +294,33 @@ function routeMapRows() {
   return readJsonData("legacy-route-map.json").routes;
 }
 
-function deployableRedirects() {
-  return readJsonData("deployable-redirects.json").redirects;
+function deployableRedirects(config = {}) {
+  const filePath = config.deployableRedirectOutputPath || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT;
+  const sourcePath = fs.existsSync(/*turbopackIgnore: true*/ filePath) ? filePath : DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT;
+  return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ sourcePath, "utf8")).redirects;
+}
+
+function routeMapSummary(routes) {
+  return {
+    summary: {
+      mappedListings: routes.filter((route) => route.url_type === "listing" && route.target_path).length,
+    },
+  };
+}
+
+function deployableRedirectsForLaunch(config) {
+  const approvals = readRedirectApprovals(config.redirectApprovalPath);
+  const customApprovals = config.redirectApprovalPath !== DEFAULT_REDIRECT_APPROVALS_PATH;
+  const redirects = approvals.length || customApprovals ? buildDeployableRedirects(routeMapRows(), approvals) : deployableRedirects(config);
+  return { summary: summarizeDeployableRedirects(redirects), redirects };
 }
 
 function currentDeployableRedirects(config) {
   return buildDeployableRedirects(routeMapRows(), readRedirectApprovals(config.redirectApprovalPath));
 }
 
-function seoEvidence() {
-  return readJsonData("seo-evidence.json");
+function currentSeoEvidence(config) {
+  return readAppSeoEvidence(config);
 }
 
 function seoEvidencePayload(seoEvidence) {
@@ -318,7 +335,10 @@ function seoEvidencePayload(seoEvidence) {
 function launchReadiness(config) {
   return buildLaunchReadinessReport({
     generatedAt: config.reviewedAt || new Date().toISOString(),
+    routeMap: routeMapSummary(routeMapRows()),
+    deployableRedirects: deployableRedirectsForLaunch(config),
     listingQualityReviewPath: config.listingQualityReviewPath || undefined,
+    seoEvidence: currentSeoEvidence(config),
     liveServices: liveServiceReports({
       syncReportPath: config.searchSyncReportPath || undefined,
       queryReportPath: config.searchQueryReportPath || undefined,
@@ -329,19 +349,19 @@ function launchReadiness(config) {
 
 function launchInputChecklist(config) {
   const routes = routeMapRows();
-  const redirects = readRedirectApprovals(config.redirectApprovalPath).length ? currentDeployableRedirects(config) : deployableRedirects();
+  const approvals = readRedirectApprovals(config.redirectApprovalPath);
+  const redirects =
+    approvals.length || config.redirectApprovalPath !== DEFAULT_REDIRECT_APPROVALS_PATH
+      ? buildDeployableRedirects(routes, approvals)
+      : deployableRedirects(config);
   const generatedAt = config.reviewedAt || new Date().toISOString();
   return renderLaunchInputChecklist({
     generatedAt,
     launchReadiness: launchReadiness(config),
-    seoEvidence: seoEvidence(),
+    seoEvidence: currentSeoEvidence(config),
     redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routes)),
     deployableRedirects: { summary: summarizeDeployableRedirects(redirects) },
-    routeMap: {
-      summary: {
-        mappedListings: routes.filter((route) => route.url_type === "listing" && route.target_path).length,
-      },
-    },
+    routeMap: routeMapSummary(routes),
   });
 }
 
@@ -383,7 +403,7 @@ function migrationReviewPayload(registry, url, config) {
       contentType: "text/csv",
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
-    seoEvidence: seoEvidencePayload(seoEvidence()),
+    seoEvidence: seoEvidencePayload(currentSeoEvidence(config)),
     listingQuality: buildListingQualityReport({ seed: currentSeed(config), generatedAt: config.reviewedAt, limit: 20 }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
@@ -601,7 +621,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return downloadJsonResponse(template.json, template.filename);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
-      return jsonResponse(200, seoEvidencePayload(seoEvidence()));
+      return jsonResponse(200, seoEvidencePayload(currentSeoEvidence(config)));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/template") {
       const template = readAppSeoEvidenceTemplate(url, config);

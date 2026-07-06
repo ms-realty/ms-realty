@@ -77,7 +77,7 @@ What it proves now:
 - Locale rollout report that turns requested disabled locales into approval tasks and public Hermes locales into draft queue summaries.
 - Hermes draft dispatch batch that prepares real crawl-backed listing prompts with citations while keeping drafts non-publishing and reviewer-gated.
 - Hermes draft worker path that calls an OpenAI-compatible vLLM/Hermes endpoint, validates JSON output, and persists only non-indexable review drafts.
-- Authenticated launch input checklist endpoint for the remaining redirect/SEO handoff gates.
+- Authenticated launch input checklist endpoint for redirect, SEO, listing-quality, and live-service launch handoff gates.
 - App Router manifest that maps every approved public route to a Next-compatible route handler, renderer, cache policy, and `lang`/`dir`.
 - Minimal App Router route-handler bridge under `app/` for homepage, search, and catch-all content routes, reusing the server-rendered HTML contracts.
 - Next App Router `sitemap.xml` and `robots.txt` handlers backed by the same approved localized sitemap contract.
@@ -173,8 +173,8 @@ need to live outside `production/data/`.
 Set these path overrides when operator evidence is mounted outside the repo:
 `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`,
 `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`,
-`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LISTING_QUALITY_REVIEW_PATH`,
-`MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, and
+`MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`,
+`MS_REALTY_LISTING_QUALITY_REVIEW_PATH`, `MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, and
 `MS_REALTY_HERMES_WORKER_REPORT_PATH`.
 
 Generated production data:

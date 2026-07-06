@@ -26,10 +26,40 @@ function seoInputPath(source, config, suffix = "") {
   return fromRoot("migration", "external", "seo", `${filename}${suffix}`);
 }
 
-function readCurrentSeoEvidence(config) {
+function readDefaultSeoEvidence() {
+  return JSON.parse(fs.readFileSync(fromRoot("production", "data", "seo-evidence.json"), "utf8"));
+}
+
+function overlayInputDirectoryEvidence(config) {
+  const evidence = readDefaultSeoEvidence();
+  evidence.generated_at = config.reviewedAt || new Date().toISOString();
+  for (const source of Object.keys(SEO_EXPORTS)) {
+    const inputPath = seoInputPath(source, config);
+    if (!fs.existsSync(/*turbopackIgnore: true*/ inputPath)) continue;
+    const csv = fs.readFileSync(/*turbopackIgnore: true*/ inputPath, "utf8");
+    const rows = parseCsv(csv).map((row) => normalizeExternalRow(source, row));
+    evidence.summary.sources[source] = {
+      source,
+      input_path: inputPath,
+      status: rows.length ? "imported" : "empty_export",
+      row_count: rows.length,
+      ...joinSource(source, rows, evidence),
+    };
+  }
+  updateMissingRequiredSources(evidence);
+  updateEvidenceCounts(evidence);
+  return evidence;
+}
+
+export function readAppSeoEvidence(config) {
   const candidate = seoEvidencePath(config);
-  const defaultPath = fromRoot("production", "data", "seo-evidence.json");
-  const filePath = fs.existsSync(/*turbopackIgnore: true*/ candidate) ? candidate : defaultPath;
+  if (config.seoEvidenceOutputPath && fs.existsSync(/*turbopackIgnore: true*/ candidate)) {
+    return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ candidate, "utf8"));
+  }
+  if (config.seoEvidenceInputDir) {
+    return overlayInputDirectoryEvidence(config);
+  }
+  const filePath = fs.existsSync(/*turbopackIgnore: true*/ candidate) ? candidate : fromRoot("production", "data", "seo-evidence.json");
   return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ filePath, "utf8"));
 }
 
@@ -227,7 +257,7 @@ export function readAppSeoEvidenceTemplate(url, config) {
 export function importAppSeoEvidenceRows(input, config) {
   const filename = SEO_EXPORTS[input.source];
   if (!filename) throw new Error(`Unknown SEO export source: ${input.source}`);
-  const evidence = readCurrentSeoEvidence(config);
+  const evidence = readAppSeoEvidence(config);
   const csv = input.csv || "";
   const rows = parseCsv(csv).map((row) => normalizeExternalRow(input.source, row));
   const outPath = seoInputPath(input.source, config);
