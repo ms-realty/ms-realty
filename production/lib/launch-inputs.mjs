@@ -132,6 +132,7 @@ ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`)
 - Broker verification tasks: ${listingVerification.summary.broker_verification_tasks}
 - High priority tasks: ${listingVerification.summary.high_priority}
 - Tasks by owner: ${verificationOwners || "none"}
+- Publication/verification build overrides: \`MS_REALTY_LOCALE_REGISTRY_PATH\`, \`MS_REALTY_LISTING_EDIT_LEDGER_PATH\`, \`MS_REALTY_LISTING_PUBLICATION_REPORT_PATH\`, \`MS_REALTY_LISTING_VERIFICATION_REPORT_PATH\`
 
 ## Validate After Inputs
 

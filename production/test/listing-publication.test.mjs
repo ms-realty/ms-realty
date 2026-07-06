@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import { spawnSync } from "node:child_process";
 import {
   assertListingPublicationReport,
   buildListingPublicationReport,
@@ -39,6 +41,32 @@ test("new listing records inherit sitemap coverage and editor link suggestions",
   assert.equal(row.primary_path, "/bg/imoti/MS-NEW-0001");
   assert.ok(row.internal_link_suggestions.length > 0);
   assert.equal(assertListingPublicationReport(report), true);
+});
+
+test("listing publication build honors mounted listing edits and output path", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-publication-`);
+  const editPath = `${dir}/listing-edits.jsonl`;
+  const reportPath = `${dir}/listing-publication-report.json`;
+  fs.writeFileSync(
+    editPath,
+    `${JSON.stringify({ listing_id: "MS-CRAWL-0001", patch: { listing_status: "reserved" } })}\n`,
+  );
+
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-listing-publication-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_LISTING_EDIT_LEDGER_PATH: editPath,
+      MS_REALTY_LISTING_PUBLICATION_REPORT_PATH: reportPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.includes(reportPath));
+  const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+  assert.equal(assertListingPublicationReport(report), true);
+  assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0001").listing_status, "reserved");
 });
 
 test("generated listing publication report is valid when present", () => {
