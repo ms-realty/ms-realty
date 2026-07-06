@@ -10,6 +10,9 @@ function blockerDetails(report) {
       if (gate.id === "live_services") {
         return (gate.evidence.reports || []).map((item) => `${item.source}: ${item.status} ${item.path || ""}`.trim());
       }
+      if (gate.id === "listing_quality_review") {
+        return [`listing_quality_review: ${gate.evidence.status} ${gate.evidence.path || ""}`.trim()];
+      }
       return [gate.message ? `${gate.id}: ${gate.message}` : `${gate.id}: blocked`];
     });
 }

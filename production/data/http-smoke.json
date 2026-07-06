@@ -16,6 +16,7 @@
       "launch_ready": false,
       "blockers": [
         "external_seo_exports",
+        "listing_quality_review",
         "live_services"
       ]
     }
@@ -36,6 +37,7 @@
       "launch_ready": false,
       "blockers": [
         "external_seo_exports",
+        "listing_quality_review",
         "live_services"
       ]
     }

@@ -407,7 +407,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       });
       assert.equal(assertServerSmoke(smoke), true);
       assert.equal(smoke.health.body.status, "ok");
-      assert.deepEqual(smoke.health.body.blockers, ["external_seo_exports", "live_services"]);
+      assert.deepEqual(smoke.health.body.blockers, ["external_seo_exports", "listing_quality_review", "live_services"]);
       assert.equal(smoke.ready.status, 503);
       assert.equal(smoke.ready.body.status, "blocked");
       assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);

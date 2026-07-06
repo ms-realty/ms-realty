@@ -4,6 +4,7 @@
   "status": "blocked",
   "blockers": [
     "external_seo_exports",
+    "listing_quality_review",
     "live_services"
   ],
   "warnings": [
@@ -115,6 +116,15 @@
           "matched_rows": 11,
           "unmatched_rows": 14
         }
+      }
+    },
+    {
+      "id": "listing_quality_review",
+      "status": "blocked",
+      "message": "Human listing quality review CSV is required before launch.",
+      "evidence": {
+        "status": "missing_review",
+        "path": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv"
       }
     },
     {

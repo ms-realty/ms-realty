@@ -3,7 +3,7 @@
 Generated: 2026-07-05T00:00:00Z
 
 Status: blocked
-Blockers: external_seo_exports, live_services
+Blockers: external_seo_exports, listing_quality_review, live_services
 
 ## Redirect Reviews
 

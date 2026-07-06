@@ -87,7 +87,7 @@ export async function textFetch(baseUrl, path, options = {}) {
 }
 
 export function assertServerSmoke(smoke) {
-  const expectedBlockers = ["external_seo_exports", "live_services"];
+  const expectedBlockers = ["external_seo_exports", "listing_quality_review", "live_services"];
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||

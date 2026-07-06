@@ -13,6 +13,7 @@ import {
   DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
   writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
+import { DEFAULT_LISTING_QUALITY_REVIEW_INPUT, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -61,6 +62,19 @@ function warningsFrom(structuredData, listingQuality) {
   return Object.entries(warnings)
     .filter(([, count]) => count > 0)
     .map(([id, count]) => ({ id, count }));
+}
+
+function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
+  if (!fs.existsSync(reviewPath)) return { status: "missing_review", path: reviewPath };
+  try {
+    return {
+      status: "pass",
+      path: reviewPath,
+      summary: validateListingQualityReviewCsv(listingQuality, fs.readFileSync(reviewPath, "utf8")).summary,
+    };
+  } catch (error) {
+    return { status: "invalid_review", path: reviewPath, error: error.message };
+  }
 }
 
 function reportStatus(source, filePath, assertReport) {
@@ -119,6 +133,7 @@ export function buildLaunchReadinessReport({
   sitemap = readJson(fromRoot("production", "data", "localized-sitemap.json")),
   structuredData = readJson(fromRoot("production", "data", "structured-data-report.json")),
   listingQuality = readJson(fromRoot("production", "data", "listing-quality-report.json")),
+  listingQualityReview = listingQualityReviewState(listingQuality),
   seoEvidence = readJson(fromRoot("production", "data", "seo-evidence.json")),
   httpSmoke = readJson(fromRoot("production", "data", "http-smoke.json")),
   nodeServerSmoke = readJson(fromRoot("production", "data", "node-server-smoke.json")),
@@ -135,6 +150,7 @@ export function buildLaunchReadinessReport({
     deployableRedirects.summary.homepageTargets === 0 &&
     deployableRedirects.summary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
+  const listingQualityReady = listingQualityReview.status === "pass";
   const liveServicesReady = liveServices.every((item) => item.status === "pass");
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
   const monitoringPlan = [
@@ -193,6 +209,12 @@ export function buildLaunchReadinessReport({
         privacy_events: seoEvidence.summary.sources.privacy_events,
       },
       seoExportsReady ? "" : "Search Console, Yandex, and backlink exports are required before launch.",
+    ),
+    gate(
+      "listing_quality_review",
+      listingQualityReady ? "pass" : "blocked",
+      listingQualityReview,
+      listingQualityReady ? "" : "Human listing quality review CSV is required before launch.",
     ),
     gate(
       "runtime_smoke",
