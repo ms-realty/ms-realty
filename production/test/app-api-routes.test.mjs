@@ -35,8 +35,22 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   const languageRequestPath = tempLedger("app-api-language-requests", resetLanguageRequests);
   const leadLedgerPath = tempLedger("app-api-leads", resetLeadLedger);
   const launchReadinessPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-readiness-`)}/launch-readiness.json`;
+  const localeRegistryPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-locales-`)}/registry.json`;
   const savedSearchLedgerPath = tempLedger("app-api-saved-searches", resetSavedSearches);
   const sellerPipelinePath = tempLedger("app-api-seller-pipeline", resetSellerPipeline);
+  const registry = JSON.parse(fs.readFileSync("locales/registry.json", "utf8"));
+  registry.locales.push({
+    code: "fr",
+    native_name: "francais",
+    admin_name: "French",
+    direction: "ltr",
+    public_enabled: false,
+    indexable: false,
+    fallback_locale: "ru",
+    translation_provider: "hermes_draft",
+    reviewer_role: "translation_editor",
+  });
+  fs.writeFileSync(localeRegistryPath, `${JSON.stringify(registry, null, 2)}\n`);
   fs.writeFileSync(
     launchReadinessPath,
     `${JSON.stringify({ status: "blocked", launch_ready: false, blockers: ["external_seo_exports"] })}\n`,
@@ -47,6 +61,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: languageRequestPath,
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessPath,
       MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
+      MS_REALTY_LOCALE_REGISTRY_PATH: localeRegistryPath,
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: savedSearchLedgerPath,
       MS_REALTY_SELLER_PIPELINE_PATH: sellerPipelinePath,
     },
@@ -131,6 +146,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(languageRequest.status, 201);
       assert.equal(languageRequest.headers.get("cache-control"), "no-store");
       assert.equal(languageRequestBody.public_indexable, false);
+      assert.equal(languageRequestBody.fallback_locale, "ru");
 
       const savedSearch = await savedSearchRoute.POST(
         new Request("https://example.test/api/saved-searches", {

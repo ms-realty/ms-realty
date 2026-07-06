@@ -41,6 +41,7 @@ export function appApiConfigFromEnv(env = process.env) {
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
+    localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -237,13 +238,13 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     }
 
     if (request.method === "GET" && url.pathname === "/api/search") {
-      const registry = loadLocaleRegistry();
+      const registry = loadLocaleRegistry(config.localeRegistryPath);
       const seed = currentSeed(config);
       return webResponse(routeSearch(url, registry, seed, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
-      const registry = loadLocaleRegistry();
+      const registry = loadLocaleRegistry(config.localeRegistryPath);
       const seed = currentSeed(config);
       return webResponse(routeLead(body, registry, seed, config));
     }
@@ -253,12 +254,12 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     }
 
     if (request.method === "POST" && url.pathname === "/api/language-requests") {
-      const registry = loadLocaleRegistry();
+      const registry = loadLocaleRegistry(config.localeRegistryPath);
       return webResponse(routeLanguageRequest(body, registry, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
-      const registry = loadLocaleRegistry();
+      const registry = loadLocaleRegistry(config.localeRegistryPath);
       const seed = currentSeed(config);
       return webResponse(routeSavedSearch(body, registry, seed, config));
     }
