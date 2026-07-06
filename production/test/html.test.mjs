@@ -78,6 +78,11 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(locationHtml, /data-location="Sandanski"/);
   assert.equal(assertHtmlPage(sellerHtml, { lang: "he", dir: "rtl", kind: "seller" }), true);
   assert.match(sellerHtml, /data-lead-type="seller"/);
+  assert.match(sellerHtml, /data-no-public-avm="true"/);
+  assert.match(sellerHtml, /data-broker-review-required="true"/);
+  assert.match(sellerHtml, /data-seller-valuation-flow="broker_callback"/);
+  assert.match(sellerHtml, /name="contact.phone"/);
+  assert.match(sellerHtml, /name="contact_preference"/);
   assert.equal(assertHtmlPage(contactHtml, { lang: "he", dir: "rtl", kind: "contact" }), true);
   assert.match(contactHtml, /data-lead-type="general"/);
   assert.match(contactHtml, /website_contact_callback/);

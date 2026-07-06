@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 9,
-    "passed": 9,
+    "checks": 10,
+    "passed": 10,
     "failed": 0
   },
   "checks": [
@@ -39,6 +39,11 @@
     },
     {
       "id": "phone_first_forms",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "seller_valuation_broker_review",
       "status": "pass",
       "evidence": {}
     },

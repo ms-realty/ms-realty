@@ -299,14 +299,31 @@ function renderLocation(page) {
 
 function renderSeller(page) {
   return `
-<main data-kind="seller" data-phone-first="true" data-min-touch-target="44">
-  <h1>${escapeHtml(page.body.h1)}</h1>
-  <p>${escapeHtml(page.body.intro)}</p>
+<main data-kind="seller" data-phone-first="true" data-no-public-avm="true" data-broker-review-required="true" data-min-touch-target="44">
+  <section aria-label="Seller valuation" data-seller-valuation-flow="broker_callback">
+    <h1>${escapeHtml(page.body.h1)}</h1>
+    <p>${escapeHtml(page.body.intro)}</p>
+    <ol data-seller-steps="true">
+      <li>Property details</li>
+      <li>Broker review</li>
+      <li>Callback</li>
+    </ol>
+  </section>
   <form method="post" action="${escapeHtml(page.body.valuation.endpoint)}" data-lead-type="seller">
     <input type="hidden" name="source" value="${escapeHtml(page.body.valuation.payload.source)}">
     <input type="hidden" name="leadType" value="${escapeHtml(page.body.valuation.payload.leadType)}">
     <input type="hidden" name="language" value="${escapeHtml(page.body.valuation.payload.language)}">
     <label>Name <input name="contact.name" required autocomplete="name"></label>
+    <label>Phone <input name="contact.phone" required autocomplete="tel" inputmode="tel"></label>
+    <label>Preferred contact
+      <select name="contact_preference">
+        <option value="phone">Phone</option>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="viber">Viber</option>
+      </select>
+    </label>
+    <label>Location <input name="property.location" autocomplete="address-level2"></label>
+    <label>Property type <input name="property.type"></label>
     <label>Property details <textarea name="message" required></textarea></label>
     <button type="submit">${escapeHtml(page.body.valuation.label)}</button>
   </form>

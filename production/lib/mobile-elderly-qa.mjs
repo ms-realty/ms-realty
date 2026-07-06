@@ -84,6 +84,14 @@ export function buildMobileElderlyQaReport({
         includes(pages.listing, "data-client-save-listing="),
     ),
     check("phone_first_forms", includes(pages.seller, "data-phone-first=\"true\"") && includes(pages.contact, "data-phone-first=\"true\"")),
+    check(
+      "seller_valuation_broker_review",
+      includes(pages.seller, "data-no-public-avm=\"true\"") &&
+        includes(pages.seller, "data-broker-review-required=\"true\"") &&
+        includes(pages.seller, "data-seller-valuation-flow=\"broker_callback\"") &&
+        includes(pages.seller, "name=\"contact.phone\"") &&
+        includes(pages.seller, "name=\"contact_preference\""),
+    ),
     check("fallback_noindex_request", includes(pages.fallback, "noindex,follow") && includes(pages.fallback, "Request this language")),
     check(
       "admin_and_market_languages",
@@ -115,6 +123,7 @@ export function assertMobileElderlyQaReport(report) {
     "mobile_search_actions",
     "listing_sticky_actions",
     "listing_detail_media_actions",
+    "seller_valuation_broker_review",
     "admin_and_market_languages",
   ]) {
     if (!report.checks.some((check) => check.id === id && check.status === "pass")) {
