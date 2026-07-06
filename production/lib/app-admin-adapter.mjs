@@ -1,6 +1,6 @@
 import { isAdminAuthorized } from "./admin-auth.mjs";
 import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
-import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
+import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
@@ -11,6 +11,11 @@ import { loadLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
+import {
+  DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
+  appendTourApproval,
+  createTourApproval,
+} from "./tours.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
   appendTranslationTask,
@@ -51,6 +56,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
     bookedAt: env.MS_REALTY_BOOKED_AT,
@@ -211,6 +217,18 @@ function appendDealClose(input, config) {
   });
 }
 
+function appendBrokerContactApproval(input, config) {
+  return appendBrokerContact(createBrokerContact(input, { reviewedAt: config.reviewedAt }), {
+    filePath: config.brokerContactLedgerPath,
+  });
+}
+
+function appendTourApprovalRow(input, config) {
+  return appendTourApproval(createTourApproval(currentSeed(config), input, config.reviewedAt), {
+    filePath: config.tourApprovalLedgerPath,
+  });
+}
+
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
   if (!isAdminAuthorized(request.headers.get("authorization") || "")) return adminUnauthorized();
   try {
@@ -234,6 +252,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
       return jsonResponse(201, appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
+      return jsonResponse(201, appendBrokerContactApproval(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
+      return jsonResponse(201, appendTourApprovalRow(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     return jsonResponse(405, { kind: "method_not_allowed" });
   } catch (error) {

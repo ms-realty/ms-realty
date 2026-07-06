@@ -38,14 +38,17 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
       MS_REALTY_SELLER_PIPELINE_PATH: tempJsonl("app-admin-seller-pipeline"),
+      MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: tempJsonl("app-admin-tour-approvals"),
       MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-translations"),
       MS_REALTY_VIEWING_LEDGER_PATH: tempJsonl("app-admin-viewings"),
     },
     async () => {
       const publicLeadRoute = await import("../../app/api/leads/route.js");
+      const brokerContactRoute = await import("../../app/api/admin/broker-contacts/route.js");
       const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
+      const tourApprovalRoute = await import("../../app/api/admin/tours/approve/route.js");
       const viewingRoute = await import("../../app/api/admin/viewings/route.js");
       const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
@@ -100,6 +103,24 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(replyBody.status, "queued_for_manual_send");
       assert.equal(replyBody.broker_approved, true);
 
+      const brokerContact = await brokerContactRoute.POST(
+        new Request("https://example.test/api/admin/broker-contacts", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            listingId: "MS-CRAWL-0001",
+            broker: "broker_ru",
+            phone: "+359880000000",
+            reviewer: "owner",
+            approved: true,
+          }),
+        }),
+      );
+      const brokerContactBody = await brokerContact.json();
+      assert.equal(brokerContact.status, 201);
+      assert.equal(brokerContactBody.status, "approved");
+      assert.equal(brokerContactBody.channels.phone, "tel:+359880000000");
+
       const editor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
@@ -128,6 +149,25 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
       assert.match(await updatedEditor.text(), /value="Updated title for Next admin"/);
+
+      const tourApproval = await tourApprovalRoute.POST(
+        new Request("https://example.test/api/admin/tours/approve", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            listingId: "MS-CRAWL-0001",
+            panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+            thumbnailUrl: "https://cdn.example.test/tours/MS-CRAWL-0001-thumb.jpg",
+            accessibilityCaption: "Reviewed 360 tour of the property.",
+            reviewer: "media_reviewer",
+          }),
+        }),
+      );
+      const tourApprovalBody = await tourApproval.json();
+      assert.equal(tourApproval.status, 201);
+      assert.equal(tourApprovalBody.provider, "photo-sphere-viewer");
+      assert.equal(tourApprovalBody.is_public, true);
+      assert.ok(tourApprovalBody.fallback_gallery.length > 0);
 
       const viewing = await viewingRoute.POST(
         new Request("https://example.test/api/admin/viewings", {
