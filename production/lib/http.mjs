@@ -369,7 +369,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       return response(
         200,
-        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, seed, readTranslationLedger(translationLedgerPath || undefined))),
+        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), readTranslationLedger(translationLedgerPath || undefined))),
         "application/xml; charset=utf-8",
       );
     }

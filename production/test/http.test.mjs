@@ -1089,6 +1089,24 @@ test("HTTP app only redirects rows in the reviewed deployable export", async () 
   assert.notEqual((await dispatchHttp(app, { url: notDeployable.old_url })).status, 301);
 });
 
+test("HTTP sitemap honors mounted listing edit ledger", async () => {
+  const listingEditLedgerPath = tempListingEdits();
+  fs.appendFileSync(
+    listingEditLedgerPath,
+    `${JSON.stringify({
+      listing_id: "MS-CRAWL-0001",
+      editor: "seo_editor",
+      patch: { location: "Runtime Only City" },
+      source_hash_after: "runtime-only-city",
+      stale_translation_count: 1,
+    })}\n`,
+  );
+  const sitemap = await dispatchHttp(createHttpApp({ listingEditLedgerPath }), { url: "/sitemap.xml" });
+
+  assert.equal(sitemap.status, 200);
+  assert.match(sitemap.body, /\/he\/locations\/runtime-only-city/);
+});
+
 test("HTTP app rejects unknown buyer listing references", async () => {
   const response = await dispatchHttp(createHttpApp(), {
     method: "POST",
