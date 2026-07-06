@@ -168,6 +168,9 @@ test("SEO evidence preflight CLI fails missing exports and passes complete expor
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /SEO EVIDENCE PREFLIGHT FAILED/);
   assert.match(missing.stderr, /Missing required SEO evidence/);
+  assert.match(missing.stderr, /search_console: 0 rows, 0 matched, 0 unmatched, 0 duplicates, status missing_export, domains none/);
+  assert.match(missing.stderr, /yandex_webmaster: 0 rows, 0 matched, 0 unmatched, 0 duplicates, status missing_export, domains none/);
+  assert.match(missing.stderr, /backlinks: 0 rows, 0 matched, 0 unmatched, 0 duplicates, status missing_export, domains none/);
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-preflight-`);
   writeCompleteSeoInputFixture(validDir);
@@ -175,7 +178,7 @@ test("SEO evidence preflight CLI fails missing exports and passes complete expor
 
   assert.equal(valid.status, 0, valid.stderr);
   assert.match(valid.stdout, /SEO evidence inputs valid/);
-  assert.match(valid.stdout, /search_console: 2 rows, 2 matched/);
+  assert.match(valid.stdout, /search_console: 2 rows, 2 matched, 0 unmatched, 0 duplicates, status imported/);
 });
 
 test("single-domain SEO exports remain launch blockers", () => {
