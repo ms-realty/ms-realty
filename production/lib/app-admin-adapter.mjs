@@ -313,6 +313,55 @@ function launchInputChecklist(config) {
   });
 }
 
+function migrationReviewPayload(registry, url, config) {
+  const routes = routeMapRows();
+  const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
+  const reviewRequired = routes.filter((route) => route.review_required);
+  const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
+  return {
+    kind: "admin_migration_review",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/migration/review",
+    canonical: "/admin/migration/review",
+    indexable: false,
+    metadata: {
+      title: "MS Realty migration review",
+      description: "Admin-only crawl metadata, media, and reviewed redirect approval workbench.",
+      robots: "noindex,nofollow",
+    },
+    workspace,
+    dashboard: readJsonData("migration-review-dashboard.json"),
+    routeMap: {
+      total: routes.length,
+      reviewRequired: reviewRequired.length,
+      mappedListings: mappedListings.length,
+      pendingSample: reviewRequired.slice(0, 20),
+      approvableSample: mappedListings.filter((route) => route.review_required && route.planned_status === 301).slice(0, 20),
+    },
+    redirectApprovals: readRedirectApprovals(config.redirectApprovalPath),
+    redirectApprovalImport: {
+      method: "POST",
+      endpoint: "/api/admin/redirect-approvals/import",
+      exportEndpoint: "/api/admin/deployable-redirects/export",
+      workbookEndpoint: "/api/admin/redirect-approval-workbook",
+      pendingWorkbookEndpoint: "/api/admin/redirect-approval-workbook?pending=1",
+      contentType: "text/csv",
+      workbookPath: "production/data/redirect-approval-workbook.csv",
+    },
+    seoEvidence: seoEvidencePayload(seoEvidence()),
+    listingQuality: buildListingQualityReport({ seed: currentSeed(config), generatedAt: config.reviewedAt, limit: 20 }),
+    listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
+    listingQualityImportEndpoint: "/api/admin/listing-quality/import",
+    launchReadinessEndpoint: "/api/admin/launch-readiness",
+    launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
+    launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
+    deployablePreview: currentDeployableRedirects(config),
+  };
+}
+
 function localePayload(registry, url) {
   return {
     workspace: renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" }),
@@ -489,6 +538,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       return htmlResponse(listingEditorPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/admin/migration/review") {
+      return htmlResponse(migrationReviewPayload(registry, url, config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
+      return jsonResponse(200, migrationReviewPayload(registry, url, config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       return jsonResponse(200, localePayload(registry, url));

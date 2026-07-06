@@ -96,6 +96,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
       const listingEditorRoute = await import("../../app/admin/listings/edit/route.js");
+      const migrationReviewHtmlRoute = await import("../../app/admin/migration/review/route.js");
+      const migrationReviewRoute = await import("../../app/api/admin/migration/review/route.js");
 
       const lead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
@@ -169,6 +171,36 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(launchChecklist.headers.get("content-type"), "text/markdown; charset=utf-8");
       assert.match(launchChecklistBody, /# Launch Input Checklist/);
       assert.match(launchChecklistBody, /External SEO Exports/);
+
+      const migrationReviewUnauthorized = await migrationReviewRoute.GET(
+        new Request("https://example.test/api/admin/migration/review?locale=bg"),
+      );
+      assert.equal(migrationReviewUnauthorized.status, 401);
+      assert.equal(migrationReviewUnauthorized.headers.get("cache-control"), "no-store");
+
+      const migrationReview = await migrationReviewRoute.GET(
+        new Request("https://example.test/api/admin/migration/review?locale=bg", { headers: auth }),
+      );
+      const migrationReviewBody = await migrationReview.json();
+      assert.equal(migrationReview.status, 200);
+      assert.equal(migrationReview.headers.get("cache-control"), "no-store");
+      assert.equal(migrationReviewBody.workspace.locale, "bg");
+      assert.equal(migrationReviewBody.dashboard.media_reconciliation.media_rows, 11859);
+      assert.equal(migrationReviewBody.routeMap.total, 457);
+      assert.equal(migrationReviewBody.routeMap.mappedListings, 165);
+      assert.equal(migrationReviewBody.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
+      assert.equal(migrationReviewBody.routeMap.approvableSample.length > 0, true);
+
+      const migrationReviewHtml = await migrationReviewHtmlRoute.GET(
+        new Request("https://example.test/admin/migration/review?locale=bg", { headers: auth }),
+      );
+      const migrationReviewHtmlBody = await migrationReviewHtml.text();
+      assert.equal(migrationReviewHtml.status, 200);
+      assert.equal(migrationReviewHtml.headers.get("content-type"), "text/html; charset=utf-8");
+      assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
+      assert.match(migrationReviewHtmlBody, /data-approvable-listing="true"/);
+      assert.match(migrationReviewHtmlBody, /data-seo-import-endpoint="\/api\/admin\/seo-evidence\/import"/);
+      assert.match(migrationReviewHtmlBody, /data-launch-readiness-export-endpoint="\/api\/admin\/launch-readiness\/export"/);
 
       const seoEvidence = await seoEvidenceRoute.GET(new Request("https://example.test/api/admin/seo-evidence", { headers: auth }));
       const seoEvidenceBody = await seoEvidence.json();
