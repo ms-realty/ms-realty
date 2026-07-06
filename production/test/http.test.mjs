@@ -546,6 +546,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
   assert.equal(smoke.adminHtml.body.includes("Manager escalations"), true);
+  assert.equal(smoke.adminHtml.body.includes('data-sla-status="manager_escalation_required"'), true);
+  assert.equal(smoke.adminHtml.body.includes("Escalation due"), true);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
   assert.equal(smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\""), true);

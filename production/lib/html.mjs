@@ -377,6 +377,7 @@ function renderAdminMigrationReview(page) {
 }
 
 function renderAdminLeadInbox(page) {
+  const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const metrics = [
     ["Leads", page.summary.leads],
     ["Replies queued", page.summary.replies],
@@ -390,14 +391,20 @@ function renderAdminLeadInbox(page) {
     .map(([label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`)
     .join("");
   const leads = page.leads
-    .map(
-      (lead) => `
+    .map((lead) => {
+      const leadSla = leadSlaById.get(lead.lead_id);
+      const slaStatus = leadSla?.status || "pending";
+      const slaLabel = slaStatus.replaceAll("_", " ");
+      const escalationDue = leadSla?.manager_escalation_due_at || "";
+      return `
       <tr data-lead-row="true">
         <td><code>${escapeHtml(lead.lead_id)}</code></td>
         <td>${escapeHtml(lead.lead_type)}</td>
         <td>${escapeHtml(lead.source)}</td>
         <td>${escapeHtml(lead.original_language)} -> ${escapeHtml(lead.admin_locale)}</td>
         <td>${escapeHtml(lead.contact_preference)}</td>
+        <td data-sla-status="${escapeHtml(slaStatus)}">${escapeHtml(slaLabel)}</td>
+        <td>${escapeHtml(escalationDue)}</td>
         <td>
           <form method="post" action="/api/admin/replies">
             <input type="hidden" name="leadId" value="${escapeHtml(lead.lead_id)}">
@@ -408,8 +415,8 @@ function renderAdminLeadInbox(page) {
             <button type="submit">Queue reply</button>
           </form>
         </td>
-      </tr>`,
-    )
+      </tr>`;
+    })
     .join("");
   const requests = page.languageRequests
     .map((request) => `<li>${escapeHtml(request.requested_locale)} -> ${escapeHtml(request.fallback_locale)}</li>`)
@@ -423,7 +430,7 @@ function renderAdminLeadInbox(page) {
   <section aria-label="CRM leads">
     <h2>CRM leads</h2>
     <table>
-      <thead><tr><th>Lead</th><th>Type</th><th>Source</th><th>Language</th><th>Contact</th><th>Reply</th></tr></thead>
+      <thead><tr><th>Lead</th><th>Type</th><th>Source</th><th>Language</th><th>Contact</th><th>SLA</th><th>Escalation due</th><th>Reply</th></tr></thead>
       <tbody>${leads}</tbody>
     </table>
   </section>
