@@ -95,6 +95,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const viewingRoute = await import("../../app/api/admin/viewings/route.js");
       const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
+      const leadInboxJsonRoute = await import("../../app/api/admin/leads/route.js");
       const listingEditorRoute = await import("../../app/admin/listings/edit/route.js");
       const migrationReviewHtmlRoute = await import("../../app/admin/migration/review/route.js");
       const migrationReviewRoute = await import("../../app/api/admin/migration/review/route.js");
@@ -121,6 +122,18 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(unauthorized.headers.get("www-authenticate"), 'Bearer realm="ms-realty-admin"');
 
       const auth = { authorization: "Bearer next-admin-test" };
+      const inboxJsonUnauthorized = await leadInboxJsonRoute.GET(new Request("https://example.test/api/admin/leads?locale=ru"));
+      assert.equal(inboxJsonUnauthorized.status, 401);
+      assert.equal(inboxJsonUnauthorized.headers.get("cache-control"), "no-store");
+
+      const inboxJson = await leadInboxJsonRoute.GET(new Request("https://example.test/api/admin/leads?locale=ru", { headers: auth }));
+      const inboxJsonBody = await inboxJson.json();
+      assert.equal(inboxJson.status, 200);
+      assert.equal(inboxJson.headers.get("cache-control"), "no-store");
+      assert.equal(inboxJsonBody.workspace.locale, "ru");
+      assert.equal(inboxJsonBody.leads.length, 1);
+      assert.equal(inboxJsonBody.leads[0].original_language, "he");
+
       const inbox = await leadInboxRoute.GET(new Request("https://example.test/admin/leads?locale=ru", { headers: auth }));
       const inboxHtml = await inbox.text();
       assert.equal(inbox.status, 200);

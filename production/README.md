@@ -84,6 +84,7 @@ What it proves now:
 - Next App Router public API handlers for health, readiness, search, and lead intake backed by the same HTTP contracts.
 - Next App Router public API handlers for analytics events, language requests, and saved searches.
 - Next App Router admin read pages for CRM lead inbox and CMS listing editor behind the same bearer auth gate.
+- Next App Router admin JSON lead inbox endpoint for broker CRM consumers.
 - Next App Router admin write handlers for reviewed replies and listing edits used by those admin pages.
 - Next App Router admin CRM lifecycle handlers for viewing bookings, viewing calendar export, and deal close tasks.
 - Next App Router admin media/contact handlers for reviewed broker contacts and approved 360 tours.

@@ -536,6 +536,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const url = new URL(request.url, "http://localhost");
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       return htmlResponse(listingEditorPayload(registry, url, config));
     }
