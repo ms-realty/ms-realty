@@ -129,6 +129,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
       const deployableRedirectExportRoute = await import("../../app/api/admin/deployable-redirects/export/route.js");
       const cmsCollectionsRoute = await import("../../app/api/admin/cms-collections/route.js");
+      const payloadCollectionsRoute = await import("../../app/api/admin/payload-collections/route.js");
       const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
       const liveServiceReportTemplateRoute = await import("../../app/api/admin/live-service-report-template/route.js");
       const liveServiceReportImportRoute = await import("../../app/api/admin/live-service-reports/import/route.js");
@@ -274,6 +275,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(cmsCollectionsBody.summary.records.listing_tours, 165);
       assert.equal(cmsCollectionsBody.collections.every((collection) => collection.publish_requires_human_review), true);
 
+      const payloadCollectionsUnauthorized = await payloadCollectionsRoute.GET(
+        new Request("https://example.test/api/admin/payload-collections"),
+      );
+      const payloadCollections = await payloadCollectionsRoute.GET(
+        new Request("https://example.test/api/admin/payload-collections", { headers: auth }),
+      );
+      const payloadCollectionsBody = await payloadCollections.json();
+      assert.equal(payloadCollectionsUnauthorized.status, 401);
+      assert.equal(payloadCollections.status, 200);
+      assert.equal(payloadCollections.headers.get("cache-control"), "no-store");
+      assert.equal(payloadCollectionsBody.kind, "admin_payload_collections");
+      assert.equal(payloadCollectionsBody.collections.length, 4);
+      assert.equal(payloadCollectionsBody.collections.every((collection) => collection.versions.drafts), true);
+
       const liveTemplate = await liveServiceReportTemplateRoute.GET(
         new Request("https://example.test/api/admin/live-service-report-template?source=hermes_draft_worker", { headers: auth }),
       );
@@ -317,6 +332,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
       assert.equal(migrationReviewBody.preflightReportsEndpoint, "/api/admin/preflight-reports");
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
+      assert.equal(migrationReviewBody.payloadCollectionsEndpoint, "/api/admin/payload-collections");
       assert.equal(migrationReviewBody.routeMap.approvableSample.length > 0, true);
 
       const migrationReviewHtml = await migrationReviewHtmlRoute.GET(
@@ -327,6 +343,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtml.headers.get("content-type"), "text/html; charset=utf-8");
       assert.equal(migrationReviewHtmlBody.includes('data-preflight-reports-endpoint="/api/admin/preflight-reports"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
+      assert.equal(migrationReviewHtmlBody.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-approvable-listing="true"/);
       assert.match(migrationReviewHtmlBody, /data-seo-import-endpoint="\/api\/admin\/seo-evidence\/import"/);

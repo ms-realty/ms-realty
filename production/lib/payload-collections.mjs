@@ -127,3 +127,9 @@ export function writePayloadCollections(config, outPath = DEFAULT_PAYLOAD_COLLEC
   fs.writeFileSync(outPath, `${JSON.stringify(config, null, 2)}\n`);
   return { outPath, summary };
 }
+
+export function loadPayloadCollections(filePath = DEFAULT_PAYLOAD_COLLECTIONS_OUTPUT) {
+  const config = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  assertPayloadCollections(config);
+  return config;
+}
