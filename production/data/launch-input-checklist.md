@@ -60,8 +60,9 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 
 - Current gate: blocked
 - Collection export: `production/data/payload-collections.json`
-- Required before final readiness: install/configure the Payload runtime app against the generated collection export.
-- Expected runtime evidence: `payload` dependency present, `payload.config.ts` or `payload.config.js` present, and the collection export generated.
+- Admin route: `/payload-admin`; API routes: `/api/[...slug]`, `/graphql`, `/graphql-playground`.
+- Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`.
+- Runtime evidence: `payload` dependency present, `payload.config.js` present, collection export generated, and required env configured.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
 
 ## Content Quality Warnings

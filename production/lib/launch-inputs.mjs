@@ -62,6 +62,12 @@ export function renderLaunchInputChecklist({
   const verificationOwners = Object.entries(listingVerification.summary.by_owner || {})
     .map(([owner, count]) => `${owner}: ${count}`)
     .join(", ");
+  const payloadGate = launchReadiness.gates.find((gate) => gate.id === "payload_runtime");
+  const payloadEvidence = payloadGate?.evidence || {};
+  const missingPayloadEnv = [
+    payloadEvidence.payload_secret_configured ? "" : "PAYLOAD_SECRET",
+    payloadEvidence.payload_database_url_configured ? "" : "DATABASE_URL",
+  ].filter(Boolean);
 
   return `# Launch Input Checklist
 
@@ -120,8 +126,9 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 
 - Current gate: ${launchReadiness.gates.find((gate) => gate.id === "payload_runtime")?.status || "unknown"}
 - Collection export: \`production/data/payload-collections.json\`
-- Required before final readiness: install/configure the Payload runtime app against the generated collection export.
-- Expected runtime evidence: \`payload\` dependency present, \`payload.config.ts\` or \`payload.config.js\` present, and the collection export generated.
+- Admin route: \`/payload-admin\`; API routes: \`/api/[...slug]\`, \`/graphql\`, \`/graphql-playground\`.
+- Required env: \`PAYLOAD_SECRET\`, \`DATABASE_URL\`${missingPayloadEnv.length ? `; currently missing: ${missingPayloadEnv.map((name) => `\`${name}\``).join(", ")}` : ""}.
+- Runtime evidence: \`payload\` dependency present, \`payload.config.js\` present, collection export generated, and required env configured.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
 
 ## Content Quality Warnings

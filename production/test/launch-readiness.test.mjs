@@ -683,7 +683,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /Payload Runtime/);
   assert.match(markdown, /Current gate: blocked/);
   assert.match(markdown, /production\/data\/payload-collections\.json/);
-  assert.match(markdown, /payload\.config\.ts/);
+  assert.match(markdown, /\/payload-admin/);
+  assert.match(markdown, /Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`/);
+  assert.match(markdown, /payload\.config\.js/);
   assert.match(markdown, /interim admin workbenches do not count/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
