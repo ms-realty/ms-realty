@@ -175,10 +175,39 @@ test("SEO evidence preflight CLI fails missing exports and passes complete expor
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-preflight-`);
   writeCompleteSeoInputFixture(validDir);
   const valid = spawnSync(process.execPath, [script, validDir], { cwd: fromRoot(), encoding: "utf8" });
+  const validFromEnv = spawnSync(process.execPath, [script], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_SEO_EVIDENCE_INPUT_DIR: validDir },
+  });
 
   assert.equal(valid.status, 0, valid.stderr);
   assert.match(valid.stdout, /SEO evidence inputs valid/);
   assert.match(valid.stdout, /search_console: 2 rows, 2 matched, 0 unmatched, 0 duplicates, status imported/);
+  assert.equal(validFromEnv.status, 0, validFromEnv.stderr);
+  assert.match(validFromEnv.stdout, /SEO evidence inputs valid/);
+});
+
+test("SEO evidence build CLI honors mounted input and output paths", () => {
+  const inputDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-build-input-`);
+  const outputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-build-output-`)}/seo-evidence.json`;
+  writeCompleteSeoInputFixture(inputDir);
+
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_SEO_EVIDENCE_INPUT_DIR: inputDir,
+      MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: outputPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, new RegExp(outputPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  const evidence = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(assertSeoEvidence(evidence), true);
+  assert.deepEqual(evidence.summary.missing_required_sources, []);
 });
 
 test("single-domain SEO exports remain launch blockers", () => {
