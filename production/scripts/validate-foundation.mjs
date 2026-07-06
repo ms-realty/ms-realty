@@ -280,6 +280,15 @@ if (
 ) {
   throw new Error("Public fixtures must include Hebrew contact callback page");
 }
+if (
+  publicFixtures.guide_en?.path !== "/en/guides/foreign-buyers" ||
+  publicFixtures.guide_en.kind !== "guide" ||
+  !publicFixtures.guide_en.body.sections?.some((section) =>
+    section.facts.join(" ").includes("Non-EU buyers cannot own Bulgarian land directly"),
+  )
+) {
+  throw new Error("Public fixtures must include approved CMS guide pages cited by Hermes");
+}
 if (JSON.stringify(publicFixtures).match(/Sandanski sea|sea destination|Сандански море/i)) {
   throw new Error("Public fixtures must not introduce Sandanski sea framing");
 }

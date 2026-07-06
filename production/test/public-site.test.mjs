@@ -1,11 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { approvedContentDocumentsForPath, readApprovedCmsContent } from "../lib/approved-content.mjs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   renderAdminShell,
   renderContactPage,
+  renderGuidePage,
   renderHomePage,
   renderLanguageFallback,
   renderListingPage,
@@ -191,6 +193,21 @@ test("contact callback page is locale-prefixed and posts generic CRM leads", () 
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
+});
+
+test("approved CMS guide page renders reviewed foreign-buyer facts", () => {
+  const path = "/en/guides/foreign-buyers";
+  const guide = renderGuidePage({
+    registry,
+    localeCode: "en",
+    path,
+    documents: approvedContentDocumentsForPath(readApprovedCmsContent(), path),
+  });
+
+  assert.equal(guide.status, 200);
+  assert.equal(guide.path, path);
+  assert.equal(guide.indexable, true);
+  assert.match(guide.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
 });
 
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {
