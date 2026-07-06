@@ -125,10 +125,13 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 ## Payload Runtime
 
 - Current gate: ${launchReadiness.gates.find((gate) => gate.id === "payload_runtime")?.status || "unknown"}
+- Runtime report: \`production/data/payload-runtime-report.json\`
 - Collection export: \`production/data/payload-collections.json\`
 - Admin route: \`/payload-admin\`; API routes: \`/api/[...slug]\`, \`/graphql\`, \`/graphql-playground\`.
 - Required env: \`PAYLOAD_SECRET\`, \`DATABASE_URL\`${missingPayloadEnv.length ? `; currently missing: ${missingPayloadEnv.map((name) => `\`${name}\``).join(", ")}` : ""}.
 - Runtime evidence: \`payload\` dependency present, \`payload.config.js\` present, collection export generated, and required env configured.
+- Runtime commands: \`npm run payload:runtime\`, then \`npm run payload:preflight\`.
+- Production/CLI path override: \`MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH\`.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
 
 ## Content Quality Warnings
@@ -174,6 +177,7 @@ npm run redirects:build
 npm run seo:preflight
 npm run seo:evidence
 npm run live:preflight
+npm run payload:preflight
 npm run listing:preflight
 npm run launch:readiness
 npm run launch:inputs

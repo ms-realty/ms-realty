@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-07-06T00:00:00Z",
+  "ready": false,
+  "status": "blocked",
+  "summary": {
+    "admin_route": "/payload-admin",
+    "checks": 8,
+    "database": {
+      "status": "missing_env"
+    },
+    "missing_env": [
+      "PAYLOAD_SECRET",
+      "DATABASE_URL"
+    ],
+    "route_files": 4
+  },
+  "checks": [
+    {
+      "id": "payload_secret",
+      "status": "missing_env",
+      "env": "PAYLOAD_SECRET"
+    },
+    {
+      "id": "database_url",
+      "status": "missing_env",
+      "env": "DATABASE_URL"
+    },
+    {
+      "id": "route:app/(payload)/payload-admin/[[...segments]]/page.js",
+      "status": "pass",
+      "file": "app/(payload)/payload-admin/[[...segments]]/page.js"
+    },
+    {
+      "id": "route:app/(payload)/api/[...slug]/route.js",
+      "status": "pass",
+      "file": "app/(payload)/api/[...slug]/route.js"
+    },
+    {
+      "id": "route:app/(payload)/graphql/route.js",
+      "status": "pass",
+      "file": "app/(payload)/graphql/route.js"
+    },
+    {
+      "id": "route:app/(payload)/graphql-playground/route.js",
+      "status": "pass",
+      "file": "app/(payload)/graphql-playground/route.js"
+    },
+    {
+      "id": "payload_config_import",
+      "status": "pass",
+      "admin_route": "/payload-admin",
+      "collections": 6
+    },
+    {
+      "id": "database_tcp",
+      "status": "missing_env",
+      "env": "DATABASE_URL"
+    }
+  ],
+  "next_actions": [
+    "Set PAYLOAD_SECRET and DATABASE_URL in the production runtime.",
+    "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
+    "Run npm run payload:preflight before launch:preflight."
+  ]
+}

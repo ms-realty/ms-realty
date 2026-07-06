@@ -14,6 +14,10 @@ import {
   writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
 import { DEFAULT_LISTING_QUALITY_REVIEW_INPUT, validateListingQualityReviewCsv } from "./listing-quality.mjs";
+import {
+  assertPayloadRuntimeReport,
+  DEFAULT_PAYLOAD_RUNTIME_REPORT,
+} from "./payload-runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -137,6 +141,22 @@ export function liveServiceReports({
   ];
 }
 
+export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT) {
+  if (!fs.existsSync(reportPath)) return { status: "missing_report", path: reportPath };
+  try {
+    const report = readJson(reportPath);
+    assertPayloadRuntimeReport(report);
+    return {
+      status: report.ready ? "pass" : "blocked_report",
+      path: reportPath,
+      summary: report.summary,
+      checks: report.checks,
+    };
+  } catch (error) {
+    return { status: "invalid_report", path: reportPath, error: error.message };
+  }
+}
+
 export function validateLiveServiceReports(options = {}) {
   const reports = liveServiceReports(options);
   return {
@@ -227,6 +247,7 @@ export function buildLaunchReadinessReport({
   nodeServerSmoke = readJson(fromRoot("production", "data", "node-server-smoke.json")),
   liveServices = liveServiceReports(),
   appState = packageState(),
+  payloadRuntime = payloadRuntimeState(),
 } = {}) {
   const crawlPass =
     migration.summary.total === 457 &&
@@ -241,12 +262,7 @@ export function buildLaunchReadinessReport({
   const listingQualityReady = listingQualityReview.status === "pass";
   const liveServicesReady = liveServices.every((item) => item.status === "pass");
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
-  const payloadRuntimeReady =
-    appState.payload_dependency &&
-    appState.payload_config &&
-    appState.payload_collection_export &&
-    appState.payload_secret_configured &&
-    appState.payload_database_url_configured;
+  const payloadRuntimeReady = payloadRuntime.status === "pass";
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
     { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
@@ -348,10 +364,10 @@ export function buildLaunchReadinessReport({
     gate(
       "payload_runtime",
       payloadRuntimeReady ? "pass" : "blocked",
-      appState,
+      payloadRuntime,
       payloadRuntimeReady
-        ? "Payload runtime is configured against the generated CMS collection export."
-        : "Payload runtime app is required before final production readiness.",
+        ? "Payload runtime report proves config, routes, env, and database reachability."
+        : "Payload runtime report must pass before final production readiness.",
     ),
   ];
 

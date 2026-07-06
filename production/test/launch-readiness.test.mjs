@@ -99,6 +99,16 @@ const readyAppState = {
   payload_secret_configured: true,
   payload_database_url_configured: true,
 };
+const readyPayloadRuntime = {
+  status: "pass",
+  path: "production/data/payload-runtime-report.json",
+  summary: { missing_env: [], database: { status: "pass" } },
+  checks: [
+    { id: "payload_secret", status: "pass" },
+    { id: "database_url", status: "pass" },
+    { id: "database_tcp", status: "pass" },
+  ],
+};
 
 function writeLiveReportFixtures(dir) {
   const syncReportPath = `${dir}/search-engine-sync-report.json`;
@@ -246,6 +256,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
     appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
   });
 
   assert.equal(assertLaunchReadinessReport(report), true);
@@ -287,6 +298,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
     appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
@@ -311,6 +323,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
     appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
   });
   assert.equal(homepageReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(homepageReport.blockers, ["redirect_reviews"]);
@@ -325,6 +338,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
     appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
   });
   assert.equal(duplicateReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(duplicateReport.blockers, ["redirect_reviews"]);
@@ -365,7 +379,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
-  assert.match(result.stderr, /payload_runtime missing: PAYLOAD_SECRET, DATABASE_URL/);
+  assert.match(result.stderr, /payload_runtime: blocked_report .*payload-runtime-report\.json .*missing PAYLOAD_SECRET, DATABASE_URL/);
   assert.match(result.stderr, /npm run launch:inputs/);
 
   const partialReviewPath = writePartialListingQualityReviewFixture(
@@ -682,10 +696,14 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /Payload Runtime/);
   assert.match(markdown, /Current gate: blocked/);
+  assert.match(markdown, /production\/data\/payload-runtime-report\.json/);
   assert.match(markdown, /production\/data\/payload-collections\.json/);
   assert.match(markdown, /\/payload-admin/);
   assert.match(markdown, /Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`/);
   assert.match(markdown, /payload\.config\.js/);
+  assert.match(markdown, /npm run payload:runtime/);
+  assert.match(markdown, /npm run payload:preflight/);
+  assert.match(markdown, /MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH/);
   assert.match(markdown, /interim admin workbenches do not count/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);

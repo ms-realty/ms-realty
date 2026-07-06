@@ -63,7 +63,7 @@
         {
           "id": "payload_runtime",
           "status": "blocked",
-          "message": "Payload runtime app is required before final production readiness."
+          "message": "Payload runtime report must pass before final production readiness."
         }
       ]
     }

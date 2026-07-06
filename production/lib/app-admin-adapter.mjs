@@ -19,6 +19,7 @@ import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   liveServiceReports,
+  payloadRuntimeState,
   readLiveServiceReportTemplate,
   writeLaunchReadinessReport,
   writeLiveServiceReport,
@@ -106,6 +107,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
     searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
+    payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
@@ -368,6 +370,7 @@ function launchReadiness(config) {
       queryReportPath: config.searchQueryReportPath || undefined,
       hermesReportPath: config.hermesWorkerReportPath || undefined,
     }),
+    payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
   });
 }
 
@@ -433,6 +436,7 @@ function preflightReports(config) {
         queryReportPath: config.searchQueryReportPath || undefined,
         hermesReportPath: config.hermesWorkerReportPath || undefined,
       }),
+      payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
     },
   };
 }

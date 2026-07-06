@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { liveServiceReports } from "../lib/launch-readiness.mjs";
+import { liveServiceReports, payloadRuntimeState } from "../lib/launch-readiness.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
   buildDeployableRedirects,
@@ -50,6 +50,9 @@ export function launchReadinessInputsFromEnv(env = process.env) {
       queryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined,
       hermesReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined,
     });
+  }
+  if (env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH) {
+    inputs.payloadRuntime = payloadRuntimeState(env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH);
   }
   return inputs;
 }

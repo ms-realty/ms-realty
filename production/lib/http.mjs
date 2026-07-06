@@ -60,6 +60,7 @@ import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   liveServiceReports,
+  payloadRuntimeState,
   publicLaunchReadinessHeaders,
   publicLaunchReadinessPayload,
   readLiveServiceReportTemplate,
@@ -310,6 +311,7 @@ export function createHttpApp({
   searchSyncReportPath = null,
   searchQueryReportPath = null,
   hermesWorkerReportPath = null,
+  payloadRuntimeReportPath = null,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
@@ -352,6 +354,7 @@ export function createHttpApp({
         queryReportPath: searchQueryReportPath || undefined,
         hermesReportPath: hermesWorkerReportPath || undefined,
       }),
+      payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
     });
   };
   const currentLaunchInputChecklist = () =>
@@ -392,6 +395,7 @@ export function createHttpApp({
           queryReportPath: searchQueryReportPath || undefined,
           hermesReportPath: hermesWorkerReportPath || undefined,
         }),
+        payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
       },
     };
   };

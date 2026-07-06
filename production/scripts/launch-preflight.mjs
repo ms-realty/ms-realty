@@ -17,11 +17,11 @@ function blockerDetails(report) {
         ];
       }
       if (gate.id === "payload_runtime") {
-        const missing = [
-          gate.evidence.payload_secret_configured ? "" : "PAYLOAD_SECRET",
-          gate.evidence.payload_database_url_configured ? "" : "DATABASE_URL",
-        ].filter(Boolean);
-        return [`payload_runtime missing: ${missing.join(", ") || "runtime proof"}`];
+        const missing = gate.evidence.summary?.missing_env || [];
+        const failed = (gate.evidence.checks || []).filter((check) => check.status !== "pass").map((check) => check.id);
+        return [
+          `payload_runtime: ${gate.evidence.status} ${gate.evidence.path || ""} ${missing.length ? `missing ${missing.join(", ")}` : ""} ${failed.length ? `failed ${failed.join(", ")}` : ""}`.trim(),
+        ];
       }
       return [gate.message ? `${gate.id}: ${gate.message}` : `${gate.id}: blocked`];
     });

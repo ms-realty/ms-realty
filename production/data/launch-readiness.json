@@ -197,15 +197,65 @@
     {
       "id": "payload_runtime",
       "status": "blocked",
-      "message": "Payload runtime app is required before final production readiness.",
+      "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "start_script": "node production/server.mjs",
-        "production_server_entrypoint": true,
-        "payload_dependency": true,
-        "payload_config": true,
-        "payload_collection_export": true,
-        "payload_secret_configured": false,
-        "payload_database_url_configured": false
+        "status": "blocked_report",
+        "path": "/Users/ivan/Code/MS-Realty/production/data/payload-runtime-report.json",
+        "summary": {
+          "admin_route": "/payload-admin",
+          "checks": 8,
+          "database": {
+            "status": "missing_env"
+          },
+          "missing_env": [
+            "PAYLOAD_SECRET",
+            "DATABASE_URL"
+          ],
+          "route_files": 4
+        },
+        "checks": [
+          {
+            "id": "payload_secret",
+            "status": "missing_env",
+            "env": "PAYLOAD_SECRET"
+          },
+          {
+            "id": "database_url",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          },
+          {
+            "id": "route:app/(payload)/payload-admin/[[...segments]]/page.js",
+            "status": "pass",
+            "file": "app/(payload)/payload-admin/[[...segments]]/page.js"
+          },
+          {
+            "id": "route:app/(payload)/api/[...slug]/route.js",
+            "status": "pass",
+            "file": "app/(payload)/api/[...slug]/route.js"
+          },
+          {
+            "id": "route:app/(payload)/graphql/route.js",
+            "status": "pass",
+            "file": "app/(payload)/graphql/route.js"
+          },
+          {
+            "id": "route:app/(payload)/graphql-playground/route.js",
+            "status": "pass",
+            "file": "app/(payload)/graphql-playground/route.js"
+          },
+          {
+            "id": "payload_config_import",
+            "status": "pass",
+            "admin_route": "/payload-admin",
+            "collections": 6
+          },
+          {
+            "id": "database_tcp",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          }
+        ]
       }
     }
   ],
