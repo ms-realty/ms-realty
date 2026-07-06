@@ -164,7 +164,7 @@ MS_REALTY_ADMIN_TOKEN=replace-me npm start
 Useful operator endpoints:
 
 - `GET /api/health` returns `status: ok` plus current launch blockers.
-- `GET /api/ready` returns `503` with blockers until launch readiness is clear.
+- `GET /api/ready` returns `503` with blockers, public blocked-gate messages, `Cache-Control: no-store`, and `Retry-After: 60` until launch readiness is clear.
 - `GET /api/admin/launch-readiness` returns the launch gate report.
 - `GET /api/admin/launch-input-checklist` returns the remaining operator inputs as Markdown.
 - `GET /api/admin/live-service-report-template` and `POST /api/admin/live-service-reports/import` handle validated live report files.

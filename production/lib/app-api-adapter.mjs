@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, appendLanguageRequest, createLanguageRequest } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
+import { publicLaunchReadinessHeaders, publicLaunchReadinessPayload } from "./launch-readiness.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -60,8 +61,8 @@ function response(status, body, contentType, headers = {}) {
   };
 }
 
-function json(status, body) {
-  return response(status, body, "application/json; charset=utf-8");
+function json(status, body, headers = {}) {
+  return response(status, body, "application/json; charset=utf-8", headers);
 }
 
 function privateJson(status, body) {
@@ -227,13 +228,11 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (request.method === "GET" && url.pathname === "/api/ready") {
       const readiness = readLaunchReadiness(config.launchReadinessOutputPath);
       return webResponse(
-        json(readiness.launch_ready ? 200 : 503, {
-          kind: "readiness",
-          service: "ms-realty",
-          status: readiness.launch_ready ? "ready" : "blocked",
-          launch_ready: readiness.launch_ready,
-          blockers: readiness.blockers,
-        }),
+        json(
+          readiness.launch_ready ? 200 : 503,
+          publicLaunchReadinessPayload(readiness),
+          publicLaunchReadinessHeaders(readiness),
+        ),
       );
     }
 

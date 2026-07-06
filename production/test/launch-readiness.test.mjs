@@ -8,6 +8,8 @@ import {
   assertLiveServicePreflightReport,
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
+  publicLaunchReadinessHeaders,
+  publicLaunchReadinessPayload,
   readLiveServiceReportTemplate,
   validateLiveServiceReports,
   writeLiveServiceReport,
@@ -138,6 +140,14 @@ test("launch readiness stays blocked until production launch blockers are cleare
     count: 7,
   });
   assert.ok(report.rollback_plan.length >= 3);
+
+  const publicPayload = publicLaunchReadinessPayload(report);
+  assert.deepEqual(
+    publicPayload.blocked_gates.map((gate) => gate.id),
+    ["external_seo_exports", "listing_quality_review", "live_services"],
+  );
+  assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Typesense\/Meilisearch/);
+  assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store", "retry-after": "60" });
 });
 
 test("launch readiness validator accepts ready state after required gates are cleared", () => {
@@ -172,6 +182,8 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.equal(report.launch_ready, true);
   assert.equal(report.status, "ready");
   assert.deepEqual(report.blockers, []);
+  assert.deepEqual(publicLaunchReadinessPayload(report).blocked_gates, []);
+  assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
 });
 
 test("launch readiness accepts reviewed location page growth", () => {

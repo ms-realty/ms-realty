@@ -58,6 +58,10 @@ export function close(server) {
   });
 }
 
+function capturedHeaders(response) {
+  return Object.fromEntries([...response.headers.entries()].filter(([key]) => key !== "date"));
+}
+
 export async function jsonFetch(baseUrl, path, options = {}) {
   const { captureHeaders = false, ...fetchOptions } = options;
   const response = await fetch(`${baseUrl}${path}`, {
@@ -71,7 +75,7 @@ export async function jsonFetch(baseUrl, path, options = {}) {
     status: response.status,
     body: await response.json(),
   };
-  if (captureHeaders) result.headers = Object.fromEntries(response.headers.entries());
+  if (captureHeaders) result.headers = capturedHeaders(response);
   return result;
 }
 
@@ -82,7 +86,7 @@ export async function textFetch(baseUrl, path, options = {}) {
     status: response.status,
     body: await response.text(),
   };
-  if (captureHeaders) result.headers = Object.fromEntries(response.headers.entries());
+  if (captureHeaders) result.headers = capturedHeaders(response);
   return result;
 }
 
@@ -98,9 +102,12 @@ export function assertServerSmoke(smoke) {
   if (
     smoke.ready?.status !== 503 ||
     smoke.ready.body.status !== "blocked" ||
-    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(expectedBlockers)
+    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(expectedBlockers) ||
+    JSON.stringify((smoke.ready.body.blocked_gates || []).map((gate) => gate.id)) !== JSON.stringify(expectedBlockers) ||
+    smoke.ready.headers?.["cache-control"] !== "no-store" ||
+    smoke.ready.headers?.["retry-after"] !== "60"
   ) {
-    throw new Error("Server must fail readiness while launch blockers remain");
+    throw new Error("Server must fail readiness with public launch gate details while blockers remain");
   }
   if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
     throw new Error("Server must serve approved legacy redirect");

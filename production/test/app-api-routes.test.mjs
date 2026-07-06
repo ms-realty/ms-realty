@@ -53,7 +53,19 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   fs.writeFileSync(localeRegistryPath, `${JSON.stringify(registry, null, 2)}\n`);
   fs.writeFileSync(
     launchReadinessPath,
-    `${JSON.stringify({ status: "blocked", launch_ready: false, blockers: ["external_seo_exports"] })}\n`,
+    `${JSON.stringify({
+      status: "blocked",
+      launch_ready: false,
+      blockers: ["external_seo_exports"],
+      gates: [
+        {
+          id: "external_seo_exports",
+          status: "blocked",
+          message: "Search Console, Yandex, and backlink exports are required before launch.",
+          evidence: {},
+        },
+      ],
+    })}\n`,
   );
   await withEnv(
     {
@@ -82,8 +94,18 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.deepEqual(healthBody.blockers, ["external_seo_exports"]);
 
       const ready = await readyRoute.GET(new Request("https://example.test/api/ready"));
+      const readyBody = await ready.json();
       assert.equal(ready.status, 503);
-      assert.equal((await ready.json()).status, "blocked");
+      assert.equal(readyBody.status, "blocked");
+      assert.deepEqual(readyBody.blocked_gates, [
+        {
+          id: "external_seo_exports",
+          status: "blocked",
+          message: "Search Console, Yandex, and backlink exports are required before launch.",
+        },
+      ]);
+      assert.equal(ready.headers.get("cache-control"), "no-store");
+      assert.equal(ready.headers.get("retry-after"), "60");
 
       fs.writeFileSync(launchReadinessPath, `${JSON.stringify({ status: "ready", launch_ready: true, blockers: [] })}\n`);
       const readyAfterExport = await readyRoute.GET(new Request("https://example.test/api/ready"));
@@ -91,6 +113,9 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(readyAfterExport.status, 200);
       assert.equal(readyAfterExportBody.status, "ready");
       assert.equal(readyAfterExportBody.launch_ready, true);
+      assert.deepEqual(readyAfterExportBody.blocked_gates, []);
+      assert.equal(readyAfterExport.headers.get("cache-control"), "no-store");
+      assert.equal(readyAfterExport.headers.get("retry-after"), null);
 
       const search = await searchRoute.GET(new Request("https://example.test/api/search?locale=he&q=Sandanski"));
       const searchBody = await search.json();

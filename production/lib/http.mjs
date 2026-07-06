@@ -54,6 +54,8 @@ import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   liveServiceReports,
+  publicLaunchReadinessHeaders,
+  publicLaunchReadinessPayload,
   readLiveServiceReportTemplate,
   writeLaunchReadinessReport,
   writeLiveServiceReport,
@@ -432,13 +434,12 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/ready") {
       const readiness = currentLaunchReadiness();
-      return json(readiness.launch_ready ? 200 : 503, {
-        kind: "readiness",
-        service: "ms-realty",
-        status: readiness.launch_ready ? "ready" : "blocked",
-        launch_ready: readiness.launch_ready,
-        blockers: readiness.blockers,
-      });
+      return response(
+        readiness.launch_ready ? 200 : 503,
+        publicLaunchReadinessPayload(readiness),
+        "application/json; charset=utf-8",
+        publicLaunchReadinessHeaders(readiness),
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/api/search") {
@@ -1039,9 +1040,12 @@ export function assertHttpSmoke(smoke) {
   if (
     smoke.ready?.status !== 503 ||
     smoke.ready.body.status !== "blocked" ||
-    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(expectedBlockers)
+    JSON.stringify(smoke.ready.body.blockers) !== JSON.stringify(expectedBlockers) ||
+    JSON.stringify((smoke.ready.body.blocked_gates || []).map((gate) => gate.id)) !== JSON.stringify(expectedBlockers) ||
+    smoke.ready.headers["cache-control"] !== "no-store" ||
+    smoke.ready.headers["retry-after"] !== "60"
   ) {
-    throw new Error("HTTP smoke must fail readiness while launch blockers remain");
+    throw new Error("HTTP smoke must fail readiness with public launch gate details while blockers remain");
   }
   if (smoke.legacyRedirect.status !== 301 || smoke.legacyRedirect.headers.location !== "/bg/imoti/MS-CRAWL-0001") {
     throw new Error("HTTP smoke must serve approved legacy redirect");

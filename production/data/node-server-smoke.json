@@ -26,7 +26,36 @@
         "external_seo_exports",
         "listing_quality_review",
         "live_services"
+      ],
+      "blocked_gates": [
+        {
+          "id": "external_seo_exports",
+          "status": "blocked",
+          "message": "Search Console, Yandex, and backlink exports are required before launch."
+        },
+        {
+          "id": "listing_quality_review",
+          "status": "blocked",
+          "message": "Human listing quality review CSV is required before launch."
+        },
+        {
+          "id": "live_services",
+          "status": "blocked",
+          "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning."
+        }
       ]
+    },
+    "headers": {
+      "cache-control": "no-store",
+      "connection": "keep-alive",
+      "content-type": "application/json; charset=utf-8",
+      "keep-alive": "timeout=5",
+      "permissions-policy": "camera=(), microphone=(), geolocation=()",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "retry-after": "60",
+      "transfer-encoding": "chunked",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY"
     }
   },
   "legacyRedirect": {

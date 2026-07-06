@@ -65,6 +65,31 @@ function warningsFrom(structuredData, listingQuality) {
     .map(([id, count]) => ({ id, count }));
 }
 
+export function publicLaunchReadinessPayload(report) {
+  const blockedGates = (report.gates || [])
+    .filter((item) => item.status === "blocked")
+    .map((item) => ({
+      id: item.id,
+      status: item.status,
+      message: item.message || "",
+    }));
+  return {
+    kind: "readiness",
+    service: "ms-realty",
+    status: report.launch_ready ? "ready" : "blocked",
+    launch_ready: report.launch_ready,
+    blockers: report.blockers || blockedGates.map((item) => item.id),
+    blocked_gates: blockedGates,
+  };
+}
+
+export function publicLaunchReadinessHeaders(report) {
+  return {
+    "cache-control": "no-store",
+    ...(report.launch_ready ? {} : { "retry-after": "60" }),
+  };
+}
+
 function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
   if (!fs.existsSync(reviewPath)) return { status: "missing_review", path: reviewPath };
   try {

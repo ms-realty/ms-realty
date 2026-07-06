@@ -486,6 +486,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.deepEqual(smoke.health.body.blockers, ["external_seo_exports", "listing_quality_review", "live_services"]);
   assert.equal(smoke.ready.status, 503);
   assert.equal(smoke.ready.body.status, "blocked");
+  assert.deepEqual(
+    smoke.ready.body.blocked_gates.map((gate) => gate.id),
+    ["external_seo_exports", "listing_quality_review", "live_services"],
+  );
+  assert.equal(smoke.ready.headers["cache-control"], "no-store");
+  assert.equal(smoke.ready.headers["retry-after"], "60");
   assert.equal(smoke.health.headers["referrer-policy"], "strict-origin-when-cross-origin");
   assert.equal(smoke.homeHtml.headers["x-frame-options"], "DENY");
   assert.equal(smoke.listing.headers["content-type"], "application/json; charset=utf-8");

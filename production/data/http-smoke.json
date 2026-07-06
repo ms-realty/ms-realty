@@ -28,7 +28,9 @@
       "referrer-policy": "strict-origin-when-cross-origin",
       "x-frame-options": "DENY",
       "permissions-policy": "camera=(), microphone=(), geolocation=()",
-      "content-type": "application/json; charset=utf-8"
+      "content-type": "application/json; charset=utf-8",
+      "cache-control": "no-store",
+      "retry-after": "60"
     },
     "body": {
       "kind": "readiness",
@@ -39,6 +41,23 @@
         "external_seo_exports",
         "listing_quality_review",
         "live_services"
+      ],
+      "blocked_gates": [
+        {
+          "id": "external_seo_exports",
+          "status": "blocked",
+          "message": "Search Console, Yandex, and backlink exports are required before launch."
+        },
+        {
+          "id": "listing_quality_review",
+          "status": "blocked",
+          "message": "Human listing quality review CSV is required before launch."
+        },
+        {
+          "id": "live_services",
+          "status": "blocked",
+          "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning."
+        }
       ]
     }
   },
