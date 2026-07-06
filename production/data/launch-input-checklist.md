@@ -62,6 +62,13 @@ Blockers: external_seo_exports, live_services
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - listing_quality.thin_public_gallery: 7
 
+## Broker Verification
+
+- Report: `production/data/listing-verification-report.json`
+- Broker verification tasks: 165
+- High priority tasks: 74
+- Tasks by owner: broker_bg: 113, broker_ru: 52
+
 ## Validate After Inputs
 
 ```bash

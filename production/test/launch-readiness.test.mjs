@@ -319,6 +319,11 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /review_status/);
   assert.match(markdown, /required_editor_fields/);
   assert.match(markdown, /POST \/api\/admin\/listings\/edit/);
+  assert.match(markdown, /Broker Verification/);
+  assert.match(markdown, /production\/data\/listing-verification-report\.json/);
+  assert.match(markdown, /Broker verification tasks: 165/);
+  assert.match(markdown, /High priority tasks: 74/);
+  assert.match(markdown, /broker_bg: 113, broker_ru: 52/);
   assert.match(markdown, /npm run launch:inputs/);
   assert.match(markdown, /npm run launch:preflight/);
 });

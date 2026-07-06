@@ -24,6 +24,10 @@ function rowCount(csvText) {
   return parseCsv(csvText).length;
 }
 
+function defaultListingVerification() {
+  return JSON.parse(fs.readFileSync(fromRoot("production", "data", "listing-verification-report.json"), "utf8"));
+}
+
 function sourceLine(source, summary) {
   const state = summary.sources[source];
   const filename = SEO_EXPORTS[source].filename;
@@ -49,11 +53,15 @@ export function renderLaunchInputChecklist({
   redirectWorkbookCsv,
   deployableRedirects,
   routeMap,
+  listingVerification = defaultListingVerification(),
 }) {
   const mapped = routeMap.summary.mappedListings;
   const approved = deployableRedirects.summary.total;
   const remaining = Math.max(mapped - approved, 0);
   const workbookRows = rowCount(redirectWorkbookCsv);
+  const verificationOwners = Object.entries(listingVerification.summary.by_owner || {})
+    .map(([owner, count]) => `${owner}: ${count}`)
+    .join(", ");
 
   return `# Launch Input Checklist
 
@@ -113,6 +121,13 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Admin import endpoint: \`POST /api/admin/listing-quality/import\`
 - Admin editor endpoint: \`POST /api/admin/listings/edit\`
 ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
+
+## Broker Verification
+
+- Report: \`production/data/listing-verification-report.json\`
+- Broker verification tasks: ${listingVerification.summary.broker_verification_tasks}
+- High priority tasks: ${listingVerification.summary.high_priority}
+- Tasks by owner: ${verificationOwners || "none"}
 
 ## Validate After Inputs
 
