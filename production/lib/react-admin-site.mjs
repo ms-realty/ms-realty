@@ -198,8 +198,194 @@ function ListingEditorBody({ page }) {
   );
 }
 
+function MigrationReviewBody({ page }) {
+  const gaps = page.dashboard.metadata_gaps || {};
+  const metrics = [
+    ["URLs", page.routeMap.total],
+    ["Review required", page.routeMap.reviewRequired],
+    ["Mapped listings", page.routeMap.mappedListings],
+    ["Deployable preview", page.deployablePreview.length],
+    ["Missing descriptions", gaps.missing_description],
+    ["Media rows", page.dashboard.media_reconciliation?.media_rows],
+  ];
+  const seoSources = ["search_console", "yandex_webmaster", "backlinks"];
+
+  return h(
+    "main",
+    {
+      "data-kind": "admin-migration-review",
+      "data-react-admin-ui": "migration-review",
+      "data-admin-workbench": "migration",
+      "data-admin-locale": page.workspace.locale,
+      "data-review-required": page.routeMap.reviewRequired,
+      "data-launch-readiness-endpoint": page.launchReadinessEndpoint,
+      "data-launch-readiness-export-endpoint": page.launchReadinessExportEndpoint,
+      "data-launch-input-checklist-endpoint": page.launchInputChecklistEndpoint,
+      "data-preflight-reports-endpoint": page.preflightReportsEndpoint,
+      "data-cms-collections-endpoint": page.cmsCollectionsEndpoint,
+      "data-payload-collections-endpoint": page.payloadCollectionsEndpoint,
+    },
+    h("h1", null, "Migration review"),
+    h(
+      "nav",
+      { "aria-label": "Launch evidence" },
+      h("a", { href: page.launchReadinessEndpoint }, "Launch readiness JSON"),
+      h("a", { href: page.launchInputChecklistEndpoint }, "Launch input checklist"),
+      h("a", { href: page.preflightReportsEndpoint }, "Preflight reports JSON"),
+      h("a", { href: page.cmsCollectionsEndpoint }, "CMS collection contracts"),
+      h("a", { href: page.payloadCollectionsEndpoint }, "Payload collection configs"),
+    ),
+    h(
+      "form",
+      { method: "post", action: page.launchReadinessExportEndpoint },
+      h("button", { type: "submit" }, "Export launch readiness"),
+    ),
+    metricList(metrics),
+    h(
+      "section",
+      { "aria-label": "Approvable listing redirects" },
+      h("h2", null, "Approvable listing redirects"),
+      h(
+        "table",
+        null,
+        h("thead", null, h("tr", null, h("th", null, "Old URL"), h("th", null, "Target"), h("th", null, "Locale"), h("th", null, "Approval"))),
+        h(
+          "tbody",
+          null,
+          ...(page.routeMap.approvableSample || []).map((route) =>
+            h(
+              "tr",
+              { key: route.old_url, "data-approvable-listing": "true" },
+              h("td", null, h("code", null, route.old_url)),
+              h("td", null, h("code", null, route.target_path)),
+              h("td", null, route.target_locale),
+              h(
+                "td",
+                null,
+                h(
+                  "form",
+                  { method: "post", action: "/api/admin/redirect-approvals" },
+                  h("input", { type: "hidden", name: "oldUrl", defaultValue: route.old_url }),
+                  h("input", { type: "hidden", name: "equivalentContent", defaultValue: "true" }),
+                  h("label", null, "Reviewer ", h("input", { name: "reviewer", required: true, autoComplete: "name" })),
+                  h("label", null, "Reason ", h("input", { name: "reason", defaultValue: "Reviewed same-content route mapping." })),
+                  h("button", { type: "submit" }, "Approve 301"),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+    h(
+      "section",
+      {
+        "aria-label": "Redirect approval CSV import",
+        "data-redirect-import-endpoint": page.redirectApprovalImport.endpoint,
+        "data-redirect-export-endpoint": page.redirectApprovalImport.exportEndpoint,
+        "data-redirect-workbook-endpoint": page.redirectApprovalImport.workbookEndpoint,
+        "data-pending-redirect-workbook-endpoint": page.redirectApprovalImport.pendingWorkbookEndpoint,
+      },
+      h("h2", null, "Import reviewed redirect CSV"),
+      h("p", null, h("a", { href: page.redirectApprovalImport.pendingWorkbookEndpoint }, "Download pending workbook")),
+      h("form", { method: "post", action: page.redirectApprovalImport.endpoint }, h("textarea", { name: "csv", rows: "5", required: true }), h("button", { type: "submit" }, "Import CSV")),
+      h("form", { method: "post", action: page.redirectApprovalImport.exportEndpoint }, h("button", { type: "submit" }, "Export deployable redirects")),
+    ),
+    h(
+      "section",
+      {
+        "aria-label": "External SEO evidence",
+        "data-seo-import-endpoint": page.seoEvidence.importEndpoint,
+        "data-seo-template-endpoint": page.seoEvidence.templateEndpoint,
+      },
+      h("h2", null, "External SEO evidence"),
+      h("p", null, `Missing required sources: ${page.seoEvidence.missingRequiredSources.join(", ") || "none"}`),
+      h(
+        "ul",
+        null,
+        ...seoSources.map((source) => {
+          const status = page.seoEvidence.sources[source];
+          return h(
+            "li",
+            { key: source },
+            h("strong", null, source),
+            `: ${status.status} / matched ${status.matched_rows} / ${status.row_count} `,
+            h("a", { href: `${page.seoEvidence.templateEndpoint}?source=${source}` }, "CSV template"),
+          );
+        }),
+      ),
+      h(
+        "form",
+        { method: "post", action: page.seoEvidence.importEndpoint },
+        h(
+          "label",
+          null,
+          "Source ",
+          h(
+            "select",
+            { name: "source", required: true },
+            h("option", { value: "search_console" }, "Search Console"),
+            h("option", { value: "yandex_webmaster" }, "Yandex Webmaster"),
+            h("option", { value: "backlinks" }, "Backlinks"),
+          ),
+        ),
+        h("textarea", { name: "csv", rows: "5", required: true }),
+        h("button", { type: "submit" }, "Import SEO CSV"),
+      ),
+    ),
+    h(
+      "section",
+      {
+        "aria-label": "Listing quality queue",
+        "data-quality-workbook-endpoint": page.listingQualityWorkbookEndpoint,
+        "data-quality-import-endpoint": page.listingQualityImportEndpoint,
+        "data-quality-affected-listings": page.listingQuality?.summary?.affected_listings || 0,
+      },
+      h("h2", null, "Listing quality queue"),
+      h("p", null, h("a", { href: page.listingQualityWorkbookEndpoint }, "Download listing quality workbook")),
+      h("form", { method: "post", action: page.listingQualityImportEndpoint }, h("textarea", { name: "csv", rows: "5", required: true }), h("button", { type: "submit" }, "Import listing quality CSV")),
+      h("p", null, `Issues: ${JSON.stringify(page.listingQuality?.summary?.issue_counts || {})}`),
+      h(
+        "table",
+        null,
+        h("thead", null, h("tr", null, h("th", null, "Listing"), h("th", null, "Locale"), h("th", null, "Location"), h("th", null, "Issues"), h("th", null, "Public photos"), h("th", null, "Missing alt"), h("th", null, "Review-gated media"))),
+        h(
+          "tbody",
+          null,
+          ...(page.listingQuality?.rows || []).map((row) =>
+            h(
+              "tr",
+              { key: row.listing_id, "data-quality-listing": "true" },
+              h("td", null, h("a", { href: row.editor_path }, row.listing_id)),
+              h("td", null, row.source_locale),
+              h("td", null, row.location || "missing"),
+              h("td", null, row.issues.join(", ")),
+              h("td", null, row.public_gallery_assets),
+              h("td", null, row.missing_alt_text_assets),
+              h("td", null, row.review_gated_assets),
+            ),
+          ),
+        ),
+      ),
+    ),
+    h(
+      "section",
+      { "aria-label": "Approved redirects" },
+      h("h2", null, "Approved redirects"),
+      h(
+        "ul",
+        null,
+        ...page.redirectApprovals.map((approval) =>
+          h("li", { key: approval.old_url }, h("code", null, approval.old_url), " -> ", h("code", null, approval.target_path)),
+        ),
+      ),
+    ),
+  );
+}
+
 export function renderReactAdminBody(page) {
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
+  if (page.kind === "admin_migration_review") return renderStaticElement(h(MigrationReviewBody, { page }));
   return "";
 }

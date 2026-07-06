@@ -346,7 +346,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
-      assert.doesNotMatch(migrationReviewHtmlBody, /data-react-admin-ui=/);
+      assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-approvable-listing="true"/);
       assert.match(migrationReviewHtmlBody, /data-seo-import-endpoint="\/api\/admin\/seo-evidence\/import"/);
       assert.match(migrationReviewHtmlBody, /data-launch-readiness-export-endpoint="\/api\/admin\/launch-readiness\/export"/);
