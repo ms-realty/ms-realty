@@ -186,6 +186,10 @@ test("launch preflight fails closed while launch blockers remain", () => {
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services/);
+  assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
+  assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
+  assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
+  assert.match(result.stderr, /npm run launch:inputs/);
 });
 
 test("live service report preflight fails missing reports and passes valid reports", () => {
