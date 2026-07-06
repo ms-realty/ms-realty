@@ -70,7 +70,9 @@ function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_
     return {
       status: "pass",
       path: reviewPath,
-      summary: validateListingQualityReviewCsv(listingQuality, fs.readFileSync(reviewPath, "utf8")).summary,
+      summary: validateListingQualityReviewCsv(listingQuality, fs.readFileSync(reviewPath, "utf8"), {
+        requireComplete: true,
+      }).summary,
     };
   } catch (error) {
     return { status: "invalid_review", path: reviewPath, error: error.message };

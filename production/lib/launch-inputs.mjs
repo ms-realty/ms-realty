@@ -121,6 +121,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Review columns: \`review_status\`, \`required_editor_fields\`, \`price_eur\`, \`bedrooms\`, \`location\`, \`description\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`
 - Admin import endpoint: \`POST /api/admin/listing-quality/import\`
 - Admin editor endpoint: \`POST /api/admin/listings/edit\`
+- Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
 ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
 
 ## Broker Verification

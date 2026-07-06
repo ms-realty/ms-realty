@@ -181,7 +181,7 @@ function assertReviewFactValue(listingId, field, value) {
   }
 }
 
-export function validateListingQualityReviewCsv(report, csvText) {
+export function validateListingQualityReviewCsv(report, csvText, { requireComplete = false } = {}) {
   const rows = parseCsv(csvText);
   if (!rows.length) throw new Error("Listing quality review CSV has no rows");
 
@@ -216,11 +216,20 @@ export function validateListingQualityReviewCsv(report, csvText) {
       patch: Object.fromEntries(factIssues.map((issue) => [FACT_FIELDS_BY_ISSUE[issue], row[FACT_FIELDS_BY_ISSUE[issue]]])),
     };
   });
+  const missingReviewRows = report.rows.filter((row) => !seen.has(row.listing_id));
+  if (requireComplete && missingReviewRows.length) {
+    const sample = missingReviewRows.slice(0, 5).map((row) => row.listing_id).join(", ");
+    throw new Error(
+      `Listing quality review is incomplete: ${missingReviewRows.length} listing rows missing review (${sample})`,
+    );
+  }
 
   return {
     reviews,
     summary: {
+      expected_review_rows: report.rows.length,
       review_rows: reviews.length,
+      missing_review_rows: missingReviewRows.length,
       facts_review_rows: reviews.filter((row) => row.fact_issues > 0).length,
       media_review_rows: reviews.filter((row) => row.media_issues > 0).length,
     },

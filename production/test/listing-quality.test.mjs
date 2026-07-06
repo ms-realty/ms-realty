@@ -17,6 +17,35 @@ import {
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
+function needsFactReview(row) {
+  return row.required_editor_fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+}
+
+function needsMediaReview(row) {
+  return row.required_editor_fields.some((field) =>
+    ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field),
+  );
+}
+
+function completeListingQualityReviewCsv(report) {
+  return [
+    "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+    ...report.rows.map((row) =>
+      [
+        row.listing_id,
+        row.required_editor_fields.includes("price_eur") ? row.price_eur || 123000 : "",
+        row.required_editor_fields.includes("bedrooms") ? row.bedrooms ?? 2 : "",
+        row.required_editor_fields.includes("location") ? row.location || "Sandanski" : "",
+        row.required_editor_fields.includes("description") ? "Reviewed listing description" : "",
+        needsFactReview(row) ? "editor_bg" : "",
+        needsMediaReview(row) ? "media_editor" : "",
+        "Reviewed from source evidence",
+      ].join(","),
+    ),
+    "",
+  ].join("\n");
+}
+
 test("listing quality report exposes actionable source listing gaps", () => {
   const report = buildListingQualityReport({ seed: loadCmsSeed(), generatedAt: "2026-07-05T00:00:00Z" });
 
@@ -180,6 +209,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   const result = validateListingQualityReviewCsv(report, csv);
 
   assert.equal(result.summary.review_rows, 1);
+  assert.equal(result.summary.expected_review_rows, report.rows.length);
+  assert.equal(result.summary.missing_review_rows, report.rows.length - 1);
   assert.equal(result.summary.facts_review_rows, 1);
   const expectedMediaRows = row.issues.some((issue) => ["media_review_pending", "thin_public_gallery"].includes(issue)) ? 1 : 0;
   assert.equal(result.summary.media_review_rows, expectedMediaRows);
@@ -194,6 +225,7 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
     () => validateListingQualityReviewCsv(report, `listing_id,price_eur,bedrooms\n${row.listing_id},,2\n`),
     /facts_reviewer|price_eur/,
   );
+  assert.throws(() => validateListingQualityReviewCsv(report, csv, { requireComplete: true }), /incomplete/);
   assert.throws(() => validateListingQualityReviewCsv(report, `${csv}\n${csv.split("\n")[1]}\n`), /Duplicate/);
 });
 
@@ -202,18 +234,9 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
     seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
     generatedAt: "2026-07-05T00:00:00Z",
   });
-  const row = report.rows.find((candidate) => candidate.review_status.includes("media"));
-  assert.ok(row, "expected a listing quality row that still requires media review");
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-quality-`);
   const csvPath = `${dir}/listing-quality.csv`;
-  fs.writeFileSync(
-    csvPath,
-    [
-      "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
-      `${row.listing_id},,,,,,media_editor,Reviewed public gallery selection`,
-      "",
-    ].join("\n"),
-  );
+  fs.writeFileSync(csvPath, completeListingQualityReviewCsv(report));
 
   const script = fromRoot("production", "scripts", "validate-listing-quality-review.mjs");
   const missing = spawnSync(process.execPath, [script, `${csvPath}.missing`], { encoding: "utf8" });
@@ -229,11 +252,11 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
   assert.match(missing.stderr, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
   assert.match(missing.stderr, /npm run listing:preflight/);
   assert.equal(valid.status, 0, valid.stderr);
-  assert.match(valid.stdout, /Listing quality review CSV valid: 1 rows/);
+  assert.match(valid.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
   assert.match(valid.stdout, /Facts review rows: 0/);
-  assert.match(valid.stdout, /Media review rows: 1/);
+  assert.match(valid.stdout, new RegExp(`Media review rows: ${report.rows.length}`));
   assert.equal(validFromEnv.status, 0, validFromEnv.stderr);
-  assert.match(validFromEnv.stdout, /Listing quality review CSV valid: 1 rows/);
+  assert.match(validFromEnv.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
 });
 
 test("generated listing quality report is valid when present", () => {

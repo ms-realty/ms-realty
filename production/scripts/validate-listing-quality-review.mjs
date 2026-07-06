@@ -21,7 +21,7 @@ try {
     tourApprovals: readTourApprovals(),
     generatedAt: "2026-07-05T00:00:00Z",
   });
-  const result = validateListingQualityReviewCsv(report, fs.readFileSync(inputPath, "utf8"));
+  const result = validateListingQualityReviewCsv(report, fs.readFileSync(inputPath, "utf8"), { requireComplete: true });
 
   console.log(`Listing quality review CSV valid: ${result.summary.review_rows} rows`);
   console.log(`Facts review rows: ${result.summary.facts_review_rows}`);

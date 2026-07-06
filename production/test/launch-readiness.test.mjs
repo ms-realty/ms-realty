@@ -30,6 +30,37 @@ function writeCompleteSeoInputFixture(dir) {
 
 function writeListingQualityReviewFixture(dir) {
   const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
+  const reviewPath = `${dir}/listing-quality.csv`;
+  const rows = listingQuality.rows.map((row) => {
+    const fields = row.required_editor_fields || [];
+    const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+    const needsMedia = fields.some((field) =>
+      ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field),
+    );
+    return [
+      row.listing_id,
+      fields.includes("price_eur") ? row.price_eur || 123000 : "",
+      fields.includes("bedrooms") ? row.bedrooms ?? 2 : "",
+      fields.includes("location") ? row.location || "Sandanski" : "",
+      fields.includes("description") ? "Reviewed listing description" : "",
+      needsFacts ? "editor_bg" : "",
+      needsMedia ? "media_editor" : "",
+      "Reviewed from source evidence",
+    ].join(",");
+  });
+  fs.writeFileSync(
+    reviewPath,
+    [
+      "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+      ...rows,
+      "",
+    ].join("\n"),
+  );
+  return reviewPath;
+}
+
+function writePartialListingQualityReviewFixture(dir) {
+  const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
   const row = listingQuality.rows.find((candidate) => candidate.review_status.includes("media"));
   assert.ok(row, "expected a listing quality row that still requires media review");
   const reviewPath = `${dir}/listing-quality.csv`;
@@ -248,6 +279,19 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
   assert.match(result.stderr, /npm run launch:inputs/);
+
+  const partialReviewPath = writePartialListingQualityReviewFixture(
+    fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-partial-listing-review-`),
+  );
+  const withPartialReviewPath = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: partialReviewPath },
+  });
+
+  assert.notEqual(withPartialReviewPath.status, 0);
+  assert.match(withPartialReviewPath.stderr, /listing_quality_review: invalid_review/);
+  assert.match(withPartialReviewPath.stderr, /incomplete/);
 
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-listing-review-`);
   const reviewPath = writeListingQualityReviewFixture(dir);
@@ -474,6 +518,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /review_status/);
   assert.match(markdown, /required_editor_fields/);
   assert.match(markdown, /POST \/api\/admin\/listings\/edit/);
+  assert.match(markdown, /one valid row for every workbook row/);
   assert.match(markdown, /Broker Verification/);
   assert.match(markdown, /production\/data\/listing-verification-report\.json/);
   assert.match(markdown, /Broker verification tasks: 165/);
