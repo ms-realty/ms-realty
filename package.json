@@ -44,6 +44,7 @@
     "seo:evidence": "node production/scripts/build-seo-evidence.mjs",
     "seo:preflight:report": "node production/scripts/build-seo-evidence-preflight-report.mjs",
     "seo:preflight": "node production/scripts/validate-seo-evidence-inputs.mjs",
+    "live:capture": "node production/scripts/run-live-service-evidence.mjs",
     "live:report": "node production/scripts/build-live-service-preflight-report.mjs",
     "live:preflight": "node production/scripts/validate-live-service-reports.mjs",
     "server:smoke": "node production/scripts/smoke-node-server.mjs",

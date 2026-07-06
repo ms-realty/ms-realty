@@ -44,8 +44,8 @@ Blockers: external_seo_exports, listing_quality_review, live_services
 - Hermes worker: set `HERMES_CHAT_COMPLETIONS_URL`; set `HERMES_API_KEY` when the endpoint requires auth.
 - Hermes default: self-host vLLM with `--enable-auto-tool-choice --tool-call-parser hermes`; hosted OpenRouter fallback is non-sensitive only.
 - Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.
-- Search sync smoke: `npm run search:sync && npm run search:query`.
-- Hermes draft smoke: `npm run hermes:worker`.
+- Live evidence capture: `npm run live:capture` runs search sync, search query, Hermes draft worker, and validates the three report outputs.
+- Individual debug commands: `npm run search:sync`, `npm run search:query`, `npm run hermes:worker`.
 - Status report: `npm run live:report` writes current missing/invalid live-service report state without clearing the launch gate.
 - Report preflight: `npm run live:preflight`.
 - Report examples: `production/data/search-engine-sync-report.json.example`, `production/data/search-engine-query-report.json.example`, `production/data/hermes-draft-worker-report.json.example`.

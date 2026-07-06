@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import http from "node:http";
 import os from "node:os";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import {
   assertLaunchReadinessReport,
   assertLiveServicePreflightReport,
@@ -123,6 +124,65 @@ function writeLiveReportFixtures(dir) {
     })}\n`,
   );
   return { syncReportPath, queryReportPath, hermesReportPath };
+}
+
+function runScript(script, env) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, [fromRoot("production", "scripts", script)], {
+      cwd: fromRoot(),
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.on("close", (status) => resolve({ status, stdout, stderr }));
+  });
+}
+
+async function withLiveServiceServer(fn) {
+  const hit = {
+    id: "MS-CRAWL-0001:bg",
+    source_listing_id: "MS-CRAWL-0001",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    title: "Reviewed listing",
+  };
+  const draft = {
+    title: "MS-CRAWL-0001 Sandanski commercial rent",
+    body: "MS-CRAWL-0001 Sandanski commercial rent draft",
+    seo_title: "MS-CRAWL-0001 Sandanski commercial rent",
+    meta_description: "MS-CRAWL-0001 Sandanski commercial rent draft",
+    citations: [{ source: "cms_seed", object_id: "MS-CRAWL-0001" }],
+  };
+  const server = http.createServer((request, response) => {
+    request.resume();
+    request.on("end", () => {
+      response.setHeader("content-type", "application/json");
+      if (request.url.includes("/documents/search?")) {
+        response.end(JSON.stringify({ found: 1, hits: [{ document: hit }] }));
+      } else if (request.url.endsWith("/search")) {
+        response.end(JSON.stringify({ estimatedTotalHits: 1, hits: [hit] }));
+      } else if (request.url === "/v1/chat/completions") {
+        response.end(JSON.stringify({ choices: [{ message: { content: JSON.stringify(draft) } }] }));
+      } else {
+        response.statusCode = 201;
+        response.end(JSON.stringify({ ok: true }));
+      }
+    });
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = server.address();
+  try {
+    await fn(`http://${address.address}:${address.port}`);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
 }
 
 test("launch readiness stays blocked until production launch blockers are cleared", () => {
@@ -448,6 +508,38 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.match(valid.stdout, /Live service reports valid/);
 });
 
+test("live service evidence command captures all required reports", async () => {
+  await withLiveServiceServer(async (baseUrl) => {
+    const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-capture-`);
+    const paths = {
+      syncReportPath: `${dir}/search-engine-sync-report.json`,
+      queryReportPath: `${dir}/search-engine-query-report.json`,
+      hermesReportPath: `${dir}/hermes-draft-worker-report.json`,
+    };
+    const result = await runScript("run-live-service-evidence.mjs", {
+      ...process.env,
+      TYPESENSE_URL: baseUrl,
+      TYPESENSE_API_KEY: "typesense-test",
+      MEILI_URL: baseUrl,
+      MEILI_API_KEY: "meili-test",
+      HERMES_CHAT_COMPLETIONS_URL: `${baseUrl}/v1/chat/completions`,
+      HERMES_API_KEY: "hermes-test",
+      HERMES_DRAFT_LIMIT: "1",
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
+      MS_REALTY_TRANSLATION_LEDGER_PATH: `${dir}/translation-tasks.jsonl`,
+      MS_REALTY_HERMES_AUDIT_PATH: `${dir}/hermes-audit.jsonl`,
+      MS_REALTY_AUDIT_LOG_PATH: `${dir}/audit-log.jsonl`,
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Search sync: 167\/167 documents/);
+    assert.match(result.stdout, /Hermes drafts: 1\/1 persisted/);
+    assert.equal(validateLiveServiceReports(paths).ready, true);
+  });
+});
+
 test("live service preflight report records blockers without clearing the gate", () => {
   const missingDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-missing-`);
   const missingReport = buildLiveServicePreflightReport({
@@ -560,7 +652,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /--enable-auto-tool-choice --tool-call-parser hermes/);
   assert.match(markdown, /npm run hermes:provisioning/);
   assert.match(markdown, /hermes-provider-provisioning-report\.json/);
-  assert.match(markdown, /npm run search:sync && npm run search:query/);
+  assert.match(markdown, /npm run live:capture/);
+  assert.match(markdown, /npm run search:sync/);
   assert.match(markdown, /npm run hermes:worker/);
   assert.match(markdown, /npm run live:report/);
   assert.match(markdown, /npm run live:preflight/);
