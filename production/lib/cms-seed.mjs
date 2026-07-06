@@ -10,6 +10,7 @@ import { createTourField } from "./tours.mjs";
 
 export const DEFAULT_MEDIA_INVENTORY_PATH = fromRoot("migration", "artifacts", "20260704-211155", "media-inventory.csv");
 export const DEFAULT_CMS_SEED_OUTPUT = fromRoot("production", "data", "cms-seed.json");
+export const DEFAULT_CMS_COLLECTIONS_OUTPUT = fromRoot("production", "data", "cms-collections.json");
 
 export function loadMediaInventory(filePath = DEFAULT_MEDIA_INVENTORY_PATH) {
   return parseCsv(fs.readFileSync(filePath, "utf8"));
@@ -161,5 +162,85 @@ export function writeCmsSeed(seed, outPath = DEFAULT_CMS_SEED_OUTPUT) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   const summary = assertCmsSeed(seed);
   fs.writeFileSync(outPath, `${JSON.stringify(seed, null, 2)}\n`);
+  return { outPath, summary };
+}
+
+export function buildCmsCollections(seed) {
+  const listings = seed.records.filter((record) => record.collection === "listings");
+  const translationRecords = listings.flatMap((record) => record.translations || []);
+  const mediaRecords = listings.flatMap((record) => record.media || []);
+  const tourRecords = listings.map((record) => record.tour).filter(Boolean);
+
+  return {
+    artifact_id: "cms-collections-20260704",
+    source_artifact: seed.artifact_id,
+    summary: {
+      collections: 4,
+      records: {
+        listings: listings.length,
+        listing_translations: translationRecords.length,
+        media_assets: mediaRecords.length,
+        listing_tours: tourRecords.length,
+      },
+      public_tours: tourRecords.filter((tour) => tour.is_public).length,
+    },
+    collections: [
+      {
+        slug: "listings",
+        records: listings.length,
+        source: "production/data/cms-seed.json records[collection=listings]",
+        workflow: ["source_imported_review_required", "draft", "review", "published", "archived"],
+        publish_requires_human_review: true,
+        fields: ["id", "cms_status", "source_locale", "source_domain", "source_url", "facts", "seo", "routing", "migration"],
+      },
+      {
+        slug: "listing_translations",
+        records: translationRecords.length,
+        source: "listings.translations",
+        workflow: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
+        publish_requires_human_review: true,
+        fields: ["locale", "source_locale", "status", "source_hash", "translated_hash", "reviewer", "approved_at"],
+      },
+      {
+        slug: "media_assets",
+        records: mediaRecords.length,
+        source: "listings.media",
+        workflow: ["approved_imported_photo", "reviewed_private", "review_required"],
+        publish_requires_human_review: true,
+        fields: ["url", "asset_url", "alt", "width", "height", "kind", "is_public", "review_status"],
+      },
+      {
+        slug: "listing_tours",
+        records: tourRecords.length,
+        source: "listings.tour",
+        workflow: ["needs_panorama_upload", "review_required", "approved", "published"],
+        publish_requires_human_review: true,
+        fields: ["provider", "listing_id", "panorama_url", "thumbnail_url", "hotspots", "is_public", "accessibility_caption"],
+      },
+    ],
+  };
+}
+
+export function assertCmsCollections(manifest) {
+  const slugs = manifest.collections.map((collection) => collection.slug);
+  if (manifest.summary.collections !== 4) throw new Error("Expected 4 implemented CMS collection contracts");
+  for (const slug of ["listings", "listing_translations", "media_assets", "listing_tours"]) {
+    if (!slugs.includes(slug)) throw new Error(`Missing CMS collection contract: ${slug}`);
+    if (!manifest.summary.records[slug]) throw new Error(`CMS collection contract has no records: ${slug}`);
+  }
+  if (manifest.summary.records.listings !== 165) throw new Error("Listings collection must cover all migrated listings");
+  if (manifest.summary.records.media_assets !== 4978) throw new Error("Media collection must cover all listing media assets");
+  if (manifest.summary.records.listing_tours !== 165) throw new Error("Tour collection must expose one review-gated tour per listing");
+  if (manifest.summary.public_tours !== 0) throw new Error("CMS collection manifest must not publish unreviewed tours");
+  if (manifest.collections.some((collection) => collection.publish_requires_human_review !== true)) {
+    throw new Error("CMS collection publishing must stay human-review gated");
+  }
+  return manifest.summary;
+}
+
+export function writeCmsCollections(manifest, outPath = DEFAULT_CMS_COLLECTIONS_OUTPUT) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  const summary = assertCmsCollections(manifest);
+  fs.writeFileSync(outPath, `${JSON.stringify(manifest, null, 2)}\n`);
   return { outPath, summary };
 }

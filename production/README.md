@@ -209,6 +209,7 @@ Generated production data:
 - `production/data/listing-publication-report.json`
 - `production/data/listing-verification-report.json`
 - `production/data/cms-seed.json`
+- `production/data/cms-collections.json`
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`
 - `production/data/runtime-smoke.json`

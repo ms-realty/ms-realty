@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { loadListings } from "../lib/content.mjs";
-import { assertCmsSeed, buildCmsSeed, loadMediaInventory } from "../lib/cms-seed.mjs";
+import { assertCmsCollections, assertCmsSeed, buildCmsCollections, buildCmsSeed, loadMediaInventory } from "../lib/cms-seed.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -39,6 +39,21 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.ok(ruListing.routing.target_path.startsWith("/ru/"));
 });
 
+test("CMS collection manifest exposes implemented Payload-style contracts only", () => {
+  const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
+  const manifest = buildCmsCollections(seed);
+  const summary = assertCmsCollections(manifest);
+  const slugs = manifest.collections.map((collection) => collection.slug);
+
+  assert.deepEqual(slugs, ["listings", "listing_translations", "media_assets", "listing_tours"]);
+  assert.equal(summary.records.listings, 165);
+  assert.equal(summary.records.listing_translations, 167);
+  assert.equal(summary.records.media_assets, 4978);
+  assert.equal(summary.records.listing_tours, 165);
+  assert.equal(summary.public_tours, 0);
+  assert.equal(manifest.collections.every((collection) => collection.publish_requires_human_review), true);
+});
+
 test("generated CMS seed file is valid when present", () => {
   const file = fromRoot("production", "data", "cms-seed.json");
   if (!fs.existsSync(file)) return;
@@ -46,4 +61,12 @@ test("generated CMS seed file is valid when present", () => {
   const summary = assertCmsSeed(seed);
   assert.equal(summary.bySourceLocale.ru, 52);
   assert.equal(seed.records.length, 165);
+});
+
+test("generated CMS collection manifest is valid when present", () => {
+  const file = fromRoot("production", "data", "cms-collections.json");
+  if (!fs.existsSync(file)) return;
+  const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
+  const summary = assertCmsCollections(manifest);
+  assert.equal(summary.records.listing_tours, 165);
 });

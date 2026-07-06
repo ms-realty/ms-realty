@@ -1,0 +1,105 @@
+{
+  "artifact_id": "cms-collections-20260704",
+  "source_artifact": "cms-seed-20260704",
+  "summary": {
+    "collections": 4,
+    "records": {
+      "listings": 165,
+      "listing_translations": 167,
+      "media_assets": 4978,
+      "listing_tours": 165
+    },
+    "public_tours": 0
+  },
+  "collections": [
+    {
+      "slug": "listings",
+      "records": 165,
+      "source": "production/data/cms-seed.json records[collection=listings]",
+      "workflow": [
+        "source_imported_review_required",
+        "draft",
+        "review",
+        "published",
+        "archived"
+      ],
+      "publish_requires_human_review": true,
+      "fields": [
+        "id",
+        "cms_status",
+        "source_locale",
+        "source_domain",
+        "source_url",
+        "facts",
+        "seo",
+        "routing",
+        "migration"
+      ]
+    },
+    {
+      "slug": "listing_translations",
+      "records": 167,
+      "source": "listings.translations",
+      "workflow": [
+        "missing",
+        "hermes_drafted",
+        "human_edited",
+        "approved",
+        "published",
+        "stale"
+      ],
+      "publish_requires_human_review": true,
+      "fields": [
+        "locale",
+        "source_locale",
+        "status",
+        "source_hash",
+        "translated_hash",
+        "reviewer",
+        "approved_at"
+      ]
+    },
+    {
+      "slug": "media_assets",
+      "records": 4978,
+      "source": "listings.media",
+      "workflow": [
+        "approved_imported_photo",
+        "reviewed_private",
+        "review_required"
+      ],
+      "publish_requires_human_review": true,
+      "fields": [
+        "url",
+        "asset_url",
+        "alt",
+        "width",
+        "height",
+        "kind",
+        "is_public",
+        "review_status"
+      ]
+    },
+    {
+      "slug": "listing_tours",
+      "records": 165,
+      "source": "listings.tour",
+      "workflow": [
+        "needs_panorama_upload",
+        "review_required",
+        "approved",
+        "published"
+      ],
+      "publish_requires_human_review": true,
+      "fields": [
+        "provider",
+        "listing_id",
+        "panorama_url",
+        "thumbnail_url",
+        "hotspots",
+        "is_public",
+        "accessibility_caption"
+      ]
+    }
+  ]
+}

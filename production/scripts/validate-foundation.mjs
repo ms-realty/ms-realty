@@ -18,6 +18,7 @@ import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
 import { assertSearchEngineQueryReport, assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
 import { assertAppRouteFiles, assertAppRouteManifest } from "../lib/app-route-manifest.mjs";
+import { assertCmsCollections } from "../lib/cms-seed.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -204,6 +205,11 @@ if (cmsSeed.summary.tourFields !== 165 || cmsSeed.summary.publicTours !== 0) {
 }
 if (cmsSeed.summary.deployableRoutes !== 0) throw new Error("CMS seed routes must stay review-gated");
 if (cmsSeed.summary.translationLocales.fr) throw new Error("CMS seed must not include unapproved French translations");
+const cmsCollections = JSON.parse(fs.readFileSync(fromRoot("production", "data", "cms-collections.json"), "utf8"));
+const cmsCollectionSummary = assertCmsCollections(cmsCollections);
+if (cmsCollectionSummary.records.listing_translations !== 167) {
+  throw new Error("CMS collection manifest must include approved source plus Greek/Hebrew translations");
+}
 
 const publicFixtures = JSON.parse(fs.readFileSync(fromRoot("production", "data", "public-fixtures.json"), "utf8"));
 if (
