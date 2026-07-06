@@ -72,6 +72,21 @@ function cardSummary(card) {
     .join(" · ");
 }
 
+function listingPriceLabel(facts = {}) {
+  if (facts.price_on_request === true) return "Price on request";
+  if (facts.price_eur === null || facts.price_eur === undefined || facts.price_eur === "") return "Price pending review";
+  const price = Number(facts.price_eur);
+  if (!Number.isFinite(price)) return "Price pending review";
+  return new Intl.NumberFormat("en", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(price);
+}
+
+function listingHighlights(facts = {}) {
+  return [facts.location, facts.property_type, facts.offer_type, facts.bedrooms ? `${facts.bedrooms} bedrooms` : null]
+    .filter(Boolean)
+    .map((value) => `<li>${escapeHtml(value)}</li>`)
+    .join("");
+}
+
 function renderListing(page) {
   const gallery = (page.body.media.gallery || [])
     .slice(0, 12)
@@ -87,19 +102,49 @@ function renderListing(page) {
   const primary = page.body.actions.primary
     .map((action) => `<button type="button" data-endpoint="${escapeHtml(action.endpoint)}">${escapeHtml(action.label)}</button>`)
     .join("");
+  const secondary = page.body.actions.secondary
+    .map((action) => {
+      if (action.kind === "share" || action.kind === "print") {
+        return `<a href="${escapeHtml(action.url)}" data-listing-action="${escapeHtml(action.id)}">${escapeHtml(action.label)}</a>`;
+      }
+      return `<button type="button" data-listing-action="${escapeHtml(action.id)}" data-client-save-listing="${escapeHtml(
+        action.listing_id,
+      )}">${escapeHtml(action.label)}</button>`;
+    })
+    .join("");
   const related = (page.body.related_listings || [])
     .map((card) => `<article data-related-listing="true"><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2></article>`)
     .join("");
+  const tour = page.body.media.tour || {};
   return `
 <main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}" data-listing-status="${escapeHtml(
     page.body.lifecycle?.status || "available",
   )}" data-active-in-search="${escapeHtml(page.body.lifecycle?.active_in_search ? "true" : "false")}" data-min-touch-target="44">
-  <h1>${escapeHtml(page.body.h1)}</h1>
+  <section aria-label="Listing summary" data-listing-summary="true" data-source-domain="${escapeHtml(
+    page.body.source.source_domain,
+  )}" data-schema-ready="${escapeHtml(page.schema ? "true" : "false")}">
+    <p data-listing-verification="true">${escapeHtml(page.translation.human_approved ? "reviewed translation" : "approved source")}</p>
+    <h1>${escapeHtml(page.body.h1)}</h1>
+    <p data-listing-price="true">${escapeHtml(listingPriceLabel(page.body.facts))}</p>
+    <ul data-listing-highlights="true">${listingHighlights(page.body.facts)}</ul>
+  </section>
   <p>${escapeHtml(page.body.description || "")}</p>
   <dl>${renderFacts(page.body.facts)}</dl>
-  <section aria-label="Gallery">${gallery}</section>
+  <nav aria-label="Listing media" data-media-gallery-count="${escapeHtml(
+    page.body.media.gallery_count || 0,
+  )}" data-tour-status="${escapeHtml(tour.available ? "available" : tour.review_status || "review_required")}">
+    <a href="#listing-gallery">Photos</a>
+    <a href="#listing-tour" aria-disabled="${escapeHtml(tour.available ? "false" : "true")}">360</a>
+  </nav>
+  <section id="listing-gallery" aria-label="Gallery" data-photo-carousel="true">${gallery}</section>
+  <section id="listing-tour" aria-label="360 tour" data-photo-sphere-viewer="${escapeHtml(
+    tour.available ? tour.mount_target : "review_required",
+  )}" data-tour-provider="${escapeHtml(tour.provider || "photo-sphere-viewer")}">
+    ${tour.available ? `<p>${escapeHtml(tour.accessibility_caption)}</p>` : `<p>${escapeHtml(tour.review_status || "review required")}</p>`}
+  </section>
   <section aria-label="Related listings">${related}</section>
   <nav aria-label="Listing actions" data-mobile-sticky-actions="${escapeHtml(page.body.actions.sticky_mobile ? "true" : "false")}">${primary}</nav>
+  <nav aria-label="Save and share">${secondary}</nav>
   <nav aria-label="Broker contact">${direct}</nav>
 </main>`;
 }

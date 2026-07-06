@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 8,
-    "passed": 8,
+    "checks": 9,
+    "passed": 9,
     "failed": 0
   },
   "checks": [
@@ -29,6 +29,11 @@
     },
     {
       "id": "listing_sticky_actions",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "listing_detail_media_actions",
       "status": "pass",
       "evidence": {}
     },

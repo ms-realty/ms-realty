@@ -74,6 +74,15 @@ export function buildMobileElderlyQaReport({
       "listing_sticky_actions",
       includes(pages.listing, "data-mobile-sticky-actions=\"true\"") && includes(pages.listing, "aria-label=\"Listing actions\""),
     ),
+    check(
+      "listing_detail_media_actions",
+      includes(pages.listing, "data-listing-summary=\"true\"") &&
+        includes(pages.listing, "data-listing-price=\"true\"") &&
+        includes(pages.listing, "data-photo-carousel=\"true\"") &&
+        includes(pages.listing, "data-photo-sphere-viewer=") &&
+        includes(pages.listing, "data-listing-action=\"print\"") &&
+        includes(pages.listing, "data-client-save-listing="),
+    ),
     check("phone_first_forms", includes(pages.seller, "data-phone-first=\"true\"") && includes(pages.contact, "data-phone-first=\"true\"")),
     check("fallback_noindex_request", includes(pages.fallback, "noindex,follow") && includes(pages.fallback, "Request this language")),
     check(
@@ -101,7 +110,13 @@ export function buildMobileElderlyQaReport({
 export function assertMobileElderlyQaReport(report) {
   if (report.status !== "pass") throw new Error("Mobile/elderly QA report must pass");
   if (!report.summary || report.summary.failed !== 0) throw new Error("Mobile/elderly QA report must have zero failures");
-  for (const id of ["mobile_search_form", "mobile_search_actions", "listing_sticky_actions", "admin_and_market_languages"]) {
+  for (const id of [
+    "mobile_search_form",
+    "mobile_search_actions",
+    "listing_sticky_actions",
+    "listing_detail_media_actions",
+    "admin_and_market_languages",
+  ]) {
     if (!report.checks.some((check) => check.id === id && check.status === "pass")) {
       throw new Error(`Mobile/elderly QA missing ${id}`);
     }

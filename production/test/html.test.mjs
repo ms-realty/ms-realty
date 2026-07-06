@@ -52,6 +52,12 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
   assert.match(listingHtml, /application\/ld\+json/);
   assert.match(listingHtml, /property="og:type" content="article"/);
+  assert.match(listingHtml, /data-listing-summary="true"/);
+  assert.match(listingHtml, /data-listing-price="true"/);
+  assert.match(listingHtml, /data-photo-carousel="true"/);
+  assert.match(listingHtml, /data-photo-sphere-viewer="review_required"/);
+  assert.match(listingHtml, /data-listing-action="print"/);
+  assert.match(listingHtml, /data-client-save-listing="MS-CRAWL-0001"/);
   assert.match(runtimeListingHtml, /property="og:image" content="https:\/\/makler-realty\.com\/wp-content\/uploads\//);
   assert.match(listingHtml, /hreflang="el"/);
   assert.doesNotMatch(listingHtml, /tel:\+359880000000/);
