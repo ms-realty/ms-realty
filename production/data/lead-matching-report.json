@@ -1,0 +1,154 @@
+{
+  "generated_at": "2026-07-05T00:00:00Z",
+  "summary": {
+    "buyer_leads_with_listing_reference": 2,
+    "leads_with_matches": 2,
+    "open_broker_tasks": 2
+  },
+  "rows": [
+    {
+      "lead_id": "http-lead-he-0001",
+      "lead_type": "buyer",
+      "original_language": "he",
+      "admin_locale": "en",
+      "assigned_broker": "broker_international",
+      "source_listing_id": "MS-CRAWL-0001",
+      "criteria": {
+        "location": "Sandanski",
+        "property_type": "commercial",
+        "offer_type": "rent"
+      },
+      "match_count": 5,
+      "matches": [
+        {
+          "listing_id": "MS-CRAWL-0006",
+          "path": "/he/properties/MS-CRAWL-0006",
+          "title": "Industrieel gebouw te huur in Sandanski",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 1,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0019",
+          "path": "/he/properties/MS-CRAWL-0019",
+          "title": "Офиси/магазини под наем в гр.Сандански - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 6,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0020",
+          "path": "/he/properties/MS-CRAWL-0020",
+          "title": "Офис под наем в центъра на гр.Сандански - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 83,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0022",
+          "path": "/he/properties/MS-CRAWL-0022",
+          "title": "Дава под наем производствено помещение в Сандански - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 600,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0094",
+          "path": "/he/properties/MS-CRAWL-0094",
+          "title": "Индустриална сграда под наем в Петрич - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 1,
+          "price_on_request": false
+        }
+      ],
+      "broker_task": {
+        "id": "inventory-match-http-lead-he-0001",
+        "status": "open",
+        "owner": "broker_international",
+        "action": "review_matching_inventory"
+      }
+    },
+    {
+      "lead_id": "http-viewing-lead-he-0001",
+      "lead_type": "buyer",
+      "original_language": "he",
+      "admin_locale": "en",
+      "assigned_broker": "broker_international",
+      "source_listing_id": "MS-CRAWL-0001",
+      "criteria": {
+        "location": "Sandanski",
+        "property_type": "commercial",
+        "offer_type": "rent"
+      },
+      "match_count": 5,
+      "matches": [
+        {
+          "listing_id": "MS-CRAWL-0006",
+          "path": "/he/properties/MS-CRAWL-0006",
+          "title": "Industrieel gebouw te huur in Sandanski",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 1,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0019",
+          "path": "/he/properties/MS-CRAWL-0019",
+          "title": "Офиси/магазини под наем в гр.Сандански - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 6,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0020",
+          "path": "/he/properties/MS-CRAWL-0020",
+          "title": "Офис под наем в центъра на гр.Сандански - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 83,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0022",
+          "path": "/he/properties/MS-CRAWL-0022",
+          "title": "Дава под наем производствено помещение в Сандански - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 600,
+          "price_on_request": false
+        },
+        {
+          "listing_id": "MS-CRAWL-0094",
+          "path": "/he/properties/MS-CRAWL-0094",
+          "title": "Индустриална сграда под наем в Петрич - Недвижими имоти в Сандански",
+          "location": "Sandanski",
+          "property_type": "commercial",
+          "offer_type": "rent",
+          "price_eur": 1,
+          "price_on_request": false
+        }
+      ],
+      "broker_task": {
+        "id": "inventory-match-http-viewing-lead-he-0001",
+        "status": "open",
+        "owner": "broker_international",
+        "action": "review_matching_inventory"
+      }
+    }
+  ]
+}

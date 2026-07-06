@@ -5,6 +5,7 @@ import { assertHermesActionAllowed } from "../lib/hermes.mjs";
 import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertLeadLedger } from "../lib/lead-ledger.mjs";
+import { assertLeadMatchingReport } from "../lib/lead-matching.mjs";
 import { assertLeadSlaReport } from "../lib/lead-sla.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
 import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
@@ -768,6 +769,11 @@ const leadSla = JSON.parse(fs.readFileSync(fromRoot("production", "data", "lead-
 assertLeadSlaReport(leadSla);
 if (leadSla.summary.manager_escalation_required !== 2 || leadSla.summary.broker_replied !== 2) {
   throw new Error("Lead SLA report must create manager escalations only for unreplied missed leads");
+}
+const leadMatching = JSON.parse(fs.readFileSync(fromRoot("production", "data", "lead-matching-report.json"), "utf8"));
+assertLeadMatchingReport(leadMatching);
+if (leadMatching.summary.buyer_leads_with_listing_reference !== 2 || leadMatching.summary.open_broker_tasks !== 2) {
+  throw new Error("Lead matching report must create broker inventory tasks for referenced buyer leads");
 }
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (replyOutbox.length !== 2) throw new Error("Reply outbox artifact must contain two deterministic smoke rows");
