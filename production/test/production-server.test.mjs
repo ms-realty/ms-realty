@@ -10,18 +10,34 @@ import { createProductionServer, productionServerConfig } from "../server.mjs";
 
 test("production server entrypoint serves runtime routes with env config", async () => {
   const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-events-`)}/events.jsonl`;
+  const operatorDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-operator-`);
+  const seoEvidenceInputDir = `${operatorDir}/seo`;
+  const seoEvidenceOutputPath = `${operatorDir}/seo-evidence.json`;
+  const launchReadinessOutputPath = `${operatorDir}/launch-readiness.json`;
+  const redirectApprovalPath = `${operatorDir}/redirect-approvals.jsonl`;
+  const deployableRedirectOutputPath = `${operatorDir}/deployable-redirects.json`;
   const config = productionServerConfig({
     PORT: "0",
     HOST: "127.0.0.1",
-    MS_REALTY_MAX_BODY_BYTES: "64",
+    MS_REALTY_MAX_BODY_BYTES: "4096",
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
+    MS_REALTY_REDIRECT_APPROVALS_PATH: redirectApprovalPath,
+    MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
+    MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
+    MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoEvidenceInputDir,
+    MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoEvidenceOutputPath,
     MS_REALTY_SEARCH_SYNC_REPORT_PATH: fromRoot("production", "data", "search-engine-sync-report.json.example"),
     MS_REALTY_SEARCH_QUERY_REPORT_PATH: fromRoot("production", "data", "search-engine-query-report.json.example"),
     MS_REALTY_HERMES_WORKER_REPORT_PATH: fromRoot("production", "data", "hermes-draft-worker-report.json.example"),
   });
   assert.equal(config.port, 0);
   assert.equal(config.host, "127.0.0.1");
-  assert.equal(config.maxBodyBytes, 64);
+  assert.equal(config.maxBodyBytes, 4096);
+  assert.equal(config.redirectApprovalPath, redirectApprovalPath);
+  assert.equal(config.deployableRedirectOutputPath, deployableRedirectOutputPath);
+  assert.equal(config.launchReadinessOutputPath, launchReadinessOutputPath);
+  assert.equal(config.seoEvidenceInputDir, seoEvidenceInputDir);
+  assert.equal(config.seoEvidenceOutputPath, seoEvidenceOutputPath);
   assert.match(config.searchSyncReportPath, /search-engine-sync-report\.json\.example$/);
   assert.match(config.searchQueryReportPath, /search-engine-query-report\.json\.example$/);
   assert.match(config.hermesWorkerReportPath, /hermes-draft-worker-report\.json\.example$/);
@@ -34,6 +50,46 @@ test("production server entrypoint serves runtime routes with env config", async
     assert.equal(response.status, 200);
     assert.equal(response.body.kind, "listing");
     assert.equal(response.body.lang, "he");
+
+    const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
+    const listing = routeMap.find((route) => route.url_type === "listing");
+    const seoImport = await jsonFetch(baseUrl, "/api/admin/seo-evidence/import", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        source: "search_console",
+        csv: `url,clicks,impressions,position\n${listing.old_url},1,10,4\n`,
+      }),
+    });
+    assert.equal(seoImport.status, 201);
+    assert.equal(fs.existsSync(`${seoEvidenceInputDir}/search-console.csv`), true);
+    assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
+
+    const redirectApproval = await jsonFetch(baseUrl, "/api/admin/redirect-approvals", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        oldUrl: listing.old_url,
+        equivalentContent: true,
+        reviewer: "editor_bg",
+      }),
+    });
+    assert.equal(redirectApproval.status, 201);
+    assert.equal(fs.existsSync(redirectApprovalPath), true);
+
+    const redirectExport = await jsonFetch(baseUrl, "/api/admin/deployable-redirects/export", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
+    assert.equal(redirectExport.status, 201);
+    assert.equal(fs.existsSync(deployableRedirectOutputPath), true);
+
+    const readinessExport = await jsonFetch(baseUrl, "/api/admin/launch-readiness/export", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
+    assert.equal(readinessExport.status, 201);
+    assert.equal(fs.existsSync(launchReadinessOutputPath), true);
 
     const readiness = await jsonFetch(baseUrl, "/api/admin/launch-readiness", {
       headers: { authorization: "Bearer local-admin-smoke" },
