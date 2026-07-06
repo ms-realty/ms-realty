@@ -121,8 +121,9 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 The current app is a **hybrid production foundation**: `production/` keeps the dependency-light
 executable contracts for URL/locale/AI/lead/migration policy, while `app/` exposes those contracts
 through Next.js App Router route handlers that pass `next build`. It is still **not** the final app:
-the first React public UI bridge now renders core App Router bodies for home, search, listings,
-locations, seller valuation, contact, and unavailable-language fallback, while full React visual
+the React public UI bridge now renders App Router bodies for home, search, listings, locations,
+seller valuation, contact, approved guides, and unavailable-language fallback, while the React admin
+bridge renders the lead inbox, property editor, and migration review workbench. Full React visual
 polish and the Payload runtime/admin app remain to land on top of these contracts.
 Payload-compatible collection configs are generated from the CMS manifest and exposed at
 `GET /api/admin/payload-collections`.
@@ -453,8 +454,8 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 |---|---|---|
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
-| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + React App Router body bridge for core public routes built**; full React public UI polish pending |
-| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor + broker verification report + generated Payload-compatible collection configs built**; Payload runtime app pending |
+| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + React App Router body bridge for public routes built**; full React public UI polish pending |
+| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + broker verification report + generated Payload-compatible collection configs built**; Payload runtime app pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, and Typesense/Meilisearch sync/query worker paths built; live engine provisioning pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, and OpenAI-compatible draft worker path built; self-hosted Hermes/vLLM endpoint provisioning pending |
 | **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; redirect reviews are locally complete; **blocked on external SEO exports, reviewed listing-quality CSV, and live service reports** |
