@@ -42,6 +42,8 @@ Blockers: external_seo_exports, listing_quality_review, live_services
 
 - Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
 - Hermes worker: set `HERMES_CHAT_COMPLETIONS_URL`; set `HERMES_API_KEY` when the endpoint requires auth.
+- Hermes default: self-host vLLM with `--enable-auto-tool-choice --tool-call-parser hermes`; hosted OpenRouter fallback is non-sensitive only.
+- Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.
 - Search sync smoke: `npm run search:sync && npm run search:query`.
 - Hermes draft smoke: `npm run hermes:worker`.
 - Status report: `npm run live:report` writes current missing/invalid live-service report state without clearing the launch gate.

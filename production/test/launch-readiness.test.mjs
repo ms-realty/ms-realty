@@ -461,6 +461,7 @@ test("live service preflight report records blockers without clearing the gate",
   assert.equal(missingReport.ready, false);
   assert.equal(missingReport.status, "blocked");
   assert.equal(missingReport.summary.missing_report, 3);
+  assert.match(missingReport.next_actions.join(" "), /npm run hermes:provisioning/);
   assert.match(missingReport.next_actions.join(" "), /npm run live:preflight/);
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-valid-`);
@@ -556,6 +557,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /TYPESENSE_URL/);
   assert.match(markdown, /MEILI_API_KEY/);
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(markdown, /--enable-auto-tool-choice --tool-call-parser hermes/);
+  assert.match(markdown, /npm run hermes:provisioning/);
+  assert.match(markdown, /hermes-provider-provisioning-report\.json/);
   assert.match(markdown, /npm run search:sync && npm run search:query/);
   assert.match(markdown, /npm run hermes:worker/);
   assert.match(markdown, /npm run live:report/);

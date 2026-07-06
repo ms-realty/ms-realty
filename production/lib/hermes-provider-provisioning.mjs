@@ -1,0 +1,170 @@
+import fs from "node:fs";
+import path from "node:path";
+import { fromRoot } from "./paths.mjs";
+
+export const DEFAULT_HERMES_PROVIDER_PROVISIONING_REPORT = fromRoot(
+  "production",
+  "data",
+  "hermes-provider-provisioning-report.json",
+);
+export const DEFAULT_SELF_HOSTED_HERMES_MODEL = "NousResearch/Hermes-4-14B";
+export const DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions";
+export const HERMES_CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
+
+const VALID_PROVIDER_MODES = new Set(["self_hosted", "openrouter"]);
+
+function cleanMode(value) {
+  const mode = String(value || "self_hosted").trim();
+  if (!VALID_PROVIDER_MODES.has(mode)) throw new Error("HERMES_PROVIDER_MODE must be self_hosted or openrouter");
+  return mode;
+}
+
+function endpointFor(mode, env) {
+  const configured = String(env.HERMES_CHAT_COMPLETIONS_URL || "").trim();
+  if (configured) return configured;
+  return mode === "openrouter" ? DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL : "";
+}
+
+function redactedEndpoint(endpoint) {
+  if (!endpoint) return null;
+  const parsed = new URL(endpoint);
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("Hermes endpoint must use http or https");
+  parsed.username = "";
+  parsed.password = "";
+  parsed.search = "";
+  parsed.hash = "";
+  return parsed.href;
+}
+
+function boolFromEnv(value) {
+  return value === "1" || value === "true" || value === "yes";
+}
+
+export function hermesProviderConfigFromEnv(env = process.env) {
+  const mode = cleanMode(env.HERMES_PROVIDER_MODE);
+  const endpoint = endpointFor(mode, env);
+  return {
+    mode,
+    endpoint,
+    endpoint_redacted: redactedEndpoint(endpoint),
+    model: String(env.HERMES_MODEL || DEFAULT_SELF_HOSTED_HERMES_MODEL).trim(),
+    has_api_key: Boolean(env.HERMES_API_KEY || env.OPENROUTER_API_KEY),
+    endpoint_requires_auth: boolFromEnv(env.HERMES_ENDPOINT_REQUIRES_AUTH),
+  };
+}
+
+function missingInputs(config) {
+  const missing = [];
+  if (!config.endpoint) missing.push("HERMES_CHAT_COMPLETIONS_URL");
+  if (config.endpoint_requires_auth && !config.has_api_key) missing.push("HERMES_API_KEY");
+  if (config.mode === "openrouter" && !config.has_api_key) missing.push("HERMES_API_KEY");
+  return missing;
+}
+
+function vllmLaunchCommand(config) {
+  return [
+    "vllm",
+    "serve",
+    config.model,
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8000",
+    "--enable-auto-tool-choice",
+    "--tool-call-parser",
+    "hermes",
+  ];
+}
+
+function requiredEnvContract(config) {
+  if (config.mode === "openrouter") return ["HERMES_PROVIDER_MODE=openrouter", "HERMES_API_KEY"];
+  return ["HERMES_CHAT_COMPLETIONS_URL", ...(config.endpoint_requires_auth ? ["HERMES_API_KEY"] : [])];
+}
+
+export function buildHermesProviderProvisioningReport({ env = process.env, generatedAt = new Date().toISOString() } = {}) {
+  const config = hermesProviderConfigFromEnv(env);
+  const missing = missingInputs(config);
+  const selfHosted = config.mode === "self_hosted";
+  return {
+    kind: "hermes_provider_provisioning",
+    generated_at: generatedAt,
+    status: missing.length ? "blocked" : "configured",
+    ready: missing.length === 0,
+    provider: {
+      mode: config.mode,
+      endpoint: config.endpoint_redacted,
+      model: config.model,
+      openai_compatible: Boolean(config.endpoint),
+      sensitive_data_allowed: selfHosted,
+      hosted_fallback_allowed_for_sensitive_data: false,
+      api_key_configured: config.has_api_key,
+      endpoint_requires_auth: config.endpoint_requires_auth || config.mode === "openrouter",
+    },
+    missing,
+    vllm: {
+      serving_stack: "vllm",
+      chat_completions_path: HERMES_CHAT_COMPLETIONS_PATH,
+      enable_auto_tool_choice: true,
+      tool_call_parser: "hermes",
+      streaming_tool_calls: false,
+      launch_command: vllmLaunchCommand(config),
+      notes: [
+        "Use the OpenAI-compatible chat completions endpoint.",
+        "Keep customer/owner data on the self-hosted endpoint; hosted fallback is non-sensitive only.",
+      ],
+    },
+    safety: {
+      draft_only: true,
+      human_approval_required: true,
+      can_publish: false,
+      can_send_customer_messages: false,
+      legal_tax_process_claims_require_approved_source: true,
+      sandanski_sea_framing_forbidden: true,
+      prompt_and_output_audited: true,
+    },
+    env_contract: {
+      required: requiredEnvContract(config),
+      optional: ["HERMES_MODEL", "HERMES_API_KEY", "HERMES_ENDPOINT_REQUIRES_AUTH", "MS_REALTY_HERMES_WORKER_REPORT_PATH"],
+      never_persist: ["HERMES_API_KEY", "OPENROUTER_API_KEY"],
+    },
+    next_actions: missing.length
+      ? [
+          "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
+          "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
+          "Run npm run hermes:provisioning, then npm run hermes:worker.",
+        ]
+      : ["Run npm run hermes:worker against this endpoint and import the generated live report."],
+  };
+}
+
+export function assertHermesProviderProvisioningReport(report) {
+  if (report.kind !== "hermes_provider_provisioning") throw new Error("Hermes provisioning report kind is invalid");
+  if (report.status !== (report.ready ? "configured" : "blocked")) throw new Error("Hermes provisioning status must match ready flag");
+  const noMissingInputs = (report.missing || []).length === 0;
+  if (report.ready !== noMissingInputs) throw new Error("Hermes provisioning ready flag must match missing inputs");
+  if (report.vllm?.tool_call_parser !== "hermes" || report.vllm?.enable_auto_tool_choice !== true) {
+    throw new Error("Hermes provisioning must require the vLLM Hermes tool parser");
+  }
+  if (report.vllm?.streaming_tool_calls !== false) throw new Error("Hermes provisioning must use non-streaming tool calls");
+  if (report.provider?.mode === "self_hosted" && report.provider.sensitive_data_allowed !== true) {
+    throw new Error("Self-hosted Hermes must allow sensitive data");
+  }
+  if (report.provider?.mode === "openrouter" && report.provider.sensitive_data_allowed !== false) {
+    throw new Error("Hosted Hermes fallback must be non-sensitive only");
+  }
+  if (report.provider?.hosted_fallback_allowed_for_sensitive_data !== false) {
+    throw new Error("Hosted Hermes fallback must never be allowed for sensitive data");
+  }
+  const serialized = JSON.stringify(report);
+  if (/secret|sk-[A-Za-z0-9_-]+|Bearer\s+/i.test(serialized)) {
+    throw new Error("Hermes provisioning report must not persist secrets");
+  }
+  return true;
+}
+
+export function writeHermesProviderProvisioningReport(report, filePath = DEFAULT_HERMES_PROVIDER_PROVISIONING_REPORT) {
+  assertHermesProviderProvisioningReport(report);
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, `${JSON.stringify(report, null, 2)}\n`);
+  return filePath;
+}

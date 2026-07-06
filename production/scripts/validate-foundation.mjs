@@ -18,6 +18,7 @@ import { assertSavedSearchAlertReport } from "../lib/saved-search-alerts.mjs";
 import { assertSearchAnalyticsReport } from "../lib/search-analytics.mjs";
 import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs";
 import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
+import { assertHermesProviderProvisioningReport } from "../lib/hermes-provider-provisioning.mjs";
 import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
 import { assertSearchEngineQueryReport, assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
@@ -877,6 +878,15 @@ if (
   localeRollout.hermes_draft_queues.find((row) => row.locale === "he")?.open_task_count !== 164
 ) {
   throw new Error("Locale rollout report must connect language requests and Hermes draft queues");
+}
+const hermesProvisioning = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-provider-provisioning-report.json"), "utf8"));
+assertHermesProviderProvisioningReport(hermesProvisioning);
+if (
+  hermesProvisioning.vllm.tool_call_parser !== "hermes" ||
+  hermesProvisioning.vllm.enable_auto_tool_choice !== true ||
+  hermesProvisioning.provider.hosted_fallback_allowed_for_sensitive_data !== false
+) {
+  throw new Error("Hermes provider provisioning report must preserve self-hosted Hermes/vLLM safety settings");
 }
 const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");

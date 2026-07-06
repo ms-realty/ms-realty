@@ -1,0 +1,71 @@
+{
+  "kind": "hermes_provider_provisioning",
+  "generated_at": "2026-07-06T00:00:00Z",
+  "status": "blocked",
+  "ready": false,
+  "provider": {
+    "mode": "self_hosted",
+    "endpoint": null,
+    "model": "NousResearch/Hermes-4-14B",
+    "openai_compatible": false,
+    "sensitive_data_allowed": true,
+    "hosted_fallback_allowed_for_sensitive_data": false,
+    "api_key_configured": false,
+    "endpoint_requires_auth": false
+  },
+  "missing": [
+    "HERMES_CHAT_COMPLETIONS_URL"
+  ],
+  "vllm": {
+    "serving_stack": "vllm",
+    "chat_completions_path": "/v1/chat/completions",
+    "enable_auto_tool_choice": true,
+    "tool_call_parser": "hermes",
+    "streaming_tool_calls": false,
+    "launch_command": [
+      "vllm",
+      "serve",
+      "NousResearch/Hermes-4-14B",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "8000",
+      "--enable-auto-tool-choice",
+      "--tool-call-parser",
+      "hermes"
+    ],
+    "notes": [
+      "Use the OpenAI-compatible chat completions endpoint.",
+      "Keep customer/owner data on the self-hosted endpoint; hosted fallback is non-sensitive only."
+    ]
+  },
+  "safety": {
+    "draft_only": true,
+    "human_approval_required": true,
+    "can_publish": false,
+    "can_send_customer_messages": false,
+    "legal_tax_process_claims_require_approved_source": true,
+    "sandanski_sea_framing_forbidden": true,
+    "prompt_and_output_audited": true
+  },
+  "env_contract": {
+    "required": [
+      "HERMES_CHAT_COMPLETIONS_URL"
+    ],
+    "optional": [
+      "HERMES_MODEL",
+      "HERMES_API_KEY",
+      "HERMES_ENDPOINT_REQUIRES_AUTH",
+      "MS_REALTY_HERMES_WORKER_REPORT_PATH"
+    ],
+    "never_persist": [
+      "HERMES_API_KEY",
+      "OPENROUTER_API_KEY"
+    ]
+  },
+  "next_actions": [
+    "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
+    "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
+    "Run npm run hermes:provisioning, then npm run hermes:worker."
+  ]
+}
