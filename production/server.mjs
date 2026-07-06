@@ -9,7 +9,6 @@ import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH } from "./lib/deal-ledger.mjs";
-import { fromRoot } from "./lib/paths.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./lib/slug-history.mjs";
@@ -57,7 +56,7 @@ export function productionServerConfig(env = process.env) {
     slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
-    localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH || fromRoot("locales", "registry.json"),
+    localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,

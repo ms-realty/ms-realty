@@ -155,6 +155,7 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.equal(config.port, 8080);
   assert.equal(config.host, "127.0.0.1");
   assert.equal(config.maxBodyBytes, 1024);
+  assert.equal(productionServerConfig({}).localeRegistryPath, undefined);
   assert.equal(productionServerConfig({ HOST: "" }).host, "0.0.0.0");
   assert.throws(() => productionServerConfig({ HOST: " 127.0.0.1" }), /HOST must be a non-empty/);
   assert.throws(() => productionServerConfig({ MS_REALTY_HOST: "127.0.0.1 " }), /HOST must be a non-empty/);
@@ -162,6 +163,40 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
   assert.throws(() => productionServerConfig({ MS_REALTY_PORT: "3000.5" }), /PORT must be an integer/);
   assert.throws(() => productionServerConfig({ MS_REALTY_MAX_BODY_BYTES: "0" }), /positive integer/);
   assert.throws(() => productionServerConfig({ MS_REALTY_MAX_BODY_BYTES: "64kb" }), /positive integer/);
+});
+
+test("production server keeps admin locale additions in memory without mounted registry path", async () => {
+  const registryPath = fromRoot("locales", "registry.json");
+  const originalRegistry = fs.readFileSync(registryPath, "utf8");
+  const server = createProductionServer(productionServerConfig({ PORT: "0", HOST: "127.0.0.1" }));
+  const address = await listen(server, 0, "127.0.0.1");
+  const baseUrl = `http://${address.address}:${address.port}`;
+  try {
+    const created = await jsonFetch(baseUrl, "/api/admin/locales", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        code: "it",
+        native_name: "Italiano",
+        admin_name: "Italian",
+        direction: "ltr",
+        public_enabled: false,
+        indexable: false,
+        fallback_locale: "en",
+      }),
+    });
+    assert.equal(created.status, 201);
+    assert.equal(created.body.locale.code, "it");
+
+    const listed = await jsonFetch(baseUrl, "/api/admin/locales", {
+      headers: { authorization: "Bearer local-admin-smoke" },
+    });
+    assert.equal(listed.status, 200);
+    assert.equal(listed.body.locales.some((locale) => locale.code === "it"), true);
+    assert.equal(fs.readFileSync(registryPath, "utf8"), originalRegistry);
+  } finally {
+    await close(server);
+  }
 });
 
 test("production server persists public leads and reviewed admin replies", async () => {
