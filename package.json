@@ -44,10 +44,19 @@
     "launch:readiness": "node production/scripts/build-launch-readiness.mjs",
     "launch:inputs": "node production/scripts/build-launch-input-checklist.mjs",
     "launch:preflight": "node production/scripts/launch-preflight.mjs",
+    "next:build": "next build",
     "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run search:sync:smoke && npm run search:query:smoke && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run listing:quality && npm run listing:publication && npm run listing:verification && npm run app:routes && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run translation:coverage && npm run locale:rollout && npm run hermes:drafts && npm run hermes:worker:smoke && npm run lead:sla && npm run saved-search:alerts && npm run seo:evidence && npm run server:smoke && npm run qa:mobile && npm run launch:readiness && npm run launch:inputs && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
-    "check": "npm run test && npm run validate"
+    "check": "npm run test && npm run validate && npm run next:build"
   },
   "engines": {
     "node": ">=22"
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "overrides": {
+    "postcss": "8.5.10"
   }
 }

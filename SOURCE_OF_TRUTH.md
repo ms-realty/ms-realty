@@ -118,10 +118,10 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 | AI | **Hermes Agent** — self-hosted Nous Research **open-weight Hermes models** + Hermes function-calling format (model-agnostic seam) | Draft-only assistant; read-only retrieval over approved CMS content; schema-validated JSON outputs; human approval; full audit logs. Full spec in §11 |
 | Locales | Admin-managed dynamic registry | Hermes drafts; humans approve; RTL support before Hebrew launch |
 
-The current `production/` folder is the **interim executable-contracts layer** (dependency-free Node
-stdlib) that proves URL/locale/AI/lead/migration policy before the Next.js/Payload app consumes it.
-It is **not** the final app — `production/server.mjs` exists to prove the contracts, and the launch
-report treats it as the production app layer only until the Next.js route layer lands.
+The current app is a **hybrid production foundation**: `production/` keeps the dependency-light
+executable contracts for URL/locale/AI/lead/migration policy, while `app/` exposes those contracts
+through Next.js App Router route handlers that pass `next build`. It is still **not** the final app:
+the React public UI and Payload CMS collections remain to land on top of these contracts.
 
 **OSS reference set (learn-from, don't fork):** PropertyWebBuilder, Open Real Estate CMS,
 MicroRealEstate, EspoCRM real-estate extension (domain models); Twenty, Frappe CRM, EspoCRM, SuiteCRM
@@ -449,7 +449,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 |---|---|---|
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
-| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + App Router route-handler bridge built**; actual Next.js/React package layer pending |
+| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + Next App Router build gate built**; React public UI polish pending |
 | **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin HTML workbenches + broker verification report built** (editor, migration review, lead inbox); Payload app pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, and Typesense/Meilisearch sync/query worker paths built; live engine provisioning pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, and OpenAI-compatible draft worker path built; self-hosted Hermes/vLLM endpoint provisioning pending |

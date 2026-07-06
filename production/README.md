@@ -1,8 +1,9 @@
 # MS Realty Production Foundation
 
-This folder contains the first executable production contracts for the future
-Next.js/Payload application. It is deliberately dependency-free for this slice:
-the app framework can be added once these rules are stable.
+This folder contains the executable production contracts used by the Next.js
+App Router bridge in `../app/`. The contracts stay mostly Node-stdlib code so
+URL, locale, AI, migration, and lead policy remains testable outside the app
+framework.
 
 What it proves now:
 
@@ -79,6 +80,7 @@ What it proves now:
 - Authenticated launch input checklist endpoint for the remaining redirect/SEO handoff gates.
 - App Router manifest that maps every approved public route to a Next-compatible route handler, renderer, cache policy, and `lang`/`dir`.
 - Minimal App Router route-handler bridge under `app/` for homepage, search, and catch-all content routes, reusing the server-rendered HTML contracts.
+- `next build` gate over the App Router handlers, pinned to Next 16 and React 19.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
 - Served sitemap XML includes approved home and location pages without unapproved French routes.
@@ -200,6 +202,5 @@ Generated production data:
 - `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`
 
-The next production slice can install the actual Next.js/React package layer
-and Payload CMS collections without re-deciding URL, locale, AI, or
-lead-language policy.
+The next production slice can add the React public UI layer or Payload CMS
+collections without re-deciding URL, locale, AI, or lead-language policy.

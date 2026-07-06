@@ -14,8 +14,8 @@ parity against the old sites.
 - **Locales:** public BG, EN, DE, NL, RU, EL (Greek), HE (Hebrew RTL); admin CMS/CRM BG, RU, EN.
 - **Target stack:** Next.js + Payload CMS + PostgreSQL + Typesense/Meilisearch + MapLibre GL JS +
   Photo Sphere Viewer + the **Hermes Agent** AI layer (self-hosted Nous Research open-weight Hermes
-  models + function-calling format; draft-only, human-approved). `production/` is the interim
-  executable-contracts layer proving policy before the Next.js/Payload app consumes it.
+  models + function-calling format; draft-only, human-approved). `production/` holds the executable
+  contracts, and `app/` now exposes them through build-checked Next App Router handlers.
 
 ## Where the truth lives
 
