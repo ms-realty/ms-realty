@@ -77,6 +77,7 @@ What it proves now:
 - Hermes draft dispatch batch that prepares real crawl-backed listing prompts with citations while keeping drafts non-publishing and reviewer-gated.
 - Hermes draft worker path that calls an OpenAI-compatible vLLM/Hermes endpoint, validates JSON output, and persists only non-indexable review drafts.
 - Authenticated launch input checklist endpoint for the remaining redirect/SEO handoff gates.
+- App Router manifest that maps every approved public route to a Next-compatible module, renderer, cache policy, and `lang`/`dir`.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
 - Served sitemap XML includes approved home and location pages without unapproved French routes.
@@ -185,6 +186,7 @@ Generated production data:
 - `production/data/seo-evidence.json`
 - `production/data/search-engine-sync-smoke.json`
 - `production/data/search-engine-query-smoke.json`
+- `production/data/app-route-manifest.json`
 - `production/data/launch-readiness.json`
 - `production/data/launch-input-checklist.md`
 - `production/data/language-requests.jsonl`

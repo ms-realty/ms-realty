@@ -17,6 +17,7 @@ import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
 import { assertSearchEngineQueryReport, assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
+import { assertAppRouteManifest } from "../lib/app-route-manifest.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -164,6 +165,16 @@ if (sitemap.summary.byLocale.el !== 5 || sitemap.summary.byLocale.he !== 5) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
+const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
+assertAppRouteManifest(appRouteManifest);
+if (
+  appRouteManifest.summary.routes !== 202 ||
+  appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||
+  appRouteManifest.summary.by_type.search !== 7 ||
+  appRouteManifest.routes.find((route) => route.path === "/he/")?.dir !== "rtl"
+) {
+  throw new Error("App Router manifest must map sitemap routes plus no-store search routes");
+}
 
 const sitemapXml = fs.readFileSync(fromRoot("production", "data", "sitemap.xml"), "utf8");
 const robotsTxt = fs.readFileSync(fromRoot("production", "data", "robots.txt"), "utf8");

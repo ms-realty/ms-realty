@@ -25,6 +25,7 @@
     "listing:publication": "node production/scripts/build-listing-publication-report.mjs",
     "listing:verification": "node production/scripts/build-listing-verification-report.mjs",
     "listing:preflight": "node production/scripts/validate-listing-quality-review.mjs",
+    "app:routes": "node production/scripts/build-app-route-manifest.mjs",
     "public:build": "node production/scripts/render-public-fixtures.mjs",
     "admin:build": "node production/scripts/build-admin-fixtures.mjs",
     "runtime:build": "node production/scripts/build-runtime-smoke.mjs",
@@ -43,7 +44,7 @@
     "launch:readiness": "node production/scripts/build-launch-readiness.mjs",
     "launch:inputs": "node production/scripts/build-launch-input-checklist.mjs",
     "launch:preflight": "node production/scripts/launch-preflight.mjs",
-    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run search:sync:smoke && npm run search:query:smoke && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run listing:quality && npm run listing:publication && npm run listing:verification && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run translation:coverage && npm run locale:rollout && npm run hermes:drafts && npm run hermes:worker:smoke && npm run lead:sla && npm run saved-search:alerts && npm run seo:evidence && npm run server:smoke && npm run qa:mobile && npm run launch:readiness && npm run launch:inputs && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
+    "validate": "python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run search:sync:smoke && npm run search:query:smoke && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run listing:quality && npm run listing:publication && npm run listing:verification && npm run app:routes && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run translation:coverage && npm run locale:rollout && npm run hermes:drafts && npm run hermes:worker:smoke && npm run lead:sla && npm run saved-search:alerts && npm run seo:evidence && npm run server:smoke && npm run qa:mobile && npm run launch:readiness && npm run launch:inputs && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
     "check": "npm run test && npm run validate"
   },
   "engines": {
