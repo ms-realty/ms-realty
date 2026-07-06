@@ -10,6 +10,7 @@ try {
   const report = await runHermesDraftWorker({
     provider: openAiCompatibleHermesProvider(),
     filePath: process.env.MS_REALTY_TRANSLATION_LEDGER_PATH || undefined,
+    auditPath: process.env.MS_REALTY_HERMES_AUDIT_PATH || undefined,
     limit,
   });
   writeHermesDraftWorkerReport(report, process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined);

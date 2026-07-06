@@ -179,6 +179,7 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
     const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-cli-`);
     const reportPath = `${dir}/hermes-draft-worker-report.json`;
     const ledgerPath = `${dir}/translation-tasks.jsonl`;
+    const auditPath = `${dir}/hermes-audit.jsonl`;
     const result = await runScript("run-hermes-draft-worker.mjs", {
       ...process.env,
       HERMES_CHAT_COMPLETIONS_URL: endpoint,
@@ -186,12 +187,15 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
       HERMES_DRAFT_LIMIT: "1",
       MS_REALTY_HERMES_WORKER_REPORT_PATH: reportPath,
       MS_REALTY_TRANSLATION_LEDGER_PATH: ledgerPath,
+      MS_REALTY_HERMES_AUDIT_PATH: auditPath,
     });
 
     assert.equal(result.status, 0, result.stderr);
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     assert.equal(assertHermesDraftWorkerReport(report), true);
     assert.equal(report.summary.persisted, 1);
+    assert.equal(report.audit_path, auditPath);
     assert.equal(readTranslationLedger(ledgerPath).length, 1);
+    assert.equal(readHermesAuditLedger(auditPath).length, 1);
   });
 });

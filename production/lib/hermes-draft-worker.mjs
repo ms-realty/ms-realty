@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
-import { appendTranslationTask, DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
+import { appendTranslationTask, auditPathFor, DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH = fromRoot("production", "data", "hermes-draft-worker-report.json");
@@ -104,6 +104,7 @@ export async function runHermesDraftWorker({
   generatedAt = "2026-07-06T00:00:00Z",
 } = {}) {
   const rows = dispatch.rows.slice(0, limit);
+  const resolvedAuditPath = auditPathFor(filePath, auditPath);
   const persisted = [];
   const rejected = [];
 
@@ -121,7 +122,7 @@ export async function runHermesDraftWorker({
   return {
     generated_at: generatedAt,
     ledger_path: filePath,
-    audit_path: auditPath || null,
+    audit_path: resolvedAuditPath,
     summary: {
       attempted: rows.length,
       persisted: persisted.length,

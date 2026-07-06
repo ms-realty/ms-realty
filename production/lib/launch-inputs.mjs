@@ -108,6 +108,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Admin template endpoint: \`GET /api/admin/live-service-report-template?source=typesense_meilisearch_sync\`, \`?source=typesense_meilisearch_query\`, \`?source=hermes_draft_worker\`.
 - Admin import endpoint: \`POST /api/admin/live-service-reports/import?source=typesense_meilisearch_sync\`, \`?source=typesense_meilisearch_query\`, \`?source=hermes_draft_worker\`.
 - Production/CLI report path overrides: \`MS_REALTY_SEARCH_SYNC_REPORT_PATH\`, \`MS_REALTY_SEARCH_QUERY_REPORT_PATH\`, \`MS_REALTY_HERMES_WORKER_REPORT_PATH\`.
+- Hermes ledger path overrides: \`MS_REALTY_TRANSLATION_LEDGER_PATH\`, \`MS_REALTY_HERMES_AUDIT_PATH\`.
 - Real report outputs stay local and ignored; examples do not count as launch evidence.
 - Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
 

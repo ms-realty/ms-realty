@@ -5,7 +5,7 @@ import { fromRoot } from "./paths.mjs";
 export const DEFAULT_TRANSLATION_LEDGER_PATH = fromRoot("production", "data", "translation-tasks.jsonl");
 export const DEFAULT_HERMES_AUDIT_LEDGER_PATH = fromRoot("production", "data", "hermes-audit.jsonl");
 
-function auditPathFor(filePath, auditPath) {
+export function auditPathFor(filePath, auditPath) {
   return (
     auditPath ||
     (filePath === DEFAULT_TRANSLATION_LEDGER_PATH
