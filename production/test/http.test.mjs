@@ -157,6 +157,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
     dealClosedAt: "2026-07-10T10:00:00Z",
     slugChangedAt: "2026-07-04T00:09:00Z",
+    leadSlaGeneratedAt: "2026-07-06T00:00:00Z",
   });
   const redirect = deployableRedirect();
   const smoke = {
@@ -538,9 +539,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
   assert.equal(smoke.admin.body.leads.length, 4);
+  assert.equal(smoke.admin.body.leadSla.summary.total_leads, 4);
+  assert.equal(smoke.admin.body.leadSla.summary.manager_escalation_required, 2);
+  assert.equal(smoke.admin.body.summary.leadSlaManagerEscalations, 2);
   assert.equal(smoke.admin.headers["cache-control"], "no-store");
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
+  assert.equal(smoke.adminHtml.body.includes("Manager escalations"), true);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
   assert.equal(smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\""), true);

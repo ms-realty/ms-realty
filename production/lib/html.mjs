@@ -380,6 +380,8 @@ function renderAdminLeadInbox(page) {
   const metrics = [
     ["Leads", page.summary.leads],
     ["Replies queued", page.summary.replies],
+    ["SLA reminders", page.summary.leadSlaReminders],
+    ["Manager escalations", page.summary.leadSlaManagerEscalations],
     ["Language requests", page.summary.languageRequests],
     ["Viewings", page.summary.viewings],
     ["Saved searches", page.summary.savedSearches],

@@ -264,6 +264,7 @@ function leadInboxPayload(registry, url, config) {
     languageRequests: readLanguageRequests(config.languageRequestPath),
     translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     listingEdits: readListingEdits(config.listingEditLedgerPath),
+    leadSlaGeneratedAt: config.reviewedAt,
     viewings: readViewings(config.viewingLedgerPath),
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
     sellerPipeline: readSellerPipeline(config.sellerPipelinePath),

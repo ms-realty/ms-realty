@@ -287,6 +287,7 @@ export function createHttpApp({
   dealClosedAt,
   slugChangedAt,
   listingQualityGeneratedAt,
+  leadSlaGeneratedAt,
 } = {}) {
   let activeRegistry = registry;
   const currentSeoEvidence = () =>
@@ -441,6 +442,7 @@ export function createHttpApp({
         languageRequests: readLanguageRequests(languageRequestPath || undefined),
         translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
         listingEdits: readListingEdits(listingEditLedgerPath || undefined),
+        leadSlaGeneratedAt,
         viewings: readViewings(viewingLedgerPath || undefined),
         savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
         sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
@@ -462,6 +464,7 @@ export function createHttpApp({
             languageRequests: readLanguageRequests(languageRequestPath || undefined),
             translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
             listingEdits: readListingEdits(listingEditLedgerPath || undefined),
+            leadSlaGeneratedAt,
             viewings: readViewings(viewingLedgerPath || undefined),
             savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
             sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),

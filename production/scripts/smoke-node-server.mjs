@@ -87,6 +87,7 @@ const server = createNodeServer(
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
     dealClosedAt: "2026-07-10T10:00:00Z",
     slugChangedAt: "2026-07-04T00:09:00Z",
+    leadSlaGeneratedAt: "2026-07-06T00:00:00Z",
   }),
 );
 const address = await listen(server);

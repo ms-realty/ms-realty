@@ -1,4 +1,5 @@
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
+import { buildLeadSlaReport } from "./lead-sla.mjs";
 
 export const LISTING_EDIT_FIELDS = [
   "title",
@@ -46,6 +47,14 @@ export function renderAdminListingEditorPayload(registry, requestedLocale, seed,
 
 export function renderAdminLeadsPayload(registry, requestedLocale, data) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const { leadSla: providedLeadSla, leadSlaGeneratedAt, ...payloadData } = data;
+  const leadSla =
+    providedLeadSla ||
+    buildLeadSlaReport({
+      leads: data.leads,
+      replies: data.replies,
+      generatedAt: leadSlaGeneratedAt,
+    });
   return {
     kind: "admin_lead_inbox",
     status: 200,
@@ -61,10 +70,13 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       robots: "noindex,nofollow",
     },
     workspace,
-    ...data,
+    ...payloadData,
+    leadSla,
     summary: {
       leads: data.leads.length,
       replies: data.replies.length,
+      leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
+      leadSlaReminders: leadSla.summary.reminder_required,
       languageRequests: data.languageRequests.length,
       viewings: data.viewings.length,
       savedSearches: data.savedSearches.length,

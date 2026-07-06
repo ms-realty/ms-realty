@@ -141,6 +141,7 @@ const app = createHttpApp({
   dealClosedAt: "2026-07-10T10:00:00Z",
   slugChangedAt: "2026-07-04T00:09:00Z",
   listingQualityGeneratedAt: "2026-07-05T03:01:09.839Z",
+  leadSlaGeneratedAt: "2026-07-06T00:00:00Z",
 });
 const legacyRedirect = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 const smoke = {

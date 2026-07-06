@@ -3272,9 +3272,75 @@
           }
         }
       ],
+      "leadSla": {
+        "generated_at": "2026-07-06T00:00:00Z",
+        "summary": {
+          "total_leads": 4,
+          "broker_replied": 1,
+          "reminder_required": 0,
+          "manager_escalation_required": 3,
+          "pending": 0
+        },
+        "rows": [
+          {
+            "lead_id": "server-lead-he-0001",
+            "source": "website_listing_detail",
+            "assigned_broker": "broker_international",
+            "sla_due_at": "2026-07-04T00:15:00.000Z",
+            "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+            "status": "broker_replied",
+            "reminder_task": null,
+            "manager_escalation": null
+          },
+          {
+            "lead_id": "server-viewing-lead-he-0001",
+            "source": "website_viewing_request",
+            "assigned_broker": "broker_international",
+            "sla_due_at": "2026-07-04T00:15:00.000Z",
+            "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+            "status": "manager_escalation_required",
+            "reminder_task": null,
+            "manager_escalation": {
+              "id": "manager-escalation-server-viewing-lead-he-0001",
+              "owner": "manager",
+              "status": "open"
+            }
+          },
+          {
+            "lead_id": "server-lead-contact-he-0001",
+            "source": "website_contact_callback",
+            "assigned_broker": "broker_international",
+            "sla_due_at": "2026-07-04T00:15:00.000Z",
+            "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+            "status": "manager_escalation_required",
+            "reminder_task": null,
+            "manager_escalation": {
+              "id": "manager-escalation-server-lead-contact-he-0001",
+              "owner": "manager",
+              "status": "open"
+            }
+          },
+          {
+            "lead_id": "server-lead-seller-el-0001",
+            "source": "website_seller_valuation",
+            "assigned_broker": "broker_international",
+            "sla_due_at": "2026-07-04T00:15:00.000Z",
+            "manager_escalation_due_at": "2026-07-04T01:00:00.000Z",
+            "status": "manager_escalation_required",
+            "reminder_task": null,
+            "manager_escalation": {
+              "id": "manager-escalation-server-lead-seller-el-0001",
+              "owner": "manager",
+              "status": "open"
+            }
+          }
+        ]
+      },
       "summary": {
         "leads": 4,
         "replies": 1,
+        "leadSlaManagerEscalations": 3,
+        "leadSlaReminders": 0,
         "languageRequests": 1,
         "viewings": 1,
         "savedSearches": 1,
