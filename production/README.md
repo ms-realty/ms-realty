@@ -34,7 +34,7 @@ What it proves now:
 - Moderated public media contract that separates imported gallery photos from review-gated floor-plan/video/tour assets.
 - Draft Photo Sphere Viewer 360 tour fields with required gallery fallback policy.
 - Authenticated 360 tour approval endpoint and ledger; approved tours overlay public listing routes with Photo Sphere Viewer mount data.
-- Public route fixtures for locale-prefixed listing/search/contact/fallback routes.
+- Public route fixtures for locale-prefixed listing/search/contact/guide/fallback routes.
 - Locale homepages with search, seller, contact, location, and featured listing paths.
 - Crawlable location pages generated from reviewed listing inventory.
 - Admin CRM/CMS shell language availability in BG, RU, and EN.
@@ -50,7 +50,8 @@ What it proves now:
 - Public listing routes overlay translation ledger state before indexability.
 - Runtime smoke fixture for listing route, search route, contact route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, contact, fallback, and lead endpoints.
-- Server-rendered HTML adapter for listing, search, contact, and fallback pages with SEO metadata.
+- Server-rendered HTML adapter for listing, search, contact, guide, and fallback pages with SEO metadata.
+- Approved CMS guide pages for foreign-buyer and buying-process facts cited by public Hermes chat.
 - Open Graph metadata in server-rendered public HTML, including listing `og:image` from reviewed gallery media.
 - Structured-data launch report for every indexable listing sitemap entry.
 - Listing quality report that turns missing price, bedroom, location, alt text, thin gallery, media review, and tour review warnings into admin editor links.
@@ -98,7 +99,7 @@ What it proves now:
 - `next build` gate over the App Router handlers, pinned to Next 16 and React 19.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.
-- Served sitemap XML includes approved home and location pages without unapproved French routes.
+- Served sitemap XML includes approved home, location, and CMS guide pages without unapproved French routes.
 - Append-only lead ledger for persisted buyer inquiry, viewing request, contact callback, and seller valuation smoke rows, including source classification.
 - Lead intake returns a deterministic instant-confirmation contract without sending unreviewed messages.
 - Lead ledger rows create an immediate broker follow-up SLA task and manager escalation timestamp.
@@ -200,6 +201,7 @@ Generated production data:
 - `production/data/redirect-approvals.jsonl`
 - `production/data/redirect-approval-workbook.csv`
 - `production/data/deployable-redirects.json`
+- `production/data/approved-cms-content.json`
 - `production/data/localized-sitemap.json`
 - `production/data/sitemap.xml`
 - `production/data/robots.txt`

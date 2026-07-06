@@ -449,7 +449,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 |---|---|---|
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
-| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + Next App Router build gate built**; React public UI polish pending |
+| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + Next App Router build gate built**; React public UI polish pending |
 | **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin HTML workbenches + broker verification report built** (editor, migration review, lead inbox); Payload app pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, and Typesense/Meilisearch sync/query worker paths built; live engine provisioning pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, and OpenAI-compatible draft worker path built; self-hosted Hermes/vLLM endpoint provisioning pending |
@@ -461,7 +461,7 @@ import fixtures (165 source listings → 167 locale-scoped docs), 165-row redire
 reviewer-gated deployable 301 export, authenticated admin migration/editor/lead workbenches,
 approved-translation-gated localized sitemap (`sitemap.xml` + `robots.txt`), `RealEstateListing`
 JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with OG
-+ hreflang + schema, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only
++ hreflang + schema, approved CMS guide pages cited by Hermes, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only
 lead/reply/viewing/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
 missed-SLA report that creates broker reminders and manager escalations from unreplied leads,
 listing-status workflow that keeps sold pages live while removing them from active inventory,
