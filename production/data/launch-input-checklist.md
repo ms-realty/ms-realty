@@ -60,6 +60,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services
 - Scope: 165 source listing rows; warning counts below include structured-data entries and listing-quality source rows.
 - Review input path: `migration/reviews/listing-quality.csv`
 - Example input: `migration/reviews/listing-quality.csv.example`
+- Example rows intentionally leave reviewer fields blank; fill them only after human gallery/facts review.
 - Production/CLI path override: `MS_REALTY_LISTING_QUALITY_REVIEW_PATH`
 - Status report: `npm run listing:preflight:report` writes current missing/invalid listing-review state without clearing the launch gate.
 - Build path overrides: `MS_REALTY_LISTING_EDIT_LEDGER_PATH`, `MS_REALTY_TOUR_APPROVAL_LEDGER_PATH`, `MS_REALTY_LISTING_QUALITY_REPORT_PATH`, `MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH`

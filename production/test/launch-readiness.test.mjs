@@ -561,6 +561,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
   assert.match(markdown, /npm run listing:preflight:report/);
+  assert.match(markdown, /Example rows intentionally leave reviewer fields blank/);
   assert.match(markdown, /MS_REALTY_LISTING_EDIT_LEDGER_PATH/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH/);
