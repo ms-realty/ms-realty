@@ -160,6 +160,7 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.equal(he.body.contact.path, "/he/contact");
   assert.equal(he.body.locations.some((location) => location.path === "/he/locations/sandanski"), true);
   assert.ok(he.cards.length > 0);
+  assert.equal(he.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
 });
 
@@ -174,6 +175,7 @@ test("location page exposes only indexable locale inventory", () => {
   assert.equal(he.cards.length, 1);
   assert.equal(he.cards[0].id, "MS-CRAWL-0001");
   assert.equal(he.cards[0].translation_indexable, true);
+  assert.match(he.cards[0].thumbnail.url, /\/wp-content\/uploads\//);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
   assert.equal(missing.status, 404);
   assert.equal(missing.indexable, false);

@@ -65,6 +65,8 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(home.html, /data-react-public-ui="home"/);
   assert.match(home.html, /aria-label="Locations"/);
   assert.match(home.html, /\/he\/locations\/sandanski/);
+  assert.match(home.html, /aria-label="Featured listings"/);
+  assert.match(home.html, /data-card-thumbnail="true"/);
 
   const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski&property_type=apartment" });
   assert.equal(search.status, 200);
@@ -105,6 +107,8 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(location.status, 200);
   assert.equal(location.rendered.kind, "location");
   assert.match(location.html, /data-react-public-ui="location"/);
+  assert.match(location.html, /aria-label="Location listings"/);
+  assert.match(location.html, /data-card-thumbnail="true"/);
 
   const seller = renderAppRoute({ pathname: "/he/sell", url: "https://example.test/he/sell" });
   assert.equal(seller.status, 200);

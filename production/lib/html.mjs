@@ -18,7 +18,7 @@ button,input,textarea,select{min-height:44px;font:inherit;color:inherit}button,a
 form[role="search"],main[data-kind="seller"] form,main[data-kind="contact"] form,form[data-editor-form="listing"]{display:grid;gap:var(--space-4);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}form[role="search"]{grid-template-columns:2fr 1fr 1fr 1fr auto;align-items:end}fieldset{margin:0;border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--space-3);display:flex;gap:var(--space-2);align-items:center}legend{padding:0 var(--space-2);color:var(--text-muted);font-weight:600}
 dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--space-3);margin:0}dt{color:var(--text-muted);font-size:13px;font-weight:600}dd{margin:0;color:var(--text-strong);font-weight:600}table{width:100%;border-collapse:collapse;background:var(--surface)}th,td{padding:.85rem;text-align:start;border-bottom:1px solid var(--border);vertical-align:top}th{background:var(--surface-sunken);color:var(--text-muted);font-size:13px;font-weight:700}section:has(> table){overflow-x:auto}
 article[data-search-card="true"],article[data-related-listing="true"],main[data-kind="home"] section article{display:grid;gap:var(--space-3);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}article[data-search-card="true"]:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}[data-card-badge],[data-listing-verification]{width:max-content;border-radius:var(--radius-pill);background:var(--ink-100);color:var(--ink-800);padding:.25rem .6rem;font-size:13px;font-weight:700}[data-card-price],[data-listing-price]{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--price)}
-main[data-kind="search"] section[aria-label="Search results"],main[data-kind="home"] section[aria-label="Featured listings"],section[aria-label="Related listings"]{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-5)}section[aria-label="Active filters"]{display:flex;flex-wrap:wrap;gap:var(--space-2)}[data-filter-chip]{border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface);padding:.35rem .7rem;color:var(--text-muted);font-weight:600}article[data-search-card] nav,nav[aria-label="Save and share"],nav[aria-label="Broker contact"],nav[aria-label="Locations"]{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
+main[data-kind="search"] section[aria-label="Search results"],main[data-kind="home"] section[aria-label="Featured listings"],main[data-kind="location"] section[aria-label="Location listings"],section[aria-label="Related listings"]{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-5)}section[aria-label="Active filters"]{display:flex;flex-wrap:wrap;gap:var(--space-2)}[data-filter-chip]{border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface);padding:.35rem .7rem;color:var(--text-muted);font-weight:600}article[data-search-card] nav,nav[aria-label="Save and share"],nav[aria-label="Broker contact"],nav[aria-label="Locations"]{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
 article[data-search-card] [data-card-thumbnail]{margin:calc(var(--space-5) * -1) calc(var(--space-5) * -1) 0;display:block}article[data-search-card] [data-card-thumbnail] img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-card) var(--radius-card) 0 0;background:var(--surface-sunken)}
 main[data-kind="listing"]{grid-template-columns:1fr;align-items:start}nav[data-listing-tools="true"]{justify-content:flex-start;padding-block:var(--space-2)}main[data-kind="listing"]>[data-listing-summary]{display:grid;gap:var(--space-3);padding:var(--space-6);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-content-grid]{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:var(--space-6);align-items:start}[data-listing-main-column],[data-listing-contact-panel]{display:grid;gap:var(--space-4)}[data-listing-description]{max-width:72ch;font-size:18px}[data-listing-contact-panel]{position:sticky;top:var(--space-5);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-highlights]{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-listing-highlights] li{border-radius:var(--radius-pill);background:var(--surface-sunken);padding:.35rem .7rem;font-weight:600}#listing-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3)}#listing-gallery img{width:100%;height:180px;object-fit:cover;border-radius:var(--radius-card);background:var(--surface-sunken)}#listing-gallery img:first-child{grid-column:span 2;height:360px}nav[aria-label="Save and share"] a,nav[aria-label="Save and share"] button,nav[aria-label="Broker contact"] a,nav[aria-label="Broker contact"] span{min-height:44px;display:inline-flex;align-items:center;border:1px solid var(--border-strong);border-radius:var(--radius-button);background:var(--surface);padding:.62rem .85rem;font-weight:600}nav[aria-label="Save and share"] button{cursor:pointer}nav[aria-label="Broker contact"] span{opacity:.58}nav[data-mobile-sticky-actions="true"]{position:sticky;bottom:0;z-index:10;display:grid;gap:var(--space-2);padding:var(--space-3);background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
 main[data-kind="seller"]>section,main[data-kind="contact"]>p,main[data-kind="guide"]>section{display:grid;gap:var(--space-3)}[data-seller-steps]{display:grid;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-seller-steps] li{padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
@@ -90,6 +90,31 @@ function cardSummary(card) {
   return [card.location, card.property_type, card.bedrooms ? `${card.bedrooms} bedrooms` : null, card.listing_status]
     .filter(Boolean)
     .join(" · ");
+}
+
+function renderListingCard(card, { actionLabel = "Listing card actions" } = {}) {
+  const thumbnail = card.thumbnail?.url
+    ? `<a href="${escapeHtml(card.path)}" data-card-thumbnail="true"><img src="${escapeHtml(card.thumbnail.url)}" alt="${escapeHtml(
+        card.thumbnail.alt || card.title,
+      )}" loading="lazy"></a>`
+    : "";
+  return `<article data-search-card="true" data-listing-id="${escapeHtml(card.id)}" data-translation-display="${escapeHtml(
+    card.translation_display,
+  )}" data-review-badge="${escapeHtml(card.review_badge)}" data-listing-status="${escapeHtml(card.listing_status)}">
+    ${thumbnail}
+    <p data-card-badge="true">${escapeHtml((card.review_badge || "").replaceAll("_", " "))}</p>
+    <h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2>
+    <p data-card-price="true">${escapeHtml(formatPrice(card))}</p>
+    <p data-search-card-meta="true">${escapeHtml(cardSummary(card))}</p>
+    <p data-card-media-count="${escapeHtml(card.image_count)}">${escapeHtml(card.image_count || 0)} photos</p>
+    <nav aria-label="${escapeHtml(actionLabel)}">
+      <a href="${escapeHtml(card.actions.detail.href)}">${escapeHtml(card.actions.detail.label)}</a>
+      <button type="button" data-endpoint="${escapeHtml(card.actions.inquiry.endpoint)}" data-listing-reference="${escapeHtml(
+        card.actions.inquiry.payload.listingReference,
+      )}">${escapeHtml(card.actions.inquiry.label)}</button>
+      <button type="button" data-client-save-listing="${escapeHtml(card.actions.save.listing_id)}">${escapeHtml(card.actions.save.label)}</button>
+    </nav>
+  </article>`;
 }
 
 function listingPriceLabel(facts = {}) {
@@ -213,10 +238,7 @@ function renderHome(page) {
     .map((location) => `<a href="${escapeHtml(location.path)}">${escapeHtml(location.location)}</a>`)
     .join("");
   const cards = page.cards
-    .map(
-      (card) =>
-        `<article><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2><p>${escapeHtml(card.location)}</p></article>`,
-    )
+    .map((card) => renderListingCard(card, { actionLabel: "Featured listing actions" }))
     .join("");
   return `
 <main data-kind="home">
@@ -256,34 +278,7 @@ function renderSearch(page) {
     .map((chip) => `<span data-filter-chip="${escapeHtml(chip.key)}">${escapeHtml(chip.value)}</span>`)
     .join("");
   const cards = page.cards
-    .map(
-      (card) =>
-        `<article data-search-card="true" data-listing-id="${escapeHtml(card.id)}" data-translation-display="${escapeHtml(
-          card.translation_display,
-        )}" data-review-badge="${escapeHtml(card.review_badge)}" data-listing-status="${escapeHtml(card.listing_status)}">
-          ${
-            card.thumbnail?.url
-              ? `<a href="${escapeHtml(card.path)}" data-card-thumbnail="true"><img src="${escapeHtml(card.thumbnail.url)}" alt="${escapeHtml(
-                  card.thumbnail.alt || card.title,
-                )}" loading="lazy"></a>`
-              : ""
-          }
-          <p data-card-badge="true">${escapeHtml(card.review_badge.replaceAll("_", " "))}</p>
-          <h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2>
-          <p data-card-price="true">${escapeHtml(formatPrice(card))}</p>
-          <p data-search-card-meta="true">${escapeHtml(cardSummary(card))}</p>
-          <p data-card-media-count="${escapeHtml(card.image_count)}">${escapeHtml(card.image_count)} photos</p>
-          <nav aria-label="Search result actions">
-            <a href="${escapeHtml(card.actions.detail.href)}">${escapeHtml(card.actions.detail.label)}</a>
-            <button type="button" data-endpoint="${escapeHtml(card.actions.inquiry.endpoint)}" data-listing-reference="${escapeHtml(
-              card.actions.inquiry.payload.listingReference,
-            )}">${escapeHtml(card.actions.inquiry.label)}</button>
-            <button type="button" data-client-save-listing="${escapeHtml(card.actions.save.listing_id)}">${escapeHtml(
-              card.actions.save.label,
-            )}</button>
-          </nav>
-        </article>`,
-    )
+    .map((card) => renderListingCard(card, { actionLabel: "Search result actions" }))
     .join("");
   return `
 <main data-kind="search" data-total-matches="${escapeHtml(page.search.total_matches)}" data-list-first-mobile="${escapeHtml(
@@ -318,10 +313,7 @@ function renderSearch(page) {
 
 function renderLocation(page) {
   const cards = page.cards
-    .map(
-      (card) =>
-        `<article><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2><p>${escapeHtml(card.property_type)}</p></article>`,
-    )
+    .map((card) => renderListingCard(card, { actionLabel: "Location listing actions" }))
     .join("");
   return `
 <main data-kind="location" data-location="${escapeHtml(page.body.location)}" data-total-matches="${escapeHtml(page.body.listing_count)}">
