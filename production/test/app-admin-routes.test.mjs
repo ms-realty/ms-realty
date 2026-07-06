@@ -43,8 +43,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
     },
     async () => {
       const publicLeadRoute = await import("../../app/api/leads/route.js");
+      const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
+      const viewingRoute = await import("../../app/api/admin/viewings/route.js");
+      const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
       const listingEditorRoute = await import("../../app/admin/listings/edit/route.js");
 
@@ -125,6 +128,41 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
       assert.match(await updatedEditor.text(), /value="Updated title for Next admin"/);
+
+      const viewing = await viewingRoute.POST(
+        new Request("https://example.test/api/admin/viewings", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            leadId: "next-admin-lead-test",
+            startsAt: "2026-07-06T10:00:00Z",
+            broker: "broker_ru",
+          }),
+        }),
+      );
+      const viewingBody = await viewing.json();
+      assert.equal(viewing.status, 201);
+      assert.equal(viewingBody.status, "booked");
+      assert.equal(viewingBody.feedback_request.status, "open");
+
+      const calendar = await viewingCalendarRoute.GET(new Request("https://example.test/api/admin/viewings.ics", { headers: auth }));
+      const calendarBody = await calendar.text();
+      assert.equal(calendar.status, 200);
+      assert.equal(calendar.headers.get("content-type"), "text/calendar; charset=utf-8");
+      assert.match(calendarBody, /BEGIN:VCALENDAR/);
+      assert.match(calendarBody, /MS Realty viewing MS-CRAWL-0001/);
+
+      const deal = await dealCloseRoute.POST(
+        new Request("https://example.test/api/admin/deals/close", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({ leadId: "next-admin-lead-test", broker: "broker_ru" }),
+        }),
+      );
+      const dealBody = await deal.json();
+      assert.equal(deal.status, 201);
+      assert.equal(dealBody.status, "closed");
+      assert.equal(dealBody.testimonial_request.status, "open");
     },
   );
 });

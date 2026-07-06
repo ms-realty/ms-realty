@@ -85,6 +85,7 @@ What it proves now:
 - Next App Router public API handlers for analytics events, language requests, and saved searches.
 - Next App Router admin read pages for CRM lead inbox and CMS listing editor behind the same bearer auth gate.
 - Next App Router admin write handlers for reviewed replies and listing edits used by those admin pages.
+- Next App Router admin CRM lifecycle handlers for viewing bookings, viewing calendar export, and deal close tasks.
 - `next build` gate over the App Router handlers, pinned to Next 16 and React 19.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.

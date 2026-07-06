@@ -1,7 +1,7 @@
 import { isAdminAuthorized } from "./admin-auth.mjs";
 import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
-import { DEFAULT_DEAL_LEDGER_PATH, readDeals } from "./deal-ledger.mjs";
+import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
@@ -17,7 +17,7 @@ import {
   latestTranslationTasks,
   readTranslationLedger,
 } from "./translation-ledger.mjs";
-import { DEFAULT_VIEWING_LEDGER_PATH, readViewings } from "./viewing-ledger.mjs";
+import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -53,6 +53,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    bookedAt: env.MS_REALTY_BOOKED_AT,
+    dealClosedAt: env.MS_REALTY_DEAL_CLOSED_AT,
     editedAt: env.MS_REALTY_EDITED_AT,
     reviewedAt: env.MS_REALTY_REVIEWED_AT,
   };
@@ -78,6 +80,18 @@ function htmlResponse(payload) {
 
 function jsonResponse(status, body) {
   return new Response(JSON.stringify(body), { status, headers: PRIVATE_JSON_HEADERS });
+}
+
+function calendarResponse(body) {
+  return new Response(body, {
+    status: 200,
+    headers: {
+      ...SECURITY_HEADERS,
+      "content-type": "text/calendar; charset=utf-8",
+      "cache-control": "no-store",
+      "content-disposition": 'attachment; filename="ms-realty-viewings.ics"',
+    },
+  });
 }
 
 async function readRequestBody(request, maxBodyBytes) {
@@ -183,6 +197,20 @@ function appendEditorChange(input, config) {
   return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
 }
 
+function appendViewingBooking(input, config) {
+  return appendViewing(readLeadLedger(config.leadLedgerPath), input, {
+    filePath: config.viewingLedgerPath,
+    bookedAt: config.bookedAt,
+  });
+}
+
+function appendDealClose(input, config) {
+  return appendClosedDeal(readLeadLedger(config.leadLedgerPath), input, {
+    filePath: config.dealLedgerPath,
+    closedAt: config.dealClosedAt,
+  });
+}
+
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
   if (!isAdminAuthorized(request.headers.get("authorization") || "")) return adminUnauthorized();
   try {
@@ -197,6 +225,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       return jsonResponse(201, appendEditorChange(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
+      return jsonResponse(201, appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
+      return calendarResponse(renderViewingCalendar(readViewings(config.viewingLedgerPath), { now: config.bookedAt }));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
+      return jsonResponse(201, appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     return jsonResponse(405, { kind: "method_not_allowed" });
   } catch (error) {
