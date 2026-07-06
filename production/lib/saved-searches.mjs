@@ -8,6 +8,15 @@ export const DEFAULT_SAVED_SEARCH_LEDGER_PATH = fromRoot("production", "data", "
 const FREQUENCIES = new Set(["instant", "daily", "weekly"]);
 const BCP47 = /^[a-z]{2,3}(-[A-Z]{2})?$/;
 
+function normalizePriceSnapshot(snapshot = {}) {
+  if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) return {};
+  return Object.fromEntries(
+    Object.entries(snapshot)
+      .map(([id, price]) => [id, Number(price)])
+      .filter(([id, price]) => id && Number.isFinite(price)),
+  );
+}
+
 export function resetSavedSearches(filePath = DEFAULT_SAVED_SEARCH_LEDGER_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, "");
@@ -45,6 +54,7 @@ export function createSavedSearch(registry, input, { matchCount = 0, savedAt = n
     filters,
     contact: input.contact,
     match_count: matchCount,
+    price_snapshot: normalizePriceSnapshot(input.priceSnapshot || input.price_snapshot),
     alert_frequency: frequency,
     status: "active",
     alert_task: {

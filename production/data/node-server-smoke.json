@@ -2286,6 +2286,20 @@
         "name": "Noa Levi"
       },
       "match_count": 41,
+      "price_snapshot": {
+        "MS-CRAWL-0003": 600,
+        "MS-CRAWL-0004": 355,
+        "MS-CRAWL-0005": 0,
+        "MS-CRAWL-0007": 53289,
+        "MS-CRAWL-0008": 350,
+        "MS-CRAWL-0009": 400,
+        "MS-CRAWL-0010": 130000,
+        "MS-CRAWL-0014": 230,
+        "MS-CRAWL-0017": 117000,
+        "MS-CRAWL-0021": 165000,
+        "MS-CRAWL-0024": 125000,
+        "MS-CRAWL-0027": 53307
+      },
       "alert_frequency": "weekly",
       "status": "active",
       "alert_task": {
@@ -2307,6 +2321,20 @@
           "name": "Noa Levi"
         },
         "match_count": 41,
+        "price_snapshot": {
+          "MS-CRAWL-0003": 600,
+          "MS-CRAWL-0004": 355,
+          "MS-CRAWL-0005": 0,
+          "MS-CRAWL-0007": 53289,
+          "MS-CRAWL-0008": 350,
+          "MS-CRAWL-0009": 400,
+          "MS-CRAWL-0010": 130000,
+          "MS-CRAWL-0014": 230,
+          "MS-CRAWL-0017": 117000,
+          "MS-CRAWL-0021": 165000,
+          "MS-CRAWL-0024": 125000,
+          "MS-CRAWL-0027": 53307
+        },
         "alert_frequency": "weekly",
         "status": "active",
         "alert_task": {
@@ -3223,6 +3251,20 @@
             "name": "Noa Levi"
           },
           "match_count": 41,
+          "price_snapshot": {
+            "MS-CRAWL-0003": 600,
+            "MS-CRAWL-0004": 355,
+            "MS-CRAWL-0005": 0,
+            "MS-CRAWL-0007": 53289,
+            "MS-CRAWL-0008": 350,
+            "MS-CRAWL-0009": 400,
+            "MS-CRAWL-0010": 130000,
+            "MS-CRAWL-0014": 230,
+            "MS-CRAWL-0017": 117000,
+            "MS-CRAWL-0021": 165000,
+            "MS-CRAWL-0024": 125000,
+            "MS-CRAWL-0027": 53307
+          },
           "alert_frequency": "weekly",
           "status": "active",
           "alert_task": {

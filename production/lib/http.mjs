@@ -1024,7 +1024,10 @@ export function createHttpApp({
           filters,
           translationTasks: readTranslationLedger(translationLedgerPath || undefined),
         });
-        const savedSearch = createSavedSearch(activeRegistry, { ...input, filters }, { matchCount: search.search.total_matches, savedAt });
+        const priceSnapshot = Object.fromEntries(
+          search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
+        );
+        const savedSearch = createSavedSearch(activeRegistry, { ...input, filters, priceSnapshot }, { matchCount: search.search.total_matches, savedAt });
         const ledger = savedSearchLedgerPath ? appendSavedSearch(savedSearch, { filePath: savedSearchLedgerPath }) : null;
         return privateJson(201, { ...savedSearch, ledger });
       } catch (error) {

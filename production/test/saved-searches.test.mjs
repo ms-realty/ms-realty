@@ -33,6 +33,7 @@ test("saved search stores criteria and creates alert task", () => {
         query: "Sandanski",
         filters: { property_type: "apartment" },
         contact: { name: "Claire Martin" },
+        priceSnapshot: { "MS-CRAWL-0001": 120000, ignored: "not-a-number" },
       },
       { matchCount: 12, savedAt: "2026-07-04T00:07:00Z" },
     ),
@@ -44,6 +45,7 @@ test("saved search stores criteria and creates alert task", () => {
   assert.equal(rows[0].requested_locale, "fr");
   assert.equal(rows[0].locale, "en");
   assert.equal(rows[0].fallback_used, true);
+  assert.deepEqual(rows[0].price_snapshot, { "MS-CRAWL-0001": 120000 });
   assert.equal(rows[0].alert_task.status, "open");
   assert.equal(assertSavedSearches(rows), true);
 });
