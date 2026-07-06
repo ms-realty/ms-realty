@@ -139,8 +139,10 @@ npm run seo:preflight
 npm run launch:preflight
 ```
 
-`redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight` and
-`launch:preflight` still exit non-zero until real external SEO exports are complete.
+`redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight` still exits
+non-zero until real external SEO exports are complete. `launch:preflight` also requires live
+Typesense/Meilisearch reports from `npm run search:sync && npm run search:query` and a Hermes
+draft-worker report from `npm run hermes:worker`.
 
 Start the local production adapter:
 

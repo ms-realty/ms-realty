@@ -10,12 +10,20 @@ function readJson(path) {
   return JSON.parse(fs.readFileSync(fromRoot(...path), "utf8"));
 }
 
+const readyLiveServices = [
+  { source: "typesense_meilisearch_sync", status: "pass", path: "production/data/search-engine-sync-report.json", summary: {} },
+  { source: "typesense_meilisearch_query", status: "pass", path: "production/data/search-engine-query-report.json", summary: {} },
+  { source: "hermes_draft_worker", status: "pass", path: "production/data/hermes-draft-worker-report.json", summary: {} },
+];
+
 test("launch readiness stays blocked until production launch blockers are cleared", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
-  assert.deepEqual(report.blockers, ["external_seo_exports"]);
+  assert.deepEqual(report.blockers, ["external_seo_exports", "live_services"]);
   assert.equal(report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
+  assert.equal(report.gates.find((gate) => gate.id === "live_services").status, "blocked");
+  assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.ok(report.rollback_plan.length >= 3);
 });
@@ -44,6 +52,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     routeMap,
     deployableRedirects,
     seoEvidence,
+    liveServices: readyLiveServices,
   });
 
   assert.equal(assertLaunchReadinessReport(report), true);
@@ -80,6 +89,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     routeMap,
     deployableRedirects,
     seoEvidence,
+    liveServices: readyLiveServices,
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
@@ -101,6 +111,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     routeMap,
     deployableRedirects,
     seoEvidence,
+    liveServices: readyLiveServices,
   });
   assert.equal(homepageReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(homepageReport.blockers, ["redirect_reviews"]);
@@ -112,6 +123,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     routeMap,
     deployableRedirects,
     seoEvidence,
+    liveServices: readyLiveServices,
   });
   assert.equal(duplicateReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(duplicateReport.blockers, ["redirect_reviews"]);
@@ -131,7 +143,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   });
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports/);
+  assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services/);
 });
 
 test("launch input checklist names remaining operator-owned blockers", () => {

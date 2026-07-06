@@ -3,7 +3,8 @@
   "launch_ready": false,
   "status": "blocked",
   "blockers": [
-    "external_seo_exports"
+    "external_seo_exports",
+    "live_services"
   ],
   "warnings": [],
   "gates": [
@@ -122,6 +123,30 @@
       }
     },
     {
+      "id": "live_services",
+      "status": "blocked",
+      "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
+      "evidence": {
+        "reports": [
+          {
+            "source": "typesense_meilisearch_sync",
+            "status": "missing_report",
+            "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json"
+          },
+          {
+            "source": "typesense_meilisearch_query",
+            "status": "missing_report",
+            "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json"
+          },
+          {
+            "source": "hermes_draft_worker",
+            "status": "missing_report",
+            "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
+          }
+        ]
+      }
+    },
+    {
       "id": "monitoring_rollback",
       "status": "pass",
       "message": "",
@@ -144,6 +169,23 @@
         "start_script": "node production/server.mjs",
         "production_server_entrypoint": true
       }
+    }
+  ],
+  "live_services": [
+    {
+      "source": "typesense_meilisearch_sync",
+      "status": "missing_report",
+      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json"
+    },
+    {
+      "source": "typesense_meilisearch_query",
+      "status": "missing_report",
+      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json"
+    },
+    {
+      "source": "hermes_draft_worker",
+      "status": "missing_report",
+      "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
     }
   ],
   "monitoring_plan": [

@@ -925,7 +925,7 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
-  const expectedBlockers = ["external_seo_exports"];
+  const expectedBlockers = ["external_seo_exports", "live_services"];
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||

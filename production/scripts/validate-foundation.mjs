@@ -952,7 +952,7 @@ const launchReadiness = JSON.parse(fs.readFileSync(fromRoot("production", "data"
 if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocked") {
   throw new Error("Launch readiness report must stay blocked until production blockers are cleared");
 }
-for (const blocker of ["external_seo_exports"]) {
+for (const blocker of ["external_seo_exports", "live_services"]) {
   if (!launchReadiness.blockers.includes(blocker)) throw new Error(`Launch readiness report must include ${blocker}`);
 }
 if (launchReadiness.blockers.includes("redirect_reviews")) {

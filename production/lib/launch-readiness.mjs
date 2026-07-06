@@ -1,5 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
+import {
+  assertSearchEngineQueryReport,
+  assertSearchEngineSyncReport,
+  DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
+  DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
+} from "./search-engine-sync.mjs";
+import {
+  assertHermesDraftWorkerReport,
+  DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+} from "./hermes-draft-worker.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -30,6 +40,25 @@ function warningsFrom(structuredData) {
     .map(([id, count]) => ({ id, count }));
 }
 
+function reportStatus(source, filePath, assertReport) {
+  if (!fs.existsSync(filePath)) return { source, status: "missing_report", path: filePath };
+  try {
+    const report = readJson(filePath);
+    assertReport(report);
+    return { source, status: "pass", path: filePath, summary: report.summary };
+  } catch (error) {
+    return { source, status: "invalid_report", path: filePath, error: error.message };
+  }
+}
+
+function liveServiceReports() {
+  return [
+    reportStatus("typesense_meilisearch_sync", DEFAULT_SEARCH_ENGINE_SYNC_REPORT, assertSearchEngineSyncReport),
+    reportStatus("typesense_meilisearch_query", DEFAULT_SEARCH_ENGINE_QUERY_REPORT, assertSearchEngineQueryReport),
+    reportStatus("hermes_draft_worker", DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH, assertHermesDraftWorkerReport),
+  ];
+}
+
 export function buildLaunchReadinessReport({
   generatedAt = new Date().toISOString(),
   migration = readJson(fromRoot("production", "data", "migration-records.json")),
@@ -40,6 +69,7 @@ export function buildLaunchReadinessReport({
   seoEvidence = readJson(fromRoot("production", "data", "seo-evidence.json")),
   httpSmoke = readJson(fromRoot("production", "data", "http-smoke.json")),
   nodeServerSmoke = readJson(fromRoot("production", "data", "node-server-smoke.json")),
+  liveServices = liveServiceReports(),
   appState = packageState(),
 } = {}) {
   const crawlPass =
@@ -52,6 +82,7 @@ export function buildLaunchReadinessReport({
     deployableRedirects.summary.homepageTargets === 0 &&
     deployableRedirects.summary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
+  const liveServicesReady = liveServices.every((item) => item.status === "pass");
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
@@ -120,6 +151,14 @@ export function buildLaunchReadinessReport({
       },
     ),
     gate(
+      "live_services",
+      liveServicesReady ? "pass" : "blocked",
+      { reports: liveServices },
+      liveServicesReady
+        ? ""
+        : "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
+    ),
+    gate(
       "monitoring_rollback",
       monitoringReady && rollbackReady ? "pass" : "blocked",
       {
@@ -145,6 +184,7 @@ export function buildLaunchReadinessReport({
     blockers,
     warnings: warningsFrom(structuredData),
     gates,
+    live_services: liveServices,
     monitoring_plan: monitoringPlan,
     rollback_plan: rollbackPlan,
   };
@@ -161,6 +201,9 @@ export function assertLaunchReadinessReport(report) {
   if (report.blockers.includes("production_app_layer")) throw new Error("Production app layer should be covered by the Node adapter");
   if (!report.gates.find((item) => item.id === "crawl_inventory" && item.status === "pass")) {
     throw new Error("Launch readiness must prove crawl inventory passed");
+  }
+  if (!report.gates.some((item) => item.id === "live_services")) {
+    throw new Error("Launch readiness must include live service provisioning gate");
   }
   if (!report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");

@@ -15,7 +15,8 @@
       "status": "ok",
       "launch_ready": false,
       "blockers": [
-        "external_seo_exports"
+        "external_seo_exports",
+        "live_services"
       ]
     }
   },
@@ -34,7 +35,8 @@
       "status": "blocked",
       "launch_ready": false,
       "blockers": [
-        "external_seo_exports"
+        "external_seo_exports",
+        "live_services"
       ]
     }
   },
