@@ -1,1 +1,5 @@
-export { renderAppRouteResponse } from "../../production/lib/app-router-adapter.mjs";
+export {
+  renderAppRobotsResponse,
+  renderAppRouteResponse,
+  renderAppSitemapResponse,
+} from "../../production/lib/app-router-adapter.mjs";

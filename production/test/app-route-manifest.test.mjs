@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { assertAppRouteFiles, assertAppRouteManifest, buildAppRouteManifest } from "../lib/app-route-manifest.mjs";
-import { renderAppRoute } from "../lib/app-router-adapter.mjs";
+import { renderAppRobots, renderAppRoute, renderAppSitemap } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -63,4 +63,25 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.kind, "listing");
   assert.match(listing.html, /MS-CRAWL-0001/);
+});
+
+test("App Router adapter serves approved sitemap and robots text", async () => {
+  const sitemap = renderAppSitemap();
+  assert.equal(sitemap.status, 200);
+  assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
+  assert.equal(sitemap.sitemap.summary.entries, 193);
+  assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he\/<\/loc>/);
+  assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
+  assert.doesNotMatch(sitemap.body, /\/el\/akinita\/MS-CRAWL-0001/);
+  assert.doesNotMatch(sitemap.body, /\/fr\//);
+
+  const robots = renderAppRobots();
+  assert.equal(robots.status, 200);
+  assert.equal(robots.headers["content-type"], "text/plain; charset=utf-8");
+  assert.match(robots.body, /Sitemap: https:\/\/makler-realty.com\/sitemap.xml/);
+
+  const sitemapRoute = await import("../../app/sitemap.xml/route.js");
+  const robotsRoute = await import("../../app/robots.txt/route.js");
+  assert.equal((await sitemapRoute.GET()).headers.get("content-type"), "application/xml; charset=utf-8");
+  assert.equal((await robotsRoute.GET()).headers.get("content-type"), "text/plain; charset=utf-8");
 });

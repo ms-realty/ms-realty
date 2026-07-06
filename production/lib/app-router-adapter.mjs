@@ -3,6 +3,7 @@ import { loadLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { readBrokerContacts } from "./broker-contacts.mjs";
 import { searchFiltersFromParams } from "./search-filters.mjs";
+import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { readTourApprovals } from "./tours.mjs";
 import { readTranslationLedger } from "./translation-ledger.mjs";
 
@@ -46,4 +47,32 @@ export function renderAppRoute({ pathname, url = pathname } = {}) {
 export function renderAppRouteResponse({ pathname, url = pathname } = {}) {
   const result = renderAppRoute({ pathname, url });
   return new Response(result.html, { status: result.status, headers: result.headers });
+}
+
+export function renderAppSitemap() {
+  const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), loadCmsSeed(), readTranslationLedger());
+  return {
+    status: 200,
+    headers: { "content-type": "application/xml; charset=utf-8", "cache-control": PUBLIC_CACHE },
+    sitemap,
+    body: renderSitemapXml(sitemap),
+  };
+}
+
+export function renderAppRobots() {
+  return {
+    status: 200,
+    headers: { "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE },
+    body: renderRobotsTxt(),
+  };
+}
+
+export function renderAppSitemapResponse() {
+  const result = renderAppSitemap();
+  return new Response(result.body, { status: result.status, headers: result.headers });
+}
+
+export function renderAppRobotsResponse() {
+  const result = renderAppRobots();
+  return new Response(result.body, { status: result.status, headers: result.headers });
 }
