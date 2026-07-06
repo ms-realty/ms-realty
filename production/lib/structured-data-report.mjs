@@ -20,22 +20,25 @@ function loadLocalizedSitemap(filePath = fromRoot("production", "data", "localiz
 
 function reportRow(registry, seed, entry) {
   const page = renderRuntimePath(registry, seed, entry.loc);
-  const issues = schemaIssues(page.schema);
+  const issues = entry.type === "guide" ? guideSchemaIssues(page.schema) : schemaIssues(page.schema);
   const warnings = [];
-  if (!filled(page.body?.facts?.location)) warnings.push("missing_location");
-  if (!filled(page.body?.facts?.price_eur) && page.body?.facts?.price_on_request !== true) warnings.push("missing_price");
-  if (
-    bedroomsRequired(page.body?.facts) &&
-    !filled(page.body?.facts?.bedrooms) &&
-    page.body?.quality_flags?.bedrooms_not_applicable !== true
-  ) {
-    warnings.push("missing_bedrooms");
+  if (entry.type === "listing") {
+    if (!filled(page.body?.facts?.location)) warnings.push("missing_location");
+    if (!filled(page.body?.facts?.price_eur) && page.body?.facts?.price_on_request !== true) warnings.push("missing_price");
+    if (
+      bedroomsRequired(page.body?.facts) &&
+      !filled(page.body?.facts?.bedrooms) &&
+      page.body?.quality_flags?.bedrooms_not_applicable !== true
+    ) {
+      warnings.push("missing_bedrooms");
+    }
+    if (page.body?.media?.review?.review_gated_assets) warnings.push("media_review_pending");
   }
-  if (page.body?.media?.review?.review_gated_assets) warnings.push("media_review_pending");
 
   return {
     loc: entry.loc,
     locale: entry.locale,
+    page_type: entry.type,
     listing_id: page.schema?.identifier || null,
     indexable: page.indexable === true,
     schema_type: page.schema?.["@type"] || null,
@@ -46,6 +49,16 @@ function reportRow(registry, seed, entry) {
   };
 }
 
+function guideSchemaIssues(schema) {
+  const issues = [];
+  if (schema?.["@context"] !== "https://schema.org") issues.push("missing_context");
+  if (schema?.["@type"] !== "Article") issues.push("missing_article_type");
+  for (const field of ["headline", "url"]) {
+    if (!filled(schema?.[field])) issues.push(`missing_${field}`);
+  }
+  return issues;
+}
+
 export function buildStructuredDataReport({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
@@ -54,10 +67,13 @@ export function buildStructuredDataReport({
   generatedAt = new Date().toISOString(),
 } = {}) {
   const reviewedSeed = applyListingEdits(seed, listingEdits);
-  const rows = sitemap.entries.filter((entry) => entry.type === "listing").map((entry) => reportRow(registry, reviewedSeed, entry));
+  const rows = sitemap.entries
+    .filter((entry) => ["listing", "guide"].includes(entry.type))
+    .map((entry) => reportRow(registry, reviewedSeed, entry));
   const summary = {
     generated_at: generatedAt,
-    listing_entries: rows.length,
+    listing_entries: rows.filter((row) => row.page_type === "listing").length,
+    guide_entries: rows.filter((row) => row.page_type === "guide").length,
     failing_entries: rows.filter((row) => row.issues.length).length,
     entries_with_offer: rows.filter((row) => row.has_offer).length,
     warnings: rows.reduce((counts, row) => {
@@ -71,7 +87,8 @@ export function buildStructuredDataReport({
 
 export function assertStructuredDataReport(report) {
   if (report.summary.listing_entries !== 167) throw new Error("Structured data report must cover 167 listing sitemap entries");
-  if (report.summary.failing_entries !== 0) throw new Error("Structured data report must have zero failing listing schemas");
+  if (report.summary.guide_entries !== 2) throw new Error("Structured data report must cover 2 approved guide sitemap entries");
+  if (report.summary.failing_entries !== 0) throw new Error("Structured data report must have zero failing public schemas");
   if (report.rows.some((row) => row.indexable !== true)) throw new Error("Structured data report must only cover indexable rows");
   return true;
 }

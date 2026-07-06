@@ -90,6 +90,8 @@ test("generated structured data report covers indexable listing sitemap entries"
   const report = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertStructuredDataReport(report), true);
   assert.equal(report.summary.listing_entries, 167);
+  assert.equal(report.summary.guide_entries, 2);
   assert.equal(report.summary.failing_entries, 0);
+  assert.equal(report.rows.some((row) => row.loc === "/en/guides/foreign-buyers" && row.schema_type === "Article"), true);
   assert.equal(Object.hasOwn(report.summary.warnings, "missing_price"), true);
 });
