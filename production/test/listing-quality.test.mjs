@@ -221,6 +221,8 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
 
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /LISTING QUALITY PREFLIGHT FAILED/);
+  assert.match(missing.stderr, /production\/data\/listing-quality-workbook\.csv/);
+  assert.match(missing.stderr, /npm run listing:preflight/);
   assert.equal(valid.status, 0, valid.stderr);
   assert.match(valid.stdout, /Listing quality review CSV valid: 1 rows/);
   assert.match(valid.stdout, /Facts review rows: 0/);
