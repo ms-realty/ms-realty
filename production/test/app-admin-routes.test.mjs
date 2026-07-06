@@ -43,6 +43,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
     },
     async () => {
       const publicLeadRoute = await import("../../app/api/leads/route.js");
+      const replyRoute = await import("../../app/api/admin/replies/route.js");
+      const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
       const listingEditorRoute = await import("../../app/admin/listings/edit/route.js");
 
@@ -77,6 +79,24 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-lead-row="true"/);
       assert.match(inboxHtml, /he -> en/);
 
+      const reply = await replyRoute.POST(
+        new Request("https://example.test/api/admin/replies", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            leadId: "next-admin-lead-test",
+            language: "he",
+            approved: "true",
+            reviewer: "broker_ru",
+            reviewedReply: "Reviewed reply for the buyer.",
+          }),
+        }),
+      );
+      const replyBody = await reply.json();
+      assert.equal(reply.status, 201);
+      assert.equal(replyBody.status, "queued_for_manual_send");
+      assert.equal(replyBody.broker_approved, true);
+
       const editor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
@@ -85,6 +105,26 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /<html lang="bg" dir="ltr">/);
       assert.match(editorHtml, /data-kind="admin-listing-editor"/);
       assert.match(editorHtml, /data-listing-id="MS-CRAWL-0001"/);
+
+      const edit = await listingEditRoute.POST(
+        new Request("https://example.test/api/admin/listings/edit", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            listingId: "MS-CRAWL-0001",
+            editor: "content_editor",
+            title: "Updated title for Next admin",
+          }),
+        }),
+      );
+      const editBody = await edit.json();
+      assert.equal(edit.status, 201);
+      assert.equal(editBody.edit.patch.title, "Updated title for Next admin");
+
+      const updatedEditor = await listingEditorRoute.GET(
+        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
+      );
+      assert.match(await updatedEditor.text(), /value="Updated title for Next admin"/);
     },
   );
 });
