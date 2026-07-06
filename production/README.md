@@ -139,7 +139,8 @@ npm run seo:preflight
 npm run launch:preflight
 ```
 
-These exit non-zero until redirect reviews and external SEO exports are complete.
+`redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight` and
+`launch:preflight` still exit non-zero until real external SEO exports are complete.
 
 Start the local production adapter:
 

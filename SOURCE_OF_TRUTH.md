@@ -453,7 +453,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin HTML workbenches + broker verification report built** (editor, migration review, lead inbox); Payload app pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, and Typesense/Meilisearch sync/query worker paths built; live engine provisioning pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, and OpenAI-compatible draft worker path built; self-hosted Hermes/vLLM endpoint provisioning pending |
-| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; **blocked on redirect reviews + external SEO exports** |
+| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; redirect reviews are locally complete; **blocked on external SEO exports** |
 
 **What is proven in code right now** (see `production/README.md` and git history):
 crawl pack for both domains (457 URLs), SQLite migration DB + review dashboards, Typesense/Meilisearch
@@ -469,8 +469,9 @@ CMS slug-history workflow that creates path-only automatic 301s to canonical lis
 listing-publication workflow that proves sitemap paths and internal-link suggestions,
 mobile/elderly QA report, and a live Node server (`npm start`) exposing the same contracts.
 
-**Blocked until launch:** human redirect reviews (`migration/reviews/redirect-approvals.csv`) and real
-external SEO exports (Search Console / Yandex / backlinks) under `migration/external/seo/`.
+**Blocked until launch:** real external SEO exports (Search Console / Yandex / backlinks) under
+`migration/external/seo/`. Redirect reviews are locally complete and covered by the reviewed deployable
+301 export.
 
 ---
 
