@@ -85,6 +85,29 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.doesNotMatch(listingPrint.html, /data-react-public-ui=/);
   assert.match(listingPrint.html, /data-kind="listing-print"/);
 
+  const location = renderAppRoute({ pathname: "/he/locations/sandanski", url: "https://example.test/he/locations/sandanski" });
+  assert.equal(location.status, 200);
+  assert.equal(location.rendered.kind, "location");
+  assert.match(location.html, /data-react-public-ui="location"/);
+
+  const seller = renderAppRoute({ pathname: "/he/sell", url: "https://example.test/he/sell" });
+  assert.equal(seller.status, 200);
+  assert.equal(seller.rendered.kind, "seller");
+  assert.match(seller.html, /data-react-public-ui="seller"/);
+  assert.match(seller.html, /data-no-public-avm="true"/);
+
+  const contact = renderAppRoute({ pathname: "/he/contact", url: "https://example.test/he/contact" });
+  assert.equal(contact.status, 200);
+  assert.equal(contact.rendered.kind, "contact");
+  assert.match(contact.html, /data-react-public-ui="contact"/);
+  assert.match(contact.html, /website_contact_callback/);
+
+  const fallback = renderAppRoute({ pathname: "/fr/", url: "https://example.test/fr/" });
+  assert.equal(fallback.status, 200);
+  assert.equal(fallback.rendered.kind, "language_fallback");
+  assert.match(fallback.html, /data-react-public-ui="language-fallback"/);
+  assert.match(fallback.html, /noindex,follow/);
+
   const guide = renderAppRoute({ pathname: "/en/guides/foreign-buyers", url: "https://example.test/en/guides/foreign-buyers" });
   assert.equal(guide.status, 200);
   assert.equal(guide.rendered.kind, "guide");

@@ -83,7 +83,7 @@ What it proves now:
 - Minimal App Router route-handler bridge under `app/` for homepage, search, and catch-all content routes, reusing the server-rendered HTML contracts.
 - Next App Router `sitemap.xml` and `robots.txt` handlers backed by the same approved localized sitemap contract.
 - Next App Router public API handlers for health, readiness, search, and lead intake backed by the same HTTP contracts.
-- Next App Router public home, search, and listing routes can render through the React body bridge while unsupported page kinds fall back to the stdlib HTML renderer.
+- Next App Router public home, search, listing, location, seller, contact, and language-fallback routes can render through the React body bridge while unsupported page kinds fall back to the stdlib HTML renderer.
 - Next App Router public API handlers for analytics events, language requests, and saved searches.
 - Next App Router admin read pages for CRM lead inbox and CMS listing editor behind the same bearer auth gate.
 - Next App Router admin JSON lead inbox endpoint for broker CRM consumers.
@@ -254,5 +254,5 @@ Generated production data:
 - `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`
 
-The next production slice can continue React public UI coverage beyond home/search/listing
-or add the Payload runtime app without re-deciding URL, locale, AI, or lead-language policy.
+The next production slice can continue React visual polish or add the Payload runtime app
+without re-deciding URL, locale, AI, or lead-language policy.

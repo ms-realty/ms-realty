@@ -121,8 +121,9 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 The current app is a **hybrid production foundation**: `production/` keeps the dependency-light
 executable contracts for URL/locale/AI/lead/migration policy, while `app/` exposes those contracts
 through Next.js App Router route handlers that pass `next build`. It is still **not** the final app:
-the first React public UI bridge now renders home/search/listing App Router bodies, while full React
-visual polish and the Payload runtime/admin app remain to land on top of these contracts.
+the first React public UI bridge now renders core App Router bodies for home, search, listings,
+locations, seller valuation, contact, and unavailable-language fallback, while full React visual
+polish and the Payload runtime/admin app remain to land on top of these contracts.
 Payload-compatible collection configs are generated from the CMS manifest and exposed at
 `GET /api/admin/payload-collections`.
 
@@ -452,7 +453,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 |---|---|---|
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
-| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + React App Router body bridge for home/search/listing built**; full React public UI polish pending |
+| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + React App Router body bridge for core public routes built**; full React public UI polish pending |
 | **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin HTML workbenches + broker verification report + generated Payload-compatible collection configs built** (editor, migration review, lead inbox); Payload runtime app pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, and Typesense/Meilisearch sync/query worker paths built; live engine provisioning pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, and OpenAI-compatible draft worker path built; self-hosted Hermes/vLLM endpoint provisioning pending |

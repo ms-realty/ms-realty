@@ -16,6 +16,7 @@ function attributeName(name) {
   if (name === "htmlFor") return "for";
   if (name === "defaultValue") return "value";
   if (name === "autoComplete") return "autocomplete";
+  if (name === "inputMode") return "inputmode";
   return name;
 }
 
@@ -160,6 +161,22 @@ function SearchBody({ page }) {
   );
 }
 
+function LocationBody({ page }) {
+  return h(
+    "main",
+    {
+      "data-kind": "location",
+      "data-react-public-ui": "location",
+      "data-location": page.body.location,
+      "data-total-matches": page.body.listing_count,
+      "data-list-first-mobile": "true",
+    },
+    h("h1", null, page.body.h1),
+    h("p", null, `${page.body.listing_count} reviewed listings`),
+    h("section", { "aria-label": "Location listings" }, ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card }))),
+  );
+}
+
 function ListingBody({ page }) {
   const facts = page.body.facts || {};
   const tour = page.body.media.tour || {};
@@ -228,9 +245,120 @@ function ListingBody({ page }) {
   );
 }
 
+function SellerBody({ page }) {
+  const valuation = page.body.valuation;
+  return h(
+    "main",
+    {
+      "data-kind": "seller",
+      "data-react-public-ui": "seller",
+      "data-phone-first": "true",
+      "data-no-public-avm": "true",
+      "data-broker-review-required": "true",
+      "data-min-touch-target": "44",
+    },
+    h(
+      "section",
+      { "aria-label": "Seller valuation", "data-seller-valuation-flow": "broker_callback" },
+      h("h1", null, page.body.h1),
+      h("p", null, page.body.intro),
+      h(
+        "ol",
+        { "data-seller-steps": "true" },
+        h("li", null, "Property details"),
+        h("li", null, "Broker review"),
+        h("li", null, "Callback"),
+      ),
+    ),
+    h(
+      "form",
+      { method: valuation.method || "POST", action: valuation.endpoint, "data-lead-type": "seller" },
+      h("input", { type: "hidden", name: "source", defaultValue: valuation.payload.source }),
+      h("input", { type: "hidden", name: "leadType", defaultValue: valuation.payload.leadType }),
+      h("input", { type: "hidden", name: "language", defaultValue: valuation.payload.language }),
+      h("label", null, "Name ", h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+      h("label", null, "Phone ", h("input", { name: "contact.phone", required: true, autoComplete: "tel", inputMode: "tel" })),
+      h(
+        "label",
+        null,
+        "Preferred contact ",
+        h(
+          "select",
+          { name: "contact_preference" },
+          h("option", { value: "phone" }, "Phone"),
+          h("option", { value: "whatsapp" }, "WhatsApp"),
+          h("option", { value: "viber" }, "Viber"),
+        ),
+      ),
+      h("label", null, "Location ", h("input", { name: "property.location", autoComplete: "address-level2" })),
+      h("label", null, "Property type ", h("input", { name: "property.type" })),
+      h("label", null, "Property details ", h("textarea", { name: "message", required: true })),
+      h("button", { type: "submit" }, valuation.label),
+    ),
+  );
+}
+
+function ContactBody({ page }) {
+  const callback = page.body.callback;
+  return h(
+    "main",
+    { "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44" },
+    h("h1", null, page.body.h1),
+    h("p", null, page.body.intro),
+    h(
+      "form",
+      {
+        method: callback.method || "POST",
+        action: callback.endpoint,
+        "data-lead-type": "general",
+        "data-source": callback.payload.source,
+      },
+      h("input", { type: "hidden", name: "source", defaultValue: callback.payload.source }),
+      h("input", { type: "hidden", name: "leadType", defaultValue: callback.payload.leadType }),
+      h("input", { type: "hidden", name: "language", defaultValue: callback.payload.language }),
+      h("input", { type: "hidden", name: "contact_preference", defaultValue: callback.payload.contact_preference }),
+      h("label", null, "Name ", h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+      h("label", null, "Message ", h("textarea", { name: "message", required: true })),
+      h("button", { type: "submit" }, callback.label),
+    ),
+    h(
+      "nav",
+      { "aria-label": "Contact actions" },
+      h("a", { href: page.body.search.path, "data-action": "search" }, "Search"),
+      h("a", { href: page.body.seller.path, "data-action": "seller" }, "Seller valuation"),
+    ),
+  );
+}
+
+function LanguageFallbackBody({ page }) {
+  return h(
+    "main",
+    {
+      "data-kind": "language-fallback",
+      "data-react-public-ui": "language-fallback",
+      "data-hermes-chat-available": page.hermes_chat_available ? "true" : "false",
+      "data-public-translation-available": page.public_translation_available ? "true" : "false",
+    },
+    h("h1", null, page.metadata.title),
+    h("p", null, page.metadata.description),
+    h(
+      "form",
+      { method: "POST", action: "/api/language-requests", "data-request-language": "true" },
+      h("input", { type: "hidden", name: "requested_locale", defaultValue: page.requested_locale }),
+      h("input", { type: "hidden", name: "fallback_locale", defaultValue: page.locale }),
+      h("button", { type: "submit" }, "Request this language"),
+    ),
+    h("a", { href: "/api/hermes/chat", "data-action": "ask-hermes" }, "Ask in this language"),
+  );
+}
+
 export function renderReactPublicBody(page) {
   if (page.kind === "home") return renderStaticElement(h(HomeBody, { page }));
   if (page.kind === "search") return renderStaticElement(h(SearchBody, { page }));
   if (page.kind === "listing") return renderStaticElement(h(ListingBody, { page }));
+  if (page.kind === "location") return renderStaticElement(h(LocationBody, { page }));
+  if (page.kind === "seller") return renderStaticElement(h(SellerBody, { page }));
+  if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
+  if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
   return "";
 }
