@@ -52,6 +52,36 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
   assert.equal(summary.records.listing_tours, 165);
   assert.equal(summary.public_tours, 0);
   assert.equal(manifest.collections.every((collection) => collection.publish_requires_human_review), true);
+  assert.equal(
+    manifest.collections.every((collection) =>
+      collection.fields.every((field) => typeof field.name === "string" && typeof field.type === "string" && typeof field.required === "boolean")
+    ),
+    true
+  );
+
+  const listingsContract = manifest.collections.find((collection) => collection.slug === "listings");
+  const listingFields = new Map(listingsContract.fields.map((field) => [field.name, field]));
+  assert.deepEqual(
+    {
+      type: listingFields.get("source_locale").type,
+      relationTo: listingFields.get("source_locale").relationTo,
+      required: listingFields.get("source_locale").required,
+    },
+    { type: "relationship", relationTo: "locales", required: true }
+  );
+  assert.equal(listingFields.get("translations").relationTo, "listing_translations");
+  assert.equal(listingFields.get("media").relationTo, "media_assets");
+  assert.equal(listingFields.get("tour").relationTo, "listing_tours");
+
+  const mediaContract = manifest.collections.find((collection) => collection.slug === "media_assets");
+  const mediaFields = new Map(mediaContract.fields.map((field) => [field.name, field]));
+  assert.equal(mediaFields.get("alt").localized, true);
+  assert.equal(mediaFields.get("review_status").options.includes("review_required"), true);
+
+  const toursContract = manifest.collections.find((collection) => collection.slug === "listing_tours");
+  const tourFields = new Map(toursContract.fields.map((field) => [field.name, field]));
+  assert.deepEqual(tourFields.get("panorama_url").required_when, ["approved", "published"]);
+  assert.equal(tourFields.get("accessibility_caption").localized, true);
 });
 
 test("generated CMS seed file is valid when present", () => {

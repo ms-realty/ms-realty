@@ -25,15 +25,128 @@
       ],
       "publish_requires_human_review": true,
       "fields": [
-        "id",
-        "cms_status",
-        "source_locale",
-        "source_domain",
-        "source_url",
-        "facts",
-        "seo",
-        "routing",
-        "migration"
+        {
+          "name": "id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "cms_status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "source_imported_review_required",
+            "draft",
+            "review",
+            "published",
+            "archived"
+          ]
+        },
+        {
+          "name": "source_locale",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locales"
+        },
+        {
+          "name": "source_domain",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "source_url",
+          "type": "url",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "facts",
+          "type": "group",
+          "required": true,
+          "localized": false,
+          "fields": [
+            "title",
+            "h1",
+            "description",
+            "property_type",
+            "location",
+            "price",
+            "area"
+          ]
+        },
+        {
+          "name": "seo",
+          "type": "group",
+          "required": true,
+          "localized": false,
+          "fields": [
+            "title",
+            "description",
+            "canonical",
+            "schema_present"
+          ]
+        },
+        {
+          "name": "translations",
+          "type": "relationship",
+          "required": false,
+          "localized": false,
+          "hasMany": true,
+          "relationTo": "listing_translations",
+          "admin": {
+            "readOnly": true
+          }
+        },
+        {
+          "name": "media",
+          "type": "relationship",
+          "required": false,
+          "localized": false,
+          "hasMany": true,
+          "relationTo": "media_assets",
+          "admin": {
+            "readOnly": true
+          }
+        },
+        {
+          "name": "tour",
+          "type": "relationship",
+          "required": false,
+          "localized": false,
+          "relationTo": "listing_tours",
+          "admin": {
+            "readOnly": true
+          }
+        },
+        {
+          "name": "routing",
+          "type": "group",
+          "required": false,
+          "localized": false,
+          "fields": [
+            "target_path",
+            "target_locale",
+            "planned_status",
+            "deployable"
+          ]
+        },
+        {
+          "name": "migration",
+          "type": "group",
+          "required": false,
+          "localized": false,
+          "fields": [
+            "record_id",
+            "review_state",
+            "metadata_gaps"
+          ]
+        }
       ]
     },
     {
@@ -50,13 +163,81 @@
       ],
       "publish_requires_human_review": true,
       "fields": [
-        "locale",
-        "source_locale",
-        "status",
-        "source_hash",
-        "translated_hash",
-        "reviewer",
-        "approved_at"
+        {
+          "name": "locale",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locales"
+        },
+        {
+          "name": "source_locale",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locales"
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "missing",
+            "hermes_drafted",
+            "human_edited",
+            "approved",
+            "published",
+            "stale"
+          ]
+        },
+        {
+          "name": "source_hash",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "translated_hash",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "reviewer",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "approved_at",
+          "type": "date",
+          "required": false,
+          "localized": false,
+          "required_when": [
+            "approved",
+            "published"
+          ]
+        },
+        {
+          "name": "direction",
+          "type": "select",
+          "required": false,
+          "localized": false,
+          "options": [
+            "ltr",
+            "rtl"
+          ]
+        },
+        {
+          "name": "public_indexable",
+          "type": "checkbox",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "readOnly": true
+          }
+        }
       ]
     },
     {
@@ -70,14 +251,67 @@
       ],
       "publish_requires_human_review": true,
       "fields": [
-        "url",
-        "asset_url",
-        "alt",
-        "width",
-        "height",
-        "kind",
-        "is_public",
-        "review_status"
+        {
+          "name": "url",
+          "type": "url",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "asset_url",
+          "type": "url",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "alt",
+          "type": "text",
+          "required": false,
+          "localized": true
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "kind",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "photo",
+            "floor_plan",
+            "site_chrome",
+            "document",
+            "unknown"
+          ]
+        },
+        {
+          "name": "is_public",
+          "type": "checkbox",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "review_status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "approved_imported_photo",
+            "reviewed_private",
+            "review_required"
+          ]
+        }
       ]
     },
     {
@@ -92,13 +326,81 @@
       ],
       "publish_requires_human_review": true,
       "fields": [
-        "provider",
-        "listing_id",
-        "panorama_url",
-        "thumbnail_url",
-        "hotspots",
-        "is_public",
-        "accessibility_caption"
+        {
+          "name": "provider",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "photo-sphere-viewer"
+          ]
+        },
+        {
+          "name": "listing_id",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "listings"
+        },
+        {
+          "name": "panorama_url",
+          "type": "url",
+          "required": false,
+          "localized": false,
+          "required_when": [
+            "approved",
+            "published"
+          ]
+        },
+        {
+          "name": "thumbnail_url",
+          "type": "url",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "hotspots",
+          "type": "array",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "is_public",
+          "type": "checkbox",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "accessibility_caption",
+          "type": "textarea",
+          "required": false,
+          "localized": true,
+          "required_when": [
+            "approved",
+            "published"
+          ]
+        },
+        {
+          "name": "review_status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "needs_panorama_upload",
+            "review_required",
+            "approved",
+            "published"
+          ]
+        },
+        {
+          "name": "fallback_gallery",
+          "type": "array",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "readOnly": true
+          }
+        }
       ]
     }
   ]

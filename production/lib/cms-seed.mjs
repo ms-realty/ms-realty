@@ -165,6 +165,48 @@ export function writeCmsSeed(seed, outPath = DEFAULT_CMS_SEED_OUTPUT) {
   return { outPath, summary };
 }
 
+function collectionField(name, type, options = {}) {
+  return {
+    name,
+    type,
+    required: false,
+    localized: false,
+    ...options,
+  };
+}
+
+const REQUIRED_COLLECTION_FIELDS = {
+  listings: {
+    id: "text",
+    cms_status: "select",
+    source_locale: "relationship",
+    source_domain: "text",
+    source_url: "url",
+    facts: "group",
+    seo: "group",
+  },
+  listing_translations: {
+    locale: "relationship",
+    source_locale: "relationship",
+    status: "select",
+    source_hash: "text",
+    translated_hash: "text",
+  },
+  media_assets: {
+    url: "url",
+    kind: "select",
+    is_public: "checkbox",
+    review_status: "select",
+  },
+  listing_tours: {
+    provider: "select",
+    listing_id: "relationship",
+    hotspots: "array",
+    is_public: "checkbox",
+    review_status: "select",
+  },
+};
+
 export function buildCmsCollections(seed) {
   const listings = seed.records.filter((record) => record.collection === "listings");
   const translationRecords = listings.flatMap((record) => record.translations || []);
@@ -191,7 +233,40 @@ export function buildCmsCollections(seed) {
         source: "production/data/cms-seed.json records[collection=listings]",
         workflow: ["source_imported_review_required", "draft", "review", "published", "archived"],
         publish_requires_human_review: true,
-        fields: ["id", "cms_status", "source_locale", "source_domain", "source_url", "facts", "seo", "routing", "migration"],
+        fields: [
+          collectionField("id", "text", { required: true, unique: true }),
+          collectionField("cms_status", "select", {
+            required: true,
+            options: ["source_imported_review_required", "draft", "review", "published", "archived"],
+          }),
+          collectionField("source_locale", "relationship", { required: true, relationTo: "locales" }),
+          collectionField("source_domain", "text", { required: true }),
+          collectionField("source_url", "url", { required: true, unique: true }),
+          collectionField("facts", "group", {
+            required: true,
+            fields: ["title", "h1", "description", "property_type", "location", "price", "area"],
+          }),
+          collectionField("seo", "group", {
+            required: true,
+            fields: ["title", "description", "canonical", "schema_present"],
+          }),
+          collectionField("translations", "relationship", {
+            hasMany: true,
+            relationTo: "listing_translations",
+            admin: { readOnly: true },
+          }),
+          collectionField("media", "relationship", {
+            hasMany: true,
+            relationTo: "media_assets",
+            admin: { readOnly: true },
+          }),
+          collectionField("tour", "relationship", {
+            relationTo: "listing_tours",
+            admin: { readOnly: true },
+          }),
+          collectionField("routing", "group", { fields: ["target_path", "target_locale", "planned_status", "deployable"] }),
+          collectionField("migration", "group", { fields: ["record_id", "review_state", "metadata_gaps"] }),
+        ],
       },
       {
         slug: "listing_translations",
@@ -199,7 +274,20 @@ export function buildCmsCollections(seed) {
         source: "listings.translations",
         workflow: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
         publish_requires_human_review: true,
-        fields: ["locale", "source_locale", "status", "source_hash", "translated_hash", "reviewer", "approved_at"],
+        fields: [
+          collectionField("locale", "relationship", { required: true, relationTo: "locales" }),
+          collectionField("source_locale", "relationship", { required: true, relationTo: "locales" }),
+          collectionField("status", "select", {
+            required: true,
+            options: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
+          }),
+          collectionField("source_hash", "text", { required: true }),
+          collectionField("translated_hash", "text", { required: true }),
+          collectionField("reviewer", "text"),
+          collectionField("approved_at", "date", { required_when: ["approved", "published"] }),
+          collectionField("direction", "select", { options: ["ltr", "rtl"] }),
+          collectionField("public_indexable", "checkbox", { admin: { readOnly: true } }),
+        ],
       },
       {
         slug: "media_assets",
@@ -207,7 +295,22 @@ export function buildCmsCollections(seed) {
         source: "listings.media",
         workflow: ["approved_imported_photo", "reviewed_private", "review_required"],
         publish_requires_human_review: true,
-        fields: ["url", "asset_url", "alt", "width", "height", "kind", "is_public", "review_status"],
+        fields: [
+          collectionField("url", "url", { required: true, unique: true }),
+          collectionField("asset_url", "url"),
+          collectionField("alt", "text", { localized: true }),
+          collectionField("width", "number"),
+          collectionField("height", "number"),
+          collectionField("kind", "select", {
+            required: true,
+            options: ["photo", "floor_plan", "site_chrome", "document", "unknown"],
+          }),
+          collectionField("is_public", "checkbox", { required: true }),
+          collectionField("review_status", "select", {
+            required: true,
+            options: ["approved_imported_photo", "reviewed_private", "review_required"],
+          }),
+        ],
       },
       {
         slug: "listing_tours",
@@ -215,7 +318,26 @@ export function buildCmsCollections(seed) {
         source: "listings.tour",
         workflow: ["needs_panorama_upload", "review_required", "approved", "published"],
         publish_requires_human_review: true,
-        fields: ["provider", "listing_id", "panorama_url", "thumbnail_url", "hotspots", "is_public", "accessibility_caption"],
+        fields: [
+          collectionField("provider", "select", {
+            required: true,
+            options: ["photo-sphere-viewer"],
+          }),
+          collectionField("listing_id", "relationship", { required: true, relationTo: "listings" }),
+          collectionField("panorama_url", "url", { required_when: ["approved", "published"] }),
+          collectionField("thumbnail_url", "url"),
+          collectionField("hotspots", "array", { required: true }),
+          collectionField("is_public", "checkbox", { required: true }),
+          collectionField("accessibility_caption", "textarea", {
+            required_when: ["approved", "published"],
+            localized: true,
+          }),
+          collectionField("review_status", "select", {
+            required: true,
+            options: ["needs_panorama_upload", "review_required", "approved", "published"],
+          }),
+          collectionField("fallback_gallery", "array", { admin: { readOnly: true } }),
+        ],
       },
     ],
   };
@@ -234,6 +356,25 @@ export function assertCmsCollections(manifest) {
   if (manifest.summary.public_tours !== 0) throw new Error("CMS collection manifest must not publish unreviewed tours");
   if (manifest.collections.some((collection) => collection.publish_requires_human_review !== true)) {
     throw new Error("CMS collection publishing must stay human-review gated");
+  }
+  for (const collection of manifest.collections) {
+    const requiredFields = REQUIRED_COLLECTION_FIELDS[collection.slug];
+    if (!requiredFields) throw new Error(`Unexpected CMS collection contract: ${collection.slug}`);
+    if (!Array.isArray(collection.fields) || collection.fields.length === 0) {
+      throw new Error(`CMS collection has no typed fields: ${collection.slug}`);
+    }
+    const fieldMap = new Map(collection.fields.map((field) => [field.name, field]));
+    for (const [name, type] of Object.entries(requiredFields)) {
+      const field = fieldMap.get(name);
+      if (!field) throw new Error(`Missing required CMS field ${collection.slug}.${name}`);
+      if (field.type !== type) throw new Error(`CMS field ${collection.slug}.${name} expected type ${type}, got ${field.type}`);
+      if (field.required !== true) throw new Error(`CMS field ${collection.slug}.${name} must be required`);
+    }
+    for (const field of collection.fields) {
+      if (!field.name || !field.type || typeof field.required !== "boolean") {
+        throw new Error(`CMS collection field is not implementation-ready: ${collection.slug}`);
+      }
+    }
   }
   return manifest.summary;
 }
