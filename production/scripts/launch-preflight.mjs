@@ -1,4 +1,5 @@
 import { assertLaunchReadinessReport, buildLaunchReadinessReport } from "../lib/launch-readiness.mjs";
+import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 
 function blockerDetails(report) {
   return report.gates
@@ -17,9 +18,7 @@ function blockerDetails(report) {
     });
 }
 
-const report = buildLaunchReadinessReport({
-  listingQualityReviewPath: process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH || undefined,
-});
+const report = buildLaunchReadinessReport(launchReadinessInputsFromEnv());
 assertLaunchReadinessReport(report);
 
 if (!report.launch_ready) {

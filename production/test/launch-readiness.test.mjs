@@ -17,6 +17,17 @@ function readJson(path) {
   return JSON.parse(fs.readFileSync(fromRoot(...path), "utf8"));
 }
 
+function writeCompleteSeoInputFixture(dir) {
+  const records = readJson(["production", "data", "migration-records.json"]).records;
+  const com = records.find((row) => row.source_domain === "makler-realty.com");
+  const ru = records.find((row) => row.source_domain === "makler-realty.ru");
+  assert.ok(com?.old_url);
+  assert.ok(ru?.old_url);
+  fs.writeFileSync(`${dir}/search-console.csv`, `url,clicks,impressions,position\n${com.old_url},3,30,7\n${ru.old_url},2,20,8\n`);
+  fs.writeFileSync(`${dir}/yandex-webmaster.csv`, `url,indexed,issue\n${com.old_url},yes,\n${ru.old_url},yes,\n`);
+  fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com.old_url},https://example.com/a\n${ru.old_url},https://example.com/b\n`);
+}
+
 const readyLiveServices = [
   { source: "typesense_meilisearch_sync", status: "pass", path: "production/data/search-engine-sync-report.json", summary: {} },
   { source: "typesense_meilisearch_query", status: "pass", path: "production/data/search-engine-query-report.json", summary: {} },
@@ -229,6 +240,26 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.notEqual(withReviewPath.status, 0);
   assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
+
+  const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-evidence-`);
+  writeCompleteSeoInputFixture(seoDir);
+  const liveDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-live-reports-`);
+  const livePaths = writeLiveReportFixtures(liveDir);
+  const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
+      MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
+    },
+  });
+
+  assert.equal(ready.status, 0, ready.stderr);
+  assert.match(ready.stdout, /LAUNCH READY/);
 });
 
 test("live service report preflight fails missing reports and passes valid reports", () => {

@@ -3,11 +3,12 @@ import {
   DEFAULT_LAUNCH_READINESS_OUTPUT,
   writeLaunchReadinessReport,
 } from "../lib/launch-readiness.mjs";
+import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 
 writeLaunchReadinessReport(
   buildLaunchReadinessReport({
+    ...launchReadinessInputsFromEnv(),
     generatedAt: "2026-07-05T00:00:00Z",
-    listingQualityReviewPath: process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH || undefined,
   }),
   DEFAULT_LAUNCH_READINESS_OUTPUT,
 );
