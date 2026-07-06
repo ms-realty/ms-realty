@@ -1,11 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseCsv } from "./csv.mjs";
-import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
-import { fromRoot } from "./paths.mjs";
 
-export const DEFAULT_SEO_EVIDENCE_INPUT_DIR = fromRoot("migration", "external", "seo");
-export const DEFAULT_SEO_EVIDENCE_OUTPUT = fromRoot("production", "data", "seo-evidence.json");
+const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
+
+export const DEFAULT_SEO_EVIDENCE_INPUT_DIR = path.resolve(MODULE_DIR, "../../migration/external/seo");
+export const DEFAULT_SEO_EVIDENCE_OUTPUT = path.resolve(MODULE_DIR, "../data/seo-evidence.json");
+const DEFAULT_MIGRATION_RECORDS_PATH = path.resolve(MODULE_DIR, "../data/migration-records.json");
+const DEFAULT_LEGACY_ROUTE_MAP_PATH = path.resolve(MODULE_DIR, "../data/legacy-route-map.json");
+const DEFAULT_EVENT_LEDGER_PATH = path.resolve(MODULE_DIR, "../data/events.jsonl");
 
 export const SEO_EXPORTS = {
   search_console: "search-console.csv",
@@ -94,7 +98,7 @@ function externalRowDedupeKey(source, target, row) {
 }
 
 function readExternalSource(source, inputDir) {
-  const inputPath = path.join(inputDir, SEO_EXPORTS[source]);
+  const inputPath = path.join(/*turbopackIgnore: true*/ inputDir, SEO_EXPORTS[source]);
   if (!fs.existsSync(inputPath)) {
     return { source, input_path: inputPath, status: "missing_export", rows: [], row_count: 0 };
   }
@@ -112,12 +116,22 @@ function loadJsonRows(filePath, key) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"))[key] || [];
 }
 
-export function loadMigrationRecords(filePath = fromRoot("production", "data", "migration-records.json")) {
-  return loadJsonRows(filePath, "records");
+function readPrivacyEventLedger(filePath) {
+  if (!fs.existsSync(filePath)) return [];
+  return fs
+    .readFileSync(filePath, "utf8")
+    .trim()
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
 }
 
-export function loadLegacyRouteMap(filePath = fromRoot("production", "data", "legacy-route-map.json")) {
-  return loadJsonRows(filePath, "routes");
+export function loadMigrationRecords() {
+  return loadJsonRows(DEFAULT_MIGRATION_RECORDS_PATH, "records");
+}
+
+export function loadLegacyRouteMap() {
+  return loadJsonRows(DEFAULT_LEGACY_ROUTE_MAP_PATH, "routes");
 }
 
 function baseUrlEvidence(record) {
@@ -256,7 +270,7 @@ export function buildSeoEvidence({
   records = loadMigrationRecords(),
   routeMap = loadLegacyRouteMap(),
   inputDir = DEFAULT_SEO_EVIDENCE_INPUT_DIR,
-  events = readEventLedger(DEFAULT_EVENT_LEDGER_PATH),
+  events = readPrivacyEventLedger(DEFAULT_EVENT_LEDGER_PATH),
   generatedAt = new Date().toISOString(),
 } = {}) {
   const { evidence, byKey, byListingReference } = indexEvidence(records, routeMap);
@@ -285,7 +299,7 @@ export function writeExternalSeoExport(source, csvText, { inputDir = DEFAULT_SEO
   const filename = SEO_EXPORTS[source];
   if (!filename) throw new Error(`Unknown SEO export source: ${source}`);
   fs.mkdirSync(inputDir, { recursive: true });
-  const outPath = path.join(inputDir, filename);
+  const outPath = path.join(/*turbopackIgnore: true*/ inputDir, filename);
   fs.writeFileSync(outPath, csvText || "");
   return { source, outPath, row_count: parseCsv(csvText || "").length };
 }
@@ -293,7 +307,7 @@ export function writeExternalSeoExport(source, csvText, { inputDir = DEFAULT_SEO
 export function readSeoExportTemplate(source, { inputDir = DEFAULT_SEO_EVIDENCE_INPUT_DIR } = {}) {
   const filename = SEO_EXPORTS[source];
   if (!filename) throw new Error(`Unknown SEO export source: ${source}`);
-  const templatePath = path.join(inputDir, `${filename}.example`);
+  const templatePath = path.join(/*turbopackIgnore: true*/ inputDir, `${filename}.example`);
   if (!fs.existsSync(templatePath)) throw new Error(`Missing SEO export template for ${source}`);
   return { source, filename: `${filename}.example`, csv: fs.readFileSync(templatePath, "utf8") };
 }

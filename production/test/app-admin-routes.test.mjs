@@ -15,6 +15,10 @@ function tempJson(prefix, contents) {
   return file;
 }
 
+function tempDir(prefix) {
+  return fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`);
+}
+
 async function withEnv(env, fn) {
   const previous = {};
   for (const key of Object.keys(env)) {
@@ -36,6 +40,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
     "app-admin-deployable-redirects",
     `${JSON.stringify({ summary: {}, redirects: [] })}\n`,
   );
+  const seoEvidenceInputDir = tempDir("app-admin-seo-evidence");
+  for (const filename of ["search-console.csv.example", "yandex-webmaster.csv.example", "backlinks.csv.example"]) {
+    fs.copyFileSync(`migration/external/seo/${filename}`, `${seoEvidenceInputDir}/${filename}`);
+  }
+  const seoEvidenceOutputPath = `${seoEvidenceInputDir}/seo-evidence.json`;
+  const launchReadinessOutputPath = tempJson("app-admin-launch-readiness", "{}\n");
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
@@ -44,6 +54,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
       MS_REALTY_EVENT_LEDGER_PATH: tempJsonl("app-admin-events"),
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
+      MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: tempJsonl("app-admin-listing-edits"),
@@ -51,6 +62,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
       MS_REALTY_SELLER_PIPELINE_PATH: tempJsonl("app-admin-seller-pipeline"),
+      MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoEvidenceInputDir,
+      MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoEvidenceOutputPath,
       MS_REALTY_SLUG_HISTORY_PATH: tempJsonl("app-admin-slug-history"),
       MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: tempJsonl("app-admin-tour-approvals"),
       MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-translations"),
@@ -62,6 +75,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
       const deployableRedirectExportRoute = await import("../../app/api/admin/deployable-redirects/export/route.js");
       const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
+      const launchReadinessExportRoute = await import("../../app/api/admin/launch-readiness/export/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
       const listingQualityWorkbookRoute = await import("../../app/api/admin/listing-quality-workbook/route.js");
@@ -71,6 +85,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const redirectApprovalsImportRoute = await import("../../app/api/admin/redirect-approvals/import/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
       const seoEvidenceRoute = await import("../../app/api/admin/seo-evidence/route.js");
+      const seoEvidenceImportRoute = await import("../../app/api/admin/seo-evidence/import/route.js");
+      const seoEvidenceTemplateRoute = await import("../../app/api/admin/seo-evidence/template/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
       const listingSlugRoute = await import("../../app/api/admin/listings/slug/route.js");
       const translationDraftRoute = await import("../../app/api/admin/translations/draft/route.js");
@@ -159,6 +175,40 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(seoEvidence.status, 200);
       assert.ok(seoEvidenceBody.missingRequiredSources.includes("search_console"));
       assert.equal(seoEvidenceBody.sources.privacy_events.status, "imported");
+
+      const seoTemplate = await seoEvidenceTemplateRoute.GET(
+        new Request("https://example.test/api/admin/seo-evidence/template?source=search_console", { headers: auth }),
+      );
+      const seoTemplateBody = await seoTemplate.text();
+      assert.equal(seoTemplate.status, 200);
+      assert.equal(seoTemplate.headers.get("content-type"), "text/csv; charset=utf-8");
+      assert.match(seoTemplateBody, /url,clicks,impressions,position/);
+
+      const seoImport = await seoEvidenceImportRoute.POST(
+        new Request("https://example.test/api/admin/seo-evidence/import?source=search_console", {
+          method: "POST",
+          headers: { ...auth, "content-type": "text/csv" },
+          body: [
+            "url,clicks,impressions,position",
+            "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/,10,100,3",
+            "https://makler-realty.ru/listing/%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82%d1%8b-%d0%b2-%d0%bf%d0%b0%d1%80%d0%ba-%d0%be%d1%82%d0%b5%d0%bb%d0%b5-%d0%bf%d0%b8%d1%80%d0%b8%d0%bd-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd/,4,40,6",
+          ].join("\n"),
+        }),
+      );
+      const seoImportBody = await seoImport.json();
+      assert.equal(seoImport.status, 201);
+      assert.equal(seoImportBody.imported.row_count, 2);
+      assert.equal(seoImportBody.sources.search_console.status, "imported");
+      assert.ok(!seoImportBody.missingRequiredSources.includes("search_console"));
+      assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
+
+      const readinessExport = await launchReadinessExportRoute.POST(
+        new Request("https://example.test/api/admin/launch-readiness/export", { method: "POST", headers: auth }),
+      );
+      const readinessExportBody = await readinessExport.json();
+      assert.equal(readinessExport.status, 201);
+      assert.equal(readinessExportBody.outPath, launchReadinessOutputPath);
+      assert.equal(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).status, "blocked");
 
       const redirectRoutes = JSON.parse(fs.readFileSync("production/data/legacy-route-map.json", "utf8")).routes.filter(
         (route) => route.url_type === "listing" && route.target_path,

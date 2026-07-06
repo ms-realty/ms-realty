@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
+import { importAppSeoEvidenceRows, readAppSeoEvidenceTemplate } from "./app-seo-evidence.mjs";
 import {
   approveTranslationTask,
   createTranslationReviewTask,
@@ -12,7 +13,7 @@ import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-le
 import { renderHtmlPage } from "./html.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
-import { buildLaunchReadinessReport } from "./launch-readiness.mjs";
+import { buildLaunchReadinessReport, writeLaunchReadinessReport } from "./launch-readiness.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
@@ -79,6 +80,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
+    launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
@@ -86,6 +88,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    seoEvidenceInputDir: env.MS_REALTY_SEO_EVIDENCE_INPUT_DIR,
+    seoEvidenceOutputPath: env.MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH,
     slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -196,6 +200,19 @@ function redirectApprovalInput(input) {
       input.equivalentContent === "on" ||
       input.equivalentContent === "1",
   };
+}
+
+function seoExportInput(request, url, body) {
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    const input = parseBody(request, body);
+    return { source: input.source || url.searchParams.get("source"), csv: input.csv || "" };
+  }
+  if (contentType.includes("application/json")) {
+    const input = parseJsonBody(body);
+    return { source: input.source || url.searchParams.get("source"), csv: input.csv || "" };
+  }
+  return { source: url.searchParams.get("source"), csv: body || "" };
 }
 
 function reviewedReplyInput(input) {
@@ -407,6 +424,12 @@ function exportDeployableRedirectRows(config) {
   return { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath) };
 }
 
+function exportLaunchReadiness(config) {
+  const report = launchReadiness(config);
+  const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined);
+  return { outPath, report };
+}
+
 function redirectApprovalWorkbook(url, config) {
   const routes = routeMapRows();
   const approvals = readRedirectApprovals(config.redirectApprovalPath);
@@ -479,6 +502,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
       return jsonResponse(200, seoEvidencePayload(seoEvidence()));
     }
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/template") {
+      const template = readAppSeoEvidenceTemplate(url, config);
+      return csvResponse(template.csv, template.filename);
+    }
     if (request.method === "GET" && url.pathname === "/api/admin/redirect-approval-workbook") {
       return csvResponse(redirectApprovalWorkbook(url, config), "redirect-approval-workbook.csv");
     }
@@ -502,6 +529,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
       return jsonResponse(201, exportDeployableRedirectRows(config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
+      return jsonResponse(201, exportLaunchReadiness(config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
+      return jsonResponse(201, importAppSeoEvidenceRows(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       return jsonResponse(201, importListingQualityRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
