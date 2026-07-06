@@ -99,6 +99,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_BROKER_CONTACT_LEDGER_PATH: tempJsonl("app-admin-broker-contacts"),
+      MS_REALTY_CONSENT_LEDGER_PATH: tempJsonl("app-admin-consents"),
       MS_REALTY_DEAL_LEDGER_PATH: tempJsonl("app-admin-deals"),
       MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
       MS_REALTY_EVENT_LEDGER_PATH: tempJsonl("app-admin-events"),
@@ -197,7 +198,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(inbox.headers.get("cache-control"), "no-store");
       assert.match(inboxHtml, /<html lang="ru" dir="ltr">/);
       assert.match(inboxHtml, /data-kind="admin-lead-inbox"/);
+      assert.match(inboxHtml, /data-admin-workbench="crm"/);
+      assert.match(inboxHtml, /data-inbox-layout="list-detail-action"/);
+      assert.match(inboxHtml, /data-lead-queue-tabs="true"/);
       assert.match(inboxHtml, /data-lead-row="true"/);
+      assert.match(inboxHtml, /data-original-language="he"/);
+      assert.match(inboxHtml, /data-reply-approval-required="true"/);
+      assert.match(inboxHtml, /data-hermes-reply-draft="broker_review_required"/);
+      assert.match(inboxHtml, /data-show-original-toggle="true"/);
       assert.match(inboxHtml, /he -> en/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
@@ -543,6 +551,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(editor.status, 200);
       assert.match(editorHtml, /<html lang="bg" dir="ltr">/);
       assert.match(editorHtml, /data-kind="admin-listing-editor"/);
+      assert.match(editorHtml, /data-admin-workbench="cms"/);
+      assert.match(editorHtml, /data-editor-layout="facts-translations-quality"/);
+      assert.match(editorHtml, /data-editor-tabs="true"/);
+      assert.match(editorHtml, /data-editor-panel="facts"/);
+      assert.match(editorHtml, /data-translation-panel="true"/);
+      assert.match(editorHtml, /data-media-review-panel="true"/);
+      assert.match(editorHtml, /data-tour-review-status=/);
       assert.match(editorHtml, /data-listing-id="MS-CRAWL-0001"/);
 
       const edit = await listingEditRoute.POST(

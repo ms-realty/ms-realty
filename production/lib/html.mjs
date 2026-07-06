@@ -551,8 +551,13 @@ function renderAdminLeadInbox(page) {
       const slaStatus = leadSla?.status || "pending";
       const slaLabel = slaStatus.replaceAll("_", " ");
       const escalationDue = leadSla?.manager_escalation_due_at || "";
+      const brokerId = lead.broker_assignment?.broker_id || "";
       return `
-      <tr data-lead-row="true">
+      <tr data-lead-row="true" data-lead-id="${escapeHtml(lead.lead_id)}" data-lead-type="${escapeHtml(
+        lead.lead_type,
+      )}" data-original-language="${escapeHtml(lead.original_language)}" data-admin-locale="${escapeHtml(
+        lead.admin_locale,
+      )}" data-contact-preference="${escapeHtml(lead.contact_preference)}" data-broker-assignment="${escapeHtml(brokerId)}">
         <td><code>${escapeHtml(lead.lead_id)}</code></td>
         <td>${escapeHtml(lead.lead_type)}</td>
         <td>${escapeHtml(lead.source)}</td>
@@ -561,10 +566,14 @@ function renderAdminLeadInbox(page) {
         <td data-sla-status="${escapeHtml(slaStatus)}">${escapeHtml(slaLabel)}</td>
         <td>${escapeHtml(escalationDue)}</td>
         <td>
-          <form method="post" action="/api/admin/replies">
+          <form method="post" action="/api/admin/replies" data-reply-approval-required="true" data-hermes-reply-draft="broker_review_required" data-original-language="${escapeHtml(
+            lead.original_language,
+          )}">
             <input type="hidden" name="leadId" value="${escapeHtml(lead.lead_id)}">
             <input type="hidden" name="language" value="${escapeHtml(lead.original_language)}">
             <input type="hidden" name="approved" value="true">
+            <input type="hidden" name="hermesDraft" value="true">
+            <label data-show-original-toggle="true"><input type="checkbox" name="showOriginal"> Show original</label>
             <label>Reviewer <input name="reviewer" required autocomplete="name"></label>
             <label>Reviewed reply <textarea name="reviewedReply" required></textarea></label>
             <button type="submit">Queue reply</button>
@@ -577,11 +586,20 @@ function renderAdminLeadInbox(page) {
     .map((request) => `<li>${escapeHtml(request.requested_locale)} -> ${escapeHtml(request.fallback_locale)}</li>`)
     .join("");
   return `
-<main data-kind="admin-lead-inbox" data-admin-locale="${escapeHtml(page.workspace.locale)}" data-interface-locales="${escapeHtml(
+<main data-kind="admin-lead-inbox" data-admin-workbench="crm" data-inbox-layout="list-detail-action" data-lead-count="${escapeHtml(
+    page.summary.leads,
+  )}" data-sla-reminders="${escapeHtml(page.summary.leadSlaReminders)}" data-admin-locale="${escapeHtml(
+    page.workspace.locale,
+  )}" data-interface-locales="${escapeHtml(
     page.workspace.interface_locales.join(","),
   )}">
   <h1>${escapeHtml(page.workspace.modules.find((module) => module.id === "crm")?.primary_view || "Lead inbox")}</h1>
   <dl>${metrics}</dl>
+  <nav aria-label="Lead queues" data-lead-queue-tabs="true">
+    <button type="button" data-lead-filter="all">All</button>
+    <button type="button" data-lead-filter="needs_reply">Needs reply</button>
+    <button type="button" data-lead-filter="sla">SLA</button>
+  </nav>
   <section aria-label="CRM leads">
     <h2>CRM leads</h2>
     <table>
@@ -598,6 +616,7 @@ function renderAdminLeadInbox(page) {
 
 function renderAdminListingEditor(page) {
   const facts = page.listing.facts || {};
+  const staleTranslations = page.translationTasks.filter((task) => task.status === "stale");
   const inputFor = (field) => {
     const value = facts[field] ?? "";
     if (field === "description") {
@@ -611,38 +630,59 @@ function renderAdminListingEditor(page) {
   const translations = (page.listing.translations || [])
     .map(
       (translation) =>
-        `<li data-translation-locale="${escapeHtml(translation.locale)}">${escapeHtml(translation.locale)}: ${escapeHtml(
+        `<li data-translation-locale="${escapeHtml(translation.locale)}" data-translation-status="${escapeHtml(
           translation.status,
-        )}</li>`,
+        )}">${escapeHtml(translation.locale)}: ${escapeHtml(translation.status)}</li>`,
     )
     .join("");
-  const staleTasks = page.translationTasks
-    .filter((task) => task.status === "stale")
-    .map((task) => `<li>${escapeHtml(task.target_locale || task.locale)} stale</li>`)
+  const staleTasks = staleTranslations
+    .map(
+      (task) =>
+        `<li data-translation-locale="${escapeHtml(task.target_locale || task.locale)}" data-translation-status="stale">${escapeHtml(
+          task.target_locale || task.locale,
+        )} stale</li>`,
+    )
     .join("");
   return `
-<main data-kind="admin-listing-editor" data-listing-id="${escapeHtml(page.listing.id)}" data-admin-locale="${escapeHtml(
+<main data-kind="admin-listing-editor" data-admin-workbench="cms" data-editor-layout="facts-translations-quality" data-cms-status="${escapeHtml(
+    page.listing.cms_status,
+  )}" data-schema-ready="${escapeHtml(page.listing.seo?.schema_present ? "true" : "false")}" data-stale-translation-count="${escapeHtml(
+    staleTranslations.length,
+  )}" data-listing-id="${escapeHtml(page.listing.id)}" data-admin-locale="${escapeHtml(
     page.workspace.locale,
   )}">
   <h1>Property editor</h1>
   <p>${escapeHtml(page.listing.source_domain)} ${escapeHtml(page.listing.source_locale)}</p>
-  <form method="post" action="/api/admin/listings/edit" data-editor-form="listing">
+  <nav aria-label="Editor sections" data-editor-tabs="true">
+    <a href="#listing-facts" data-editor-tab="facts">Facts</a>
+    <a href="#listing-translations" data-editor-tab="translations">Translations</a>
+    <a href="#listing-media" data-editor-tab="media">Media</a>
+    <a href="#listing-quality" data-editor-tab="quality">Quality</a>
+  </nav>
+  <form id="listing-facts" method="post" action="/api/admin/listings/edit" data-editor-form="listing" data-editor-panel="facts">
     <input type="hidden" name="listingId" value="${escapeHtml(page.listing.id)}">
     <label>Editor <input name="editor" required autocomplete="name"></label>
     ${fields}
     <button type="submit">Save source edit</button>
   </form>
-  <section aria-label="Translation state">
+  <section id="listing-translations" aria-label="Translation state" data-translation-panel="true">
     <h2>Translation state</h2>
     <ul>${translations}${staleTasks}</ul>
   </section>
-  <section aria-label="Quality">
+  <section id="listing-media" aria-label="Media review" data-media-review-panel="true" data-tour-review-status="${escapeHtml(
+    page.listing.tour?.available ? "available" : "review_required",
+  )}">
+    <h2>Media review</h2>
+    <dl>
+      <dt>Media assets</dt><dd>${escapeHtml((page.listing.media || []).length)}</dd>
+      <dt>Public tour</dt><dd>${escapeHtml(page.listing.tour?.available ? "available" : "review required")}</dd>
+    </dl>
+  </section>
+  <section id="listing-quality" aria-label="Quality" data-quality-panel="true">
     <h2>Quality</h2>
     <dl>
       <dt>CMS status</dt><dd>${escapeHtml(page.listing.cms_status)}</dd>
       <dt>Schema</dt><dd>${escapeHtml(page.listing.seo?.schema_present ? "present" : "missing")}</dd>
-      <dt>Media assets</dt><dd>${escapeHtml((page.listing.media || []).length)}</dd>
-      <dt>Public tour</dt><dd>${escapeHtml(page.listing.tour?.available ? "available" : "review required")}</dd>
     </dl>
   </section>
 </main>`;
