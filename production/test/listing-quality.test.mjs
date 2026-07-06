@@ -9,7 +9,9 @@ import {
   readListingEdits,
 } from "../lib/listing-edits.mjs";
 import {
+  assertListingQualityPreflightReport,
   assertListingQualityReport,
+  buildListingQualityPreflightReport,
   buildListingQualityReport,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
@@ -257,6 +259,57 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
   assert.match(valid.stdout, new RegExp(`Media review rows: ${report.rows.length}`));
   assert.equal(validFromEnv.status, 0, validFromEnv.stderr);
   assert.match(validFromEnv.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
+});
+
+test("listing quality preflight report records missing and valid human review state", () => {
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-quality-preflight-`);
+  const missingPath = `${dir}/missing-listing-quality.csv`;
+  const missingReport = buildListingQualityPreflightReport({
+    report,
+    reviewPath: missingPath,
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertListingQualityPreflightReport(missingReport), true);
+  assert.equal(missingReport.ready, false);
+  assert.equal(missingReport.review.status, "missing_review");
+  assert.equal(missingReport.summary.missing_review_rows, report.rows.length);
+
+  const partialReport = buildListingQualityPreflightReport({
+    report,
+    reviewPath: `${dir}/partial-listing-quality.csv`,
+    csvText: completeListingQualityReviewCsv({ ...report, rows: report.rows.slice(0, 1) }),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertListingQualityPreflightReport(partialReport), true);
+  assert.equal(partialReport.ready, false);
+  assert.equal(partialReport.review.status, "invalid_review");
+  assert.match(partialReport.review.error, /incomplete/);
+
+  const reviewPath = `${dir}/listing-quality.csv`;
+  const outputPath = `${dir}/listing-quality-preflight-report.json`;
+  fs.writeFileSync(reviewPath, completeListingQualityReviewCsv(report));
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-listing-quality-preflight-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
+      MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH: outputPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.includes(outputPath));
+  const readyReport = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(assertListingQualityPreflightReport(readyReport), true);
+  assert.equal(readyReport.ready, true);
+  assert.equal(readyReport.summary.review_rows, report.rows.length);
 });
 
 test("listing quality build honors mounted ledgers and output paths", () => {

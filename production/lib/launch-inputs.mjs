@@ -120,7 +120,9 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Review input path: \`migration/reviews/listing-quality.csv\`
 - Example input: \`migration/reviews/listing-quality.csv.example\`
 - Production/CLI path override: \`MS_REALTY_LISTING_QUALITY_REVIEW_PATH\`
+- Status report: \`npm run listing:preflight:report\` writes current missing/invalid listing-review state without clearing the launch gate.
 - Build path overrides: \`MS_REALTY_LISTING_EDIT_LEDGER_PATH\`, \`MS_REALTY_TOUR_APPROVAL_LEDGER_PATH\`, \`MS_REALTY_LISTING_QUALITY_REPORT_PATH\`, \`MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH\`
+- Preflight report override: \`MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH\`
 - Review columns: \`review_status\`, \`required_editor_fields\`, \`price_eur\`, \`bedrooms\`, \`location\`, \`description\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`
 - Admin import endpoint: \`POST /api/admin/listing-quality/import\`
 - Admin editor endpoint: \`POST /api/admin/listings/edit\`

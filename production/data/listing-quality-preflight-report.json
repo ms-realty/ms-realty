@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-07-06T00:00:00Z",
+  "ready": false,
+  "status": "blocked",
+  "review": {
+    "status": "missing_review",
+    "path": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv",
+    "summary": {
+      "expected_review_rows": 7,
+      "review_rows": 0,
+      "missing_review_rows": 7,
+      "facts_review_rows": 0,
+      "media_review_rows": 0
+    }
+  },
+  "summary": {
+    "affected_listings": 7,
+    "expected_review_rows": 7,
+    "review_rows": 0,
+    "missing_review_rows": 7,
+    "facts_review_rows": 0,
+    "media_review_rows": 0,
+    "issue_counts": {
+      "missing_price": 0,
+      "missing_bedrooms": 0,
+      "missing_location": 0,
+      "missing_description": 0,
+      "media_review_pending": 0,
+      "missing_alt_text": 0,
+      "thin_public_gallery": 7,
+      "tour_review_pending": 0
+    }
+  },
+  "next_actions": [
+    "Review production/data/listing-quality-workbook.csv.",
+    "Write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH.",
+    "Run npm run listing:preflight before launch:preflight."
+  ]
+}

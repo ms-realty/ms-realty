@@ -9,6 +9,8 @@ import { loadCmsSeed } from "../lib/runtime.mjs";
 import { readTourApprovals } from "../lib/tours.mjs";
 
 const inputPath = process.argv[2] || process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
+const listingEditPath = process.env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || undefined;
+const tourApprovalPath = process.env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || undefined;
 
 try {
   if (!fs.existsSync(inputPath)) {
@@ -17,8 +19,8 @@ try {
     );
   }
   const report = buildListingQualityReport({
-    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
-    tourApprovals: readTourApprovals(),
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits(listingEditPath)),
+    tourApprovals: readTourApprovals(tourApprovalPath),
     generatedAt: "2026-07-05T00:00:00Z",
   });
   const result = validateListingQualityReviewCsv(report, fs.readFileSync(inputPath, "utf8"), { requireComplete: true });

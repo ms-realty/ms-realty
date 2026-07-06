@@ -9,6 +9,7 @@ import { fromRoot } from "./paths.mjs";
 export const DEFAULT_LISTING_QUALITY_REPORT = fromRoot("production", "data", "listing-quality-report.json");
 export const DEFAULT_LISTING_QUALITY_WORKBOOK = fromRoot("production", "data", "listing-quality-workbook.csv");
 export const DEFAULT_LISTING_QUALITY_REVIEW_INPUT = fromRoot("migration", "reviews", "listing-quality.csv");
+export const DEFAULT_LISTING_QUALITY_PREFLIGHT_REPORT = fromRoot("production", "data", "listing-quality-preflight-report.json");
 
 const FACT_FIELDS_BY_ISSUE = {
   missing_price: "price_eur",
@@ -234,6 +235,92 @@ export function validateListingQualityReviewCsv(report, csvText, { requireComple
       media_review_rows: reviews.filter((row) => row.media_issues > 0).length,
     },
   };
+}
+
+function missingReviewSummary(report) {
+  return {
+    expected_review_rows: report.rows.length,
+    review_rows: 0,
+    missing_review_rows: report.rows.length,
+    facts_review_rows: 0,
+    media_review_rows: 0,
+  };
+}
+
+function reviewState(report, reviewPath, csvText = null) {
+  if (csvText === null && !fs.existsSync(reviewPath)) {
+    return { status: "missing_review", path: reviewPath, summary: missingReviewSummary(report) };
+  }
+
+  try {
+    const text = csvText ?? fs.readFileSync(reviewPath, "utf8");
+    const validation = validateListingQualityReviewCsv(report, text);
+    if (validation.summary.missing_review_rows > 0) {
+      const sample = report.rows
+        .filter((row) => !validation.reviews.some((review) => review.listing_id === row.listing_id))
+        .slice(0, 5)
+        .map((row) => row.listing_id)
+        .join(", ");
+      return {
+        status: "invalid_review",
+        path: reviewPath,
+        summary: validation.summary,
+        error: `Listing quality review is incomplete: ${validation.summary.missing_review_rows} listing rows missing review (${sample})`,
+      };
+    }
+    return { status: "pass", path: reviewPath, summary: validation.summary };
+  } catch (error) {
+    return { status: "invalid_review", path: reviewPath, summary: missingReviewSummary(report), error: error.message };
+  }
+}
+
+export function buildListingQualityPreflightReport({
+  report = buildListingQualityReport(),
+  reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
+  csvText = null,
+  generatedAt = new Date().toISOString(),
+} = {}) {
+  const review = reviewState(report, reviewPath, csvText);
+  return {
+    generated_at: generatedAt,
+    ready: review.status === "pass",
+    status: review.status === "pass" ? "ready" : "blocked",
+    review,
+    summary: {
+      affected_listings: report.summary.affected_listings,
+      expected_review_rows: review.summary.expected_review_rows,
+      review_rows: review.summary.review_rows,
+      missing_review_rows: review.summary.missing_review_rows,
+      facts_review_rows: review.summary.facts_review_rows,
+      media_review_rows: review.summary.media_review_rows,
+      issue_counts: report.summary.issue_counts,
+    },
+    next_actions:
+      review.status === "pass"
+        ? ["Run npm run launch:preflight with the same listing quality review path."]
+        : [
+            "Review production/data/listing-quality-workbook.csv.",
+            "Write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH.",
+            "Run npm run listing:preflight before launch:preflight.",
+          ],
+  };
+}
+
+export function assertListingQualityPreflightReport(report) {
+  const ready = report.review?.status === "pass";
+  if (report.ready !== ready) throw new Error("Listing quality preflight ready flag must match review state");
+  if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Listing quality preflight status must match ready flag");
+  if (!report.summary || report.summary.expected_review_rows < report.summary.review_rows) {
+    throw new Error("Listing quality preflight summary must count expected and reviewed rows");
+  }
+  return true;
+}
+
+export function writeListingQualityPreflightReport(report, outPath = DEFAULT_LISTING_QUALITY_PREFLIGHT_REPORT) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  assertListingQualityPreflightReport(report);
+  fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
+  return outPath;
 }
 
 export function writeListingQualityReport(report, outPath = DEFAULT_LISTING_QUALITY_REPORT) {

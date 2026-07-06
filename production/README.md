@@ -136,6 +136,7 @@ Fail closed before launch:
 ```bash
 npm run redirects:preflight
 npm run seo:preflight
+npm run listing:preflight:report
 npm run listing:preflight
 npm run live:report
 npm run live:preflight
@@ -143,7 +144,8 @@ npm run launch:preflight
 ```
 
 `redirects:preflight` passes once reviewed 301 approvals are present. `seo:preflight` still exits
-non-zero until real external SEO exports are complete. `listing:preflight` still exits non-zero until
+non-zero until real external SEO exports are complete. `listing:preflight:report` writes the current
+listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
 the reviewed listing-quality CSV is present. `launch:preflight` also requires live Typesense/Meilisearch
 reports from `npm run search:sync && npm run search:query` and a Hermes draft-worker report from
 `npm run hermes:worker`; `live:preflight` checks those report files directly.
@@ -179,7 +181,8 @@ Set these path overrides when operator evidence is mounted outside the repo:
 `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`,
 `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`,
 `MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`,
-`MS_REALTY_LISTING_QUALITY_REVIEW_PATH`, `MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, and
+`MS_REALTY_LISTING_QUALITY_REVIEW_PATH`, `MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH`,
+`MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, and
 `MS_REALTY_HERMES_WORKER_REPORT_PATH`.
 
 Generated production data:
@@ -199,6 +202,7 @@ Generated production data:
 - `production/data/structured-data-report.json`
 - `production/data/listing-quality-report.json`
 - `production/data/listing-quality-workbook.csv`
+- `production/data/listing-quality-preflight-report.json`
 - `production/data/listing-publication-report.json`
 - `production/data/listing-verification-report.json`
 - `production/data/cms-seed.json`
