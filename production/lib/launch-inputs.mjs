@@ -117,7 +117,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Scope: 165 source listing rows; warning counts below include structured-data entries and listing-quality source rows.
 - Review input path: \`migration/reviews/listing-quality.csv\`
 - Example input: \`migration/reviews/listing-quality.csv.example\`
-- Production adapter path override: \`MS_REALTY_LISTING_QUALITY_REVIEW_PATH\`
+- Production/CLI path override: \`MS_REALTY_LISTING_QUALITY_REVIEW_PATH\`
 - Review columns: \`review_status\`, \`required_editor_fields\`, \`price_eur\`, \`bedrooms\`, \`location\`, \`description\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`
 - Admin import endpoint: \`POST /api/admin/listing-quality/import\`
 - Admin editor endpoint: \`POST /api/admin/listings/edit\`

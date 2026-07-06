@@ -196,6 +196,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
+    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: "" },
   });
 
   assert.notEqual(result.status, 0);
@@ -205,6 +206,29 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
   assert.match(result.stderr, /npm run launch:inputs/);
+
+  const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
+  const row = listingQuality.rows.find((candidate) => candidate.review_status.includes("media"));
+  assert.ok(row, "expected a listing quality row that still requires media review");
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-listing-review-`);
+  const reviewPath = `${dir}/listing-quality.csv`;
+  fs.writeFileSync(
+    reviewPath,
+    [
+      "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+      `${row.listing_id},,,,,,media_editor,Reviewed public gallery selection`,
+      "",
+    ].join("\n"),
+  );
+  const withReviewPath = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath },
+  });
+
+  assert.notEqual(withReviewPath.status, 0);
+  assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services/);
+  assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
 });
 
 test("live service report preflight fails missing reports and passes valid reports", () => {

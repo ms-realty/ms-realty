@@ -17,7 +17,9 @@ function blockerDetails(report) {
     });
 }
 
-const report = buildLaunchReadinessReport();
+const report = buildLaunchReadinessReport({
+  listingQualityReviewPath: process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH || undefined,
+});
 assertLaunchReadinessReport(report);
 
 if (!report.launch_ready) {

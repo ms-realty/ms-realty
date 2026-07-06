@@ -8,12 +8,12 @@ import { applyListingEdits, readListingEdits } from "../lib/listing-edits.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { readTourApprovals } from "../lib/tours.mjs";
 
-const inputPath = process.argv[2] || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
+const inputPath = process.argv[2] || process.env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
 
 try {
   if (!fs.existsSync(inputPath)) {
     throw new Error(
-      `Missing listing quality review CSV: ${inputPath}\nNext: review production/data/listing-quality-workbook.csv, write migration/reviews/listing-quality.csv, then run \`npm run listing:preflight\`.`,
+      `Missing listing quality review CSV: ${inputPath}\nNext: review production/data/listing-quality-workbook.csv, write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH, then run \`npm run listing:preflight\`.`,
     );
   }
   const report = buildListingQualityReport({

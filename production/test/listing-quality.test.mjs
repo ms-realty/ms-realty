@@ -218,15 +218,22 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
   const script = fromRoot("production", "scripts", "validate-listing-quality-review.mjs");
   const missing = spawnSync(process.execPath, [script, `${csvPath}.missing`], { encoding: "utf8" });
   const valid = spawnSync(process.execPath, [script, csvPath], { encoding: "utf8" });
+  const validFromEnv = spawnSync(process.execPath, [script], {
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: csvPath },
+  });
 
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /LISTING QUALITY PREFLIGHT FAILED/);
   assert.match(missing.stderr, /production\/data\/listing-quality-workbook\.csv/);
+  assert.match(missing.stderr, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
   assert.match(missing.stderr, /npm run listing:preflight/);
   assert.equal(valid.status, 0, valid.stderr);
   assert.match(valid.stdout, /Listing quality review CSV valid: 1 rows/);
   assert.match(valid.stdout, /Facts review rows: 0/);
   assert.match(valid.stdout, /Media review rows: 1/);
+  assert.equal(validFromEnv.status, 0, validFromEnv.stderr);
+  assert.match(validFromEnv.stdout, /Listing quality review CSV valid: 1 rows/);
 });
 
 test("generated listing quality report is valid when present", () => {
