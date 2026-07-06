@@ -373,3 +373,18 @@ test("generated listing quality workbook is valid when present", () => {
   assert.ok(rows.every((row) => row.required_editor_fields));
   assert.ok(rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });
+
+test("listing quality review example names current pending rows without pre-approving them", () => {
+  const exampleText = fs.readFileSync(fromRoot("migration", "reviews", "listing-quality.csv.example"), "utf8");
+  const exampleRows = parseCsv(exampleText);
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+  const pendingIds = new Set(report.rows.map((row) => row.listing_id));
+
+  assert.equal(exampleRows.length, report.rows.length);
+  assert.ok(exampleRows.every((row) => pendingIds.has(row.listing_id)));
+  assert.ok(exampleRows.every((row) => row.media_reviewer === ""));
+  assert.throws(() => validateListingQualityReviewCsv(report, exampleText), /requires media_reviewer/);
+});

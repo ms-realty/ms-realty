@@ -1,2 +1,8 @@
-listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes
-MS-CRAWL-0001,123000,2,Sandanski,Reviewed listing description,editor_bg,media_editor,Reviewed from source evidence.
+listing_id,media_reviewer,review_notes
+MS-CRAWL-0006,,Review public gallery: currently 1 public asset.
+MS-CRAWL-0012,,Review public gallery: currently 2 public assets.
+MS-CRAWL-0049,,Review public gallery: currently 1 public asset.
+MS-CRAWL-0068,,Review public gallery: currently 1 public asset.
+MS-CRAWL-0070,,Review public gallery: currently 1 public asset.
+MS-CRAWL-0082,,Review public gallery: currently 1 public asset.
+MS-CRAWL-0112,,Review public gallery: currently 2 public assets.
