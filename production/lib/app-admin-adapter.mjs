@@ -16,6 +16,7 @@ import { buildLaunchReadinessReport } from "./launch-readiness.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
+import { buildListingQualityReport, renderListingQualityWorkbook, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -413,6 +414,50 @@ function redirectApprovalWorkbook(url, config) {
   return renderRedirectApprovalWorkbook(rows);
 }
 
+function listingQualityWorkbook(config) {
+  return renderListingQualityWorkbook(buildListingQualityReport({ seed: currentSeed(config) }));
+}
+
+function importListingQualityRows(inputCsv, config) {
+  const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed(config) }), inputCsv);
+  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const edits = review.reviews
+    .filter((row) => Object.keys(row.patch).length || row.media_reviewer)
+    .map((row) => {
+      const result = createListingEdit(
+        currentSeed(config),
+        {
+          id: `listing-quality-${row.listing_id}`,
+          listingId: row.listing_id,
+          editor: row.editor,
+          patch: row.patch,
+          mediaReviewer: row.media_reviewer,
+        },
+        translationTasks,
+        config.editedAt,
+      );
+      const edit = appendListingEdit(
+        {
+          ...result.edit,
+          review_source: "listing_quality_csv",
+          media_reviewer: row.media_reviewer || undefined,
+          review_notes: row.review_notes || undefined,
+        },
+        { filePath: config.listingEditLedgerPath },
+      );
+      const persistedStaleTranslations = result.staleTranslations
+        .filter((translation) => translation.id)
+        .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
+      return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
+    });
+  return {
+    imported: review.summary.review_rows,
+    edited: edits.length,
+    mediaReviewRows: review.summary.media_review_rows,
+    edits,
+  };
+}
+
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
   if (!isAdminAuthorized(request.headers.get("authorization") || "")) return adminUnauthorized();
   try {
@@ -437,6 +482,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/redirect-approval-workbook") {
       return csvResponse(redirectApprovalWorkbook(url, config), "redirect-approval-workbook.csv");
     }
+    if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
+      return csvResponse(listingQualityWorkbook(config), "listing-quality-workbook.csv");
+    }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
@@ -454,6 +502,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
       return jsonResponse(201, exportDeployableRedirectRows(config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
+      return jsonResponse(201, importListingQualityRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       return jsonResponse(201, appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));

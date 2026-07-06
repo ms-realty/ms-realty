@@ -63,6 +63,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const deployableRedirectExportRoute = await import("../../app/api/admin/deployable-redirects/export/route.js");
       const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
+      const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
+      const listingQualityWorkbookRoute = await import("../../app/api/admin/listing-quality-workbook/route.js");
       const localeRoute = await import("../../app/api/admin/locales/route.js");
       const redirectApprovalWorkbookRoute = await import("../../app/api/admin/redirect-approval-workbook/route.js");
       const redirectApprovalsRoute = await import("../../app/api/admin/redirect-approvals/route.js");
@@ -215,6 +217,29 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectExportBody.exported, 2);
       assert.equal(redirectExportBody.summary.total, 2);
       assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 2);
+
+      const listingQualityWorkbook = await listingQualityWorkbookRoute.GET(
+        new Request("https://example.test/api/admin/listing-quality-workbook", { headers: auth }),
+      );
+      const listingQualityCsv = await listingQualityWorkbook.text();
+      assert.equal(listingQualityWorkbook.status, 200);
+      assert.equal(listingQualityWorkbook.headers.get("content-type"), "text/csv; charset=utf-8");
+      assert.match(listingQualityCsv, /MS-CRAWL-0006/);
+      assert.match(listingQualityCsv, /thin_public_gallery/);
+
+      const listingQualityImport = await listingQualityImportRoute.POST(
+        new Request("https://example.test/api/admin/listing-quality/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "text/csv" },
+          body: "listing_id,media_reviewer,review_notes\nMS-CRAWL-0006,media_editor,Gallery reviewed for launch.\n",
+        }),
+      );
+      const listingQualityImportBody = await listingQualityImport.json();
+      assert.equal(listingQualityImport.status, 201);
+      assert.equal(listingQualityImportBody.imported, 1);
+      assert.equal(listingQualityImportBody.edited, 1);
+      assert.equal(listingQualityImportBody.mediaReviewRows, 1);
+      assert.equal(listingQualityImportBody.edits[0].edit.media_reviewer, "media_editor");
 
       const draft = await translationDraftRoute.POST(
         new Request("https://example.test/api/admin/translations/draft", {
