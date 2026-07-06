@@ -137,6 +137,7 @@ Fail closed before launch:
 npm run redirects:preflight
 npm run seo:preflight
 npm run listing:preflight
+npm run live:report
 npm run live:preflight
 npm run launch:preflight
 ```
@@ -146,6 +147,7 @@ non-zero until real external SEO exports are complete. `listing:preflight` still
 the reviewed listing-quality CSV is present. `launch:preflight` also requires live Typesense/Meilisearch
 reports from `npm run search:sync && npm run search:query` and a Hermes draft-worker report from
 `npm run hermes:worker`; `live:preflight` checks those report files directly.
+`live:report` writes the current live-service report status without clearing the launch gate.
 The expected report shapes are committed as `production/data/*-report.json.example`; the real live
 report files are ignored and must be generated from provisioned services.
 
@@ -176,6 +178,7 @@ Set these path overrides when operator evidence is mounted outside the repo:
 `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`,
 `MS_REALTY_SEO_EVIDENCE_INPUT_DIR`, `MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH`,
 `MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH`, `MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH`,
+`MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH`,
 `MS_REALTY_LISTING_QUALITY_REVIEW_PATH`, `MS_REALTY_SEARCH_SYNC_REPORT_PATH`, `MS_REALTY_SEARCH_QUERY_REPORT_PATH`, and
 `MS_REALTY_HERMES_WORKER_REPORT_PATH`.
 
@@ -221,6 +224,7 @@ Generated production data:
 - `production/data/seo-evidence.json`
 - `production/data/search-engine-sync-smoke.json`
 - `production/data/search-engine-query-smoke.json`
+- `production/data/live-service-preflight-report.json`
 - `production/data/app-route-manifest.json`
 - `production/data/launch-readiness.json`
 - `production/data/launch-input-checklist.md`

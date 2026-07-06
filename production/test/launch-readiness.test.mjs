@@ -5,6 +5,8 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import {
   assertLaunchReadinessReport,
+  assertLiveServicePreflightReport,
+  buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   readLiveServiceReportTemplate,
   validateLiveServiceReports,
@@ -434,6 +436,44 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.match(valid.stdout, /Live service reports valid/);
 });
 
+test("live service preflight report records blockers without clearing the gate", () => {
+  const missingDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-missing-`);
+  const missingReport = buildLiveServicePreflightReport({
+    generatedAt: "2026-07-06T00:00:00Z",
+    syncReportPath: `${missingDir}/search-engine-sync-report.json`,
+    queryReportPath: `${missingDir}/search-engine-query-report.json`,
+    hermesReportPath: `${missingDir}/hermes-draft-worker-report.json`,
+  });
+
+  assert.equal(assertLiveServicePreflightReport(missingReport), true);
+  assert.equal(missingReport.ready, false);
+  assert.equal(missingReport.status, "blocked");
+  assert.equal(missingReport.summary.missing_report, 3);
+  assert.match(missingReport.next_actions.join(" "), /npm run live:preflight/);
+
+  const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-valid-`);
+  const paths = writeLiveReportFixtures(validDir);
+  const outputPath = `${validDir}/live-service-preflight-report.json`;
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-live-service-preflight-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: paths.syncReportPath,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
+      MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH: outputPath,
+    },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, new RegExp(outputPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  const readyReport = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(assertLiveServicePreflightReport(readyReport), true);
+  assert.equal(readyReport.ready, true);
+  assert.equal(readyReport.summary.pass, 3);
+});
+
 test("live service report examples validate but do not replace real launch evidence", () => {
   const result = validateLiveServiceReports({
     syncReportPath: fromRoot("production", "data", "search-engine-sync-report.json.example"),
@@ -504,12 +544,14 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
   assert.match(markdown, /npm run search:sync && npm run search:query/);
   assert.match(markdown, /npm run hermes:worker/);
+  assert.match(markdown, /npm run live:report/);
   assert.match(markdown, /npm run live:preflight/);
   assert.match(markdown, /search-engine-sync-report\.json\.example/);
   assert.match(markdown, /live-service-report-template\?source=typesense_meilisearch_sync/);
   assert.match(markdown, /live-service-reports\/import\?source=typesense_meilisearch_sync/);
   assert.match(markdown, /MS_REALTY_SEARCH_SYNC_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_HERMES_WORKER_REPORT_PATH/);
+  assert.match(markdown, /MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_HERMES_AUDIT_PATH/);
   assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);

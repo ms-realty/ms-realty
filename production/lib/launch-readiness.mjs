@@ -17,6 +17,7 @@ import { DEFAULT_LISTING_QUALITY_REVIEW_INPUT, validateListingQualityReviewCsv }
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
+export const DEFAULT_LIVE_SERVICE_PREFLIGHT_REPORT = fromRoot("production", "data", "live-service-preflight-report.json");
 
 const LIVE_SERVICE_REPORT_TEMPLATES = {
   typesense_meilisearch_sync: "search-engine-sync-report.json.example",
@@ -108,6 +109,55 @@ export function validateLiveServiceReports(options = {}) {
     ready: reports.every((item) => item.status === "pass"),
     reports,
   };
+}
+
+export function buildLiveServicePreflightReport({ generatedAt = new Date().toISOString(), ...options } = {}) {
+  const result = validateLiveServiceReports(options);
+  const statusCounts = result.reports.reduce((counts, report) => {
+    counts[report.status] = (counts[report.status] || 0) + 1;
+    return counts;
+  }, {});
+  return {
+    generated_at: generatedAt,
+    ready: result.ready,
+    status: result.ready ? "ready" : "blocked",
+    summary: {
+      report_count: result.reports.length,
+      pass: statusCounts.pass || 0,
+      missing_report: statusCounts.missing_report || 0,
+      invalid_report: statusCounts.invalid_report || 0,
+      configured_paths: Object.fromEntries(result.reports.map((report) => [report.source, report.path])),
+    },
+    reports: result.reports,
+    next_actions: result.ready
+      ? ["Run npm run launch:preflight with the same mounted live report paths."]
+      : [
+          "Provision Typesense, Meilisearch, and Hermes provider credentials.",
+          "Run npm run search:sync && npm run search:query.",
+          "Run npm run hermes:worker.",
+          "Run npm run live:preflight before launch:preflight.",
+        ],
+  };
+}
+
+export function assertLiveServicePreflightReport(report) {
+  if (!Array.isArray(report.reports) || report.reports.length !== 3) {
+    throw new Error("Live service preflight report must include three service reports");
+  }
+  const ready = report.reports.every((item) => item.status === "pass");
+  if (report.ready !== ready) throw new Error("Live service preflight ready flag must match reports");
+  if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Live service preflight status must match ready flag");
+  if (report.summary.report_count !== report.reports.length) {
+    throw new Error("Live service preflight summary must count reports");
+  }
+  return true;
+}
+
+export function writeLiveServicePreflightReport(report, outPath = DEFAULT_LIVE_SERVICE_PREFLIGHT_REPORT) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  assertLiveServicePreflightReport(report);
+  fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
+  return outPath;
 }
 
 export function readLiveServiceReportTemplate(source) {
