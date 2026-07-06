@@ -11,6 +11,8 @@ import {
   writeLocaleRegistry,
 } from "./locales.mjs";
 import { renderHtmlPage } from "./html.mjs";
+import { renderReactAdminBody } from "./react-admin-site.mjs";
+import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
@@ -127,8 +129,14 @@ function publicResponse(request, url, rendered) {
   if (wantsPrint(url, rendered)) {
     return response(rendered.status || 200, renderHtmlPage(rendered, { print: true }), "text/html; charset=utf-8");
   }
-  if (wantsHtml(request, url)) return response(rendered.status || 200, renderHtmlPage(rendered), "text/html; charset=utf-8");
+  if (wantsHtml(request, url)) {
+    return response(rendered.status || 200, renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered) }), "text/html; charset=utf-8");
+  }
   return json(rendered.status || 200, rendered);
+}
+
+function adminHtml(page) {
+  return renderHtmlPage(page, { bodyHtml: renderReactAdminBody(page) });
 }
 
 function adminUnauthorized() {
@@ -522,7 +530,7 @@ export function createHttpApp({
         deals: readDeals(dealLedgerPath || undefined),
         brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
       });
-      if (wantsHtml(request, url)) return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
 
@@ -530,7 +538,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        renderHtmlPage(
+        adminHtml(
           renderAdminLeadsPayload(activeRegistry, url.searchParams.get("locale") || "en", {
             leads: readLeadLedger(leadLedgerPath || undefined),
             replies: readReplyOutbox(replyOutboxPath || undefined),
@@ -583,7 +591,7 @@ export function createHttpApp({
       try {
         return adminResponse(
           200,
-          renderHtmlPage(
+          adminHtml(
             renderAdminListingEditorPayload(
               activeRegistry,
               url.searchParams.get("locale") || "en",
@@ -612,7 +620,7 @@ export function createHttpApp({
         currentSeed(),
         listingQualityGeneratedAt,
       );
-      return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
@@ -629,7 +637,7 @@ export function createHttpApp({
         currentSeed(),
         listingQualityGeneratedAt,
       );
-      if (wantsHtml(request, url)) return adminResponse(200, renderHtmlPage(payload), "text/html; charset=utf-8");
+      if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
 

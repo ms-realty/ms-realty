@@ -125,6 +125,7 @@ What it proves now:
 - Public health endpoint that reports liveness while still exposing launch blockers.
 - Public readiness endpoint that returns `503` until launch gates pass.
 - Production Node server adapter exposed by `npm start`.
+- Production Node HTML adapter uses the same React public/admin body bridges as the App Router, while listing `?print=1` stays on the print renderer.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
 - Generated mobile/elderly QA report over rendered public HTML, including Hebrew RTL, search form, sticky listing actions, phone-first forms, fallback noindex, and BG/RU/EN admin language policy.
 

@@ -582,7 +582,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.legacyRedirect.headers.location, redirect.target_path);
   assert.equal(smoke.home.body.body.search.path, "/he/search");
   assert.equal(smoke.homeHtml.body.includes("data-kind=\"home\""), true);
+  assert.equal(smoke.homeHtml.body.includes("data-react-public-ui=\"home\""), true);
   assert.equal(smoke.listingPrint.body.includes("data-kind=\"listing-print\""), true);
+  assert.equal(smoke.listingPrint.body.includes("data-react-public-ui="), false);
   assert.equal(smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\""), true);
   assert.equal(smoke.search.body.cards.length > 0, true);
   assert.equal(smoke.location.body.cards.length, 1);
@@ -614,6 +616,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.guidePage.body.indexable, true);
   assert.match(smoke.guidePage.body.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
   assert.match(smoke.guideHtml.body, /data-kind="guide"/);
+  assert.match(smoke.guideHtml.body, /data-react-public-ui="guide"/);
   assert.equal(smoke.languageRequest.headers["cache-control"], "no-store");
   assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(smoke.tourApproval.body.is_public, true);
@@ -668,12 +671,14 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.headers["cache-control"], "no-store");
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
+  assert.equal(smoke.adminHtml.body.includes("data-react-admin-ui=\"lead-inbox\""), true);
   assert.equal(smoke.adminHtml.body.includes("Manager escalations"), true);
   assert.equal(smoke.adminHtml.body.includes('data-sla-status="manager_escalation_required"'), true);
   assert.equal(smoke.adminHtml.body.includes("Escalation due"), true);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
   assert.equal(smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\""), true);
+  assert.equal(smoke.listingEditorHtml.body.includes("data-react-admin-ui=\"listing-editor\""), true);
   assert.equal(smoke.listingEditorHtml.body.includes("data-listing-id=\"MS-CRAWL-0001\""), true);
   assert.equal(smoke.admin.body.savedSearches.length, 1);
   assert.equal(smoke.admin.body.sellerPipeline.length, 1);
@@ -687,6 +692,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminMigrationReview.body.routeMap.mappedListings, 165);
   assert.equal(smoke.adminMigrationReview.headers["cache-control"], "no-store");
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\""), true);
+  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-react-admin-ui=\"migration-review\""), true);
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\""), true);
   assert.equal(smoke.adminMigrationReviewUnauthorized.status, 401);
   assert.equal(smoke.adminMigrationReviewUnauthorized.headers["cache-control"], "no-store");
