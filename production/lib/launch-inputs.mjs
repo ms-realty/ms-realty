@@ -87,6 +87,14 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Optional analytics: \`migration/external/seo/analytics.csv\`; privacy events are already imported.
 - Launch rule: required SEO exports must match crawled URLs from both \`makler-realty.com\` and \`makler-realty.ru\`.
 
+## Live Service Provisioning
+
+- Search engines: set \`TYPESENSE_URL\`, \`TYPESENSE_API_KEY\`, \`MEILI_URL\`, and \`MEILI_API_KEY\`.
+- Hermes worker: set \`HERMES_CHAT_COMPLETIONS_URL\`; set \`HERMES_API_KEY\` when the endpoint requires auth.
+- Search sync smoke: \`npm run search:sync && npm run search:query\`.
+- Hermes draft smoke: \`npm run hermes:worker\`.
+- Launch rule: run live search and Hermes commands after provisioning; the checked-in smoke commands remain local contract tests only.
+
 ## Content Quality Warnings
 
 - Workbook: \`production/data/listing-quality-workbook.csv\`

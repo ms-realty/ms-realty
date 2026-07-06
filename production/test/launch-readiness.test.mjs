@@ -161,6 +161,13 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=yandex_webmaster`: `url,indexed,issue/);
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=backlinks`: `target_url,source_url,referring_domain/);
   assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
+  assert.match(markdown, /Live Service Provisioning/);
+  assert.match(markdown, /TYPESENSE_URL/);
+  assert.match(markdown, /MEILI_API_KEY/);
+  assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(markdown, /npm run search:sync && npm run search:query/);
+  assert.match(markdown, /npm run hermes:worker/);
+  assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /review_status/);
   assert.match(markdown, /required_editor_fields/);
