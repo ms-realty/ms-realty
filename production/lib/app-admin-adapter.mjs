@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
+import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate } from "./app-seo-evidence.mjs";
 import {
   approveTranslationTask,
@@ -92,6 +93,7 @@ function bytesFrom(value) {
 export function appAdminConfigFromEnv(env = process.env) {
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
+    auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -265,6 +267,14 @@ function listingEditInput(input) {
 
 function currentSeed(config) {
   return applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath));
+}
+
+function auditRecordedAt(config) {
+  return config.reviewedAt || config.editedAt || config.bookedAt || config.dealClosedAt || new Date().toISOString();
+}
+
+function recordAudit(input, config) {
+  return appendAuditLog(createAuditLogEntry(input, auditRecordedAt(config)), { filePath: config.auditLogPath });
 }
 
 function leadInboxPayload(registry, url, config) {
@@ -483,6 +493,21 @@ function localePayload(registry, url) {
 function addLocale(registry, input, config) {
   const result = addLocaleToRegistry(registry, input);
   writeLocaleRegistry(result.registry, config.localeRegistryPath);
+  recordAudit(
+    {
+      action: "locale_created",
+      actor: input.reviewer || "admin",
+      objectType: "locale",
+      objectId: result.locale.code,
+      locale: result.locale.code,
+      metadata: {
+        public_enabled: result.locale.public_enabled,
+        indexable: result.locale.indexable,
+        fallback_locale: result.locale.fallback_locale,
+      },
+    },
+    config,
+  );
   return {
     locale: result.locale,
     required_admin_locales: requiredAdminLocales(result.registry),
@@ -496,10 +521,22 @@ function addLocale(registry, input, config) {
 }
 
 function appendReply(input, config) {
-  return appendReviewedReply(readLeadLedger(config.leadLedgerPath), reviewedReplyInput(input), {
+  const reply = appendReviewedReply(readLeadLedger(config.leadLedgerPath), reviewedReplyInput(input), {
     filePath: config.replyOutboxPath,
     reviewedAt: config.reviewedAt,
   });
+  recordAudit(
+    {
+      action: "reply_approved",
+      actor: reply.reviewer,
+      objectType: "reply",
+      objectId: reply.id,
+      locale: reply.reply_language,
+      metadata: { lead_id: reply.lead_id, hermes_draft_used: reply.hermes_draft_used, status: reply.status },
+    },
+    config,
+  );
+  return reply;
 }
 
 function appendEditorChange(input, config) {
@@ -509,51 +546,147 @@ function appendEditorChange(input, config) {
   const persistedStaleTranslations = result.staleTranslations
     .filter((translation) => translation.id)
     .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
+  recordAudit(
+    {
+      action: "listing_edited",
+      actor: edit.editor,
+      objectType: "listing",
+      objectId: edit.listing_id,
+      metadata: {
+        changed_fields: Object.keys(edit.patch || {}),
+        media_reviewer: edit.media_reviewer || null,
+        stale_translation_count: result.staleTranslations.length,
+      },
+    },
+    config,
+  );
   return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
 }
 
 function appendViewingBooking(input, config) {
-  return appendViewing(readLeadLedger(config.leadLedgerPath), input, {
+  const viewing = appendViewing(readLeadLedger(config.leadLedgerPath), input, {
     filePath: config.viewingLedgerPath,
     bookedAt: config.bookedAt,
   });
+  recordAudit(
+    {
+      action: "viewing_booked",
+      actor: viewing.broker,
+      objectType: "viewing",
+      objectId: viewing.id,
+      locale: viewing.original_language,
+      metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
+    },
+    config,
+  );
+  return viewing;
 }
 
 function appendDealClose(input, config) {
-  return appendClosedDeal(readLeadLedger(config.leadLedgerPath), input, {
+  const deal = appendClosedDeal(readLeadLedger(config.leadLedgerPath), input, {
     filePath: config.dealLedgerPath,
     closedAt: config.dealClosedAt,
   });
+  recordAudit(
+    {
+      action: "deal_closed",
+      actor: deal.broker,
+      objectType: "deal",
+      objectId: deal.id,
+      locale: deal.original_language,
+      metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
+    },
+    config,
+  );
+  return deal;
 }
 
 function appendBrokerContactApproval(input, config) {
-  return appendBrokerContact(createBrokerContact(input, { reviewedAt: config.reviewedAt }), {
+  const contact = appendBrokerContact(createBrokerContact(input, { reviewedAt: config.reviewedAt }), {
     filePath: config.brokerContactLedgerPath,
   });
+  recordAudit(
+    {
+      action: "broker_contact_approved",
+      actor: contact.reviewer,
+      objectType: "broker_contact",
+      objectId: contact.id,
+      metadata: { listing_id: contact.listing_id, broker: contact.broker, channels: Object.keys(contact.channels || {}) },
+    },
+    config,
+  );
+  return contact;
 }
 
 function appendTourApprovalRow(input, config) {
-  return appendTourApproval(createTourApproval(currentSeed(config), input, config.reviewedAt), {
+  const tour = appendTourApproval(createTourApproval(currentSeed(config), input, config.reviewedAt), {
     filePath: config.tourApprovalLedgerPath,
   });
+  recordAudit(
+    {
+      action: "tour_approved",
+      actor: tour.reviewer,
+      objectType: "listing_tour",
+      objectId: tour.id,
+      metadata: { listing_id: tour.listing_id, provider: tour.provider, is_public: tour.is_public },
+    },
+    config,
+  );
+  return tour;
 }
 
 function appendTranslationDraft(registry, input, config) {
-  return appendTranslationTask(createTranslationReviewTask(registry, input), { filePath: config.translationLedgerPath });
+  const task = appendTranslationTask(createTranslationReviewTask(registry, input), { filePath: config.translationLedgerPath });
+  recordAudit(
+    {
+      action: "translation_drafted",
+      actor: input.reviewer || "translation_editor",
+      objectType: task.object_type,
+      objectId: task.id,
+      locale: task.target_locale,
+      metadata: { object_id: task.object_id, status: task.status, public_indexable: task.public_indexable },
+    },
+    config,
+  );
+  return task;
 }
 
 function appendPublishedTranslation(registry, input, config) {
   const task = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)).find((row) => row.id === input.taskId);
   if (!task) throw new Error("Known translation task is required");
   const approved = approveTranslationTask(registry, task, input.reviewer, input.approvedAt || config.reviewedAt);
-  return appendTranslationTask(publishApprovedTranslation(registry, approved), { filePath: config.translationLedgerPath });
+  const published = appendTranslationTask(publishApprovedTranslation(registry, approved), { filePath: config.translationLedgerPath });
+  recordAudit(
+    {
+      action: "translation_published",
+      actor: published.reviewer,
+      objectType: published.object_type,
+      objectId: published.id,
+      locale: published.target_locale,
+      metadata: { object_id: published.object_id, status: published.status, public_indexable: published.public_indexable },
+    },
+    config,
+  );
+  return published;
 }
 
 function appendListingSlugChange(registry, input, config) {
-  return appendSlugChange(registry, currentSeed(config), input, {
+  const change = appendSlugChange(registry, currentSeed(config), input, {
     filePath: config.slugHistoryPath,
     changedAt: config.editedAt,
   });
+  recordAudit(
+    {
+      action: "listing_slug_changed",
+      actor: change.changed_by,
+      objectType: "listing_slug",
+      objectId: change.id,
+      locale: change.locale,
+      metadata: { listing_id: change.listing_id, old_path: change.old_path, new_path: change.new_path, status: change.status },
+    },
+    config,
+  );
+  return change;
 }
 
 function appendRedirectApprovalRow(input, config) {
@@ -561,6 +694,17 @@ function appendRedirectApprovalRow(input, config) {
     filePath: config.redirectApprovalPath,
     approvedAt: config.reviewedAt,
   });
+  recordAudit(
+    {
+      action: "redirect_approval_created",
+      actor: approval.reviewer,
+      objectType: "redirect",
+      objectId: approval.old_url,
+      locale: approval.target_locale,
+      metadata: { target_path: approval.target_path, status: approval.status, deployable: approval.deployable },
+    },
+    config,
+  );
   return {
     approval,
     deployablePreview: currentDeployableRedirects(config),
@@ -572,6 +716,16 @@ function importRedirectApprovalRows(csvText, config) {
     filePath: config.redirectApprovalPath,
     approvedAt: config.reviewedAt,
   });
+  recordAudit(
+    {
+      action: "redirect_approvals_imported",
+      actor: "seo_editor",
+      objectType: "redirect_import",
+      objectId: `redirect-import-${imported.length}`,
+      metadata: { imported: imported.length },
+    },
+    config,
+  );
   return {
     imported: imported.length,
     approvals: imported,
@@ -581,12 +735,33 @@ function importRedirectApprovalRows(csvText, config) {
 
 function exportDeployableRedirectRows(config) {
   const rows = currentDeployableRedirects(config);
-  return { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath) };
+  const exported = { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath) };
+  recordAudit(
+    {
+      action: "deployable_redirects_exported",
+      actor: "seo_editor",
+      objectType: "redirect_export",
+      objectId: "deployable-redirects",
+      metadata: { exported: rows.length, total: exported.summary?.total },
+    },
+    config,
+  );
+  return exported;
 }
 
 function exportLaunchReadiness(config) {
   const report = launchReadiness(config);
   const outPath = writeLaunchReadinessReport(report, config.launchReadinessOutputPath || undefined);
+  recordAudit(
+    {
+      action: "launch_readiness_exported",
+      actor: "operations",
+      objectType: "launch_readiness",
+      objectId: "launch-readiness",
+      metadata: { status: report.status, blockers: report.blockers },
+    },
+    config,
+  );
   return { outPath, report };
 }
 
@@ -602,7 +777,35 @@ function importLiveServiceReport(input, config) {
     queryReportPath: config.searchQueryReportPath || undefined,
     hermesReportPath: config.hermesWorkerReportPath || undefined,
   });
+  recordAudit(
+    {
+      action: "live_service_report_imported",
+      actor: "operations",
+      objectType: "live_service_report",
+      objectId: input.source,
+      metadata: { status: imported.report?.status || input.report?.status, out_path: imported.outPath },
+    },
+    config,
+  );
   return { imported, livePreflight, report: launchReadiness(config) };
+}
+
+function importSeoEvidence(input, config) {
+  const result = importAppSeoEvidenceRows(input, config);
+  recordAudit(
+    {
+      action: "seo_evidence_imported",
+      actor: "seo_editor",
+      objectType: "seo_evidence",
+      objectId: input.source,
+      metadata: {
+        row_count: result.imported?.row_count,
+        missing_required_sources: result.missingRequiredSources,
+      },
+    },
+    config,
+  );
+  return result;
 }
 
 function redirectApprovalWorkbook(url, config) {
@@ -661,6 +864,21 @@ function importListingQualityRows(inputCsv, config) {
         .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
       return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
     });
+  recordAudit(
+    {
+      action: "listing_quality_imported",
+      actor: "listing_quality_editor",
+      objectType: "listing_quality_review",
+      objectId: `listing-quality-${review.summary.review_rows}`,
+      metadata: {
+        imported: review.summary.review_rows,
+        edited: edits.length,
+        media_review_rows: review.summary.media_review_rows,
+        review_persisted: Boolean(reviewPath),
+      },
+    },
+    config,
+  );
   return {
     imported: review.summary.review_rows,
     edited: edits.length,
@@ -748,7 +966,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
-      return jsonResponse(201, importAppSeoEvidenceRows(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       return jsonResponse(201, importListingQualityRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));

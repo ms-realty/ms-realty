@@ -1,5 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DEFAULT_AUDIT_LOG_PATH } from "./lib/audit-log.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
@@ -46,6 +47,7 @@ export function productionServerConfig(env = process.env) {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
+    auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
@@ -75,6 +77,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
   return createHttpApp({
     eventLedgerPath: config.eventLedgerPath,
     consentLedgerPath: config.consentLedgerPath,
+    auditLogPath: config.auditLogPath,
     leadLedgerPath: config.leadLedgerPath,
     replyOutboxPath: config.replyOutboxPath,
     languageRequestPath: config.languageRequestPath,

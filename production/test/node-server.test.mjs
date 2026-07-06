@@ -16,6 +16,7 @@ import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from ".
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
+import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -34,6 +35,7 @@ async function withServer(fn) {
   const tourApprovalLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-tour-approvals-`)}/tour-approvals.jsonl`;
   const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-events-`)}/events.jsonl`;
   const consentLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-consents-`)}/consents.jsonl`;
+  const auditLogPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-audit-`)}/audit-log.jsonl`;
   const slugHistoryPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-slug-history-`)}/slug-history.jsonl`;
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
@@ -48,6 +50,7 @@ async function withServer(fn) {
   resetTourApprovals(tourApprovalLedgerPath);
   resetEventLedger(eventLedgerPath);
   resetConsentLedger(consentLedgerPath);
+  resetAuditLog(auditLogPath);
   resetSlugHistory(slugHistoryPath);
   const server = createNodeServer(
     createHttpApp({
@@ -64,6 +67,7 @@ async function withServer(fn) {
       tourApprovalLedgerPath,
       eventLedgerPath,
       consentLedgerPath,
+      auditLogPath,
       slugHistoryPath,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
@@ -93,6 +97,7 @@ async function withServer(fn) {
       tourApprovalLedgerPath,
       eventLedgerPath,
       consentLedgerPath,
+      auditLogPath,
       slugHistoryPath,
     );
   } finally {
@@ -102,6 +107,13 @@ async function withServer(fn) {
 
 function deployableRedirect() {
   return JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
+}
+
+function actionCounts(rows) {
+  return rows.reduce((counts, row) => {
+    counts[row.action] = (counts[row.action] || 0) + 1;
+    return counts;
+  }, {});
 }
 
 function assertPrivateSecurityHeaders(headers) {
@@ -129,6 +141,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       tourApprovalLedgerPath,
       eventLedgerPath,
       consentLedgerPath,
+      auditLogPath,
       slugHistoryPath,
     ) => {
       const redirect = deployableRedirect();
@@ -468,6 +481,19 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         }, {}),
         { language_request: 1, saved_search_alerts: 1, inquiry_follow_up: 4 },
       );
+      const auditRows = readAuditLog(auditLogPath);
+      assert.equal(assertAuditLog(auditRows), true);
+      assert.deepEqual(actionCounts(auditRows), {
+        broker_contact_approved: 1,
+        tour_approved: 1,
+        listing_slug_changed: 1,
+        reply_approved: 1,
+        viewing_booked: 1,
+        deal_closed: 1,
+        translation_drafted: 1,
+        translation_published: 1,
+        listing_edited: 1,
+      });
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
       assert.deepEqual(
         [

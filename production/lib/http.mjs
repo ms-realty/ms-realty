@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
+import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
 import {
   addLocaleToRegistry,
@@ -288,6 +289,7 @@ export function createHttpApp({
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
   consentLedgerPath = null,
+  auditLogPath = null,
   slugHistoryPath = null,
   redirectApprovalPath = null,
   deployableRedirectOutputPath = null,
@@ -387,6 +389,12 @@ export function createHttpApp({
   const recordConsent = (input) =>
     consentLedgerPath
       ? appendConsentRecord(createConsentRecord(input, receivedAt || new Date().toISOString()), { filePath: consentLedgerPath })
+      : null;
+  const recordAudit = (input) =>
+    auditLogPath
+      ? appendAuditLog(createAuditLogEntry(input, reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()), {
+          filePath: auditLogPath,
+        })
       : null;
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
@@ -657,6 +665,13 @@ export function createHttpApp({
           queryReportPath: searchQueryReportPath || undefined,
           hermesReportPath: hermesWorkerReportPath || undefined,
         });
+        recordAudit({
+          action: "live_service_report_imported",
+          actor: "operations",
+          objectType: "live_service_report",
+          objectId: input.source,
+          metadata: { status: input.report?.status, out_path: imported.outPath },
+        });
         return adminJson(201, { imported, livePreflight, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -667,6 +682,13 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const report = currentLaunchReadiness();
       const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined);
+      recordAudit({
+        action: "launch_readiness_exported",
+        actor: "operations",
+        objectType: "launch_readiness",
+        objectId: "launch-readiness",
+        metadata: { status: report.status, blockers: report.blockers },
+      });
       return adminJson(201, { outPath, report });
     }
 
@@ -677,6 +699,16 @@ export function createHttpApp({
         const imported = writeExternalSeoExport(input.source, input.csv, { inputDir: seoEvidenceInputDir || undefined });
         const evidence = currentSeoEvidence();
         writeSeoEvidence(evidence, seoEvidenceOutputPath || undefined);
+        recordAudit({
+          action: "seo_evidence_imported",
+          actor: "seo_editor",
+          objectType: "seo_evidence",
+          objectId: input.source,
+          metadata: {
+            row_count: imported.row_count,
+            missing_required_sources: evidence.summary.missing_required_sources,
+          },
+        });
         return adminJson(201, {
           imported,
           ...seoEvidencePayload(evidence),
@@ -707,6 +739,14 @@ export function createHttpApp({
           approvedAt: reviewedAt,
         });
         const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
+        recordAudit({
+          action: "redirect_approval_created",
+          actor: approval.reviewer,
+          objectType: "redirect",
+          objectId: approval.old_url,
+          locale: approval.target_locale,
+          metadata: { target_path: approval.target_path, status: approval.status, deployable: approval.deployable },
+        });
         return adminJson(201, {
           approval,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
@@ -724,6 +764,13 @@ export function createHttpApp({
           approvedAt: reviewedAt,
         });
         const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
+        recordAudit({
+          action: "redirect_approvals_imported",
+          actor: "seo_editor",
+          objectType: "redirect_import",
+          objectId: `redirect-import-${imported.length}`,
+          metadata: { imported: imported.length },
+        });
         return adminJson(201, {
           imported: imported.length,
           approvals: imported,
@@ -739,6 +786,13 @@ export function createHttpApp({
       try {
         const rows = buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
         const written = writeDeployableRedirects(rows, deployableRedirectOutputPath || undefined);
+        recordAudit({
+          action: "deployable_redirects_exported",
+          actor: "seo_editor",
+          objectType: "redirect_export",
+          objectId: "deployable-redirects",
+          metadata: { exported: rows.length, total: written.summary?.total },
+        });
         return adminJson(201, { exported: rows.length, ...written });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -816,6 +870,18 @@ export function createHttpApp({
               .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
             return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
           });
+        recordAudit({
+          action: "listing_quality_imported",
+          actor: "listing_quality_editor",
+          objectType: "listing_quality_review",
+          objectId: `listing-quality-${review.summary.review_rows}`,
+          metadata: {
+            imported: review.summary.review_rows,
+            edited: edits.length,
+            media_review_rows: review.summary.media_review_rows,
+            review_persisted: Boolean(reviewPath),
+          },
+        });
         return adminJson(201, {
           imported: review.summary.review_rows,
           edited: edits.length,
@@ -833,9 +899,22 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const result = addLocaleToRegistry(activeRegistry, parseJsonBody(request));
+        const input = parseJsonBody(request);
+        const result = addLocaleToRegistry(activeRegistry, input);
         activeRegistry = result.registry;
         if (localeRegistryPath) writeLocaleRegistry(activeRegistry, localeRegistryPath);
+        recordAudit({
+          action: "locale_created",
+          actor: input.reviewer || "admin",
+          objectType: "locale",
+          objectId: result.locale.code,
+          locale: result.locale.code,
+          metadata: {
+            public_enabled: result.locale.public_enabled,
+            indexable: result.locale.indexable,
+            fallback_locale: result.locale.fallback_locale,
+          },
+        });
         return adminJson(201, {
           locale: result.locale,
           required_admin_locales: requiredAdminLocales(activeRegistry),
@@ -854,8 +933,17 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const task = createTranslationReviewTask(activeRegistry, parseJsonBody(request));
-        return adminJson(201, appendTranslationTask(task, { filePath: translationLedgerPath || undefined }));
+        const input = parseJsonBody(request);
+        const task = appendTranslationTask(createTranslationReviewTask(activeRegistry, input), { filePath: translationLedgerPath || undefined });
+        recordAudit({
+          action: "translation_drafted",
+          actor: input.reviewer || "translation_editor",
+          objectType: task.object_type,
+          objectId: task.id,
+          locale: task.target_locale,
+          metadata: { object_id: task.object_id, status: task.status, public_indexable: task.public_indexable },
+        });
+        return adminJson(201, task);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -868,7 +956,16 @@ export function createHttpApp({
         const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
         const published = publishApprovedTranslation(activeRegistry, approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt));
-        return adminJson(201, appendTranslationTask(published, { filePath: translationLedgerPath || undefined }));
+        const persisted = appendTranslationTask(published, { filePath: translationLedgerPath || undefined });
+        recordAudit({
+          action: "translation_published",
+          actor: persisted.reviewer,
+          objectType: persisted.object_type,
+          objectId: persisted.id,
+          locale: persisted.target_locale,
+          metadata: { object_id: persisted.object_id, status: persisted.status, public_indexable: persisted.public_indexable },
+        });
+        return adminJson(201, persisted);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -883,6 +980,17 @@ export function createHttpApp({
         const persistedStaleTranslations = result.staleTranslations
           .filter((translation) => translation.id)
           .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
+        recordAudit({
+          action: "listing_edited",
+          actor: edit.editor,
+          objectType: "listing",
+          objectId: edit.listing_id,
+          metadata: {
+            changed_fields: Object.keys(edit.patch || {}),
+            media_reviewer: edit.media_reviewer || null,
+            stale_translation_count: result.staleTranslations.length,
+          },
+        });
         return adminJson(201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -892,13 +1000,19 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listings/slug") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return adminJson(
-          201,
-          appendSlugChange(activeRegistry, currentSeed(), parseBody(request), {
-            filePath: slugHistoryPath || undefined,
-            changedAt: slugChangedAt || editedAt,
-          }),
-        );
+        const change = appendSlugChange(activeRegistry, currentSeed(), parseBody(request), {
+          filePath: slugHistoryPath || undefined,
+          changedAt: slugChangedAt || editedAt,
+        });
+        recordAudit({
+          action: "listing_slug_changed",
+          actor: change.changed_by,
+          objectType: "listing_slug",
+          objectId: change.id,
+          locale: change.locale,
+          metadata: { listing_id: change.listing_id, old_path: change.old_path, new_path: change.new_path, status: change.status },
+        });
+        return adminJson(201, change);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -908,13 +1022,19 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = reviewedReplyInput(request);
-        return adminJson(
-          201,
-          appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
-            filePath: replyOutboxPath || undefined,
-            reviewedAt,
-          }),
-        );
+        const reply = appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
+          filePath: replyOutboxPath || undefined,
+          reviewedAt,
+        });
+        recordAudit({
+          action: "reply_approved",
+          actor: reply.reviewer,
+          objectType: "reply",
+          objectId: reply.id,
+          locale: reply.reply_language,
+          metadata: { lead_id: reply.lead_id, hermes_draft_used: reply.hermes_draft_used, status: reply.status },
+        });
+        return adminJson(201, reply);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -924,13 +1044,19 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
-        return adminJson(
-          201,
-          appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
-            filePath: viewingLedgerPath || undefined,
-            bookedAt,
-          }),
-        );
+        const viewing = appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
+          filePath: viewingLedgerPath || undefined,
+          bookedAt,
+        });
+        recordAudit({
+          action: "viewing_booked",
+          actor: viewing.broker,
+          objectType: "viewing",
+          objectId: viewing.id,
+          locale: viewing.original_language,
+          metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
+        });
+        return adminJson(201, viewing);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -939,13 +1065,19 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return adminJson(
-          201,
-          appendClosedDeal(readLeadLedger(leadLedgerPath || undefined), parseJsonBody(request), {
-            filePath: dealLedgerPath || undefined,
-            closedAt: dealClosedAt,
-          }),
-        );
+        const deal = appendClosedDeal(readLeadLedger(leadLedgerPath || undefined), parseJsonBody(request), {
+          filePath: dealLedgerPath || undefined,
+          closedAt: dealClosedAt,
+        });
+        recordAudit({
+          action: "deal_closed",
+          actor: deal.broker,
+          objectType: "deal",
+          objectId: deal.id,
+          locale: deal.original_language,
+          metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
+        });
+        return adminJson(201, deal);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -955,7 +1087,15 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const contact = createBrokerContact(parseJsonBody(request), { reviewedAt });
-        return adminJson(201, appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined }));
+        const persisted = appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined });
+        recordAudit({
+          action: "broker_contact_approved",
+          actor: persisted.reviewer,
+          objectType: "broker_contact",
+          objectId: persisted.id,
+          metadata: { listing_id: persisted.listing_id, broker: persisted.broker, channels: Object.keys(persisted.channels || {}) },
+        });
+        return adminJson(201, persisted);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -964,12 +1104,17 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        return adminJson(
-          201,
-          appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
-            filePath: tourApprovalLedgerPath || undefined,
-          }),
-        );
+        const tour = appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
+          filePath: tourApprovalLedgerPath || undefined,
+        });
+        recordAudit({
+          action: "tour_approved",
+          actor: tour.reviewer,
+          objectType: "listing_tour",
+          objectId: tour.id,
+          metadata: { listing_id: tour.listing_id, provider: tour.provider, is_public: tour.is_public },
+        });
+        return adminJson(201, tour);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

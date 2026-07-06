@@ -66,6 +66,12 @@ import {
   resetConsentLedger,
 } from "../lib/consent-ledger.mjs";
 import {
+  DEFAULT_AUDIT_LOG_PATH,
+  assertAuditLog,
+  readAuditLog,
+  resetAuditLog,
+} from "../lib/audit-log.mjs";
+import {
   assertSlugHistory,
   readSlugHistory,
   resetSlugHistory,
@@ -106,6 +112,7 @@ const brokerContactLedgerPath = path.join(smokeDir, "broker-contacts.jsonl");
 const tourApprovalLedgerPath = path.join(smokeDir, "tour-approvals.jsonl");
 const eventLedgerPath = path.join(smokeDir, "events.jsonl");
 const consentLedgerPath = path.join(smokeDir, "consent.jsonl");
+const auditLogPath = path.join(smokeDir, "audit-log.jsonl");
 const slugHistoryPath = path.join(smokeDir, "slug-history.jsonl");
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 
@@ -122,6 +129,7 @@ resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
 resetConsentLedger(consentLedgerPath);
+resetAuditLog(auditLogPath);
 resetSlugHistory(slugHistoryPath);
 fs.writeFileSync(localeRegistryPath, `${JSON.stringify(loadLocaleRegistry(), null, 2)}\n`);
 const app = createHttpApp({
@@ -138,6 +146,7 @@ const app = createHttpApp({
   tourApprovalLedgerPath,
   eventLedgerPath,
   consentLedgerPath,
+  auditLogPath,
   slugHistoryPath,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
@@ -528,6 +537,13 @@ fs.copyFileSync(consentLedgerPath, DEFAULT_CONSENT_LEDGER_PATH);
 smoke.consentLedger = {
   rows: consents.length,
   byType: consents.reduce((counts, row) => ({ ...counts, [row.consent_type]: (counts[row.consent_type] || 0) + 1 }), {}),
+};
+const auditRows = readAuditLog(auditLogPath);
+assertAuditLog(auditRows);
+fs.copyFileSync(auditLogPath, DEFAULT_AUDIT_LOG_PATH);
+smoke.auditLog = {
+  rows: auditRows.length,
+  byAction: auditRows.reduce((counts, row) => ({ ...counts, [row.action]: (counts[row.action] || 0) + 1 }), {}),
 };
 const slugHistory = readSlugHistory(slugHistoryPath);
 assertSlugHistory(slugHistory);

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
+import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 
 function tempJsonl(prefix) {
@@ -29,6 +30,13 @@ function tempDir(prefix) {
 function csvCell(value) {
   const text = String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
+}
+
+function actionCounts(rows) {
+  return rows.reduce((counts, row) => {
+    counts[row.action] = (counts[row.action] || 0) + 1;
+    return counts;
+  }, {});
 }
 
 function completeListingQualityReviewCsv(workbookCsv) {
@@ -85,9 +93,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
   const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
   const listingEditLedgerPath = tempDefaultListingEdits();
+  const auditLogPath = tempJsonl("app-admin-audit");
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_BROKER_CONTACT_LEDGER_PATH: tempJsonl("app-admin-broker-contacts"),
       MS_REALTY_DEAL_LEDGER_PATH: tempJsonl("app-admin-deals"),
       MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
@@ -626,6 +636,28 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(deal.status, 201);
       assert.equal(dealBody.status, "closed");
       assert.equal(dealBody.testimonial_request.status, "open");
+
+      const auditRows = readAuditLog(auditLogPath);
+      assert.equal(assertAuditLog(auditRows), true);
+      assert.deepEqual(actionCounts(auditRows), {
+        locale_created: 1,
+        live_service_report_imported: 1,
+        seo_evidence_imported: 1,
+        launch_readiness_exported: 1,
+        redirect_approval_created: 1,
+        redirect_approvals_imported: 1,
+        deployable_redirects_exported: 1,
+        listing_quality_imported: 1,
+        translation_drafted: 1,
+        translation_published: 1,
+        reply_approved: 1,
+        broker_contact_approved: 1,
+        listing_edited: 1,
+        listing_slug_changed: 1,
+        tour_approved: 1,
+        viewing_booked: 1,
+        deal_closed: 1,
+      });
     },
   );
 });
@@ -633,10 +665,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
 test("Next admin listing-quality import persists complete launch review CSV", async () => {
   const listingQualityReviewPath = `${tempDir("app-admin-complete-listing-quality")}/listing-quality.csv`;
   const listingEditLedgerPath = tempDefaultListingEdits();
+  const auditLogPath = tempJsonl("app-admin-complete-audit");
   const auth = { authorization: "Bearer next-admin-test" };
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
       MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-complete-translations"),
@@ -668,6 +702,9 @@ test("Next admin listing-quality import persists complete launch review CSV", as
       assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
       assert.equal(readinessBody.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
       assert.equal(readinessBody.blockers.includes("listing_quality_review"), false);
+      const auditRows = readAuditLog(auditLogPath);
+      assert.equal(assertAuditLog(auditRows), true);
+      assert.deepEqual(actionCounts(auditRows), { listing_quality_imported: 1 });
     },
   );
 });

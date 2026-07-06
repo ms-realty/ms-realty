@@ -15,6 +15,7 @@ import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from ".
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
+import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { assertServerSmoke, close, createNodeServer, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -51,6 +52,7 @@ const brokerContactLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 
 const tourApprovalLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-tour-approvals-")), "tour-approvals.jsonl");
 const eventLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-events-")), "events.jsonl");
 const consentLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-consent-")), "consent.jsonl");
+const auditLogPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-audit-")), "audit-log.jsonl");
 const slugHistoryPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-slug-history-")), "slug-history.jsonl");
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
@@ -65,6 +67,7 @@ resetBrokerContacts(brokerContactLedgerPath);
 resetTourApprovals(tourApprovalLedgerPath);
 resetEventLedger(eventLedgerPath);
 resetConsentLedger(consentLedgerPath);
+resetAuditLog(auditLogPath);
 resetSlugHistory(slugHistoryPath);
 const server = createNodeServer(
   createHttpApp({
@@ -81,6 +84,7 @@ const server = createNodeServer(
     tourApprovalLedgerPath,
     eventLedgerPath,
     consentLedgerPath,
+    auditLogPath,
     slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
@@ -456,6 +460,12 @@ try {
   smoke.consentLedger = {
     rows: consents.length,
     byType: consents.reduce((counts, row) => ({ ...counts, [row.consent_type]: (counts[row.consent_type] || 0) + 1 }), {}),
+  };
+  const auditRows = readAuditLog(auditLogPath);
+  assertAuditLog(auditRows);
+  smoke.auditLog = {
+    rows: auditRows.length,
+    byAction: auditRows.reduce((counts, row) => ({ ...counts, [row.action]: (counts[row.action] || 0) + 1 }), {}),
   };
   const slugHistory = readSlugHistory(slugHistoryPath);
   assertSlugHistory(slugHistory);

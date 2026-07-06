@@ -11525,6 +11525,21 @@
       "inquiry_follow_up": 4
     }
   },
+  "auditLog": {
+    "rows": 11,
+    "byAction": {
+      "broker_contact_approved": 1,
+      "tour_approved": 1,
+      "listing_slug_changed": 1,
+      "reply_approved": 2,
+      "viewing_booked": 1,
+      "deal_closed": 1,
+      "translation_drafted": 1,
+      "translation_published": 1,
+      "listing_edited": 1,
+      "locale_created": 1
+    }
+  },
   "slugHistoryLedger": {
     "rows": 1
   },

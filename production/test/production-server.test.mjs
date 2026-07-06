@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { close, jsonFetch, listen, textFetch } from "../lib/node-server.mjs";
+import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
 import { readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
@@ -12,6 +13,7 @@ import { createProductionServer, productionServerConfig } from "../server.mjs";
 test("production server entrypoint serves runtime routes with env config", async () => {
   const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-events-`)}/events.jsonl`;
   const consentLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-consents-`)}/consents.jsonl`;
+  const auditLogPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-audit-`)}/audit-log.jsonl`;
   const operatorDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-operator-`);
   const seoEvidenceInputDir = `${operatorDir}/seo`;
   const seoEvidenceOutputPath = `${operatorDir}/seo-evidence.json`;
@@ -47,6 +49,7 @@ test("production server entrypoint serves runtime routes with env config", async
     PORT: "0",
     HOST: "127.0.0.1",
     MS_REALTY_MAX_BODY_BYTES: "4096",
+    MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
     MS_REALTY_CONSENT_LEDGER_PATH: consentLedgerPath,
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
     MS_REALTY_REDIRECT_APPROVALS_PATH: redirectApprovalPath,
@@ -63,6 +66,7 @@ test("production server entrypoint serves runtime routes with env config", async
   assert.equal(config.port, 0);
   assert.equal(config.host, "127.0.0.1");
   assert.equal(config.maxBodyBytes, 4096);
+  assert.equal(config.auditLogPath, auditLogPath);
   assert.equal(config.consentLedgerPath, consentLedgerPath);
   assert.equal(config.redirectApprovalPath, redirectApprovalPath);
   assert.equal(config.deployableRedirectOutputPath, deployableRedirectOutputPath);
@@ -142,6 +146,20 @@ test("production server entrypoint serves runtime routes with env config", async
     assert.equal(readiness.status, 200);
     assert.equal(readiness.body.blockers.includes("listing_quality_review"), true);
     assert.equal(readiness.body.blockers.includes("live_services"), false);
+    const auditRows = readAuditLog(auditLogPath);
+    assert.equal(assertAuditLog(auditRows), true);
+    assert.deepEqual(
+      auditRows.reduce((counts, row) => {
+        counts[row.action] = (counts[row.action] || 0) + 1;
+        return counts;
+      }, {}),
+      {
+        seo_evidence_imported: 1,
+        redirect_approval_created: 1,
+        deployable_redirects_exported: 1,
+        launch_readiness_exported: 1,
+      },
+    );
   } finally {
     await close(server);
   }
@@ -172,7 +190,9 @@ test("production server config prefers explicit MS Realty env and rejects ambigu
 test("production server keeps admin locale additions in memory without mounted registry path", async () => {
   const registryPath = fromRoot("locales", "registry.json");
   const originalRegistry = fs.readFileSync(registryPath, "utf8");
-  const server = createProductionServer(productionServerConfig({ PORT: "0", HOST: "127.0.0.1" }));
+  const auditLogPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-locale-audit-`)}/audit-log.jsonl`;
+  resetAuditLog(auditLogPath);
+  const server = createProductionServer(productionServerConfig({ PORT: "0", HOST: "127.0.0.1", MS_REALTY_AUDIT_LOG_PATH: auditLogPath }));
   const address = await listen(server, 0, "127.0.0.1");
   const baseUrl = `http://${address.address}:${address.port}`;
   try {
@@ -198,6 +218,9 @@ test("production server keeps admin locale additions in memory without mounted r
     assert.equal(listed.status, 200);
     assert.equal(listed.body.locales.some((locale) => locale.code === "it"), true);
     assert.equal(fs.readFileSync(registryPath, "utf8"), originalRegistry);
+    const auditRows = readAuditLog(auditLogPath);
+    assert.equal(assertAuditLog(auditRows), true);
+    assert.deepEqual(auditRows.map((row) => row.action), ["locale_created"]);
   } finally {
     await close(server);
   }
@@ -207,16 +230,19 @@ test("production server persists public leads and reviewed admin replies", async
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-prod-ledgers-`);
   const eventLedgerPath = `${dir}/events.jsonl`;
   const consentLedgerPath = `${dir}/consents.jsonl`;
+  const auditLogPath = `${dir}/audit-log.jsonl`;
   const leadLedgerPath = `${dir}/leads.jsonl`;
   const replyOutboxPath = `${dir}/replies.jsonl`;
   fs.writeFileSync(eventLedgerPath, "");
   resetConsentLedger(consentLedgerPath);
+  resetAuditLog(auditLogPath);
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
 
   const config = productionServerConfig({
     PORT: "0",
     HOST: "127.0.0.1",
+    MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
     MS_REALTY_CONSENT_LEDGER_PATH: consentLedgerPath,
     MS_REALTY_EVENT_LEDGER_PATH: eventLedgerPath,
     MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
@@ -259,6 +285,9 @@ test("production server persists public leads and reviewed admin replies", async
     });
     assert.equal(reply.status, 201);
     assert.equal(readReplyOutbox(replyOutboxPath).length, 1);
+    const auditRows = readAuditLog(auditLogPath);
+    assert.equal(assertAuditLog(auditRows), true);
+    assert.deepEqual(auditRows.map((row) => row.action), ["reply_approved"]);
   } finally {
     await close(server);
   }

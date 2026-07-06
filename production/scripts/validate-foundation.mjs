@@ -5,6 +5,7 @@ import { assertHermesActionAllowed } from "../lib/hermes.mjs";
 import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertConsentLedger } from "../lib/consent-ledger.mjs";
+import { assertAuditLog } from "../lib/audit-log.mjs";
 import { assertLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertLeadMatchingReport } from "../lib/lead-matching.mjs";
 import { assertLeadSlaReport } from "../lib/lead-sla.mjs";
@@ -26,6 +27,47 @@ import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
 assertLocaleRegistry(registry);
+
+const expectedHttpAuditActions = {
+  broker_contact_approved: 1,
+  deal_closed: 1,
+  listing_edited: 1,
+  listing_slug_changed: 1,
+  locale_created: 1,
+  reply_approved: 2,
+  tour_approved: 1,
+  translation_drafted: 1,
+  translation_published: 1,
+  viewing_booked: 1,
+};
+const expectedNodeServerAuditActions = {
+  broker_contact_approved: 1,
+  deal_closed: 1,
+  listing_edited: 1,
+  listing_slug_changed: 1,
+  reply_approved: 1,
+  tour_approved: 1,
+  translation_drafted: 1,
+  translation_published: 1,
+  viewing_booked: 1,
+};
+
+function countBy(rows, field) {
+  return rows.reduce((counts, row) => {
+    counts[row[field]] = (counts[row[field]] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+function assertRuntimeAuditSummary(summary, label, expectedActions) {
+  const expectedRows = Object.values(expectedActions).reduce((total, count) => total + count, 0);
+  if (summary?.rows !== expectedRows) throw new Error(`${label} audit log must contain ${expectedRows} admin mutation rows`);
+  for (const [action, count] of Object.entries(expectedActions)) {
+    if (summary.byAction?.[action] !== count) throw new Error(`${label} audit log missing ${action}`);
+  }
+  const unexpected = Object.keys(summary.byAction || {}).filter((action) => !Object.hasOwn(expectedActions, action));
+  if (unexpected.length) throw new Error(`${label} audit log has unexpected actions: ${unexpected.join(", ")}`);
+}
 
 const publicLocales = publicIndexableLocales(registry).map((locale) => locale.code);
 for (const code of ["bg", "en", "de", "nl", "ru", "el", "he"]) {
@@ -447,6 +489,7 @@ if (
 ) {
   throw new Error("HTTP smoke must persist privacy-safe consent rows for public form submissions");
 }
+assertRuntimeAuditSummary(httpSmoke.auditLog, "HTTP smoke", expectedHttpAuditActions);
 if (
   httpSmoke.searchFiltered.status !== 200 ||
   httpSmoke.searchFiltered.body.search.filters.property_type !== "apartment" ||
@@ -644,6 +687,7 @@ if (
 ) {
   throw new Error("Node server smoke must persist privacy-safe consent rows for public form submissions");
 }
+assertRuntimeAuditSummary(nodeServerSmoke.auditLog, "Node server smoke", expectedNodeServerAuditActions);
 if (
   nodeServerSmoke.viewingLead.status !== 201 ||
   nodeServerSmoke.viewingLead.body.lead.source !== "website_viewing_request" ||
@@ -815,6 +859,14 @@ if (
 ) {
   throw new Error("Consent ledger artifact must contain deterministic privacy-safe public form rows");
 }
+const auditLog = fs
+  .readFileSync(fromRoot("production", "data", "audit-log.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+assertAuditLog(auditLog);
+assertRuntimeAuditSummary({ rows: auditLog.length, byAction: countBy(auditLog, "action") }, "Persisted audit", expectedHttpAuditActions);
 const localeRollout = JSON.parse(fs.readFileSync(fromRoot("production", "data", "locale-rollout-report.json"), "utf8"));
 assertLocaleRolloutReport(localeRollout);
 if (

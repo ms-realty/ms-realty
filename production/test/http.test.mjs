@@ -16,6 +16,7 @@ import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from ".
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
+import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { parseCsv } from "../lib/csv.mjs";
@@ -105,6 +106,12 @@ function tempConsents() {
   return file;
 }
 
+function tempAuditLog() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-audit-`)}/audit-log.jsonl`;
+  resetAuditLog(file);
+  return file;
+}
+
 function tempSlugHistory() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-slug-history-`)}/slug-history.jsonl`;
   resetSlugHistory(file);
@@ -164,6 +171,13 @@ function deployableRedirect() {
   return JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8")).redirects[0];
 }
 
+function actionCounts(rows) {
+  return rows.reduce((counts, row) => {
+    counts[row.action] = (counts[row.action] || 0) + 1;
+    return counts;
+  }, {});
+}
+
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();
   const replyOutboxPath = tempOutbox();
@@ -178,6 +192,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const tourApprovalLedgerPath = tempTourApprovals();
   const eventLedgerPath = tempEvents();
   const consentLedgerPath = tempConsents();
+  const auditLogPath = tempAuditLog();
   const slugHistoryPath = tempSlugHistory();
   const app = createHttpApp({
     leadLedgerPath,
@@ -193,6 +208,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     tourApprovalLedgerPath,
     eventLedgerPath,
     consentLedgerPath,
+    auditLogPath,
     slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
@@ -595,6 +611,20 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     }, {}),
     { language_request: 1, saved_search_alerts: 1, inquiry_follow_up: 4 },
   );
+  const auditRows = readAuditLog(auditLogPath);
+  assert.equal(assertAuditLog(auditRows), true);
+  assert.deepEqual(actionCounts(auditRows), {
+    broker_contact_approved: 1,
+    tour_approved: 1,
+    listing_slug_changed: 1,
+    reply_approved: 2,
+    viewing_booked: 1,
+    deal_closed: 1,
+    translation_drafted: 1,
+    translation_published: 1,
+    listing_edited: 1,
+    locale_created: 1,
+  });
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
@@ -661,6 +691,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const deployableRedirectOutputPath = tempDeployableRedirects();
   const listingEditLedgerPath = tempListingEdits();
   const translationLedgerPath = tempTranslations();
+  const auditLogPath = tempAuditLog();
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -677,6 +708,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     deployableRedirectOutputPath,
     listingEditLedgerPath,
     translationLedgerPath,
+    auditLogPath,
     reviewedAt: "2026-07-05T00:00:00Z",
     editedAt: "2026-07-05T00:03:00Z",
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
@@ -928,16 +960,26 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     true,
   );
   assert.equal(reviewHtml.body.includes('data-quality-listing="true"'), true);
+  const auditRows = readAuditLog(auditLogPath);
+  assert.equal(assertAuditLog(auditRows), true);
+  assert.deepEqual(actionCounts(auditRows), {
+    redirect_approval_created: 2,
+    listing_quality_imported: 1,
+    redirect_approvals_imported: 2,
+    deployable_redirects_exported: 1,
+  });
 });
 
 test("HTTP admin persists complete listing quality review CSV as launch evidence", async () => {
   const listingEditLedgerPath = tempDefaultListingEdits();
   const translationLedgerPath = tempTranslations();
   const listingQualityReviewPath = tempListingQualityReviewPath();
+  const auditLogPath = tempAuditLog();
   const app = createHttpApp({
     listingEditLedgerPath,
     translationLedgerPath,
     listingQualityReviewPath,
+    auditLogPath,
     editedAt: "2026-07-05T00:03:00Z",
   });
   const workbookCsv = fs.readFileSync(fromRoot("production", "data", "listing-quality-workbook.csv"), "utf8");
@@ -965,6 +1007,9 @@ test("HTTP admin persists complete listing quality review CSV as launch evidence
   assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
   assert.equal(readiness.body.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
   assert.equal(readiness.body.blockers.includes("listing_quality_review"), false);
+  const auditRows = readAuditLog(auditLogPath);
+  assert.equal(assertAuditLog(auditRows), true);
+  assert.deepEqual(actionCounts(auditRows), { listing_quality_imported: 1 });
 });
 
 test("HTTP app rejects invalid language requests", async () => {
