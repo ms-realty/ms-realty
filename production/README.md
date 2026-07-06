@@ -171,6 +171,7 @@ Useful operator endpoints:
 - `GET /api/admin/live-service-report-template` and `POST /api/admin/live-service-reports/import` handle validated live report files.
 - `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
 - `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
+- `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest without a Payload runtime dependency.
 
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.
 Set `MS_REALTY_ADMIN_TOKEN` before running the production server.
@@ -213,6 +214,7 @@ Generated production data:
 - `production/data/listing-verification-report.json`
 - `production/data/cms-seed.json`
 - `production/data/cms-collections.json`
+- `production/data/payload-collections.json`
 - `production/data/public-fixtures.json`
 - `production/data/admin-fixtures.json`
 - `production/data/runtime-smoke.json`

@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { loadListings } from "../lib/content.mjs";
 import { assertCmsCollections, assertCmsSeed, buildCmsCollections, buildCmsSeed, loadMediaInventory } from "../lib/cms-seed.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { assertPayloadCollections, buildPayloadCollections } from "../lib/payload-collections.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -84,6 +85,23 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
   assert.equal(tourFields.get("accessibility_caption").localized, true);
 });
 
+test("Payload collection configs adapt CMS manifest fields without adding Payload runtime dependency", () => {
+  const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
+  const payload = buildPayloadCollections(buildCmsCollections(seed));
+  const summary = assertPayloadCollections(payload);
+  const listingsConfig = payload.collections.find((collection) => collection.slug === "listings");
+  const facts = listingsConfig.fields.find((field) => field.name === "facts");
+  const mediaConfig = payload.collections.find((collection) => collection.slug === "media_assets");
+  const toursConfig = payload.collections.find((collection) => collection.slug === "listing_tours");
+
+  assert.equal(summary.collections, 4);
+  assert.equal(listingsConfig.versions.drafts, true);
+  assert.equal(listingsConfig.custom.publish_requires_human_review, true);
+  assert.equal(facts.fields.some((field) => field.name === "price_eur" && field.type === "number"), true);
+  assert.equal(mediaConfig.fields.find((field) => field.name === "url").type, "text");
+  assert.equal(toursConfig.fields.find((field) => field.name === "fallback_gallery").fields[0].name, "url");
+});
+
 test("generated CMS seed file is valid when present", () => {
   const file = fromRoot("production", "data", "cms-seed.json");
   if (!fs.existsSync(file)) return;
@@ -99,4 +117,12 @@ test("generated CMS collection manifest is valid when present", () => {
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
   const summary = assertCmsCollections(manifest);
   assert.equal(summary.records.listing_tours, 165);
+});
+
+test("generated Payload collection config file is valid when present", () => {
+  const file = fromRoot("production", "data", "payload-collections.json");
+  if (!fs.existsSync(file)) return;
+  const payload = JSON.parse(fs.readFileSync(file, "utf8"));
+  const summary = assertPayloadCollections(payload);
+  assert.equal(summary.collections, 4);
 });

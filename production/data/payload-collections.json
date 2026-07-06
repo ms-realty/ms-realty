@@ -1,0 +1,562 @@
+{
+  "artifact_id": "payload-collections-20260704",
+  "source_artifact": "cms-collections-20260704",
+  "generated_from": "production/data/cms-collections.json",
+  "collections": [
+    {
+      "slug": "listings",
+      "admin": {
+        "useAsTitle": "id",
+        "defaultColumns": [
+          "id",
+          "cms_status",
+          "source_locale",
+          "source_domain"
+        ]
+      },
+      "versions": {
+        "drafts": true
+      },
+      "labels": {
+        "singular": "listings",
+        "plural": "listings"
+      },
+      "fields": [
+        {
+          "name": "id",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true
+        },
+        {
+          "name": "cms_status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "source_imported_review_required",
+            "draft",
+            "review",
+            "published",
+            "archived"
+          ]
+        },
+        {
+          "name": "source_locale",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locales"
+        },
+        {
+          "name": "source_domain",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "source_url",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true,
+          "admin": {
+            "description": "URL field from migration manifest."
+          }
+        },
+        {
+          "name": "facts",
+          "type": "group",
+          "required": true,
+          "localized": false,
+          "fields": [
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "h1",
+              "type": "text"
+            },
+            {
+              "name": "description",
+              "type": "textarea"
+            },
+            {
+              "name": "location",
+              "type": "text"
+            },
+            {
+              "name": "property_type",
+              "type": "text"
+            },
+            {
+              "name": "offer_type",
+              "type": "text"
+            },
+            {
+              "name": "bedrooms",
+              "type": "number"
+            },
+            {
+              "name": "price_eur",
+              "type": "number"
+            },
+            {
+              "name": "price_on_request",
+              "type": "checkbox"
+            },
+            {
+              "name": "image_count",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "name": "seo",
+          "type": "group",
+          "required": true,
+          "localized": false,
+          "fields": [
+            {
+              "name": "title",
+              "type": "text"
+            },
+            {
+              "name": "description",
+              "type": "textarea"
+            },
+            {
+              "name": "canonical",
+              "type": "text"
+            },
+            {
+              "name": "schema_present",
+              "type": "checkbox"
+            }
+          ]
+        },
+        {
+          "name": "translations",
+          "type": "relationship",
+          "required": false,
+          "localized": false,
+          "hasMany": true,
+          "relationTo": "listing_translations",
+          "admin": {
+            "readOnly": true
+          }
+        },
+        {
+          "name": "media",
+          "type": "relationship",
+          "required": false,
+          "localized": false,
+          "hasMany": true,
+          "relationTo": "media_assets",
+          "admin": {
+            "readOnly": true
+          }
+        },
+        {
+          "name": "tour",
+          "type": "relationship",
+          "required": false,
+          "localized": false,
+          "relationTo": "listing_tours",
+          "admin": {
+            "readOnly": true
+          }
+        },
+        {
+          "name": "routing",
+          "type": "group",
+          "required": false,
+          "localized": false,
+          "fields": [
+            {
+              "name": "target_path",
+              "type": "text"
+            },
+            {
+              "name": "target_locale",
+              "type": "text"
+            },
+            {
+              "name": "planned_status",
+              "type": "number"
+            },
+            {
+              "name": "deployable",
+              "type": "checkbox"
+            },
+            {
+              "name": "review_required",
+              "type": "checkbox"
+            }
+          ]
+        },
+        {
+          "name": "migration",
+          "type": "group",
+          "required": false,
+          "localized": false,
+          "fields": [
+            {
+              "name": "record_id",
+              "type": "text"
+            },
+            {
+              "name": "review_state",
+              "type": "text"
+            },
+            {
+              "name": "metadata_gaps",
+              "type": "json"
+            }
+          ]
+        }
+      ],
+      "custom": {
+        "source": "production/data/cms-seed.json records[collection=listings]",
+        "workflow": [
+          "source_imported_review_required",
+          "draft",
+          "review",
+          "published",
+          "archived"
+        ],
+        "publish_requires_human_review": true
+      }
+    },
+    {
+      "slug": "listing_translations",
+      "admin": {
+        "useAsTitle": "locale",
+        "defaultColumns": [
+          "locale",
+          "source_locale",
+          "status",
+          "source_hash"
+        ]
+      },
+      "versions": {
+        "drafts": true
+      },
+      "labels": {
+        "singular": "listing translations",
+        "plural": "listing translations"
+      },
+      "fields": [
+        {
+          "name": "locale",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locales"
+        },
+        {
+          "name": "source_locale",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "locales"
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "missing",
+            "hermes_drafted",
+            "human_edited",
+            "approved",
+            "published",
+            "stale"
+          ]
+        },
+        {
+          "name": "source_hash",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "translated_hash",
+          "type": "text",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "reviewer",
+          "type": "text",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "approved_at",
+          "type": "date",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "description": "Required before: approved, published"
+          }
+        },
+        {
+          "name": "direction",
+          "type": "select",
+          "required": false,
+          "localized": false,
+          "options": [
+            "ltr",
+            "rtl"
+          ]
+        },
+        {
+          "name": "public_indexable",
+          "type": "checkbox",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "readOnly": true
+          }
+        }
+      ],
+      "custom": {
+        "source": "listings.translations",
+        "workflow": [
+          "missing",
+          "hermes_drafted",
+          "human_edited",
+          "approved",
+          "published",
+          "stale"
+        ],
+        "publish_requires_human_review": true
+      }
+    },
+    {
+      "slug": "media_assets",
+      "admin": {
+        "useAsTitle": "url",
+        "defaultColumns": [
+          "url",
+          "asset_url",
+          "alt",
+          "width"
+        ]
+      },
+      "versions": {
+        "drafts": true
+      },
+      "labels": {
+        "singular": "media assets",
+        "plural": "media assets"
+      },
+      "fields": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "unique": true,
+          "admin": {
+            "description": "URL field from migration manifest."
+          }
+        },
+        {
+          "name": "asset_url",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "description": "URL field from migration manifest."
+          }
+        },
+        {
+          "name": "alt",
+          "type": "text",
+          "required": false,
+          "localized": true
+        },
+        {
+          "name": "width",
+          "type": "number",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "height",
+          "type": "number",
+          "required": false,
+          "localized": false
+        },
+        {
+          "name": "kind",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "photo",
+            "floor_plan",
+            "site_chrome",
+            "document",
+            "unknown"
+          ]
+        },
+        {
+          "name": "is_public",
+          "type": "checkbox",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "review_status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "approved_imported_photo",
+            "reviewed_private",
+            "review_required"
+          ]
+        }
+      ],
+      "custom": {
+        "source": "listings.media",
+        "workflow": [
+          "approved_imported_photo",
+          "reviewed_private",
+          "review_required"
+        ],
+        "publish_requires_human_review": true
+      }
+    },
+    {
+      "slug": "listing_tours",
+      "admin": {
+        "useAsTitle": "provider",
+        "defaultColumns": [
+          "provider",
+          "listing_id",
+          "panorama_url",
+          "thumbnail_url"
+        ]
+      },
+      "versions": {
+        "drafts": true
+      },
+      "labels": {
+        "singular": "listing tours",
+        "plural": "listing tours"
+      },
+      "fields": [
+        {
+          "name": "provider",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "photo-sphere-viewer"
+          ]
+        },
+        {
+          "name": "listing_id",
+          "type": "relationship",
+          "required": true,
+          "localized": false,
+          "relationTo": "listings"
+        },
+        {
+          "name": "panorama_url",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "description": "Required before: approved, published"
+          }
+        },
+        {
+          "name": "thumbnail_url",
+          "type": "text",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "description": "URL field from migration manifest."
+          }
+        },
+        {
+          "name": "hotspots",
+          "type": "array",
+          "required": true,
+          "localized": false,
+          "fields": [
+            {
+              "name": "value",
+              "type": "json"
+            }
+          ]
+        },
+        {
+          "name": "is_public",
+          "type": "checkbox",
+          "required": true,
+          "localized": false
+        },
+        {
+          "name": "accessibility_caption",
+          "type": "textarea",
+          "required": false,
+          "localized": true,
+          "admin": {
+            "description": "Required before: approved, published"
+          }
+        },
+        {
+          "name": "review_status",
+          "type": "select",
+          "required": true,
+          "localized": false,
+          "options": [
+            "needs_panorama_upload",
+            "review_required",
+            "approved",
+            "published"
+          ]
+        },
+        {
+          "name": "fallback_gallery",
+          "type": "array",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "readOnly": true
+          },
+          "fields": [
+            {
+              "name": "url",
+              "type": "text"
+            },
+            {
+              "name": "alt",
+              "type": "text",
+              "localized": true
+            }
+          ]
+        }
+      ],
+      "custom": {
+        "source": "listings.tour",
+        "workflow": [
+          "needs_panorama_upload",
+          "review_required",
+          "approved",
+          "published"
+        ],
+        "publish_requires_human_review": true
+      }
+    }
+  ]
+}
