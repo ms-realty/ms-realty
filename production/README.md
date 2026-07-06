@@ -70,6 +70,7 @@ What it proves now:
 - Search API overlays translation ledger state before card display/indexability.
 - Search API returns reviewed translation cards for admin-added approved locales.
 - Search engine sync worker path for Typesense and Meilisearch imports from the same reviewed 167-document fixture.
+- Search engine query smoke path that verifies both engines can return the reviewed BG listing document without draft locales.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
 - Locale rollout report that turns requested disabled locales into approval tasks and public Hermes locales into draft queue summaries.
@@ -183,6 +184,7 @@ Generated production data:
 - `production/data/slug-history.jsonl`
 - `production/data/seo-evidence.json`
 - `production/data/search-engine-sync-smoke.json`
+- `production/data/search-engine-query-smoke.json`
 - `production/data/launch-readiness.json`
 - `production/data/launch-input-checklist.md`
 - `production/data/language-requests.jsonl`

@@ -16,7 +16,7 @@ import { assertTranslationCoverageReport } from "../lib/translation-coverage.mjs
 import { assertLocaleRolloutReport } from "../lib/locale-rollout.mjs";
 import { assertHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
 import { assertHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
-import { assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
+import { assertSearchEngineQueryReport, assertSearchEngineSyncReport } from "../lib/search-engine-sync.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const registry = loadLocaleRegistry();
@@ -82,6 +82,11 @@ if (
   searchEngineSyncSmoke.calls.length !== 4
 ) {
   throw new Error("Search engine sync smoke must cover Typesense and Meilisearch imports");
+}
+const searchEngineQuerySmoke = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-smoke.json"), "utf8"));
+assertSearchEngineQueryReport(searchEngineQuerySmoke);
+if (searchEngineQuerySmoke.summary.first_hit_ids.some((id) => id !== "MS-CRAWL-0001:bg")) {
+  throw new Error("Search engine query smoke must find the reviewed BG listing document first");
 }
 
 const migration = JSON.parse(fs.readFileSync(fromRoot("production", "data", "migration-records.json"), "utf8"));

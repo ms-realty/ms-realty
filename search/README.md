@@ -15,6 +15,7 @@ are BG, RU, and EN.
 python3 search/build_search_indexes.py
 python3 search/validate_search_imports.py
 npm run search:sync:smoke
+npm run search:query:smoke
 ```
 
 Generated files:
@@ -27,6 +28,7 @@ Generated files:
 - `search/data/meilisearch-listings.ndjson` - Meilisearch NDJSON import body.
 - `search/data/search-fixture-summary.json` - corpus counts and inferred facets.
 - `production/data/search-engine-sync-smoke.json` - local proof that the same 167 documents are sent to both engine APIs.
+- `production/data/search-engine-query-smoke.json` - local proof that both engine query APIs return the reviewed BG listing document.
 
 `validate_search_imports.py` checks that the Typesense JSONL and Meilisearch
 NDJSON match `index-listings.json`, have unique IDs, fit the Typesense schema,
@@ -52,6 +54,7 @@ TYPESENSE_API_KEY=dev-ms-realty \
 MEILI_URL=http://localhost:7700 \
 MEILI_API_KEY=dev-ms-realty \
 npm run search:sync
+npm run search:query
 ```
 
 ```bash

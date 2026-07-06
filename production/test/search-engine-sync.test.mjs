@@ -2,7 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
+  assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
+  runSearchEngineQuerySmoke,
   runSearchEngineSync,
   syncTypesense,
 } from "../lib/search-engine-sync.mjs";
@@ -54,4 +56,39 @@ test("generated search sync smoke report is valid when present", () => {
   const file = fromRoot("production", "data", "search-engine-sync-smoke.json");
   if (!fs.existsSync(file)) return;
   assert.equal(assertSearchEngineSyncReport(JSON.parse(fs.readFileSync(file, "utf8"))), true);
+});
+
+test("search engine query smoke normalizes Typesense and Meilisearch hits", async () => {
+  const calls = [];
+  const hit = {
+    id: "MS-CRAWL-0001:bg",
+    source_listing_id: "MS-CRAWL-0001",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-CRAWL-0001",
+    title: "Reviewed listing",
+  };
+  const report = await runSearchEngineQuerySmoke({
+    typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+    meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      if (url.includes("typesense.local")) {
+        return { ok: true, status: 200, async json() { return { found: 1, hits: [{ document: hit }] }; } };
+      }
+      return { ok: true, status: 200, async json() { return { estimatedTotalHits: 1, hits: [hit] }; } };
+    },
+  });
+
+  assert.equal(assertSearchEngineQueryReport(report), true);
+  assert.equal(calls[0].url.includes("/documents/search?"), true);
+  assert.equal(calls[0].options.method, "GET");
+  assert.equal(calls[1].url, "http://meili.local/indexes/ms_realty_listings/search");
+  assert.equal(calls[1].options.method, "POST");
+  assert.equal(JSON.parse(calls[1].options.body).filter, "translation_indexable = true AND locale = bg");
+});
+
+test("generated search query smoke report is valid when present", () => {
+  const file = fromRoot("production", "data", "search-engine-query-smoke.json");
+  if (!fs.existsSync(file)) return;
+  assert.equal(assertSearchEngineQueryReport(JSON.parse(fs.readFileSync(file, "utf8"))), true);
 });
