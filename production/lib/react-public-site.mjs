@@ -9,6 +9,16 @@ function cardSummary(card) {
   return [card.location, card.property_type, card.offer_type].filter(Boolean).join(" / ");
 }
 
+function factsList(facts = {}) {
+  return h(
+    "dl",
+    null,
+    ...Object.entries(facts)
+      .filter(([, value]) => value !== null && value !== undefined && value !== "")
+      .flatMap(([key, value]) => [h("dt", { key: `${key}-term` }, key.replaceAll("_", " ")), h("dd", { key: `${key}-value` }, value)]),
+  );
+}
+
 function SearchCard({ card }) {
   return h(
     "article",
@@ -61,6 +71,11 @@ function HomeBody({ page }) {
       h("a", { href: page.body.contact.path, "data-action": "contact" }, page.body.contact.label),
     ),
     h(
+      "nav",
+      { "aria-label": "Locations" },
+      ...(page.body.locations || []).map((location) => h("a", { key: location.path, href: location.path }, location.location)),
+    ),
+    h(
       "section",
       { "aria-label": "Featured listings" },
       ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card })),
@@ -90,6 +105,16 @@ function SearchBody({ page }) {
       filter("location", "Location"),
       filter("property_type", "Type"),
       h(
+        "label",
+        null,
+        "Sort ",
+        h(
+          "select",
+          { name: "sort" },
+          ...(controls.sort_options || []).map((option) => h("option", { key: option.id, value: option.id, selected: option.default ? true : undefined }, option.label)),
+        ),
+      ),
+      h(
         "fieldset",
         { "data-view-mode-control": "true", "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false" },
         h("legend", null, "View"),
@@ -105,6 +130,11 @@ function SearchBody({ page }) {
       h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
       h("input", { type: "hidden", name: "query", defaultValue: page.search.query || "" }),
       h("button", { type: "submit" }, "Save search"),
+    ),
+    h(
+      "section",
+      { "aria-label": "Active filters", "data-active-filter-count": (controls.active_filter_chips || []).length },
+      ...(controls.active_filter_chips || []).map((chip) => h("span", { key: chip.key, "data-filter-chip": chip.key }, chip.value)),
     ),
     h("p", null, `${page.search.total_matches} matches`),
     h("section", { "aria-label": "Search results" }, ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card }))),
@@ -154,6 +184,17 @@ function ListingBody({ page }) {
       ),
     ),
     h("p", null, page.body.description || ""),
+    factsList(facts),
+    h(
+      "nav",
+      {
+        "aria-label": "Listing media",
+        "data-media-gallery-count": page.body.media.gallery_count || 0,
+        "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
+      },
+      h("a", { href: "#listing-gallery" }, "Photos"),
+      h("a", { href: "#listing-tour", "aria-disabled": tour.available ? "false" : "true" }, "360"),
+    ),
     h(
       "section",
       { id: "listing-gallery", "aria-label": "Gallery", "data-photo-carousel": "true" },
@@ -168,6 +209,13 @@ function ListingBody({ page }) {
         "data-tour-provider": tour.provider || "photo-sphere-viewer",
       },
       h("p", null, tour.available ? tour.accessibility_caption : tour.review_status || "review required"),
+    ),
+    h(
+      "section",
+      { "aria-label": "Related listings" },
+      ...(page.body.related_listings || []).map((card) =>
+        h("article", { key: card.id, "data-related-listing": "true" }, h("h2", null, h("a", { href: card.path }, card.title))),
+      ),
     ),
     h(
       "nav",

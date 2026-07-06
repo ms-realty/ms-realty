@@ -63,19 +63,28 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(home.headers["cache-control"], "public, max-age=300, s-maxage=3600");
   assert.match(home.html, /<html lang="he" dir="rtl">/);
   assert.match(home.html, /data-react-public-ui="home"/);
+  assert.match(home.html, /aria-label="Locations"/);
+  assert.match(home.html, /\/he\/locations\/sandanski/);
 
-  const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski" });
+  const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski&property_type=apartment" });
   assert.equal(search.status, 200);
   assert.equal(search.headers["cache-control"], "no-store");
   assert.equal(search.rendered.kind, "search");
   assert.equal(search.rendered.search.query, "sandanski");
   assert.match(search.html, /data-react-public-ui="search"/);
+  assert.match(search.html, /<select name="sort">/);
+  assert.match(search.html, /data-active-filter-count="1"/);
+  assert.match(search.html, /data-filter-chip="property_type"/);
 
   const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001" });
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.kind, "listing");
   assert.match(listing.html, /MS-CRAWL-0001/);
   assert.match(listing.html, /data-react-public-ui="listing"/);
+  assert.match(listing.html, /<dl>/);
+  assert.match(listing.html, /aria-label="Listing media"/);
+  assert.match(listing.html, /data-media-gallery-count=/);
+  assert.match(listing.html, /aria-label="Related listings"/);
 
   const listingPrint = renderAppRoute({
     pathname: "/he/properties/MS-CRAWL-0001",
