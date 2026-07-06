@@ -263,6 +263,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const liveImportBody = await liveImport.json();
       assert.equal(liveImport.status, 201);
       assert.equal(liveImportBody.imported.outPath, hermesWorkerReportPath);
+      assert.equal(liveImportBody.livePreflight.status, "blocked");
+      assert.equal(liveImportBody.livePreflight.summary.pass, 1);
+      assert.equal(liveImportBody.livePreflight.summary.missing_report, 2);
       assert.equal(fs.existsSync(hermesWorkerReportPath), true);
 
       const migrationReviewUnauthorized = await migrationReviewRoute.GET(

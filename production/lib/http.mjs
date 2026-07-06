@@ -638,7 +638,13 @@ export function createHttpApp({
           queryReportPath: searchQueryReportPath || undefined,
           hermesReportPath: hermesWorkerReportPath || undefined,
         });
-        return adminJson(201, { imported, report: currentLaunchReadiness() });
+        const livePreflight = buildLiveServicePreflightReport({
+          generatedAt: reviewedAt || new Date().toISOString(),
+          syncReportPath: searchSyncReportPath || undefined,
+          queryReportPath: searchQueryReportPath || undefined,
+          hermesReportPath: hermesWorkerReportPath || undefined,
+        });
+        return adminJson(201, { imported, livePreflight, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

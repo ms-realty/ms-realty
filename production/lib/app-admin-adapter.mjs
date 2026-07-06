@@ -594,7 +594,13 @@ function importLiveServiceReport(input, config) {
     queryReportPath: config.searchQueryReportPath || undefined,
     hermesReportPath: config.hermesWorkerReportPath || undefined,
   });
-  return { imported, report: launchReadiness(config) };
+  const livePreflight = buildLiveServicePreflightReport({
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+    syncReportPath: config.searchSyncReportPath || undefined,
+    queryReportPath: config.searchQueryReportPath || undefined,
+    hermesReportPath: config.hermesWorkerReportPath || undefined,
+  });
+  return { imported, livePreflight, report: launchReadiness(config) };
 }
 
 function redirectApprovalWorkbook(url, config) {
