@@ -244,3 +244,9 @@ export function writeCmsCollections(manifest, outPath = DEFAULT_CMS_COLLECTIONS_
   fs.writeFileSync(outPath, `${JSON.stringify(manifest, null, 2)}\n`);
   return { outPath, summary };
 }
+
+export function loadCmsCollections(filePath = DEFAULT_CMS_COLLECTIONS_OUTPUT) {
+  const manifest = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  assertCmsCollections(manifest);
+  return manifest;
+}

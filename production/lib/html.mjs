@@ -302,11 +302,14 @@ function renderAdminMigrationReview(page) {
     page.launchInputChecklistEndpoint,
   )}" data-preflight-reports-endpoint="${escapeHtml(
     page.preflightReportsEndpoint,
+  )}" data-cms-collections-endpoint="${escapeHtml(
+    page.cmsCollectionsEndpoint,
   )}">
   <h1>Migration review</h1>
   <p><a href="${escapeHtml(page.launchReadinessEndpoint)}">Launch readiness JSON</a></p>
   <p><a href="${escapeHtml(page.launchInputChecklistEndpoint)}">Launch input checklist</a></p>
   <p><a href="${escapeHtml(page.preflightReportsEndpoint)}">Preflight reports JSON</a></p>
+  <p><a href="${escapeHtml(page.cmsCollectionsEndpoint)}">CMS collection contracts</a></p>
   <form method="post" action="${escapeHtml(page.launchReadinessExportEndpoint)}">
     <button type="submit">Export launch readiness</button>
   </form>

@@ -168,6 +168,7 @@ Useful operator endpoints:
 - `GET /api/admin/launch-readiness` returns the launch gate report.
 - `GET /api/admin/launch-input-checklist` returns the remaining operator inputs as Markdown.
 - `GET /api/admin/live-service-report-template` and `POST /api/admin/live-service-reports/import` handle validated live report files.
+- `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
 - `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
 
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.

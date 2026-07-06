@@ -61,6 +61,7 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
+import { loadCmsCollections } from "./cms-seed.mjs";
 import {
   DEFAULT_LISTING_QUALITY_REPORT,
   buildListingQualityPreflightReport,
@@ -262,6 +263,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    cmsCollectionsEndpoint: "/api/admin/cms-collections",
     deployablePreview: buildDeployableRedirects(routes, approvals),
   };
 }
@@ -540,6 +542,11 @@ export function createHttpApp({
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
         locales: activeRegistry.locales,
       });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/cms-collections") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, { kind: "admin_cms_collections", ...loadCmsCollections() });
     }
 
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
@@ -1335,6 +1342,7 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.routeMap.mappedListings !== 165 ||
     smoke.adminMigrationReview.body.listingQuality.summary.affected_listings < 1 ||
     smoke.adminMigrationReview.body.launchInputChecklistEndpoint !== "/api/admin/launch-input-checklist" ||
+    smoke.adminMigrationReview.body.cmsCollectionsEndpoint !== "/api/admin/cms-collections" ||
     smoke.adminMigrationReview.body.routeMap.approvableSample?.length < 1
   ) {
     throw new Error("HTTP smoke must serve admin migration review workbench contract");
@@ -1352,6 +1360,7 @@ export function assertHttpSmoke(smoke) {
     !smoke.adminMigrationReviewHtml.body.includes("data-seo-template-endpoint=\"/api/admin/seo-evidence/template\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-endpoint=\"/api/admin/launch-readiness\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-readiness-export-endpoint=\"/api/admin/launch-readiness/export\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-cms-collections-endpoint=\"/api/admin/cms-collections\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-launch-input-checklist-endpoint=\"/api/admin/launch-input-checklist\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-quality-workbook-endpoint=\"/api/admin/listing-quality-workbook\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-quality-listing=\"true\"")

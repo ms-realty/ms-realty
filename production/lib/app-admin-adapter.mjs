@@ -33,6 +33,7 @@ import {
   writeCompleteListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
+import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
@@ -467,6 +468,7 @@ function migrationReviewPayload(registry, url, config) {
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    cmsCollectionsEndpoint: "/api/admin/cms-collections",
     deployablePreview: currentDeployableRedirects(config),
   };
 }
@@ -688,6 +690,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
       return jsonResponse(200, localePayload(registry, url));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/cms-collections") {
+      return jsonResponse(200, { kind: "admin_cms_collections", ...loadCmsCollections() });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
       return jsonResponse(200, launchReadiness(config));
