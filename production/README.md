@@ -89,6 +89,7 @@ What it proves now:
 - Next App Router admin media/contact handlers for reviewed broker contacts and approved 360 tours.
 - Next App Router admin locale and translation handlers for dynamic language rollout without AI auto-publish.
 - Next App Router admin launch-readiness, launch-input checklist, and SEO evidence read endpoints.
+- Next App Router admin redirect review handlers for approval workbook, CSV import, single approvals, and deployable export.
 - `next build` gate over the App Router handlers, pinned to Next 16 and React 19.
 - Admin-approved dynamic locale translations resolve as locale-prefixed listing routes.
 - Served sitemap XML includes approved dynamic locale translations from the review ledger.

@@ -32,16 +32,22 @@ async function withEnv(env, fn) {
 }
 
 test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin auth", async () => {
+  const deployableRedirectOutputPath = tempJson(
+    "app-admin-deployable-redirects",
+    `${JSON.stringify({ summary: {}, redirects: [] })}\n`,
+  );
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
       MS_REALTY_BROKER_CONTACT_LEDGER_PATH: tempJsonl("app-admin-broker-contacts"),
       MS_REALTY_DEAL_LEDGER_PATH: tempJsonl("app-admin-deals"),
+      MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
       MS_REALTY_EVENT_LEDGER_PATH: tempJsonl("app-admin-events"),
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: tempJsonl("app-admin-listing-edits"),
+      MS_REALTY_REDIRECT_APPROVALS_PATH: tempJsonl("app-admin-redirect-approvals"),
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
       MS_REALTY_SELLER_PIPELINE_PATH: tempJsonl("app-admin-seller-pipeline"),
@@ -53,9 +59,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const publicLeadRoute = await import("../../app/api/leads/route.js");
       const brokerContactRoute = await import("../../app/api/admin/broker-contacts/route.js");
       const dealCloseRoute = await import("../../app/api/admin/deals/close/route.js");
+      const deployableRedirectExportRoute = await import("../../app/api/admin/deployable-redirects/export/route.js");
       const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const localeRoute = await import("../../app/api/admin/locales/route.js");
+      const redirectApprovalWorkbookRoute = await import("../../app/api/admin/redirect-approval-workbook/route.js");
+      const redirectApprovalsRoute = await import("../../app/api/admin/redirect-approvals/route.js");
+      const redirectApprovalsImportRoute = await import("../../app/api/admin/redirect-approvals/import/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
       const seoEvidenceRoute = await import("../../app/api/admin/seo-evidence/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
@@ -145,6 +155,64 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(seoEvidence.status, 200);
       assert.ok(seoEvidenceBody.missingRequiredSources.includes("search_console"));
       assert.equal(seoEvidenceBody.sources.privacy_events.status, "imported");
+
+      const redirectRoutes = JSON.parse(fs.readFileSync("production/data/legacy-route-map.json", "utf8")).routes.filter(
+        (route) => route.url_type === "listing" && route.target_path,
+      );
+      const [firstRedirect, secondRedirect] = redirectRoutes;
+      const redirectWorkbook = await redirectApprovalWorkbookRoute.GET(
+        new Request("https://example.test/api/admin/redirect-approval-workbook?pending=1", { headers: auth }),
+      );
+      const redirectWorkbookCsv = await redirectWorkbook.text();
+      assert.equal(redirectWorkbook.status, 200);
+      assert.equal(redirectWorkbook.headers.get("content-type"), "text/csv; charset=utf-8");
+      assert.ok(redirectWorkbookCsv.includes(firstRedirect.old_url));
+      assert.ok(redirectWorkbookCsv.includes(firstRedirect.target_path));
+
+      const redirectApproval = await redirectApprovalsRoute.POST(
+        new Request("https://example.test/api/admin/redirect-approvals", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            oldUrl: firstRedirect.old_url,
+            equivalentContent: true,
+            reviewer: "seo_editor",
+          }),
+        }),
+      );
+      const redirectApprovalBody = await redirectApproval.json();
+      assert.equal(redirectApproval.status, 201);
+      assert.equal(redirectApprovalBody.approval.target_path, firstRedirect.target_path);
+      assert.equal(redirectApprovalBody.deployablePreview.length, 1);
+
+      const redirectImport = await redirectApprovalsImportRoute.POST(
+        new Request("https://example.test/api/admin/redirect-approvals/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "text/csv" },
+          body: `old_url,equivalent_content,reviewer\n${secondRedirect.old_url},true,seo_editor\n`,
+        }),
+      );
+      const redirectImportBody = await redirectImport.json();
+      assert.equal(redirectImport.status, 201);
+      assert.equal(redirectImportBody.imported, 1);
+      assert.equal(redirectImportBody.deployablePreview.length, 2);
+
+      const pendingRedirectWorkbook = await redirectApprovalWorkbookRoute.GET(
+        new Request("https://example.test/api/admin/redirect-approval-workbook?pending=1", { headers: auth }),
+      );
+      const pendingRedirectWorkbookCsv = await pendingRedirectWorkbook.text();
+      assert.equal(pendingRedirectWorkbook.status, 200);
+      assert.ok(!pendingRedirectWorkbookCsv.includes(firstRedirect.old_url));
+      assert.ok(!pendingRedirectWorkbookCsv.includes(secondRedirect.old_url));
+
+      const redirectExport = await deployableRedirectExportRoute.POST(
+        new Request("https://example.test/api/admin/deployable-redirects/export", { method: "POST", headers: auth }),
+      );
+      const redirectExportBody = await redirectExport.json();
+      assert.equal(redirectExport.status, 201);
+      assert.equal(redirectExportBody.exported, 2);
+      assert.equal(redirectExportBody.summary.total, 2);
+      assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 2);
 
       const draft = await translationDraftRoute.POST(
         new Request("https://example.test/api/admin/translations/draft", {

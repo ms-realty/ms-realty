@@ -19,7 +19,19 @@ import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits,
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
-import { buildRedirectApprovalWorkbook, renderRedirectApprovalWorkbook, summarizeDeployableRedirects } from "./redirect-approvals.mjs";
+import {
+  DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
+  DEFAULT_REDIRECT_APPROVALS_PATH,
+  appendRedirectApproval,
+  buildDeployableRedirects,
+  buildPendingRedirectApprovalWorkbook,
+  buildRedirectApprovalWorkbook,
+  importRedirectApprovalsCsv,
+  readRedirectApprovals,
+  renderRedirectApprovalWorkbook,
+  summarizeDeployableRedirects,
+  writeDeployableRedirects,
+} from "./redirect-approvals.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
 import {
@@ -48,6 +60,7 @@ const PRIVATE_JSON_HEADERS = {
   "cache-control": "no-store",
 };
 const PRIVATE_MARKDOWN_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/markdown; charset=utf-8", "cache-control": "no-store" };
+const PRIVATE_CSV_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/csv; charset=utf-8", "cache-control": "no-store" };
 
 function bytesFrom(value) {
   const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
@@ -62,10 +75,12 @@ export function appAdminConfigFromEnv(env = process.env) {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
+    deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
@@ -103,6 +118,13 @@ function jsonResponse(status, body) {
 
 function markdownResponse(body) {
   return new Response(body, { status: 200, headers: PRIVATE_MARKDOWN_HEADERS });
+}
+
+function csvResponse(body, filename) {
+  return new Response(body, {
+    status: 200,
+    headers: { ...PRIVATE_CSV_HEADERS, "content-disposition": `attachment; filename="${filename}"` },
+  });
 }
 
 function calendarResponse(body) {
@@ -154,6 +176,23 @@ function parseBody(request, body) {
   const contentType = request.headers.get("content-type") || "";
   if (contentType.includes("application/x-www-form-urlencoded")) return Object.fromEntries(new URLSearchParams(body));
   return parseJsonBody(body);
+}
+
+function csvInput(request, body) {
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("application/x-www-form-urlencoded")) return parseBody(request, body).csv || "";
+  return body || "";
+}
+
+function redirectApprovalInput(input) {
+  return {
+    ...input,
+    equivalentContent:
+      input.equivalentContent === true ||
+      input.equivalentContent === "true" ||
+      input.equivalentContent === "on" ||
+      input.equivalentContent === "1",
+  };
 }
 
 function reviewedReplyInput(input) {
@@ -215,6 +254,10 @@ function deployableRedirects() {
   return readJsonData("deployable-redirects.json").redirects;
 }
 
+function currentDeployableRedirects(config) {
+  return buildDeployableRedirects(routeMapRows(), readRedirectApprovals(config.redirectApprovalPath));
+}
+
 function seoEvidence() {
   return readJsonData("seo-evidence.json");
 }
@@ -234,7 +277,7 @@ function launchReadiness(config) {
 
 function launchInputChecklist(config) {
   const routes = routeMapRows();
-  const redirects = deployableRedirects();
+  const redirects = readRedirectApprovals(config.redirectApprovalPath).length ? currentDeployableRedirects(config) : deployableRedirects();
   const generatedAt = config.reviewedAt || new Date().toISOString();
   return renderLaunchInputChecklist({
     generatedAt,
@@ -326,6 +369,41 @@ function appendPublishedTranslation(registry, input, config) {
   return appendTranslationTask(publishApprovedTranslation(registry, approved), { filePath: config.translationLedgerPath });
 }
 
+function appendRedirectApprovalRow(input, config) {
+  const approval = appendRedirectApproval(routeMapRows(), redirectApprovalInput(input), {
+    filePath: config.redirectApprovalPath,
+    approvedAt: config.reviewedAt,
+  });
+  return {
+    approval,
+    deployablePreview: currentDeployableRedirects(config),
+  };
+}
+
+function importRedirectApprovalRows(csvText, config) {
+  const imported = importRedirectApprovalsCsv(routeMapRows(), csvText, {
+    filePath: config.redirectApprovalPath,
+    approvedAt: config.reviewedAt,
+  });
+  return {
+    imported: imported.length,
+    approvals: imported,
+    deployablePreview: currentDeployableRedirects(config),
+  };
+}
+
+function exportDeployableRedirectRows(config) {
+  const rows = currentDeployableRedirects(config);
+  return { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath) };
+}
+
+function redirectApprovalWorkbook(url, config) {
+  const routes = routeMapRows();
+  const approvals = readRedirectApprovals(config.redirectApprovalPath);
+  const rows = url.searchParams.get("pending") ? buildPendingRedirectApprovalWorkbook(routes, approvals) : buildRedirectApprovalWorkbook(routes);
+  return renderRedirectApprovalWorkbook(rows);
+}
+
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
   if (!isAdminAuthorized(request.headers.get("authorization") || "")) return adminUnauthorized();
   try {
@@ -347,6 +425,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
       return jsonResponse(200, seoEvidencePayload(seoEvidence()));
     }
+    if (request.method === "GET" && url.pathname === "/api/admin/redirect-approval-workbook") {
+      return csvResponse(redirectApprovalWorkbook(url, config), "redirect-approval-workbook.csv");
+    }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
@@ -355,6 +436,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
       return jsonResponse(201, appendPublishedTranslation(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
+      return jsonResponse(201, appendRedirectApprovalRow(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
+      return jsonResponse(201, importRedirectApprovalRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
+      return jsonResponse(201, exportDeployableRedirectRows(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       return jsonResponse(201, appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
