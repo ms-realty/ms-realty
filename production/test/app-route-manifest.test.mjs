@@ -120,8 +120,10 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   const guide = renderAppRoute({ pathname: "/en/guides/foreign-buyers", url: "https://example.test/en/guides/foreign-buyers" });
   assert.equal(guide.status, 200);
   assert.equal(guide.rendered.kind, "guide");
+  assert.match(guide.html, /data-react-public-ui="guide"/);
+  assert.match(guide.html, /data-approved-source="cms"/);
+  assert.match(guide.html, /aria-label="Guide actions"/);
   assert.match(guide.html, /Non-EU buyers cannot own Bulgarian land directly/);
-  assert.doesNotMatch(guide.html, /data-react-public-ui=/);
 });
 
 test("App Router adapter honors mounted public listing edit ledger", () => {

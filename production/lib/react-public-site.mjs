@@ -350,6 +350,35 @@ function LanguageFallbackBody({ page }) {
   );
 }
 
+function GuideBody({ page }) {
+  return h(
+    "main",
+    {
+      "data-kind": "guide",
+      "data-react-public-ui": "guide",
+      "data-approved-source": "cms",
+      "data-min-touch-target": "44",
+    },
+    h("h1", null, page.body.h1),
+    h("p", null, page.body.intro),
+    ...(page.body.sections || []).map((section) =>
+      h(
+        "section",
+        { key: section.id, id: section.id, "data-reviewer": section.reviewer },
+        h("h2", null, section.title),
+        h("ul", null, ...(section.facts || []).map((fact) => h("li", { key: fact }, fact))),
+      ),
+    ),
+    h(
+      "nav",
+      { "aria-label": "Guide actions" },
+      h("a", { href: page.body.ctas.search.path }, "Search"),
+      h("a", { href: page.body.ctas.seller.path }, "Seller valuation"),
+      h("a", { href: page.body.ctas.contact.path }, "Contact"),
+    ),
+  );
+}
+
 export function renderReactPublicBody(page) {
   if (page.kind === "home") return renderStaticElement(h(HomeBody, { page }));
   if (page.kind === "search") return renderStaticElement(h(SearchBody, { page }));
@@ -358,5 +387,6 @@ export function renderReactPublicBody(page) {
   if (page.kind === "seller") return renderStaticElement(h(SellerBody, { page }));
   if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
+  if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
   return "";
 }
