@@ -2,12 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
+import { spawnSync } from "node:child_process";
 import {
   assertHermesDraftWorkerReport,
   openAiCompatibleHermesProvider,
   runHermesDraftWorker,
   taskFromHermesDraft,
 } from "../lib/hermes-draft-worker.mjs";
+import { fromRoot } from "../lib/paths.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
 function dispatchRow() {
@@ -115,4 +117,15 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(request.body.model, "NousResearch/Hermes-4-14B");
   assert.equal(request.body.response_format.type, "json_object");
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
+});
+
+test("live Hermes draft worker CLI fails closed when provider env is missing", () => {
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "run-hermes-draft-worker.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, HERMES_CHAT_COMPLETIONS_URL: "", HERMES_API_KEY: "" },
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /HERMES DRAFT WORKER FAILED: HERMES_CHAT_COMPLETIONS_URL is required/);
 });

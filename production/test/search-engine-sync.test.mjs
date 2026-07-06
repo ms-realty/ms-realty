@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
 import {
   assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
@@ -91,4 +92,23 @@ test("generated search query smoke report is valid when present", () => {
   const file = fromRoot("production", "data", "search-engine-query-smoke.json");
   if (!fs.existsSync(file)) return;
   assert.equal(assertSearchEngineQueryReport(JSON.parse(fs.readFileSync(file, "utf8"))), true);
+});
+
+test("live search engine CLIs fail closed when provisioning env is missing", () => {
+  const env = { ...process.env, TYPESENSE_URL: "", TYPESENSE_API_KEY: "", MEILI_URL: "", MEILI_API_KEY: "" };
+  const cases = [
+    ["run-search-engine-sync.mjs", /SEARCH ENGINE SYNC FAILED: TYPESENSE_URL is required/],
+    ["run-search-engine-query.mjs", /SEARCH ENGINE QUERY FAILED: TYPESENSE_URL is required/],
+  ];
+
+  for (const [script, message] of cases) {
+    const result = spawnSync(process.execPath, [fromRoot("production", "scripts", script)], {
+      cwd: fromRoot(),
+      encoding: "utf8",
+      env,
+    });
+
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, message);
+  }
 });
