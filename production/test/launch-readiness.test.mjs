@@ -219,6 +219,21 @@ test("generated launch readiness report is valid when present", () => {
   assert.equal(assertLaunchReadinessReport(report), true);
 });
 
+test("launch readiness build honors output path override", () => {
+  const outputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-readiness-output-`)}/launch-readiness.json`;
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-readiness.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: outputPath },
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.ok(result.stdout.includes(`Wrote launch readiness report to ${outputPath}`));
+  const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(assertLaunchReadinessReport(report), true);
+  assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services"]);
+});
+
 test("launch preflight fails closed while launch blockers remain", () => {
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
