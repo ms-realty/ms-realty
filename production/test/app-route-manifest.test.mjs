@@ -62,22 +62,34 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(home.status, 200);
   assert.equal(home.headers["cache-control"], "public, max-age=300, s-maxage=3600");
   assert.match(home.html, /<html lang="he" dir="rtl">/);
+  assert.match(home.html, /data-react-public-ui="home"/);
 
   const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski" });
   assert.equal(search.status, 200);
   assert.equal(search.headers["cache-control"], "no-store");
   assert.equal(search.rendered.kind, "search");
   assert.equal(search.rendered.search.query, "sandanski");
+  assert.match(search.html, /data-react-public-ui="search"/);
 
   const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001" });
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.kind, "listing");
   assert.match(listing.html, /MS-CRAWL-0001/);
+  assert.match(listing.html, /data-react-public-ui="listing"/);
+
+  const listingPrint = renderAppRoute({
+    pathname: "/he/properties/MS-CRAWL-0001",
+    url: "https://example.test/he/properties/MS-CRAWL-0001?print=1",
+  });
+  assert.equal(listingPrint.status, 200);
+  assert.doesNotMatch(listingPrint.html, /data-react-public-ui=/);
+  assert.match(listingPrint.html, /data-kind="listing-print"/);
 
   const guide = renderAppRoute({ pathname: "/en/guides/foreign-buyers", url: "https://example.test/en/guides/foreign-buyers" });
   assert.equal(guide.status, 200);
   assert.equal(guide.rendered.kind, "guide");
   assert.match(guide.html, /Non-EU buyers cannot own Bulgarian land directly/);
+  assert.doesNotMatch(guide.html, /data-react-public-ui=/);
 });
 
 test("App Router adapter honors mounted public listing edit ledger", () => {

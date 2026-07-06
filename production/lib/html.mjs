@@ -726,13 +726,14 @@ function renderBody(page, options = {}) {
 }
 
 export function renderHtmlPage(page, options = {}) {
+  const body = options.bodyHtml || renderBody(page, options);
   return `<!doctype html>
 <html lang="${escapeHtml(page.lang || page.locale || "en")}" dir="${escapeHtml(page.dir || "ltr")}">
 <head>
 ${meta(page)}
 </head>
 <body>
-${renderBody(page, options)}
+${body}
 </body>
 </html>`;
 }

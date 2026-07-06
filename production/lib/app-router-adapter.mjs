@@ -1,4 +1,5 @@
 import { renderHtmlPage } from "./html.mjs";
+import { renderReactPublicBody } from "./react-public-site.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
@@ -62,7 +63,9 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
         readBrokerContacts(config.brokerContactLedgerPath),
         readTourApprovals(config.tourApprovalLedgerPath),
       );
-  const html = renderHtmlPage(rendered, { print: requestUrl.searchParams.get("print") === "1" });
+  const print = requestUrl.searchParams.get("print") === "1";
+  const reactBody = print ? "" : renderReactPublicBody(rendered);
+  const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print });
 
   return {
     status: rendered.status || 200,
