@@ -130,6 +130,9 @@ export async function buildPayloadRuntimeReport({
 }
 
 export function assertPayloadRuntimeReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Payload runtime report must include valid generated_at");
+  }
   if (!Array.isArray(report.checks) || report.checks.length < 1) throw new Error("Payload runtime report must include checks");
   const ready = report.checks.every((item) => item.status === "pass");
   if (report.ready !== ready) throw new Error("Payload runtime ready flag must match checks");

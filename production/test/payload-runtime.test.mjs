@@ -75,3 +75,15 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(JSON.stringify(report).includes("not-written-to-report"), false);
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
 });
+
+test("Payload runtime report rejects missing generated timestamp", async () => {
+  const report = await buildPayloadRuntimeReport({
+    env: {},
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, generated_at: "" }),
+    /valid generated_at/,
+  );
+});
