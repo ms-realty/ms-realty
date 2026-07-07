@@ -289,6 +289,24 @@ test("empty required SEO export files remain launch blockers", () => {
   assert.equal(evidence.summary.sources.search_console.status, "empty_export");
 });
 
+test("copied SEO export templates remain launch blockers", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-template-seo-evidence-`);
+  fs.copyFileSync(fromRoot("migration", "external", "seo", "search-console.csv.example"), `${dir}/search-console.csv`);
+  fs.copyFileSync(fromRoot("migration", "external", "seo", "yandex-webmaster.csv.example"), `${dir}/yandex-webmaster.csv`);
+  fs.copyFileSync(fromRoot("migration", "external", "seo", "backlinks.csv.example"), `${dir}/backlinks.csv`);
+
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    events: [{ type: "page_view", path: "https://makler-realty.com/" }],
+  });
+
+  assert.ok(evidence.summary.missing_required_sources.includes("search_console"));
+  assert.ok(evidence.summary.missing_required_sources.includes("backlinks"));
+  assert.equal(evidence.summary.sources.search_console.signal_rows, 0);
+  assert.equal(evidence.summary.sources.backlinks.placeholder_rows, 2);
+});
+
 test("unmatched required SEO export files remain launch blockers", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-unmatched-seo-evidence-`);
   fs.writeFileSync(`${dir}/search-console.csv`, "url,clicks,impressions,position\nhttps://unrelated.example/page,3,30,7\n");

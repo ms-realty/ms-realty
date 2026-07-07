@@ -170,8 +170,10 @@ function indexEvidence(records, routeMap) {
 
 function joinExternal(source, sourceData, byKey) {
   let matched = 0;
+  let signalRows = 0;
   let unmatched = 0;
   let duplicateRows = 0;
+  let placeholderRows = 0;
   const matchedSourceDomains = new Set();
   const referringDomains = new Set();
   const seenRows = new Set();
@@ -194,16 +196,21 @@ function joinExternal(source, sourceData, byKey) {
     matchedSourceDomains.add(target.source_domain);
 
     if (source === "search_console") {
+      if (row.clicks > 0 || row.impressions > 0) signalRows += 1;
       addMetric(target.search_console, "clicks", row.clicks);
       addMetric(target.search_console, "impressions", row.impressions);
       if (row.position) target.search_console.avg_position = row.position;
     } else if (source === "yandex_webmaster") {
+      if (row.indexed || row.issue) signalRows += 1;
       addMetric(target.yandex_webmaster, "rows", 1);
       if (row.issue) addMetric(target.yandex_webmaster, "issues", 1);
     } else if (source === "backlinks") {
+      if (/example\.com\/ms-realty-(com|ru)/.test(row.source_url || "")) placeholderRows += 1;
+      else if (row.source_url || row.referring_domain) signalRows += 1;
       addMetric(target.backlinks, "backlinks", 1);
       if (row.referring_domain) referringDomains.add(`${target.old_url}|${row.referring_domain}`);
     } else if (source === "analytics_export") {
+      if (row.page_views > 0) signalRows += 1;
       addMetric(target.analytics, "exported_page_views", row.page_views);
     }
   }
@@ -216,8 +223,10 @@ function joinExternal(source, sourceData, byKey) {
 
   return {
     matched_rows: matched,
+    signal_rows: signalRows,
     unmatched_rows: unmatched,
     duplicate_rows: duplicateRows,
+    placeholder_rows: placeholderRows,
     matched_source_domains: [...matchedSourceDomains].sort(),
   };
 }
@@ -246,6 +255,8 @@ function summarize(records, sourceSummaries, urlEvidence) {
     return (
       summary?.status !== "imported" ||
       summary.matched_rows < 1 ||
+      summary.signal_rows < 1 ||
+      summary.placeholder_rows > 0 ||
       REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
     );
   });

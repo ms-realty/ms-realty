@@ -17,8 +17,10 @@
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
+        "signal_rows": 0,
         "unmatched_rows": 0,
         "duplicate_rows": 0,
+        "placeholder_rows": 0,
         "matched_source_domains": []
       },
       "yandex_webmaster": {
@@ -27,8 +29,10 @@
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
+        "signal_rows": 0,
         "unmatched_rows": 0,
         "duplicate_rows": 0,
+        "placeholder_rows": 0,
         "matched_source_domains": []
       },
       "backlinks": {
@@ -37,8 +41,10 @@
         "status": "missing_export",
         "row_count": 0,
         "matched_rows": 0,
+        "signal_rows": 0,
         "unmatched_rows": 0,
         "duplicate_rows": 0,
+        "placeholder_rows": 0,
         "matched_source_domains": []
       }
     }
