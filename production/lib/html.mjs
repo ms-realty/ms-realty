@@ -535,6 +535,8 @@ function renderAdminMigrationReview(page) {
   </section>
   <section aria-label="Listing quality queue" data-quality-workbook-endpoint="${escapeHtml(
     page.listingQualityWorkbookEndpoint,
+  )}" data-quality-review-draft-endpoint="${escapeHtml(
+    page.listingQualityReviewDraftEndpoint,
   )}" data-quality-import-endpoint="${escapeHtml(
     page.listingQualityImportEndpoint,
   )}" data-quality-affected-listings="${escapeHtml(
@@ -542,6 +544,7 @@ function renderAdminMigrationReview(page) {
   )}">
     <h2>Listing quality queue</h2>
     <p><a href="${escapeHtml(page.listingQualityWorkbookEndpoint)}">Download listing quality workbook</a></p>
+    <p><a href="${escapeHtml(page.listingQualityReviewDraftEndpoint)}">Download listing quality review draft</a></p>
     <form method="post" action="${escapeHtml(page.listingQualityImportEndpoint)}">
       <textarea name="csv" rows="5" required></textarea>
       <button type="submit">Import listing quality CSV</button>

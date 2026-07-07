@@ -141,6 +141,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const preflightReportsRoute = await import("../../app/api/admin/preflight-reports/route.js");
       const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
+      const listingQualityReviewDraftRoute = await import("../../app/api/admin/listing-quality-review-draft/route.js");
       const listingQualityWorkbookRoute = await import("../../app/api/admin/listing-quality-workbook/route.js");
       const localeRoute = await import("../../app/api/admin/locales/route.js");
       const redirectApprovalWorkbookRoute = await import("../../app/api/admin/redirect-approval-workbook/route.js");
@@ -518,6 +519,15 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityWorkbook.headers.get("content-type"), "text/csv; charset=utf-8");
       assert.match(listingQualityCsv, /MS-CRAWL-0006/);
       assert.match(listingQualityCsv, /thin_public_gallery/);
+
+      const listingQualityReviewDraft = await listingQualityReviewDraftRoute.GET(
+        new Request("https://example.test/api/admin/listing-quality-review-draft", { headers: auth }),
+      );
+      const listingQualityReviewDraftCsv = await listingQualityReviewDraft.text();
+      assert.equal(listingQualityReviewDraft.status, 200);
+      assert.equal(listingQualityReviewDraft.headers.get("content-type"), "text/csv; charset=utf-8");
+      assert.match(listingQualityReviewDraftCsv, /review_notes/);
+      assert.match(listingQualityReviewDraftCsv, /Review public gallery/);
 
       const listingQualityImport = await listingQualityImportRoute.POST(
         new Request("https://example.test/api/admin/listing-quality/import", {

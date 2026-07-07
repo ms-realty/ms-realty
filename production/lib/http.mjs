@@ -75,6 +75,7 @@ import { loadPayloadCollections } from "./payload-collections.mjs";
 import {
   buildListingQualityPreflightReport,
   buildListingQualityReport,
+  renderListingQualityReviewDraft,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
   writeCompleteListingQualityReviewCsv,
@@ -273,6 +274,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     seoEvidence: seoEvidencePayload(seoEvidence),
     listingQuality,
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
+    listingQualityReviewDraftEndpoint: "/api/admin/listing-quality-review-draft",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
@@ -871,6 +873,16 @@ export function createHttpApp({
         renderListingQualityWorkbook(currentListingQualityReport()),
         "text/csv; charset=utf-8",
         { "content-disposition": 'attachment; filename="listing-quality-workbook.csv"' },
+      );
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-draft") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminResponse(
+        200,
+        renderListingQualityReviewDraft(currentListingQualityReport()),
+        "text/csv; charset=utf-8",
+        { "content-disposition": 'attachment; filename="listing-quality-review-draft.csv"' },
       );
     }
 

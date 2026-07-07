@@ -31,6 +31,7 @@ import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits,
 import {
   buildListingQualityPreflightReport,
   buildListingQualityReport,
+  renderListingQualityReviewDraft,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
   writeCompleteListingQualityReviewCsv,
@@ -495,6 +496,7 @@ function migrationReviewPayload(registry, url, config) {
     seoEvidence: seoEvidencePayload(currentSeoEvidence(config)),
     listingQuality: currentListingQualityReport(config, { generatedAt: config.reviewedAt, limit: 20 }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
+    listingQualityReviewDraftEndpoint: "/api/admin/listing-quality-review-draft",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
@@ -857,6 +859,10 @@ function listingQualityWorkbook(config) {
   return renderListingQualityWorkbook(currentListingQualityReport(config));
 }
 
+function listingQualityReviewDraft(config) {
+  return renderListingQualityReviewDraft(currentListingQualityReport(config));
+}
+
 function importListingQualityRows(inputCsv, config) {
   const report = currentListingQualityReport(config);
   const review = validateListingQualityReviewCsv(report, inputCsv);
@@ -979,6 +985,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
       return csvResponse(listingQualityWorkbook(config), "listing-quality-workbook.csv");
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-draft") {
+      return csvResponse(listingQualityReviewDraft(config), "listing-quality-review-draft.csv");
     }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));

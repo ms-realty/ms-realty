@@ -338,11 +338,13 @@ function MigrationReviewBody({ page }) {
       {
         "aria-label": "Listing quality queue",
         "data-quality-workbook-endpoint": page.listingQualityWorkbookEndpoint,
+        "data-quality-review-draft-endpoint": page.listingQualityReviewDraftEndpoint,
         "data-quality-import-endpoint": page.listingQualityImportEndpoint,
         "data-quality-affected-listings": page.listingQuality?.summary?.affected_listings || 0,
       },
       h("h2", null, "Listing quality queue"),
       h("p", null, h("a", { href: page.listingQualityWorkbookEndpoint }, "Download listing quality workbook")),
+      h("p", null, h("a", { href: page.listingQualityReviewDraftEndpoint }, "Download listing quality review draft")),
       h("form", { method: "post", action: page.listingQualityImportEndpoint }, h("textarea", { name: "csv", rows: "5", required: true }), h("button", { type: "submit" }, "Import listing quality CSV")),
       h("p", null, `Issues: ${JSON.stringify(page.listingQuality?.summary?.issue_counts || {})}`),
       h(

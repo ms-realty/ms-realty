@@ -249,6 +249,7 @@ export function buildListingQualityReviewPacket({
       editor_path_pattern: "/admin/listings/edit?listingId=:listing_id",
       import_endpoint: "POST /api/admin/listing-quality/import",
       workbook_endpoint: "GET /api/admin/listing-quality-workbook",
+      draft_review_endpoint: "GET /api/admin/listing-quality-review-draft",
     },
     summary: {
       expected_review_rows: report.rows.length,
