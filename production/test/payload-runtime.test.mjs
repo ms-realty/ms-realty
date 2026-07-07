@@ -227,3 +227,39 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
     /database TCP target evidence/,
   );
 });
+
+test("Payload runtime ready report requires route and config evidence", async () => {
+  const report = await buildPayloadRuntimeReport({
+    databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id.startsWith("route:") ? { id: check.id, status: "pass" } : check)),
+      }),
+    /route file evidence/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        summary: { ...report.summary, route_files: 0 },
+      }),
+    /route summary evidence/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id === "payload_config_import" ? { id: check.id, status: "pass" } : check)),
+      }),
+    /Payload config evidence/,
+  );
+});
