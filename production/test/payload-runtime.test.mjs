@@ -38,6 +38,26 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.equal(report.checks.find((check) => check.id === "payload_config_import").status, "pass");
 });
 
+test("Payload runtime report rejects copied placeholder env values", async () => {
+  const report = await buildPayloadRuntimeReport({
+    databaseProbe: async () => {
+      throw new Error("placeholder DATABASE_URL should not be probed");
+    },
+    env: {
+      DATABASE_URL: "postgres://ms_realty_payload:replace-with-postgres-password@127.0.0.1:5432/ms_realty_payload",
+      PAYLOAD_SECRET: "replace-with-output-of-openssl-rand-base64-32",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertPayloadRuntimeReport(report), true);
+  assert.equal(report.ready, false);
+  assert.deepEqual(report.summary.missing_env, []);
+  assert.deepEqual(report.summary.placeholder_env, ["PAYLOAD_SECRET", "DATABASE_URL"]);
+  assert.equal(report.summary.database.status, "placeholder");
+  assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "placeholder");
+});
+
 test("Payload runtime report passes with env and database reachability proof", async () => {
   const report = await buildPayloadRuntimeReport({
     databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),

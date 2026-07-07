@@ -62,12 +62,15 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 
 - Current gate: blocked
 - Runtime report: `production/data/payload-runtime-report.json`
+- Runtime env example: `production/data/payload-runtime.env.example`
+- Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`
 - Admin route: `/payload-admin`; API routes: `/api/[...slug]`, `/graphql`, `/graphql-playground`.
 - Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`.
 - Runtime evidence: `payload` dependency present, `payload.config.js` present, collection export generated, and required env configured.
-- Runtime commands: `npm run payload:runtime`, then `npm run payload:preflight`.
-- Production/CLI path override: `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
+- Placeholder rule: copied example values such as `replace-with-...` and `change-me` stay blocked.
+- Runtime commands: `npm run payload:bootstrap`, copy/edit the private env file, start Postgres, then `npm run payload:runtime` and `npm run payload:preflight`.
+- Production/CLI path overrides: `MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
 
 ## Content Quality Warnings
@@ -114,6 +117,7 @@ npm run seo:preflight
 npm run seo:evidence
 npm run live:provisioning:preflight
 npm run live:preflight
+npm run payload:bootstrap
 npm run payload:preflight
 npm run listing:preflight
 npm run launch:readiness

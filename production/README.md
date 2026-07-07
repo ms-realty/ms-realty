@@ -147,6 +147,9 @@ npm run live:provisioning
 npm run live:provisioning:preflight
 npm run live:report
 npm run live:preflight
+npm run payload:bootstrap
+npm run payload:runtime
+npm run payload:preflight
 npm run launch:preflight
 ```
 
@@ -160,6 +163,8 @@ reports from `npm run search:sync && npm run search:query`, a Hermes draft-worke
 `live:provisioning` writes redacted endpoint and missing-env evidence before live capture, and
 `live:provisioning:preflight` must pass before treating `live:capture` output as launch evidence.
 `live:report` writes the current live-service report status without clearing the launch gate.
+`payload:bootstrap` writes the Payload private-env example and localhost Postgres compose file;
+placeholder values remain blocked until replaced with real secrets and a reachable database.
 The expected report shapes are committed as `production/data/*-report.json.example`; the real live
 report files are ignored and must be generated from provisioned services.
 

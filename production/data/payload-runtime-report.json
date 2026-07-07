@@ -12,6 +12,7 @@
       "PAYLOAD_SECRET",
       "DATABASE_URL"
     ],
+    "placeholder_env": [],
     "route_files": 4
   },
   "checks": [

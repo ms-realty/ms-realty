@@ -1,0 +1,20 @@
+services:
+  payload-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PAYLOAD_POSTGRES_USER:-ms_realty_payload}
+      POSTGRES_PASSWORD: ${PAYLOAD_POSTGRES_PASSWORD:?set PAYLOAD_POSTGRES_PASSWORD in the private Payload env file}
+      POSTGRES_DB: ${PAYLOAD_POSTGRES_DB:-ms_realty_payload}
+    ports:
+      - "${PAYLOAD_POSTGRES_HOST:-127.0.0.1}:${PAYLOAD_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - payload-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  payload-postgres-data:

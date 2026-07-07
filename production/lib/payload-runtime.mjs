@@ -17,6 +17,20 @@ function check(id, status, evidence = {}) {
   return { id, status, ...evidence };
 }
 
+function configuredSecret(value) {
+  const secret = String(value || "").trim();
+  if (!secret) return "missing_env";
+  if (/replace-with|change-me|example|local-payload-secret/i.test(secret)) return "placeholder";
+  return "pass";
+}
+
+function configuredDatabaseUrl(value) {
+  const databaseUrl = String(value || "").trim();
+  if (!databaseUrl) return "missing_env";
+  if (/replace-with|change-me|example/i.test(databaseUrl)) return "placeholder";
+  return "pass";
+}
+
 function databaseTarget(connectionString) {
   const parsed = new URL(connectionString);
   if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
@@ -67,14 +81,15 @@ export async function buildPayloadRuntimeReport({
   generatedAt = new Date().toISOString(),
 } = {}) {
   const checks = [
-    check("payload_secret", env.PAYLOAD_SECRET ? "pass" : "missing_env", { env: "PAYLOAD_SECRET" }),
-    check("database_url", env.DATABASE_URL ? "pass" : "missing_env", { env: "DATABASE_URL" }),
+    check("payload_secret", configuredSecret(env.PAYLOAD_SECRET), { env: "PAYLOAD_SECRET" }),
+    check("database_url", configuredDatabaseUrl(env.DATABASE_URL), { env: "DATABASE_URL" }),
     ...REQUIRED_ROUTE_FILES.map((file) => check(`route:${file}`, fs.existsSync(fromRoot(file)) ? "pass" : "fail", { file })),
     await payloadConfigCheck(),
   ];
 
-  let database = { status: env.DATABASE_URL ? "not_checked" : "missing_env" };
-  if (env.DATABASE_URL) {
+  const databaseUrlStatus = configuredDatabaseUrl(env.DATABASE_URL);
+  let database = { status: databaseUrlStatus === "pass" ? "not_checked" : databaseUrlStatus };
+  if (databaseUrlStatus === "pass") {
     try {
       const target = databaseTarget(env.DATABASE_URL);
       const probe = await databaseProbe(target);
@@ -85,10 +100,11 @@ export async function buildPayloadRuntimeReport({
       checks.push(check("database_tcp", "fail", { error: error.message }));
     }
   } else {
-    checks.push(check("database_tcp", "missing_env", { env: "DATABASE_URL" }));
+    checks.push(check("database_tcp", databaseUrlStatus, { env: "DATABASE_URL" }));
   }
 
   const missingEnv = checks.filter((item) => item.status === "missing_env").map((item) => item.env);
+  const placeholders = checks.filter((item) => item.status === "placeholder").map((item) => item.env).filter(Boolean);
   const ready = checks.every((item) => item.status === "pass");
   return {
     generated_at: generatedAt,
@@ -99,6 +115,7 @@ export async function buildPayloadRuntimeReport({
       checks: checks.length,
       database,
       missing_env: [...new Set(missingEnv)],
+      placeholder_env: [...new Set(placeholders)],
       route_files: REQUIRED_ROUTE_FILES.length,
     },
     checks,

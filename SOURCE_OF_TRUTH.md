@@ -455,7 +455,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
 | **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + React App Router body bridge for public routes built**; full React public UI polish pending |
-| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + broker verification report + generated Payload-compatible collection configs built**; Payload runtime app pending |
+| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + broker verification report + generated Payload-compatible collection configs + Payload runtime bootstrap built**; real Payload runtime env/database pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, Typesense/Meilisearch sync/query worker paths, and redacted live provisioning report built; live engine URLs/API keys pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, OpenAI-compatible draft worker path, and Hermes provisioning contract built; self-hosted Hermes/vLLM endpoint pending |
 | **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; redirect reviews are locally complete; **blocked on external SEO exports, reviewed listing-quality CSV, live service provisioning/reports, and Payload runtime env/database configuration** |
@@ -471,7 +471,7 @@ lead/reply/viewing/deal/saved-search/seller/broker-contact/tour/analytics ledger
 missed-SLA report that creates broker reminders and manager escalations from unreplied leads,
 listing-status workflow that keeps sold pages live while removing them from active inventory,
 CMS slug-history workflow that creates path-only automatic 301s to canonical listing routes,
-Payload-compatible collection config export for the implemented CMS manifest,
+Payload-compatible collection config export and runtime bootstrap handoff for the implemented CMS manifest,
 redacted live-service provisioning report for Typesense/Meilisearch/Hermes readiness,
 listing-publication workflow that proves sitemap paths and internal-link suggestions,
 mobile/elderly QA report, and a live Node server (`npm start`) exposing the same contracts.
@@ -479,7 +479,7 @@ mobile/elderly QA report, and a live Node server (`npm start`) exposing the same
 **Blocked until launch:** real external SEO exports (Search Console / Yandex / backlinks) under
 `migration/external/seo/`, reviewed listing-quality fixes under `migration/reviews/listing-quality.csv`,
 live Typesense/Meilisearch URLs/API keys, Hermes/vLLM endpoint, sync/query and Hermes draft-worker
-reports, plus Payload `PAYLOAD_SECRET`, `DATABASE_URL`, and reachable database. Redirect reviews are locally complete and covered by
+reports, plus real Payload `PAYLOAD_SECRET`, `DATABASE_URL`, and reachable database. Redirect reviews are locally complete and covered by
 the reviewed deployable 301 export.
 
 ---
