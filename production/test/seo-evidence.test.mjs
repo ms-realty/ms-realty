@@ -223,6 +223,49 @@ test("SEO evidence preflight report records missing and valid export state", () 
   assert.deepEqual(readyReport.summary.missing_required_sources, []);
 });
 
+test("SEO preflight ready report requires complete source evidence", () => {
+  const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-preflight-assert-`);
+  writeCompleteSeoInputFixture(validDir);
+  const report = buildSeoEvidencePreflightReport({
+    inputDir: validDir,
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertSeoEvidencePreflightReport(report), true);
+  assert.throws(() => assertSeoEvidencePreflightReport({ ...report, generated_at: "" }), /valid generated_at/);
+  assert.throws(
+    () =>
+      assertSeoEvidencePreflightReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          sources: {
+            ...report.summary.sources,
+            search_console: {
+              ...report.summary.sources.search_console,
+              matched_source_domains: ["makler-realty.com"],
+            },
+          },
+        },
+      }),
+    /complete search_console evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidencePreflightReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          sources: {
+            ...report.summary.sources,
+            backlinks: { ...report.summary.sources.backlinks, placeholder_rows: 1 },
+          },
+        },
+      }),
+    /complete backlinks evidence/,
+  );
+});
+
 test("SEO evidence build CLI honors mounted input and output paths", () => {
   const inputDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-build-input-`);
   const outputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-build-output-`)}/seo-evidence.json`;

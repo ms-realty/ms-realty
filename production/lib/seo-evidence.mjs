@@ -381,11 +381,28 @@ export function buildSeoEvidencePreflightReport(options = {}) {
 }
 
 export function assertSeoEvidencePreflightReport(report) {
-  const ready = report.summary?.missing_required_sources?.length === 0;
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("SEO preflight report must include valid generated_at");
+  }
+  if (!report.summary || !Array.isArray(report.summary.missing_required_sources)) {
+    throw new Error("SEO preflight report must summarize missing required sources");
+  }
+  const ready = report.summary.missing_required_sources.length === 0;
   if (report.ready !== ready) throw new Error("SEO preflight ready flag must match missing required sources");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("SEO preflight status must match ready flag");
   for (const source of REQUIRED_EXPORTS) {
-    if (!report.summary.sources[source]) throw new Error(`SEO preflight report missing ${source} source status`);
+    const sourceStatus = report.summary.sources?.[source];
+    if (!sourceStatus) throw new Error(`SEO preflight report missing ${source} source status`);
+    if (
+      ready &&
+      (sourceStatus.status !== "imported" ||
+        sourceStatus.matched_rows < 1 ||
+        sourceStatus.signal_rows < 1 ||
+        sourceStatus.placeholder_rows > 0 ||
+        REQUIRED_SOURCE_DOMAINS.some((domain) => !sourceStatus.matched_source_domains?.includes(domain)))
+    ) {
+      throw new Error(`SEO preflight ready report requires complete ${source} evidence`);
+    }
   }
   return true;
 }
