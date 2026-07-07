@@ -38,6 +38,7 @@ import {
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
+import { writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
@@ -802,6 +803,21 @@ function importLiveServiceReport(input, config) {
   return { imported, livePreflight, report: launchReadiness(config) };
 }
 
+function importPayloadRuntimeReport(report, config) {
+  const outPath = writePayloadRuntimeReport(report, config.payloadRuntimeReportPath || undefined);
+  recordAudit(
+    {
+      action: "payload_runtime_report_imported",
+      actor: "operations",
+      objectType: "payload_runtime_report",
+      objectId: "payload-runtime",
+      metadata: { status: report.status, out_path: outPath },
+    },
+    config,
+  );
+  return { imported: { outPath, summary: report.summary }, report: launchReadiness(config) };
+}
+
 function importSeoEvidence(input, config) {
   const result = importAppSeoEvidenceRows(input, config);
   recordAudit(
@@ -980,6 +996,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         201,
         importLiveServiceReport(liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config),
       );
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
+      return jsonResponse(201, importPayloadRuntimeReport(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
       return jsonResponse(201, importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config));

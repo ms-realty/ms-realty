@@ -19,6 +19,7 @@ import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../l
 import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -1145,9 +1146,18 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
   const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
+  const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
   const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-report.json.example"), "utf8"));
   const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-report.json.example"), "utf8"));
   const hermesReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-worker-report.json.example"), "utf8"));
+  const payloadReport = await buildPayloadRuntimeReport({
+    databaseProbe: async ({ database, host, port }) => ({ database, host, port, status: "pass" }),
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
   delete syncReport.example;
   delete queryReport.example;
   delete hermesReport.example;
@@ -1169,6 +1179,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     searchSyncReportPath,
     searchQueryReportPath,
     hermesWorkerReportPath,
+    payloadRuntimeReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
   });
 
@@ -1272,6 +1283,12 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     headers: { authorization: "Bearer local-admin-smoke" },
     body: hermesReport,
   });
+  const payloadImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/payload-runtime/import",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: payloadReport,
+  });
   const launchAfterLive = await dispatchHttp(app, {
     url: "/api/admin/launch-readiness",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -1329,10 +1346,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveHermesImport.status, 201);
   assert.equal(liveHermesImport.body.livePreflight.ready, true);
   assert.equal(liveHermesImport.body.livePreflight.summary.pass, 3);
+  assert.equal(payloadImport.status, 201);
+  assert.equal(payloadImport.body.imported.outPath, payloadRuntimeReportPath);
   assert.equal(fs.existsSync(searchSyncReportPath), true);
   assert.equal(fs.existsSync(searchQueryReportPath), true);
   assert.equal(fs.existsSync(hermesWorkerReportPath), true);
-  assert.deepEqual(launchAfterLive.body.blockers, ["listing_quality_review", "payload_runtime"]);
+  assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
+  assert.deepEqual(launchAfterLive.body.blockers, ["listing_quality_review"]);
   assert.equal(launchAfterLive.body.status, "blocked");
 });
 

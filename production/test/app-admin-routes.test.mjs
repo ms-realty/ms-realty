@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { parseCsv } from "../lib/csv.mjs";
+import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 
 function tempJsonl(prefix) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -91,6 +92,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
   const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
+  const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
   const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
   const listingEditLedgerPath = tempDefaultListingEdits();
   const auditLogPath = tempJsonl("app-admin-audit");
@@ -110,6 +112,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
+      MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimeReportPath,
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
       MS_REALTY_REDIRECT_APPROVALS_PATH: tempJsonl("app-admin-redirect-approvals"),
@@ -133,6 +136,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const launchInputChecklistRoute = await import("../../app/api/admin/launch-input-checklist/route.js");
       const liveServiceReportTemplateRoute = await import("../../app/api/admin/live-service-report-template/route.js");
       const liveServiceReportImportRoute = await import("../../app/api/admin/live-service-reports/import/route.js");
+      const payloadRuntimeImportRoute = await import("../../app/api/admin/payload-runtime/import/route.js");
       const launchReadinessExportRoute = await import("../../app/api/admin/launch-readiness/export/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const preflightReportsRoute = await import("../../app/api/admin/preflight-reports/route.js");
@@ -266,7 +270,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(preflightReportsBody.reports.live_services.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_service_provisioning.status, "blocked_report");
       assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
-      assert.equal(preflightReportsBody.reports.payload_runtime.status, "blocked_report");
+      assert.equal(preflightReportsBody.reports.payload_runtime.status, "missing_report");
 
       const cmsCollectionsUnauthorized = await cmsCollectionsRoute.GET(new Request("https://example.test/api/admin/cms-collections"));
       const cmsCollections = await cmsCollectionsRoute.GET(new Request("https://example.test/api/admin/cms-collections", { headers: auth }));
@@ -335,6 +339,27 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveImportValidBody.livePreflight.summary.pass, 1);
       assert.equal(liveImportValidBody.livePreflight.summary.missing_report, 2);
       assert.equal(fs.existsSync(hermesWorkerReportPath), true);
+
+      const payloadRuntimeReport = await buildPayloadRuntimeReport({
+        databaseProbe: async ({ database, host, port }) => ({ database, host, port, status: "pass" }),
+        env: {
+          DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+          PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+        },
+        generatedAt: "2026-07-06T00:00:00Z",
+      });
+      const payloadImport = await payloadRuntimeImportRoute.POST(
+        new Request("https://example.test/api/admin/payload-runtime/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify(payloadRuntimeReport),
+        }),
+      );
+      const payloadImportBody = await payloadImport.json();
+      assert.equal(payloadImport.status, 201);
+      assert.equal(payloadImportBody.imported.outPath, payloadRuntimeReportPath);
+      assert.equal(payloadImportBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
+      assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
 
       const migrationReviewUnauthorized = await migrationReviewRoute.GET(
         new Request("https://example.test/api/admin/migration/review?locale=bg"),
@@ -699,6 +724,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.deepEqual(actionCounts(auditRows), {
         locale_created: 1,
         live_service_report_imported: 1,
+        payload_runtime_report_imported: 1,
         seo_evidence_imported: 1,
         launch_readiness_exported: 1,
         redirect_approval_created: 1,

@@ -68,6 +68,7 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
+import { writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
@@ -703,6 +704,24 @@ export function createHttpApp({
           metadata: { status: input.report?.status, out_path: imported.outPath },
         });
         return adminJson(201, { imported, livePreflight, report: currentLaunchReadiness() });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const report = parseJsonBody(request);
+        const outPath = writePayloadRuntimeReport(report, payloadRuntimeReportPath || undefined);
+        recordAudit({
+          action: "payload_runtime_report_imported",
+          actor: "operations",
+          objectType: "payload_runtime_report",
+          objectId: "payload-runtime",
+          metadata: { status: report.status, out_path: outPath },
+        });
+        return adminJson(201, { imported: { outPath, summary: report.summary }, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

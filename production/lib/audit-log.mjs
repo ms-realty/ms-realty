@@ -15,6 +15,7 @@ const ADMIN_ACTIONS = new Set([
   "listing_slug_changed",
   "live_service_report_imported",
   "locale_created",
+  "payload_runtime_report_imported",
   "redirect_approval_created",
   "redirect_approvals_imported",
   "reply_approved",

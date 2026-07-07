@@ -71,6 +71,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - Runtime evidence: `payload` dependency present, `payload.config.js` present, collection export generated, and required env configured.
 - Placeholder rule: copied example values such as `replace-with-...` and `change-me` stay blocked.
 - Runtime commands: `npm run payload:bootstrap`, copy/edit the private env file, start Postgres, then `npm run payload:runtime` and `npm run payload:preflight`.
+- Admin import endpoint: `POST /api/admin/payload-runtime/import` accepts the redacted JSON from `npm run payload:runtime`.
 - Production/CLI path overrides: `MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
 
