@@ -127,6 +127,22 @@ function gateById(report, id) {
   return report.gates.find((item) => item.id === id);
 }
 
+function assertPassListingQualityEvidence(report) {
+  const review = gateById(report, "listing_quality_review");
+  if (review?.status !== "pass") return;
+  const summary = review.evidence?.summary;
+  if (
+    review.evidence?.status !== "pass" ||
+    !review.evidence?.path ||
+    review.evidence.path.endsWith(".example") ||
+    summary?.expected_review_rows < 1 ||
+    summary.review_rows !== summary.expected_review_rows ||
+    summary.missing_review_rows !== 0
+  ) {
+    throw new Error("Launch readiness listing quality requires complete non-example review evidence");
+  }
+}
+
 function assertPassRuntimeEvidence(report) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
@@ -515,6 +531,7 @@ export function assertLaunchReadinessReport(report) {
   if (!report.gates.some((item) => item.id === "live_services")) {
     throw new Error("Launch readiness must include live service provisioning gate");
   }
+  assertPassListingQualityEvidence(report);
   assertPassRuntimeEvidence(report);
   if (!report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");

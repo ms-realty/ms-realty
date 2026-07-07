@@ -107,7 +107,7 @@ const readyLiveServices = [
 const readyListingQualityReview = {
   status: "pass",
   path: "migration/reviews/listing-quality.csv",
-  summary: { review_rows: 7, facts_review_rows: 0, media_review_rows: 7 },
+  summary: { expected_review_rows: 7, review_rows: 7, missing_review_rows: 0, facts_review_rows: 0, media_review_rows: 7 },
 };
 const readyAppState = {
   start_script: "node production/server.mjs",
@@ -390,6 +390,28 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
   assert.throws(() => assertLaunchReadinessReport(weakPayload), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakPayloadCredentials), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakLiveServices), /non-example reports/);
+});
+
+test("launch readiness validator rejects weak listing quality pass evidence", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: {
+      ...readyListingQualityReview,
+      summary: { ...readyListingQualityReview.summary, review_rows: 6, missing_review_rows: 1 },
+    },
+    liveServices: readyLiveServices,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+
+  assert.throws(() => assertLaunchReadinessReport(report), /complete non-example review evidence/);
 });
 
 test("launch readiness accepts reviewed location page growth", () => {
