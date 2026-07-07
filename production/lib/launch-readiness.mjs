@@ -157,6 +157,38 @@ function assertPassRedirectReviewEvidence(report) {
   }
 }
 
+function assertPassLocalizedSitemapEvidence(report) {
+  const sitemap = gateById(report, "localized_sitemap");
+  if (sitemap?.status !== "pass") return;
+  const evidence = sitemap.evidence || {};
+  const entries =
+    evidence.home_pages +
+    evidence.listing_entries +
+    evidence.location_pages +
+    evidence.seller_pages +
+    evidence.contact_pages +
+    evidence.guide_pages;
+  if (
+    evidence.home_pages !== 7 ||
+    evidence.listing_entries !== 167 ||
+    evidence.location_pages < 6 ||
+    evidence.seller_pages !== 7 ||
+    evidence.contact_pages !== 7 ||
+    evidence.guide_pages !== 2 ||
+    evidence.entries !== entries
+  ) {
+    throw new Error("Launch readiness localized sitemap requires complete approved route evidence");
+  }
+}
+
+function assertPassStructuredDataEvidence(report) {
+  const structuredData = gateById(report, "structured_data");
+  if (structuredData?.status !== "pass") return;
+  if (structuredData.evidence?.failing_entries !== 0) {
+    throw new Error("Launch readiness structured data requires zero failing entries");
+  }
+}
+
 function assertPassListingQualityEvidence(report) {
   const review = gateById(report, "listing_quality_review");
   if (review?.status !== "pass") return;
@@ -592,6 +624,8 @@ export function assertLaunchReadinessReport(report) {
   }
   assertPassCrawlInventoryEvidence(report);
   assertPassRedirectReviewEvidence(report);
+  assertPassLocalizedSitemapEvidence(report);
+  assertPassStructuredDataEvidence(report);
   assertPassExternalSeoEvidence(report);
   assertPassListingQualityEvidence(report);
   assertPassRuntimeSmokeEvidence(report);
