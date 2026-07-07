@@ -55,7 +55,9 @@ function assertLaunchServiceUrl(value, label) {
   }
   if (!["http:", "https:"].includes(parsed.protocol)) throw new Error(`${label} must use http or https`);
   const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  if (["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(host) || host.endsWith(".local") || host === "example.com" || host.endsWith(".example.com")) {
+  const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
+  const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
+  if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
     throw new Error(`${label} must not use localhost or placeholder service URLs`);
   }
 }

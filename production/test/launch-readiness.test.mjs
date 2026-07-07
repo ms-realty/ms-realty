@@ -576,6 +576,28 @@ test("live service report preflight fails missing reports and passes valid repor
     localResult.reports.find((report) => report.source === "typesense_meilisearch_sync").error,
     /localhost or placeholder/,
   );
+
+  const reservedDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reserved-live-reports-`);
+  const reservedPaths = writeLiveReportFixtures(reservedDir);
+  const reservedQuery = JSON.parse(fs.readFileSync(reservedPaths.queryReportPath, "utf8"));
+  reservedQuery.engines[0].service_url = "https://example.com";
+  reservedQuery.engines[1].service_url = "https://typesense.example";
+  fs.writeFileSync(reservedPaths.queryReportPath, `${JSON.stringify(reservedQuery)}\n`);
+  const reservedHermes = JSON.parse(fs.readFileSync(reservedPaths.hermesReportPath, "utf8"));
+  reservedHermes.provider.endpoint = "https://hermes.invalid/v1/chat/completions";
+  fs.writeFileSync(reservedPaths.hermesReportPath, `${JSON.stringify(reservedHermes)}\n`);
+  const reservedResult = validateLiveServiceReports(reservedPaths);
+  assert.equal(reservedResult.ready, false);
+  assert.equal(reservedResult.reports.find((report) => report.source === "typesense_meilisearch_query").status, "invalid_report");
+  assert.equal(reservedResult.reports.find((report) => report.source === "hermes_draft_worker").status, "invalid_report");
+  assert.match(
+    reservedResult.reports.find((report) => report.source === "typesense_meilisearch_query").error,
+    /localhost or placeholder/,
+  );
+  assert.match(
+    reservedResult.reports.find((report) => report.source === "hermes_draft_worker").error,
+    /localhost or placeholder/,
+  );
 });
 
 test("live service evidence command refuses localhost launch evidence", async () => {
