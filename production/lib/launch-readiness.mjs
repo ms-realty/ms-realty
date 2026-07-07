@@ -39,6 +39,12 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function assertLiveServiceReportTimestamp(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Live service report must include valid generated_at");
+  }
+}
+
 function packageState(filePath = fromRoot("package.json")) {
   const pkg = readJson(filePath);
   const hasPayload = Boolean(pkg.dependencies?.payload || pkg.devDependencies?.payload);
@@ -126,6 +132,7 @@ function reportStatus(source, filePath, assertReport) {
     if (report.example === true || filePath.endsWith(".example")) {
       return { source, status: "example_report", path: filePath, summary: report.summary };
     }
+    assertLiveServiceReportTimestamp(report);
     return { source, status: "pass", path: filePath, summary: report.summary };
   } catch (error) {
     return { source, status: "invalid_report", path: filePath, error: error.message };
@@ -233,6 +240,7 @@ export function writeLiveServiceReport(source, report, options = {}) {
   const writer = LIVE_SERVICE_REPORT_WRITERS[source];
   if (!writer) throw new Error(`Unknown live service report source: ${source}`);
   if (report.example === true) throw new Error("Example live service reports cannot be imported as launch evidence");
+  assertLiveServiceReportTimestamp(report);
   const outPath = writer.write(report, options[writer.pathKey]);
   return { source, outPath, summary: report.summary };
 }

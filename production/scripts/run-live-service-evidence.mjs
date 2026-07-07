@@ -12,10 +12,11 @@ import {
 } from "../lib/hermes-draft-worker.mjs";
 
 async function capture() {
-  const syncReport = await runSearchEngineSync();
+  const runAt = new Date().toISOString();
+  const syncReport = await runSearchEngineSync({ generatedAt: runAt });
   writeSearchEngineSyncReport(syncReport, process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined);
 
-  const queryReport = await runSearchEngineQuerySmoke();
+  const queryReport = await runSearchEngineQuerySmoke({ generatedAt: runAt });
   writeSearchEngineQueryReport(queryReport, process.env.MS_REALTY_SEARCH_QUERY_REPORT_PATH || undefined);
 
   const hermesReport = await runHermesDraftWorker({
@@ -24,6 +25,8 @@ async function capture() {
     auditPath: process.env.MS_REALTY_HERMES_AUDIT_PATH || undefined,
     auditLogPath: process.env.MS_REALTY_AUDIT_LOG_PATH || undefined,
     limit: Number(process.env.HERMES_DRAFT_LIMIT || 25),
+    generatedAt: runAt,
+    recordedAt: runAt,
   });
   writeHermesDraftWorkerReport(hermesReport, process.env.MS_REALTY_HERMES_WORKER_REPORT_PATH || undefined);
 

@@ -117,6 +117,7 @@ function writeLiveReportFixtures(dir) {
   fs.writeFileSync(
     syncReportPath,
     `${JSON.stringify({
+      generated_at: "2026-07-06T00:00:00Z",
       summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 4 },
       engines: [
         { engine: "typesense", documents: 167, operations: [{ bytes: 1 }, { bytes: 1 }] },
@@ -127,6 +128,7 @@ function writeLiveReportFixtures(dir) {
   fs.writeFileSync(
     queryReportPath,
     `${JSON.stringify({
+      generated_at: "2026-07-06T00:00:00Z",
       summary: { engines: 2, total_hits: 2, first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"] },
       engines: [
         { engine: "typesense", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
@@ -137,6 +139,7 @@ function writeLiveReportFixtures(dir) {
   fs.writeFileSync(
     hermesReportPath,
     `${JSON.stringify({
+      generated_at: "2026-07-06T00:00:00Z",
       summary: { attempted: 1, persisted: 1, rejected: 0 },
       persisted: [{ status: "hermes_drafted", public_indexable: false }],
       rejected: [],
@@ -641,7 +644,19 @@ test("live service report import writes only validated source reports", () => {
     () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, example: true }, { queryReportPath: outPath }),
     /Example live service reports cannot be imported/,
   );
-  assert.throws(() => writeLiveServiceReport("typesense_meilisearch_query", { summary: { engines: 1 }, engines: [] }, { queryReportPath: outPath }), /cover Typesense and Meilisearch/);
+  assert.throws(
+    () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, generated_at: "" }, { queryReportPath: outPath }),
+    /valid generated_at/,
+  );
+  assert.throws(
+    () =>
+      writeLiveServiceReport(
+        "typesense_meilisearch_query",
+        { generated_at: "2026-07-06T00:00:00Z", summary: { engines: 1 }, engines: [] },
+        { queryReportPath: outPath },
+      ),
+    /cover Typesense and Meilisearch/,
+  );
   assert.throws(() => writeLiveServiceReport("../bad", queryReport), /Unknown live service report source/);
 });
 
