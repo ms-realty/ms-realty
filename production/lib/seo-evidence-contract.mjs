@@ -18,6 +18,23 @@ export function missingRequiredSources(sourceSummaries) {
   return analyticsReady ? missing : [...missing, "privacy_or_ga4_analytics"];
 }
 
+export function assertSeoSourceSummary(summary, source) {
+  if (summary?.source && summary.source !== source) throw new Error(`SEO evidence ${source} source name mismatch`);
+  const rowCount = summary?.row_count ?? 0;
+  const matchedRows = summary?.matched_rows ?? 0;
+  const unmatchedRows = summary?.unmatched_rows ?? 0;
+  const duplicateRows = summary?.duplicate_rows ?? 0;
+  if (rowCount !== matchedRows + unmatchedRows + duplicateRows) {
+    throw new Error(`SEO evidence ${source} row counts must match source summary`);
+  }
+  if ((summary?.signal_rows ?? 0) > matchedRows || (summary?.placeholder_rows ?? 0) > matchedRows) {
+    throw new Error(`SEO evidence ${source} signal counts must not exceed matched rows`);
+  }
+  if ((summary?.matched_source_domains || []).length > matchedRows) {
+    throw new Error(`SEO evidence ${source} matched domains must not exceed matched rows`);
+  }
+}
+
 export function assertSeoEvidence(evidence) {
   if (!evidence.generated_at || Number.isNaN(Date.parse(evidence.generated_at))) {
     throw new Error("SEO evidence must include valid generated_at");
@@ -41,6 +58,7 @@ export function assertSeoEvidence(evidence) {
   if (!Array.isArray(evidence.summary.missing_required_sources)) throw new Error("SEO evidence must summarize missing required sources");
   for (const source of REQUIRED_EXPORTS) {
     if (!evidence.summary.sources[source]) throw new Error(`SEO evidence missing ${source} source status`);
+    assertSeoSourceSummary(evidence.summary.sources[source], source);
   }
   const expectedMissing = missingRequiredSources(evidence.summary.sources);
   if (JSON.stringify(evidence.summary.missing_required_sources) !== JSON.stringify(expectedMissing)) {

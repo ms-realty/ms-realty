@@ -6,6 +6,7 @@ import {
   REQUIRED_EXPORTS,
   REQUIRED_SOURCE_DOMAINS,
   assertSeoEvidence,
+  assertSeoSourceSummary,
   missingRequiredExport,
   missingRequiredSources,
 } from "./seo-evidence-contract.mjs";
@@ -377,6 +378,7 @@ export function assertSeoEvidencePreflightReport(report) {
   for (const source of REQUIRED_EXPORTS) {
     const sourceStatus = report.summary.sources?.[source];
     if (!sourceStatus) throw new Error(`SEO preflight report missing ${source} source status`);
+    assertSeoSourceSummary(sourceStatus, source);
     if (ready && missingRequiredExport(sourceStatus)) {
       throw new Error(`SEO preflight ready report requires complete ${source} evidence`);
     }

@@ -258,6 +258,20 @@ test("SEO preflight ready report requires complete source evidence", () => {
           ...report.summary,
           sources: {
             ...report.summary.sources,
+            yandex_webmaster: { ...report.summary.sources.yandex_webmaster, duplicate_rows: 99 },
+          },
+        },
+      }),
+    /row counts/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidencePreflightReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          sources: {
+            ...report.summary.sources,
             backlinks: { ...report.summary.sources.backlinks, placeholder_rows: 1 },
           },
         },
@@ -330,6 +344,20 @@ test("SEO evidence assertion rejects hand-cleared missing source state", () => {
   assert.throws(
     () => assertSeoEvidence({ ...evidence, summary: { ...evidence.summary, urls_with_any_evidence: 999 } }),
     /URL evidence count/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
+        summary: {
+          ...evidence.summary,
+          sources: {
+            ...evidence.summary.sources,
+            search_console: { ...evidence.summary.sources.search_console, row_count: 99 },
+          },
+        },
+      }),
+    /row counts/,
   );
 
   evidence.summary.missing_required_sources = [];
