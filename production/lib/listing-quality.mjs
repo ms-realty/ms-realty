@@ -478,6 +478,9 @@ export function assertListingQualityPreflightReport(report) {
     }
   }
   if (ready) {
+    if (!report.review.path || report.review.path.endsWith(".example")) {
+      throw new Error("Listing quality preflight ready report must include non-example review path");
+    }
     if (report.summary.expected_review_rows < 1 || report.summary.review_rows !== report.summary.expected_review_rows) {
       throw new Error("Listing quality preflight ready report must cover every review row");
     }

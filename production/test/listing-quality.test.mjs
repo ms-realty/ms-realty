@@ -419,6 +419,14 @@ test("listing quality preflight report records missing and valid human review st
   assert.equal(readyReport.ready, true);
   assert.equal(readyReport.summary.review_rows, report.rows.length);
   assert.throws(
+    () => assertListingQualityPreflightReport({ ...readyReport, review: { ...readyReport.review, path: "" } }),
+    /non-example review path/,
+  );
+  assert.throws(
+    () => assertListingQualityPreflightReport({ ...readyReport, review: { ...readyReport.review, path: `${reviewPath}.example` } }),
+    /non-example review path/,
+  );
+  assert.throws(
     () => assertListingQualityPreflightReport({ ...readyReport, generated_at: "" }),
     /valid generated_at/,
   );
