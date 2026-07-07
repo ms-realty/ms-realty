@@ -13,6 +13,7 @@ import {
   validateSeoEvidenceInputs,
   writeExternalSeoExport,
 } from "../lib/seo-evidence.mjs";
+import { importAppSeoEvidenceRows } from "../lib/app-seo-evidence.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function legacyDomainSampleUrls() {
@@ -559,6 +560,30 @@ test("unmatched required SEO export files remain launch blockers", () => {
   assert.deepEqual(evidence.summary.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
   assert.equal(evidence.summary.sources.search_console.status, "imported");
   assert.equal(evidence.summary.sources.search_console.matched_rows, 0);
+});
+
+test("app SEO evidence import validates joined evidence before persisting uploads", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-seo-import-invalid-`);
+  const evidencePath = `${dir}/seo-evidence.json`;
+  const evidence = buildSeoEvidence({
+    generatedAt: "2026-07-05T00:00:00Z",
+    events: [{ type: "page_view", path: "https://makler-realty.com/" }],
+  });
+  evidence.summary.sources.yandex_webmaster.row_count = 99;
+  fs.writeFileSync(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
+
+  const { com, ru } = legacyDomainSampleUrls();
+
+  assert.throws(
+    () =>
+      importAppSeoEvidenceRows(
+        { source: "search_console", csv: `url,clicks,impressions,position\n${com},3,30,7\n${ru},2,20,8\n` },
+        { seoEvidenceInputDir: dir, seoEvidenceOutputPath: evidencePath, reviewedAt: "2026-07-05T00:01:00Z" },
+      ),
+    /row counts/,
+  );
+  assert.equal(fs.existsSync(`${dir}/search-console.csv`), false);
+  assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).summary.sources.yandex_webmaster.row_count, 99);
 });
 
 test("external SEO export templates are present but real CSVs stay local", () => {

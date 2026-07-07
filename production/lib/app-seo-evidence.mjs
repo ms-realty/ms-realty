@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
+import { assertSeoEvidence } from "./seo-evidence-contract.mjs";
 import { fromRoot } from "./paths.mjs";
 
 const SEO_EXPORTS = {
@@ -284,8 +285,6 @@ export function importAppSeoEvidenceRows(input, config) {
   const csv = input.csv || "";
   const rows = parseCsv(csv).map((row) => normalizeExternalRow(input.source, row));
   const outPath = seoInputPath(input.source, config);
-  fs.mkdirSync(path.dirname(/*turbopackIgnore: true*/ outPath), { recursive: true });
-  fs.writeFileSync(/*turbopackIgnore: true*/ outPath, csv);
 
   evidence.generated_at = config.reviewedAt || new Date().toISOString();
   evidence.summary.sources[input.source] = {
@@ -297,8 +296,11 @@ export function importAppSeoEvidenceRows(input, config) {
   };
   updateMissingRequiredSources(evidence);
   updateEvidenceCounts(evidence);
+  assertSeoEvidence(evidence);
 
   const evidencePath = seoEvidencePath(config);
+  fs.mkdirSync(path.dirname(/*turbopackIgnore: true*/ outPath), { recursive: true });
+  fs.writeFileSync(/*turbopackIgnore: true*/ outPath, csv);
   fs.mkdirSync(path.dirname(/*turbopackIgnore: true*/ evidencePath), { recursive: true });
   fs.writeFileSync(/*turbopackIgnore: true*/ evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
   return { imported: { source: input.source, outPath, row_count: rows.length }, ...evidencePayload(evidence) };
