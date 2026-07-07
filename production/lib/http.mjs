@@ -73,7 +73,6 @@ import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import {
-  DEFAULT_LISTING_QUALITY_REPORT,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   renderListingQualityWorkbook,
@@ -234,7 +233,7 @@ function seoEvidencePayload(seoEvidence) {
   };
 }
 
-function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, seed, listingQualityGeneratedAt) {
+function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, listingQuality) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const reviewRequired = routes.filter((route) => route.review_required);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
@@ -272,7 +271,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
     seoEvidence: seoEvidencePayload(seoEvidence),
-    listingQuality: buildListingQualityReport({ seed, generatedAt: listingQualityGeneratedAt, limit: 20 }),
+    listingQuality,
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
@@ -332,6 +331,13 @@ export function createHttpApp({
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeRedirects = redirects ?? loadDeployableRedirects(deployableRedirectOutputPath || undefined);
+  const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
+  const currentListingQualityReport = (options = {}) =>
+    buildListingQualityReport({
+      seed: currentSeed(),
+      tourApprovals: readTourApprovals(tourApprovalLedgerPath || undefined),
+      ...options,
+    });
   const currentSeoEvidence = () =>
     buildSeoEvidence({
       inputDir: seoEvidenceInputDir || undefined,
@@ -350,6 +356,7 @@ export function createHttpApp({
         },
       },
       deployableRedirects: { summary: summarizeDeployableRedirects(redirectRows), redirects: redirectRows },
+      listingQuality: currentListingQualityReport({ generatedAt: reviewedAt || new Date().toISOString() }),
       listingQualityReviewPath: listingQualityReviewPath || undefined,
       seoEvidence: currentSeoEvidence(),
       liveServices: liveServiceReports({
@@ -374,8 +381,7 @@ export function createHttpApp({
       },
     });
   const currentPreflightReports = () => {
-    const listingReport = buildListingQualityReport({
-      seed: currentSeed(),
+    const listingReport = currentListingQualityReport({
       generatedAt: listingQualityGeneratedAt || reviewedAt || new Date().toISOString(),
     });
     return {
@@ -403,7 +409,6 @@ export function createHttpApp({
       },
     };
   };
-  const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
   const recordEvent = (input) =>
     eventLedgerPath ? appendEvent(createEvent(input, receivedAt || new Date().toISOString()), { filePath: eventLedgerPath }) : null;
   const recordConsent = (input) =>
@@ -625,8 +630,7 @@ export function createHttpApp({
         routeMap,
         readRedirectApprovals(redirectApprovalPath || undefined),
         currentSeoEvidence(),
-        currentSeed(),
-        listingQualityGeneratedAt,
+        currentListingQualityReport({ generatedAt: listingQualityGeneratedAt, limit: 20 }),
       );
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
@@ -642,8 +646,7 @@ export function createHttpApp({
         routeMap,
         approvals,
         currentSeoEvidence(),
-        currentSeed(),
-        listingQualityGeneratedAt,
+        currentListingQualityReport({ generatedAt: listingQualityGeneratedAt, limit: 20 }),
       );
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
@@ -865,7 +868,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        renderListingQualityWorkbook(buildListingQualityReport({ seed: currentSeed() })),
+        renderListingQualityWorkbook(currentListingQualityReport()),
         "text/csv; charset=utf-8",
         { "content-disposition": 'attachment; filename="listing-quality-workbook.csv"' },
       );
@@ -875,13 +878,14 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const inputCsv = csvInput(request);
-        const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed() }), inputCsv);
+        const report = currentListingQualityReport();
+        const review = validateListingQualityReviewCsv(report, inputCsv);
         let reviewPath = null;
         let reviewPersistenceError = "";
         if (review.summary.missing_review_rows === 0) {
           try {
             reviewPath = writeCompleteListingQualityReviewCsv(
-              JSON.parse(fs.readFileSync(DEFAULT_LISTING_QUALITY_REPORT, "utf8")),
+              report,
               inputCsv,
               listingQualityReviewPath || undefined,
             );

@@ -401,6 +401,7 @@ function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_
       status: "pass",
       path: reviewPath,
       summary: validateListingQualityReviewCsv(listingQuality, fs.readFileSync(reviewPath, "utf8"), {
+        allowExtraRows: true,
         requireComplete: true,
       }).summary,
     };

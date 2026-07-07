@@ -301,6 +301,27 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   );
 });
 
+test("listing quality review CSV can ignore rows outside the current report for readiness", () => {
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const currentReport = { ...report, rows: report.rows.slice(0, 1) };
+  const reviewCsv = `${completeListingQualityReviewCsv(currentReport)}MS-CRAWL-9999,,,,,,media_editor,Previously reviewed row no longer pending\n`;
+
+  assert.throws(() => validateListingQualityReviewCsv(currentReport, reviewCsv, { requireComplete: true }), /known listing_id/);
+
+  const validation = validateListingQualityReviewCsv(currentReport, reviewCsv, {
+    allowExtraRows: true,
+    requireComplete: true,
+  });
+
+  assert.equal(validation.summary.expected_review_rows, 1);
+  assert.equal(validation.summary.review_rows, 1);
+  assert.equal(validation.summary.missing_review_rows, 0);
+  assert.equal(validation.reviews[0].listing_id, currentReport.rows[0].listing_id);
+});
+
 test("listing quality review packet writer and CLI honor output overrides", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-review-pack-`);
   const packetPath = `${dir}/listing-quality-review-packet.json`;

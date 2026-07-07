@@ -317,13 +317,14 @@ function assertReviewNotes(listingId, value) {
   }
 }
 
-export function validateListingQualityReviewCsv(report, csvText, { requireComplete = false } = {}) {
+export function validateListingQualityReviewCsv(report, csvText, { allowExtraRows = false, requireComplete = false } = {}) {
   const rows = parseCsv(csvText);
   if (!rows.length) throw new Error("Listing quality review CSV has no rows");
 
   const byListing = new Map(report.rows.map((row) => [row.listing_id, row]));
   const seen = new Set();
-  const reviews = rows.map((row) => {
+  const reviewRows = allowExtraRows ? rows.filter((row) => byListing.has(row.listing_id || row.listingId)) : rows;
+  const reviews = reviewRows.map((row) => {
     const listingId = row.listing_id || row.listingId;
     const quality = byListing.get(listingId);
     if (!quality) throw new Error(`Listing quality review requires a known listing_id: ${listingId || ""}`);
@@ -402,7 +403,7 @@ function reviewState(report, reviewPath, csvText = null) {
 
   try {
     const text = csvText ?? fs.readFileSync(reviewPath, "utf8");
-    const validation = validateListingQualityReviewCsv(report, text);
+    const validation = validateListingQualityReviewCsv(report, text, { allowExtraRows: true });
     if (validation.summary.missing_review_rows > 0) {
       const reviewed = new Set(validation.reviews.map((review) => review.listing_id));
       const missingRows = report.rows.filter((row) => !reviewed.has(row.listing_id));

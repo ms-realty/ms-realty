@@ -823,6 +823,7 @@ test("Next admin listing-quality import persists complete review for mounted lis
     async () => {
       const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
       const listingQualityWorkbookRoute = await import("../../app/api/admin/listing-quality-workbook/route.js");
+      const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
 
       const workbook = await listingQualityWorkbookRoute.GET(
         new Request("https://example.test/api/admin/listing-quality-workbook", { headers: auth }),
@@ -842,6 +843,10 @@ test("Next admin listing-quality import persists complete review for mounted lis
         }),
       );
       const importedBody = await imported.json();
+      const readiness = await launchReadinessRoute.GET(
+        new Request("https://example.test/api/admin/launch-readiness", { headers: auth }),
+      );
+      const readinessBody = await readiness.json();
 
       assert.equal(imported.status, 201);
       assert.equal(importedBody.imported, parseCsv(workbookCsv).length);
@@ -850,6 +855,9 @@ test("Next admin listing-quality import persists complete review for mounted lis
       assert.equal(importedBody.reviewPersistenceError, "");
       assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
       assert.equal(importedBody.edits.some((row) => row.edit.listing_id === "MS-CRAWL-0003"), true);
+      assert.equal(readiness.status, 200);
+      assert.equal(readinessBody.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+      assert.equal(readinessBody.blockers.includes("listing_quality_review"), false);
       const auditRows = readAuditLog(auditLogPath);
       assert.equal(assertAuditLog(auditRows), true);
       assert.deepEqual(actionCounts(auditRows), { listing_quality_imported: 1 });

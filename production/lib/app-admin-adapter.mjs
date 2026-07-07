@@ -61,6 +61,7 @@ import {
   DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
   appendTourApproval,
   createTourApproval,
+  readTourApprovals,
 } from "./tours.mjs";
 import {
   DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -278,6 +279,14 @@ function currentSeed(config) {
   return applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath));
 }
 
+function currentListingQualityReport(config, options = {}) {
+  return buildListingQualityReport({
+    seed: currentSeed(config),
+    tourApprovals: readTourApprovals(config.tourApprovalLedgerPath),
+    ...options,
+  });
+}
+
 function auditRecordedAt(config) {
   return config.reviewedAt || config.editedAt || config.bookedAt || config.dealClosedAt || new Date().toISOString();
 }
@@ -365,6 +374,7 @@ function launchReadiness(config) {
     generatedAt: config.reviewedAt || new Date().toISOString(),
     routeMap: routeMapSummary(routeMapRows()),
     deployableRedirects: deployableRedirectsForLaunch(config),
+    listingQuality: currentListingQualityReport(config, { generatedAt: config.reviewedAt || new Date().toISOString() }),
     listingQualityReviewPath: config.listingQualityReviewPath || undefined,
     seoEvidence: currentSeoEvidence(config),
     liveServices: liveServiceReports({
@@ -421,7 +431,7 @@ function seoPreflightReport(config) {
 
 function preflightReports(config) {
   const generatedAt = config.reviewedAt || new Date().toISOString();
-  const listingReport = buildListingQualityReport({ seed: currentSeed(config), generatedAt });
+  const listingReport = currentListingQualityReport(config, { generatedAt });
   return {
     kind: "admin_preflight_reports",
     generated_at: generatedAt,
@@ -483,7 +493,7 @@ function migrationReviewPayload(registry, url, config) {
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
     seoEvidence: seoEvidencePayload(currentSeoEvidence(config)),
-    listingQuality: buildListingQualityReport({ seed: currentSeed(config), generatedAt: config.reviewedAt, limit: 20 }),
+    listingQuality: currentListingQualityReport(config, { generatedAt: config.reviewedAt, limit: 20 }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
     launchReadinessEndpoint: "/api/admin/launch-readiness",
@@ -844,11 +854,11 @@ function redirectApprovalWorkbook(url, config) {
 }
 
 function listingQualityWorkbook(config) {
-  return renderListingQualityWorkbook(buildListingQualityReport({ seed: currentSeed(config) }));
+  return renderListingQualityWorkbook(currentListingQualityReport(config));
 }
 
 function importListingQualityRows(inputCsv, config) {
-  const report = buildListingQualityReport({ seed: currentSeed(config) });
+  const report = currentListingQualityReport(config);
   const review = validateListingQualityReviewCsv(report, inputCsv);
   let reviewPath = null;
   let reviewPersistenceError = "";
