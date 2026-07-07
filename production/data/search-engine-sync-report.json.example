@@ -1,5 +1,6 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
+  "example": true,
   "summary": {
     "engines": 2,
     "documents_per_engine": [167, 167],

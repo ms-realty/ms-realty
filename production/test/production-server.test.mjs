@@ -145,7 +145,7 @@ test("production server entrypoint serves runtime routes with env config", async
     });
     assert.equal(readiness.status, 200);
     assert.equal(readiness.body.blockers.includes("listing_quality_review"), true);
-    assert.equal(readiness.body.blockers.includes("live_services"), false);
+    assert.equal(readiness.body.blockers.includes("live_services"), true);
     const auditRows = readAuditLog(auditLogPath);
     assert.equal(assertAuditLog(auditRows), true);
     assert.deepEqual(

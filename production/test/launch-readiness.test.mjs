@@ -607,21 +607,22 @@ test("live service preflight report records blockers without clearing the gate",
   assert.equal(readyReport.summary.pass, 3);
 });
 
-test("live service report examples validate but do not replace real launch evidence", () => {
+test("live service report examples are templates, not launch evidence", () => {
   const result = validateLiveServiceReports({
     syncReportPath: fromRoot("production", "data", "search-engine-sync-report.json.example"),
     queryReportPath: fromRoot("production", "data", "search-engine-query-report.json.example"),
     hermesReportPath: fromRoot("production", "data", "hermes-draft-worker-report.json.example"),
   });
 
-  assert.equal(result.ready, true);
-  assert.equal(result.reports.every((report) => report.status === "pass"), true);
+  assert.equal(result.ready, false);
+  assert.equal(result.reports.every((report) => report.status === "example_report"), true);
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-sync-report\.json/);
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/search-engine-query-report\.json/);
   assert.match(fs.readFileSync(fromRoot(".gitignore"), "utf8"), /production\/data\/hermes-draft-worker-report\.json/);
 
   const template = readLiveServiceReportTemplate("typesense_meilisearch_query");
   assert.equal(template.filename, "search-engine-query-report.json.example");
+  assert.equal(JSON.parse(template.json).example, true);
   assert.equal(JSON.parse(template.json).summary.engines, 2);
   assert.throws(() => readLiveServiceReportTemplate("../bad"), /Unknown live service report source/);
 });
@@ -636,6 +637,10 @@ test("live service report import writes only validated source reports", () => {
 
   assert.equal(imported.outPath, outPath);
   assert.equal(JSON.parse(fs.readFileSync(outPath, "utf8")).summary.engines, 2);
+  assert.throws(
+    () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, example: true }, { queryReportPath: outPath }),
+    /Example live service reports cannot be imported/,
+  );
   assert.throws(() => writeLiveServiceReport("typesense_meilisearch_query", { summary: { engines: 1 }, engines: [] }, { queryReportPath: outPath }), /cover Typesense and Meilisearch/);
   assert.throws(() => writeLiveServiceReport("../bad", queryReport), /Unknown live service report source/);
 });

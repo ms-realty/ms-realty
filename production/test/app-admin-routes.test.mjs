@@ -300,6 +300,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveTemplate.status, 200);
       assert.equal(liveTemplate.headers.get("content-type"), "application/json; charset=utf-8");
       assert.equal(liveTemplate.headers.get("content-disposition"), 'attachment; filename="hermes-draft-worker-report.json.example"');
+      assert.equal(liveTemplateBody.example, true);
       assert.equal(liveTemplateBody.summary.attempted, 1);
 
       const liveImport = await liveServiceReportImportRoute.POST(
@@ -310,11 +311,25 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         }),
       );
       const liveImportBody = await liveImport.json();
-      assert.equal(liveImport.status, 201);
-      assert.equal(liveImportBody.imported.outPath, hermesWorkerReportPath);
-      assert.equal(liveImportBody.livePreflight.status, "blocked");
-      assert.equal(liveImportBody.livePreflight.summary.pass, 1);
-      assert.equal(liveImportBody.livePreflight.summary.missing_report, 2);
+      assert.equal(liveImport.status, 400);
+      assert.match(liveImportBody.message, /Example live service reports cannot be imported/);
+      assert.equal(fs.existsSync(hermesWorkerReportPath), false);
+
+      const liveReport = { ...liveTemplateBody };
+      delete liveReport.example;
+      const liveImportValid = await liveServiceReportImportRoute.POST(
+        new Request("https://example.test/api/admin/live-service-reports/import?source=hermes_draft_worker", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify(liveReport),
+        }),
+      );
+      const liveImportValidBody = await liveImportValid.json();
+      assert.equal(liveImportValid.status, 201);
+      assert.equal(liveImportValidBody.imported.outPath, hermesWorkerReportPath);
+      assert.equal(liveImportValidBody.livePreflight.status, "blocked");
+      assert.equal(liveImportValidBody.livePreflight.summary.pass, 1);
+      assert.equal(liveImportValidBody.livePreflight.summary.missing_report, 2);
       assert.equal(fs.existsSync(hermesWorkerReportPath), true);
 
       const migrationReviewUnauthorized = await migrationReviewRoute.GET(

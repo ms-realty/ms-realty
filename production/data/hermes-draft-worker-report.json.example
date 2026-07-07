@@ -1,5 +1,6 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
+  "example": true,
   "ledger_path": "production/data/translation-tasks.jsonl",
   "audit_path": "production/data/hermes-audit.jsonl",
   "summary": {

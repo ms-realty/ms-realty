@@ -1148,6 +1148,9 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-report.json.example"), "utf8"));
   const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-report.json.example"), "utf8"));
   const hermesReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-worker-report.json.example"), "utf8"));
+  delete syncReport.example;
+  delete queryReport.example;
+  delete hermesReport.example;
   const app = createHttpApp({
     routeMap,
     seoEvidenceInputDir,
@@ -1304,6 +1307,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveTemplateUnauthorized.status, 401);
   assert.equal(liveTemplate.status, 200);
   assert.equal(liveTemplate.headers["content-disposition"], 'attachment; filename="search-engine-sync-report.json.example"');
+  assert.equal(JSON.parse(liveTemplate.body).example, true);
   assert.equal(JSON.parse(liveTemplate.body).summary.engines, 2);
   assert.equal(liveImportUnauthorized.status, 401);
   assert.equal(liveSyncImport.status, 201);

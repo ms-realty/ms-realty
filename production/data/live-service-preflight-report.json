@@ -7,6 +7,7 @@
     "pass": 0,
     "missing_report": 3,
     "invalid_report": 0,
+    "example_report": 0,
     "configured_paths": {
       "typesense_meilisearch_sync": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json",
       "typesense_meilisearch_query": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json",

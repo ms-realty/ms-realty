@@ -123,6 +123,9 @@ function reportStatus(source, filePath, assertReport) {
   try {
     const report = readJson(filePath);
     assertReport(report);
+    if (report.example === true || filePath.endsWith(".example")) {
+      return { source, status: "example_report", path: filePath, summary: report.summary };
+    }
     return { source, status: "pass", path: filePath, summary: report.summary };
   } catch (error) {
     return { source, status: "invalid_report", path: filePath, error: error.message };
@@ -180,6 +183,7 @@ export function buildLiveServicePreflightReport({ generatedAt = new Date().toISO
       pass: statusCounts.pass || 0,
       missing_report: statusCounts.missing_report || 0,
       invalid_report: statusCounts.invalid_report || 0,
+      example_report: statusCounts.example_report || 0,
       configured_paths: Object.fromEntries(result.reports.map((report) => [report.source, report.path])),
     },
     reports: result.reports,
@@ -228,6 +232,7 @@ export function readLiveServiceReportTemplate(source) {
 export function writeLiveServiceReport(source, report, options = {}) {
   const writer = LIVE_SERVICE_REPORT_WRITERS[source];
   if (!writer) throw new Error(`Unknown live service report source: ${source}`);
+  if (report.example === true) throw new Error("Example live service reports cannot be imported as launch evidence");
   const outPath = writer.write(report, options[writer.pathKey]);
   return { source, outPath, summary: report.summary };
 }
