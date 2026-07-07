@@ -1072,6 +1072,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /same_content_checklist/);
   assert.match(markdown, /Approval import columns: `old_url`, `equivalent_content`, `reviewer`/);
   assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
+  assert.match(markdown, /rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0/);
   assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);
   assert.match(markdown, /migration\/external\/seo\/backlinks\.csv`: missing_export/);
   assert.match(markdown, /Minimum required domain coverage/);

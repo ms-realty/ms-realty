@@ -32,7 +32,7 @@ function sourceLine(source, summary) {
   const state = summary.sources[source];
   const filename = SEO_EXPORTS[source].filename;
   const domains = (state.matched_source_domains || []).join(", ") || "none";
-  return `- \`migration/external/seo/${filename}\`: ${state.status}, ${state.matched_rows} matched rows, domains: ${domains}`;
+  return `- \`migration/external/seo/${filename}\`: ${state.status}, rows ${state.row_count}, matched ${state.matched_rows}, signal ${state.signal_rows}, unmatched ${state.unmatched_rows}, duplicates ${state.duplicate_rows}, placeholders ${state.placeholder_rows}, domains: ${domains}`;
 }
 
 function importLine(source) {
