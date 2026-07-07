@@ -310,6 +310,30 @@ function assertPassRuntimeEvidence(report) {
   }
 }
 
+function assertPassAppLayerEvidence(report) {
+  const app = gateById(report, "production_app_layer");
+  if (app?.status !== "pass") return;
+  if (app.evidence?.start_script !== "node production/server.mjs" || app.evidence?.production_server_entrypoint !== true) {
+    throw new Error("Launch readiness production app layer requires Node adapter evidence");
+  }
+}
+
+function assertPassMonitoringRollbackEvidence(report) {
+  const monitoring = gateById(report, "monitoring_rollback");
+  if (monitoring?.status !== "pass") return;
+  const sources = new Set(monitoring.evidence?.monitoring_sources || []);
+  for (const source of ["privacy_events", "search_console", "yandex_webmaster", "backlinks"]) {
+    if (!sources.has(source)) throw new Error("Launch readiness monitoring rollback requires source evidence");
+  }
+  if (
+    monitoring.evidence?.privacy_events_status !== "imported" ||
+    !Number.isInteger(monitoring.evidence?.rollback_steps) ||
+    monitoring.evidence.rollback_steps < 3
+  ) {
+    throw new Error("Launch readiness monitoring rollback requires privacy monitoring and rollback evidence");
+  }
+}
+
 function warningsFrom(structuredData, listingQuality) {
   const warnings = {
     ...Object.fromEntries(
@@ -667,6 +691,8 @@ export function assertLaunchReadinessReport(report) {
   assertPassListingQualityEvidence(report);
   assertPassRuntimeSmokeEvidence(report);
   assertPassRuntimeEvidence(report);
+  assertPassAppLayerEvidence(report);
+  assertPassMonitoringRollbackEvidence(report);
   if (!report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }

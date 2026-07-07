@@ -504,6 +504,22 @@ test("launch readiness validator rejects weak live service pass summaries", () =
   assert.throws(() => assertLaunchReadinessReport(report), /search sync summary evidence/);
 });
 
+test("launch readiness validator rejects weak production app layer pass evidence", () => {
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const appGate = report.gates.find((gate) => gate.id === "production_app_layer");
+  appGate.evidence.start_script = "next start";
+
+  assert.throws(() => assertLaunchReadinessReport(report), /Node adapter evidence/);
+});
+
+test("launch readiness validator rejects weak monitoring rollback pass evidence", () => {
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const monitoringGate = report.gates.find((gate) => gate.id === "monitoring_rollback");
+  monitoringGate.evidence.privacy_events_status = "missing";
+
+  assert.throws(() => assertLaunchReadinessReport(report), /privacy monitoring and rollback evidence/);
+});
+
 test("launch readiness validator rejects weak listing quality pass evidence", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
