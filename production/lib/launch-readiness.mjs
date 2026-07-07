@@ -146,9 +146,11 @@ function assertPassRuntimeEvidence(report) {
     if (
       payload.evidence?.status !== "pass" ||
       database?.status !== "pass" ||
+      !database.database ||
       !database.host ||
       !Number.isInteger(database.port) ||
       databaseTcp?.status !== "pass" ||
+      !databaseTcp.database ||
       !databaseTcp.host ||
       !databaseTcp.port
     ) {

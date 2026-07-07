@@ -44,8 +44,10 @@ function databaseTarget(connectionString) {
   if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
     throw new Error("DATABASE_URL must use postgres:// or postgresql://");
   }
+  const database = decodeURIComponent(parsed.pathname.replace(/^\//, "")).trim();
+  if (!database) throw new Error("DATABASE_URL must include a database name");
   return {
-    database: parsed.pathname.replace(/^\//, "") || "",
+    database,
     host: parsed.hostname,
     port: Number(parsed.port || 5432),
   };
@@ -181,7 +183,15 @@ export function assertPayloadRuntimeReport(report) {
   if (report.summary.database?.status !== databaseTcp.status) {
     throw new Error("Payload runtime database summary must match database_tcp check");
   }
-  if (ready && (!report.summary.database.host || !Number.isInteger(report.summary.database.port) || !databaseTcp.host || !databaseTcp.port)) {
+  if (
+    ready &&
+    (!report.summary.database.database ||
+      !report.summary.database.host ||
+      !Number.isInteger(report.summary.database.port) ||
+      !databaseTcp.database ||
+      !databaseTcp.host ||
+      !databaseTcp.port)
+  ) {
     throw new Error("Payload runtime ready report must include database TCP target evidence");
   }
   return true;

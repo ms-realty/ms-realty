@@ -90,9 +90,29 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(assertPayloadRuntimeReport(report), true);
   assert.equal(report.ready, true);
   assert.deepEqual(report.summary.missing_env, []);
+  assert.equal(report.summary.database.database, "ms_realty");
   assert.equal(report.summary.database.host, "db.internal");
   assert.equal(JSON.stringify(report).includes("not-written-to-report-32-byte-minimum"), false);
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
+});
+
+test("Payload runtime report rejects DATABASE_URL without a database name", async () => {
+  const report = await buildPayloadRuntimeReport({
+    databaseProbe: async () => {
+      throw new Error("DATABASE_URL without database name should not be probed");
+    },
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.internal:5432",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertPayloadRuntimeReport(report), true);
+  assert.equal(report.ready, false);
+  assert.equal(report.summary.database.status, "fail");
+  assert.match(report.summary.database.error, /database name/);
+  assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "fail");
 });
 
 test("Payload runtime report rejects missing generated timestamp", async () => {
@@ -148,6 +168,15 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
 
   assert.throws(
     () => assertPayloadRuntimeReport(withoutTarget),
+    /database TCP target evidence/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        summary: { ...report.summary, database: { ...report.summary.database, database: "" } },
+        checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, database: "" } : check)),
+      }),
     /database TCP target evidence/,
   );
 });

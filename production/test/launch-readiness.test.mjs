@@ -102,11 +102,11 @@ const readyAppState = {
 const readyPayloadRuntime = {
   status: "pass",
   path: "production/data/payload-runtime-report.json",
-  summary: { missing_env: [], database: { status: "pass", host: "db.internal", port: 5432 } },
+  summary: { missing_env: [], database: { status: "pass", database: "ms_realty", host: "db.internal", port: 5432 } },
   checks: [
     { id: "payload_secret", status: "pass" },
     { id: "database_url", status: "pass" },
-    { id: "database_tcp", status: "pass", host: "db.internal", port: 5432 },
+    { id: "database_tcp", status: "pass", database: "ms_realty", host: "db.internal", port: 5432 },
   ],
 };
 
