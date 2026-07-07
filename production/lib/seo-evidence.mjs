@@ -2,6 +2,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseCsv } from "./csv.mjs";
+import {
+  REQUIRED_EXPORTS,
+  REQUIRED_SOURCE_DOMAINS,
+  assertSeoEvidence,
+  missingRequiredExport,
+  missingRequiredSources,
+} from "./seo-evidence-contract.mjs";
+
+export { assertSeoEvidence } from "./seo-evidence-contract.mjs";
 
 const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
 
@@ -18,9 +27,6 @@ export const SEO_EXPORTS = {
   backlinks: "backlinks.csv",
   analytics_export: "analytics.csv",
 };
-
-const REQUIRED_EXPORTS = ["search_console", "yandex_webmaster", "backlinks"];
-const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"];
 
 function lowerRow(row) {
   return Object.fromEntries(Object.entries(row).map(([key, value]) => [key.trim().toLowerCase().replaceAll(" ", "_"), value]));
@@ -261,23 +267,6 @@ function joinPrivacyEvents(events, byKey, byListingReference) {
   return { row_count: events.length, matched_rows: matched, unmatched_rows: events.length - matched };
 }
 
-function missingRequiredExport(summary) {
-  return (
-    summary?.status !== "imported" ||
-    summary.matched_rows < 1 ||
-    summary.signal_rows < 1 ||
-    summary.placeholder_rows > 0 ||
-    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
-  );
-}
-
-function missingRequiredSources(sourceSummaries) {
-  const missing = REQUIRED_EXPORTS.filter((source) => missingRequiredExport(sourceSummaries[source]));
-  const analyticsReady =
-    sourceSummaries.privacy_events?.status === "imported" || sourceSummaries.analytics_export?.status === "imported";
-  return analyticsReady ? missing : [...missing, "privacy_or_ga4_analytics"];
-}
-
 function summarize(records, sourceSummaries, urlEvidence) {
   return {
     crawl_urls: records.length,
@@ -339,21 +328,6 @@ export function readSeoExportTemplate(source, { inputDir = DEFAULT_SEO_EVIDENCE_
   const templatePath = path.join(/*turbopackIgnore: true*/ inputDir, `${filename}.example`);
   if (!fs.existsSync(templatePath)) throw new Error(`Missing SEO export template for ${source}`);
   return { source, filename: `${filename}.example`, csv: fs.readFileSync(templatePath, "utf8") };
-}
-
-export function assertSeoEvidence(evidence) {
-  if (evidence.summary.crawl_urls !== evidence.url_evidence.length) throw new Error("SEO evidence must cover every crawled URL");
-  if (evidence.summary.crawl_urls !== 457) throw new Error("SEO evidence must cover the 457 URL migration inventory");
-  if (!evidence.summary.sources.privacy_events) throw new Error("SEO evidence must include privacy analytics status");
-  if (!Array.isArray(evidence.summary.missing_required_sources)) throw new Error("SEO evidence must summarize missing required sources");
-  for (const source of REQUIRED_EXPORTS) {
-    if (!evidence.summary.sources[source]) throw new Error(`SEO evidence missing ${source} source status`);
-  }
-  const expectedMissing = missingRequiredSources(evidence.summary.sources);
-  if (JSON.stringify(evidence.summary.missing_required_sources) !== JSON.stringify(expectedMissing)) {
-    throw new Error("SEO evidence missing required sources must match source evidence");
-  }
-  return true;
 }
 
 export function validateSeoEvidenceInputs(options = {}) {

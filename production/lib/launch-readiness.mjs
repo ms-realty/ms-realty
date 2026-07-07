@@ -19,7 +19,7 @@ import {
   assertPayloadRuntimeReport,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
-import { assertSeoEvidence } from "./seo-evidence.mjs";
+import { assertSeoEvidence } from "./seo-evidence-contract.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
