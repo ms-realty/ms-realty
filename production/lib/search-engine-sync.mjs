@@ -73,6 +73,15 @@ function assertSearchEngines(report, label) {
   }
 }
 
+function assertReportUrl(value, label) {
+  try {
+    const parsed = new URL(value);
+    if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("bad protocol");
+  } catch {
+    throw new Error(`${label} must include valid service URL evidence`);
+  }
+}
+
 export async function syncTypesense({
   baseUrl = process.env.TYPESENSE_URL,
   apiKey = process.env.TYPESENSE_API_KEY,
@@ -180,6 +189,11 @@ export function assertSearchEngineSyncReport(report) {
   if (report.summary.total_operations !== operationCount) throw new Error("Search sync summary operations must match engine rows");
   for (const engine of report.engines) {
     if (engine.documents !== 167) throw new Error(`${engine.engine} must sync 167 locale-scoped documents`);
+    for (const operation of engine.operations || []) {
+      assertReportUrl(operation.url, `${engine.engine} sync operation`);
+      if (!["PATCH", "POST"].includes(operation.method)) throw new Error(`${engine.engine} sync operation method is invalid`);
+      if (![200, 201, 202, 409].includes(operation.status)) throw new Error(`${engine.engine} sync operation status is invalid`);
+    }
     if (engine.operations.some((operation) => operation.bytes <= 0)) {
       throw new Error(`${engine.engine} operations must send non-empty request bodies`);
     }
@@ -289,6 +303,11 @@ export function assertSearchEngineQueryReport(report) {
     throw new Error("Search query summary first hits must match engine rows");
   }
   for (const engine of report.engines) {
+    assertReportUrl(engine.service_url, `${engine.engine} query report`);
+    if (!String(engine.query || "").trim()) throw new Error(`${engine.engine} query report must include query evidence`);
+    if (!String(engine.filter || "").includes("translation_indexable") || !String(engine.filter || "").includes("locale")) {
+      throw new Error(`${engine.engine} query report must prove reviewed locale filtering`);
+    }
     if (engine.total < 1 || !engine.hits.length) throw new Error(`${engine.engine} query must return search hits`);
     if (!engine.hits.some((hit) => hit.id === "MS-CRAWL-0001:bg")) {
       throw new Error(`${engine.engine} query must find the reviewed BG listing document`);

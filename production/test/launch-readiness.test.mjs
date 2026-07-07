@@ -182,8 +182,22 @@ function writeLiveReportFixtures(dir) {
       generated_at: "2026-07-06T00:00:00Z",
       summary: { engines: 2, total_hits: 2, first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"] },
       engines: [
-        { engine: "typesense", service_url: "https://typesense.ms-realty.bg", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
-        { engine: "meilisearch", service_url: "https://meili.ms-realty.bg", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
+        {
+          engine: "typesense",
+          service_url: "https://typesense.ms-realty.bg",
+          query: "Sandanski",
+          filter: "translation_indexable:=true && locale:=bg",
+          total: 1,
+          hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }],
+        },
+        {
+          engine: "meilisearch",
+          service_url: "https://meili.ms-realty.bg",
+          query: "Sandanski",
+          filter: "translation_indexable = true AND locale = bg",
+          total: 1,
+          hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }],
+        },
       ],
     })}\n`,
   );

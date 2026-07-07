@@ -108,6 +108,36 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
     () => assertSearchEngineSyncReport({ ...report, summary: { ...report.summary, total_operations: 3 } }),
     /four engine operations/,
   );
+  assert.throws(
+    () =>
+      assertSearchEngineSyncReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
+          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], url: "" }, engine.operations[1]] } : engine,
+        ),
+      }),
+    /service URL evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineSyncReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
+          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], method: "GET" }, engine.operations[1]] } : engine,
+        ),
+      }),
+    /operation method/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineSyncReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
+          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], status: 500 }, engine.operations[1]] } : engine,
+        ),
+      }),
+    /operation status/,
+  );
 });
 
 test("Typesense sync accepts existing collection response before upsert import", async () => {
@@ -210,6 +240,30 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.throws(
     () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, first_hit_ids: ["wrong", "wrong"] } }),
     /summary first hits/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, service_url: "" } : engine)),
+      }),
+    /service URL evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, query: "" } : engine)),
+      }),
+    /query evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, filter: "" } : engine)),
+      }),
+    /reviewed locale filtering/,
   );
 });
 
