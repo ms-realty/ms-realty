@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-07-06T00:00:00Z",
+  "ready": false,
+  "status": "blocked",
+  "summary": {
+    "checks": 7,
+    "missing_env": [
+      "TYPESENSE_URL",
+      "TYPESENSE_API_KEY",
+      "MEILI_URL",
+      "MEILI_API_KEY",
+      "HERMES_CHAT_COMPLETIONS_URL"
+    ],
+    "services": [
+      "typesense",
+      "meilisearch",
+      "hermes"
+    ]
+  },
+  "checks": [
+    {
+      "id": "typesense_url",
+      "env": "TYPESENSE_URL",
+      "status": "missing_env"
+    },
+    {
+      "id": "typesense_api_key",
+      "env": "TYPESENSE_API_KEY",
+      "status": "missing_env"
+    },
+    {
+      "id": "meili_url",
+      "env": "MEILI_URL",
+      "status": "missing_env"
+    },
+    {
+      "id": "meili_api_key",
+      "env": "MEILI_API_KEY",
+      "status": "missing_env"
+    },
+    {
+      "id": "typesense_health",
+      "status": "missing_env"
+    },
+    {
+      "id": "meilisearch_health",
+      "status": "missing_env"
+    },
+    {
+      "id": "hermes_provider",
+      "mode": "self_hosted",
+      "status": "missing_env",
+      "missing": [
+        "HERMES_CHAT_COMPLETIONS_URL"
+      ]
+    }
+  ],
+  "hermes": {
+    "mode": "self_hosted",
+    "endpoint": null,
+    "model": "NousResearch/Hermes-4-14B",
+    "ready": false
+  },
+  "next_actions": [
+    "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
+    "Run npm run live:provisioning until all service checks pass.",
+    "Run npm run live:capture only after provisioning passes."
+  ]
+}

@@ -143,6 +143,8 @@ npm run seo:preflight:report
 npm run seo:preflight
 npm run listing:preflight:report
 npm run listing:preflight
+npm run live:provisioning
+npm run live:provisioning:preflight
 npm run live:report
 npm run live:preflight
 npm run launch:preflight
@@ -155,6 +157,8 @@ listing review status without clearing the launch gate, and `listing:preflight` 
 the reviewed listing-quality CSV is present. `launch:preflight` also requires live Typesense/Meilisearch
 reports from `npm run search:sync && npm run search:query`, a Hermes draft-worker report from
 `npm run hermes:worker`, and a configured Payload runtime app; `live:preflight` checks those report files directly.
+`live:provisioning` writes redacted endpoint and missing-env evidence before live capture, and
+`live:provisioning:preflight` must pass before treating `live:capture` output as launch evidence.
 `live:report` writes the current live-service report status without clearing the launch gate.
 The expected report shapes are committed as `production/data/*-report.json.example`; the real live
 report files are ignored and must be generated from provisioned services.

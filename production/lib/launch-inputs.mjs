@@ -110,6 +110,8 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Hermes worker: set \`HERMES_CHAT_COMPLETIONS_URL\`; set \`HERMES_API_KEY\` when the endpoint requires auth.
 - Hermes default: self-host vLLM with \`--enable-auto-tool-choice --tool-call-parser hermes\`; hosted OpenRouter fallback is non-sensitive only.
 - Hermes provider report: \`npm run hermes:provisioning\` writes \`production/data/hermes-provider-provisioning-report.json\` without persisting API keys.
+- Live service provisioning report: \`npm run live:provisioning\` writes \`production/data/live-service-provisioning-report.json\` with redacted endpoint health and missing-env evidence.
+- Provisioning preflight: \`npm run live:provisioning:preflight\` must pass before live evidence capture.
 - Live evidence capture: \`npm run live:capture\` runs search sync, search query, Hermes draft worker, and validates the three report outputs.
 - Individual debug commands: \`npm run search:sync\`, \`npm run search:query\`, \`npm run hermes:worker\`.
 - Status report: \`npm run live:report\` writes current missing/invalid live-service report state without clearing the launch gate.
@@ -176,6 +178,7 @@ npm run redirects:preflight
 npm run redirects:build
 npm run seo:preflight
 npm run seo:evidence
+npm run live:provisioning:preflight
 npm run live:preflight
 npm run payload:preflight
 npm run listing:preflight
