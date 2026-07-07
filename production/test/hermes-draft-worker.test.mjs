@@ -161,6 +161,7 @@ test("Hermes draft worker report rejects no-op launch evidence", () => {
   assert.throws(
     () =>
       assertHermesDraftWorkerReport({
+        generated_at: "2026-07-06T00:00:00Z",
         agent_runtime: agentRuntime,
         provider,
         summary: { attempted: 0, persisted: 0, rejected: 0 },
@@ -172,6 +173,7 @@ test("Hermes draft worker report rejects no-op launch evidence", () => {
   assert.throws(
     () =>
       assertHermesDraftWorkerReport({
+        generated_at: "2026-07-06T00:00:00Z",
         agent_runtime: agentRuntime,
         provider,
         summary: { attempted: 1, persisted: 0, rejected: 1 },
@@ -184,6 +186,7 @@ test("Hermes draft worker report rejects no-op launch evidence", () => {
 
 test("Hermes draft worker report rejects generic runtime evidence", () => {
   const report = {
+    generated_at: "2026-07-06T00:00:00Z",
     agent_runtime: {
       product: "Nous Hermes Agent",
       official_url: "https://hermes-agent.nousresearch.com/",
@@ -199,6 +202,10 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     rejected: [],
   };
 
+  assert.throws(
+    () => assertHermesDraftWorkerReport({ ...report, generated_at: "" }),
+    /valid generated_at/,
+  );
   assert.throws(
     () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, product: "Generic Agent" } }),
     /Nous Hermes Agent/,
@@ -218,6 +225,10 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
         provider: { ...report.provider, endpoint: "https://hermes.ms-realty.bg/v1/models" },
       }),
     /\/v1\/chat\/completions/,
+  );
+  assert.throws(
+    () => assertHermesDraftWorkerReport({ ...report, persisted: [], rejected: [] }),
+    /row counts/,
   );
 });
 

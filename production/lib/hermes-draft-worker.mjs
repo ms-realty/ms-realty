@@ -210,6 +210,9 @@ export async function runHermesDraftWorker({
 }
 
 export function assertHermesDraftWorkerReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Hermes worker report must include valid generated_at");
+  }
   if (report.agent_runtime?.product !== "Nous Hermes Agent") throw new Error("Hermes worker report must target Nous Hermes Agent");
   if (report.agent_runtime?.official_url !== HERMES_AGENT_OFFICIAL_URL) {
     throw new Error("Hermes worker report must link the official Hermes Agent runtime");
@@ -225,6 +228,12 @@ export function assertHermesDraftWorkerReport(report) {
   if (report.summary.persisted < 1) throw new Error("Hermes worker must persist at least one draft");
   if (report.summary.attempted !== report.summary.persisted + report.summary.rejected) {
     throw new Error("Hermes worker summary must match persisted and rejected rows");
+  }
+  if (!Array.isArray(report.persisted) || !Array.isArray(report.rejected)) {
+    throw new Error("Hermes worker report must include persisted and rejected rows");
+  }
+  if (report.persisted.length !== report.summary.persisted || report.rejected.length !== report.summary.rejected) {
+    throw new Error("Hermes worker row counts must match summary");
   }
   if (report.audit_log_path && report.audit_log_rows !== report.summary.attempted) {
     throw new Error("Hermes worker audit log must cover every attempted model call");
