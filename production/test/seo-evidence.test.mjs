@@ -339,6 +339,76 @@ test("reserved example backlink domains remain launch blockers", () => {
   assert.equal(evidence.summary.sources.backlinks.placeholder_rows, 2);
 });
 
+test("self-referring legacy backlink domains remain launch blockers", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-self-backlinks-`);
+  fs.writeFileSync(
+    `${dir}/search-console.csv`,
+    "url,clicks,impressions,position\nhttps://makler-realty.com/p/1,3,30,7\nhttps://makler-realty.ru/p/2,2,20,8\n",
+  );
+  fs.writeFileSync(
+    `${dir}/yandex-webmaster.csv`,
+    "url,indexed,issue\nhttps://makler-realty.com/p/1,yes,\nhttps://makler-realty.ru/p/2,yes,\n",
+  );
+  fs.writeFileSync(
+    `${dir}/backlinks.csv`,
+    [
+      "target_url,source_url",
+      "https://makler-realty.com/p/1,https://makler-realty.com/internal-a",
+      "https://makler-realty.ru/p/2,https://makler-realty.ru/internal-b",
+    ].join("\n"),
+  );
+
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    records: [
+      { old_url: "https://makler-realty.com/p/1", source_domain: "makler-realty.com", url_type: "listing" },
+      { old_url: "https://makler-realty.ru/p/2", source_domain: "makler-realty.ru", url_type: "listing" },
+    ],
+    routeMap: [],
+    events: [{ type: "page_view", path: "https://makler-realty.com/p/1" }],
+  });
+
+  assert.deepEqual(evidence.summary.missing_required_sources, ["backlinks"]);
+  assert.equal(evidence.summary.sources.backlinks.signal_rows, 0);
+  assert.equal(evidence.summary.sources.backlinks.placeholder_rows, 2);
+});
+
+test("local and reserved backlink hosts remain launch blockers", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-local-backlinks-`);
+  fs.writeFileSync(
+    `${dir}/search-console.csv`,
+    "url,clicks,impressions,position\nhttps://makler-realty.com/p/1,3,30,7\nhttps://makler-realty.ru/p/2,2,20,8\n",
+  );
+  fs.writeFileSync(
+    `${dir}/yandex-webmaster.csv`,
+    "url,indexed,issue\nhttps://makler-realty.com/p/1,yes,\nhttps://makler-realty.ru/p/2,yes,\n",
+  );
+  fs.writeFileSync(
+    `${dir}/backlinks.csv`,
+    [
+      "target_url,source_url,referring_domain",
+      "https://makler-realty.com/p/1,http://localhost/a,localhost",
+      "https://makler-realty.ru/p/2,https://staging.local/b,staging.local",
+    ].join("\n"),
+  );
+
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    records: [
+      { old_url: "https://makler-realty.com/p/1", source_domain: "makler-realty.com", url_type: "listing" },
+      { old_url: "https://makler-realty.ru/p/2", source_domain: "makler-realty.ru", url_type: "listing" },
+    ],
+    routeMap: [],
+    events: [{ type: "page_view", path: "https://makler-realty.com/p/1" }],
+  });
+
+  assert.deepEqual(evidence.summary.missing_required_sources, ["backlinks"]);
+  assert.equal(evidence.summary.sources.backlinks.signal_rows, 0);
+  assert.equal(evidence.summary.sources.backlinks.placeholder_rows, 2);
+});
+
 test("unmatched required SEO export files remain launch blockers", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-unmatched-seo-evidence-`);
   fs.writeFileSync(`${dir}/search-console.csv`, "url,clicks,impressions,position\nhttps://unrelated.example/page,3,30,7\n");

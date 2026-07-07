@@ -46,9 +46,16 @@ function host(value) {
   }
 }
 
-function placeholderBacklink(row) {
+function invalidBacklinkReferral(row, target) {
   const domain = (row.referring_domain || host(row.source_url || "")).toLowerCase();
-  return /(^|\.)example$/.test(domain) || /(^|\.)example\.(com|net|org)$/.test(domain);
+  if (!domain) return true;
+  if (REQUIRED_SOURCE_DOMAINS.includes(domain)) return true;
+  if (domain === target.source_domain) return true;
+  if (["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(domain)) return true;
+  if (domain.endsWith(".local") || domain.endsWith(".localhost")) return true;
+  if (/(^|\.)example$/.test(domain) || /(^|\.)example\.(com|net|org)$/.test(domain)) return true;
+  if (/(^|\.)(test|invalid)$/.test(domain)) return true;
+  return false;
 }
 
 function routeKeys(value) {
@@ -210,7 +217,7 @@ function joinExternal(source, sourceData, byKey) {
       addMetric(target.yandex_webmaster, "rows", 1);
       if (row.issue) addMetric(target.yandex_webmaster, "issues", 1);
     } else if (source === "backlinks") {
-      if (placeholderBacklink(row)) placeholderRows += 1;
+      if (invalidBacklinkReferral(row, target)) placeholderRows += 1;
       else if (row.source_url || row.referring_domain) signalRows += 1;
       addMetric(target.backlinks, "backlinks", 1);
       if (row.referring_domain) referringDomains.add(`${target.old_url}|${row.referring_domain}`);
