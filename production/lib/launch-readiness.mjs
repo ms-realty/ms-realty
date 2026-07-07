@@ -19,7 +19,7 @@ import {
   assertPayloadRuntimeReport,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
-import { REQUIRED_EXPORTS, assertSeoEvidence, missingRequiredExport } from "./seo-evidence-contract.mjs";
+import { REQUIRED_EXPORTS, assertSeoEvidence, assertSeoSourceSummary, missingRequiredExport } from "./seo-evidence-contract.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -226,7 +226,9 @@ function assertPassExternalSeoEvidence(report) {
     throw new Error("Launch readiness external SEO requires imported privacy events and no missing sources");
   }
   for (const source of REQUIRED_EXPORTS) {
-    if (missingRequiredExport(evidence.sources?.[source])) {
+    const sourceSummary = evidence.sources?.[source];
+    assertSeoSourceSummary(sourceSummary, source);
+    if (missingRequiredExport(sourceSummary)) {
       throw new Error(`Launch readiness external SEO requires complete ${source} evidence`);
     }
   }

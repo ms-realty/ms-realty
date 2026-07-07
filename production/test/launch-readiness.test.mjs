@@ -380,6 +380,9 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
   seoGate.evidence.sources.search_console.signal_rows = 0;
 
   assert.throws(() => assertLaunchReadinessReport(report), /complete search_console evidence/);
+  seoGate.evidence.sources.search_console.signal_rows = 1;
+  seoGate.evidence.sources.search_console.row_count = 99;
+  assert.throws(() => assertLaunchReadinessReport(report), /row counts/);
 });
 
 test("launch readiness validator rejects weak crawl inventory pass evidence", () => {
