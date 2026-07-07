@@ -46,6 +46,7 @@ function databaseTarget(connectionString) {
   }
   const database = decodeURIComponent(parsed.pathname.replace(/^\//, "")).trim();
   if (!database) throw new Error("DATABASE_URL must include a database name");
+  if (!parsed.hostname) throw new Error("DATABASE_URL must include a database host");
   return {
     database,
     host: parsed.hostname,
