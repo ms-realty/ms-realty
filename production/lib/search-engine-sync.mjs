@@ -159,9 +159,17 @@ export async function runSearchEngineSync({
 }
 
 export function assertSearchEngineSyncReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Search sync report must include valid generated_at");
+  }
   if (report.summary.engines !== 2) throw new Error("Search sync must cover Typesense and Meilisearch");
   if (report.summary.total_operations !== 4) throw new Error("Search sync must perform four engine operations");
   assertSearchEngines(report, "Search sync");
+  if (JSON.stringify(report.summary.documents_per_engine) !== JSON.stringify(report.engines.map((engine) => engine.documents))) {
+    throw new Error("Search sync summary documents must match engine rows");
+  }
+  const operationCount = report.engines.reduce((sum, engine) => sum + (engine.operations || []).length, 0);
+  if (report.summary.total_operations !== operationCount) throw new Error("Search sync summary operations must match engine rows");
   for (const engine of report.engines) {
     if (engine.documents !== 167) throw new Error(`${engine.engine} must sync 167 locale-scoped documents`);
     if (engine.operations.some((operation) => operation.bytes <= 0)) {
@@ -260,8 +268,16 @@ export async function runSearchEngineQuerySmoke({
 }
 
 export function assertSearchEngineQueryReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Search query smoke report must include valid generated_at");
+  }
   if (report.summary.engines !== 2) throw new Error("Search query smoke must cover Typesense and Meilisearch");
   assertSearchEngines(report, "Search query smoke");
+  const totalHits = report.engines.reduce((sum, engine) => sum + engine.total, 0);
+  if (report.summary.total_hits !== totalHits) throw new Error("Search query summary hits must match engine rows");
+  if (JSON.stringify(report.summary.first_hit_ids) !== JSON.stringify(report.engines.map((engine) => engine.hits?.[0]?.id || null))) {
+    throw new Error("Search query summary first hits must match engine rows");
+  }
   for (const engine of report.engines) {
     if (engine.total < 1 || !engine.hits.length) throw new Error(`${engine.engine} query must return search hits`);
     if (!engine.hits.some((hit) => hit.id === "MS-CRAWL-0001:bg")) {

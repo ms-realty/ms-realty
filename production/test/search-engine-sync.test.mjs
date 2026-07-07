@@ -99,6 +99,15 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
     () => assertSearchEngineSyncReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
     /exactly once/,
   );
+  assert.throws(() => assertSearchEngineSyncReport({ ...report, generated_at: "" }), /valid generated_at/);
+  assert.throws(
+    () => assertSearchEngineSyncReport({ ...report, summary: { ...report.summary, documents_per_engine: [167, 166] } }),
+    /summary documents/,
+  );
+  assert.throws(
+    () => assertSearchEngineSyncReport({ ...report, summary: { ...report.summary, total_operations: 3 } }),
+    /four engine operations/,
+  );
 });
 
 test("Typesense sync accepts existing collection response before upsert import", async () => {
@@ -192,6 +201,15 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.throws(
     () => assertSearchEngineQueryReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
     /exactly once/,
+  );
+  assert.throws(() => assertSearchEngineQueryReport({ ...report, generated_at: "not-a-date" }), /valid generated_at/);
+  assert.throws(
+    () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, total_hits: 1 } }),
+    /summary hits/,
+  );
+  assert.throws(
+    () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, first_hit_ids: ["wrong", "wrong"] } }),
+    /summary first hits/,
   );
 });
 
