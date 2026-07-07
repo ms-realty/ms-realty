@@ -1,5 +1,10 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
+  "agent_runtime": {
+    "product": "Nous Hermes Agent",
+    "official_url": "https://hermes-agent.nousresearch.com/",
+    "project_context_file": "AGENTS.md"
+  },
   "ledger_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-translations.jsonl",
   "audit_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit.jsonl",
   "audit_log_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit-log.jsonl",

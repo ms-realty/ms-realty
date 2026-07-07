@@ -154,6 +154,11 @@ function writeLiveReportFixtures(dir) {
     hermesReportPath,
     `${JSON.stringify({
       generated_at: "2026-07-06T00:00:00Z",
+      agent_runtime: {
+        product: "Nous Hermes Agent",
+        official_url: "https://hermes-agent.nousresearch.com/",
+        project_context_file: "AGENTS.md",
+      },
       summary: { attempted: 1, persisted: 1, rejected: 0 },
       provider: {
         mode: "self_hosted",

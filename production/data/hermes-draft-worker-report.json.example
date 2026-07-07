@@ -1,6 +1,11 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
   "example": true,
+  "agent_runtime": {
+    "product": "Nous Hermes Agent",
+    "official_url": "https://hermes-agent.nousresearch.com/",
+    "project_context_file": "AGENTS.md"
+  },
   "ledger_path": "production/data/translation-tasks.jsonl",
   "audit_path": "production/data/hermes-audit.jsonl",
   "summary": {

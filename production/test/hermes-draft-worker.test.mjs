@@ -124,6 +124,9 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   });
 
   assert.equal(assertHermesDraftWorkerReport(report), true);
+  assert.equal(report.agent_runtime.product, "Nous Hermes Agent");
+  assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
+  assert.equal(report.agent_runtime.project_context_file, "AGENTS.md");
   assert.equal(report.summary.persisted, 1);
   assert.equal(report.summary.rejected, 0);
   assert.equal(report.audit_log_rows, 1);
@@ -145,9 +148,21 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
 });
 
 test("Hermes draft worker report rejects no-op launch evidence", () => {
+  const agentRuntime = {
+    product: "Nous Hermes Agent",
+    official_url: "https://hermes-agent.nousresearch.com/",
+    project_context_file: "AGENTS.md",
+  };
+  const provider = {
+    mode: "self_hosted",
+    model: "NousResearch/Hermes-4-14B",
+    tool_call_parser: "hermes",
+  };
   assert.throws(
     () =>
       assertHermesDraftWorkerReport({
+        agent_runtime: agentRuntime,
+        provider,
         summary: { attempted: 0, persisted: 0, rejected: 0 },
         persisted: [],
         rejected: [],
@@ -157,11 +172,44 @@ test("Hermes draft worker report rejects no-op launch evidence", () => {
   assert.throws(
     () =>
       assertHermesDraftWorkerReport({
+        agent_runtime: agentRuntime,
+        provider,
         summary: { attempted: 1, persisted: 0, rejected: 1 },
         persisted: [],
         rejected: [{ id: "translation-listing-MS-TEST-1-he", error: "bad draft" }],
       }),
     /persist at least one draft/,
+  );
+});
+
+test("Hermes draft worker report rejects generic runtime evidence", () => {
+  const report = {
+    agent_runtime: {
+      product: "Nous Hermes Agent",
+      official_url: "https://hermes-agent.nousresearch.com/",
+      project_context_file: "AGENTS.md",
+    },
+    provider: {
+      mode: "self_hosted",
+      model: "NousResearch/Hermes-4-14B",
+      tool_call_parser: "hermes",
+    },
+    summary: { attempted: 1, persisted: 1, rejected: 0 },
+    persisted: [{ id: "translation-listing-MS-TEST-1-he", status: "hermes_drafted", public_indexable: false }],
+    rejected: [],
+  };
+
+  assert.throws(
+    () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, product: "Generic Agent" } }),
+    /Nous Hermes Agent/,
+  );
+  assert.throws(
+    () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, project_context_file: "" } }),
+    /AGENTS\.md/,
+  );
+  assert.throws(
+    () => assertHermesDraftWorkerReport({ ...report, provider: { ...report.provider, tool_call_parser: "generic" } }),
+    /Hermes tool parser/,
   );
 });
 
