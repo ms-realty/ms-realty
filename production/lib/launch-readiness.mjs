@@ -307,6 +307,11 @@ function assertPassRuntimeEvidence(report) {
   if (payload?.status === "pass") {
     const databaseTcp = payload.evidence?.checks?.find((item) => item.id === "database_tcp");
     const database = payload.evidence?.summary?.database;
+    const databaseTargetMatches =
+      databaseTcp?.database === database?.database &&
+      databaseTcp?.host === database?.host &&
+      databaseTcp?.port === database?.port &&
+      databaseTcp?.credentials_configured === database?.credentials_configured;
     if (
       payload.evidence?.status !== "pass" ||
       database?.status !== "pass" ||
@@ -317,8 +322,9 @@ function assertPassRuntimeEvidence(report) {
       databaseTcp?.status !== "pass" ||
       !databaseTcp.database ||
       !databaseTcp.host ||
-      !databaseTcp.port ||
-      databaseTcp.credentials_configured !== true
+      !Number.isInteger(databaseTcp.port) ||
+      databaseTcp.credentials_configured !== true ||
+      !databaseTargetMatches
     ) {
       throw new Error("Launch readiness payload runtime requires database TCP target evidence");
     }

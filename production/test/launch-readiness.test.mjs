@@ -496,9 +496,25 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
       ),
     },
   });
+  const weakPayloadTcpTarget = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    appState: readyAppState,
+    payloadRuntime: {
+      ...readyPayloadRuntime,
+      checks: readyPayloadRuntime.checks.map((check) =>
+        check.id === "database_tcp" ? { ...check, host: "other-db.internal", port: "5432" } : check,
+      ),
+    },
+  });
 
   assert.throws(() => assertLaunchReadinessReport(weakPayload), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakPayloadCredentials), /Payload runtime requires database TCP target evidence/i);
+  assert.throws(() => assertLaunchReadinessReport(weakPayloadTcpTarget), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakLiveServices), /non-example reports/);
 });
 
