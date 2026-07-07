@@ -330,6 +330,27 @@ test("launch readiness rejects hand-cleared external SEO blockers", () => {
   );
 });
 
+test("launch readiness validator rejects weak external SEO pass evidence", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+  const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
+  seoGate.evidence.sources.search_console.signal_rows = 0;
+
+  assert.throws(() => assertLaunchReadinessReport(report), /complete search_console evidence/);
+});
+
 test("launch readiness validator requires every production gate", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
 

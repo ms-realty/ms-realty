@@ -19,7 +19,7 @@ import {
   assertPayloadRuntimeReport,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
-import { assertSeoEvidence } from "./seo-evidence-contract.mjs";
+import { REQUIRED_EXPORTS, assertSeoEvidence, missingRequiredExport } from "./seo-evidence-contract.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -140,6 +140,24 @@ function assertPassListingQualityEvidence(report) {
     summary.missing_review_rows !== 0
   ) {
     throw new Error("Launch readiness listing quality requires complete non-example review evidence");
+  }
+}
+
+function assertPassExternalSeoEvidence(report) {
+  const seo = gateById(report, "external_seo_exports");
+  if (seo?.status !== "pass") return;
+  const evidence = seo.evidence || {};
+  if (
+    !Array.isArray(evidence.missing_required_sources) ||
+    evidence.missing_required_sources.length !== 0 ||
+    evidence.privacy_events?.status !== "imported"
+  ) {
+    throw new Error("Launch readiness external SEO requires imported privacy events and no missing sources");
+  }
+  for (const source of REQUIRED_EXPORTS) {
+    if (missingRequiredExport(evidence.sources?.[source])) {
+      throw new Error(`Launch readiness external SEO requires complete ${source} evidence`);
+    }
   }
 }
 
@@ -446,6 +464,7 @@ export function buildLaunchReadinessReport({
       {
         missing_required_sources: seoEvidence.summary.missing_required_sources,
         privacy_events: seoEvidence.summary.sources.privacy_events,
+        sources: Object.fromEntries(REQUIRED_EXPORTS.map((source) => [source, seoEvidence.summary.sources[source]])),
       },
       seoExportsReady ? "" : "Search Console, Yandex, and backlink exports are required before launch.",
     ),
@@ -531,6 +550,7 @@ export function assertLaunchReadinessReport(report) {
   if (!report.gates.some((item) => item.id === "live_services")) {
     throw new Error("Launch readiness must include live service provisioning gate");
   }
+  assertPassExternalSeoEvidence(report);
   assertPassListingQualityEvidence(report);
   assertPassRuntimeEvidence(report);
   if (!report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
