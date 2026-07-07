@@ -498,16 +498,19 @@ export function assertLiveServicePreflightReport(report) {
       throw new Error("Live service preflight summary status counts must match reports");
     }
   }
+  const sources = new Set(report.reports.map((item) => item.source));
+  if (sources.size !== report.reports.length) {
+    throw new Error("Live service preflight report sources must be unique");
+  }
+  for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
+    if (!sources.has(source)) throw new Error(`Live service preflight missing ${source} evidence`);
+  }
   for (const item of report.reports) {
     if (report.summary.configured_paths?.[item.source] !== item.path) {
       throw new Error("Live service preflight configured paths must match reports");
     }
   }
   if (ready) {
-    const sources = new Set(report.reports.map((item) => item.source));
-    for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
-      if (!sources.has(source)) throw new Error(`Live service preflight missing ${source} evidence`);
-    }
     for (const item of report.reports) assertLiveServiceReportPassEvidence(item);
   }
   return true;

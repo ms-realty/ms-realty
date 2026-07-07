@@ -812,6 +812,23 @@ test("live service report preflight fails missing reports and passes valid repor
 
   const readyReport = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z", ...paths });
   assert.equal(assertLiveServicePreflightReport(readyReport), true);
+  const duplicateSourceReport = {
+    ...readyReport,
+    reports: readyReport.reports.map((report, index) =>
+      index === 2 ? { ...report, source: "typesense_meilisearch_query" } : report,
+    ),
+  };
+  assert.throws(() => assertLiveServicePreflightReport(duplicateSourceReport), /sources must be unique/);
+  assert.throws(
+    () =>
+      assertLiveServicePreflightReport({
+        ...readyReport,
+        reports: readyReport.reports.map((report, index) =>
+          index === 2 ? { ...report, source: "unknown_live_service" } : report,
+        ),
+      }),
+    /missing hermes_draft_worker evidence/,
+  );
   readyReport.reports.find((report) => report.source === "typesense_meilisearch_sync").summary.total_operations = 0;
   assert.throws(() => assertLiveServicePreflightReport(readyReport), /search sync summary evidence/);
 
