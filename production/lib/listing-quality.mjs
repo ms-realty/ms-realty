@@ -306,6 +306,13 @@ function assertReviewerValue(listingId, field, value) {
   }
 }
 
+function assertReviewNotes(listingId, value) {
+  if (!filled(value)) throw new Error(`Listing ${listingId} requires review_notes`);
+  if (/^(done|example|n\/?a|none|ok|placeholder|reviewed|sample|tbd|test|todo|unknown)$/i.test(String(value).trim())) {
+    throw new Error(`Listing ${listingId} requires real review_notes`);
+  }
+}
+
 export function validateListingQualityReviewCsv(report, csvText, { requireComplete = false } = {}) {
   const rows = parseCsv(csvText);
   if (!rows.length) throw new Error("Listing quality review CSV has no rows");
@@ -326,6 +333,7 @@ export function validateListingQualityReviewCsv(report, csvText, { requireComple
       assertReviewFactValue(listingId, FACT_FIELDS_BY_ISSUE[issue], row[FACT_FIELDS_BY_ISSUE[issue]]);
     }
     if (mediaIssues.length) assertReviewerValue(listingId, "media_reviewer", row.media_reviewer);
+    assertReviewNotes(listingId, row.review_notes);
 
     return {
       listing_id: listingId,

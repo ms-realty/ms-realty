@@ -265,6 +265,28 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       ),
     /real media_reviewer/,
   );
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        [
+          "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+          `${row.listing_id},123000,2,Sandanski,Reviewed listing description,editor_bg,media_editor,todo`,
+        ].join("\n"),
+      ),
+    /real review_notes/,
+  );
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        [
+          "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+          `${row.listing_id},123000,2,Sandanski,Reviewed listing description,editor_bg,media_editor,`,
+        ].join("\n"),
+      ),
+    /requires review_notes/,
+  );
 });
 
 test("listing quality review packet writer and CLI honor output overrides", () => {
