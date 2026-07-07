@@ -194,6 +194,15 @@ export function assertPayloadRuntimeReport(report) {
     throw new Error("Payload runtime database summary must match database_tcp check");
   }
   if (
+    databaseTcp.status === "pass" &&
+    (report.summary.database.database !== databaseTcp.database ||
+      report.summary.database.host !== databaseTcp.host ||
+      report.summary.database.port !== databaseTcp.port ||
+      report.summary.database.credentials_configured !== databaseTcp.credentials_configured)
+  ) {
+    throw new Error("Payload runtime database TCP target must match summary evidence");
+  }
+  if (
     ready &&
     (!report.summary.database.database ||
       !report.summary.database.host ||
@@ -201,7 +210,7 @@ export function assertPayloadRuntimeReport(report) {
       report.summary.database.credentials_configured !== true ||
       !databaseTcp.database ||
       !databaseTcp.host ||
-      !databaseTcp.port ||
+      !Number.isInteger(databaseTcp.port) ||
       databaseTcp.credentials_configured !== true)
   ) {
     throw new Error("Payload runtime ready report must include database TCP target evidence");

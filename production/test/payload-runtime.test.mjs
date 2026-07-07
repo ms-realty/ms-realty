@@ -224,6 +224,23 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
         ...report,
         summary: { ...report.summary, database: { ...report.summary.database, credentials_configured: false } },
       }),
+    /database TCP target/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, host: "other-db.internal" } : check)),
+      }),
+    /database TCP target must match summary evidence/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        summary: { ...report.summary, database: { ...report.summary.database, port: "5432" } },
+        checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, port: "5432" } : check)),
+      }),
     /database TCP target evidence/,
   );
 });
