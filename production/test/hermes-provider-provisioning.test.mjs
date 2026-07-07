@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import {
+  HERMES_AGENT_REQUIRED_CAPABILITIES,
   assertHermesProviderProvisioningReport,
   buildHermesProviderProvisioningReport,
   writeHermesProviderProvisioningReport,
@@ -21,6 +22,7 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
   assert.match(report.agent_runtime.install_command, /hermes-agent\.nousresearch\.com\/install\.sh/);
   assert.ok(report.agent_runtime.setup_commands.includes("hermes model"));
+  assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
   assert.equal(report.agent_runtime.project_context.file, "AGENTS.md");
   assert.equal(report.agent_runtime.project_context.present, true);
   assert.equal(report.agent_runtime.gateway_security.allow_all_users, false);
@@ -122,6 +124,14 @@ test("Hermes provisioning report rejects generic agent runtime evidence", () => 
   assert.throws(
     () => assertHermesProviderProvisioningReport({ ...report, agent_runtime: { ...report.agent_runtime, product: "Generic Agent" } }),
     /Nous Hermes Agent/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, required_capabilities: report.agent_runtime.required_capabilities.slice(1) },
+      }),
+    /official Hermes Agent capabilities/,
   );
   assert.throws(
     () =>

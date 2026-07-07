@@ -12,6 +12,14 @@ export const DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/ap
 export const HERMES_AGENT_OFFICIAL_URL = "https://hermes-agent.nousresearch.com/";
 export const HERMES_AGENT_INSTALL_COMMAND = "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash";
 export const HERMES_CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
+export const HERMES_AGENT_REQUIRED_CAPABILITIES = Object.freeze([
+  "messaging_gateway",
+  "persistent_memory",
+  "skills",
+  "mcp",
+  "scheduled_automations",
+  "isolated_subagents",
+]);
 const PROJECT_CONTEXT_FILE = "AGENTS.md";
 
 const VALID_PROVIDER_MODES = new Set(["self_hosted", "openrouter"]);
@@ -120,6 +128,7 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
       install_command: HERMES_AGENT_INSTALL_COMMAND,
       setup_commands: ["hermes setup --portal", "hermes model"],
       gateway_setup_command: "hermes gateway setup",
+      required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
       project_context: projectContext,
       gateway_security: {
         allow_all_users: false,
@@ -191,6 +200,11 @@ export function assertHermesProviderProvisioningReport(report) {
   }
   if (!report.agent_runtime?.setup_commands?.includes("hermes model")) {
     throw new Error("Hermes provisioning must include Hermes model setup");
+  }
+  for (const capability of HERMES_AGENT_REQUIRED_CAPABILITIES) {
+    if (!report.agent_runtime?.required_capabilities?.includes(capability)) {
+      throw new Error("Hermes provisioning must include official Hermes Agent capabilities");
+    }
   }
   if (report.agent_runtime?.project_context?.file !== PROJECT_CONTEXT_FILE || report.agent_runtime.project_context.present !== true) {
     throw new Error("Hermes provisioning requires project AGENTS.md context");

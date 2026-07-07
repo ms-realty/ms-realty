@@ -4,6 +4,7 @@ import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
 import {
+  HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_OFFICIAL_URL,
   assertHermesChatCompletionsEndpoint,
   hermesProviderConfigFromEnv,
@@ -117,6 +118,7 @@ function agentRuntimeMetadata() {
     product: "Nous Hermes Agent",
     official_url: HERMES_AGENT_OFFICIAL_URL,
     project_context_file: "AGENTS.md",
+    required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
   };
 }
 
@@ -219,6 +221,11 @@ export function assertHermesDraftWorkerReport(report) {
   }
   if (report.agent_runtime?.project_context_file !== "AGENTS.md") {
     throw new Error("Hermes worker report must include AGENTS.md project context evidence");
+  }
+  for (const capability of HERMES_AGENT_REQUIRED_CAPABILITIES) {
+    if (!report.agent_runtime?.required_capabilities?.includes(capability)) {
+      throw new Error("Hermes worker report must include official Hermes Agent capabilities");
+    }
   }
   if (report.provider?.tool_call_parser !== "hermes") throw new Error("Hermes worker report must use Hermes tool parser");
   if (!String(report.provider?.mode || "").trim()) throw new Error("Hermes worker report must include provider mode");

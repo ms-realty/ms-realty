@@ -4,7 +4,15 @@
   "agent_runtime": {
     "product": "Nous Hermes Agent",
     "official_url": "https://hermes-agent.nousresearch.com/",
-    "project_context_file": "AGENTS.md"
+    "project_context_file": "AGENTS.md",
+    "required_capabilities": [
+      "messaging_gateway",
+      "persistent_memory",
+      "skills",
+      "mcp",
+      "scheduled_automations",
+      "isolated_subagents"
+    ]
   },
   "ledger_path": "production/data/translation-tasks.jsonl",
   "audit_path": "production/data/hermes-audit.jsonl",

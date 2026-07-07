@@ -12,6 +12,14 @@
       "hermes model"
     ],
     "gateway_setup_command": "hermes gateway setup",
+    "required_capabilities": [
+      "messaging_gateway",
+      "persistent_memory",
+      "skills",
+      "mcp",
+      "scheduled_automations",
+      "isolated_subagents"
+    ],
     "project_context": {
       "file": "AGENTS.md",
       "path": "/Users/ivan/Code/MS-Realty/AGENTS.md",

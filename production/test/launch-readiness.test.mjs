@@ -16,6 +16,7 @@ import {
   writeLiveServiceReport,
 } from "../lib/launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
+import { HERMES_AGENT_REQUIRED_CAPABILITIES } from "../lib/hermes-provider-provisioning.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function readJson(path) {
@@ -209,6 +210,7 @@ function writeLiveReportFixtures(dir) {
         product: "Nous Hermes Agent",
         official_url: "https://hermes-agent.nousresearch.com/",
         project_context_file: "AGENTS.md",
+        required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
       },
       summary: { attempted: 1, persisted: 1, rejected: 0 },
       provider: {

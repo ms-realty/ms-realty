@@ -3,7 +3,15 @@
   "agent_runtime": {
     "product": "Nous Hermes Agent",
     "official_url": "https://hermes-agent.nousresearch.com/",
-    "project_context_file": "AGENTS.md"
+    "project_context_file": "AGENTS.md",
+    "required_capabilities": [
+      "messaging_gateway",
+      "persistent_memory",
+      "skills",
+      "mcp",
+      "scheduled_automations",
+      "isolated_subagents"
+    ]
   },
   "ledger_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-translations.jsonl",
   "audit_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit.jsonl",
