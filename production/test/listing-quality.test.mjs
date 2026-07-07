@@ -418,6 +418,30 @@ test("listing quality preflight report records missing and valid human review st
   assert.equal(assertListingQualityPreflightReport(readyReport), true);
   assert.equal(readyReport.ready, true);
   assert.equal(readyReport.summary.review_rows, report.rows.length);
+  assert.throws(
+    () => assertListingQualityPreflightReport({ ...readyReport, generated_at: "" }),
+    /valid generated_at/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        summary: { ...readyReport.summary, review_rows: readyReport.summary.review_rows - 1 },
+      }),
+    /summary must match review summary/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        review: {
+          ...readyReport.review,
+          summary: { ...readyReport.review.summary, expected_review_rows: readyReport.review.summary.expected_review_rows + 1 },
+        },
+        summary: { ...readyReport.summary, expected_review_rows: readyReport.summary.expected_review_rows + 1 },
+      }),
+    /cover every review row/,
+  );
 });
 
 test("listing quality build honors mounted ledgers and output paths", () => {

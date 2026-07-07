@@ -463,11 +463,27 @@ export function buildListingQualityPreflightReport({
 }
 
 export function assertListingQualityPreflightReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Listing quality preflight report must include valid generated_at");
+  }
   const ready = report.review?.status === "pass";
   if (report.ready !== ready) throw new Error("Listing quality preflight ready flag must match review state");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Listing quality preflight status must match ready flag");
   if (!report.summary || report.summary.expected_review_rows < report.summary.review_rows) {
     throw new Error("Listing quality preflight summary must count expected and reviewed rows");
+  }
+  for (const key of ["expected_review_rows", "review_rows", "missing_review_rows", "facts_review_rows", "media_review_rows"]) {
+    if (report.summary[key] !== report.review.summary?.[key]) {
+      throw new Error("Listing quality preflight summary must match review summary");
+    }
+  }
+  if (ready) {
+    if (report.summary.expected_review_rows < 1 || report.summary.review_rows !== report.summary.expected_review_rows) {
+      throw new Error("Listing quality preflight ready report must cover every review row");
+    }
+    if (report.summary.missing_review_rows !== 0) {
+      throw new Error("Listing quality preflight ready report must have no missing review rows");
+    }
   }
   if (!ready && report.summary.missing_review_rows > 0) {
     if (!Array.isArray(report.review.pending_review_sample) || report.review.pending_review_sample.length < 1) {
