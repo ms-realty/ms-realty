@@ -139,13 +139,30 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
 
 export function assertHermesProviderProvisioningReport(report) {
   if (report.kind !== "hermes_provider_provisioning") throw new Error("Hermes provisioning report kind is invalid");
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Hermes provisioning report must include valid generated_at");
+  }
   if (report.status !== (report.ready ? "configured" : "blocked")) throw new Error("Hermes provisioning status must match ready flag");
   const noMissingInputs = (report.missing || []).length === 0;
   if (report.ready !== noMissingInputs) throw new Error("Hermes provisioning ready flag must match missing inputs");
+  if (!VALID_PROVIDER_MODES.has(report.provider?.mode)) throw new Error("Hermes provisioning provider mode is invalid");
+  if (!String(report.provider?.model || "").trim()) throw new Error("Hermes provisioning report must include provider model");
+  if (report.provider?.endpoint) redactedEndpoint(report.provider.endpoint);
+  if (report.ready && (!report.provider?.endpoint || report.provider.openai_compatible !== true)) {
+    throw new Error("Hermes provisioning ready report must include OpenAI-compatible endpoint evidence");
+  }
   if (report.vllm?.tool_call_parser !== "hermes" || report.vllm?.enable_auto_tool_choice !== true) {
     throw new Error("Hermes provisioning must require the vLLM Hermes tool parser");
   }
   if (report.vllm?.streaming_tool_calls !== false) throw new Error("Hermes provisioning must use non-streaming tool calls");
+  if (
+    report.safety?.draft_only !== true ||
+    report.safety?.human_approval_required !== true ||
+    report.safety?.can_publish !== false ||
+    report.safety?.can_send_customer_messages !== false
+  ) {
+    throw new Error("Hermes provisioning must remain draft-only with human approval");
+  }
   if (report.provider?.mode === "self_hosted" && report.provider.sensitive_data_allowed !== true) {
     throw new Error("Self-hosted Hermes must allow sensitive data");
   }

@@ -62,6 +62,42 @@ test("Hermes hosted fallback is configured as non-sensitive only", () => {
   assert.equal(report.provider.hosted_fallback_allowed_for_sensitive_data, false);
 });
 
+test("Hermes provisioning report rejects incomplete ready endpoint evidence", () => {
+  const report = buildHermesProviderProvisioningReport({
+    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions" },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, generated_at: "" }),
+    /valid generated_at/,
+  );
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, provider: { ...report.provider, endpoint: null } }),
+    /endpoint evidence/,
+  );
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, provider: { ...report.provider, openai_compatible: false } }),
+    /endpoint evidence/,
+  );
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, provider: { ...report.provider, model: " " } }),
+    /provider model/,
+  );
+});
+
+test("Hermes provisioning report rejects publish-capable safety flags", () => {
+  const report = buildHermesProviderProvisioningReport({
+    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions" },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, safety: { ...report.safety, can_publish: true } }),
+    /draft-only/,
+  );
+});
+
 test("Hermes provisioning report writer and CLI do not persist secrets", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-provisioning-`);
   const outPath = `${dir}/hermes-provider-provisioning-report.json`;
