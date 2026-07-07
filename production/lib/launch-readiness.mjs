@@ -272,6 +272,13 @@ function assertLiveServiceSummaryEvidence(item) {
   }
 }
 
+function assertLiveServiceReportPassEvidence(item) {
+  if (item.status !== "pass" || !item.path || item.path.endsWith(".example")) {
+    throw new Error("Launch readiness live services require validated non-example reports");
+  }
+  assertLiveServiceSummaryEvidence(item);
+}
+
 function assertPassRuntimeEvidence(report) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
@@ -281,10 +288,7 @@ function assertPassRuntimeEvidence(report) {
       if (!sources.has(source)) throw new Error(`Launch readiness live services missing ${source} evidence`);
     }
     for (const item of reports) {
-      if (item.status !== "pass" || !item.path || item.path.endsWith(".example")) {
-        throw new Error("Launch readiness live services require validated non-example reports");
-      }
-      assertLiveServiceSummaryEvidence(item);
+      assertLiveServiceReportPassEvidence(item);
     }
   }
 
@@ -440,12 +444,16 @@ export function validateLiveServiceReports(options = {}) {
   };
 }
 
-export function buildLiveServicePreflightReport({ generatedAt = new Date().toISOString(), ...options } = {}) {
-  const result = validateLiveServiceReports(options);
-  const statusCounts = result.reports.reduce((counts, report) => {
+function liveServiceStatusCounts(reports) {
+  return reports.reduce((counts, report) => {
     counts[report.status] = (counts[report.status] || 0) + 1;
     return counts;
   }, {});
+}
+
+export function buildLiveServicePreflightReport({ generatedAt = new Date().toISOString(), ...options } = {}) {
+  const result = validateLiveServiceReports(options);
+  const statusCounts = liveServiceStatusCounts(result.reports);
   return {
     generated_at: generatedAt,
     ready: result.ready,
@@ -480,6 +488,19 @@ export function assertLiveServicePreflightReport(report) {
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Live service preflight status must match ready flag");
   if (report.summary.report_count !== report.reports.length) {
     throw new Error("Live service preflight summary must count reports");
+  }
+  const statusCounts = liveServiceStatusCounts(report.reports);
+  for (const status of ["pass", "missing_report", "invalid_report", "example_report"]) {
+    if (report.summary[status] !== (statusCounts[status] || 0)) {
+      throw new Error("Live service preflight summary status counts must match reports");
+    }
+  }
+  if (ready) {
+    const sources = new Set(report.reports.map((item) => item.source));
+    for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
+      if (!sources.has(source)) throw new Error(`Live service preflight missing ${source} evidence`);
+    }
+    for (const item of report.reports) assertLiveServiceReportPassEvidence(item);
   }
   return true;
 }

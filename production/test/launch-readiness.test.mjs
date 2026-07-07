@@ -794,6 +794,11 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(result.ready, true);
   assert.equal(result.reports.every((report) => report.status === "pass"), true);
 
+  const readyReport = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z", ...paths });
+  assert.equal(assertLiveServicePreflightReport(readyReport), true);
+  readyReport.reports.find((report) => report.source === "typesense_meilisearch_sync").summary.total_operations = 0;
+  assert.throws(() => assertLiveServicePreflightReport(readyReport), /search sync summary evidence/);
+
   const valid = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-live-service-reports.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
@@ -856,6 +861,13 @@ test("live service report preflight fails missing reports and passes valid repor
     wrongHermesPathResult.reports.find((report) => report.source === "hermes_draft_worker").error,
     /\/v1\/chat\/completions/,
   );
+});
+
+test("live service preflight report rejects hand-edited status counts", () => {
+  const report = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z" });
+  report.summary.pass = 3;
+
+  assert.throws(() => assertLiveServicePreflightReport(report), /status counts must match reports/);
 });
 
 test("live service evidence command refuses localhost launch evidence", async () => {
