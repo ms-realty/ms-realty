@@ -367,6 +367,37 @@ test("SEO evidence assertion rejects hand-cleared missing source state", () => {
       }),
     /row counts/,
   );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
+        summary: {
+          ...evidence.summary,
+          sources: {
+            ...evidence.summary.sources,
+            search_console: { ...evidence.summary.sources.search_console, matched_rows: -1 },
+          },
+        },
+      }),
+    /non-negative integers/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
+        summary: {
+          ...evidence.summary,
+          sources: {
+            ...evidence.summary.sources,
+            search_console: {
+              ...evidence.summary.sources.search_console,
+              matched_source_domains: "makler-realty.com",
+            },
+          },
+        },
+      }),
+    /matched domains must be an array/,
+  );
 
   evidence.summary.missing_required_sources = [];
 

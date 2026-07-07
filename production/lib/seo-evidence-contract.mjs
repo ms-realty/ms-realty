@@ -20,6 +20,14 @@ export function missingRequiredSources(sourceSummaries) {
 
 export function assertSeoSourceSummary(summary, source) {
   if (summary?.source && summary.source !== source) throw new Error(`SEO evidence ${source} source name mismatch`);
+  for (const key of ["row_count", "matched_rows", "unmatched_rows", "duplicate_rows", "signal_rows", "placeholder_rows"]) {
+    if (!Number.isInteger(summary?.[key]) || summary[key] < 0) {
+      throw new Error(`SEO evidence ${source} counts must be non-negative integers`);
+    }
+  }
+  if (!Array.isArray(summary.matched_source_domains)) {
+    throw new Error(`SEO evidence ${source} matched domains must be an array`);
+  }
   const rowCount = summary?.row_count ?? 0;
   const matchedRows = summary?.matched_rows ?? 0;
   const unmatchedRows = summary?.unmatched_rows ?? 0;
