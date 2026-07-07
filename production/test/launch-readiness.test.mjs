@@ -909,6 +909,14 @@ test("live service preflight report rejects hand-edited status counts", () => {
     () =>
       assertLiveServicePreflightReport({
         ...report,
+        reports: report.reports.map((item, index) => (index === 0 ? { ...item, status: "skipped" } : item)),
+      }),
+    /statuses must be known/,
+  );
+  assert.throws(
+    () =>
+      assertLiveServicePreflightReport({
+        ...report,
         summary: {
           ...report.summary,
           configured_paths: {
@@ -919,6 +927,29 @@ test("live service preflight report rejects hand-edited status counts", () => {
       }),
     /configured paths/,
   );
+  const partialPassReport = {
+    ...report,
+    summary: {
+      ...report.summary,
+      pass: 1,
+      missing_report: 2,
+      configured_paths: {
+        ...report.summary.configured_paths,
+        typesense_meilisearch_sync: "/tmp/search-engine-sync-report.json",
+      },
+    },
+    reports: report.reports.map((item) =>
+      item.source === "typesense_meilisearch_sync"
+        ? {
+            ...item,
+            status: "pass",
+            path: "/tmp/search-engine-sync-report.json",
+            summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 0 },
+          }
+        : item,
+    ),
+  };
+  assert.throws(() => assertLiveServicePreflightReport(partialPassReport), /search sync summary evidence/);
   report.summary.pass = 3;
 
   assert.throws(() => assertLiveServicePreflightReport(report), /status counts must match reports/);

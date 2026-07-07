@@ -460,6 +460,8 @@ function liveServiceStatusCounts(reports) {
   }, {});
 }
 
+const LIVE_SERVICE_REPORT_STATUSES = new Set(["pass", "missing_report", "invalid_report", "example_report"]);
+
 export function buildLiveServicePreflightReport({ generatedAt = new Date().toISOString(), ...options } = {}) {
   const result = validateLiveServiceReports(options);
   const statusCounts = liveServiceStatusCounts(result.reports);
@@ -501,6 +503,11 @@ export function assertLiveServicePreflightReport(report) {
   if (report.summary.report_count !== report.reports.length) {
     throw new Error("Live service preflight summary must count reports");
   }
+  for (const item of report.reports) {
+    if (!LIVE_SERVICE_REPORT_STATUSES.has(item.status)) {
+      throw new Error("Live service preflight report statuses must be known");
+    }
+  }
   const statusCounts = liveServiceStatusCounts(report.reports);
   for (const status of ["pass", "missing_report", "invalid_report", "example_report"]) {
     if (report.summary[status] !== (statusCounts[status] || 0)) {
@@ -518,6 +525,7 @@ export function assertLiveServicePreflightReport(report) {
     if (report.summary.configured_paths?.[item.source] !== item.path) {
       throw new Error("Live service preflight configured paths must match reports");
     }
+    if (item.status === "pass") assertLiveServiceReportPassEvidence(item);
   }
   if (ready) {
     for (const item of report.reports) assertLiveServiceReportPassEvidence(item);
