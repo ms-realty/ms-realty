@@ -472,6 +472,12 @@ export function assertListingQualityPreflightReport(report) {
   if (!report.summary || report.summary.expected_review_rows < report.summary.review_rows) {
     throw new Error("Listing quality preflight summary must count expected and reviewed rows");
   }
+  if (
+    !Number.isInteger(report.summary.affected_listings) ||
+    report.summary.affected_listings < report.summary.expected_review_rows
+  ) {
+    throw new Error("Listing quality preflight summary must cover affected listings");
+  }
   for (const key of ["expected_review_rows", "review_rows", "missing_review_rows", "facts_review_rows", "media_review_rows"]) {
     if (report.summary[key] !== report.review.summary?.[key]) {
       throw new Error("Listing quality preflight summary must match review summary");
@@ -483,6 +489,9 @@ export function assertListingQualityPreflightReport(report) {
     }
     if (report.summary.expected_review_rows < 1 || report.summary.review_rows !== report.summary.expected_review_rows) {
       throw new Error("Listing quality preflight ready report must cover every review row");
+    }
+    if (report.summary.affected_listings !== report.summary.expected_review_rows) {
+      throw new Error("Listing quality preflight ready report must cover every affected listing");
     }
     if (report.summary.missing_review_rows !== 0) {
       throw new Error("Listing quality preflight ready report must have no missing review rows");

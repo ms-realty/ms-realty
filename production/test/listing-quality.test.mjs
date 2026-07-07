@@ -442,11 +442,31 @@ test("listing quality preflight report records missing and valid human review st
     () =>
       assertListingQualityPreflightReport({
         ...readyReport,
+        summary: { ...readyReport.summary, affected_listings: readyReport.summary.expected_review_rows - 1 },
+      }),
+    /cover affected listings/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        summary: { ...readyReport.summary, affected_listings: readyReport.summary.expected_review_rows + 1 },
+      }),
+    /cover every affected listing/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
         review: {
           ...readyReport.review,
           summary: { ...readyReport.review.summary, expected_review_rows: readyReport.review.summary.expected_review_rows + 1 },
         },
-        summary: { ...readyReport.summary, expected_review_rows: readyReport.summary.expected_review_rows + 1 },
+        summary: {
+          ...readyReport.summary,
+          affected_listings: readyReport.summary.affected_listings + 1,
+          expected_review_rows: readyReport.summary.expected_review_rows + 1,
+        },
       }),
     /cover every review row/,
   );
