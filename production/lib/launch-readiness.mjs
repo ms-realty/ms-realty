@@ -480,6 +480,9 @@ export function buildLiveServicePreflightReport({ generatedAt = new Date().toISO
 }
 
 export function assertLiveServicePreflightReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Live service preflight report must include valid generated_at");
+  }
   if (!Array.isArray(report.reports) || report.reports.length !== 3) {
     throw new Error("Live service preflight report must include three service reports");
   }
@@ -493,6 +496,11 @@ export function assertLiveServicePreflightReport(report) {
   for (const status of ["pass", "missing_report", "invalid_report", "example_report"]) {
     if (report.summary[status] !== (statusCounts[status] || 0)) {
       throw new Error("Live service preflight summary status counts must match reports");
+    }
+  }
+  for (const item of report.reports) {
+    if (report.summary.configured_paths?.[item.source] !== item.path) {
+      throw new Error("Live service preflight configured paths must match reports");
     }
   }
   if (ready) {

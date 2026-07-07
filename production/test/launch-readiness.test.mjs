@@ -879,6 +879,21 @@ test("live service report preflight fails missing reports and passes valid repor
 
 test("live service preflight report rejects hand-edited status counts", () => {
   const report = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z" });
+  assert.throws(() => assertLiveServicePreflightReport({ ...report, generated_at: "" }), /valid generated_at/);
+  assert.throws(
+    () =>
+      assertLiveServicePreflightReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          configured_paths: {
+            ...report.summary.configured_paths,
+            typesense_meilisearch_sync: "/tmp/wrong-search-engine-sync-report.json",
+          },
+        },
+      }),
+    /configured paths/,
+  );
   report.summary.pass = 3;
 
   assert.throws(() => assertLiveServicePreflightReport(report), /status counts must match reports/);
