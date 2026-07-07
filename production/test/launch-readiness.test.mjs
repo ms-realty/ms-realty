@@ -910,10 +910,13 @@ test("live service evidence command refuses localhost launch evidence", async ()
     });
 
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /LIVE SERVICE EVIDENCE FAILED: typesense_meilisearch_sync, typesense_meilisearch_query, hermes_draft_worker/);
+    assert.match(
+      result.stderr,
+      /LIVE SERVICE EVIDENCE FAILED: live service provisioning must pass before capture: typesense_health, meilisearch_health, hermes_provider/,
+    );
     const validation = validateLiveServiceReports(paths);
     assert.equal(validation.ready, false);
-    assert.equal(validation.reports.every((report) => report.status === "invalid_report"), true);
+    assert.equal(validation.reports.every((report) => report.status === "missing_report"), true);
   });
 });
 

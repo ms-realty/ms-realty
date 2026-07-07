@@ -1,5 +1,9 @@
 import { validateLiveServiceReports } from "../lib/launch-readiness.mjs";
 import {
+  assertLiveServiceProvisioningReport,
+  buildLiveServiceProvisioningReport,
+} from "../lib/live-service-provisioning.mjs";
+import {
   runSearchEngineQuerySmoke,
   runSearchEngineSync,
   writeSearchEngineQueryReport,
@@ -13,6 +17,13 @@ import {
 
 async function capture() {
   const runAt = new Date().toISOString();
+  const provisioning = await buildLiveServiceProvisioningReport({ generatedAt: runAt });
+  assertLiveServiceProvisioningReport(provisioning);
+  if (!provisioning.ready) {
+    const failed = provisioning.checks.filter((check) => check.status !== "pass").map((check) => check.id).join(", ");
+    throw new Error(`live service provisioning must pass before capture: ${failed}`);
+  }
+
   const syncReport = await runSearchEngineSync({ generatedAt: runAt });
   writeSearchEngineSyncReport(syncReport, process.env.MS_REALTY_SEARCH_SYNC_REPORT_PATH || undefined);
 
