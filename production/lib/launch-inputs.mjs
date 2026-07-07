@@ -64,10 +64,14 @@ export function renderLaunchInputChecklist({
     .join(", ");
   const payloadGate = launchReadiness.gates.find((gate) => gate.id === "payload_runtime");
   const payloadEvidence = payloadGate?.evidence || {};
-  const missingPayloadEnv = [
-    payloadEvidence.payload_secret_configured ? "" : "PAYLOAD_SECRET",
-    payloadEvidence.payload_database_url_configured ? "" : "DATABASE_URL",
-  ].filter(Boolean);
+  const payloadSummary = payloadEvidence.summary || {};
+  const missingPayloadEnv = Array.isArray(payloadSummary.missing_env)
+    ? payloadSummary.missing_env
+    : [
+        payloadEvidence.payload_secret_configured ? "" : "PAYLOAD_SECRET",
+        payloadEvidence.payload_database_url_configured ? "" : "DATABASE_URL",
+      ].filter(Boolean);
+  const weakPayloadEnv = Array.isArray(payloadSummary.weak_env) ? payloadSummary.weak_env : [];
 
   return `# Launch Input Checklist
 
@@ -133,6 +137,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Collection export: \`production/data/payload-collections.json\`
 - Admin route: \`/payload-admin\`; API routes: \`/api/[...slug]\`, \`/graphql\`, \`/graphql-playground\`.
 - Required env: \`PAYLOAD_SECRET\`, \`DATABASE_URL\`${missingPayloadEnv.length ? `; currently missing: ${missingPayloadEnv.map((name) => `\`${name}\``).join(", ")}` : ""}.
+- Secret strength: \`PAYLOAD_SECRET\` must be at least 32 bytes${weakPayloadEnv.length ? `; currently weak: ${weakPayloadEnv.map((name) => `\`${name}\``).join(", ")}` : ""}.
 - Runtime evidence: \`payload\` dependency present, \`payload.config.js\` present, collection export generated, and required env configured.
 - Placeholder rule: copied example values such as \`replace-with-...\` and \`change-me\` stay blocked.
 - Runtime commands: \`npm run payload:bootstrap\`, copy/edit the private env file, start Postgres, then \`npm run payload:runtime\` and \`npm run payload:preflight\`.

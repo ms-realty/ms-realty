@@ -28,6 +28,7 @@ function configuredSecret(value) {
   const secret = String(value || "").trim();
   if (!secret) return "missing_env";
   if (/replace-with|change-me|example|local-payload-secret/i.test(secret)) return "placeholder";
+  if (Buffer.byteLength(secret, "utf8") < 32) return "weak_secret";
   return "pass";
 }
 
@@ -112,6 +113,7 @@ export async function buildPayloadRuntimeReport({
 
   const missingEnv = checks.filter((item) => item.status === "missing_env").map((item) => item.env);
   const placeholders = checks.filter((item) => item.status === "placeholder").map((item) => item.env).filter(Boolean);
+  const weakEnv = checks.filter((item) => item.status === "weak_secret").map((item) => item.env).filter(Boolean);
   const ready = checks.every((item) => item.status === "pass");
   return {
     generated_at: generatedAt,
@@ -123,6 +125,7 @@ export async function buildPayloadRuntimeReport({
       database,
       missing_env: [...new Set(missingEnv)],
       placeholder_env: [...new Set(placeholders)],
+      weak_env: [...new Set(weakEnv)],
       route_files: REQUIRED_ROUTE_FILES.length,
     },
     checks,
@@ -153,17 +156,26 @@ export function assertPayloadRuntimeReport(report) {
   const ready = report.checks.every((item) => item.status === "pass");
   if (report.ready !== ready) throw new Error("Payload runtime ready flag must match checks");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Payload runtime status must match ready flag");
-  if (!report.summary || !Array.isArray(report.summary.missing_env) || !Array.isArray(report.summary.placeholder_env)) {
-    throw new Error("Payload runtime report must summarize missing and placeholder env");
+  if (
+    !report.summary ||
+    !Array.isArray(report.summary.missing_env) ||
+    !Array.isArray(report.summary.placeholder_env) ||
+    !Array.isArray(report.summary.weak_env)
+  ) {
+    throw new Error("Payload runtime report must summarize missing, placeholder, and weak env");
   }
   if (report.summary.checks !== report.checks.length) throw new Error("Payload runtime summary check count must match checks");
   const missingEnv = [...new Set(report.checks.filter((item) => item.status === "missing_env").map((item) => item.env).filter(Boolean))];
   const placeholderEnv = [...new Set(report.checks.filter((item) => item.status === "placeholder").map((item) => item.env).filter(Boolean))];
+  const weakEnv = [...new Set(report.checks.filter((item) => item.status === "weak_secret").map((item) => item.env).filter(Boolean))];
   if (JSON.stringify(report.summary.missing_env) !== JSON.stringify(missingEnv)) {
     throw new Error("Payload runtime missing env summary must match checks");
   }
   if (JSON.stringify(report.summary.placeholder_env) !== JSON.stringify(placeholderEnv)) {
     throw new Error("Payload runtime placeholder env summary must match checks");
+  }
+  if (JSON.stringify(report.summary.weak_env) !== JSON.stringify(weakEnv)) {
+    throw new Error("Payload runtime weak env summary must match checks");
   }
   const databaseTcp = report.checks.find((item) => item.id === "database_tcp");
   if (report.summary.database?.status !== databaseTcp.status) {

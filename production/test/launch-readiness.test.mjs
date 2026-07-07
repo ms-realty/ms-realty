@@ -764,6 +764,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /production\/data\/payload-collections\.json/);
   assert.match(markdown, /\/payload-admin/);
   assert.match(markdown, /Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`/);
+  assert.match(markdown, /Secret strength: `PAYLOAD_SECRET` must be at least 32 bytes/);
   assert.match(markdown, /payload\.config\.js/);
   assert.match(markdown, /npm run payload:runtime/);
   assert.match(markdown, /npm run payload:preflight/);

@@ -34,6 +34,7 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.equal(assertPayloadRuntimeReport(report), true);
   assert.equal(report.ready, false);
   assert.deepEqual(report.summary.missing_env, ["PAYLOAD_SECRET", "DATABASE_URL"]);
+  assert.deepEqual(report.summary.weak_env, []);
   assert.equal(report.summary.database.status, "missing_env");
   assert.equal(report.checks.find((check) => check.id === "payload_config_import").status, "pass");
 });
@@ -54,8 +55,26 @@ test("Payload runtime report rejects copied placeholder env values", async () =>
   assert.equal(report.ready, false);
   assert.deepEqual(report.summary.missing_env, []);
   assert.deepEqual(report.summary.placeholder_env, ["PAYLOAD_SECRET", "DATABASE_URL"]);
+  assert.deepEqual(report.summary.weak_env, []);
   assert.equal(report.summary.database.status, "placeholder");
   assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "placeholder");
+});
+
+test("Payload runtime report rejects weak non-placeholder secrets", async () => {
+  const report = await buildPayloadRuntimeReport({
+    databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      PAYLOAD_SECRET: "short-secret",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertPayloadRuntimeReport(report), true);
+  assert.equal(report.ready, false);
+  assert.deepEqual(report.summary.weak_env, ["PAYLOAD_SECRET"]);
+  assert.equal(report.checks.find((check) => check.id === "payload_secret").status, "weak_secret");
+  assert.equal(JSON.stringify(report).includes("short-secret"), false);
 });
 
 test("Payload runtime report passes with env and database reachability proof", async () => {
@@ -63,7 +82,7 @@ test("Payload runtime report passes with env and database reachability proof", a
     databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
     env: {
       DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
-      PAYLOAD_SECRET: "not-written-to-report",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
     },
     generatedAt: "2026-07-06T00:00:00Z",
   });
@@ -72,7 +91,7 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(report.ready, true);
   assert.deepEqual(report.summary.missing_env, []);
   assert.equal(report.summary.database.host, "db.internal");
-  assert.equal(JSON.stringify(report).includes("not-written-to-report"), false);
+  assert.equal(JSON.stringify(report).includes("not-written-to-report-32-byte-minimum"), false);
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
 });
 
@@ -117,7 +136,7 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
     databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
     env: {
       DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
-      PAYLOAD_SECRET: "not-written-to-report",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
     },
     generatedAt: "2026-07-06T00:00:00Z",
   });

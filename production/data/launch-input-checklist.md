@@ -67,6 +67,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - Collection export: `production/data/payload-collections.json`
 - Admin route: `/payload-admin`; API routes: `/api/[...slug]`, `/graphql`, `/graphql-playground`.
 - Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`.
+- Secret strength: `PAYLOAD_SECRET` must be at least 32 bytes.
 - Runtime evidence: `payload` dependency present, `payload.config.js` present, collection export generated, and required env configured.
 - Placeholder rule: copied example values such as `replace-with-...` and `change-me` stay blocked.
 - Runtime commands: `npm run payload:bootstrap`, copy/edit the private env file, start Postgres, then `npm run payload:runtime` and `npm run payload:preflight`.

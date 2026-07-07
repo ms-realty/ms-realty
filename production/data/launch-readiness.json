@@ -212,6 +212,7 @@
             "DATABASE_URL"
           ],
           "placeholder_env": [],
+          "weak_env": [],
           "route_files": 4
         },
         "checks": [
