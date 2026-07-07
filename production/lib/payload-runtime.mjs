@@ -202,6 +202,20 @@ export function assertPayloadRuntimeReport(report) {
   ) {
     throw new Error("Payload runtime database TCP target must match summary evidence");
   }
+  if (report.summary.admin_route !== "/payload-admin" || report.summary.route_files !== REQUIRED_ROUTE_FILES.length) {
+    throw new Error("Payload runtime report must include route summary evidence");
+  }
+  for (const file of REQUIRED_ROUTE_FILES) {
+    const route = report.checks.find((item) => item.id === `route:${file}`);
+    if (route?.file !== file) throw new Error("Payload runtime report must include route file evidence");
+  }
+  const config = report.checks.find((item) => item.id === "payload_config_import");
+  if (
+    config?.status === "pass" &&
+    (config.admin_route !== "/payload-admin" || !Number.isInteger(config.collections) || config.collections < 6)
+  ) {
+    throw new Error("Payload runtime report must include Payload config evidence");
+  }
   if (
     ready &&
     (!report.summary.database.database ||
@@ -214,19 +228,6 @@ export function assertPayloadRuntimeReport(report) {
       databaseTcp.credentials_configured !== true)
   ) {
     throw new Error("Payload runtime ready report must include database TCP target evidence");
-  }
-  if (ready) {
-    for (const file of REQUIRED_ROUTE_FILES) {
-      const route = report.checks.find((item) => item.id === `route:${file}`);
-      if (route?.file !== file) throw new Error("Payload runtime ready report must include route file evidence");
-    }
-    const config = report.checks.find((item) => item.id === "payload_config_import");
-    if (report.summary.admin_route !== "/payload-admin" || report.summary.route_files !== REQUIRED_ROUTE_FILES.length) {
-      throw new Error("Payload runtime ready report must include route summary evidence");
-    }
-    if (config?.admin_route !== "/payload-admin" || !Number.isInteger(config.collections) || config.collections < 6) {
-      throw new Error("Payload runtime ready report must include Payload config evidence");
-    }
   }
   return true;
 }

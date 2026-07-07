@@ -188,6 +188,26 @@ test("Payload runtime report requires the full launch check set", async () => {
     () => assertPayloadRuntimeReport({ ...report, summary: { ...report.summary, database: { status: "pass" } } }),
     /database summary/,
   );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id.startsWith("route:") ? { id: check.id, status: "pass" } : check)),
+      }),
+    /route file evidence/,
+  );
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, summary: { ...report.summary, route_files: 0 } }),
+    /route summary evidence/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id === "payload_config_import" ? { id: check.id, status: "pass" } : check)),
+      }),
+    /Payload config evidence/,
+  );
 });
 
 test("Payload runtime ready report requires concrete database TCP evidence", async () => {
