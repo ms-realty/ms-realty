@@ -142,6 +142,7 @@ npm run redirects:preflight
 npm run seo:preflight:report
 npm run seo:preflight
 npm run listing:preflight:report
+npm run listing:review-pack
 npm run listing:preflight
 npm run live:provisioning
 npm run live:provisioning:preflight
@@ -157,7 +158,8 @@ npm run launch:preflight
 SEO export status without clearing the launch gate, and `seo:preflight` still exits
 non-zero until real external SEO exports are complete. `listing:preflight:report` writes the current
 listing review status without clearing the launch gate, and `listing:preflight` still exits non-zero until
-the reviewed listing-quality CSV is present. `launch:preflight` also requires live Typesense/Meilisearch
+the reviewed listing-quality CSV is present. `listing:review-pack` writes a complete draft review packet
+for editors, but it is not launch evidence until reviewer fields are filled. `launch:preflight` also requires live Typesense/Meilisearch
 reports from `npm run search:sync && npm run search:query`, a Hermes draft-worker report from
 `npm run hermes:worker`, and a configured Payload runtime app; `live:preflight` checks those report files directly.
 `live:provisioning` writes redacted endpoint and missing-env evidence before live capture, and

@@ -10,11 +10,15 @@ import {
 } from "../lib/listing-edits.mjs";
 import {
   assertListingQualityPreflightReport,
+  assertListingQualityReviewPacket,
   assertListingQualityReport,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
+  buildListingQualityReviewPacket,
+  renderListingQualityReviewDraft,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
+  writeListingQualityReviewPacket,
 } from "../lib/listing-quality.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -190,6 +194,30 @@ test("listing quality workbook gives editors importable review rows without appr
   assert.match(mediaRow.editor_path, /^\/admin\/listings\/edit\?listingId=/);
 });
 
+test("listing quality review packet is a complete draft but not launch evidence", () => {
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const draft = renderListingQualityReviewDraft(report);
+  const rows = parseCsv(draft);
+  const packet = buildListingQualityReviewPacket({
+    draftCsvPath: "production/data/listing-quality-review-draft.csv",
+    generatedAt: "2026-07-06T00:00:00Z",
+    report,
+  });
+
+  assert.equal(assertListingQualityReviewPacket(packet), true);
+  assert.equal(packet.ready, false);
+  assert.equal(packet.status, "draft_not_launch_evidence");
+  assert.equal(rows.length, report.rows.length);
+  assert.ok(rows.every((row) => row.media_reviewer === ""));
+  assert.ok(rows.every((row) => row.facts_reviewer === ""));
+  assert.ok(rows.every((row) => row.review_notes.includes("Review public gallery")));
+  assert.equal(packet.paths.draft_review_csv === packet.paths.launch_review_csv, false);
+  assert.throws(() => validateListingQualityReviewCsv(report, draft, { requireComplete: true }), /media_reviewer/);
+});
+
 test("listing quality review CSV preflight validates reviewer fixes without applying edits", () => {
   const base = loadCmsSeed();
   const seed = {
@@ -231,6 +259,39 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   assert.throws(() => validateListingQualityReviewCsv(report, `${csv}\n${csv.split("\n")[1]}\n`), /Duplicate/);
 });
 
+test("listing quality review packet writer and CLI honor output overrides", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-review-pack-`);
+  const packetPath = `${dir}/listing-quality-review-packet.json`;
+  const draftCsvPath = `${dir}/listing-quality-review-draft.csv`;
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const packet = buildListingQualityReviewPacket({ draftCsvPath, generatedAt: "2026-07-06T00:00:00Z", report });
+  writeListingQualityReviewPacket(packet, { draftCsv: renderListingQualityReviewDraft(report), draftCsvPath, packetPath });
+
+  assert.equal(fs.existsSync(packetPath), true);
+  assert.equal(fs.existsSync(draftCsvPath), true);
+  assert.equal(JSON.parse(fs.readFileSync(packetPath, "utf8")).status, "draft_not_launch_evidence");
+
+  const cliPacketPath = `${dir}/cli-listing-quality-review-packet.json`;
+  const cliDraftPath = `${dir}/cli-listing-quality-review-draft.csv`;
+  const cli = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-listing-quality-review-packet.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      PATH: process.env.PATH,
+      MS_REALTY_LISTING_QUALITY_REVIEW_DRAFT_PATH: cliDraftPath,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PACKET_PATH: cliPacketPath,
+    },
+  });
+
+  assert.equal(cli.status, 0, cli.stderr);
+  assert.match(cli.stdout, /Wrote listing quality review packet/);
+  assert.equal(fs.existsSync(cliPacketPath), true);
+  assert.equal(fs.existsSync(cliDraftPath), true);
+});
+
 test("listing quality preflight CLI fails missing CSV and passes valid CSV", () => {
   const report = buildListingQualityReport({
     seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
@@ -250,7 +311,8 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
 
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /LISTING QUALITY PREFLIGHT FAILED/);
-  assert.match(missing.stderr, /production\/data\/listing-quality-workbook\.csv/);
+  assert.match(missing.stderr, /npm run listing:review-pack/);
+  assert.match(missing.stderr, /draft review CSV/);
   assert.match(missing.stderr, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
   assert.match(missing.stderr, /npm run listing:preflight/);
   assert.equal(valid.status, 0, valid.stderr);

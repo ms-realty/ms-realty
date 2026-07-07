@@ -10,6 +10,8 @@ export const DEFAULT_LISTING_QUALITY_REPORT = fromRoot("production", "data", "li
 export const DEFAULT_LISTING_QUALITY_WORKBOOK = fromRoot("production", "data", "listing-quality-workbook.csv");
 export const DEFAULT_LISTING_QUALITY_REVIEW_INPUT = fromRoot("migration", "reviews", "listing-quality.csv");
 export const DEFAULT_LISTING_QUALITY_PREFLIGHT_REPORT = fromRoot("production", "data", "listing-quality-preflight-report.json");
+export const DEFAULT_LISTING_QUALITY_REVIEW_DRAFT = fromRoot("production", "data", "listing-quality-review-draft.csv");
+export const DEFAULT_LISTING_QUALITY_REVIEW_PACKET = fromRoot("production", "data", "listing-quality-review-packet.json");
 
 const FACT_FIELDS_BY_ISSUE = {
   missing_price: "price_eur",
@@ -166,6 +168,121 @@ export function renderListingQualityWorkbook(report) {
     "editor_path",
   ];
   return `${[headers.join(","), ...report.rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
+}
+
+function reviewNoteForRow(row) {
+  const notes = [];
+  if (row.required_editor_fields.includes("public_gallery")) {
+    notes.push(`Review public gallery: currently ${row.public_gallery_assets} public asset(s).`);
+  }
+  if (row.required_editor_fields.includes("media_alt_text")) {
+    notes.push(`Review media alt text: ${row.missing_alt_text_assets} public asset(s) missing alt text.`);
+  }
+  if (row.required_editor_fields.includes("media_review")) {
+    notes.push(`Review gated media: ${row.review_gated_assets} asset(s) still gated.`);
+  }
+  if (row.required_editor_fields.includes("tour_review")) notes.push("Review 360 tour before public display.");
+  return notes.join(" ");
+}
+
+export function renderListingQualityReviewDraft(report) {
+  const headers = [
+    "listing_id",
+    "price_eur",
+    "bedrooms",
+    "location",
+    "description",
+    "facts_reviewer",
+    "media_reviewer",
+    "review_notes",
+    "editor_path",
+    "review_status",
+    "issues",
+    "required_editor_fields",
+    "public_gallery_assets",
+    "missing_alt_text_assets",
+  ];
+  const rows = report.rows.map((row) => ({
+    listing_id: row.listing_id,
+    price_eur: row.required_editor_fields.includes("price_eur") ? row.price_eur || "" : "",
+    bedrooms: row.required_editor_fields.includes("bedrooms") ? row.bedrooms ?? "" : "",
+    location: row.required_editor_fields.includes("location") ? row.location || "" : "",
+    description: row.required_editor_fields.includes("description") ? row.description || "" : "",
+    facts_reviewer: "",
+    media_reviewer: "",
+    review_notes: reviewNoteForRow(row),
+    editor_path: row.editor_path,
+    review_status: row.review_status,
+    issues: row.issues,
+    required_editor_fields: row.required_editor_fields,
+    public_gallery_assets: row.public_gallery_assets,
+    missing_alt_text_assets: row.missing_alt_text_assets,
+  }));
+  return `${[headers.join(","), ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
+}
+
+export function buildListingQualityReviewPacket({
+  draftCsvPath = DEFAULT_LISTING_QUALITY_REVIEW_DRAFT,
+  generatedAt = new Date().toISOString(),
+  report = buildListingQualityReport(),
+  reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
+} = {}) {
+  const factsReviewRows = report.rows.filter((row) =>
+    row.required_editor_fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field)),
+  ).length;
+  const mediaReviewRows = report.rows.filter((row) =>
+    row.required_editor_fields.some((field) =>
+      ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field),
+    ),
+  ).length;
+  return {
+    kind: "listing_quality_review_packet",
+    generated_at: generatedAt,
+    ready: false,
+    status: "draft_not_launch_evidence",
+    paths: {
+      workbook_csv: DEFAULT_LISTING_QUALITY_WORKBOOK,
+      draft_review_csv: draftCsvPath,
+      launch_review_csv: reviewPath,
+    },
+    admin: {
+      editor_path_pattern: "/admin/listings/edit?listingId=:listing_id",
+      import_endpoint: "POST /api/admin/listing-quality/import",
+      workbook_endpoint: "GET /api/admin/listing-quality-workbook",
+    },
+    summary: {
+      expected_review_rows: report.rows.length,
+      facts_review_rows_required: factsReviewRows,
+      media_review_rows_required: mediaReviewRows,
+      reviewer_fields_blank: report.rows.length,
+      issue_counts: report.summary.issue_counts,
+      by_review_status: countBy(report.rows, (row) => row.review_status),
+    },
+    instructions: [
+      "Use the draft CSV as a reviewer worksheet only; it is not launch evidence.",
+      "Fill facts_reviewer when fact fields are required and media_reviewer when media or gallery review is required.",
+      "Copy the completed rows to migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH.",
+      "Run npm run listing:preflight before launch:preflight.",
+    ],
+  };
+}
+
+export function assertListingQualityReviewPacket(packet) {
+  if (packet.kind !== "listing_quality_review_packet") throw new Error("Listing quality review packet kind is invalid");
+  if (packet.ready !== false || packet.status !== "draft_not_launch_evidence") {
+    throw new Error("Listing quality review packet must not claim launch readiness");
+  }
+  if (!packet.paths?.draft_review_csv || !packet.paths?.launch_review_csv) {
+    throw new Error("Listing quality review packet must include draft and launch review paths");
+  }
+  if (packet.paths.draft_review_csv === packet.paths.launch_review_csv) {
+    throw new Error("Listing quality draft path must not equal the launch review path");
+  }
+  if (packet.summary.expected_review_rows < 1) throw new Error("Listing quality review packet must include review rows");
+  if (packet.summary.reviewer_fields_blank !== packet.summary.expected_review_rows) {
+    throw new Error("Listing quality review packet must keep reviewer fields blank");
+  }
+  return true;
 }
 
 function assertReviewFactValue(listingId, field, value) {
@@ -367,6 +484,23 @@ export function writeListingQualityWorkbook(report, outPath = DEFAULT_LISTING_QU
   assertListingQualityReport(report);
   fs.writeFileSync(outPath, renderListingQualityWorkbook(report));
   return outPath;
+}
+
+export function writeListingQualityReviewPacket(
+  packet,
+  {
+    draftCsv = null,
+    draftCsvPath = packet.paths.draft_review_csv,
+    packetPath = DEFAULT_LISTING_QUALITY_REVIEW_PACKET,
+    report = null,
+  } = {},
+) {
+  fs.mkdirSync(path.dirname(packetPath), { recursive: true });
+  fs.mkdirSync(path.dirname(draftCsvPath), { recursive: true });
+  assertListingQualityReviewPacket(packet);
+  fs.writeFileSync(packetPath, `${JSON.stringify(packet, null, 2)}\n`);
+  fs.writeFileSync(draftCsvPath, draftCsv ?? renderListingQualityReviewDraft(report ?? buildListingQualityReport()));
+  return { draftCsvPath, packetPath };
 }
 
 export function writeListingQualityReviewCsv(csvText, outPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {

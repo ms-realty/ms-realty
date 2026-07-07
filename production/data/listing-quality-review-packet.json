@@ -1,0 +1,41 @@
+{
+  "kind": "listing_quality_review_packet",
+  "generated_at": "2026-07-06T00:00:00Z",
+  "ready": false,
+  "status": "draft_not_launch_evidence",
+  "paths": {
+    "workbook_csv": "/Users/ivan/Code/MS-Realty/production/data/listing-quality-workbook.csv",
+    "draft_review_csv": "/Users/ivan/Code/MS-Realty/production/data/listing-quality-review-draft.csv",
+    "launch_review_csv": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv"
+  },
+  "admin": {
+    "editor_path_pattern": "/admin/listings/edit?listingId=:listing_id",
+    "import_endpoint": "POST /api/admin/listing-quality/import",
+    "workbook_endpoint": "GET /api/admin/listing-quality-workbook"
+  },
+  "summary": {
+    "expected_review_rows": 7,
+    "facts_review_rows_required": 0,
+    "media_review_rows_required": 7,
+    "reviewer_fields_blank": 7,
+    "issue_counts": {
+      "missing_price": 0,
+      "missing_bedrooms": 0,
+      "missing_location": 0,
+      "missing_description": 0,
+      "media_review_pending": 0,
+      "missing_alt_text": 0,
+      "thin_public_gallery": 7,
+      "tour_review_pending": 0
+    },
+    "by_review_status": {
+      "needs_media_review": 7
+    }
+  },
+  "instructions": [
+    "Use the draft CSV as a reviewer worksheet only; it is not launch evidence.",
+    "Fill facts_reviewer when fact fields are required and media_reviewer when media or gallery review is required.",
+    "Copy the completed rows to migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH.",
+    "Run npm run listing:preflight before launch:preflight."
+  ]
+}

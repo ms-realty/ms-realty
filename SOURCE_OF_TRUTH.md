@@ -458,7 +458,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + broker verification report + generated Payload-compatible collection configs + Payload runtime bootstrap built**; real Payload runtime env/database pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, Typesense/Meilisearch sync/query worker paths, and redacted live provisioning report built; live engine URLs/API keys pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, OpenAI-compatible draft worker path, and Hermes provisioning contract built; self-hosted Hermes/vLLM endpoint pending |
-| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; redirect reviews are locally complete; **blocked on external SEO exports, reviewed listing-quality CSV, live service provisioning/reports, and Payload runtime env/database configuration** |
+| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; redirect reviews are locally complete; listing-quality review packet is generated; **blocked on external SEO exports, reviewed listing-quality CSV, live service provisioning/reports, and Payload runtime env/database configuration** |
 
 **What is proven in code right now** (see `production/README.md` and git history):
 crawl pack for both domains (457 URLs), SQLite migration DB + review dashboards, Typesense/Meilisearch
@@ -473,6 +473,7 @@ listing-status workflow that keeps sold pages live while removing them from acti
 CMS slug-history workflow that creates path-only automatic 301s to canonical listing routes,
 Payload-compatible collection config export and runtime bootstrap handoff for the implemented CMS manifest,
 redacted live-service provisioning report for Typesense/Meilisearch/Hermes readiness,
+complete draft listing-quality review packet for the remaining human gallery checks,
 listing-publication workflow that proves sitemap paths and internal-link suggestions,
 mobile/elderly QA report, and a live Node server (`npm start`) exposing the same contracts.
 

@@ -15,7 +15,7 @@ const tourApprovalPath = process.env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || unde
 try {
   if (!fs.existsSync(inputPath)) {
     throw new Error(
-      `Missing listing quality review CSV: ${inputPath}\nNext: review production/data/listing-quality-workbook.csv, write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH, then run \`npm run listing:preflight\`.`,
+      `Missing listing quality review CSV: ${inputPath}\nNext: run \`npm run listing:review-pack\`, complete the draft review CSV with reviewer signoff, write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH, then run \`npm run listing:preflight\`.`,
     );
   }
   const report = buildListingQualityReport({

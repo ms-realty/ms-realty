@@ -142,17 +142,20 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 ## Content Quality Warnings
 
 - Workbook: \`production/data/listing-quality-workbook.csv\`
+- Review packet: \`production/data/listing-quality-review-packet.json\`
+- Draft review CSV: \`production/data/listing-quality-review-draft.csv\`
 - Scope: 165 source listing rows; warning counts below include structured-data entries and listing-quality source rows.
 - Review input path: \`migration/reviews/listing-quality.csv\`
 - Example input: \`migration/reviews/listing-quality.csv.example\`
-- Example rows intentionally leave reviewer fields blank; fill them only after human gallery/facts review.
-- Production/CLI path override: \`MS_REALTY_LISTING_QUALITY_REVIEW_PATH\`
+- Draft and example rows intentionally leave reviewer fields blank; fill them only after human gallery/facts review.
+- Production/CLI path overrides: \`MS_REALTY_LISTING_QUALITY_REVIEW_DRAFT_PATH\`, \`MS_REALTY_LISTING_QUALITY_REVIEW_PACKET_PATH\`, \`MS_REALTY_LISTING_QUALITY_REVIEW_PATH\`
 - Status report: \`npm run listing:preflight:report\` writes current missing/invalid listing-review state without clearing the launch gate.
 - Build path overrides: \`MS_REALTY_LISTING_EDIT_LEDGER_PATH\`, \`MS_REALTY_TOUR_APPROVAL_LEDGER_PATH\`, \`MS_REALTY_LISTING_QUALITY_REPORT_PATH\`, \`MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH\`
 - Preflight report override: \`MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH\`
 - Review columns: \`review_status\`, \`required_editor_fields\`, \`price_eur\`, \`bedrooms\`, \`location\`, \`description\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`
 - Admin import endpoint: \`POST /api/admin/listing-quality/import\`
 - Admin editor endpoint: \`POST /api/admin/listings/edit\`
+- Review pack command: \`npm run listing:review-pack\`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
 ${launchReadiness.warnings.map((warning) => `- ${warning.id}: ${warning.count}`).join("\n")}
 
@@ -185,6 +188,7 @@ npm run live:provisioning:preflight
 npm run live:preflight
 npm run payload:bootstrap
 npm run payload:preflight
+npm run listing:review-pack
 npm run listing:preflight
 npm run launch:readiness
 npm run launch:inputs
