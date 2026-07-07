@@ -3,7 +3,11 @@ import path from "node:path";
 import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
-import { HERMES_AGENT_OFFICIAL_URL, hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
+import {
+  HERMES_AGENT_OFFICIAL_URL,
+  assertHermesChatCompletionsEndpoint,
+  hermesProviderConfigFromEnv,
+} from "./hermes-provider-provisioning.mjs";
 import { appendTranslationTask, auditPathFor, DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -216,6 +220,7 @@ export function assertHermesDraftWorkerReport(report) {
   if (report.provider?.tool_call_parser !== "hermes") throw new Error("Hermes worker report must use Hermes tool parser");
   if (!String(report.provider?.mode || "").trim()) throw new Error("Hermes worker report must include provider mode");
   if (!String(report.provider?.model || "").trim()) throw new Error("Hermes worker report must include provider model");
+  if (report.provider?.endpoint) assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker endpoint");
   if (report.summary.attempted < 1) throw new Error("Hermes worker must attempt at least one draft");
   if (report.summary.persisted < 1) throw new Error("Hermes worker must persist at least one draft");
   if (report.summary.attempted !== report.summary.persisted + report.summary.rejected) {

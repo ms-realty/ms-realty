@@ -211,6 +211,14 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     () => assertHermesDraftWorkerReport({ ...report, provider: { ...report.provider, tool_call_parser: "generic" } }),
     /Hermes tool parser/,
   );
+  assert.throws(
+    () =>
+      assertHermesDraftWorkerReport({
+        ...report,
+        provider: { ...report.provider, endpoint: "https://hermes.ms-realty.bg/v1/models" },
+      }),
+    /\/v1\/chat\/completions/,
+  );
 });
 
 test("Hermes draft worker rejects outputs that omit protected facts", () => {

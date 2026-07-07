@@ -667,6 +667,19 @@ test("live service report preflight fails missing reports and passes valid repor
     reservedResult.reports.find((report) => report.source === "hermes_draft_worker").error,
     /localhost or placeholder/,
   );
+
+  const wrongHermesPathDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-wrong-hermes-path-`);
+  const wrongHermesPathReports = writeLiveReportFixtures(wrongHermesPathDir);
+  const wrongHermesPath = JSON.parse(fs.readFileSync(wrongHermesPathReports.hermesReportPath, "utf8"));
+  wrongHermesPath.provider.endpoint = "https://hermes.ms-realty.bg/v1/models";
+  fs.writeFileSync(wrongHermesPathReports.hermesReportPath, `${JSON.stringify(wrongHermesPath)}\n`);
+  const wrongHermesPathResult = validateLiveServiceReports(wrongHermesPathReports);
+  assert.equal(wrongHermesPathResult.ready, false);
+  assert.equal(wrongHermesPathResult.reports.find((report) => report.source === "hermes_draft_worker").status, "invalid_report");
+  assert.match(
+    wrongHermesPathResult.reports.find((report) => report.source === "hermes_draft_worker").error,
+    /\/v1\/chat\/completions/,
+  );
 });
 
 test("live service evidence command refuses localhost launch evidence", async () => {

@@ -39,6 +39,15 @@ function redactedEndpoint(endpoint) {
   return parsed.href;
 }
 
+export function assertHermesChatCompletionsEndpoint(endpoint, label = "Hermes endpoint") {
+  const parsed = new URL(endpoint);
+  const pathname = parsed.pathname.replace(/\/+$/, "");
+  if (!pathname.endsWith(HERMES_CHAT_COMPLETIONS_PATH)) {
+    throw new Error(`${label} must use ${HERMES_CHAT_COMPLETIONS_PATH}`);
+  }
+  return true;
+}
+
 function boolFromEnv(value) {
   return value === "1" || value === "true" || value === "yes";
 }
@@ -191,7 +200,10 @@ export function assertHermesProviderProvisioningReport(report) {
   }
   if (!VALID_PROVIDER_MODES.has(report.provider?.mode)) throw new Error("Hermes provisioning provider mode is invalid");
   if (!String(report.provider?.model || "").trim()) throw new Error("Hermes provisioning report must include provider model");
-  if (report.provider?.endpoint) redactedEndpoint(report.provider.endpoint);
+  if (report.provider?.endpoint) {
+    redactedEndpoint(report.provider.endpoint);
+    assertHermesChatCompletionsEndpoint(report.provider.endpoint);
+  }
   if (report.ready && (!report.provider?.endpoint || report.provider.openai_compatible !== true)) {
     throw new Error("Hermes provisioning ready report must include OpenAI-compatible endpoint evidence");
   }

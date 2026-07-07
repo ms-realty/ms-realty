@@ -13,6 +13,7 @@ import {
   DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
   writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
+import { assertHermesChatCompletionsEndpoint } from "./hermes-provider-provisioning.mjs";
 import { DEFAULT_LISTING_QUALITY_REVIEW_INPUT, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import {
   assertPayloadRuntimeReport,
@@ -92,6 +93,7 @@ function assertLaunchLiveServiceEvidence(source, report) {
   }
   if (source === "hermes_draft_worker") {
     assertLaunchServiceUrl(report.provider?.endpoint, "Hermes worker report");
+    assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker report endpoint");
   }
 }
 

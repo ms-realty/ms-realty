@@ -91,6 +91,14 @@ test("Hermes provisioning report rejects incomplete ready endpoint evidence", ()
     () => assertHermesProviderProvisioningReport({ ...report, provider: { ...report.provider, model: " " } }),
     /provider model/,
   );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        provider: { ...report.provider, endpoint: "https://hermes.ms-realty.bg/v1/models" },
+      }),
+    /\/v1\/chat\/completions/,
+  );
 });
 
 test("Hermes provisioning report rejects publish-capable safety flags", () => {
