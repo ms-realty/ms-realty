@@ -181,6 +181,14 @@ test("Payload runtime report requires the full launch check set", async () => {
     /duplicate check payload_secret/,
   );
   assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, status: "skipped" } : check)),
+      }),
+    /known statuses/,
+  );
+  assert.throws(
     () => assertPayloadRuntimeReport({ ...report, summary: { ...report.summary, missing_env: [] } }),
     /missing env summary/,
   );
