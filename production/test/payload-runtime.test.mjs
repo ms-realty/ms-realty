@@ -87,3 +87,19 @@ test("Payload runtime report rejects missing generated timestamp", async () => {
     /valid generated_at/,
   );
 });
+
+test("Payload runtime report requires the full launch check set", async () => {
+  const report = await buildPayloadRuntimeReport({
+    env: {},
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, checks: report.checks.filter((check) => check.id !== "database_tcp") }),
+    /missing required check database_tcp/,
+  );
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, checks: [...report.checks, report.checks[0]] }),
+    /duplicate check payload_secret/,
+  );
+});

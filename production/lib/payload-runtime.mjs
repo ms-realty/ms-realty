@@ -12,6 +12,13 @@ const REQUIRED_ROUTE_FILES = [
   "app/(payload)/graphql/route.js",
   "app/(payload)/graphql-playground/route.js",
 ];
+const REQUIRED_CHECK_IDS = [
+  "payload_secret",
+  "database_url",
+  ...REQUIRED_ROUTE_FILES.map((file) => `route:${file}`),
+  "payload_config_import",
+  "database_tcp",
+];
 
 function check(id, status, evidence = {}) {
   return { id, status, ...evidence };
@@ -134,12 +141,22 @@ export function assertPayloadRuntimeReport(report) {
     throw new Error("Payload runtime report must include valid generated_at");
   }
   if (!Array.isArray(report.checks) || report.checks.length < 1) throw new Error("Payload runtime report must include checks");
+  const checkIds = new Set();
+  for (const item of report.checks) {
+    if (!item?.id) throw new Error("Payload runtime report checks must include ids");
+    if (checkIds.has(item.id)) throw new Error(`Payload runtime report has duplicate check ${item.id}`);
+    checkIds.add(item.id);
+  }
+  for (const id of REQUIRED_CHECK_IDS) {
+    if (!checkIds.has(id)) throw new Error(`Payload runtime report missing required check ${id}`);
+  }
   const ready = report.checks.every((item) => item.status === "pass");
   if (report.ready !== ready) throw new Error("Payload runtime ready flag must match checks");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Payload runtime status must match ready flag");
   if (!report.summary || !Array.isArray(report.summary.missing_env)) {
     throw new Error("Payload runtime report must summarize missing env");
   }
+  if (report.summary.checks !== report.checks.length) throw new Error("Payload runtime summary check count must match checks");
   return true;
 }
 
