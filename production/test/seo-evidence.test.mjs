@@ -322,6 +322,16 @@ test("SEO evidence assertion rejects hand-cleared missing source state", () => {
     events: [{ type: "page_view", path: "https://makler-realty.com/" }],
   });
 
+  assert.throws(() => assertSeoEvidence({ ...evidence, generated_at: "" }), /valid generated_at/);
+  assert.throws(
+    () => assertSeoEvidence({ ...evidence, summary: { ...evidence.summary, url_types: { listing: 1 } } }),
+    /URL type counts/,
+  );
+  assert.throws(
+    () => assertSeoEvidence({ ...evidence, summary: { ...evidence.summary, urls_with_any_evidence: 999 } }),
+    /URL evidence count/,
+  );
+
   evidence.summary.missing_required_sources = [];
 
   assert.throws(() => assertSeoEvidence(evidence), /missing required sources must match source evidence/);

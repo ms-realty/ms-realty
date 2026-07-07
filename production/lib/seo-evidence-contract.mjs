@@ -19,8 +19,24 @@ export function missingRequiredSources(sourceSummaries) {
 }
 
 export function assertSeoEvidence(evidence) {
+  if (!evidence.generated_at || Number.isNaN(Date.parse(evidence.generated_at))) {
+    throw new Error("SEO evidence must include valid generated_at");
+  }
   if (evidence.summary.crawl_urls !== evidence.url_evidence.length) throw new Error("SEO evidence must cover every crawled URL");
   if (evidence.summary.crawl_urls !== 457) throw new Error("SEO evidence must cover the 457 URL migration inventory");
+  const urlTypeTotal = Object.values(evidence.summary.url_types || {}).reduce((sum, count) => sum + count, 0);
+  if (urlTypeTotal !== evidence.summary.crawl_urls) throw new Error("SEO evidence URL type counts must match crawl URLs");
+  const urlsWithAnyEvidence = evidence.url_evidence.filter(
+    (row) =>
+      row.search_console?.impressions ||
+      row.yandex_webmaster?.rows ||
+      row.backlinks?.backlinks ||
+      row.analytics?.page_views ||
+      row.analytics?.exported_page_views,
+  ).length;
+  if (evidence.summary.urls_with_any_evidence !== urlsWithAnyEvidence) {
+    throw new Error("SEO evidence URL evidence count must match URL rows");
+  }
   if (!evidence.summary.sources.privacy_events) throw new Error("SEO evidence must include privacy analytics status");
   if (!Array.isArray(evidence.summary.missing_required_sources)) throw new Error("SEO evidence must summarize missing required sources");
   for (const source of REQUIRED_EXPORTS) {
