@@ -24,6 +24,7 @@ test("live service provisioning report fails closed until service env is configu
   assert.equal(report.ready, false);
   assert.equal(report.status, "blocked");
   assert.deepEqual(report.summary.services, ["typesense", "meilisearch", "hermes"]);
+  assert.deepEqual(report.summary.placeholder_env, []);
   assert.ok(report.summary.missing_env.includes("TYPESENSE_URL"));
   assert.ok(report.summary.missing_env.includes("TYPESENSE_API_KEY"));
   assert.ok(report.summary.missing_env.includes("MEILI_URL"));
@@ -54,6 +55,7 @@ test("live service provisioning report verifies live endpoints without persistin
   assert.equal(report.ready, true);
   assert.equal(report.status, "ready");
   assert.equal(report.summary.missing_env.length, 0);
+  assert.equal(report.summary.placeholder_env.length, 0);
   assert.equal(report.checks.find((check) => check.id === "typesense_health").redacted_url, "https://typesense.internal");
   assert.equal(report.checks.find((check) => check.id === "meilisearch_health").redacted_url, "https://meili.internal");
   assert.equal(calls.length, 2);
@@ -62,6 +64,28 @@ test("live service provisioning report verifies live endpoints without persistin
   assert.equal(serialized.includes("meili-test-secret"), false);
   assert.equal(serialized.includes("user:pass"), false);
   assert.equal(serialized.includes("token=secret"), false);
+});
+
+test("live service provisioning rejects copied placeholder env values before health checks", async () => {
+  const report = await buildLiveServiceProvisioningReport({
+    env: {
+      TYPESENSE_URL: "https://example.com",
+      TYPESENSE_API_KEY: "replace-with-typesense-key",
+      MEILI_URL: "https://meili.internal",
+      MEILI_API_KEY: "meili-key",
+      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions",
+    },
+    fetchImpl: async (url) => {
+      assert.equal(String(url).startsWith("https://meili.internal"), true);
+      return { ok: true, status: 200 };
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertLiveServiceProvisioningReport(report), true);
+  assert.equal(report.ready, false);
+  assert.deepEqual(report.summary.placeholder_env, ["TYPESENSE_URL", "TYPESENSE_API_KEY"]);
+  assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "missing_env");
 });
 
 test("live service provisioning report requires complete evidence shape", async () => {
@@ -85,6 +109,10 @@ test("live service provisioning report requires complete evidence shape", async 
   assert.throws(
     () => assertLiveServiceProvisioningReport({ ...report, summary: { ...report.summary, missing_env: [] } }),
     /missing env summary/,
+  );
+  assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, summary: { ...report.summary, placeholder_env: ["TYPESENSE_URL"] } }),
+    /placeholder env summary/,
   );
 });
 

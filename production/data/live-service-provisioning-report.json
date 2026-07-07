@@ -11,6 +11,7 @@
       "MEILI_API_KEY",
       "HERMES_CHAT_COMPLETIONS_URL"
     ],
+    "placeholder_env": [],
     "services": [
       "typesense",
       "meilisearch",

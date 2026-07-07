@@ -31,7 +31,10 @@ function redactUrl(value) {
 }
 
 function envCheck(id, env, key) {
-  return { id, env: key, status: env[key] ? "pass" : "missing_env" };
+  const value = String(env[key] || "").trim();
+  if (!value) return { id, env: key, status: "missing_env" };
+  if (/replace-with|change-me|example/i.test(value)) return { id, env: key, status: "placeholder" };
+  return { id, env: key, status: "pass" };
 }
 
 async function healthCheck({ fetchImpl, headers = {}, id, path: route, url }) {
@@ -58,7 +61,7 @@ export async function buildLiveServiceProvisioningReport({
     envCheck("meili_api_key", env, "MEILI_API_KEY"),
   ];
 
-  if (env.TYPESENSE_URL && env.TYPESENSE_API_KEY) {
+  if (checks.find((check) => check.id === "typesense_url").status === "pass" && checks.find((check) => check.id === "typesense_api_key").status === "pass") {
     checks.push(
       await healthCheck({
         fetchImpl,
@@ -72,7 +75,7 @@ export async function buildLiveServiceProvisioningReport({
     checks.push({ id: "typesense_health", status: "missing_env" });
   }
 
-  if (env.MEILI_URL && env.MEILI_API_KEY) {
+  if (checks.find((check) => check.id === "meili_url").status === "pass" && checks.find((check) => check.id === "meili_api_key").status === "pass") {
     checks.push(
       await healthCheck({
         fetchImpl,
@@ -98,6 +101,7 @@ export async function buildLiveServiceProvisioningReport({
     ...checks.filter((check) => check.status === "missing_env").map((check) => check.env).filter(Boolean),
     ...hermes.missing,
   ];
+  const placeholderEnv = checks.filter((check) => check.status === "placeholder").map((check) => check.env).filter(Boolean);
   const ready = checks.every((check) => check.status === "pass");
   return {
     generated_at: generatedAt,
@@ -106,6 +110,7 @@ export async function buildLiveServiceProvisioningReport({
     summary: {
       checks: checks.length,
       missing_env: [...new Set(missingEnv)],
+      placeholder_env: [...new Set(placeholderEnv)],
       services: ["typesense", "meilisearch", "hermes"],
     },
     checks,
@@ -146,8 +151,8 @@ export function assertLiveServiceProvisioningReport(report) {
   if (report.status !== (ready ? "ready" : "blocked")) {
     throw new Error("Live service provisioning status must match ready flag");
   }
-  if (!report.summary || !Array.isArray(report.summary.missing_env)) {
-    throw new Error("Live service provisioning report must summarize missing env");
+  if (!report.summary || !Array.isArray(report.summary.missing_env) || !Array.isArray(report.summary.placeholder_env)) {
+    throw new Error("Live service provisioning report must summarize missing and placeholder env");
   }
   if (report.summary.checks !== report.checks.length) throw new Error("Live service provisioning summary check count must match checks");
   const missingEnv = [
@@ -156,6 +161,10 @@ export function assertLiveServiceProvisioningReport(report) {
   ];
   if (JSON.stringify(report.summary.missing_env) !== JSON.stringify([...new Set(missingEnv)])) {
     throw new Error("Live service provisioning missing env summary must match checks");
+  }
+  const placeholderEnv = report.checks.filter((check) => check.status === "placeholder").map((check) => check.env).filter(Boolean);
+  if (JSON.stringify(report.summary.placeholder_env) !== JSON.stringify([...new Set(placeholderEnv)])) {
+    throw new Error("Live service provisioning placeholder env summary must match checks");
   }
   for (const id of ["typesense_health", "meilisearch_health"]) {
     const check = report.checks.find((item) => item.id === id);
