@@ -296,6 +296,19 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
 });
 
+test("launch readiness validator requires every production gate", () => {
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+
+  assert.throws(
+    () => assertLaunchReadinessReport({ ...report, gates: report.gates.filter((gate) => gate.id !== "payload_runtime") }),
+    /missing required gate payload_runtime/,
+  );
+  assert.throws(
+    () => assertLaunchReadinessReport({ ...report, gates: report.gates.filter((gate) => gate.id !== "live_services") }),
+    /missing required gate live_services/,
+  );
+});
+
 test("launch readiness accepts reviewed location page growth", () => {
   const sitemap = readJson(["production", "data", "localized-sitemap.json"]);
   sitemap.summary = {

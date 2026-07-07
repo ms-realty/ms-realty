@@ -34,6 +34,19 @@ const LIVE_SERVICE_REPORT_WRITERS = {
   typesense_meilisearch_query: { write: writeSearchEngineQueryReport, pathKey: "queryReportPath" },
   hermes_draft_worker: { write: writeHermesDraftWorkerReport, pathKey: "hermesReportPath" },
 };
+const REQUIRED_LAUNCH_GATE_IDS = [
+  "crawl_inventory",
+  "redirect_reviews",
+  "localized_sitemap",
+  "structured_data",
+  "external_seo_exports",
+  "listing_quality_review",
+  "runtime_smoke",
+  "live_services",
+  "monitoring_rollback",
+  "production_app_layer",
+  "payload_runtime",
+];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -439,6 +452,10 @@ export function buildLaunchReadinessReport({
 
 export function assertLaunchReadinessReport(report) {
   if (!Array.isArray(report.gates) || report.gates.length < 7) throw new Error("Launch readiness report must include core gates");
+  const gateIds = new Set(report.gates.map((item) => item.id));
+  for (const id of REQUIRED_LAUNCH_GATE_IDS) {
+    if (!gateIds.has(id)) throw new Error(`Launch readiness missing required gate ${id}`);
+  }
   const gateBlockers = blockersFrom(report.gates);
   if (JSON.stringify(report.blockers || []) !== JSON.stringify(gateBlockers)) {
     throw new Error("Launch readiness blockers must match blocked gates");
