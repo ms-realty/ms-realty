@@ -21,6 +21,12 @@ export const HERMES_AGENT_REQUIRED_CAPABILITIES = Object.freeze([
   "isolated_subagents",
 ]);
 const PROJECT_CONTEXT_FILE = "AGENTS.md";
+const REQUIRED_PROJECT_CONTEXT_MARKERS = Object.freeze([
+  "Do not call the system production-ready while any launch gate is blocked.",
+  "Hermes may draft translations",
+  "Hermes must not publish pages",
+  "Real launch evidence must come from live services and operator inputs",
+]);
 
 const VALID_PROVIDER_MODES = new Set(["self_hosted", "openrouter"]);
 
@@ -103,10 +109,16 @@ function requiredEnvContract(config) {
 
 function projectContextState() {
   const filePath = fromRoot(PROJECT_CONTEXT_FILE);
+  const present = fs.existsSync(filePath);
+  const text = present ? fs.readFileSync(filePath, "utf8") : "";
+  const missingMarkers = REQUIRED_PROJECT_CONTEXT_MARKERS.filter((marker) => !text.includes(marker));
   return {
     file: PROJECT_CONTEXT_FILE,
     path: filePath,
-    present: fs.existsSync(filePath),
+    present,
+    complete: present && missingMarkers.length === 0,
+    required_markers: REQUIRED_PROJECT_CONTEXT_MARKERS,
+    missing_markers: missingMarkers,
     loaded_by_hermes_agent: true,
     required_for_launch: true,
   };
@@ -208,6 +220,9 @@ export function assertHermesProviderProvisioningReport(report) {
   }
   if (report.agent_runtime?.project_context?.file !== PROJECT_CONTEXT_FILE || report.agent_runtime.project_context.present !== true) {
     throw new Error("Hermes provisioning requires project AGENTS.md context");
+  }
+  if (report.agent_runtime.project_context.complete !== true || report.agent_runtime.project_context.missing_markers?.length) {
+    throw new Error("Hermes provisioning requires complete project AGENTS.md guardrails");
   }
   if (report.agent_runtime?.gateway_security?.allow_all_users !== false) {
     throw new Error("Hermes gateway must not allow all users");

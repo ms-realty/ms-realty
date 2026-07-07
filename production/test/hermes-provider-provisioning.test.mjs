@@ -25,6 +25,9 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
   assert.equal(report.agent_runtime.project_context.file, "AGENTS.md");
   assert.equal(report.agent_runtime.project_context.present, true);
+  assert.equal(report.agent_runtime.project_context.complete, true);
+  assert.deepEqual(report.agent_runtime.project_context.missing_markers, []);
+  assert.ok(report.agent_runtime.project_context.required_markers.includes("Hermes must not publish pages"));
   assert.equal(report.agent_runtime.gateway_security.allow_all_users, false);
   assert.equal(report.provider.mode, "self_hosted");
   assert.equal(report.provider.sensitive_data_allowed, true);
@@ -140,6 +143,21 @@ test("Hermes provisioning report rejects generic agent runtime evidence", () => 
         agent_runtime: { ...report.agent_runtime, project_context: { ...report.agent_runtime.project_context, present: false } },
       }),
     /AGENTS\.md/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: {
+          ...report.agent_runtime,
+          project_context: {
+            ...report.agent_runtime.project_context,
+            complete: false,
+            missing_markers: ["Hermes must not publish pages"],
+          },
+        },
+      }),
+    /AGENTS\.md guardrails/,
   );
   assert.throws(
     () =>

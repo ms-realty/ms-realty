@@ -24,6 +24,14 @@
       "file": "AGENTS.md",
       "path": "/Users/ivan/Code/MS-Realty/AGENTS.md",
       "present": true,
+      "complete": true,
+      "required_markers": [
+        "Do not call the system production-ready while any launch gate is blocked.",
+        "Hermes may draft translations",
+        "Hermes must not publish pages",
+        "Real launch evidence must come from live services and operator inputs"
+      ],
+      "missing_markers": [],
       "loaded_by_hermes_agent": true,
       "required_for_launch": true
     },
