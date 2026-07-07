@@ -201,6 +201,14 @@ test("SEO evidence preflight report records missing and valid export state", () 
   assert.equal(missingReport.ready, false);
   assert.equal(missingReport.status, "blocked");
   assert.deepEqual(missingReport.summary.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
+  assert.throws(
+    () =>
+      assertSeoEvidencePreflightReport({
+        ...missingReport,
+        summary: { ...missingReport.summary, missing_required_sources: ["search_console"] },
+      }),
+    /missing required sources must match source statuses/,
+  );
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-preflight-report-valid-`);
   const outputPath = `${validDir}/seo-evidence-preflight-report.json`;
