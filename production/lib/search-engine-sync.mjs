@@ -24,6 +24,14 @@ function joinUrl(baseUrl, route) {
   return `${String(baseUrl).replace(/\/+$/, "")}${route}`;
 }
 
+function redactedUrl(value) {
+  const parsed = new URL(value);
+  parsed.username = "";
+  parsed.password = "";
+  parsed.hash = "";
+  return parsed.href;
+}
+
 function required(value, name) {
   if (!value) throw new Error(`${name} is required`);
   return value;
@@ -36,7 +44,7 @@ async function checkedFetch(fetchImpl, url, options, acceptedStatuses = [200, 20
   }
   return {
     method: options.method,
-    url,
+    url: redactedUrl(url),
     status: response.status,
     bytes: Buffer.byteLength(options.body || ""),
   };
@@ -212,6 +220,7 @@ export async function queryTypesense({
 
   return {
     engine: "typesense",
+    service_url: redactedUrl(baseUrl),
     query: q,
     filter: filterBy,
     total: Number(payload.found || 0),
@@ -239,6 +248,7 @@ export async function queryMeilisearch({
 
   return {
     engine: "meilisearch",
+    service_url: redactedUrl(baseUrl),
     query: q,
     filter,
     total: Number(payload.estimatedTotalHits ?? payload.totalHits ?? 0),

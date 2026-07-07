@@ -45,6 +45,41 @@ function assertLiveServiceReportTimestamp(report) {
   }
 }
 
+function assertLaunchServiceUrl(value, label) {
+  if (!value) throw new Error(`${label} must include service URL evidence`);
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`${label} must include valid service URL evidence`);
+  }
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error(`${label} must use http or https`);
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(host) || host.endsWith(".local") || host === "example.com" || host.endsWith(".example.com")) {
+    throw new Error(`${label} must not use localhost or placeholder service URLs`);
+  }
+}
+
+function assertLaunchLiveServiceEvidence(source, report) {
+  if (source === "typesense_meilisearch_sync") {
+    for (const engine of report.engines || []) {
+      const urls = (engine.operations || []).map((operation) => operation.url);
+      if (!urls.length) throw new Error(`${engine.engine} sync report must include operation URL evidence`);
+      for (const url of urls) assertLaunchServiceUrl(url, `${engine.engine} sync report`);
+    }
+    return;
+  }
+  if (source === "typesense_meilisearch_query") {
+    for (const engine of report.engines || []) {
+      assertLaunchServiceUrl(engine.service_url, `${engine.engine} query report`);
+    }
+    return;
+  }
+  if (source === "hermes_draft_worker") {
+    assertLaunchServiceUrl(report.provider?.endpoint, "Hermes worker report");
+  }
+}
+
 function packageState(filePath = fromRoot("package.json")) {
   const pkg = readJson(filePath);
   const hasPayload = Boolean(pkg.dependencies?.payload || pkg.devDependencies?.payload);
@@ -133,6 +168,7 @@ function reportStatus(source, filePath, assertReport) {
       return { source, status: "example_report", path: filePath, summary: report.summary };
     }
     assertLiveServiceReportTimestamp(report);
+    assertLaunchLiveServiceEvidence(source, report);
     return { source, status: "pass", path: filePath, summary: report.summary };
   } catch (error) {
     return { source, status: "invalid_report", path: filePath, error: error.message };
@@ -241,6 +277,7 @@ export function writeLiveServiceReport(source, report, options = {}) {
   if (!writer) throw new Error(`Unknown live service report source: ${source}`);
   if (report.example === true) throw new Error("Example live service reports cannot be imported as launch evidence");
   assertLiveServiceReportTimestamp(report);
+  assertLaunchLiveServiceEvidence(source, report);
   const outPath = writer.write(report, options[writer.pathKey]);
   return { source, outPath, summary: report.summary };
 }

@@ -8,6 +8,13 @@
     "persisted": 1,
     "rejected": 0
   },
+  "provider": {
+    "mode": "self_hosted",
+    "model": "NousResearch/Hermes-4-14B",
+    "endpoint": "https://hermes.example.com/v1/chat/completions",
+    "tool_call_parser": "hermes",
+    "sensitive_data_allowed": true
+  },
   "persisted": [
     {
       "id": "listing:MS-CRAWL-0001:el",

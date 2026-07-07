@@ -4,6 +4,13 @@
   "audit_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit.jsonl",
   "audit_log_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-audit-log.jsonl",
   "audit_log_rows": 2,
+  "provider": {
+    "mode": "self_hosted",
+    "model": "smoke-hermes-fixture",
+    "endpoint": null,
+    "tool_call_parser": "hermes",
+    "sensitive_data_allowed": true
+  },
   "summary": {
     "attempted": 2,
     "persisted": 2,

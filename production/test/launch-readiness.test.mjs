@@ -120,8 +120,22 @@ function writeLiveReportFixtures(dir) {
       generated_at: "2026-07-06T00:00:00Z",
       summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 4 },
       engines: [
-        { engine: "typesense", documents: 167, operations: [{ bytes: 1 }, { bytes: 1 }] },
-        { engine: "meilisearch", documents: 167, operations: [{ bytes: 1 }, { bytes: 1 }] },
+        {
+          engine: "typesense",
+          documents: 167,
+          operations: [
+            { method: "POST", url: "https://typesense.ms-realty.bg/collections", status: 201, bytes: 1 },
+            { method: "POST", url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert", status: 200, bytes: 1 },
+          ],
+        },
+        {
+          engine: "meilisearch",
+          documents: 167,
+          operations: [
+            { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
+            { method: "POST", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=id", status: 202, bytes: 1 },
+          ],
+        },
       ],
     })}\n`,
   );
@@ -131,8 +145,8 @@ function writeLiveReportFixtures(dir) {
       generated_at: "2026-07-06T00:00:00Z",
       summary: { engines: 2, total_hits: 2, first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"] },
       engines: [
-        { engine: "typesense", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
-        { engine: "meilisearch", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
+        { engine: "typesense", service_url: "https://typesense.ms-realty.bg", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
+        { engine: "meilisearch", service_url: "https://meili.ms-realty.bg", total: 1, hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }] },
       ],
     })}\n`,
   );
@@ -141,6 +155,13 @@ function writeLiveReportFixtures(dir) {
     `${JSON.stringify({
       generated_at: "2026-07-06T00:00:00Z",
       summary: { attempted: 1, persisted: 1, rejected: 0 },
+      provider: {
+        mode: "self_hosted",
+        model: "NousResearch/Hermes-4-14B",
+        endpoint: "https://hermes.ms-realty.bg/v1/chat/completions",
+        tool_call_parser: "hermes",
+        sensitive_data_allowed: true,
+      },
       persisted: [{ status: "hermes_drafted", public_indexable: false }],
       rejected: [],
     })}\n`,
@@ -537,9 +558,22 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.equal(valid.status, 0, valid.stderr);
   assert.match(valid.stdout, /typesense_meilisearch_sync: pass/);
   assert.match(valid.stdout, /Live service reports valid/);
+
+  const localDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-local-live-reports-`);
+  const localPaths = writeLiveReportFixtures(localDir);
+  const localSync = JSON.parse(fs.readFileSync(localPaths.syncReportPath, "utf8"));
+  localSync.engines[0].operations[0].url = "http://127.0.0.1:8108/collections";
+  fs.writeFileSync(localPaths.syncReportPath, `${JSON.stringify(localSync)}\n`);
+  const localResult = validateLiveServiceReports(localPaths);
+  assert.equal(localResult.ready, false);
+  assert.equal(localResult.reports.find((report) => report.source === "typesense_meilisearch_sync").status, "invalid_report");
+  assert.match(
+    localResult.reports.find((report) => report.source === "typesense_meilisearch_sync").error,
+    /localhost or placeholder/,
+  );
 });
 
-test("live service evidence command captures all required reports", async () => {
+test("live service evidence command refuses localhost launch evidence", async () => {
   await withLiveServiceServer(async (baseUrl) => {
     const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-capture-`);
     const paths = {
@@ -564,10 +598,11 @@ test("live service evidence command captures all required reports", async () => 
       MS_REALTY_AUDIT_LOG_PATH: `${dir}/audit-log.jsonl`,
     });
 
-    assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /Search sync: 167\/167 documents/);
-    assert.match(result.stdout, /Hermes drafts: 1\/1 persisted/);
-    assert.equal(validateLiveServiceReports(paths).ready, true);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /LIVE SERVICE EVIDENCE FAILED: typesense_meilisearch_sync, typesense_meilisearch_query, hermes_draft_worker/);
+    const validation = validateLiveServiceReports(paths);
+    assert.equal(validation.ready, false);
+    assert.equal(validation.reports.every((report) => report.status === "invalid_report"), true);
   });
 });
 
@@ -647,6 +682,15 @@ test("live service report import writes only validated source reports", () => {
   assert.throws(
     () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, generated_at: "" }, { queryReportPath: outPath }),
     /valid generated_at/,
+  );
+  assert.throws(
+    () =>
+      writeLiveServiceReport(
+        "typesense_meilisearch_query",
+        { ...queryReport, engines: [{ ...queryReport.engines[0], service_url: "http://typesense.local" }, queryReport.engines[1]] },
+        { queryReportPath: outPath },
+      ),
+    /localhost or placeholder/,
   );
   assert.throws(
     () =>

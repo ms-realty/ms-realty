@@ -1151,6 +1151,16 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   delete syncReport.example;
   delete queryReport.example;
   delete hermesReport.example;
+  for (const engine of syncReport.engines) {
+    const host = engine.engine === "typesense" ? "typesense.ms-realty.bg" : "meili.ms-realty.bg";
+    for (const operation of engine.operations) {
+      operation.url = operation.url.replace(`${engine.engine === "typesense" ? "typesense" : "meili"}.example.com`, host);
+    }
+  }
+  for (const engine of queryReport.engines) {
+    engine.service_url = engine.engine === "typesense" ? "https://typesense.ms-realty.bg" : "https://meili.ms-realty.bg";
+  }
+  hermesReport.provider.endpoint = "https://hermes.ms-realty.bg/v1/chat/completions";
   const app = createHttpApp({
     routeMap,
     seoEvidenceInputDir,

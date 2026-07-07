@@ -9,6 +9,7 @@
   "engines": [
     {
       "engine": "typesense",
+      "service_url": "https://typesense.example.com",
       "query": "Sandanski",
       "filter": "translation_indexable:=true && locale:=bg",
       "total": 1,
@@ -24,6 +25,7 @@
     },
     {
       "engine": "meilisearch",
+      "service_url": "https://meili.example.com",
       "query": "Sandanski",
       "filter": "translation_indexable = true AND locale = bg",
       "total": 1,

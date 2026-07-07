@@ -317,6 +317,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
 
       const liveReport = { ...liveTemplateBody };
       delete liveReport.example;
+      liveReport.provider = {
+        ...liveReport.provider,
+        endpoint: "https://hermes.ms-realty.bg/v1/chat/completions",
+      };
       const liveImportValid = await liveServiceReportImportRoute.POST(
         new Request("https://example.test/api/admin/live-service-reports/import?source=hermes_draft_worker", {
           method: "POST",

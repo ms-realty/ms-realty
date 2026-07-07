@@ -102,6 +102,7 @@ function providerMetadataFromEnv(env = process.env) {
   return {
     mode: config.mode,
     model: config.model,
+    endpoint: config.endpoint_redacted,
     toolCallParser: "hermes",
     sensitiveDataAllowed: config.mode === "self_hosted",
   };
@@ -178,6 +179,13 @@ export async function runHermesDraftWorker({
     audit_path: resolvedAuditPath,
     audit_log_path: auditLogPath || null,
     audit_log_rows: auditLogRows.length,
+    provider: {
+      mode: providerMetadata.mode,
+      model: providerMetadata.model,
+      endpoint: providerMetadata.endpoint || null,
+      tool_call_parser: providerMetadata.toolCallParser || "hermes",
+      sensitive_data_allowed: providerMetadata.sensitiveDataAllowed === true,
+    },
     summary: {
       attempted: rows.length,
       persisted: persisted.length,

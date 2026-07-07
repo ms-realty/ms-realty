@@ -11,6 +11,7 @@
   "engines": [
     {
       "engine": "typesense",
+      "service_url": "http://typesense.local/",
       "query": "Sandanski",
       "filter": "translation_indexable:=true && locale:=bg",
       "total": 1,
@@ -26,6 +27,7 @@
     },
     {
       "engine": "meilisearch",
+      "service_url": "http://meili.local/",
       "query": "Sandanski",
       "filter": "translation_indexable = true AND locale = bg",
       "total": 1,
