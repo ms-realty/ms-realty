@@ -58,6 +58,13 @@ function searchHit(doc) {
   };
 }
 
+function assertSearchEngines(report, label) {
+  const engines = (report.engines || []).map((engine) => engine.engine).sort();
+  if (engines.join("|") !== "meilisearch|typesense") {
+    throw new Error(`${label} must cover Typesense and Meilisearch exactly once`);
+  }
+}
+
 export async function syncTypesense({
   baseUrl = process.env.TYPESENSE_URL,
   apiKey = process.env.TYPESENSE_API_KEY,
@@ -154,6 +161,7 @@ export async function runSearchEngineSync({
 export function assertSearchEngineSyncReport(report) {
   if (report.summary.engines !== 2) throw new Error("Search sync must cover Typesense and Meilisearch");
   if (report.summary.total_operations !== 4) throw new Error("Search sync must perform four engine operations");
+  assertSearchEngines(report, "Search sync");
   for (const engine of report.engines) {
     if (engine.documents !== 167) throw new Error(`${engine.engine} must sync 167 locale-scoped documents`);
     if (engine.operations.some((operation) => operation.bytes <= 0)) {
@@ -253,6 +261,7 @@ export async function runSearchEngineQuerySmoke({
 
 export function assertSearchEngineQueryReport(report) {
   if (report.summary.engines !== 2) throw new Error("Search query smoke must cover Typesense and Meilisearch");
+  assertSearchEngines(report, "Search query smoke");
   for (const engine of report.engines) {
     if (engine.total < 1 || !engine.hits.length) throw new Error(`${engine.engine} query must return search hits`);
     if (!engine.hits.some((hit) => hit.id === "MS-CRAWL-0001:bg")) {

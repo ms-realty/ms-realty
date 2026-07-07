@@ -95,6 +95,10 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
   assert.equal(calls[3].options.headers.authorization, "Bearer meili-key");
   assert.match(calls[1].body, /MS-CRAWL-0001:bg/);
   assert.match(calls[3].body, /MS-CRAWL-0001:bg/);
+  assert.throws(
+    () => assertSearchEngineSyncReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
+    /exactly once/,
+  );
 });
 
 test("Typesense sync accepts existing collection response before upsert import", async () => {
@@ -185,6 +189,10 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.equal(calls[1].url, "http://meili.local/indexes/ms_realty_listings/search");
   assert.equal(calls[1].options.method, "POST");
   assert.equal(JSON.parse(calls[1].options.body).filter, "translation_indexable = true AND locale = bg");
+  assert.throws(
+    () => assertSearchEngineQueryReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
+    /exactly once/,
+  );
 });
 
 test("generated search query smoke report is valid when present", () => {
