@@ -102,11 +102,11 @@ const readyAppState = {
 const readyPayloadRuntime = {
   status: "pass",
   path: "production/data/payload-runtime-report.json",
-  summary: { missing_env: [], database: { status: "pass" } },
+  summary: { missing_env: [], database: { status: "pass", host: "db.internal", port: 5432 } },
   checks: [
     { id: "payload_secret", status: "pass" },
     { id: "database_url", status: "pass" },
-    { id: "database_tcp", status: "pass" },
+    { id: "database_tcp", status: "pass", host: "db.internal", port: 5432 },
   ],
 };
 
@@ -307,6 +307,43 @@ test("launch readiness validator requires every production gate", () => {
     () => assertLaunchReadinessReport({ ...report, gates: report.gates.filter((gate) => gate.id !== "live_services") }),
     /missing required gate live_services/,
   );
+});
+
+test("launch readiness validator rejects weak runtime pass evidence", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  seoEvidence.summary.missing_required_sources = [];
+  for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
+    seoEvidence.summary.sources[source] = { ...seoEvidence.summary.sources[source], status: "imported" };
+  }
+
+  const weakPayload = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    appState: readyAppState,
+    payloadRuntime: { ...readyPayloadRuntime, summary: { missing_env: [], database: { status: "pass" } } },
+  });
+  const weakLiveServices = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "hermes_draft_worker" ? { ...item, path: "production/data/hermes-draft-worker-report.json.example" } : item,
+    ),
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+
+  assert.throws(() => assertLaunchReadinessReport(weakPayload), /Payload runtime requires database TCP target evidence/i);
+  assert.throws(() => assertLaunchReadinessReport(weakLiveServices), /non-example reports/);
 });
 
 test("launch readiness accepts reviewed location page growth", () => {

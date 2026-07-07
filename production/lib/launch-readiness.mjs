@@ -120,6 +120,43 @@ function blockersFrom(gates) {
   return gates.filter((item) => item.status === "blocked").map((item) => item.id);
 }
 
+function gateById(report, id) {
+  return report.gates.find((item) => item.id === id);
+}
+
+function assertPassRuntimeEvidence(report) {
+  const liveServices = gateById(report, "live_services");
+  if (liveServices?.status === "pass") {
+    const reports = liveServices.evidence?.reports || [];
+    const sources = new Set(reports.map((item) => item.source));
+    for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
+      if (!sources.has(source)) throw new Error(`Launch readiness live services missing ${source} evidence`);
+    }
+    for (const item of reports) {
+      if (item.status !== "pass" || !item.path || item.path.endsWith(".example")) {
+        throw new Error("Launch readiness live services require validated non-example reports");
+      }
+    }
+  }
+
+  const payload = gateById(report, "payload_runtime");
+  if (payload?.status === "pass") {
+    const databaseTcp = payload.evidence?.checks?.find((item) => item.id === "database_tcp");
+    const database = payload.evidence?.summary?.database;
+    if (
+      payload.evidence?.status !== "pass" ||
+      database?.status !== "pass" ||
+      !database.host ||
+      !Number.isInteger(database.port) ||
+      databaseTcp?.status !== "pass" ||
+      !databaseTcp.host ||
+      !databaseTcp.port
+    ) {
+      throw new Error("Launch readiness payload runtime requires database TCP target evidence");
+    }
+  }
+}
+
 function warningsFrom(structuredData, listingQuality) {
   const warnings = {
     ...Object.fromEntries(
@@ -469,6 +506,7 @@ export function assertLaunchReadinessReport(report) {
   if (!report.gates.some((item) => item.id === "live_services")) {
     throw new Error("Launch readiness must include live service provisioning gate");
   }
+  assertPassRuntimeEvidence(report);
   if (!report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }
