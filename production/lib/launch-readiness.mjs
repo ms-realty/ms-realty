@@ -141,6 +141,22 @@ function assertPassCrawlInventoryEvidence(report) {
   }
 }
 
+function assertPassRedirectReviewEvidence(report) {
+  const redirects = gateById(report, "redirect_reviews");
+  if (redirects?.status !== "pass") return;
+  const evidence = redirects.evidence || {};
+  if (
+    !Number.isInteger(evidence.mapped_listings) ||
+    !Number.isInteger(evidence.deployable_redirects) ||
+    evidence.mapped_listings < 1 ||
+    evidence.deployable_redirects < evidence.mapped_listings ||
+    evidence.homepage_targets !== 0 ||
+    evidence.duplicate_old_urls !== 0
+  ) {
+    throw new Error("Launch readiness redirect reviews require complete same-content redirect evidence");
+  }
+}
+
 function assertPassListingQualityEvidence(report) {
   const review = gateById(report, "listing_quality_review");
   if (review?.status !== "pass") return;
@@ -575,6 +591,7 @@ export function assertLaunchReadinessReport(report) {
     throw new Error("Launch readiness must include live service provisioning gate");
   }
   assertPassCrawlInventoryEvidence(report);
+  assertPassRedirectReviewEvidence(report);
   assertPassExternalSeoEvidence(report);
   assertPassListingQualityEvidence(report);
   assertPassRuntimeSmokeEvidence(report);

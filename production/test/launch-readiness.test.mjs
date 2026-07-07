@@ -359,6 +359,16 @@ test("launch readiness validator rejects weak crawl inventory pass evidence", ()
   assert.throws(() => assertLaunchReadinessReport(report), /exact source URL evidence/);
 });
 
+test("launch readiness validator rejects weak redirect review pass evidence", () => {
+  for (const patch of [{ deployable_redirects: 0 }, { homepage_targets: 1 }, { duplicate_old_urls: 1 }]) {
+    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+    const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
+    Object.assign(redirectGate.evidence, patch);
+
+    assert.throws(() => assertLaunchReadinessReport(report), /complete same-content redirect evidence/);
+  }
+});
+
 test("launch readiness validator requires every production gate", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
 
