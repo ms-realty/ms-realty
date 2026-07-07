@@ -33,6 +33,25 @@ function writeCompleteSeoInputFixture(dir) {
   fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com.old_url},https://regionalbroker.bg/a\n${ru.old_url},https://partnerrealty.de/b\n`);
 }
 
+function readySeoEvidenceFixture() {
+  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+  seoEvidence.summary.missing_required_sources = [];
+  for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
+    seoEvidence.summary.sources[source] = {
+      ...seoEvidence.summary.sources[source],
+      status: "imported",
+      row_count: 2,
+      matched_rows: 2,
+      unmatched_rows: 0,
+      duplicate_rows: 0,
+      signal_rows: 2,
+      placeholder_rows: 0,
+      matched_source_domains: ["makler-realty.com", "makler-realty.ru"],
+    };
+  }
+  return seoEvidence;
+}
+
 function writeListingQualityReviewFixture(dir) {
   const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
   const reviewPath = `${dir}/listing-quality.csv`;
@@ -264,21 +283,9 @@ test("launch readiness stays blocked until production launch blockers are cleare
 test("launch readiness validator accepts ready state after required gates are cleared", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
-  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
-  const sources = seoEvidence.summary.sources;
+  const seoEvidence = readySeoEvidenceFixture();
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
-  seoEvidence.summary.missing_required_sources = [];
-  for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
-    sources[source] = {
-      ...sources[source],
-      status: "imported",
-      row_count: 2,
-      matched_rows: 2,
-      unmatched_rows: 0,
-      matched_source_domains: ["makler-realty.com", "makler-realty.ru"],
-    };
-  }
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -299,6 +306,30 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
 });
 
+test("launch readiness rejects hand-cleared external SEO blockers", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  seoEvidence.summary.missing_required_sources = [];
+
+  assert.throws(
+    () =>
+      buildLaunchReadinessReport({
+        generatedAt: "2026-07-05T00:00:00Z",
+        routeMap,
+        deployableRedirects,
+        seoEvidence,
+        listingQualityReview: readyListingQualityReview,
+        liveServices: readyLiveServices,
+        appState: readyAppState,
+        payloadRuntime: readyPayloadRuntime,
+      }),
+    /SEO evidence missing required sources must match source evidence/,
+  );
+});
+
 test("launch readiness validator requires every production gate", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
 
@@ -315,12 +346,8 @@ test("launch readiness validator requires every production gate", () => {
 test("launch readiness validator rejects weak runtime pass evidence", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
-  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+  const seoEvidence = readySeoEvidenceFixture();
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
-  seoEvidence.summary.missing_required_sources = [];
-  for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
-    seoEvidence.summary.sources[source] = { ...seoEvidence.summary.sources[source], status: "imported" };
-  }
 
   const weakPayload = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -382,10 +409,10 @@ test("launch readiness accepts reviewed location page growth", () => {
 test("launch readiness blocks incomplete monitoring configuration", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
-  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+  const seoEvidence = readySeoEvidenceFixture();
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
-  seoEvidence.summary.missing_required_sources = [];
+  seoEvidence.summary.sources.analytics_export.status = "imported";
   seoEvidence.summary.sources.privacy_events.status = "";
 
   const report = buildLaunchReadinessReport({
@@ -406,12 +433,11 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
 test("launch readiness blocks broad or duplicate deployable redirect exports", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
-  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+  const seoEvidence = readySeoEvidenceFixture();
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
   deployableRedirects.summary.homepageTargets = 1;
   deployableRedirects.summary.duplicateOldUrls = 0;
-  seoEvidence.summary.missing_required_sources = [];
 
   const homepageReport = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",

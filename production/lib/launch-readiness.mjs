@@ -19,6 +19,7 @@ import {
   assertPayloadRuntimeReport,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
+import { assertSeoEvidence } from "./seo-evidence.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -357,6 +358,8 @@ export function buildLaunchReadinessReport({
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(),
 } = {}) {
+  assertSeoEvidence(seoEvidence);
+
   const crawlPass =
     migration.summary.total === 457 &&
     migration.summary.byDomain?.["makler-realty.com"] === 278 &&

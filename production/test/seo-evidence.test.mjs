@@ -314,6 +314,19 @@ test("generated SEO evidence file records missing external launch exports", () =
   assert.equal(evidence.summary.sources.privacy_events.status, "imported");
 });
 
+test("SEO evidence assertion rejects hand-cleared missing source state", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hand-cleared-seo-evidence-`);
+  const evidence = buildSeoEvidence({
+    inputDir: dir,
+    generatedAt: "2026-07-05T00:00:00Z",
+    events: [{ type: "page_view", path: "https://makler-realty.com/" }],
+  });
+
+  evidence.summary.missing_required_sources = [];
+
+  assert.throws(() => assertSeoEvidence(evidence), /missing required sources must match source evidence/);
+});
+
 test("empty required SEO export files remain launch blockers", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-empty-seo-evidence-`);
   for (const file of ["search-console.csv", "yandex-webmaster.csv", "backlinks.csv"]) {

@@ -261,24 +261,29 @@ function joinPrivacyEvents(events, byKey, byListingReference) {
   return { row_count: events.length, matched_rows: matched, unmatched_rows: events.length - matched };
 }
 
-function summarize(records, sourceSummaries, urlEvidence) {
-  const missing = REQUIRED_EXPORTS.filter((source) => {
-    const summary = sourceSummaries[source];
-    return (
-      summary?.status !== "imported" ||
-      summary.matched_rows < 1 ||
-      summary.signal_rows < 1 ||
-      summary.placeholder_rows > 0 ||
-      REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
-    );
-  });
+function missingRequiredExport(summary) {
+  return (
+    summary?.status !== "imported" ||
+    summary.matched_rows < 1 ||
+    summary.signal_rows < 1 ||
+    summary.placeholder_rows > 0 ||
+    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
+  );
+}
+
+function missingRequiredSources(sourceSummaries) {
+  const missing = REQUIRED_EXPORTS.filter((source) => missingRequiredExport(sourceSummaries[source]));
   const analyticsReady =
     sourceSummaries.privacy_events?.status === "imported" || sourceSummaries.analytics_export?.status === "imported";
+  return analyticsReady ? missing : [...missing, "privacy_or_ga4_analytics"];
+}
+
+function summarize(records, sourceSummaries, urlEvidence) {
   return {
     crawl_urls: records.length,
     url_types: records.reduce((counts, row) => ({ ...counts, [row.url_type]: (counts[row.url_type] || 0) + 1 }), {}),
     sources: sourceSummaries,
-    missing_required_sources: analyticsReady ? missing : [...missing, "privacy_or_ga4_analytics"],
+    missing_required_sources: missingRequiredSources(sourceSummaries),
     urls_with_any_evidence: urlEvidence.filter(
       (row) =>
         row.search_console.impressions ||
@@ -340,8 +345,13 @@ export function assertSeoEvidence(evidence) {
   if (evidence.summary.crawl_urls !== evidence.url_evidence.length) throw new Error("SEO evidence must cover every crawled URL");
   if (evidence.summary.crawl_urls !== 457) throw new Error("SEO evidence must cover the 457 URL migration inventory");
   if (!evidence.summary.sources.privacy_events) throw new Error("SEO evidence must include privacy analytics status");
+  if (!Array.isArray(evidence.summary.missing_required_sources)) throw new Error("SEO evidence must summarize missing required sources");
   for (const source of REQUIRED_EXPORTS) {
     if (!evidence.summary.sources[source]) throw new Error(`SEO evidence missing ${source} source status`);
+  }
+  const expectedMissing = missingRequiredSources(evidence.summary.sources);
+  if (JSON.stringify(evidence.summary.missing_required_sources) !== JSON.stringify(expectedMissing)) {
+    throw new Error("SEO evidence missing required sources must match source evidence");
   }
   return true;
 }
@@ -393,14 +403,7 @@ export function assertSeoEvidencePreflightReport(report) {
   for (const source of REQUIRED_EXPORTS) {
     const sourceStatus = report.summary.sources?.[source];
     if (!sourceStatus) throw new Error(`SEO preflight report missing ${source} source status`);
-    if (
-      ready &&
-      (sourceStatus.status !== "imported" ||
-        sourceStatus.matched_rows < 1 ||
-        sourceStatus.signal_rows < 1 ||
-        sourceStatus.placeholder_rows > 0 ||
-        REQUIRED_SOURCE_DOMAINS.some((domain) => !sourceStatus.matched_source_domains?.includes(domain)))
-    ) {
+    if (ready && missingRequiredExport(sourceStatus)) {
       throw new Error(`SEO preflight ready report requires complete ${source} evidence`);
     }
   }
