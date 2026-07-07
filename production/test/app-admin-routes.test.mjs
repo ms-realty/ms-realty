@@ -765,3 +765,68 @@ test("Next admin listing-quality import persists complete launch review CSV", as
     },
   );
 });
+
+test("Next admin listing-quality import persists complete review for mounted listing edits", async () => {
+  const listingQualityReviewPath = `${tempDir("app-admin-mounted-listing-quality")}/listing-quality.csv`;
+  const listingEditLedgerPath = tempDefaultListingEdits();
+  fs.appendFileSync(
+    listingEditLedgerPath,
+    `${JSON.stringify({
+      edited_at: "2026-07-07T08:30:00Z",
+      id: "listing-edit-mounted-missing-description",
+      listing_id: "MS-CRAWL-0003",
+      editor: "editor_bg",
+      source_locale: "bg",
+      patch: { description: "" },
+      source_hash_before: "mounted-source-before",
+      source_hash_after: "mounted-source-after",
+      stale_translation_count: 1,
+      stale_locales: ["en"],
+    })}\n`,
+  );
+  const auditLogPath = tempJsonl("app-admin-mounted-complete-audit");
+  const auth = { authorization: "Bearer next-admin-test" };
+  await withEnv(
+    {
+      MS_REALTY_ADMIN_TOKEN: "next-admin-test",
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
+      MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-mounted-complete-translations"),
+    },
+    async () => {
+      const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
+      const listingQualityWorkbookRoute = await import("../../app/api/admin/listing-quality-workbook/route.js");
+
+      const workbook = await listingQualityWorkbookRoute.GET(
+        new Request("https://example.test/api/admin/listing-quality-workbook", { headers: auth }),
+      );
+      const workbookCsv = await workbook.text();
+      const reviewCsv = completeListingQualityReviewCsv(workbookCsv);
+
+      assert.equal(workbook.status, 200);
+      assert.match(workbookCsv, /^MS-CRAWL-0003,/m);
+      assert.match(workbookCsv, /missing_description/);
+
+      const imported = await listingQualityImportRoute.POST(
+        new Request("https://example.test/api/admin/listing-quality/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "text/csv" },
+          body: reviewCsv,
+        }),
+      );
+      const importedBody = await imported.json();
+
+      assert.equal(imported.status, 201);
+      assert.equal(importedBody.imported, parseCsv(workbookCsv).length);
+      assert.equal(importedBody.reviewPersisted, true);
+      assert.equal(importedBody.reviewPath, listingQualityReviewPath);
+      assert.equal(importedBody.reviewPersistenceError, "");
+      assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
+      assert.equal(importedBody.edits.some((row) => row.edit.listing_id === "MS-CRAWL-0003"), true);
+      const auditRows = readAuditLog(auditLogPath);
+      assert.equal(assertAuditLog(auditRows), true);
+      assert.deepEqual(actionCounts(auditRows), { listing_quality_imported: 1 });
+    },
+  );
+});

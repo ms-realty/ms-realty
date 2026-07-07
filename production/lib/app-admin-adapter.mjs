@@ -29,7 +29,6 @@ import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import {
-  DEFAULT_LISTING_QUALITY_REPORT,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   renderListingQualityWorkbook,
@@ -833,13 +832,14 @@ function listingQualityWorkbook(config) {
 }
 
 function importListingQualityRows(inputCsv, config) {
-  const review = validateListingQualityReviewCsv(buildListingQualityReport({ seed: currentSeed(config) }), inputCsv);
+  const report = buildListingQualityReport({ seed: currentSeed(config) });
+  const review = validateListingQualityReviewCsv(report, inputCsv);
   let reviewPath = null;
   let reviewPersistenceError = "";
   if (review.summary.missing_review_rows === 0) {
     try {
       reviewPath = writeCompleteListingQualityReviewCsv(
-        JSON.parse(fs.readFileSync(DEFAULT_LISTING_QUALITY_REPORT, "utf8")),
+        report,
         inputCsv,
         config.listingQualityReviewPath || undefined,
       );
