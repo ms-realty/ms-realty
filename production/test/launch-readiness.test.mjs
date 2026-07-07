@@ -100,9 +100,24 @@ function writePartialListingQualityReviewFixture(dir) {
 }
 
 const readyLiveServices = [
-  { source: "typesense_meilisearch_sync", status: "pass", path: "production/data/search-engine-sync-report.json", summary: {} },
-  { source: "typesense_meilisearch_query", status: "pass", path: "production/data/search-engine-query-report.json", summary: {} },
-  { source: "hermes_draft_worker", status: "pass", path: "production/data/hermes-draft-worker-report.json", summary: {} },
+  {
+    source: "typesense_meilisearch_sync",
+    status: "pass",
+    path: "production/data/search-engine-sync-report.json",
+    summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 4 },
+  },
+  {
+    source: "typesense_meilisearch_query",
+    status: "pass",
+    path: "production/data/search-engine-query-report.json",
+    summary: { engines: 2, total_hits: 2, first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"] },
+  },
+  {
+    source: "hermes_draft_worker",
+    status: "pass",
+    path: "production/data/hermes-draft-worker-report.json",
+    summary: { attempted: 1, persisted: 1, rejected: 0 },
+  },
 ];
 const readyListingQualityReview = {
   status: "pass",
@@ -466,6 +481,27 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
   assert.throws(() => assertLaunchReadinessReport(weakPayload), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakPayloadCredentials), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakLiveServices), /non-example reports/);
+});
+
+test("launch readiness validator rejects weak live service pass summaries", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "typesense_meilisearch_sync" ? { ...item, summary: { ...item.summary, total_operations: 0 } } : item,
+    ),
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+
+  assert.throws(() => assertLaunchReadinessReport(report), /search sync summary evidence/);
 });
 
 test("launch readiness validator rejects weak listing quality pass evidence", () => {

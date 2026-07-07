@@ -236,6 +236,42 @@ function assertPassRuntimeSmokeEvidence(report) {
   }
 }
 
+function assertLiveServiceSummaryEvidence(item) {
+  const summary = item.summary || {};
+  if (
+    item.source === "typesense_meilisearch_sync" &&
+    (summary.engines !== 2 ||
+      !Array.isArray(summary.documents_per_engine) ||
+      summary.documents_per_engine.length !== 2 ||
+      summary.documents_per_engine.some((count) => !Number.isInteger(count) || count < 167) ||
+      !Number.isInteger(summary.total_operations) ||
+      summary.total_operations < 4)
+  ) {
+    throw new Error("Launch readiness live services require search sync summary evidence");
+  }
+  if (
+    item.source === "typesense_meilisearch_query" &&
+    (summary.engines !== 2 ||
+      !Number.isInteger(summary.total_hits) ||
+      summary.total_hits < 1 ||
+      !Array.isArray(summary.first_hit_ids) ||
+      summary.first_hit_ids.length < 2)
+  ) {
+    throw new Error("Launch readiness live services require search query summary evidence");
+  }
+  if (
+    item.source === "hermes_draft_worker" &&
+    (!Number.isInteger(summary.attempted) ||
+      !Number.isInteger(summary.persisted) ||
+      !Number.isInteger(summary.rejected) ||
+      summary.attempted < 1 ||
+      summary.persisted < 1 ||
+      summary.attempted !== summary.persisted + summary.rejected)
+  ) {
+    throw new Error("Launch readiness live services require Hermes worker summary evidence");
+  }
+}
+
 function assertPassRuntimeEvidence(report) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
@@ -248,6 +284,7 @@ function assertPassRuntimeEvidence(report) {
       if (item.status !== "pass" || !item.path || item.path.endsWith(".example")) {
         throw new Error("Launch readiness live services require validated non-example reports");
       }
+      assertLiveServiceSummaryEvidence(item);
     }
   }
 
