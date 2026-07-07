@@ -9,7 +9,10 @@ export const DEFAULT_HERMES_PROVIDER_PROVISIONING_REPORT = fromRoot(
 );
 export const DEFAULT_SELF_HOSTED_HERMES_MODEL = "NousResearch/Hermes-4-14B";
 export const DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions";
+export const HERMES_AGENT_OFFICIAL_URL = "https://hermes-agent.nousresearch.com/";
+export const HERMES_AGENT_INSTALL_COMMAND = "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash";
 export const HERMES_CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
+const PROJECT_CONTEXT_FILE = "AGENTS.md";
 
 const VALID_PROVIDER_MODES = new Set(["self_hosted", "openrouter"]);
 
@@ -81,15 +84,39 @@ function requiredEnvContract(config) {
   return ["HERMES_CHAT_COMPLETIONS_URL", ...(config.endpoint_requires_auth ? ["HERMES_API_KEY"] : [])];
 }
 
+function projectContextState() {
+  const filePath = fromRoot(PROJECT_CONTEXT_FILE);
+  return {
+    file: PROJECT_CONTEXT_FILE,
+    path: filePath,
+    present: fs.existsSync(filePath),
+    loaded_by_hermes_agent: true,
+    required_for_launch: true,
+  };
+}
+
 export function buildHermesProviderProvisioningReport({ env = process.env, generatedAt = new Date().toISOString() } = {}) {
   const config = hermesProviderConfigFromEnv(env);
   const missing = missingInputs(config);
   const selfHosted = config.mode === "self_hosted";
+  const projectContext = projectContextState();
   return {
     kind: "hermes_provider_provisioning",
     generated_at: generatedAt,
     status: missing.length ? "blocked" : "configured",
     ready: missing.length === 0,
+    agent_runtime: {
+      product: "Nous Hermes Agent",
+      official_url: HERMES_AGENT_OFFICIAL_URL,
+      install_command: HERMES_AGENT_INSTALL_COMMAND,
+      setup_commands: ["hermes setup --portal", "hermes model"],
+      gateway_setup_command: "hermes gateway setup",
+      project_context: projectContext,
+      gateway_security: {
+        allow_all_users: false,
+        required_allowlist_env: ["GATEWAY_ALLOWED_USERS", "TELEGRAM_ALLOWED_USERS", "DISCORD_ALLOWED_USERS"],
+      },
+    },
     provider: {
       mode: config.mode,
       endpoint: config.endpoint_redacted,
@@ -129,6 +156,7 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
     },
     next_actions: missing.length
       ? [
+          "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
           "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
           "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
           "Run npm run hermes:provisioning, then npm run hermes:worker.",
@@ -145,6 +173,22 @@ export function assertHermesProviderProvisioningReport(report) {
   if (report.status !== (report.ready ? "configured" : "blocked")) throw new Error("Hermes provisioning status must match ready flag");
   const noMissingInputs = (report.missing || []).length === 0;
   if (report.ready !== noMissingInputs) throw new Error("Hermes provisioning ready flag must match missing inputs");
+  if (report.agent_runtime?.product !== "Nous Hermes Agent") throw new Error("Hermes provisioning must target Nous Hermes Agent");
+  if (report.agent_runtime?.official_url !== HERMES_AGENT_OFFICIAL_URL) {
+    throw new Error("Hermes provisioning must link the official Hermes Agent runtime");
+  }
+  if (report.agent_runtime?.install_command !== HERMES_AGENT_INSTALL_COMMAND) {
+    throw new Error("Hermes provisioning must include the official Hermes Agent installer");
+  }
+  if (!report.agent_runtime?.setup_commands?.includes("hermes model")) {
+    throw new Error("Hermes provisioning must include Hermes model setup");
+  }
+  if (report.agent_runtime?.project_context?.file !== PROJECT_CONTEXT_FILE || report.agent_runtime.project_context.present !== true) {
+    throw new Error("Hermes provisioning requires project AGENTS.md context");
+  }
+  if (report.agent_runtime?.gateway_security?.allow_all_users !== false) {
+    throw new Error("Hermes gateway must not allow all users");
+  }
   if (!VALID_PROVIDER_MODES.has(report.provider?.mode)) throw new Error("Hermes provisioning provider mode is invalid");
   if (!String(report.provider?.model || "").trim()) throw new Error("Hermes provisioning report must include provider model");
   if (report.provider?.endpoint) redactedEndpoint(report.provider.endpoint);

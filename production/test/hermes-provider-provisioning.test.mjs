@@ -17,6 +17,13 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.ready, false);
   assert.equal(report.status, "blocked");
   assert.deepEqual(report.missing, ["HERMES_CHAT_COMPLETIONS_URL"]);
+  assert.equal(report.agent_runtime.product, "Nous Hermes Agent");
+  assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
+  assert.match(report.agent_runtime.install_command, /hermes-agent\.nousresearch\.com\/install\.sh/);
+  assert.ok(report.agent_runtime.setup_commands.includes("hermes model"));
+  assert.equal(report.agent_runtime.project_context.file, "AGENTS.md");
+  assert.equal(report.agent_runtime.project_context.present, true);
+  assert.equal(report.agent_runtime.gateway_security.allow_all_users, false);
   assert.equal(report.provider.mode, "self_hosted");
   assert.equal(report.provider.sensitive_data_allowed, true);
   assert.equal(report.vllm.tool_call_parser, "hermes");
@@ -95,6 +102,34 @@ test("Hermes provisioning report rejects publish-capable safety flags", () => {
   assert.throws(
     () => assertHermesProviderProvisioningReport({ ...report, safety: { ...report.safety, can_publish: true } }),
     /draft-only/,
+  );
+});
+
+test("Hermes provisioning report rejects generic agent runtime evidence", () => {
+  const report = buildHermesProviderProvisioningReport({
+    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions" },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, agent_runtime: { ...report.agent_runtime, product: "Generic Agent" } }),
+    /Nous Hermes Agent/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, project_context: { ...report.agent_runtime.project_context, present: false } },
+      }),
+    /AGENTS\.md/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, gateway_security: { ...report.agent_runtime.gateway_security, allow_all_users: true } },
+      }),
+    /allow all users/,
   );
 });
 

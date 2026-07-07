@@ -3,6 +3,31 @@
   "generated_at": "2026-07-06T00:00:00Z",
   "status": "blocked",
   "ready": false,
+  "agent_runtime": {
+    "product": "Nous Hermes Agent",
+    "official_url": "https://hermes-agent.nousresearch.com/",
+    "install_command": "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
+    "setup_commands": [
+      "hermes setup --portal",
+      "hermes model"
+    ],
+    "gateway_setup_command": "hermes gateway setup",
+    "project_context": {
+      "file": "AGENTS.md",
+      "path": "/Users/ivan/Code/MS-Realty/AGENTS.md",
+      "present": true,
+      "loaded_by_hermes_agent": true,
+      "required_for_launch": true
+    },
+    "gateway_security": {
+      "allow_all_users": false,
+      "required_allowlist_env": [
+        "GATEWAY_ALLOWED_USERS",
+        "TELEGRAM_ALLOWED_USERS",
+        "DISCORD_ALLOWED_USERS"
+      ]
+    }
+  },
   "provider": {
     "mode": "self_hosted",
     "endpoint": null,
@@ -64,6 +89,7 @@
     ]
   },
   "next_actions": [
+    "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
     "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
     "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
     "Run npm run hermes:provisioning, then npm run hermes:worker."
