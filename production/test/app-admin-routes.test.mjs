@@ -264,6 +264,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(preflightReportsBody.reports.seo.status, "blocked");
       assert.equal(preflightReportsBody.reports.listing_quality.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_services.status, "blocked");
+      assert.equal(preflightReportsBody.reports.live_service_provisioning.status, "blocked_report");
+      assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
       assert.equal(preflightReportsBody.reports.payload_runtime.status, "blocked_report");
 
       const cmsCollectionsUnauthorized = await cmsCollectionsRoute.GET(new Request("https://example.test/api/admin/cms-collections"));

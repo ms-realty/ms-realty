@@ -70,6 +70,8 @@ export function productionServerConfig(env = process.env) {
     searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
     searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
+    liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
+    payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
   };
 }
 
@@ -100,6 +102,8 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     searchSyncReportPath: config.searchSyncReportPath,
     searchQueryReportPath: config.searchQueryReportPath,
     hermesWorkerReportPath: config.hermesWorkerReportPath,
+    liveServiceProvisioningReportPath: config.liveServiceProvisioningReportPath,
+    payloadRuntimeReportPath: config.payloadRuntimeReportPath,
   });
 }
 

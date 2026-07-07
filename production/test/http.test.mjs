@@ -949,6 +949,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(preflightReports.body.reports.seo.status, "blocked");
   assert.equal(preflightReports.body.reports.listing_quality.status, "blocked");
   assert.equal(preflightReports.body.reports.live_services.status, "blocked");
+  assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
+  assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
   assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
   assert.equal(cmsCollectionsUnauthorized.status, 401);
   assert.equal(cmsCollections.status, 200);

@@ -132,6 +132,23 @@ export function assertLiveServiceProvisioningReport(report) {
   return true;
 }
 
+export function liveServiceProvisioningState(reportPath = DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT) {
+  if (!fs.existsSync(reportPath)) return { status: "missing_report", path: reportPath };
+  try {
+    const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+    assertLiveServiceProvisioningReport(report);
+    return {
+      status: report.ready ? "pass" : "blocked_report",
+      path: reportPath,
+      summary: report.summary,
+      checks: report.checks,
+      hermes: report.hermes,
+    };
+  } catch (error) {
+    return { status: "invalid_report", path: reportPath, error: error.message };
+  }
+}
+
 export function writeLiveServiceProvisioningReport(report, outPath = DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   assertLiveServiceProvisioningReport(report);

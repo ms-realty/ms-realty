@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 import {
   assertLiveServiceProvisioningReport,
   buildLiveServiceProvisioningReport,
+  liveServiceProvisioningState,
   writeLiveServiceProvisioningReport,
 } from "../lib/live-service-provisioning.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -83,6 +84,8 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
   assert.equal(written.includes("typesense-test-secret"), false);
   assert.equal(written.includes("meili-test-secret"), false);
   assert.equal(assertLiveServiceProvisioningReport(JSON.parse(written)), true);
+  assert.equal(liveServiceProvisioningState(outPath).status, "pass");
+  assert.equal(liveServiceProvisioningState(`${dir}/missing.json`).status, "missing_report");
 
   const cliOutPath = `${dir}/cli-live-service-provisioning-report.json`;
   const cli = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-live-service-provisioning-report.mjs")], {

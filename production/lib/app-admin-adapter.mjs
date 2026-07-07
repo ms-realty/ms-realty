@@ -24,6 +24,7 @@ import {
   writeLaunchReadinessReport,
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
+import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
@@ -107,6 +108,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
     searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
+    liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
@@ -436,6 +438,7 @@ function preflightReports(config) {
         queryReportPath: config.searchQueryReportPath || undefined,
         hermesReportPath: config.hermesWorkerReportPath || undefined,
       }),
+      live_service_provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
       payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
     },
   };

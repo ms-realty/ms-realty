@@ -67,6 +67,7 @@ import {
   writeLaunchReadinessReport,
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
+import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
@@ -311,6 +312,7 @@ export function createHttpApp({
   searchSyncReportPath = null,
   searchQueryReportPath = null,
   hermesWorkerReportPath = null,
+  liveServiceProvisioningReportPath = null,
   payloadRuntimeReportPath = null,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
@@ -395,6 +397,7 @@ export function createHttpApp({
           queryReportPath: searchQueryReportPath || undefined,
           hermesReportPath: hermesWorkerReportPath || undefined,
         }),
+        live_service_provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
         payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
       },
     };
