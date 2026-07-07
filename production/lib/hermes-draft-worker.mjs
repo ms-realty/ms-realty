@@ -189,6 +189,8 @@ export async function runHermesDraftWorker({
 }
 
 export function assertHermesDraftWorkerReport(report) {
+  if (report.summary.attempted < 1) throw new Error("Hermes worker must attempt at least one draft");
+  if (report.summary.persisted < 1) throw new Error("Hermes worker must persist at least one draft");
   if (report.summary.attempted !== report.summary.persisted + report.summary.rejected) {
     throw new Error("Hermes worker summary must match persisted and rejected rows");
   }

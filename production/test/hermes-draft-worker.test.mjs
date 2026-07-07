@@ -144,6 +144,27 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.equal(JSON.stringify(auditRows).includes("Sandanski apartment"), false);
 });
 
+test("Hermes draft worker report rejects no-op launch evidence", () => {
+  assert.throws(
+    () =>
+      assertHermesDraftWorkerReport({
+        summary: { attempted: 0, persisted: 0, rejected: 0 },
+        persisted: [],
+        rejected: [],
+      }),
+    /attempt at least one draft/,
+  );
+  assert.throws(
+    () =>
+      assertHermesDraftWorkerReport({
+        summary: { attempted: 1, persisted: 0, rejected: 1 },
+        persisted: [],
+        rejected: [{ id: "translation-listing-MS-TEST-1-he", error: "bad draft" }],
+      }),
+    /persist at least one draft/,
+  );
+});
+
 test("Hermes draft worker rejects outputs that omit protected facts", () => {
   assert.throws(
     () =>
