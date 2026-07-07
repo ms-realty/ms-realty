@@ -47,7 +47,9 @@ function databaseTarget(connectionString) {
   const database = decodeURIComponent(parsed.pathname.replace(/^\//, "")).trim();
   if (!database) throw new Error("DATABASE_URL must include a database name");
   if (!parsed.hostname) throw new Error("DATABASE_URL must include a database host");
+  if (!parsed.username || !parsed.password) throw new Error("DATABASE_URL must include database credentials");
   return {
+    credentials_configured: true,
     database,
     host: parsed.hostname,
     port: Number(parsed.port || 5432),
@@ -105,7 +107,14 @@ export async function buildPayloadRuntimeReport({
       const target = databaseTarget(env.DATABASE_URL);
       const probe = await databaseProbe(target);
       database = { ...target, ...probe };
-      checks.push(check("database_tcp", probe.status, { database: target.database, host: target.host, port: target.port }));
+      checks.push(
+        check("database_tcp", probe.status, {
+          credentials_configured: target.credentials_configured,
+          database: target.database,
+          host: target.host,
+          port: target.port,
+        }),
+      );
     } catch (error) {
       database = { error: error.message, status: "fail" };
       checks.push(check("database_tcp", "fail", { error: error.message }));
@@ -189,9 +198,11 @@ export function assertPayloadRuntimeReport(report) {
     (!report.summary.database.database ||
       !report.summary.database.host ||
       !Number.isInteger(report.summary.database.port) ||
+      report.summary.database.credentials_configured !== true ||
       !databaseTcp.database ||
       !databaseTcp.host ||
-      !databaseTcp.port)
+      !databaseTcp.port ||
+      databaseTcp.credentials_configured !== true)
   ) {
     throw new Error("Payload runtime ready report must include database TCP target evidence");
   }

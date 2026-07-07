@@ -102,11 +102,14 @@ const readyAppState = {
 const readyPayloadRuntime = {
   status: "pass",
   path: "production/data/payload-runtime-report.json",
-  summary: { missing_env: [], database: { status: "pass", database: "ms_realty", host: "db.internal", port: 5432 } },
+  summary: {
+    missing_env: [],
+    database: { status: "pass", credentials_configured: true, database: "ms_realty", host: "db.internal", port: 5432 },
+  },
   checks: [
     { id: "payload_secret", status: "pass" },
     { id: "database_url", status: "pass" },
-    { id: "database_tcp", status: "pass", database: "ms_realty", host: "db.internal", port: 5432 },
+    { id: "database_tcp", status: "pass", credentials_configured: true, database: "ms_realty", host: "db.internal", port: 5432 },
   ],
 };
 
@@ -341,8 +344,24 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
+  const weakPayloadCredentials = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    appState: readyAppState,
+    payloadRuntime: {
+      ...readyPayloadRuntime,
+      checks: readyPayloadRuntime.checks.map((check) =>
+        check.id === "database_tcp" ? { ...check, credentials_configured: false } : check,
+      ),
+    },
+  });
 
   assert.throws(() => assertLaunchReadinessReport(weakPayload), /Payload runtime requires database TCP target evidence/i);
+  assert.throws(() => assertLaunchReadinessReport(weakPayloadCredentials), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakLiveServices), /non-example reports/);
 });
 

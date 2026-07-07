@@ -149,10 +149,12 @@ function assertPassRuntimeEvidence(report) {
       !database.database ||
       !database.host ||
       !Number.isInteger(database.port) ||
+      database.credentials_configured !== true ||
       databaseTcp?.status !== "pass" ||
       !databaseTcp.database ||
       !databaseTcp.host ||
-      !databaseTcp.port
+      !databaseTcp.port ||
+      databaseTcp.credentials_configured !== true
     ) {
       throw new Error("Launch readiness payload runtime requires database TCP target evidence");
     }
