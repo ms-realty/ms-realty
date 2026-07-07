@@ -287,6 +287,18 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       ),
     /requires review_notes/,
   );
+  const mediaRow = report.rows.find((candidate) => candidate.review_status.includes("media"));
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        [
+          "listing_id,media_reviewer,review_notes",
+          `${mediaRow.listing_id},media_editor,Review public gallery: currently ${mediaRow.public_gallery_assets} public asset(s).`,
+        ].join("\n"),
+      ),
+    /draft instructions/,
+  );
 });
 
 test("listing quality review packet writer and CLI honor output overrides", () => {

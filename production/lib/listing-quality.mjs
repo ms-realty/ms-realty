@@ -308,8 +308,12 @@ function assertReviewerValue(listingId, field, value) {
 
 function assertReviewNotes(listingId, value) {
   if (!filled(value)) throw new Error(`Listing ${listingId} requires review_notes`);
-  if (/^(done|example|n\/?a|none|ok|placeholder|reviewed|sample|tbd|test|todo|unknown)$/i.test(String(value).trim())) {
+  const notes = String(value).trim();
+  if (/^(done|example|n\/?a|none|ok|placeholder|reviewed|sample|tbd|test|todo|unknown)$/i.test(notes)) {
     throw new Error(`Listing ${listingId} requires real review_notes`);
+  }
+  if (/^Review (public gallery|media alt text|gated media|360 tour)\b/i.test(notes)) {
+    throw new Error(`Listing ${listingId} requires resolved review_notes, not draft instructions`);
   }
 }
 
