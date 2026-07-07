@@ -46,6 +46,11 @@ function host(value) {
   }
 }
 
+function placeholderBacklink(row) {
+  const domain = (row.referring_domain || host(row.source_url || "")).toLowerCase();
+  return /(^|\.)example$/.test(domain) || /(^|\.)example\.(com|net|org)$/.test(domain);
+}
+
 function routeKeys(value) {
   if (!value) return [];
   try {
@@ -205,7 +210,7 @@ function joinExternal(source, sourceData, byKey) {
       addMetric(target.yandex_webmaster, "rows", 1);
       if (row.issue) addMetric(target.yandex_webmaster, "issues", 1);
     } else if (source === "backlinks") {
-      if (/example\.com\/ms-realty-(com|ru)/.test(row.source_url || "")) placeholderRows += 1;
+      if (placeholderBacklink(row)) placeholderRows += 1;
       else if (row.source_url || row.referring_domain) signalRows += 1;
       addMetric(target.backlinks, "backlinks", 1);
       if (row.referring_domain) referringDomains.add(`${target.old_url}|${row.referring_domain}`);

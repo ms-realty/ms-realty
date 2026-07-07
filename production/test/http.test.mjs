@@ -1206,7 +1206,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
       authorization: "Bearer local-admin-smoke",
       "content-type": "text/csv",
     },
-    body: `target_url,source_url,referring_domain\n${com.old_url},https://example.com/a,example.com\n${ru.old_url},https://example.com/b,example.com\n`,
+    body: `target_url,source_url,referring_domain\n${com.old_url},https://regionalbroker.bg/a,regionalbroker.bg\n${ru.old_url},https://partnerrealty.de/b,partnerrealty.de\n`,
   });
   const review = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=en",

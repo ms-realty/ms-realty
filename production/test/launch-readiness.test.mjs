@@ -30,7 +30,7 @@ function writeCompleteSeoInputFixture(dir) {
   assert.ok(ru?.old_url);
   fs.writeFileSync(`${dir}/search-console.csv`, `url,clicks,impressions,position\n${com.old_url},3,30,7\n${ru.old_url},2,20,8\n`);
   fs.writeFileSync(`${dir}/yandex-webmaster.csv`, `url,indexed,issue\n${com.old_url},yes,\n${ru.old_url},yes,\n`);
-  fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com.old_url},https://example.com/a\n${ru.old_url},https://example.com/b\n`);
+  fs.writeFileSync(`${dir}/backlinks.csv`, `target_url,source_url\n${com.old_url},https://regionalbroker.bg/a\n${ru.old_url},https://partnerrealty.de/b\n`);
 }
 
 function writeListingQualityReviewFixture(dir) {
