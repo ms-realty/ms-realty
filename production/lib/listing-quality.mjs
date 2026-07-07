@@ -299,6 +299,13 @@ function assertReviewFactValue(listingId, field, value) {
   }
 }
 
+function assertReviewerValue(listingId, field, value) {
+  if (!filled(value)) throw new Error(`Listing ${listingId} requires ${field}`);
+  if (/^(ai|chatgpt|codex|example|hermes|n\/?a|none|placeholder|reviewer|sample|tbd|test|todo|unknown)$/i.test(String(value).trim())) {
+    throw new Error(`Listing ${listingId} requires a real ${field}`);
+  }
+}
+
 export function validateListingQualityReviewCsv(report, csvText, { requireComplete = false } = {}) {
   const rows = parseCsv(csvText);
   if (!rows.length) throw new Error("Listing quality review CSV has no rows");
@@ -314,15 +321,11 @@ export function validateListingQualityReviewCsv(report, csvText, { requireComple
 
     const factIssues = quality.issues.filter((issue) => FACT_FIELDS_BY_ISSUE[issue]);
     const mediaIssues = quality.issues.filter((issue) => MEDIA_FIELDS_BY_ISSUE[issue]);
-    if (factIssues.length && !filled(row.facts_reviewer)) {
-      throw new Error(`Listing ${listingId} requires facts_reviewer`);
-    }
+    if (factIssues.length) assertReviewerValue(listingId, "facts_reviewer", row.facts_reviewer);
     for (const issue of factIssues) {
       assertReviewFactValue(listingId, FACT_FIELDS_BY_ISSUE[issue], row[FACT_FIELDS_BY_ISSUE[issue]]);
     }
-    if (mediaIssues.length && !filled(row.media_reviewer)) {
-      throw new Error(`Listing ${listingId} requires media_reviewer`);
-    }
+    if (mediaIssues.length) assertReviewerValue(listingId, "media_reviewer", row.media_reviewer);
 
     return {
       listing_id: listingId,

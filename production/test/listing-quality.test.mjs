@@ -257,6 +257,14 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   );
   assert.throws(() => validateListingQualityReviewCsv(report, csv, { requireComplete: true }), /incomplete/);
   assert.throws(() => validateListingQualityReviewCsv(report, `${csv}\n${csv.split("\n")[1]}\n`), /Duplicate/);
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        `listing_id,media_reviewer\n${report.rows.find((candidate) => candidate.review_status.includes("media")).listing_id},todo\n`,
+      ),
+    /real media_reviewer/,
+  );
 });
 
 test("listing quality review packet writer and CLI honor output overrides", () => {
