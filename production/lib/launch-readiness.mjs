@@ -127,6 +127,20 @@ function gateById(report, id) {
   return report.gates.find((item) => item.id === id);
 }
 
+function assertPassCrawlInventoryEvidence(report) {
+  const crawl = gateById(report, "crawl_inventory");
+  if (crawl?.status !== "pass") return;
+  const evidence = crawl.evidence || {};
+  if (
+    evidence.total !== 457 ||
+    evidence.byDomain?.["makler-realty.com"] !== 278 ||
+    evidence.byDomain?.["makler-realty.ru"] !== 179 ||
+    evidence.byStatus?.["200"] !== 457
+  ) {
+    throw new Error("Launch readiness crawl inventory requires exact source URL evidence");
+  }
+}
+
 function assertPassListingQualityEvidence(report) {
   const review = gateById(report, "listing_quality_review");
   if (review?.status !== "pass") return;
@@ -557,12 +571,10 @@ export function assertLaunchReadinessReport(report) {
   if (report.launch_ready !== (gateBlockers.length === 0)) throw new Error("Launch readiness flag must match blockers");
   if (report.status !== (report.launch_ready ? "ready" : "blocked")) throw new Error("Launch readiness status must match blockers");
   if (report.blockers.includes("production_app_layer")) throw new Error("Production app layer should be covered by the Node adapter");
-  if (!report.gates.find((item) => item.id === "crawl_inventory" && item.status === "pass")) {
-    throw new Error("Launch readiness must prove crawl inventory passed");
-  }
   if (!report.gates.some((item) => item.id === "live_services")) {
     throw new Error("Launch readiness must include live service provisioning gate");
   }
+  assertPassCrawlInventoryEvidence(report);
   assertPassExternalSeoEvidence(report);
   assertPassListingQualityEvidence(report);
   assertPassRuntimeSmokeEvidence(report);

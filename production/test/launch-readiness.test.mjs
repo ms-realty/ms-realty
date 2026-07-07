@@ -351,6 +351,14 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
   assert.throws(() => assertLaunchReadinessReport(report), /complete search_console evidence/);
 });
 
+test("launch readiness validator rejects weak crawl inventory pass evidence", () => {
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const crawlGate = report.gates.find((gate) => gate.id === "crawl_inventory");
+  crawlGate.evidence.total = 456;
+
+  assert.throws(() => assertLaunchReadinessReport(report), /exact source URL evidence/);
+});
+
 test("launch readiness validator requires every production gate", () => {
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
 
