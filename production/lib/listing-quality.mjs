@@ -469,8 +469,22 @@ export function assertListingQualityPreflightReport(report) {
   const ready = report.review?.status === "pass";
   if (report.ready !== ready) throw new Error("Listing quality preflight ready flag must match review state");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Listing quality preflight status must match ready flag");
-  if (!report.summary || report.summary.expected_review_rows < report.summary.review_rows) {
+  if (!report.summary || !report.review?.summary || report.summary.expected_review_rows < report.summary.review_rows) {
     throw new Error("Listing quality preflight summary must count expected and reviewed rows");
+  }
+  for (const key of ["expected_review_rows", "review_rows", "missing_review_rows", "facts_review_rows", "media_review_rows"]) {
+    if (!Number.isInteger(report.summary[key]) || report.summary[key] < 0) {
+      throw new Error("Listing quality preflight summary counts must be non-negative integers");
+    }
+  }
+  if (report.summary.expected_review_rows !== report.summary.review_rows + report.summary.missing_review_rows) {
+    throw new Error("Listing quality preflight summary must reconcile expected, reviewed, and missing rows");
+  }
+  if (report.summary.facts_review_rows > report.summary.review_rows || report.summary.media_review_rows > report.summary.review_rows) {
+    throw new Error("Listing quality preflight summary review counts cannot exceed reviewed rows");
+  }
+  if (!report.summary.issue_counts || typeof report.summary.issue_counts !== "object" || Array.isArray(report.summary.issue_counts)) {
+    throw new Error("Listing quality preflight summary must include issue counts");
   }
   if (
     !Number.isInteger(report.summary.affected_listings) ||

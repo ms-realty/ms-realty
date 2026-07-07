@@ -555,6 +555,12 @@ test("launch readiness validator rejects weak listing quality pass evidence", ()
     payloadRuntime: readyPayloadRuntime,
   });
 
+  const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
+  assert.equal(listingGate.status, "blocked");
+  listingGate.status = "pass";
+  report.blockers = [];
+  report.launch_ready = true;
+  report.status = "ready";
   assert.throws(() => assertLaunchReadinessReport(report), /complete non-example review evidence/);
 });
 

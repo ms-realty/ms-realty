@@ -189,18 +189,27 @@ function assertPassStructuredDataEvidence(report) {
   }
 }
 
+function hasCompleteListingQualityEvidence(evidence) {
+  const summary = evidence?.summary;
+  const countKeys = ["expected_review_rows", "review_rows", "missing_review_rows", "facts_review_rows", "media_review_rows"];
+  return (
+    evidence?.status === "pass" &&
+    Boolean(evidence?.path) &&
+    !evidence.path.endsWith(".example") &&
+    countKeys.every((key) => Number.isInteger(summary?.[key]) && summary[key] >= 0) &&
+    summary.expected_review_rows >= 1 &&
+    summary.review_rows === summary.expected_review_rows &&
+    summary.missing_review_rows === 0 &&
+    summary.facts_review_rows <= summary.review_rows &&
+    summary.media_review_rows <= summary.review_rows &&
+    summary.expected_review_rows === summary.review_rows + summary.missing_review_rows
+  );
+}
+
 function assertPassListingQualityEvidence(report) {
   const review = gateById(report, "listing_quality_review");
   if (review?.status !== "pass") return;
-  const summary = review.evidence?.summary;
-  if (
-    review.evidence?.status !== "pass" ||
-    !review.evidence?.path ||
-    review.evidence.path.endsWith(".example") ||
-    summary?.expected_review_rows < 1 ||
-    summary.review_rows !== summary.expected_review_rows ||
-    summary.missing_review_rows !== 0
-  ) {
+  if (!hasCompleteListingQualityEvidence(review.evidence)) {
     throw new Error("Launch readiness listing quality requires complete non-example review evidence");
   }
 }
@@ -572,7 +581,7 @@ export function buildLaunchReadinessReport({
     deployableRedirects.summary.homepageTargets === 0 &&
     deployableRedirects.summary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
-  const listingQualityReady = listingQualityReview.status === "pass";
+  const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
   const liveServicesReady = liveServices.every((item) => item.status === "pass");
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
   const payloadRuntimeReady = payloadRuntime.status === "pass";

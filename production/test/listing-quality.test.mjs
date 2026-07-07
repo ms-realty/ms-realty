@@ -434,7 +434,7 @@ test("listing quality preflight report records missing and valid human review st
     () =>
       assertListingQualityPreflightReport({
         ...readyReport,
-        summary: { ...readyReport.summary, review_rows: readyReport.summary.review_rows - 1 },
+        summary: { ...readyReport.summary, facts_review_rows: readyReport.summary.facts_review_rows + 1 },
       }),
     /summary must match review summary/,
   );
@@ -460,15 +460,60 @@ test("listing quality preflight report records missing and valid human review st
         ...readyReport,
         review: {
           ...readyReport.review,
-          summary: { ...readyReport.review.summary, expected_review_rows: readyReport.review.summary.expected_review_rows + 1 },
+          summary: {
+            ...readyReport.review.summary,
+            expected_review_rows: readyReport.review.summary.expected_review_rows + 1,
+            missing_review_rows: 1,
+          },
         },
         summary: {
           ...readyReport.summary,
           affected_listings: readyReport.summary.affected_listings + 1,
           expected_review_rows: readyReport.summary.expected_review_rows + 1,
+          missing_review_rows: 1,
         },
       }),
     /cover every review row/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        summary: { ...readyReport.summary, review_rows: "not-a-count" },
+      }),
+    /non-negative integers/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        review: {
+          ...readyReport.review,
+          summary: { ...readyReport.review.summary, missing_review_rows: 1 },
+        },
+        summary: { ...readyReport.summary, missing_review_rows: 1 },
+      }),
+    /reconcile expected, reviewed, and missing rows/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        review: {
+          ...readyReport.review,
+          summary: { ...readyReport.review.summary, media_review_rows: readyReport.summary.review_rows + 1 },
+        },
+        summary: { ...readyReport.summary, media_review_rows: readyReport.summary.review_rows + 1 },
+      }),
+    /cannot exceed reviewed rows/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        summary: { ...readyReport.summary, issue_counts: null },
+      }),
+    /issue counts/,
   );
 });
 
