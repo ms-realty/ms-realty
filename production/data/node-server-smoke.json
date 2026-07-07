@@ -1,6 +1,10 @@
 {
   "fixture_id": "node-server-smoke-20260704",
   "baseUrl": "http://127.0.0.1:0",
+  "server": {
+    "host": "127.0.0.1",
+    "port_observed": true
+  },
   "health": {
     "status": 200,
     "body": {

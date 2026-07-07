@@ -176,7 +176,7 @@
       "evidence": {
         "http_listing_status": 200,
         "node_listing_status": 200,
-        "node_server_port": null
+        "node_server_port_observed": true
       }
     },
     {

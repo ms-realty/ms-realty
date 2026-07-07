@@ -107,6 +107,7 @@ try {
   const smoke = {
     fixture_id: "node-server-smoke-20260704",
     baseUrl: "http://127.0.0.1:0",
+    server: { host: address.address, port_observed: Number.isInteger(address.port) && address.port > 0 },
     health: await jsonFetch(baseUrl, "/api/health"),
     ready: await jsonFetch(baseUrl, "/api/ready", { captureHeaders: true }),
     legacyRedirect: await textFetch(baseUrl, legacyUrl.pathname, {

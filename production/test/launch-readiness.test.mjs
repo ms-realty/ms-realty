@@ -364,6 +364,27 @@ test("launch readiness validator requires every production gate", () => {
   );
 });
 
+test("launch readiness validator rejects weak runtime smoke pass evidence", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+  const smokeGate = report.gates.find((gate) => gate.id === "runtime_smoke");
+  smokeGate.evidence.node_server_port_observed = false;
+
+  assert.throws(() => assertLaunchReadinessReport(report), /runtime smoke requires HTTP and Node listing evidence/);
+});
+
 test("launch readiness validator rejects weak runtime pass evidence", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);

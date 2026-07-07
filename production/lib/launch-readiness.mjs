@@ -161,6 +161,19 @@ function assertPassExternalSeoEvidence(report) {
   }
 }
 
+function assertPassRuntimeSmokeEvidence(report) {
+  const smoke = gateById(report, "runtime_smoke");
+  if (smoke?.status !== "pass") return;
+  const evidence = smoke.evidence || {};
+  if (
+    evidence.http_listing_status !== 200 ||
+    evidence.node_listing_status !== 200 ||
+    evidence.node_server_port_observed !== true
+  ) {
+    throw new Error("Launch readiness runtime smoke requires HTTP and Node listing evidence");
+  }
+}
+
 function assertPassRuntimeEvidence(report) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
@@ -480,7 +493,7 @@ export function buildLaunchReadinessReport({
       {
         http_listing_status: httpSmoke.listing?.status,
         node_listing_status: nodeServerSmoke.listing?.status,
-        node_server_port: nodeServerSmoke.server?.port || null,
+        node_server_port_observed: nodeServerSmoke.server?.port_observed === true,
       },
     ),
     gate(
@@ -552,6 +565,7 @@ export function assertLaunchReadinessReport(report) {
   }
   assertPassExternalSeoEvidence(report);
   assertPassListingQualityEvidence(report);
+  assertPassRuntimeSmokeEvidence(report);
   assertPassRuntimeEvidence(report);
   if (!report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
