@@ -10,6 +10,15 @@ export const DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT = fromRoot(
   "data",
   "live-service-provisioning-report.json",
 );
+const REQUIRED_CHECK_IDS = [
+  "typesense_url",
+  "typesense_api_key",
+  "meili_url",
+  "meili_api_key",
+  "typesense_health",
+  "meilisearch_health",
+  "hermes_provider",
+];
 
 function redactUrl(value) {
   if (!value) return null;
@@ -117,13 +126,45 @@ export async function buildLiveServiceProvisioningReport({
 }
 
 export function assertLiveServiceProvisioningReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Live service provisioning report must include valid generated_at");
+  }
   if (!Array.isArray(report.checks) || report.checks.length < 1) {
     throw new Error("Live service provisioning report must include checks");
+  }
+  const checkIds = new Set();
+  for (const check of report.checks) {
+    if (!check?.id) throw new Error("Live service provisioning checks must include ids");
+    if (checkIds.has(check.id)) throw new Error(`Live service provisioning report has duplicate check ${check.id}`);
+    checkIds.add(check.id);
+  }
+  for (const id of REQUIRED_CHECK_IDS) {
+    if (!checkIds.has(id)) throw new Error(`Live service provisioning report missing required check ${id}`);
   }
   const ready = report.checks.every((check) => check.status === "pass");
   if (report.ready !== ready) throw new Error("Live service provisioning ready flag must match checks");
   if (report.status !== (ready ? "ready" : "blocked")) {
     throw new Error("Live service provisioning status must match ready flag");
+  }
+  if (!report.summary || !Array.isArray(report.summary.missing_env)) {
+    throw new Error("Live service provisioning report must summarize missing env");
+  }
+  if (report.summary.checks !== report.checks.length) throw new Error("Live service provisioning summary check count must match checks");
+  const missingEnv = [
+    ...report.checks.filter((check) => check.status === "missing_env").map((check) => check.env).filter(Boolean),
+    ...((report.checks.find((check) => check.id === "hermes_provider")?.missing) || []),
+  ];
+  if (JSON.stringify(report.summary.missing_env) !== JSON.stringify([...new Set(missingEnv)])) {
+    throw new Error("Live service provisioning missing env summary must match checks");
+  }
+  for (const id of ["typesense_health", "meilisearch_health"]) {
+    const check = report.checks.find((item) => item.id === id);
+    if (ready && (!check.redacted_url || !Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299)) {
+      throw new Error(`${id} must include successful endpoint evidence`);
+    }
+  }
+  if (ready && (!report.hermes?.endpoint || report.hermes.ready !== true)) {
+    throw new Error("Live service provisioning ready report must include Hermes endpoint evidence");
   }
   const serialized = JSON.stringify(report);
   if (/secret|Bearer\s+|sk-[A-Za-z0-9_-]+|user:pass/i.test(serialized)) {

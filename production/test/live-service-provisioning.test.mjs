@@ -64,6 +64,63 @@ test("live service provisioning report verifies live endpoints without persistin
   assert.equal(serialized.includes("token=secret"), false);
 });
 
+test("live service provisioning report requires complete evidence shape", async () => {
+  const report = await buildLiveServiceProvisioningReport({
+    env: {},
+    fetchImpl: async () => {
+      throw new Error("fetch should not be called without URLs and API keys");
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.throws(() => assertLiveServiceProvisioningReport({ ...report, generated_at: "" }), /valid generated_at/);
+  assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, checks: report.checks.filter((check) => check.id !== "typesense_health") }),
+    /missing required check typesense_health/,
+  );
+  assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, checks: [...report.checks, report.checks[0]] }),
+    /duplicate check typesense_url/,
+  );
+  assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, summary: { ...report.summary, missing_env: [] } }),
+    /missing env summary/,
+  );
+});
+
+test("live service provisioning ready report requires endpoint evidence", async () => {
+  const report = await buildLiveServiceProvisioningReport({
+    env: {
+      TYPESENSE_URL: "https://typesense.internal",
+      TYPESENSE_API_KEY: "typesense-key",
+      MEILI_URL: "https://meili.internal",
+      MEILI_API_KEY: "meili-key",
+      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions",
+    },
+    fetchImpl: async () => ({ ok: true, status: 200 }),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+  const withoutEndpointEvidence = {
+    ...report,
+    checks: report.checks.map((check) =>
+      check.id === "typesense_health" ? { id: "typesense_health", status: "pass" } : check,
+    ),
+  };
+  const withoutHermesEndpoint = {
+    ...report,
+    hermes: { ...report.hermes, endpoint: null },
+  };
+
+  assert.throws(
+    () => assertLiveServiceProvisioningReport(withoutEndpointEvidence),
+    /typesense_health must include successful endpoint evidence/,
+  );
+  assert.throws(
+    () => assertLiveServiceProvisioningReport(withoutHermesEndpoint),
+    /Hermes endpoint evidence/,
+  );
+});
+
 test("live service provisioning writer and CLI do not persist secrets", async () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`);
   const outPath = `${dir}/live-service-provisioning-report.json`;
