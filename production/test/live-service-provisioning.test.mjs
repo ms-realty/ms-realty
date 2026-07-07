@@ -88,6 +88,26 @@ test("live service provisioning rejects copied placeholder env values before hea
   assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "missing_env");
 });
 
+test("live service provisioning rejects non-chat Hermes endpoints before capture", async () => {
+  const report = await buildLiveServiceProvisioningReport({
+    env: {
+      TYPESENSE_URL: "https://typesense.internal",
+      TYPESENSE_API_KEY: "typesense-key",
+      MEILI_URL: "https://meili.internal",
+      MEILI_API_KEY: "meili-key",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/models",
+    },
+    fetchImpl: async () => ({ ok: true, status: 200 }),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertLiveServiceProvisioningReport(report), true);
+  assert.equal(report.ready, false);
+  assert.equal(report.status, "blocked");
+  assert.equal(report.checks.find((check) => check.id === "hermes_provider").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "hermes_provider").error, /\/v1\/chat\/completions/);
+});
+
 test("live service provisioning report requires complete evidence shape", async () => {
   const report = await buildLiveServiceProvisioningReport({
     env: {},
@@ -146,6 +166,14 @@ test("live service provisioning ready report requires endpoint evidence", async 
   assert.throws(
     () => assertLiveServiceProvisioningReport(withoutHermesEndpoint),
     /Hermes endpoint evidence/,
+  );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        hermes: { ...report.hermes, endpoint: "https://hermes.ms-realty.bg/v1/models" },
+      }),
+    /\/v1\/chat\/completions/,
   );
 });
 

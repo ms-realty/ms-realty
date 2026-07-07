@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  assertHermesChatCompletionsEndpoint,
   buildHermesProviderProvisioningReport,
 } from "./hermes-provider-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -49,6 +50,29 @@ async function healthCheck({ fetchImpl, headers = {}, id, path: route, url }) {
   }
 }
 
+function hermesProviderCheck(hermes) {
+  if (!hermes.ready) {
+    return {
+      id: "hermes_provider",
+      mode: hermes.provider.mode,
+      status: "missing_env",
+      missing: hermes.missing,
+    };
+  }
+  const check = {
+    id: "hermes_provider",
+    mode: hermes.provider.mode,
+    status: "pass",
+    missing: hermes.missing,
+  };
+  try {
+    assertHermesChatCompletionsEndpoint(hermes.provider.endpoint, "Hermes provisioning endpoint");
+    return check;
+  } catch (error) {
+    return { ...check, status: "fail", error: error.message };
+  }
+}
+
 export async function buildLiveServiceProvisioningReport({
   env = process.env,
   fetchImpl = globalThis.fetch,
@@ -90,12 +114,7 @@ export async function buildLiveServiceProvisioningReport({
   }
 
   const hermes = buildHermesProviderProvisioningReport({ env, generatedAt });
-  checks.push({
-    id: "hermes_provider",
-    mode: hermes.provider.mode,
-    status: hermes.ready ? "pass" : "missing_env",
-    missing: hermes.missing,
-  });
+  checks.push(hermesProviderCheck(hermes));
 
   const missingEnv = [
     ...checks.filter((check) => check.status === "missing_env").map((check) => check.env).filter(Boolean),
@@ -172,8 +191,12 @@ export function assertLiveServiceProvisioningReport(report) {
       throw new Error(`${id} must include successful endpoint evidence`);
     }
   }
-  if (ready && (!report.hermes?.endpoint || report.hermes.ready !== true)) {
+  const hermesProvider = report.checks.find((check) => check.id === "hermes_provider");
+  if ((ready || hermesProvider?.status === "pass") && (!report.hermes?.endpoint || report.hermes.ready !== true)) {
     throw new Error("Live service provisioning ready report must include Hermes endpoint evidence");
+  }
+  if ((ready || hermesProvider?.status === "pass") && report.hermes?.endpoint) {
+    assertHermesChatCompletionsEndpoint(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
   }
   const serialized = JSON.stringify(report);
   if (/secret|Bearer\s+|sk-[A-Za-z0-9_-]+|user:pass/i.test(serialized)) {
