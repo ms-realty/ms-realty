@@ -31,6 +31,17 @@ function redactUrl(value) {
   return parsed.href.replace(/\/$/, "");
 }
 
+function assertProvisioningServiceUrl(value, label) {
+  const parsed = new URL(value);
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error(`${label} must use http or https`);
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
+  const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
+  if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
+    throw new Error(`${label} must not use localhost or placeholder service URLs`);
+  }
+}
+
 function envCheck(id, env, key) {
   const value = String(env[key] || "").trim();
   if (!value) return { id, env: key, status: "missing_env" };
@@ -43,6 +54,7 @@ async function healthCheck({ fetchImpl, headers = {}, id, path: route, url }) {
   let redacted_url = null;
   try {
     redacted_url = redactUrl(url);
+    assertProvisioningServiceUrl(redacted_url, id);
     const response = await fetchImpl(`${String(url).replace(/\/+$/, "")}${route}`, { headers, method: "GET" });
     return { id, redacted_url, status: response.ok ? "pass" : "fail", status_code: response.status };
   } catch (error) {
@@ -66,6 +78,7 @@ function hermesProviderCheck(hermes) {
     missing: hermes.missing,
   };
   try {
+    assertProvisioningServiceUrl(hermes.provider.endpoint, "Hermes provisioning endpoint");
     assertHermesChatCompletionsEndpoint(hermes.provider.endpoint, "Hermes provisioning endpoint");
     return check;
   } catch (error) {
@@ -190,12 +203,14 @@ export function assertLiveServiceProvisioningReport(report) {
     if (ready && (!check.redacted_url || !Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299)) {
       throw new Error(`${id} must include successful endpoint evidence`);
     }
+    if (ready && check.redacted_url) assertProvisioningServiceUrl(check.redacted_url, id);
   }
   const hermesProvider = report.checks.find((check) => check.id === "hermes_provider");
   if ((ready || hermesProvider?.status === "pass") && (!report.hermes?.endpoint || report.hermes.ready !== true)) {
     throw new Error("Live service provisioning ready report must include Hermes endpoint evidence");
   }
   if ((ready || hermesProvider?.status === "pass") && report.hermes?.endpoint) {
+    assertProvisioningServiceUrl(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
     assertHermesChatCompletionsEndpoint(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
   }
   const serialized = JSON.stringify(report);

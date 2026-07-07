@@ -42,7 +42,7 @@ test("live service provisioning report verifies live endpoints without persistin
       TYPESENSE_API_KEY: "typesense-test-secret",
       MEILI_URL: "https://user:pass@meili.internal?token=secret",
       MEILI_API_KEY: "meili-test-secret",
-      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
     },
     fetchImpl: async (url, options) => {
       calls.push({ url, headers: options.headers });
@@ -73,7 +73,7 @@ test("live service provisioning rejects copied placeholder env values before hea
       TYPESENSE_API_KEY: "replace-with-typesense-key",
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-key",
-      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
     },
     fetchImpl: async (url) => {
       assert.equal(String(url).startsWith("https://meili.internal"), true);
@@ -86,6 +86,32 @@ test("live service provisioning rejects copied placeholder env values before hea
   assert.equal(report.ready, false);
   assert.deepEqual(report.summary.placeholder_env, ["TYPESENSE_URL", "TYPESENSE_API_KEY"]);
   assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "missing_env");
+});
+
+test("live service provisioning rejects local service URLs before capture", async () => {
+  const calls = [];
+  const report = await buildLiveServiceProvisioningReport({
+    env: {
+      TYPESENSE_URL: "http://127.0.0.1:8108",
+      TYPESENSE_API_KEY: "typesense-key",
+      MEILI_URL: "https://meili.internal",
+      MEILI_API_KEY: "meili-key",
+      HERMES_CHAT_COMPLETIONS_URL: "http://localhost:8000/v1/chat/completions",
+    },
+    fetchImpl: async (url) => {
+      calls.push(String(url));
+      return { ok: true, status: 200 };
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertLiveServiceProvisioningReport(report), true);
+  assert.equal(report.ready, false);
+  assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "typesense_health").error, /localhost or placeholder/);
+  assert.equal(report.checks.find((check) => check.id === "hermes_provider").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "hermes_provider").error, /localhost or placeholder/);
+  assert.deepEqual(calls, ["https://meili.internal/health"]);
 });
 
 test("live service provisioning rejects non-chat Hermes endpoints before capture", async () => {
@@ -143,7 +169,7 @@ test("live service provisioning ready report requires endpoint evidence", async 
       TYPESENSE_API_KEY: "typesense-key",
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-key",
-      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
     },
     fetchImpl: async () => ({ ok: true, status: 200 }),
     generatedAt: "2026-07-06T00:00:00Z",
@@ -175,6 +201,24 @@ test("live service provisioning ready report requires endpoint evidence", async 
       }),
     /\/v1\/chat\/completions/,
   );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        checks: report.checks.map((check) =>
+          check.id === "typesense_health" ? { ...check, redacted_url: "http://127.0.0.1:8108" } : check,
+        ),
+      }),
+    /localhost or placeholder/,
+  );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        hermes: { ...report.hermes, endpoint: "http://localhost:8000/v1/chat/completions" },
+      }),
+    /localhost or placeholder/,
+  );
 });
 
 test("live service provisioning writer and CLI do not persist secrets", async () => {
@@ -186,7 +230,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
       TYPESENSE_API_KEY: "typesense-test-secret",
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-test-secret",
-      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
     },
     fetchImpl: async () => ({ ok: true, status: 200 }),
     generatedAt: "2026-07-06T00:00:00Z",
