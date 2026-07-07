@@ -502,6 +502,7 @@ function migrationReviewPayload(registry, url, config) {
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     deployablePreview: currentDeployableRedirects(config),
@@ -968,6 +969,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
       return jsonResponse(200, preflightReports(config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/live-service-provisioning") {
+      return jsonResponse(200, {
+        kind: "admin_live_service_provisioning",
+        provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+      });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
       const template = readLiveServiceReportTemplate(url.searchParams.get("source"));

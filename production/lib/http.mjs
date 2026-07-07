@@ -280,6 +280,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     deployablePreview: buildDeployableRedirects(routes, approvals),
@@ -672,6 +673,14 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminJson(200, currentPreflightReports());
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/live-service-provisioning") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, {
+        kind: "admin_live_service_provisioning",
+        provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
+      });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
