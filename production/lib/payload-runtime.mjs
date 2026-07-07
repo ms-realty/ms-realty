@@ -153,10 +153,25 @@ export function assertPayloadRuntimeReport(report) {
   const ready = report.checks.every((item) => item.status === "pass");
   if (report.ready !== ready) throw new Error("Payload runtime ready flag must match checks");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Payload runtime status must match ready flag");
-  if (!report.summary || !Array.isArray(report.summary.missing_env)) {
-    throw new Error("Payload runtime report must summarize missing env");
+  if (!report.summary || !Array.isArray(report.summary.missing_env) || !Array.isArray(report.summary.placeholder_env)) {
+    throw new Error("Payload runtime report must summarize missing and placeholder env");
   }
   if (report.summary.checks !== report.checks.length) throw new Error("Payload runtime summary check count must match checks");
+  const missingEnv = [...new Set(report.checks.filter((item) => item.status === "missing_env").map((item) => item.env).filter(Boolean))];
+  const placeholderEnv = [...new Set(report.checks.filter((item) => item.status === "placeholder").map((item) => item.env).filter(Boolean))];
+  if (JSON.stringify(report.summary.missing_env) !== JSON.stringify(missingEnv)) {
+    throw new Error("Payload runtime missing env summary must match checks");
+  }
+  if (JSON.stringify(report.summary.placeholder_env) !== JSON.stringify(placeholderEnv)) {
+    throw new Error("Payload runtime placeholder env summary must match checks");
+  }
+  const databaseTcp = report.checks.find((item) => item.id === "database_tcp");
+  if (report.summary.database?.status !== databaseTcp.status) {
+    throw new Error("Payload runtime database summary must match database_tcp check");
+  }
+  if (ready && (!report.summary.database.host || !Number.isInteger(report.summary.database.port) || !databaseTcp.host || !databaseTcp.port)) {
+    throw new Error("Payload runtime ready report must include database TCP target evidence");
+  }
   return true;
 }
 

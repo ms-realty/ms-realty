@@ -102,4 +102,33 @@ test("Payload runtime report requires the full launch check set", async () => {
     () => assertPayloadRuntimeReport({ ...report, checks: [...report.checks, report.checks[0]] }),
     /duplicate check payload_secret/,
   );
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, summary: { ...report.summary, missing_env: [] } }),
+    /missing env summary/,
+  );
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, summary: { ...report.summary, database: { status: "pass" } } }),
+    /database summary/,
+  );
+});
+
+test("Payload runtime ready report requires concrete database TCP evidence", async () => {
+  const report = await buildPayloadRuntimeReport({
+    databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+  const withoutTarget = {
+    ...report,
+    summary: { ...report.summary, database: { status: "pass" } },
+    checks: report.checks.map((check) => (check.id === "database_tcp" ? { id: "database_tcp", status: "pass" } : check)),
+  };
+
+  assert.throws(
+    () => assertPayloadRuntimeReport(withoutTarget),
+    /database TCP target evidence/,
+  );
 });
