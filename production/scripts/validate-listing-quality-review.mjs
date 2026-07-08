@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import {
+  buildListingQualityPreflightReport,
   buildListingQualityReport,
   DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
   validateListingQualityReviewCsv,
@@ -12,17 +13,25 @@ const inputPath = process.argv[2] || process.env.MS_REALTY_LISTING_QUALITY_REVIE
 const listingEditPath = process.env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || undefined;
 const tourApprovalPath = process.env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || undefined;
 
+function pendingReviewLines(preflight) {
+  return (preflight.review.pending_review_sample || [])
+    .slice(0, 5)
+    .map((row) => `${row.listing_id}: ${row.required_editor_fields.join(", ")} ${row.editor_path}`);
+}
+
 try {
-  if (!fs.existsSync(inputPath)) {
-    throw new Error(
-      `Missing listing quality review CSV: ${inputPath}\nNext: run \`npm run listing:review-pack\`, complete the draft review CSV with reviewer signoff, write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH, then run \`npm run listing:preflight\`.`,
-    );
-  }
   const report = buildListingQualityReport({
     seed: applyListingEdits(loadCmsSeed(), readListingEdits(listingEditPath)),
     tourApprovals: readTourApprovals(tourApprovalPath),
     generatedAt: "2026-07-05T00:00:00Z",
   });
+  if (!fs.existsSync(inputPath)) {
+    const preflight = buildListingQualityPreflightReport({ report, reviewPath: inputPath, generatedAt: "2026-07-05T00:00:00Z" });
+    const pending = pendingReviewLines(preflight);
+    throw new Error(
+      `Missing listing quality review CSV: ${inputPath}\nPending review sample:\n${pending.join("\n")}\nNext: run \`npm run listing:review-pack\`, complete the draft review CSV with reviewer signoff, write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH, then run \`npm run listing:preflight\`.`,
+    );
+  }
   const result = validateListingQualityReviewCsv(report, fs.readFileSync(inputPath, "utf8"), { requireComplete: true });
 
   console.log(`Listing quality review CSV valid: ${result.summary.review_rows} rows`);

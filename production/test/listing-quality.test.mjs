@@ -418,6 +418,9 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
 
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /LISTING QUALITY PREFLIGHT FAILED/);
+  assert.match(missing.stderr, /Pending review sample:/);
+  assert.match(missing.stderr, /MS-CRAWL-/);
+  assert.match(missing.stderr, /\/admin\/listings\/edit\?listingId=/);
   assert.match(missing.stderr, /npm run listing:review-pack/);
   assert.match(missing.stderr, /draft review CSV/);
   assert.match(missing.stderr, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
