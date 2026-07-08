@@ -20,6 +20,7 @@ import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   launchBlockerSummary,
+  liveServiceImportSummary,
   liveServiceReports,
   payloadRuntimeState,
   readLiveServiceReportTemplate,
@@ -789,17 +790,22 @@ function importLiveServiceReport(input, config) {
     queryReportPath: config.searchQueryReportPath || undefined,
     hermesReportPath: config.hermesWorkerReportPath || undefined,
   });
+  const liveImport = liveServiceImportSummary(imported, livePreflight);
   recordAudit(
     {
       action: "live_service_report_imported",
       actor: "operations",
       objectType: "live_service_report",
       objectId: input.source,
-      metadata: { status: imported.report?.status || input.report?.status, out_path: imported.outPath },
+      metadata: {
+        blocked_reports: liveImport.blockedReports.map((report) => report.source),
+        status: imported.report?.status || input.report?.status,
+        out_path: imported.outPath,
+      },
     },
     config,
   );
-  return { imported, livePreflight, report: launchReadiness(config) };
+  return { imported, liveImport, livePreflight, report: launchReadiness(config) };
 }
 
 function importPayloadRuntimeReport(report, config) {

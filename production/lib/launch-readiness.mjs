@@ -947,6 +947,21 @@ export function writeLiveServiceReport(source, report, options = {}) {
   return { source, outPath, summary: report.summary, evidence: liveServiceEvidenceSnapshot(source, report) };
 }
 
+export function liveServiceImportSummary(imported, preflight) {
+  const blockedReports = preflight.reports
+    .filter((report) => report.status !== "pass")
+    .map((report) => ({ source: report.source, status: report.status, path: report.path }));
+  const importedReport = preflight.reports.find((report) => report.source === imported.source);
+  return {
+    ready: preflight.ready,
+    status: preflight.status,
+    importedSource: imported.source,
+    importedReportStatus: importedReport?.status || "unknown",
+    blockedReports,
+    nextActions: preflight.next_actions,
+  };
+}
+
 export function buildLaunchReadinessReport({
   generatedAt = new Date().toISOString(),
   migration = readJson(fromRoot("production", "data", "migration-records.json")),

@@ -1570,8 +1570,18 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveSyncImport.body.livePreflight.status, "blocked");
   assert.equal(liveSyncImport.body.livePreflight.summary.pass, 1);
   assert.equal(liveSyncImport.body.livePreflight.summary.missing_report, 2);
+  assert.equal(liveSyncImport.body.liveImport.ready, false);
+  assert.equal(liveSyncImport.body.liveImport.status, "blocked");
+  assert.equal(liveSyncImport.body.liveImport.importedSource, "typesense_meilisearch_sync");
+  assert.deepEqual(
+    liveSyncImport.body.liveImport.blockedReports.map((report) => report.source),
+    ["typesense_meilisearch_query", "hermes_draft_worker"],
+  );
   assert.equal(liveQueryImport.status, 202);
   assert.equal(liveHermesImport.status, 201);
+  assert.equal(liveHermesImport.body.liveImport.ready, true);
+  assert.equal(liveHermesImport.body.liveImport.status, "ready");
+  assert.deepEqual(liveHermesImport.body.liveImport.blockedReports, []);
   assert.equal(liveHermesImport.body.livePreflight.ready, true);
   assert.equal(liveHermesImport.body.livePreflight.summary.pass, 3);
   assert.equal(payloadBlockedImport.status, 202);

@@ -9,6 +9,7 @@ import {
   assertLiveServicePreflightReport,
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
+  liveServiceImportSummary,
   publicLaunchReadinessHeaders,
   publicLaunchReadinessPayload,
   readLiveServiceReportTemplate,
@@ -1570,8 +1571,24 @@ test("live service report import writes only validated source reports", () => {
   const outPath = `${dir}/imported-query-report.json`;
 
   const imported = writeLiveServiceReport("typesense_meilisearch_query", queryReport, { queryReportPath: outPath });
+  const importSummary = liveServiceImportSummary(
+    imported,
+    buildLiveServicePreflightReport({
+      queryReportPath: outPath,
+      syncReportPath: `${dir}/missing-sync-report.json`,
+      hermesReportPath: `${dir}/missing-hermes-report.json`,
+    }),
+  );
 
   assert.equal(imported.outPath, outPath);
+  assert.equal(importSummary.ready, false);
+  assert.equal(importSummary.status, "blocked");
+  assert.equal(importSummary.importedSource, "typesense_meilisearch_query");
+  assert.equal(importSummary.importedReportStatus, "pass");
+  assert.deepEqual(
+    importSummary.blockedReports.map((report) => report.source),
+    ["typesense_meilisearch_sync", "hermes_draft_worker"],
+  );
   assert.equal(JSON.parse(fs.readFileSync(outPath, "utf8")).summary.engines, 2);
   assert.throws(
     () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, example: true }, { queryReportPath: outPath }),

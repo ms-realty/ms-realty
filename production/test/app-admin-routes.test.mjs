@@ -417,6 +417,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const liveImportValidBody = await liveImportValid.json();
       assert.equal(liveImportValid.status, 202);
       assert.equal(liveImportValidBody.imported.outPath, hermesWorkerReportPath);
+      assert.equal(liveImportValidBody.liveImport.ready, false);
+      assert.equal(liveImportValidBody.liveImport.status, "blocked");
+      assert.equal(liveImportValidBody.liveImport.importedSource, "hermes_draft_worker");
+      assert.deepEqual(
+        liveImportValidBody.liveImport.blockedReports.map((report) => report.source),
+        ["typesense_meilisearch_sync", "typesense_meilisearch_query"],
+      );
       assert.equal(liveImportValidBody.livePreflight.status, "blocked");
       assert.equal(liveImportValidBody.livePreflight.summary.pass, 1);
       assert.equal(liveImportValidBody.livePreflight.summary.missing_report, 2);

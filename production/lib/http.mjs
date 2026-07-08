@@ -59,6 +59,7 @@ import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   launchBlockerSummary,
+  liveServiceImportSummary,
   liveServiceReports,
   payloadRuntimeState,
   publicLaunchReadinessHeaders,
@@ -761,14 +762,19 @@ export function createHttpApp({
           queryReportPath: searchQueryReportPath || undefined,
           hermesReportPath: hermesWorkerReportPath || undefined,
         });
+        const liveImport = liveServiceImportSummary(imported, livePreflight);
         recordAudit({
           action: "live_service_report_imported",
           actor: "operations",
           objectType: "live_service_report",
           objectId: input.source,
-          metadata: { status: input.report?.status, out_path: imported.outPath },
+          metadata: {
+            blocked_reports: liveImport.blockedReports.map((report) => report.source),
+            status: input.report?.status,
+            out_path: imported.outPath,
+          },
         });
-        return adminJson(livePreflight.ready ? 201 : 202, { imported, livePreflight, report: currentLaunchReadiness() });
+        return adminJson(livePreflight.ready ? 201 : 202, { imported, liveImport, livePreflight, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
