@@ -88,6 +88,30 @@ test("live service provisioning rejects copied placeholder env values before hea
   assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "missing_env");
 });
 
+test("live service provisioning preflight CLI explains blocked remediation", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-preflight-`);
+  const reportPath = `${dir}/live-service-provisioning-report.json`;
+  writeLiveServiceProvisioningReport(
+    await buildLiveServiceProvisioningReport({
+      env: {},
+      fetchImpl: async () => {
+        throw new Error("fetch should not be called without URLs and API keys");
+      },
+      generatedAt: "2026-07-06T00:00:00Z",
+    }),
+    reportPath,
+  );
+  const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "validate-live-service-provisioning-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: reportPath },
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /LIVE SERVICE PROVISIONING FAILED/);
+  assert.match(result.stderr, /Next: set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and HERMES_CHAT_COMPLETIONS_URL/);
+});
+
 test("live service provisioning rejects local service URLs before capture", async () => {
   const calls = [];
   const report = await buildLiveServiceProvisioningReport({
