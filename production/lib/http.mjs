@@ -1025,7 +1025,7 @@ export function createHttpApp({
             review_persisted: Boolean(reviewPath),
           },
         });
-        return adminJson(201, {
+        return adminJson(reviewPath ? 201 : 202, {
           imported: review.summary.review_rows,
           edited: edits.length,
           mediaReviewRows: review.summary.media_review_rows,

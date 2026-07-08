@@ -997,7 +997,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityReviewDraft.headers["content-disposition"], 'attachment; filename="listing-quality-review-draft.csv"');
   assert.ok(parseCsv(qualityReviewDraft.body).every((row) => row.facts_reviewer === "" && row.media_reviewer === ""));
   assert.equal(qualityImportUnauthorized.status, 401);
-  assert.equal(qualityImported.status, 201);
+  assert.equal(qualityImported.status, 202);
   assert.equal(qualityImported.body.imported, 1);
   assert.equal(qualityImported.body.edited, 1);
   assert.equal(qualityImported.body.mediaReviewRows, 1);

@@ -684,7 +684,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         }),
       );
       const listingQualityImportBody = await listingQualityImport.json();
-      assert.equal(listingQualityImport.status, 201);
+      assert.equal(listingQualityImport.status, 202);
       assert.equal(listingQualityImportBody.imported, 1);
       assert.equal(listingQualityImportBody.edited, 1);
       assert.equal(listingQualityImportBody.mediaReviewRows, 1);

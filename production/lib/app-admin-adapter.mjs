@@ -1065,7 +1065,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
-      return jsonResponse(201, importListingQualityRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      const result = importListingQualityRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.reviewPersisted ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       return jsonResponse(201, appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
