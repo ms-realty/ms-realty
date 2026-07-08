@@ -95,7 +95,7 @@ export function seoEvidenceImportSummary(source, rowCount, evidence) {
     requiredSourceDomains: REQUIRED_SOURCE_DOMAINS,
     urlsWithAnyEvidence: evidence.summary.urls_with_any_evidence,
     nextActions: ready
-      ? ["Run npm run seo:preflight and npm run launch:preflight with the same SEO evidence paths."]
+      ? ["Run npm run seo:evidence, npm run seo:preflight, npm run seo:preflight:report, then npm run launch:preflight with the same SEO evidence paths."]
       : [
           "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
           "Run npm run seo:preflight after all required exports are imported.",

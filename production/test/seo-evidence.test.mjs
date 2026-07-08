@@ -729,6 +729,18 @@ test("app SEO evidence import summary exposes remaining launch sources", () => {
   assert.equal(result.seoImport.rowCount, 2);
   assert.deepEqual(result.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
   assert.ok(result.seoImport.nextActions.some((action) => action.includes("seo:preflight")));
+
+  importAppSeoEvidenceRows(
+    { source: "yandex_webmaster", csv: `url,indexed,issue\n${com},yes,\n${ru},yes,\n` },
+    { seoEvidenceInputDir: dir, seoEvidenceOutputPath: evidencePath, reviewedAt: "2026-07-05T00:02:00Z" },
+  );
+  const readyResult = importAppSeoEvidenceRows(
+    { source: "backlinks", csv: `target_url,source_url\n${com},https://regionalbroker.bg/a\n${ru},https://partnerrealty.de/b\n` },
+    { seoEvidenceInputDir: dir, seoEvidenceOutputPath: evidencePath, reviewedAt: "2026-07-05T00:03:00Z" },
+  );
+  assert.equal(readyResult.seoImport.ready, true);
+  assert.ok(readyResult.seoImport.nextActions.some((action) => action.includes("seo:evidence")));
+  assert.ok(readyResult.seoImport.nextActions.some((action) => action.includes("seo:preflight:report")));
 });
 
 test("external SEO export templates are present but real CSVs stay local", () => {
