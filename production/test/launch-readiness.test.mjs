@@ -172,12 +172,21 @@ const readyPayloadRuntime = {
   status: "pass",
   path: "production/data/payload-runtime-report.json",
   summary: {
+    checks: 8,
     missing_env: [],
+    placeholder_env: [],
+    weak_env: [],
+    route_files: 4,
     database: { status: "pass", credentials_configured: true, database: "ms_realty", host: "db.internal", port: 5432 },
   },
   checks: [
     { id: "payload_secret", status: "pass" },
     { id: "database_url", status: "pass" },
+    { id: "route:app/(payload)/payload-admin/[[...segments]]/page.js", status: "pass" },
+    { id: "route:app/(payload)/api/[...slug]/route.js", status: "pass" },
+    { id: "route:app/(payload)/graphql/route.js", status: "pass" },
+    { id: "route:app/(payload)/graphql-playground/route.js", status: "pass" },
+    { id: "payload_config_import", status: "pass" },
     { id: "database_tcp", status: "pass", credentials_configured: true, database: "ms_realty", host: "db.internal", port: 5432 },
   ],
 };
@@ -591,7 +600,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     liveServices: readyLiveServices,
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
-    payloadRuntime: { ...readyPayloadRuntime, summary: { missing_env: [], database: { status: "pass" } } },
+    payloadRuntime: { ...readyPayloadRuntime, summary: { ...readyPayloadRuntime.summary, database: { status: "pass" } } },
   });
   const weakLiveServices = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -664,6 +673,31 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
   assert.throws(() => assertLaunchReadinessReport(weakPayloadTcpTarget), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakPayloadPlaceholderHost), /localhost or placeholder/);
   assert.throws(() => assertLaunchReadinessReport(weakLiveServices), /non-example reports/);
+});
+
+test("launch readiness validator rejects weak payload runtime pass evidence", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  const seoEvidence = readySeoEvidenceFixture();
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: {
+      ...readyPayloadRuntime,
+      summary: { ...readyPayloadRuntime.summary, checks: readyPayloadRuntime.summary.checks - 1 },
+      checks: readyPayloadRuntime.checks.filter((check) => check.id !== "payload_config_import"),
+    },
+  });
+
+  assert.throws(() => assertLaunchReadinessReport(report), /payload runtime requires check payload_config_import/);
 });
 
 test("launch readiness validator rejects weak live service pass summaries", () => {

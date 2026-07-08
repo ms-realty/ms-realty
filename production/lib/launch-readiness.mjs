@@ -54,6 +54,19 @@ const REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS = [
   "meilisearch_health",
   "hermes_provider",
 ];
+const REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES = [
+  "app/(payload)/payload-admin/[[...segments]]/page.js",
+  "app/(payload)/api/[...slug]/route.js",
+  "app/(payload)/graphql/route.js",
+  "app/(payload)/graphql-playground/route.js",
+];
+const REQUIRED_PAYLOAD_RUNTIME_CHECK_IDS = [
+  "payload_secret",
+  "database_url",
+  ...REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES.map((file) => `route:${file}`),
+  "payload_config_import",
+  "database_tcp",
+];
 const REQUIRED_LAUNCH_GATE_IDS = [
   "crawl_inventory",
   "redirect_reviews",
@@ -437,6 +450,7 @@ function assertPassRuntimeEvidence(report) {
 
   const payload = gateById(report, "payload_runtime");
   if (payload?.status === "pass") {
+    const checks = new Map((payload.evidence?.checks || []).map((check) => [check.id, check]));
     const databaseTcp = payload.evidence?.checks?.find((item) => item.id === "database_tcp");
     const database = payload.evidence?.summary?.database;
     const databaseTargetMatches =
@@ -444,6 +458,18 @@ function assertPassRuntimeEvidence(report) {
       databaseTcp?.host === database?.host &&
       databaseTcp?.port === database?.port &&
       databaseTcp?.credentials_configured === database?.credentials_configured;
+    if (
+      payload.evidence?.summary?.checks !== payload.evidence?.checks?.length ||
+      payload.evidence?.summary?.missing_env?.length !== 0 ||
+      payload.evidence?.summary?.placeholder_env?.length !== 0 ||
+      payload.evidence?.summary?.weak_env?.length !== 0 ||
+      payload.evidence?.summary?.route_files !== REQUIRED_PAYLOAD_RUNTIME_ROUTE_FILES.length
+    ) {
+      throw new Error("Launch readiness payload runtime requires complete runtime summary evidence");
+    }
+    for (const id of REQUIRED_PAYLOAD_RUNTIME_CHECK_IDS) {
+      if (checks.get(id)?.status !== "pass") throw new Error(`Launch readiness payload runtime requires check ${id}`);
+    }
     if (
       payload.evidence?.status !== "pass" ||
       database?.status !== "pass" ||
