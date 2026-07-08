@@ -399,6 +399,7 @@ export function createHttpApp({
     return {
       kind: "admin_preflight_reports",
       generated_at: reviewedAt || new Date().toISOString(),
+      launch_readiness: launchBlockerSummary(currentLaunchReadiness()),
       reports: {
         seo: currentSeoPreflightReport(),
         listing_quality: buildListingQualityPreflightReport({

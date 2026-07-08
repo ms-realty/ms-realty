@@ -413,6 +413,7 @@ function preflightReports(config) {
   return {
     kind: "admin_preflight_reports",
     generated_at: generatedAt,
+    launch_readiness: launchBlockerSummary(launchReadiness(config)),
     reports: {
       seo: seoPreflightReport(config),
       listing_quality: buildListingQualityPreflightReport({

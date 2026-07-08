@@ -284,6 +284,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const preflightReportsBody = await preflightReports.json();
       assert.equal(preflightReports.status, 200);
       assert.equal(preflightReportsBody.kind, "admin_preflight_reports");
+      assert.deepEqual(preflightReportsBody.launch_readiness.blockers, launchReadinessBody.blockers);
+      assert.ok(preflightReportsBody.launch_readiness.blocked_gates.every((gate) => gate.next_actions.length > 0));
       assert.equal(preflightReportsBody.reports.seo.status, "blocked");
       assert.equal(preflightReportsBody.reports.listing_quality.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_services.status, "blocked");
