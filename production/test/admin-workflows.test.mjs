@@ -59,6 +59,9 @@ test("Hermes translation tasks are drafts until human approval and publication",
   assert.equal(task.public_indexable, false);
   assert.equal(task.hermes.can_publish, false);
   assert.match(task.hermes.prompt.rules.join(" "), /Do not describe Sandanski as a sea destination/);
+  assert.match(task.hermes.prompt.forbiddenClaims.join(" "), /Sandanski/);
+  assert.equal(task.hermes.prompt.capabilities.requires_human_approval, true);
+  assert.equal(task.hermes.prompt.seoTargets.meta_description_max_chars, 160);
 
   const approved = approveTranslationTask(registry, task, "translator_he");
   assert.equal(approved.status, "approved");

@@ -124,6 +124,18 @@ export function assertHermesDraftDispatch(dispatch) {
     if (!row.prompt?.sourceText || row.prompt.role !== "translation_draft" || !row.source_snapshot?.source_hash) {
       throw new Error("Hermes dispatch rows must include prompt and source snapshot");
     }
+    if (
+      !Array.isArray(row.prompt.toneRules) ||
+      !row.prompt.toneRules.length ||
+      !Array.isArray(row.prompt.forbiddenClaims) ||
+      !row.prompt.forbiddenClaims.length ||
+      !row.prompt.forbiddenClaims.join(" ").includes("Sandanski") ||
+      !row.prompt.seoTargets?.title_max_chars ||
+      row.prompt.capabilities?.can_publish !== false ||
+      row.prompt.capabilities?.requires_human_approval !== true
+    ) {
+      throw new Error("Hermes dispatch prompts must include reviewable tone, forbidden-claim, SEO, and approval policy");
+    }
     if (!Array.isArray(row.citations) || row.citations.length < 2) {
       throw new Error("Hermes dispatch rows must cite source content and coverage task");
     }

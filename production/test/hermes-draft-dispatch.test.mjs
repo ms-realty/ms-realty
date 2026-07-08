@@ -81,6 +81,9 @@ test("Hermes draft dispatch batches model-ready tasks without publish rights", (
   assert.equal(dispatch.rows[0].can_publish, false);
   assert.equal(dispatch.rows[0].requires_human_approval, true);
   assert.match(dispatch.rows[0].prompt.rules.join(" "), /Draft only; never publish/);
+  assert.match(dispatch.rows[0].prompt.forbiddenClaims.join(" "), /Sandanski/);
+  assert.equal(dispatch.rows[0].prompt.seoTargets.title_max_chars, 60);
+  assert.equal(dispatch.rows[0].prompt.capabilities.can_mark_indexable, false);
   assert.equal(dispatch.rows[0].citations.length, 2);
 });
 

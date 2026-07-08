@@ -1,6 +1,12 @@
 const MUTATING_ACTIONS = new Set(["publish", "send_message", "mark_indexable", "change_price", "change_redirect"]);
 const SANDANSKI_SEA_TOKENS = ["sea", "seaside", "coast", "coastal", "beach", "море", "морски", "плаж", "θάλασσα", "παραλία", "ים", "חוף"];
 const LEGAL_CLAIM_TOKENS = ["tax", "legal", "mortgage", "financing", "visa", "residency", "notary", "данък", "ипотека", "правн", "налог", "ипотек", "юрид", "φόρος", "νομικ", "משכנת", "מס", "חוק"];
+const DEFAULT_TONE_RULES = ["Professional real-estate broker tone.", "Factual and concise; no hype or unverifiable claims."];
+const FORBIDDEN_CLAIMS = [
+  "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+  "Do not invent legal, tax, financing, residency, valuation, or availability claims.",
+];
+const DEFAULT_SEO_TARGETS = { title_max_chars: 60, meta_description_min_chars: 120, meta_description_max_chars: 160 };
 
 export function assertHermesActionAllowed(action) {
   if (MUTATING_ACTIONS.has(action)) {
@@ -9,10 +15,19 @@ export function assertHermesActionAllowed(action) {
   return true;
 }
 
-export function translationPrompt({ sourceLocale, targetLocale, sourceText, propertyFacts = {}, glossary = {} }) {
+export function translationPrompt({
+  sourceLocale,
+  targetLocale,
+  sourceText,
+  propertyFacts = {},
+  glossary = {},
+  toneRules = DEFAULT_TONE_RULES,
+  seoTargets = DEFAULT_SEO_TARGETS,
+}) {
   if (!sourceLocale || !targetLocale || !sourceText) {
     throw new Error("sourceLocale, targetLocale, and sourceText are required");
   }
+  const targets = { ...DEFAULT_SEO_TARGETS, ...seoTargets };
   return {
     role: "translation_draft",
     sourceLocale,
@@ -20,12 +35,21 @@ export function translationPrompt({ sourceLocale, targetLocale, sourceText, prop
     sourceText,
     propertyFacts,
     glossary,
+    toneRules: [...toneRules],
+    forbiddenClaims: [...FORBIDDEN_CLAIMS],
+    seoTargets: targets,
+    capabilities: {
+      can_publish: false,
+      can_mark_indexable: false,
+      requires_human_approval: true,
+    },
     rules: [
       "Draft only; never publish.",
       "Preserve price, area, property ID, location, availability, and contact facts exactly.",
       "Do not describe Sandanski as a sea destination.",
       "Legal, tax, financing, and valuation claims require approved CMS source content.",
-      "Return SEO title and meta description drafts within normal search-result lengths.",
+      `Return SEO title drafts at or below ${targets.title_max_chars} characters.`,
+      `Return meta description drafts between ${targets.meta_description_min_chars} and ${targets.meta_description_max_chars} characters.`,
     ],
   };
 }

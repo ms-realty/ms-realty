@@ -5233,12 +5233,31 @@
                 "location": "Sandanski"
               },
               "glossary": {},
+              "toneRules": [
+                "Professional real-estate broker tone.",
+                "Factual and concise; no hype or unverifiable claims."
+              ],
+              "forbiddenClaims": [
+                "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+                "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+              ],
+              "seoTargets": {
+                "title_max_chars": 60,
+                "meta_description_min_chars": 120,
+                "meta_description_max_chars": 160
+              },
+              "capabilities": {
+                "can_publish": false,
+                "can_mark_indexable": false,
+                "requires_human_approval": true
+              },
               "rules": [
                 "Draft only; never publish.",
                 "Preserve price, area, property ID, location, availability, and contact facts exactly.",
                 "Do not describe Sandanski as a sea destination.",
                 "Legal, tax, financing, and valuation claims require approved CMS source content.",
-                "Return SEO title and meta description drafts within normal search-result lengths."
+                "Return SEO title drafts at or below 60 characters.",
+                "Return meta description drafts between 120 and 160 characters."
               ]
             },
             "output": null,
@@ -10843,12 +10862,31 @@
             "location": "Sandanski"
           },
           "glossary": {},
+          "toneRules": [
+            "Professional real-estate broker tone.",
+            "Factual and concise; no hype or unverifiable claims."
+          ],
+          "forbiddenClaims": [
+            "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+            "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+          ],
+          "seoTargets": {
+            "title_max_chars": 60,
+            "meta_description_min_chars": 120,
+            "meta_description_max_chars": 160
+          },
+          "capabilities": {
+            "can_publish": false,
+            "can_mark_indexable": false,
+            "requires_human_approval": true
+          },
           "rules": [
             "Draft only; never publish.",
             "Preserve price, area, property ID, location, availability, and contact facts exactly.",
             "Do not describe Sandanski as a sea destination.",
             "Legal, tax, financing, and valuation claims require approved CMS source content.",
-            "Return SEO title and meta description drafts within normal search-result lengths."
+            "Return SEO title drafts at or below 60 characters.",
+            "Return meta description drafts between 120 and 160 characters."
           ]
         },
         "output": null,
@@ -10899,12 +10937,31 @@
             "location": "Sandanski"
           },
           "glossary": {},
+          "toneRules": [
+            "Professional real-estate broker tone.",
+            "Factual and concise; no hype or unverifiable claims."
+          ],
+          "forbiddenClaims": [
+            "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+            "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+          ],
+          "seoTargets": {
+            "title_max_chars": 60,
+            "meta_description_min_chars": 120,
+            "meta_description_max_chars": 160
+          },
+          "capabilities": {
+            "can_publish": false,
+            "can_mark_indexable": false,
+            "requires_human_approval": true
+          },
           "rules": [
             "Draft only; never publish.",
             "Preserve price, area, property ID, location, availability, and contact facts exactly.",
             "Do not describe Sandanski as a sea destination.",
             "Legal, tax, financing, and valuation claims require approved CMS source content.",
-            "Return SEO title and meta description drafts within normal search-result lengths."
+            "Return SEO title drafts at or below 60 characters.",
+            "Return meta description drafts between 120 and 160 characters."
           ]
         },
         "output": null,
@@ -10989,12 +11046,31 @@
                 "location": "Sandanski"
               },
               "glossary": {},
+              "toneRules": [
+                "Professional real-estate broker tone.",
+                "Factual and concise; no hype or unverifiable claims."
+              ],
+              "forbiddenClaims": [
+                "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+                "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+              ],
+              "seoTargets": {
+                "title_max_chars": 60,
+                "meta_description_min_chars": 120,
+                "meta_description_max_chars": 160
+              },
+              "capabilities": {
+                "can_publish": false,
+                "can_mark_indexable": false,
+                "requires_human_approval": true
+              },
               "rules": [
                 "Draft only; never publish.",
                 "Preserve price, area, property ID, location, availability, and contact facts exactly.",
                 "Do not describe Sandanski as a sea destination.",
                 "Legal, tax, financing, and valuation claims require approved CMS source content.",
-                "Return SEO title and meta description drafts within normal search-result lengths."
+                "Return SEO title drafts at or below 60 characters.",
+                "Return meta description drafts between 120 and 160 characters."
               ]
             },
             "output": null,
@@ -11043,12 +11119,31 @@
                 "location": "Sandanski"
               },
               "glossary": {},
+              "toneRules": [
+                "Professional real-estate broker tone.",
+                "Factual and concise; no hype or unverifiable claims."
+              ],
+              "forbiddenClaims": [
+                "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+                "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+              ],
+              "seoTargets": {
+                "title_max_chars": 60,
+                "meta_description_min_chars": 120,
+                "meta_description_max_chars": 160
+              },
+              "capabilities": {
+                "can_publish": false,
+                "can_mark_indexable": false,
+                "requires_human_approval": true
+              },
               "rules": [
                 "Draft only; never publish.",
                 "Preserve price, area, property ID, location, availability, and contact facts exactly.",
                 "Do not describe Sandanski as a sea destination.",
                 "Legal, tax, financing, and valuation claims require approved CMS source content.",
-                "Return SEO title and meta description drafts within normal search-result lengths."
+                "Return SEO title drafts at or below 60 characters.",
+                "Return meta description drafts between 120 and 160 characters."
               ]
             },
             "output": null,

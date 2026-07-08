@@ -133,15 +133,16 @@ test("translation workflow marks stale content and human approval explicitly", (
 test("Hermes can draft translations but cannot publish or send", () => {
   assert.equal(assertHermesActionAllowed("draft_translation"), true);
   assert.throws(() => assertHermesActionAllowed("publish"), /cannot perform/);
-  assert.match(
-    translationPrompt({
-      sourceLocale: "bg",
-      targetLocale: "he",
-      sourceText: "Светъл апартамент в Сандански.",
-      propertyFacts: { location: "Sandanski" },
-    }).rules.join(" "),
-    /Sandanski/,
-  );
+  const prompt = translationPrompt({
+    sourceLocale: "bg",
+    targetLocale: "he",
+    sourceText: "Светъл апартамент в Сандански.",
+    propertyFacts: { location: "Sandanski" },
+  });
+  assert.match(prompt.rules.join(" "), /Sandanski/);
+  assert.match(prompt.forbiddenClaims.join(" "), /Sandanski/);
+  assert.equal(prompt.seoTargets.title_max_chars, 60);
+  assert.equal(prompt.capabilities.can_publish, false);
   const draft = validateHermesTranslationDraft({
     propertyFacts: { id: "MS-1", location: "Sandanski" },
     sourceSnapshot: { source_hash: "source-1" },
