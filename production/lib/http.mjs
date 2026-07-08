@@ -400,6 +400,11 @@ export function createHttpApp({
     return {
       kind: "admin_preflight_reports",
       generated_at: reviewedAt || new Date().toISOString(),
+      checklist: {
+        endpoint: "/api/admin/launch-input-checklist",
+        path: "production/data/launch-input-checklist.md",
+        refresh_command: "npm run launch:inputs",
+      },
       launch_readiness: launchBlockerSummary(currentLaunchReadiness()),
       reports: {
         seo: currentSeoPreflightReport(),

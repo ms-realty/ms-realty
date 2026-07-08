@@ -415,6 +415,11 @@ function preflightReports(config) {
   return {
     kind: "admin_preflight_reports",
     generated_at: generatedAt,
+    checklist: {
+      endpoint: "/api/admin/launch-input-checklist",
+      path: "production/data/launch-input-checklist.md",
+      refresh_command: "npm run launch:inputs",
+    },
     launch_readiness: launchBlockerSummary(launchReadiness(config)),
     reports: {
       seo: seoPreflightReport(config),

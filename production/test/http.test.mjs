@@ -1029,6 +1029,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(preflightReportsUnauthorized.status, 401);
   assert.equal(preflightReports.status, 200);
   assert.equal(preflightReports.body.kind, "admin_preflight_reports");
+  assert.equal(preflightReports.body.checklist.endpoint, "/api/admin/launch-input-checklist");
+  assert.equal(preflightReports.body.checklist.path, "production/data/launch-input-checklist.md");
+  assert.equal(preflightReports.body.checklist.refresh_command, "npm run launch:inputs");
   assert.deepEqual(preflightReports.body.launch_readiness.blockers, review.body.launchBlockers.blockers);
   assert.ok(preflightReports.body.launch_readiness.blocked_gates.every((gate) => gate.next_actions.length > 0));
   assert.equal(preflightReports.body.reports.seo.status, "blocked");

@@ -9203,7 +9203,7 @@
             "message": "Human listing quality review CSV is required before launch.",
             "next_actions": [
               "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
-              "Import a complete human-reviewed CSV through /api/admin/listing-quality/import."
+              "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight."
             ]
           },
           {
@@ -9211,7 +9211,7 @@
             "message": "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
             "next_actions": [
               "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
-              "Import or mount the three live service reports before launch."
+              "Import or mount the three live service reports, then run npm run live:preflight before launch."
             ]
           },
           {
@@ -9219,7 +9219,7 @@
             "message": "Payload runtime report must pass before final production readiness.",
             "next_actions": [
               "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
-              "Run npm run payload:runtime and import the redacted report through /api/admin/payload-runtime/import."
+              "Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight."
             ]
           }
         ]
