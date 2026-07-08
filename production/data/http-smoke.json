@@ -8797,6 +8797,20 @@
           "yandex_webmaster",
           "backlinks"
         ],
+        "requiredSourceDomains": [
+          "makler-realty.com",
+          "makler-realty.ru"
+        ],
+        "crawlCoverage": {
+          "urls": 457,
+          "urlTypes": {
+            "page": 104,
+            "post": 42,
+            "taxonomy": 146,
+            "listing": 165
+          },
+          "urlsWithAnyEvidence": 2
+        },
         "sources": {
           "search_console": {
             "source": "search_console",

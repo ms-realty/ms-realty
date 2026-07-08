@@ -1425,6 +1425,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.match(template.body, /url,clicks,impressions,position/);
   assert.equal(badTemplate.status, 400);
   assert.equal(searchConsole.status, 201);
+  assert.equal(searchConsole.body.crawlCoverage.urls, 457);
+  assert.deepEqual(searchConsole.body.crawlCoverage.urlTypes, { page: 104, post: 42, taxonomy: 146, listing: 165 });
+  assert.equal(searchConsole.body.crawlCoverage.urlsWithAnyEvidence, 3);
+  assert.deepEqual(searchConsole.body.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);
   assert.deepEqual(searchConsole.body.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
   assert.deepEqual(searchConsole.body.sources.search_console.matched_source_domains, [
     "makler-realty.com",
@@ -1444,6 +1448,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(review.body.seoEvidence.importEndpoint, "/api/admin/seo-evidence/import");
   assert.equal(review.body.seoEvidence.templateEndpoint, "/api/admin/seo-evidence/template");
   assert.equal(review.body.seoEvidence.exportEndpoint, "/api/admin/seo-evidence/export");
+  assert.equal(review.body.seoEvidence.crawlCoverage.urls, 457);
+  assert.deepEqual(review.body.seoEvidence.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);
   assert.deepEqual(review.body.seoEvidence.missingRequiredSources, []);
   assert.equal(reviewHtml.body.includes('data-seo-import-endpoint="/api/admin/seo-evidence/import"'), true);
   assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);

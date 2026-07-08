@@ -56,6 +56,7 @@ import {
   writeExternalSeoExport,
   writeSeoEvidence,
 } from "./seo-evidence.mjs";
+import { REQUIRED_SOURCE_DOMAINS } from "./seo-evidence-contract.mjs";
 import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
@@ -230,6 +231,12 @@ function listingEditInput(request) {
 function seoEvidencePayload(seoEvidence) {
   return {
     missingRequiredSources: seoEvidence.summary.missing_required_sources,
+    requiredSourceDomains: REQUIRED_SOURCE_DOMAINS,
+    crawlCoverage: {
+      urls: seoEvidence.summary.crawl_urls,
+      urlTypes: seoEvidence.summary.url_types,
+      urlsWithAnyEvidence: seoEvidence.summary.urls_with_any_evidence,
+    },
     sources: seoEvidence.summary.sources,
     importEndpoint: "/api/admin/seo-evidence/import",
     templateEndpoint: "/api/admin/seo-evidence/template",

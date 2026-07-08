@@ -513,6 +513,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const seoEvidenceBody = await seoEvidence.json();
       assert.equal(seoEvidence.status, 200);
       assert.ok(seoEvidenceBody.missingRequiredSources.includes("search_console"));
+      assert.equal(seoEvidenceBody.crawlCoverage.urls, 457);
+      assert.deepEqual(seoEvidenceBody.crawlCoverage.urlTypes, { page: 104, post: 42, taxonomy: 146, listing: 165 });
+      assert.deepEqual(seoEvidenceBody.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);
       assert.equal(seoEvidenceBody.sources.privacy_events.status, "imported");
       assert.equal(seoEvidenceBody.exportEndpoint, "/api/admin/seo-evidence/export");
 
@@ -547,6 +550,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const seoImportBody = await seoImport.json();
       assert.equal(seoImport.status, 201);
       assert.equal(seoImportBody.imported.row_count, 2);
+      assert.equal(seoImportBody.crawlCoverage.urls, 457);
+      assert.deepEqual(seoImportBody.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);
       assert.equal(seoImportBody.sources.search_console.status, "imported");
       assert.ok(!seoImportBody.missingRequiredSources.includes("search_console"));
       assert.equal(fs.existsSync(seoEvidenceOutputPath), true);

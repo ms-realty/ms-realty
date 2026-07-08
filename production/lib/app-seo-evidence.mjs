@@ -248,6 +248,12 @@ function updateEvidenceCounts(evidence) {
 function evidencePayload(evidence) {
   return {
     missingRequiredSources: evidence.summary.missing_required_sources,
+    requiredSourceDomains: REQUIRED_SOURCE_DOMAINS,
+    crawlCoverage: {
+      urls: evidence.summary.crawl_urls,
+      urlTypes: evidence.summary.url_types,
+      urlsWithAnyEvidence: evidence.summary.urls_with_any_evidence,
+    },
     sources: evidence.summary.sources,
     importEndpoint: "/api/admin/seo-evidence/import",
     templateEndpoint: "/api/admin/seo-evidence/template",
