@@ -232,6 +232,22 @@ test("Payload runtime report requires the full launch check set", async () => {
     /known statuses/,
   );
   assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id === "payload_secret" ? { ...check, env: "DATABASE_URL" } : check)),
+      }),
+    /payload_secret check must reference PAYLOAD_SECRET/,
+  );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id === "database_url" ? { ...check, env: "PAYLOAD_SECRET" } : check)),
+      }),
+    /database_url check must reference DATABASE_URL/,
+  );
+  assert.throws(
     () => assertPayloadRuntimeReport({ ...report, summary: { ...report.summary, missing_env: [] } }),
     /missing env summary/,
   );

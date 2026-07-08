@@ -22,6 +22,10 @@ const REQUIRED_CHECK_IDS = [
 const REQUIRED_CHECK_ID_SET = new Set(REQUIRED_CHECK_IDS);
 const PAYLOAD_RUNTIME_CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "weak_secret", "fail"]);
 const PAYLOAD_RUNTIME_SECRET_FIELD_NAMES = new Set(["apikey", "authorization", "databaseurl", "password", "payloadsecret", "secret", "token"]);
+const REQUIRED_ENV_BY_CHECK = {
+  payload_secret: "PAYLOAD_SECRET",
+  database_url: "DATABASE_URL",
+};
 
 function check(id, status, evidence = {}) {
   return { id, status, ...evidence };
@@ -197,6 +201,9 @@ export function assertPayloadRuntimeReport(report) {
     if (!REQUIRED_CHECK_ID_SET.has(item.id)) throw new Error(`Payload runtime report has unknown check ${item.id}`);
     if (!PAYLOAD_RUNTIME_CHECK_STATUSES.has(item.status)) throw new Error("Payload runtime report checks must use known statuses");
     if (checkIds.has(item.id)) throw new Error(`Payload runtime report has duplicate check ${item.id}`);
+    if (REQUIRED_ENV_BY_CHECK[item.id] && item.env !== REQUIRED_ENV_BY_CHECK[item.id]) {
+      throw new Error(`Payload runtime report ${item.id} check must reference ${REQUIRED_ENV_BY_CHECK[item.id]}`);
+    }
     checkIds.add(item.id);
   }
   for (const id of REQUIRED_CHECK_IDS) {
