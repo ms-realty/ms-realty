@@ -886,6 +886,18 @@ export function assertLiveServicePreflightReport(report) {
   const ready = report.reports.every((item) => item.status === "pass");
   if (report.ready !== ready) throw new Error("Live service preflight ready flag must match reports");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Live service preflight status must match ready flag");
+  if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
+    throw new Error("Live service preflight report must include next actions");
+  }
+  if (!ready && !report.next_actions.some((action) => action.includes("live:preflight"))) {
+    throw new Error("Live service preflight blocked report must point to live:preflight");
+  }
+  if (
+    ready &&
+    !report.next_actions.some((action) => action.includes("live:preflight") && action.includes("launch:preflight"))
+  ) {
+    throw new Error("Live service preflight ready report must point to live:preflight before launch:preflight");
+  }
   if (report.summary.report_count !== report.reports.length) {
     throw new Error("Live service preflight summary must count reports");
   }

@@ -1267,7 +1267,17 @@ test("live service report preflight fails missing reports and passes valid repor
 
   const readyReport = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z", ...paths });
   assert.equal(assertLiveServicePreflightReport(readyReport), true);
-  assert.match(readyReport.next_actions.join(" "), /npm run live:preflight/);
+  assert.ok(
+    readyReport.next_actions.some((action) => action.includes("live:preflight") && action.includes("launch:preflight")),
+  );
+  assert.throws(
+    () =>
+      assertLiveServicePreflightReport({
+        ...readyReport,
+        next_actions: ["Run npm run launch:preflight with the same mounted live report paths."],
+      }),
+    /live:preflight before launch:preflight/,
+  );
   const duplicateSourceReport = {
     ...readyReport,
     reports: readyReport.reports.map((report, index) =>
@@ -1398,6 +1408,11 @@ test("live service report preflight fails missing reports and passes valid repor
 test("live service preflight report rejects hand-edited status counts", () => {
   const report = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z" });
   assert.throws(() => assertLiveServicePreflightReport({ ...report, generated_at: "" }), /valid generated_at/);
+  assert.throws(() => assertLiveServicePreflightReport({ ...report, next_actions: [] }), /next actions/);
+  assert.throws(
+    () => assertLiveServicePreflightReport({ ...report, next_actions: ["Provision services."] }),
+    /live:preflight/,
+  );
   assert.throws(
     () =>
       assertLiveServicePreflightReport({
