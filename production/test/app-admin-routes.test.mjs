@@ -293,6 +293,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
       assert.ok(preflightReportsBody.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
       assert.equal(preflightReportsBody.reports.payload_runtime.status, "missing_report");
+      assert.ok(preflightReportsBody.reports.payload_runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
 
       const seoPreflight = await seoPreflightRoute.GET(new Request("https://example.test/api/admin/seo-preflight", { headers: auth }));
       const seoPreflightBody = await seoPreflight.json();
@@ -324,6 +325,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(payloadRuntime.status, 200);
       assert.equal(payloadRuntimeBody.kind, "admin_payload_runtime");
       assert.equal(payloadRuntimeBody.runtime.status, "missing_report");
+      assert.ok(payloadRuntimeBody.runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
 
       const payloadRuntimeBootstrap = await payloadRuntimeBootstrapRoute.GET(
         new Request("https://example.test/api/admin/payload-runtime-bootstrap", { headers: auth }),

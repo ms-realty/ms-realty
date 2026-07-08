@@ -8,6 +8,7 @@ import {
   assertPayloadRuntimeReport,
   buildPayloadRuntimeReport,
 } from "../lib/payload-runtime.mjs";
+import { payloadRuntimeState } from "../lib/launch-readiness.mjs";
 
 test("Payload config exposes generated CMS collections behind an admin runtime", async () => {
   const resolved = await config;
@@ -45,15 +46,23 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
 
 test("Payload runtime preflight CLI explains missing report remediation", () => {
   const missingPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-cli-`)}/payload-runtime-report.json`;
+  const missingState = payloadRuntimeState(missingPath);
   const result = spawnSync(process.execPath, ["production/scripts/validate-payload-runtime-report.mjs"], {
     cwd: process.cwd(),
     encoding: "utf8",
     env: { ...process.env, MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: missingPath },
   });
 
+  assert.equal(missingState.status, "missing_report");
+  assert.ok(missingState.next_actions.some((action) => action.includes("payload:bootstrap")));
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /PAYLOAD RUNTIME PREFLIGHT FAILED: missing_report/);
   assert.match(result.stderr, /Next: run `npm run payload:bootstrap`/);
+
+  fs.writeFileSync(missingPath, "{}\n");
+  const invalidState = payloadRuntimeState(missingPath);
+  assert.equal(invalidState.status, "invalid_report");
+  assert.ok(invalidState.next_actions.some((action) => action.includes("payload:runtime")));
 });
 
 test("Payload runtime generator explains blocked remediation", () => {

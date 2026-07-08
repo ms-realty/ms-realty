@@ -367,7 +367,13 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
   assert.equal(assertLiveServiceProvisioningReport(JSON.parse(written)), true);
   assert.equal(liveServiceProvisioningState(outPath).status, "pass");
   assert.ok(liveServiceProvisioningState(outPath).next_actions.some((action) => action.includes("live:capture")));
-  assert.equal(liveServiceProvisioningState(`${dir}/missing.json`).status, "missing_report");
+  const missingState = liveServiceProvisioningState(`${dir}/missing.json`);
+  assert.equal(missingState.status, "missing_report");
+  assert.ok(missingState.next_actions.some((action) => action.includes("live:provisioning")));
+  fs.writeFileSync(`${dir}/invalid.json`, "{}\n");
+  const invalidState = liveServiceProvisioningState(`${dir}/invalid.json`);
+  assert.equal(invalidState.status, "invalid_report");
+  assert.ok(invalidState.next_actions.some((action) => action.includes("live:provisioning")));
 
   const cliOutPath = `${dir}/cli-live-service-provisioning-report.json`;
   const cli = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-live-service-provisioning-report.mjs")], {

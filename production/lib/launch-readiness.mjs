@@ -559,8 +559,19 @@ export function liveServiceReports({
   ];
 }
 
+const PAYLOAD_RUNTIME_MISSING_REPORT_ACTIONS = [
+  "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
+  "Run npm run payload:runtime, then npm run payload:preflight.",
+];
+const PAYLOAD_RUNTIME_INVALID_REPORT_ACTIONS = [
+  "Regenerate the Payload runtime report with npm run payload:runtime.",
+  "Run npm run payload:preflight before launch:preflight.",
+];
+
 export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT) {
-  if (!fs.existsSync(reportPath)) return { status: "missing_report", path: reportPath };
+  if (!fs.existsSync(reportPath)) {
+    return { status: "missing_report", path: reportPath, next_actions: PAYLOAD_RUNTIME_MISSING_REPORT_ACTIONS };
+  }
   try {
     const report = readJson(reportPath);
     assertPayloadRuntimeReport(report);
@@ -572,7 +583,12 @@ export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT)
       next_actions: report.next_actions,
     };
   } catch (error) {
-    return { status: "invalid_report", path: reportPath, error: error.message };
+    return {
+      status: "invalid_report",
+      path: reportPath,
+      error: error.message,
+      next_actions: PAYLOAD_RUNTIME_INVALID_REPORT_ACTIONS,
+    };
   }
 }
 

@@ -301,8 +301,19 @@ export function assertLiveServiceProvisioningReport(report) {
   return true;
 }
 
+const LIVE_SERVICE_PROVISIONING_MISSING_REPORT_ACTIONS = [
+  "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
+  "Run npm run live:provisioning, then npm run live:provisioning:preflight.",
+];
+const LIVE_SERVICE_PROVISIONING_INVALID_REPORT_ACTIONS = [
+  "Regenerate the live service provisioning report with npm run live:provisioning.",
+  "Run npm run live:provisioning:preflight before live:capture.",
+];
+
 export function liveServiceProvisioningState(reportPath = DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT) {
-  if (!fs.existsSync(reportPath)) return { status: "missing_report", path: reportPath };
+  if (!fs.existsSync(reportPath)) {
+    return { status: "missing_report", path: reportPath, next_actions: LIVE_SERVICE_PROVISIONING_MISSING_REPORT_ACTIONS };
+  }
   try {
     const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
     assertLiveServiceProvisioningReport(report);
@@ -315,7 +326,7 @@ export function liveServiceProvisioningState(reportPath = DEFAULT_LIVE_SERVICE_P
       next_actions: report.next_actions,
     };
   } catch (error) {
-    return { status: "invalid_report", path: reportPath, error: error.message };
+    return { status: "invalid_report", path: reportPath, error: error.message, next_actions: LIVE_SERVICE_PROVISIONING_INVALID_REPORT_ACTIONS };
   }
 }
 
