@@ -110,3 +110,63 @@ export function assertSeoEvidence(evidence) {
   }
   return true;
 }
+
+function seoPreflightSourceSummaries(sourceSummaries) {
+  return Object.fromEntries(
+    [...REQUIRED_EXPORTS, "analytics_export", "privacy_events"]
+      .filter((source) => sourceSummaries[source])
+      .map((source) => [source, sourceSummaries[source]]),
+  );
+}
+
+export function buildSeoEvidencePreflightReportFromEvidence(evidence) {
+  assertSeoEvidence(evidence);
+  const missing = evidence.summary.missing_required_sources;
+  return {
+    generated_at: evidence.generated_at,
+    ready: missing.length === 0,
+    status: missing.length ? "blocked" : "ready",
+    summary: {
+      crawl_urls: evidence.summary.crawl_urls,
+      urls_with_any_evidence: evidence.summary.urls_with_any_evidence,
+      missing_required_sources: missing,
+      sources: seoPreflightSourceSummaries(evidence.summary.sources),
+    },
+    next_actions: missing.length
+      ? [
+          "Export Search Console, Yandex Webmaster, and backlink CSVs for both legacy domains.",
+          "Place them in migration/external/seo or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR.",
+          "Run npm run seo:preflight before launch:preflight.",
+        ]
+      : ["Run npm run launch:preflight with the same SEO evidence input path."],
+  };
+}
+
+export function assertSeoEvidencePreflightReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("SEO preflight report must include valid generated_at");
+  }
+  if (!report.summary || !Array.isArray(report.summary.missing_required_sources)) {
+    throw new Error("SEO preflight report must summarize missing required sources");
+  }
+  const sourceStatuses = {};
+  for (const source of REQUIRED_EXPORTS) {
+    const sourceStatus = report.summary.sources?.[source];
+    if (!sourceStatus) throw new Error(`SEO preflight report missing ${source} source status`);
+    assertSeoSourceSummary(sourceStatus, source);
+    sourceStatuses[source] = sourceStatus;
+  }
+  const ready = report.summary.missing_required_sources.length === 0;
+  if (report.ready !== ready) throw new Error("SEO preflight ready flag must match missing required sources");
+  if (report.status !== (ready ? "ready" : "blocked")) throw new Error("SEO preflight status must match ready flag");
+  for (const source of REQUIRED_EXPORTS) {
+    if (ready && missingRequiredExport(sourceStatuses[source])) {
+      throw new Error(`SEO preflight ready report requires complete ${source} evidence`);
+    }
+  }
+  const expectedMissing = missingRequiredSources({ ...report.summary.sources, ...sourceStatuses });
+  if (report.summary.missing_required_sources.join("|") !== expectedMissing.join("|")) {
+    throw new Error("SEO preflight missing required sources must match source statuses");
+  }
+  return true;
+}

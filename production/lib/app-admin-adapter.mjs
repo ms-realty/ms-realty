@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
-import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence.mjs";
+import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
 import {
   approveTranslationTask,
   createTranslationReviewTask,
