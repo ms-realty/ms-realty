@@ -430,6 +430,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         },
         generatedAt: "2026-07-06T00:00:00Z",
       });
+      const blockedPayloadRuntimeReport = await buildPayloadRuntimeReport({
+        env: {},
+        generatedAt: "2026-07-06T00:00:00Z",
+      });
       const localPayloadRuntimeReport = {
         ...payloadRuntimeReport,
         summary: { ...payloadRuntimeReport.summary, database: { ...payloadRuntimeReport.summary.database, host: "127.0.0.1" } },
@@ -437,6 +441,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           check.id === "database_tcp" ? { ...check, host: "127.0.0.1" } : check,
         ),
       };
+      const payloadImportBlocked = await payloadRuntimeImportRoute.POST(
+        new Request("https://example.test/api/admin/payload-runtime/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify(blockedPayloadRuntimeReport),
+        }),
+      );
       const payloadImportLocal = await payloadRuntimeImportRoute.POST(
         new Request("https://example.test/api/admin/payload-runtime/import", {
           method: "POST",
@@ -452,7 +463,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         }),
       );
       const payloadImportBody = await payloadImport.json();
+      const payloadImportBlockedBody = await payloadImportBlocked.json();
       const payloadImportLocalBody = await payloadImportLocal.json();
+      assert.equal(payloadImportBlocked.status, 202);
+      assert.equal(payloadImportBlockedBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "blocked");
       assert.equal(payloadImportLocal.status, 400);
       assert.match(payloadImportLocalBody.message, /localhost or placeholder/);
       assert.equal(payloadImport.status, 201);
@@ -881,7 +895,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.deepEqual(actionCounts(auditRows), {
         locale_created: 1,
         live_service_report_imported: 1,
-        payload_runtime_report_imported: 1,
+        payload_runtime_report_imported: 2,
         seo_evidence_imported: 1,
         launch_readiness_exported: 1,
         redirect_approval_created: 1,

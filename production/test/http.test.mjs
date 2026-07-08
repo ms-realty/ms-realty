@@ -1304,6 +1304,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     },
     generatedAt: "2026-07-06T00:00:00Z",
   });
+  const blockedPayloadReport = await buildPayloadRuntimeReport({
+    env: {},
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
   writeLiveServiceProvisioningReport(
     await buildLiveServiceProvisioningReport({
       env: {
@@ -1462,6 +1466,12 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     headers: { authorization: "Bearer local-admin-smoke" },
     body: hermesReport,
   });
+  const payloadBlockedImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/payload-runtime/import",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: blockedPayloadReport,
+  });
   const payloadImport = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/payload-runtime/import",
@@ -1541,6 +1551,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(liveHermesImport.status, 201);
   assert.equal(liveHermesImport.body.livePreflight.ready, true);
   assert.equal(liveHermesImport.body.livePreflight.summary.pass, 3);
+  assert.equal(payloadBlockedImport.status, 202);
+  assert.equal(payloadBlockedImport.body.report.gates.find((gate) => gate.id === "payload_runtime").status, "blocked");
   assert.equal(payloadImport.status, 201);
   assert.equal(payloadImport.body.imported.outPath, payloadRuntimeReportPath);
   assert.equal(fs.existsSync(searchSyncReportPath), true);

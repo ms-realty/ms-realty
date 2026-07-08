@@ -785,7 +785,7 @@ export function createHttpApp({
           objectId: "payload-runtime",
           metadata: { status: report.status, out_path: outPath },
         });
-        return adminJson(201, { imported: { outPath, summary: report.summary }, report: currentLaunchReadiness() });
+        return adminJson(report.ready ? 201 : 202, { imported: { outPath, summary: report.summary }, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

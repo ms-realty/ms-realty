@@ -1059,7 +1059,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
-      return jsonResponse(201, importPayloadRuntimeReport(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+      const report = parseJsonBody(await readRequestBody(request, config.maxBodyBytes));
+      return jsonResponse(report.ready ? 201 : 202, importPayloadRuntimeReport(report, config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
       return jsonResponse(201, importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config));
