@@ -46,6 +46,11 @@ function sourceDomainSampleLines(seoEvidence) {
   }).join("\n");
 }
 
+function missingSeoSourcesLine(evidence) {
+  const missing = Array.isArray(evidence.missing_required_sources) ? evidence.missing_required_sources : [];
+  return missing.length ? missing.join(", ") : "none";
+}
+
 function liveServiceReportLine(report) {
   const details = [
     report.path ? `path ${report.path}` : "",
@@ -114,6 +119,8 @@ export function renderLaunchInputChecklist({
   const liveServiceEvidence = liveServiceGate?.evidence || {};
   const listingQualityGate = launchReadiness.gates.find((gate) => gate.id === "listing_quality_review");
   const listingReviewEvidence = listingQualityGate?.evidence || {};
+  const seoGate = launchReadiness.gates.find((gate) => gate.id === "external_seo_exports");
+  const seoGateEvidence = seoGate?.evidence || {};
 
   return `# Launch Input Checklist
 
@@ -138,6 +145,7 @@ Blockers: ${launchReadiness.blockers.join(", ") || "none"}
 
 ## External SEO Exports
 
+- Missing required sources: ${missingSeoSourcesLine(seoGateEvidence)}
 ${["search_console", "yandex_webmaster", "backlinks"].map((source) => sourceLine(source, seoEvidence.summary)).join("\n")}
 
 - Minimum required domain coverage:

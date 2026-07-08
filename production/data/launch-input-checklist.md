@@ -21,6 +21,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 
 ## External SEO Exports
 
+- Missing required sources: search_console, yandex_webmaster, backlinks
 - `migration/external/seo/search-console.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none
 - `migration/external/seo/yandex-webmaster.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none
 - `migration/external/seo/backlinks.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none
