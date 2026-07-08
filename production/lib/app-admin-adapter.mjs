@@ -19,6 +19,7 @@ import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
+  launchBlockerSummary,
   liveServiceReports,
   payloadRuntimeState,
   readLiveServiceReportTemplate,
@@ -436,6 +437,7 @@ function migrationReviewPayload(registry, url, config) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
   const reviewRequired = routes.filter((route) => route.review_required);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
+  const readiness = launchReadiness(config);
   return {
     kind: "admin_migration_review",
     status: 200,
@@ -474,6 +476,7 @@ function migrationReviewPayload(registry, url, config) {
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityReviewDraftEndpoint: "/api/admin/listing-quality-review-draft",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
+    launchBlockers: launchBlockerSummary(readiness),
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",

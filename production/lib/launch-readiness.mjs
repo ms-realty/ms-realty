@@ -58,6 +58,10 @@ const REQUIRED_LAUNCH_GATE_IDS = [
   "payload_runtime",
 ];
 const BLOCKED_GATE_NEXT_ACTIONS = {
+  redirect_reviews: [
+    "Download /api/admin/redirect-approval-workbook?pending=1 for unresolved legacy listing redirects.",
+    "Import reviewed same-content approvals through /api/admin/redirect-approvals/import.",
+  ],
   external_seo_exports: [
     "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
     "Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.",
@@ -447,6 +451,20 @@ export function publicLaunchReadinessPayload(report) {
     launch_ready: report.launch_ready,
     blockers: report.blockers || blockedGates.map((item) => item.id),
     blocked_gates: blockedGates,
+  };
+}
+
+export function launchBlockerSummary(report) {
+  const blockedGates = (report.gates || []).filter((item) => item.status === "blocked");
+  return {
+    status: report.launch_ready ? "ready" : "blocked",
+    launch_ready: report.launch_ready,
+    blockers: report.blockers || blockedGates.map((item) => item.id),
+    blocked_gates: blockedGates.map((item) => ({
+      id: item.id,
+      message: item.message || "",
+      next_actions: item.next_actions || [],
+    })),
   };
 }
 

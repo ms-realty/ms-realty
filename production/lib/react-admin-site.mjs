@@ -209,6 +209,11 @@ function MigrationReviewBody({ page }) {
     ["Media rows", page.dashboard.media_reconciliation?.media_rows],
   ];
   const seoSources = ["search_console", "yandex_webmaster", "backlinks"];
+  const launchBlockers = page.launchBlockers?.blockers || [];
+  const launchActionCount = (page.launchBlockers?.blocked_gates || []).reduce(
+    (count, gate) => count + (gate.next_actions || []).length,
+    0,
+  );
 
   return h(
     "main",
@@ -218,6 +223,9 @@ function MigrationReviewBody({ page }) {
       "data-admin-workbench": "migration",
       "data-admin-locale": page.workspace.locale,
       "data-review-required": page.routeMap.reviewRequired,
+      "data-launch-status": page.launchBlockers?.status || "unknown",
+      "data-launch-blockers": launchBlockers.join(","),
+      "data-launch-action-count": launchActionCount,
       "data-launch-readiness-endpoint": page.launchReadinessEndpoint,
       "data-launch-readiness-export-endpoint": page.launchReadinessExportEndpoint,
       "data-launch-input-checklist-endpoint": page.launchInputChecklistEndpoint,

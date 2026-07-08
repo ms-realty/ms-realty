@@ -1105,6 +1105,14 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.cmsCollectionsEndpoint, "/api/admin/cms-collections");
   assert.equal(review.body.payloadCollectionsEndpoint, "/api/admin/payload-collections");
   assert.equal(review.body.listingQualityEndpoint, "/api/admin/listing-quality");
+  assert.ok(review.body.launchBlockers.blockers.includes("redirect_reviews"));
+  assert.ok(review.body.launchBlockers.blockers.includes("external_seo_exports"));
+  assert.ok(review.body.launchBlockers.blockers.includes("listing_quality_review"));
+  assert.ok(review.body.launchBlockers.blockers.includes("live_services"));
+  assert.ok(review.body.launchBlockers.blockers.includes("payload_runtime"));
+  assert.ok(review.body.launchBlockers.blocked_gates.every((gate) => gate.next_actions.length > 0));
+  const migrationReviewBlockers = review.body.launchBlockers.blockers.join(",");
+  const migrationReviewActionCount = review.body.launchBlockers.blocked_gates.reduce((count, gate) => count + gate.next_actions.length, 0);
   assert.equal(review.body.listingQuality.generated_at, "2026-07-05T00:09:00Z");
   assert.equal(review.body.listingQuality.summary.listings, 165);
   assert.equal(Object.hasOwn(review.body.listingQuality.summary.issue_counts, "missing_price"), true);
@@ -1119,6 +1127,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-redirect-export-endpoint="/api/admin/deployable-redirects/export"'), true);
   assert.equal(reviewHtml.body.includes('data-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-pending-redirect-workbook-endpoint="/api/admin/redirect-approval-workbook?pending=1"'), true);
+  assert.equal(reviewHtml.body.includes('data-launch-status="blocked"'), true);
+  assert.equal(
+    reviewHtml.body.includes(`data-launch-blockers="${migrationReviewBlockers}"`),
+    true,
+  );
+  assert.equal(reviewHtml.body.includes(`data-launch-action-count="${migrationReviewActionCount}"`), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-endpoint="/api/admin/launch-readiness"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-readiness-export-endpoint="/api/admin/launch-readiness/export"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-input-checklist-endpoint="/api/admin/launch-input-checklist"'), true);

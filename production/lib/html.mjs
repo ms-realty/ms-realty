@@ -467,9 +467,18 @@ function renderAdminMigrationReview(page) {
       </tr>`,
     )
     .join("");
+  const launchBlockers = page.launchBlockers?.blockers || [];
+  const launchActionCount = (page.launchBlockers?.blocked_gates || []).reduce(
+    (count, gate) => count + (gate.next_actions || []).length,
+    0,
+  );
   return `
 <main data-kind="admin-migration-review" data-admin-locale="${escapeHtml(page.workspace.locale)}" data-review-required="${escapeHtml(
     page.routeMap.reviewRequired,
+  )}" data-launch-status="${escapeHtml(page.launchBlockers?.status || "unknown")}" data-launch-blockers="${escapeHtml(
+    launchBlockers.join(","),
+  )}" data-launch-action-count="${escapeHtml(
+    launchActionCount,
   )}" data-launch-readiness-endpoint="${escapeHtml(page.launchReadinessEndpoint)}" data-launch-readiness-export-endpoint="${escapeHtml(
     page.launchReadinessExportEndpoint,
   )}" data-launch-input-checklist-endpoint="${escapeHtml(

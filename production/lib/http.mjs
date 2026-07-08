@@ -60,6 +60,7 @@ import { seoEvidencePayload } from "./app-seo-evidence.mjs";
 import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
+  launchBlockerSummary,
   liveServiceReports,
   payloadRuntimeState,
   publicLaunchReadinessHeaders,
@@ -228,7 +229,7 @@ function listingEditInput(request) {
   return { ...input, patch };
 }
 
-function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, listingQuality) {
+function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, listingQuality, launchReadiness) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const reviewRequired = routes.filter((route) => route.review_required);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
@@ -270,6 +271,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityReviewDraftEndpoint: "/api/admin/listing-quality-review-draft",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
+    launchBlockers: launchBlockerSummary(launchReadiness),
     launchReadinessEndpoint: "/api/admin/launch-readiness",
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
@@ -637,6 +639,7 @@ export function createHttpApp({
         readRedirectApprovals(redirectApprovalPath || undefined),
         currentSeoEvidence(),
         currentListingQualityReport({ generatedAt: listingQualityGeneratedAt, limit: 20 }),
+        currentLaunchReadiness(),
       );
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
     }
@@ -653,6 +656,7 @@ export function createHttpApp({
         approvals,
         currentSeoEvidence(),
         currentListingQualityReport({ generatedAt: listingQualityGeneratedAt, limit: 20 }),
+        currentLaunchReadiness(),
       );
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);

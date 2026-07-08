@@ -480,6 +480,16 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
       assert.equal(migrationReviewBody.payloadCollectionsEndpoint, "/api/admin/payload-collections");
       assert.equal(migrationReviewBody.listingQualityEndpoint, "/api/admin/listing-quality");
+      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("redirect_reviews"));
+      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("external_seo_exports"));
+      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("listing_quality_review"));
+      assert.ok(migrationReviewBody.launchBlockers.blockers.includes("live_services"));
+      assert.ok(migrationReviewBody.launchBlockers.blocked_gates.every((gate) => gate.next_actions.length > 0));
+      const migrationReviewBlockers = migrationReviewBody.launchBlockers.blockers.join(",");
+      const migrationReviewActionCount = migrationReviewBody.launchBlockers.blocked_gates.reduce(
+        (count, gate) => count + gate.next_actions.length,
+        0,
+      );
       assert.equal(migrationReviewBody.routeMap.approvableSample.length > 0, true);
 
       const migrationReviewHtml = await migrationReviewHtmlRoute.GET(
@@ -489,6 +499,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtml.status, 200);
       assert.equal(migrationReviewHtml.headers.get("content-type"), "text/html; charset=utf-8");
       assert.equal(migrationReviewHtmlBody.includes('data-preflight-reports-endpoint="/api/admin/preflight-reports"'), true);
+      assert.equal(migrationReviewHtmlBody.includes('data-launch-status="blocked"'), true);
+      assert.equal(
+        migrationReviewHtmlBody.includes(`data-launch-blockers="${migrationReviewBlockers}"`),
+        true,
+      );
+      assert.equal(migrationReviewHtmlBody.includes(`data-launch-action-count="${migrationReviewActionCount}"`), true);
       assert.equal(migrationReviewHtmlBody.includes('data-seo-preflight-endpoint="/api/admin/seo-preflight"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-live-services-endpoint="/api/admin/live-services"'), true);
       assert.equal(
