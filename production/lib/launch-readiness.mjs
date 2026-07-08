@@ -57,6 +57,24 @@ const REQUIRED_LAUNCH_GATE_IDS = [
   "production_app_layer",
   "payload_runtime",
 ];
+const BLOCKED_GATE_NEXT_ACTIONS = {
+  external_seo_exports: [
+    "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
+    "Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.",
+  ],
+  listing_quality_review: [
+    "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
+    "Import a complete human-reviewed CSV through /api/admin/listing-quality/import.",
+  ],
+  live_services: [
+    "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
+    "Import or mount the three live service reports before launch.",
+  ],
+  payload_runtime: [
+    "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
+    "Run npm run payload:runtime and import the redacted report through /api/admin/payload-runtime/import.",
+  ],
+};
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -134,7 +152,8 @@ function packageState(filePath = fromRoot("package.json")) {
 }
 
 function gate(id, status, evidence, message = "") {
-  return { id, status, message, evidence };
+  const nextActions = status === "blocked" ? BLOCKED_GATE_NEXT_ACTIONS[id] : null;
+  return { id, status, message, evidence, ...(nextActions ? { next_actions: nextActions } : {}) };
 }
 
 function blockersFrom(gates) {

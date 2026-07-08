@@ -354,6 +354,11 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
   assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
+  for (const id of ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]) {
+    const blockedGate = report.gates.find((gate) => gate.id === id);
+    assert.ok(blockedGate.next_actions.length > 0);
+  }
+  assert.equal("next_actions" in report.gates.find((gate) => gate.id === "redirect_reviews"), false);
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {
     id: "listing_quality.thin_public_gallery",
@@ -367,6 +372,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
     ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
   );
   assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Typesense\/Meilisearch/);
+  assert.equal("next_actions" in publicPayload.blocked_gates.find((gate) => gate.id === "live_services"), false);
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store", "retry-after": "60" });
 });
 

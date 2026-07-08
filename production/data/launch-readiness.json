@@ -198,7 +198,11 @@
             "unmatched_rows": 14
           }
         }
-      }
+      },
+      "next_actions": [
+        "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
+        "Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import."
+      ]
     },
     {
       "id": "listing_quality_review",
@@ -323,7 +327,11 @@
             ]
           }
         ]
-      }
+      },
+      "next_actions": [
+        "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
+        "Import a complete human-reviewed CSV through /api/admin/listing-quality/import."
+      ]
     },
     {
       "id": "runtime_smoke",
@@ -421,7 +429,11 @@
             "ready": false
           }
         }
-      }
+      },
+      "next_actions": [
+        "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
+        "Import or mount the three live service reports before launch."
+      ]
     },
     {
       "id": "monitoring_rollback",
@@ -516,7 +528,11 @@
             "env": "DATABASE_URL"
           }
         ]
-      }
+      },
+      "next_actions": [
+        "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
+        "Run npm run payload:runtime and import the redacted report through /api/admin/payload-runtime/import."
+      ]
     }
   ],
   "live_services": [
