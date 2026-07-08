@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { parseCsv } from "../lib/csv.mjs";
+import { buildLiveServiceProvisioningReport } from "../lib/live-service-provisioning.mjs";
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 
 function tempJsonl(prefix) {
@@ -148,6 +149,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const seoPreflightRoute = await import("../../app/api/admin/seo-preflight/route.js");
       const liveServicesRoute = await import("../../app/api/admin/live-services/route.js");
       const liveServiceProvisioningRoute = await import("../../app/api/admin/live-service-provisioning/route.js");
+      const liveServiceProvisioningImportRoute = await import("../../app/api/admin/live-service-provisioning/import/route.js");
       const payloadRuntimeRoute = await import("../../app/api/admin/payload-runtime/route.js");
       const payloadRuntimeBootstrapRoute = await import("../../app/api/admin/payload-runtime-bootstrap/route.js");
       const listingQualityRoute = await import("../../app/api/admin/listing-quality/route.js");
@@ -319,6 +321,31 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveServiceProvisioningBody.provisioning.status, "blocked_report");
       assert.ok(liveServiceProvisioningBody.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
       assert.ok(liveServiceProvisioningBody.provisioning.next_actions.some((action) => action.includes("live:provisioning")));
+
+      const readyProvisioningReport = await buildLiveServiceProvisioningReport({
+        env: {
+          TYPESENSE_URL: "https://typesense.ms-realty.bg",
+          TYPESENSE_API_KEY: "typesense-key",
+          MEILI_URL: "https://meili.ms-realty.bg",
+          MEILI_API_KEY: "meili-key",
+          HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+          HERMES_API_KEY: "hermes-key",
+        },
+        fetchImpl: async () => ({ ok: true, status: 200 }),
+        generatedAt: "2026-07-06T00:00:00Z",
+      });
+      const liveServiceProvisioningImport = await liveServiceProvisioningImportRoute.POST(
+        new Request("https://example.test/api/admin/live-service-provisioning/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify(readyProvisioningReport),
+        }),
+      );
+      const liveServiceProvisioningImportBody = await liveServiceProvisioningImport.json();
+      assert.equal(liveServiceProvisioningImport.status, 201);
+      assert.equal(liveServiceProvisioningImportBody.imported.outPath, liveServiceProvisioningReportPath);
+      assert.equal(liveServiceProvisioningImportBody.provisioning.status, "pass");
+      assert.deepEqual(liveServiceProvisioningImportBody.provisioning.summary.missing_env, []);
 
       const payloadRuntime = await payloadRuntimeRoute.GET(new Request("https://example.test/api/admin/payload-runtime", { headers: auth }));
       const payloadRuntimeBody = await payloadRuntime.json();
@@ -512,6 +539,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.seoPreflightEndpoint, "/api/admin/seo-preflight");
       assert.equal(migrationReviewBody.liveServicesEndpoint, "/api/admin/live-services");
       assert.equal(migrationReviewBody.liveServiceProvisioningEndpoint, "/api/admin/live-service-provisioning");
+      assert.equal(migrationReviewBody.liveServiceProvisioningImportEndpoint, "/api/admin/live-service-provisioning/import");
       assert.equal(migrationReviewBody.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
       assert.equal(migrationReviewBody.payloadRuntimeBootstrapEndpoint, "/api/admin/payload-runtime-bootstrap");
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
@@ -546,6 +574,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-live-services-endpoint="/api/admin/live-services"'), true);
       assert.equal(
         migrationReviewHtmlBody.includes('data-live-service-provisioning-endpoint="/api/admin/live-service-provisioning"'),
+        true,
+      );
+      assert.equal(
+        migrationReviewHtmlBody.includes(
+          'data-live-service-provisioning-import-endpoint="/api/admin/live-service-provisioning/import"',
+        ),
         true,
       );
       assert.equal(migrationReviewHtmlBody.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
@@ -926,6 +960,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(assertAuditLog(auditRows), true);
       assert.deepEqual(actionCounts(auditRows), {
         locale_created: 1,
+        live_service_provisioning_report_imported: 1,
         live_service_report_imported: 1,
         payload_runtime_report_imported: 2,
         seo_evidence_imported: 1,

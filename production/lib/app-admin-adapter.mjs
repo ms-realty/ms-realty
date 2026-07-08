@@ -27,7 +27,7 @@ import {
   writeLaunchReadinessReport,
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
-import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
+import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
@@ -487,6 +487,7 @@ function migrationReviewPayload(registry, url, config) {
     seoPreflightEndpoint: "/api/admin/seo-preflight",
     liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
+    liveServiceProvisioningImportEndpoint: "/api/admin/live-service-provisioning/import",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     payloadRuntimeBootstrapEndpoint: "/api/admin/payload-runtime-bootstrap",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
@@ -831,6 +832,26 @@ function importPayloadRuntimeReport(report, config) {
   return { imported: { outPath, summary: report.summary }, report: launchReadiness(config), runtime };
 }
 
+function importLiveServiceProvisioningReport(report, config) {
+  const outPath = writeLiveServiceProvisioningReport(report, config.liveServiceProvisioningReportPath || undefined);
+  const provisioning = liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined);
+  recordAudit(
+    {
+      action: "live_service_provisioning_report_imported",
+      actor: "operations",
+      objectType: "live_service_provisioning_report",
+      objectId: "live-service-provisioning",
+      metadata: {
+        missing_env: provisioning.summary?.missing_env || [],
+        out_path: outPath,
+        status: report.status,
+      },
+    },
+    config,
+  );
+  return { imported: { outPath, summary: report.summary }, provisioning, report: launchReadiness(config) };
+}
+
 function importSeoEvidence(input, config) {
   const result = importAppSeoEvidenceRows(input, config);
   recordAudit(
@@ -1015,6 +1036,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         kind: "admin_live_service_provisioning",
         provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
       });
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/live-service-provisioning/import") {
+      const report = parseJsonBody(await readRequestBody(request, config.maxBodyBytes));
+      return jsonResponse(report.ready ? 201 : 202, importLiveServiceProvisioningReport(report, config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {
       return jsonResponse(200, {

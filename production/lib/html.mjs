@@ -491,6 +491,8 @@ function renderAdminMigrationReview(page) {
     page.liveServicesEndpoint,
   )}" data-live-service-provisioning-endpoint="${escapeHtml(
     page.liveServiceProvisioningEndpoint,
+  )}" data-live-service-provisioning-import-endpoint="${escapeHtml(
+    page.liveServiceProvisioningImportEndpoint,
   )}" data-payload-runtime-endpoint="${escapeHtml(
     page.payloadRuntimeEndpoint,
   )}" data-payload-runtime-bootstrap-endpoint="${escapeHtml(

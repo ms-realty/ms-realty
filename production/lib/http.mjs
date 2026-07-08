@@ -68,7 +68,7 @@ import {
   writeLaunchReadinessReport,
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
-import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
+import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
@@ -279,6 +279,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     seoPreflightEndpoint: "/api/admin/seo-preflight",
     liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
+    liveServiceProvisioningImportEndpoint: "/api/admin/live-service-provisioning/import",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     payloadRuntimeBootstrapEndpoint: "/api/admin/payload-runtime-bootstrap",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
@@ -720,6 +721,29 @@ export function createHttpApp({
         kind: "admin_live_service_provisioning",
         provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
       });
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/live-service-provisioning/import") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const report = parseJsonBody(request);
+        const outPath = writeLiveServiceProvisioningReport(report, liveServiceProvisioningReportPath || undefined);
+        const provisioning = liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined);
+        recordAudit({
+          action: "live_service_provisioning_report_imported",
+          actor: "operations",
+          objectType: "live_service_provisioning_report",
+          objectId: "live-service-provisioning",
+          metadata: {
+            missing_env: provisioning.summary?.missing_env || [],
+            out_path: outPath,
+            status: report.status,
+          },
+        });
+        return adminJson(report.ready ? 201 : 202, { imported: { outPath, summary: report.summary }, provisioning, report: currentLaunchReadiness() });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {

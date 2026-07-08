@@ -21,7 +21,6 @@ import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slu
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import {
   buildLiveServiceProvisioningReport,
-  writeLiveServiceProvisioningReport,
 } from "../lib/live-service-provisioning.mjs";
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
@@ -1126,6 +1125,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.seoPreflightEndpoint, "/api/admin/seo-preflight");
   assert.equal(review.body.liveServicesEndpoint, "/api/admin/live-services");
   assert.equal(review.body.liveServiceProvisioningEndpoint, "/api/admin/live-service-provisioning");
+  assert.equal(review.body.liveServiceProvisioningImportEndpoint, "/api/admin/live-service-provisioning/import");
   assert.equal(review.body.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
   assert.equal(review.body.payloadRuntimeBootstrapEndpoint, "/api/admin/payload-runtime-bootstrap");
   assert.equal(review.body.cmsCollectionsEndpoint, "/api/admin/cms-collections");
@@ -1166,6 +1166,10 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-seo-preflight-endpoint="/api/admin/seo-preflight"'), true);
   assert.equal(reviewHtml.body.includes('data-live-services-endpoint="/api/admin/live-services"'), true);
   assert.equal(reviewHtml.body.includes('data-live-service-provisioning-endpoint="/api/admin/live-service-provisioning"'), true);
+  assert.equal(
+    reviewHtml.body.includes('data-live-service-provisioning-import-endpoint="/api/admin/live-service-provisioning/import"'),
+    true,
+  );
   assert.equal(reviewHtml.body.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-runtime-bootstrap-endpoint="/api/admin/payload-runtime-bootstrap"'), true);
   assert.equal(reviewHtml.body.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
@@ -1322,21 +1326,18 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     env: {},
     generatedAt: "2026-07-06T00:00:00Z",
   });
-  writeLiveServiceProvisioningReport(
-    await buildLiveServiceProvisioningReport({
-      env: {
-        TYPESENSE_URL: "https://typesense.ms-realty.bg",
-        TYPESENSE_API_KEY: "typesense-key",
-        MEILI_URL: "https://meili.ms-realty.bg",
-        MEILI_API_KEY: "meili-key",
-        HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
-        HERMES_API_KEY: "hermes-key",
-      },
-      fetchImpl: async () => ({ ok: true, status: 200 }),
-      generatedAt: "2026-07-06T00:00:00Z",
-    }),
-    liveServiceProvisioningReportPath,
-  );
+  const liveServiceProvisioningReport = await buildLiveServiceProvisioningReport({
+    env: {
+      TYPESENSE_URL: "https://typesense.ms-realty.bg",
+      TYPESENSE_API_KEY: "typesense-key",
+      MEILI_URL: "https://meili.ms-realty.bg",
+      MEILI_API_KEY: "meili-key",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-key",
+    },
+    fetchImpl: async () => ({ ok: true, status: 200 }),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
   delete syncReport.example;
   delete queryReport.example;
   delete hermesReport.example;
@@ -1464,6 +1465,17 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
     body: syncReport,
   });
+  const liveProvisioningImportUnauthorized = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/live-service-provisioning/import",
+    body: liveServiceProvisioningReport,
+  });
+  const liveProvisioningImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/live-service-provisioning/import",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: liveServiceProvisioningReport,
+  });
   const liveSyncImport = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/live-service-reports/import?source=typesense_meilisearch_sync",
@@ -1565,6 +1577,11 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(JSON.parse(liveTemplate.body).example, true);
   assert.equal(JSON.parse(liveTemplate.body).summary.engines, 2);
   assert.equal(liveImportUnauthorized.status, 401);
+  assert.equal(liveProvisioningImportUnauthorized.status, 401);
+  assert.equal(liveProvisioningImport.status, 201);
+  assert.equal(liveProvisioningImport.body.imported.outPath, liveServiceProvisioningReportPath);
+  assert.equal(liveProvisioningImport.body.provisioning.status, "pass");
+  assert.equal(liveProvisioningImport.body.provisioning.summary.missing_env.length, 0);
   assert.equal(liveSyncImport.status, 202);
   assert.equal(liveSyncImport.body.imported.outPath, searchSyncReportPath);
   assert.equal(liveSyncImport.body.livePreflight.status, "blocked");
@@ -1601,6 +1618,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(searchSyncReportPath), true);
   assert.equal(fs.existsSync(searchQueryReportPath), true);
   assert.equal(fs.existsSync(hermesWorkerReportPath), true);
+  assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
   assert.deepEqual(launchAfterLive.body.blockers, ["listing_quality_review"]);
   assert.equal(launchAfterLive.body.status, "blocked");

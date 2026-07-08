@@ -13,6 +13,7 @@ const ADMIN_ACTIONS = new Set([
   "listing_edited",
   "listing_quality_imported",
   "listing_slug_changed",
+  "live_service_provisioning_report_imported",
   "live_service_report_imported",
   "locale_created",
   "payload_runtime_report_imported",

@@ -233,6 +233,7 @@ function MigrationReviewBody({ page }) {
       "data-seo-preflight-endpoint": page.seoPreflightEndpoint,
       "data-live-services-endpoint": page.liveServicesEndpoint,
       "data-live-service-provisioning-endpoint": page.liveServiceProvisioningEndpoint,
+      "data-live-service-provisioning-import-endpoint": page.liveServiceProvisioningImportEndpoint,
       "data-payload-runtime-endpoint": page.payloadRuntimeEndpoint,
       "data-payload-runtime-bootstrap-endpoint": page.payloadRuntimeBootstrapEndpoint,
       "data-cms-collections-endpoint": page.cmsCollectionsEndpoint,

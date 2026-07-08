@@ -67,6 +67,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.
 - Live service provisioning report: `npm run live:provisioning` writes `production/data/live-service-provisioning-report.json` with redacted endpoint health and missing-env evidence.
 - Admin provisioning status endpoint: `GET /api/admin/live-service-provisioning`.
+- Admin provisioning import endpoint: `POST /api/admin/live-service-provisioning/import` accepts the redacted JSON from `npm run live:provisioning`.
 - Provisioning preflight: `npm run live:provisioning:preflight` must pass before live evidence capture.
 - Live evidence capture: `npm run live:capture` runs search sync, search query, Hermes draft worker, and validates the three report outputs.
 - Individual debug commands: `npm run search:sync`, `npm run search:query`, `npm run hermes:worker`.
