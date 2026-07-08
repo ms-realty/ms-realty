@@ -22,5 +22,8 @@ try {
   printSourceSummaries(result);
 } catch (error) {
   console.error(`SEO EVIDENCE PREFLIGHT FAILED: ${error.message}`);
+  console.error(
+    `Next: export Search Console, Yandex Webmaster, and backlink CSVs into ${inputDir} or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR, then run \`npm run seo:evidence\` and \`npm run seo:preflight\`.`,
+  );
   process.exitCode = 1;
 }

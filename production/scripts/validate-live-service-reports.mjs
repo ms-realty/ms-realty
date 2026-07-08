@@ -15,6 +15,9 @@ for (const report of result.reports) {
 if (!result.ready) {
   const failed = result.reports.filter((report) => report.status !== "pass").map((report) => report.source).join(", ");
   console.error(`LIVE SERVICE PREFLIGHT FAILED: ${failed}`);
+  console.error(
+    "Next: run `npm run live:provisioning:preflight`, capture real service evidence with `npm run live:capture`, then rerun `npm run live:preflight`.",
+  );
   process.exitCode = 1;
 } else {
   console.log("Live service reports valid");

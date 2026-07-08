@@ -938,6 +938,7 @@ test("live service report preflight fails missing reports and passes valid repor
   assert.notEqual(missing.status, 0);
   assert.match(missing.stderr, /typesense_meilisearch_sync: missing_report/);
   assert.match(missing.stderr, /LIVE SERVICE PREFLIGHT FAILED/);
+  assert.match(missing.stderr, /Next: run `npm run live:provisioning:preflight`/);
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-valid-live-reports-`);
   const paths = writeLiveReportFixtures(validDir);

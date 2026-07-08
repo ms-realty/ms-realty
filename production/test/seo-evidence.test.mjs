@@ -174,6 +174,7 @@ test("SEO evidence preflight CLI fails missing exports and passes complete expor
   assert.match(missing.stderr, /search_console: 0 rows, 0 matched, 0 unmatched, 0 duplicates, status missing_export, domains none/);
   assert.match(missing.stderr, /yandex_webmaster: 0 rows, 0 matched, 0 unmatched, 0 duplicates, status missing_export, domains none/);
   assert.match(missing.stderr, /backlinks: 0 rows, 0 matched, 0 unmatched, 0 duplicates, status missing_export, domains none/);
+  assert.match(missing.stderr, /Next: export Search Console, Yandex Webmaster, and backlink CSVs/);
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-cli-seo-preflight-`);
   writeCompleteSeoInputFixture(validDir);

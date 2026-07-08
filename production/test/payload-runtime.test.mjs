@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import { spawnSync } from "node:child_process";
 import config from "../../payload.config.js";
 import {
   assertPayloadRuntimeReport,
@@ -37,6 +40,19 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.deepEqual(report.summary.weak_env, []);
   assert.equal(report.summary.database.status, "missing_env");
   assert.equal(report.checks.find((check) => check.id === "payload_config_import").status, "pass");
+});
+
+test("Payload runtime preflight CLI explains missing report remediation", () => {
+  const missingPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-cli-`)}/payload-runtime-report.json`;
+  const result = spawnSync(process.execPath, ["production/scripts/validate-payload-runtime-report.mjs"], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: { ...process.env, MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: missingPath },
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /PAYLOAD RUNTIME PREFLIGHT FAILED: missing_report/);
+  assert.match(result.stderr, /Next: run `npm run payload:bootstrap`/);
 });
 
 test("Payload runtime report rejects copied placeholder env values", async () => {
