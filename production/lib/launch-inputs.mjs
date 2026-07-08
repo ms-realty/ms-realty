@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { parseCsv } from "./csv.mjs";
+import { launchBlockerSummary } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -125,6 +126,13 @@ function listingPendingReviewLines(evidence) {
     .join("\n");
 }
 
+function blockedGateActionLines(launchReadiness) {
+  const actions = launchBlockerSummary(launchReadiness).blocked_gates.flatMap((gate) =>
+    gate.next_actions.map((action) => `- ${gate.id}: ${action}`),
+  );
+  return actions.length ? actions.join("\n") : "- none";
+}
+
 export function renderLaunchInputChecklist({
   generatedAt,
   launchReadiness,
@@ -165,6 +173,10 @@ Generated: ${generatedAt}
 
 Status: ${launchReadiness.status}
 Blockers: ${launchReadiness.blockers.join(", ") || "none"}
+
+## Blocked Gate Actions
+
+${blockedGateActionLines(launchReadiness)}
 
 ## Redirect Reviews
 

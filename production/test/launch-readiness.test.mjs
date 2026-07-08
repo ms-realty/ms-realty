@@ -1244,6 +1244,11 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   });
 
   assert.match(markdown, /Status: blocked/);
+  assert.match(markdown, /## Blocked Gate Actions/);
+  assert.match(markdown, /external_seo_exports: Import Search Console/);
+  assert.match(markdown, /listing_quality_review: Download \/api\/admin\/listing-quality-review-packet/);
+  assert.match(markdown, /live_services: Run npm run live:provisioning:preflight/);
+  assert.match(markdown, /payload_runtime: Run npm run payload:runtime/);
   assert.match(markdown, /Remaining approvals required: 0/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
   assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
