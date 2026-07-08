@@ -203,6 +203,7 @@ test("SEO evidence preflight report records missing and valid export state", () 
   assert.equal(missingReport.ready, false);
   assert.equal(missingReport.status, "blocked");
   assert.deepEqual(missingReport.summary.missing_required_sources, ["search_console", "yandex_webmaster", "backlinks"]);
+  assert.ok(missingReport.next_actions.some((action) => action.includes("seo:preflight")));
   assert.throws(
     () =>
       assertSeoEvidencePreflightReport({
@@ -210,6 +211,14 @@ test("SEO evidence preflight report records missing and valid export state", () 
         summary: { ...missingReport.summary, missing_required_sources: ["search_console"] },
       }),
     /missing required sources must match source statuses/,
+  );
+  assert.throws(
+    () => assertSeoEvidencePreflightReport({ ...missingReport, next_actions: [] }),
+    /next actions/,
+  );
+  assert.throws(
+    () => assertSeoEvidencePreflightReport({ ...missingReport, next_actions: ["Export CSVs."] }),
+    /seo:preflight/,
   );
   const missingOutputPath = `${missingDir}/seo-evidence-preflight-report.json`;
   const missingResult = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence-preflight-report.mjs")], {

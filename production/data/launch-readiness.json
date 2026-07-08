@@ -197,7 +197,12 @@
             "matched_rows": 11,
             "unmatched_rows": 14
           }
-        }
+        },
+        "next_actions": [
+          "Export Search Console, Yandex Webmaster, and backlink CSVs for both legacy domains.",
+          "Place them in migration/external/seo or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR.",
+          "Run npm run seo:preflight before launch:preflight."
+        ]
       },
       "next_actions": [
         "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
@@ -326,6 +331,11 @@
               "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg [alt: Земеделска земя в землището на с.Джигурово]"
             ]
           }
+        ],
+        "next_actions": [
+          "Review production/data/listing-quality-workbook.csv.",
+          "Write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH.",
+          "Run npm run listing:preflight before launch:preflight."
         ]
       },
       "next_actions": [

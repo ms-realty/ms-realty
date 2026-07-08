@@ -330,7 +330,9 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(seoGate.evidence.crawl_urls, 457);
   assert.deepEqual(seoGate.evidence.url_types, { page: 104, post: 42, taxonomy: 146, listing: 165 });
   assert.equal(seoGate.evidence.urls_with_any_evidence, 2);
+  assert.ok(seoGate.evidence.next_actions.some((action) => action.includes("seo:preflight")));
   assert.equal(listingGate.status, "blocked");
+  assert.ok(listingGate.evidence.next_actions.some((action) => action.includes("listing:preflight")));
   assert.deepEqual(listingGate.evidence.summary, {
     expected_review_rows: 7,
     review_rows: 0,

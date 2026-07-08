@@ -508,6 +508,12 @@ export function assertListingQualityPreflightReport(report) {
   const ready = report.review?.status === "pass";
   if (report.ready !== ready) throw new Error("Listing quality preflight ready flag must match review state");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Listing quality preflight status must match ready flag");
+  if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
+    throw new Error("Listing quality preflight report must include next actions");
+  }
+  if (!ready && !report.next_actions.some((action) => action.includes("listing:preflight"))) {
+    throw new Error("Listing quality preflight blocked report must point to listing:preflight");
+  }
   if (!report.summary || !report.review?.summary || report.summary.expected_review_rows < report.summary.review_rows) {
     throw new Error("Listing quality preflight summary must count expected and reviewed rows");
   }

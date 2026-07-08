@@ -1015,7 +1015,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.deepEqual(preflightReports.body.launch_readiness.blockers, review.body.launchBlockers.blockers);
   assert.ok(preflightReports.body.launch_readiness.blocked_gates.every((gate) => gate.next_actions.length > 0));
   assert.equal(preflightReports.body.reports.seo.status, "blocked");
+  assert.ok(preflightReports.body.reports.seo.next_actions.some((action) => action.includes("seo:preflight")));
   assert.equal(preflightReports.body.reports.listing_quality.status, "blocked");
+  assert.ok(preflightReports.body.reports.listing_quality.next_actions.some((action) => action.includes("listing:preflight")));
   assert.equal(preflightReports.body.reports.live_services.status, "blocked");
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
   assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
@@ -1054,6 +1056,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(listingQualityStatus.status, 200);
   assert.equal(listingQualityStatus.body.kind, "admin_listing_quality");
   assert.equal(listingQualityStatus.body.listing_quality.status, "blocked");
+  assert.ok(listingQualityStatus.body.listing_quality.next_actions.some((action) => action.includes("listing:preflight")));
   assert.ok(listingQualityStatus.body.listing_quality.summary.affected_listings > 0);
   assert.equal(listingQualityReviewPacketUnauthorized.status, 401);
   assert.equal(listingQualityReviewPacket.status, 200);

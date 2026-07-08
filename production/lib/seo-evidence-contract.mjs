@@ -159,6 +159,12 @@ export function assertSeoEvidencePreflightReport(report) {
   const ready = report.summary.missing_required_sources.length === 0;
   if (report.ready !== ready) throw new Error("SEO preflight ready flag must match missing required sources");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("SEO preflight status must match ready flag");
+  if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
+    throw new Error("SEO preflight report must include next actions");
+  }
+  if (!ready && !report.next_actions.some((action) => action.includes("seo:preflight"))) {
+    throw new Error("SEO preflight blocked report must point to seo:preflight");
+  }
   for (const source of REQUIRED_EXPORTS) {
     if (ready && missingRequiredExport(sourceStatuses[source])) {
       throw new Error(`SEO preflight ready report requires complete ${source} evidence`);

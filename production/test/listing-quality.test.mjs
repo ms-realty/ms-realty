@@ -457,6 +457,7 @@ test("listing quality preflight report records missing and valid human review st
   assert.equal(missingReport.review.pending_review_sample[0].listing_id, report.rows[0].listing_id);
   assert.equal(missingReport.review.pending_review_sample[0].editor_path, report.rows[0].editor_path);
   assert.ok(missingReport.review.pending_review_sample[0].required_editor_fields.length > 0);
+  assert.ok(missingReport.next_actions.some((action) => action.includes("listing:preflight")));
   assert.throws(
     () =>
       assertListingQualityPreflightReport({
@@ -464,6 +465,14 @@ test("listing quality preflight report records missing and valid human review st
         review: { ...missingReport.review, status: "operator_uploaded" },
       }),
     /known review status/,
+  );
+  assert.throws(
+    () => assertListingQualityPreflightReport({ ...missingReport, next_actions: [] }),
+    /next actions/,
+  );
+  assert.throws(
+    () => assertListingQualityPreflightReport({ ...missingReport, next_actions: ["Review CSV."] }),
+    /listing:preflight/,
   );
 
   const partialReport = buildListingQualityPreflightReport({

@@ -25,6 +25,7 @@ import {
   REQUIRED_EXPORTS,
   assertSeoEvidence,
   assertSeoSourceSummary,
+  buildSeoEvidencePreflightReportFromEvidence,
   missingRequiredExport,
   missingRequiredSources,
 } from "./seo-evidence-contract.mjs";
@@ -510,16 +511,18 @@ export function publicLaunchReadinessHeaders(report) {
 }
 
 function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
-  const { status, path: reportPath, summary, error, pending_review_sample: pendingReviewSample } = buildListingQualityPreflightReport({
+  const report = buildListingQualityPreflightReport({
     report: listingQuality,
     reviewPath,
-  }).review;
+  });
+  const { status, path: reportPath, summary, error, pending_review_sample: pendingReviewSample } = report.review;
   return {
     status,
     path: reportPath,
     ...(summary ? { summary } : {}),
     ...(error ? { error } : {}),
     ...(pendingReviewSample ? { pending_review_sample: pendingReviewSample } : {}),
+    next_actions: report.next_actions,
   };
 }
 
@@ -705,6 +708,7 @@ export function buildLaunchReadinessReport({
   payloadRuntime = payloadRuntimeState(),
 } = {}) {
   assertSeoEvidence(seoEvidence);
+  const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);
 
   const crawlPass =
     migration.summary.total === 457 &&
@@ -781,6 +785,7 @@ export function buildLaunchReadinessReport({
         privacy_events: seoEvidence.summary.sources.privacy_events,
         analytics_export: seoEvidence.summary.sources.analytics_export,
         sources: seoLaunchSourceSummaries(seoEvidence.summary.sources),
+        next_actions: seoPreflight.next_actions,
       },
       seoExportsReady ? "" : "Search Console, Yandex, and backlink exports are required before launch.",
     ),
