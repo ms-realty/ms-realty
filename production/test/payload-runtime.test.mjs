@@ -113,7 +113,10 @@ test("Payload runtime report rejects DATABASE_URL without a database name", asyn
   assert.equal(report.ready, false);
   assert.equal(report.summary.database.status, "fail");
   assert.match(report.summary.database.error, /database name/);
+  assert.equal(report.checks.find((check) => check.id === "database_url").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_url").error, /database name/);
   assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_tcp").error, /database name/);
 });
 
 test("Payload runtime report rejects DATABASE_URL without a database host", async () => {
@@ -132,7 +135,10 @@ test("Payload runtime report rejects DATABASE_URL without a database host", asyn
   assert.equal(report.ready, false);
   assert.equal(report.summary.database.status, "fail");
   assert.match(report.summary.database.error, /database host/);
+  assert.equal(report.checks.find((check) => check.id === "database_url").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_url").error, /database host/);
   assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_tcp").error, /database host/);
 });
 
 test("Payload runtime report rejects DATABASE_URL without database credentials", async () => {
@@ -151,7 +157,10 @@ test("Payload runtime report rejects DATABASE_URL without database credentials",
   assert.equal(report.ready, false);
   assert.equal(report.summary.database.status, "fail");
   assert.match(report.summary.database.error, /database credentials/);
+  assert.equal(report.checks.find((check) => check.id === "database_url").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_url").error, /database credentials/);
   assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_tcp").error, /database credentials/);
 });
 
 test("Payload runtime report rejects localhost database launch evidence", async () => {
@@ -170,7 +179,10 @@ test("Payload runtime report rejects localhost database launch evidence", async 
   assert.equal(report.ready, false);
   assert.equal(report.summary.database.status, "fail");
   assert.match(report.summary.database.error, /localhost or placeholder/);
+  assert.equal(report.checks.find((check) => check.id === "database_url").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_url").error, /localhost or placeholder/);
   assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "fail");
+  assert.match(report.checks.find((check) => check.id === "database_tcp").error, /localhost or placeholder/);
 });
 
 test("Payload runtime report rejects missing generated timestamp", async () => {

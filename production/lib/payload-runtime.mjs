@@ -35,9 +35,14 @@ function configuredSecret(value) {
 
 function configuredDatabaseUrl(value) {
   const databaseUrl = String(value || "").trim();
-  if (!databaseUrl) return "missing_env";
-  if (/replace-with|change-me|example/i.test(databaseUrl)) return "placeholder";
-  return "pass";
+  if (!databaseUrl) return { status: "missing_env" };
+  if (/replace-with|change-me|example/i.test(databaseUrl)) return { status: "placeholder" };
+  try {
+    databaseTarget(databaseUrl);
+    return { status: "pass" };
+  } catch (error) {
+    return { error: error.message, status: "fail" };
+  }
 }
 
 export function assertProductionDatabaseHost(value) {
@@ -104,16 +109,17 @@ export async function buildPayloadRuntimeReport({
   env = process.env,
   generatedAt = new Date().toISOString(),
 } = {}) {
+  const databaseUrl = configuredDatabaseUrl(env.DATABASE_URL);
   const checks = [
     check("payload_secret", configuredSecret(env.PAYLOAD_SECRET), { env: "PAYLOAD_SECRET" }),
-    check("database_url", configuredDatabaseUrl(env.DATABASE_URL), { env: "DATABASE_URL" }),
+    check("database_url", databaseUrl.status, { env: "DATABASE_URL", ...(databaseUrl.error ? { error: databaseUrl.error } : {}) }),
     ...REQUIRED_ROUTE_FILES.map((file) => check(`route:${file}`, fs.existsSync(fromRoot(file)) ? "pass" : "fail", { file })),
     await payloadConfigCheck(),
   ];
 
-  const databaseUrlStatus = configuredDatabaseUrl(env.DATABASE_URL);
-  let database = { status: databaseUrlStatus === "pass" ? "not_checked" : databaseUrlStatus };
-  if (databaseUrlStatus === "pass") {
+  let database = { status: databaseUrl.status === "pass" ? "not_checked" : databaseUrl.status };
+  if (databaseUrl.error) database.error = databaseUrl.error;
+  if (databaseUrl.status === "pass") {
     try {
       const target = databaseTarget(env.DATABASE_URL);
       const probe = await databaseProbe(target);
@@ -131,7 +137,7 @@ export async function buildPayloadRuntimeReport({
       checks.push(check("database_tcp", "fail", { error: error.message }));
     }
   } else {
-    checks.push(check("database_tcp", databaseUrlStatus, { env: "DATABASE_URL" }));
+    checks.push(check("database_tcp", databaseUrl.status, { env: "DATABASE_URL", ...(databaseUrl.error ? { error: databaseUrl.error } : {}) }));
   }
 
   const missingEnv = checks.filter((item) => item.status === "missing_env").map((item) => item.env);
