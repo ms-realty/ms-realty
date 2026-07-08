@@ -101,6 +101,7 @@ test("Payload runtime generator explains blocked remediation", () => {
     env: {
       ...process.env,
       DATABASE_URL: "",
+      MS_REALTY_GENERATED_AT: "2026-07-08T12:00:00Z",
       MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: reportPath,
       PAYLOAD_SECRET: "",
     },
@@ -112,6 +113,7 @@ test("Payload runtime generator explains blocked remediation", () => {
   assert.match(result.stdout, /Missing env: PAYLOAD_SECRET, DATABASE_URL/);
   assert.match(result.stdout, /Next: run `npm run payload:bootstrap`/);
   assert.ok(fs.existsSync(reportPath));
+  assert.equal(JSON.parse(fs.readFileSync(reportPath, "utf8")).generated_at, "2026-07-08T12:00:00Z");
 });
 
 test("Payload runtime bootstrap tells operators to import or mount the redacted report", () => {

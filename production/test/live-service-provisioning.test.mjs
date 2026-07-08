@@ -402,6 +402,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
     encoding: "utf8",
     env: {
       PATH: process.env.PATH,
+      MS_REALTY_GENERATED_AT: "2026-07-08T12:00:00Z",
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: cliOutPath,
     },
   });
@@ -411,5 +412,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
   assert.match(cli.stdout, /Missing env: TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
   assert.match(cli.stdout, /Next: set real Typesense, Meilisearch, and Hermes provider env/);
   assert.equal(fs.readFileSync(cliOutPath, "utf8").includes("typesense-test-secret"), false);
-  assert.equal(assertLiveServiceProvisioningReport(JSON.parse(fs.readFileSync(cliOutPath, "utf8"))), true);
+  const cliReport = JSON.parse(fs.readFileSync(cliOutPath, "utf8"));
+  assert.equal(cliReport.generated_at, "2026-07-08T12:00:00Z");
+  assert.equal(assertLiveServiceProvisioningReport(cliReport), true);
 });

@@ -5,7 +5,8 @@ import {
 } from "../lib/payload-runtime.mjs";
 
 const outputPath = process.env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH || DEFAULT_PAYLOAD_RUNTIME_REPORT;
-const report = await buildPayloadRuntimeReport({ generatedAt: "2026-07-06T00:00:00Z" });
+const generatedAt = process.env.MS_REALTY_GENERATED_AT || new Date().toISOString();
+const report = await buildPayloadRuntimeReport({ generatedAt });
 const outPath = writePayloadRuntimeReport(report, outputPath);
 
 console.log(`Wrote Payload runtime report to ${outPath}`);

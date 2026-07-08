@@ -1637,6 +1637,7 @@ test("live service preflight report records blockers without clearing the gate",
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: `${missingDir}/search-engine-query-report.json`,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: `${missingDir}/hermes-draft-worker-report.json`,
       MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH: missingOutputPath,
+      MS_REALTY_GENERATED_AT: "2026-07-08T12:00:00Z",
     },
   });
 
@@ -1644,6 +1645,7 @@ test("live service preflight report records blockers without clearing the gate",
   assert.match(missingResult.stdout, /Live service reports blocked: typesense_meilisearch_sync, typesense_meilisearch_query, hermes_draft_worker/);
   assert.match(missingResult.stdout, /Missing reports: 3/);
   assert.match(missingResult.stdout, /Next: run `npm run live:provisioning:preflight`/);
+  assert.equal(JSON.parse(fs.readFileSync(missingOutputPath, "utf8")).generated_at, "2026-07-08T12:00:00Z");
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-valid-`);
   const paths = writeLiveReportFixtures(validDir);
@@ -1657,12 +1659,14 @@ test("live service preflight report records blockers without clearing the gate",
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: paths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: paths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH: outputPath,
+      MS_REALTY_GENERATED_AT: "2026-07-08T12:00:00Z",
     },
   });
 
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, new RegExp(outputPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   const readyReport = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(readyReport.generated_at, "2026-07-08T12:00:00Z");
   assert.equal(assertLiveServicePreflightReport(readyReport), true);
   assert.equal(readyReport.ready, true);
   assert.equal(readyReport.summary.pass, 3);
