@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
 import {
@@ -231,7 +231,7 @@ export async function runHermesDraftWorker({
   provider = openAiCompatibleHermesProvider(),
   filePath = DEFAULT_TRANSLATION_LEDGER_PATH,
   auditPath,
-  auditLogPath,
+  auditLogPath = DEFAULT_AUDIT_LOG_PATH,
   providerMetadata = providerMetadataFromEnv(),
   limit = dispatch.rows.length,
   recordedAt = "2026-07-06T00:00:00Z",

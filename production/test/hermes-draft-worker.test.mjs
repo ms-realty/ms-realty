@@ -16,7 +16,7 @@ import {
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
 } from "../lib/hermes-provider-provisioning.mjs";
-import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
+import { DEFAULT_AUDIT_LOG_PATH, assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { readHermesAuditLedger, readTranslationLedger } from "../lib/translation-ledger.mjs";
 
@@ -205,6 +205,16 @@ test("Hermes draft worker report rejects no-op launch evidence", () => {
       }),
     /persist at least one draft/,
   );
+});
+
+test("Hermes draft worker uses the production audit log by default", async () => {
+  const report = await runHermesDraftWorker({
+    dispatch: { rows: [] },
+    provider: async () => validDraft(),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(report.audit_log_path, DEFAULT_AUDIT_LOG_PATH);
 });
 
 test("Hermes draft worker report rejects generic runtime evidence", () => {
