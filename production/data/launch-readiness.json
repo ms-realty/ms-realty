@@ -473,7 +473,12 @@
               "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
               "Run npm run hermes:provisioning, then npm run hermes:worker."
             ]
-          }
+          },
+          "next_actions": [
+            "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
+            "Run npm run live:provisioning until all service checks pass.",
+            "Run npm run live:capture only after provisioning passes."
+          ]
         }
       },
       "next_actions": [

@@ -291,6 +291,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(preflightReportsBody.reports.live_services.status, "blocked");
       assert.equal(preflightReportsBody.reports.live_service_provisioning.status, "blocked_report");
       assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+      assert.ok(preflightReportsBody.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
       assert.equal(preflightReportsBody.reports.payload_runtime.status, "missing_report");
 
       const seoPreflight = await seoPreflightRoute.GET(new Request("https://example.test/api/admin/seo-preflight", { headers: auth }));
@@ -316,6 +317,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(liveServiceProvisioningBody.kind, "admin_live_service_provisioning");
       assert.equal(liveServiceProvisioningBody.provisioning.status, "blocked_report");
       assert.ok(liveServiceProvisioningBody.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+      assert.ok(liveServiceProvisioningBody.provisioning.next_actions.some((action) => action.includes("live:provisioning")));
 
       const payloadRuntime = await payloadRuntimeRoute.GET(new Request("https://example.test/api/admin/payload-runtime", { headers: auth }));
       const payloadRuntimeBody = await payloadRuntime.json();

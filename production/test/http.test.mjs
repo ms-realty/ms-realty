@@ -1021,6 +1021,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(preflightReports.body.reports.live_services.status, "blocked");
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
   assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.ok(preflightReports.body.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
   assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
   assert.ok(preflightReports.body.reports.payload_runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
   assert.equal(seoPreflightUnauthorized.status, 401);
@@ -1039,6 +1040,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(liveServiceProvisioning.body.kind, "admin_live_service_provisioning");
   assert.equal(liveServiceProvisioning.body.provisioning.status, "blocked_report");
   assert.ok(liveServiceProvisioning.body.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.ok(liveServiceProvisioning.body.provisioning.next_actions.some((action) => action.includes("live:provisioning")));
   assert.equal(liveServiceProvisioning.body.provisioning.hermes.install_command, "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash");
   assert.equal(liveServiceProvisioning.body.provisioning.hermes.safety.can_publish, false);
   assert.equal(payloadRuntimeUnauthorized.status, 401);

@@ -40,6 +40,7 @@ test("live service provisioning report fails closed until service env is configu
   assert.equal(report.hermes.vllm.chat_completions_path, "/v1/chat/completions");
   assert.equal(report.hermes.safety.can_publish, false);
   assert.ok(report.hermes.next_actions.some((action) => action.includes("Install Hermes Agent")));
+  assert.ok(report.next_actions.some((action) => action.includes("live:provisioning")));
 });
 
 test("live service provisioning report verifies live endpoints without persisting secrets", async () => {
@@ -268,6 +269,14 @@ test("live service provisioning report requires complete evidence shape", async 
     /next actions/,
   );
   assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, next_actions: [] }),
+    /next actions/,
+  );
+  assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, next_actions: ["Set service env."] }),
+    /live:provisioning/,
+  );
+  assert.throws(
     () =>
       assertLiveServiceProvisioningReport({
         ...report,
@@ -357,6 +366,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
   assert.equal(written.includes("meili-test-secret"), false);
   assert.equal(assertLiveServiceProvisioningReport(JSON.parse(written)), true);
   assert.equal(liveServiceProvisioningState(outPath).status, "pass");
+  assert.ok(liveServiceProvisioningState(outPath).next_actions.some((action) => action.includes("live:capture")));
   assert.equal(liveServiceProvisioningState(`${dir}/missing.json`).status, "missing_report");
 
   const cliOutPath = `${dir}/cli-live-service-provisioning-report.json`;

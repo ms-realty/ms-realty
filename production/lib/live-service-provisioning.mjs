@@ -288,6 +288,12 @@ export function assertLiveServiceProvisioningReport(report) {
   if (!Array.isArray(report.hermes?.next_actions) || report.hermes.next_actions.length === 0) {
     throw new Error("Live service provisioning Hermes handoff must include next actions");
   }
+  if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
+    throw new Error("Live service provisioning report must include next actions");
+  }
+  if (!ready && !report.next_actions.some((action) => action.includes("live:provisioning"))) {
+    throw new Error("Blocked live service provisioning report must point to live:provisioning");
+  }
   const serialized = JSON.stringify(report);
   if (/secret|Bearer\s+|sk-[A-Za-z0-9_-]+|user:pass/i.test(serialized)) {
     throw new Error("Live service provisioning report must not persist secrets");
@@ -306,6 +312,7 @@ export function liveServiceProvisioningState(reportPath = DEFAULT_LIVE_SERVICE_P
       summary: report.summary,
       checks: report.checks,
       hermes: report.hermes,
+      next_actions: report.next_actions,
     };
   } catch (error) {
     return { status: "invalid_report", path: reportPath, error: error.message };
