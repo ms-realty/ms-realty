@@ -211,6 +211,21 @@ test("SEO evidence preflight report records missing and valid export state", () 
       }),
     /missing required sources must match source statuses/,
   );
+  const missingOutputPath = `${missingDir}/seo-evidence-preflight-report.json`;
+  const missingResult = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence-preflight-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_SEO_EVIDENCE_INPUT_DIR: missingDir,
+      MS_REALTY_SEO_PREFLIGHT_REPORT_PATH: missingOutputPath,
+    },
+  });
+
+  assert.equal(missingResult.status, 0, missingResult.stderr);
+  assert.match(missingResult.stdout, /SEO evidence blocked: search_console, yandex_webmaster, backlinks/);
+  assert.match(missingResult.stdout, /Next: export Search Console, Yandex Webmaster, and backlink CSVs/);
+  assert.match(missingResult.stdout, /npm run seo:evidence/);
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-preflight-report-valid-`);
   const outputPath = `${validDir}/seo-evidence-preflight-report.json`;
