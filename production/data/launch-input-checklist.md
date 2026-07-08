@@ -42,6 +42,10 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 
 ## Live Service Provisioning
 
+- Current report evidence:
+- typesense_meilisearch_sync: missing_report (path /Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json)
+- typesense_meilisearch_query: missing_report (path /Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json)
+- hermes_draft_worker: missing_report (path /Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json)
 - Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
 - Hermes worker: set `HERMES_CHAT_COMPLETIONS_URL`; set `HERMES_API_KEY` when the endpoint requires auth.
 - Hermes default: self-host vLLM with `--enable-auto-tool-choice --tool-call-parser hermes`; hosted OpenRouter fallback is non-sensitive only.

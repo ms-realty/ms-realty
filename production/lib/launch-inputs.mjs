@@ -46,6 +46,20 @@ function sourceDomainSampleLines(seoEvidence) {
   }).join("\n");
 }
 
+function liveServiceReportLine(report) {
+  const details = [
+    report.path ? `path ${report.path}` : "",
+    report.error ? `error ${report.error}` : "",
+  ].filter(Boolean);
+  return `- ${report.source}: ${report.status}${details.length ? ` (${details.join("; ")})` : ""}`;
+}
+
+function liveServiceReportLines(liveEvidence) {
+  const reports = Array.isArray(liveEvidence.reports) ? liveEvidence.reports : [];
+  if (!reports.length) return ["- no live service report rows available"];
+  return reports.map(liveServiceReportLine);
+}
+
 function payloadCheckLine(check) {
   const details = [
     check.env ? `env ${check.env}` : "",
@@ -88,6 +102,8 @@ export function renderLaunchInputChecklist({
         payloadEvidence.payload_database_url_configured ? "" : "DATABASE_URL",
       ].filter(Boolean);
   const weakPayloadEnv = Array.isArray(payloadSummary.weak_env) ? payloadSummary.weak_env : [];
+  const liveServiceGate = launchReadiness.gates.find((gate) => gate.id === "live_services");
+  const liveServiceEvidence = liveServiceGate?.evidence || {};
 
   return `# Launch Input Checklist
 
@@ -128,6 +144,8 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 
 ## Live Service Provisioning
 
+- Current report evidence:
+${liveServiceReportLines(liveServiceEvidence).join("\n")}
 - Search engines: set \`TYPESENSE_URL\`, \`TYPESENSE_API_KEY\`, \`MEILI_URL\`, and \`MEILI_API_KEY\`.
 - Hermes worker: set \`HERMES_CHAT_COMPLETIONS_URL\`; set \`HERMES_API_KEY\` when the endpoint requires auth.
 - Hermes default: self-host vLLM with \`--enable-auto-tool-choice --tool-call-parser hermes\`; hosted OpenRouter fallback is non-sensitive only.

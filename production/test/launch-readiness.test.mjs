@@ -1231,6 +1231,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /MS_REALTY_SEO_PREFLIGHT_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH/);
   assert.match(markdown, /Live Service Provisioning/);
+  assert.match(markdown, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
+  assert.match(markdown, /typesense_meilisearch_query: missing_report .*search-engine-query-report\.json/);
+  assert.match(markdown, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
   assert.match(markdown, /TYPESENSE_URL/);
   assert.match(markdown, /MEILI_API_KEY/);
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
