@@ -390,6 +390,7 @@ export function createHttpApp({
           mappedListings: routeMap.filter((route) => route.url_type === "listing" && route.target_path).length,
         },
       },
+      liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
     });
   const currentSeoPreflightReport = () =>
     buildSeoEvidencePreflightReport({

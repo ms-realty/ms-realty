@@ -406,6 +406,7 @@ function launchInputChecklist(config) {
     redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routes)),
     deployableRedirects: { summary: summarizeDeployableRedirects(redirects) },
     routeMap: routeMapSummary(routes),
+    liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
   });
 }
 

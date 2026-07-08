@@ -737,6 +737,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const listingEditLedgerPath = tempListingEdits();
   const translationLedgerPath = tempTranslations();
   const auditLogPath = tempAuditLog();
+  const liveServiceProvisioningReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`)}/mounted-live-service-provisioning-report.json`;
+  fs.copyFileSync(fromRoot("production", "data", "live-service-provisioning-report.json"), liveServiceProvisioningReportPath);
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -754,6 +756,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     listingEditLedgerPath,
     translationLedgerPath,
     auditLogPath,
+    liveServiceProvisioningReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
     editedAt: "2026-07-05T00:03:00Z",
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
@@ -1005,6 +1008,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.match(launchChecklist.body, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(launchChecklist.body, /POST \/api\/admin\/seo-evidence\/import/);
   assert.match(launchChecklist.body, /POST \/api\/admin\/listing-quality\/import/);
+  assert.ok(launchChecklist.body.includes(liveServiceProvisioningReportPath));
   assert.equal(preflightReportsUnauthorized.status, 401);
   assert.equal(preflightReports.status, 200);
   assert.equal(preflightReports.body.kind, "admin_preflight_reports");

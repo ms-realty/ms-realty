@@ -92,6 +92,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
   const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
+  const liveServiceProvisioningReportPath = tempJson(
+    "app-admin-live-service-provisioning",
+    fs.readFileSync("production/data/live-service-provisioning-report.json", "utf8"),
+  );
   const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
   const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
   const listingEditLedgerPath = tempDefaultListingEdits();
@@ -112,6 +116,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
+      MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveServiceProvisioningReportPath,
       MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimeReportPath,
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
@@ -267,6 +272,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(launchChecklistBody, /External SEO Exports/);
       assert.match(launchChecklistBody, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
       assert.match(launchChecklistBody, /live-service-report-template/);
+      assert.equal(launchChecklistBody.includes(liveServiceProvisioningReportPath), true);
 
       const preflightReports = await preflightReportsRoute.GET(
         new Request("https://example.test/api/admin/preflight-reports", { headers: auth }),
