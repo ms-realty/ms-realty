@@ -40,7 +40,9 @@ if (!report.launch_ready) {
   console.error(`LAUNCH BLOCKED: ${report.blockers.join(", ")}`);
   for (const line of blockerDetails(report)) console.error(`- ${line}`);
   for (const line of blockerActions(report)) console.error(`- ${line}`);
-  console.error("Next: provide the missing evidence, then run `npm run launch:inputs` and `npm run launch:preflight`.");
+  console.error(
+    "Next: provide the missing evidence, review `production/data/launch-input-checklist.md`, then run `npm run launch:inputs` and `npm run launch:preflight`.",
+  );
   process.exitCode = 1;
 } else {
   console.log("LAUNCH READY");

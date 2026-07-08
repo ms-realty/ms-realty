@@ -1115,6 +1115,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.match(result.stderr, /listing_quality_review next: Download \/api\/admin\/listing-quality-review-packet/);
   assert.match(result.stderr, /live_services next: Run npm run live:provisioning:preflight/);
   assert.match(result.stderr, /payload_runtime next: Run npm run payload:runtime/);
+  assert.match(result.stderr, /production\/data\/launch-input-checklist\.md/);
   assert.match(result.stderr, /npm run launch:inputs/);
 
   const partialReviewPath = writePartialListingQualityReviewFixture(
