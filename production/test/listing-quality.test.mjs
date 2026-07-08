@@ -259,13 +259,36 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   );
   assert.throws(() => validateListingQualityReviewCsv(report, csv, { requireComplete: true }), /incomplete/);
   assert.throws(() => validateListingQualityReviewCsv(report, `${csv}\n${csv.split("\n")[1]}\n`), /Duplicate/);
+  const mediaReviewRow = report.rows.find((candidate) => candidate.review_status.includes("media"));
   assert.throws(
     () =>
       validateListingQualityReviewCsv(
         report,
-        `listing_id,media_reviewer\n${report.rows.find((candidate) => candidate.review_status.includes("media")).listing_id},todo\n`,
+        `listing_id,media_reviewer\n${mediaReviewRow.listing_id},todo\n`,
       ),
     /real media_reviewer/,
+  );
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        [
+          "listing_id,media_reviewer,review_notes",
+          `${mediaReviewRow.listing_id},hermes_editor,Reviewed source gallery evidence`,
+        ].join("\n"),
+      ),
+    /real media_reviewer/,
+  );
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        [
+          "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+          `${row.listing_id},123000,2,Sandanski,Reviewed listing description,codex-reviewer,media_editor,Reviewed from source evidence`,
+        ].join("\n"),
+      ),
+    /real facts_reviewer/,
   );
   assert.throws(
     () =>
@@ -289,14 +312,13 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       ),
     /requires review_notes/,
   );
-  const mediaRow = report.rows.find((candidate) => candidate.review_status.includes("media"));
   assert.throws(
     () =>
       validateListingQualityReviewCsv(
         report,
         [
           "listing_id,media_reviewer,review_notes",
-          `${mediaRow.listing_id},media_editor,Review public gallery: currently ${mediaRow.public_gallery_assets} public asset(s).`,
+          `${mediaReviewRow.listing_id},media_editor,Review public gallery: currently ${mediaReviewRow.public_gallery_assets} public asset(s).`,
         ].join("\n"),
       ),
     /draft instructions/,

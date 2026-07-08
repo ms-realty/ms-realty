@@ -303,7 +303,13 @@ function assertReviewFactValue(listingId, field, value) {
 
 function assertReviewerValue(listingId, field, value) {
   if (!filled(value)) throw new Error(`Listing ${listingId} requires ${field}`);
-  if (/^(ai|chatgpt|codex|example|hermes|n\/?a|none|placeholder|reviewer|sample|tbd|test|todo|unknown)$/i.test(String(value).trim())) {
+  const reviewer = String(value).trim();
+  if (
+    /^(ai|chatgpt|codex|example|hermes|n\/?a|none|placeholder|reviewer|sample|tbd|test|todo|unknown)$/i.test(
+      reviewer,
+    ) ||
+    /(^|[^a-z0-9])(ai|chatgpt|codex|hermes)([^a-z0-9]|$)/i.test(reviewer)
+  ) {
     throw new Error(`Listing ${listingId} requires a real ${field}`);
   }
 }
