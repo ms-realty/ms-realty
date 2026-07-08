@@ -1138,6 +1138,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=yandex_webmaster`: `url,indexed,issue/);
   assert.match(markdown, /POST \/api\/admin\/seo-evidence\/import\?source=backlinks`: `target_url,source_url,referring_domain/);
   assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
+  assert.match(markdown, /GET \/api\/admin\/seo-evidence\/export/);
   assert.match(markdown, /MS_REALTY_SEO_EVIDENCE_INPUT_DIR/);
   assert.match(markdown, /npm run seo:preflight:report/);
   assert.match(markdown, /GET \/api\/admin\/seo-preflight/);

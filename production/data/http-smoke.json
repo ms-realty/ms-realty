@@ -8856,7 +8856,8 @@
           }
         },
         "importEndpoint": "/api/admin/seo-evidence/import",
-        "templateEndpoint": "/api/admin/seo-evidence/template"
+        "templateEndpoint": "/api/admin/seo-evidence/template",
+        "exportEndpoint": "/api/admin/seo-evidence/export"
       },
       "listingQuality": {
         "generated_at": "2026-07-05T03:01:09.839Z",

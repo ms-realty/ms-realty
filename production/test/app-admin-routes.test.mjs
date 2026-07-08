@@ -156,6 +156,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const redirectApprovalsImportRoute = await import("../../app/api/admin/redirect-approvals/import/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
       const seoEvidenceRoute = await import("../../app/api/admin/seo-evidence/route.js");
+      const seoEvidenceExportRoute = await import("../../app/api/admin/seo-evidence/export/route.js");
       const seoEvidenceImportRoute = await import("../../app/api/admin/seo-evidence/import/route.js");
       const seoEvidenceTemplateRoute = await import("../../app/api/admin/seo-evidence/template/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
@@ -485,6 +486,16 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(seoEvidence.status, 200);
       assert.ok(seoEvidenceBody.missingRequiredSources.includes("search_console"));
       assert.equal(seoEvidenceBody.sources.privacy_events.status, "imported");
+      assert.equal(seoEvidenceBody.exportEndpoint, "/api/admin/seo-evidence/export");
+
+      const seoEvidenceExport = await seoEvidenceExportRoute.GET(
+        new Request("https://example.test/api/admin/seo-evidence/export", { headers: auth }),
+      );
+      const seoEvidenceExportBody = await seoEvidenceExport.json();
+      assert.equal(seoEvidenceExport.status, 200);
+      assert.equal(seoEvidenceExport.headers.get("content-disposition"), 'attachment; filename="seo-evidence.json"');
+      assert.ok(seoEvidenceExportBody.summary.missing_required_sources.includes("search_console"));
+      assert.ok(seoEvidenceExportBody.url_evidence.length > 0);
 
       const seoTemplate = await seoEvidenceTemplateRoute.GET(
         new Request("https://example.test/api/admin/seo-evidence/template?source=search_console", { headers: auth }),

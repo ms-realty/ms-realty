@@ -1302,6 +1302,9 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const templateUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/seo-evidence/template?source=search_console",
   });
+  const exportUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/seo-evidence/export",
+  });
   const template = await dispatchHttp(app, {
     url: "/api/admin/seo-evidence/template?source=search_console",
     headers: { authorization: "Bearer local-admin-smoke" },
@@ -1339,6 +1342,10 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
       "content-type": "text/csv",
     },
     body: `target_url,source_url,referring_domain\n${com.old_url},https://regionalbroker.bg/a,regionalbroker.bg\n${ru.old_url},https://partnerrealty.de/b,partnerrealty.de\n`,
+  });
+  const exportedEvidence = await dispatchHttp(app, {
+    url: "/api/admin/seo-evidence/export",
+    headers: { authorization: "Bearer local-admin-smoke" },
   });
   const review = await dispatchHttp(app, {
     url: "/api/admin/migration/review?locale=en",
@@ -1407,6 +1414,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
 
   assert.equal(unauthorized.status, 401);
   assert.equal(templateUnauthorized.status, 401);
+  assert.equal(exportUnauthorized.status, 401);
   assert.equal(template.status, 200);
   assert.equal(template.headers["content-type"], "text/csv; charset=utf-8");
   assert.match(template.body, /url,clicks,impressions,position/);
@@ -1421,9 +1429,16 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.deepEqual(yandex.body.missingRequiredSources, ["backlinks"]);
   assert.equal(backlinks.status, 201);
   assert.deepEqual(backlinks.body.missingRequiredSources, []);
+  assert.equal(backlinks.body.exportEndpoint, "/api/admin/seo-evidence/export");
+  assert.equal(exportedEvidence.status, 200);
+  assert.equal(exportedEvidence.headers["content-disposition"], 'attachment; filename="seo-evidence.json"');
+  const exportedEvidenceBody = JSON.parse(exportedEvidence.body);
+  assert.deepEqual(exportedEvidenceBody.summary.missing_required_sources, []);
+  assert.ok(exportedEvidenceBody.url_evidence.length > 0);
   assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
   assert.equal(review.body.seoEvidence.importEndpoint, "/api/admin/seo-evidence/import");
   assert.equal(review.body.seoEvidence.templateEndpoint, "/api/admin/seo-evidence/template");
+  assert.equal(review.body.seoEvidence.exportEndpoint, "/api/admin/seo-evidence/export");
   assert.deepEqual(review.body.seoEvidence.missingRequiredSources, []);
   assert.equal(reviewHtml.body.includes('data-seo-import-endpoint="/api/admin/seo-evidence/import"'), true);
   assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);

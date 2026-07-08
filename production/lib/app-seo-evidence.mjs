@@ -266,6 +266,7 @@ function evidencePayload(evidence) {
     sources: evidence.summary.sources,
     importEndpoint: "/api/admin/seo-evidence/import",
     templateEndpoint: "/api/admin/seo-evidence/template",
+    exportEndpoint: "/api/admin/seo-evidence/export",
   };
 }
 

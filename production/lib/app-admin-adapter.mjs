@@ -369,6 +369,7 @@ function seoEvidencePayload(seoEvidence) {
     sources: seoEvidence.summary.sources,
     importEndpoint: "/api/admin/seo-evidence/import",
     templateEndpoint: "/api/admin/seo-evidence/template",
+    exportEndpoint: "/api/admin/seo-evidence/export",
   };
 }
 
@@ -1033,6 +1034,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
       return jsonResponse(200, seoEvidencePayload(currentSeoEvidence(config)));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/export") {
+      return downloadJsonResponse(`${JSON.stringify(currentSeoEvidence(config), null, 2)}\n`, "seo-evidence.json");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/template") {
       const template = readAppSeoEvidenceTemplate(url, config);

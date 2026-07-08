@@ -233,6 +233,7 @@ function seoEvidencePayload(seoEvidence) {
     sources: seoEvidence.summary.sources,
     importEndpoint: "/api/admin/seo-evidence/import",
     templateEndpoint: "/api/admin/seo-evidence/template",
+    exportEndpoint: "/api/admin/seo-evidence/export",
   };
 }
 
@@ -832,6 +833,13 @@ export function createHttpApp({
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/export") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminResponse(200, `${JSON.stringify(currentSeoEvidence(), null, 2)}\n`, "application/json; charset=utf-8", {
+        "content-disposition": 'attachment; filename="seo-evidence.json"',
+      });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/template") {
