@@ -441,6 +441,14 @@ test("listing quality preflight report records missing and valid human review st
   assert.equal(missingReport.review.pending_review_sample[0].listing_id, report.rows[0].listing_id);
   assert.equal(missingReport.review.pending_review_sample[0].editor_path, report.rows[0].editor_path);
   assert.ok(missingReport.review.pending_review_sample[0].required_editor_fields.length > 0);
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...missingReport,
+        review: { ...missingReport.review, status: "operator_uploaded" },
+      }),
+    /known review status/,
+  );
 
   const partialReport = buildListingQualityPreflightReport({
     report,

@@ -26,6 +26,7 @@ const MEDIA_FIELDS_BY_ISSUE = {
   tour_review_pending: "tour_review",
 };
 const KNOWN_ISSUES = [...Object.keys(FACT_FIELDS_BY_ISSUE), ...Object.keys(MEDIA_FIELDS_BY_ISSUE)];
+const LISTING_QUALITY_REVIEW_STATUSES = new Set(["missing_review", "invalid_review", "pass"]);
 
 function filled(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
@@ -482,6 +483,9 @@ export function buildListingQualityPreflightReport({
 export function assertListingQualityPreflightReport(report) {
   if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
     throw new Error("Listing quality preflight report must include valid generated_at");
+  }
+  if (!LISTING_QUALITY_REVIEW_STATUSES.has(report.review?.status)) {
+    throw new Error("Listing quality preflight report must use a known review status");
   }
   const ready = report.review?.status === "pass";
   if (report.ready !== ready) throw new Error("Listing quality preflight ready flag must match review state");
