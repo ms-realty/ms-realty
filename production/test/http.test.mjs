@@ -1534,6 +1534,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(searchConsole.body.seoImport.status, "blocked");
   assert.equal(searchConsole.body.seoImport.importedSource, "search_console");
   assert.deepEqual(searchConsole.body.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
+  assert.equal(searchConsole.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "blocked");
+  assert.equal(searchConsole.body.report.blockers.includes("external_seo_exports"), true);
   assert.deepEqual(searchConsole.body.sources.search_console.matched_source_domains, [
     "makler-realty.com",
     "makler-realty.ru",
@@ -1545,6 +1547,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(backlinks.body.seoImport.ready, true);
   assert.equal(backlinks.body.seoImport.status, "ready");
   assert.deepEqual(backlinks.body.seoImport.missingRequiredSources, []);
+  assert.equal(backlinks.body.report.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
+  assert.equal(backlinks.body.report.blockers.includes("external_seo_exports"), false);
   assert.equal(backlinks.body.exportEndpoint, "/api/admin/seo-evidence/export");
   assert.equal(exportedEvidence.status, 200);
   assert.equal(exportedEvidence.headers["content-disposition"], 'attachment; filename="seo-evidence.json"');

@@ -867,7 +867,7 @@ function importSeoEvidence(input, config) {
     },
     config,
   );
-  return result;
+  return { ...result, report: launchReadiness(config) };
 }
 
 function redirectApprovalWorkbook(url, config) {
