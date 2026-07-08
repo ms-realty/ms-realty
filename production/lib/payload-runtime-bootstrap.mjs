@@ -52,7 +52,7 @@ export function payloadRuntimeBootstrapChecklist() {
     "2. Replace `PAYLOAD_SECRET` with `openssl rand -base64 32` output and replace the Postgres password placeholders.",
     "3. Start Postgres with `docker compose --env-file .env.payload-runtime -f production/docker-compose.payload.yml up -d payload-postgres`.",
     "4. Export or source the same private env file in the application runtime.",
-    "5. Run `npm run payload:runtime`, then `npm run payload:preflight`, then `npm run launch:preflight`.",
+    "5. Run `npm run payload:runtime`, import or mount the redacted report, then run `npm run payload:preflight` and `npm run launch:preflight`.",
   ];
 }
 

@@ -9,6 +9,7 @@ import {
   buildPayloadRuntimeReport,
   payloadRuntimeImportSummary,
 } from "../lib/payload-runtime.mjs";
+import { payloadRuntimeBootstrapChecklist } from "../lib/payload-runtime-bootstrap.mjs";
 import { payloadRuntimeState } from "../lib/launch-readiness.mjs";
 
 test("Payload config exposes generated CMS collections behind an admin runtime", async () => {
@@ -105,6 +106,10 @@ test("Payload runtime generator explains blocked remediation", () => {
   assert.ok(fs.existsSync(reportPath));
 });
 
+test("Payload runtime bootstrap tells operators to import or mount the redacted report", () => {
+  assert.match(payloadRuntimeBootstrapChecklist().join(" "), /import or mount the redacted report/);
+});
+
 test("Payload runtime report rejects copied placeholder env values", async () => {
   const report = await buildPayloadRuntimeReport({
     databaseProbe: async () => {
@@ -159,6 +164,7 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(report.summary.database.database, "ms_realty");
   assert.equal(report.summary.database.host, "db.internal");
   assert.equal(report.summary.database.credentials_configured, true);
+  assert.ok(report.next_actions.some((action) => action.includes("redacted Payload runtime report")));
   assert.equal(JSON.stringify(report).includes("not-written-to-report-32-byte-minimum"), false);
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
 });
