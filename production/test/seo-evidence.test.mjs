@@ -399,6 +399,34 @@ test("SEO evidence assertion rejects hand-cleared missing source state", () => {
       }),
     /matched domains must be an array/,
   );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
+        url_evidence: evidence.url_evidence.map((row, index) => (index === 0 ? { ...row, old_url: "" } : row)),
+      }),
+    /old_url/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
+        url_evidence: evidence.url_evidence.map((row, index) =>
+          index === 0 ? { ...row, source_domain: "example.com" } : row,
+        ),
+      }),
+    /legacy source domain/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
+        url_evidence: evidence.url_evidence.map((row, index) =>
+          index === 0 ? { ...row, search_console: { ...row.search_console, clicks: -1 } } : row,
+        ),
+      }),
+    /search_console\.clicks/,
+  );
 
   evidence.summary.missing_required_sources = [];
 

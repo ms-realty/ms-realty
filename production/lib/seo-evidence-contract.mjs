@@ -43,6 +43,11 @@ export function assertSeoSourceSummary(summary, source) {
   }
 }
 
+function assertNonNegativeMetric(row, path) {
+  const value = path.split(".").reduce((target, key) => target?.[key], row);
+  if (!Number.isFinite(value) || value < 0) throw new Error(`SEO evidence URL metric ${path} must be non-negative`);
+}
+
 export function assertSeoEvidence(evidence) {
   if (!evidence.generated_at || Number.isNaN(Date.parse(evidence.generated_at))) {
     throw new Error("SEO evidence must include valid generated_at");
@@ -64,6 +69,27 @@ export function assertSeoEvidence(evidence) {
   }
   if (!evidence.summary.sources.privacy_events) throw new Error("SEO evidence must include privacy analytics status");
   if (!Array.isArray(evidence.summary.missing_required_sources)) throw new Error("SEO evidence must summarize missing required sources");
+  for (const row of evidence.url_evidence) {
+    if (!row.old_url) throw new Error("SEO evidence URL rows must include old_url");
+    if (!REQUIRED_SOURCE_DOMAINS.includes(row.source_domain)) throw new Error("SEO evidence URL rows must include a legacy source domain");
+    if (!row.url_type) throw new Error("SEO evidence URL rows must include url_type");
+    for (const path of [
+      "search_console.clicks",
+      "search_console.impressions",
+      "search_console.avg_position",
+      "yandex_webmaster.rows",
+      "yandex_webmaster.issues",
+      "backlinks.backlinks",
+      "backlinks.referring_domains",
+      "analytics.page_views",
+      "analytics.searches",
+      "analytics.leads",
+      "analytics.cta_clicks",
+      "analytics.exported_page_views",
+    ]) {
+      assertNonNegativeMetric(row, path);
+    }
+  }
   for (const source of REQUIRED_EXPORTS) {
     if (!evidence.summary.sources[source]) throw new Error(`SEO evidence missing ${source} source status`);
     assertSeoSourceSummary(evidence.summary.sources[source], source);
