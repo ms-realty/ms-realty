@@ -10,6 +10,7 @@
     {
       "engine": "typesense",
       "service_url": "https://typesense.example.com",
+      "collection": "ms_realty_listings",
       "query": "Sandanski",
       "filter": "translation_indexable:=true && locale:=bg",
       "total": 1,
@@ -26,6 +27,7 @@
     {
       "engine": "meilisearch",
       "service_url": "https://meili.example.com",
+      "index": "ms_realty_listings",
       "query": "Sandanski",
       "filter": "translation_indexable = true AND locale = bg",
       "total": 1,

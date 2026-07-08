@@ -82,6 +82,33 @@ function assertReportUrl(value, label) {
   }
 }
 
+function targetFieldForEngine(engine) {
+  if (engine.engine === "typesense") return "collection";
+  if (engine.engine === "meilisearch") return "index";
+  throw new Error(`${engine.engine} search report engine is unsupported`);
+}
+
+function assertSearchEngineTarget(engine, label) {
+  const field = targetFieldForEngine(engine);
+  const target = String(engine[field] || "").trim();
+  if (!target) throw new Error(`${label} must include ${field} evidence`);
+  if (target.includes("/") || target.includes("?") || target.includes("#")) {
+    throw new Error(`${label} ${field} evidence must be a target name`);
+  }
+  return { field, target };
+}
+
+function operationUrlsIncludeTarget(engine, target) {
+  const encoded = encodeURIComponent(target);
+  return (engine.operations || []).some((operation) => {
+    try {
+      return new URL(operation.url).pathname.split("/").includes(encoded);
+    } catch {
+      return false;
+    }
+  });
+}
+
 export async function syncTypesense({
   baseUrl = process.env.TYPESENSE_URL,
   apiKey = process.env.TYPESENSE_API_KEY,
@@ -188,6 +215,10 @@ export function assertSearchEngineSyncReport(report) {
   const operationCount = report.engines.reduce((sum, engine) => sum + (engine.operations || []).length, 0);
   if (report.summary.total_operations !== operationCount) throw new Error("Search sync summary operations must match engine rows");
   for (const engine of report.engines) {
+    const { target } = assertSearchEngineTarget(engine, `${engine.engine} sync report`);
+    if (!operationUrlsIncludeTarget(engine, target)) {
+      throw new Error(`${engine.engine} sync report must include operation URL evidence for its target`);
+    }
     if (engine.documents !== 167) throw new Error(`${engine.engine} must sync 167 locale-scoped documents`);
     for (const operation of engine.operations || []) {
       assertReportUrl(operation.url, `${engine.engine} sync operation`);
@@ -235,6 +266,7 @@ export async function queryTypesense({
   return {
     engine: "typesense",
     service_url: redactedUrl(baseUrl),
+    collection: collectionName,
     query: q,
     filter: filterBy,
     total: Number(payload.found || 0),
@@ -263,6 +295,7 @@ export async function queryMeilisearch({
   return {
     engine: "meilisearch",
     service_url: redactedUrl(baseUrl),
+    index: indexName,
     query: q,
     filter,
     total: Number(payload.estimatedTotalHits ?? payload.totalHits ?? 0),
@@ -304,6 +337,7 @@ export function assertSearchEngineQueryReport(report) {
   }
   for (const engine of report.engines) {
     assertReportUrl(engine.service_url, `${engine.engine} query report`);
+    assertSearchEngineTarget(engine, `${engine.engine} query report`);
     if (!String(engine.query || "").trim()) throw new Error(`${engine.engine} query report must include query evidence`);
     if (!String(engine.filter || "").includes("translation_indexable") || !String(engine.filter || "").includes("locale")) {
       throw new Error(`${engine.engine} query report must prove reviewed locale filtering`);

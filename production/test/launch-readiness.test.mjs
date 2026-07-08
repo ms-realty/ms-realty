@@ -164,6 +164,7 @@ function writeLiveReportFixtures(dir) {
       engines: [
         {
           engine: "typesense",
+          collection: "ms_realty_listings",
           documents: 167,
           operations: [
             { method: "POST", url: "https://typesense.ms-realty.bg/collections", status: 201, bytes: 1 },
@@ -172,6 +173,7 @@ function writeLiveReportFixtures(dir) {
         },
         {
           engine: "meilisearch",
+          index: "ms_realty_listings",
           documents: 167,
           operations: [
             { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
@@ -190,6 +192,7 @@ function writeLiveReportFixtures(dir) {
         {
           engine: "typesense",
           service_url: "https://typesense.ms-realty.bg",
+          collection: "ms_realty_listings",
           query: "Sandanski",
           filter: "translation_indexable:=true && locale:=bg",
           total: 1,
@@ -198,6 +201,7 @@ function writeLiveReportFixtures(dir) {
         {
           engine: "meilisearch",
           service_url: "https://meili.ms-realty.bg",
+          index: "ms_realty_listings",
           query: "Sandanski",
           filter: "translation_indexable = true AND locale = bg",
           total: 1,
