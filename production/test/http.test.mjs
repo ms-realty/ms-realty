@@ -901,6 +901,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/listing-quality",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const listingQualityReviewPacketUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/listing-quality-review-packet",
+  });
+  const listingQualityReviewPacket = await dispatchHttp(app, {
+    url: "/api/admin/listing-quality-review-packet",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const cmsCollectionsUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/cms-collections",
   });
@@ -1037,6 +1044,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(listingQualityStatus.body.kind, "admin_listing_quality");
   assert.equal(listingQualityStatus.body.listing_quality.status, "blocked");
   assert.ok(listingQualityStatus.body.listing_quality.summary.affected_listings > 0);
+  assert.equal(listingQualityReviewPacketUnauthorized.status, 401);
+  assert.equal(listingQualityReviewPacket.status, 200);
+  assert.equal(listingQualityReviewPacket.body.kind, "listing_quality_review_packet");
+  assert.equal(listingQualityReviewPacket.body.status, "draft_not_launch_evidence");
+  assert.equal(listingQualityReviewPacket.body.admin.review_packet_endpoint, "GET /api/admin/listing-quality-review-packet");
+  assert.ok(listingQualityReviewPacket.body.summary.expected_review_rows > 0);
   assert.equal(cmsCollectionsUnauthorized.status, 401);
   assert.equal(cmsCollections.status, 200);
   assert.equal(cmsCollections.headers["cache-control"], "no-store");

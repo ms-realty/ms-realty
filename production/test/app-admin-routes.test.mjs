@@ -148,6 +148,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const listingQualityRoute = await import("../../app/api/admin/listing-quality/route.js");
       const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
       const listingQualityReviewDraftRoute = await import("../../app/api/admin/listing-quality-review-draft/route.js");
+      const listingQualityReviewPacketRoute = await import("../../app/api/admin/listing-quality-review-packet/route.js");
       const listingQualityWorkbookRoute = await import("../../app/api/admin/listing-quality-workbook/route.js");
       const localeRoute = await import("../../app/api/admin/locales/route.js");
       const redirectApprovalWorkbookRoute = await import("../../app/api/admin/redirect-approval-workbook/route.js");
@@ -324,6 +325,16 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityBody.kind, "admin_listing_quality");
       assert.equal(listingQualityBody.listing_quality.status, "blocked");
       assert.ok(listingQualityBody.listing_quality.summary.affected_listings > 0);
+
+      const listingQualityReviewPacket = await listingQualityReviewPacketRoute.GET(
+        new Request("https://example.test/api/admin/listing-quality-review-packet", { headers: auth }),
+      );
+      const listingQualityReviewPacketBody = await listingQualityReviewPacket.json();
+      assert.equal(listingQualityReviewPacket.status, 200);
+      assert.equal(listingQualityReviewPacketBody.kind, "listing_quality_review_packet");
+      assert.equal(listingQualityReviewPacketBody.status, "draft_not_launch_evidence");
+      assert.equal(listingQualityReviewPacketBody.admin.review_packet_endpoint, "GET /api/admin/listing-quality-review-packet");
+      assert.ok(listingQualityReviewPacketBody.summary.expected_review_rows > 0);
 
       const cmsCollectionsUnauthorized = await cmsCollectionsRoute.GET(new Request("https://example.test/api/admin/cms-collections"));
       const cmsCollections = await cmsCollectionsRoute.GET(new Request("https://example.test/api/admin/cms-collections", { headers: auth }));

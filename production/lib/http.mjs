@@ -74,6 +74,7 @@ import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import {
+  buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   renderListingQualityReviewDraft,
@@ -944,6 +945,19 @@ export function createHttpApp({
         renderListingQualityReviewDraft(currentListingQualityReport()),
         "text/csv; charset=utf-8",
         { "content-disposition": 'attachment; filename="listing-quality-review-draft.csv"' },
+      );
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-packet") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const generatedAt = reviewedAt || new Date().toISOString();
+      return adminJson(
+        200,
+        buildListingQualityReviewPacket({
+          generatedAt,
+          report: currentListingQualityReport({ generatedAt }),
+          reviewPath: listingQualityReviewPath || undefined,
+        }),
       );
     }
 

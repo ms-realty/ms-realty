@@ -211,6 +211,7 @@ test("listing quality review packet is a complete draft but not launch evidence"
   assert.equal(packet.ready, false);
   assert.equal(packet.status, "draft_not_launch_evidence");
   assert.equal(packet.admin.draft_review_endpoint, "GET /api/admin/listing-quality-review-draft");
+  assert.equal(packet.admin.review_packet_endpoint, "GET /api/admin/listing-quality-review-packet");
   assert.equal(rows.length, report.rows.length);
   assert.ok(rows.every((row) => row.media_reviewer === ""));
   assert.ok(rows.every((row) => row.facts_reviewer === ""));

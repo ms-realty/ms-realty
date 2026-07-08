@@ -29,6 +29,7 @@ import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import {
+  buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   renderListingQualityReviewDraft,
@@ -870,6 +871,15 @@ function listingQualityReviewDraft(config) {
   return renderListingQualityReviewDraft(currentListingQualityReport(config));
 }
 
+function listingQualityReviewPacket(config) {
+  const generatedAt = config.reviewedAt || new Date().toISOString();
+  return buildListingQualityReviewPacket({
+    generatedAt,
+    report: currentListingQualityReport(config, { generatedAt }),
+    reviewPath: config.listingQualityReviewPath || undefined,
+  });
+}
+
 function importListingQualityRows(inputCsv, config) {
   const report = currentListingQualityReport(config);
   const review = validateListingQualityReviewCsv(report, inputCsv);
@@ -1036,6 +1046,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-draft") {
       return csvResponse(listingQualityReviewDraft(config), "listing-quality-review-draft.csv");
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-packet") {
+      return jsonResponse(200, listingQualityReviewPacket(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));

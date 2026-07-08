@@ -250,6 +250,7 @@ export function buildListingQualityReviewPacket({
       import_endpoint: "POST /api/admin/listing-quality/import",
       workbook_endpoint: "GET /api/admin/listing-quality-workbook",
       draft_review_endpoint: "GET /api/admin/listing-quality-review-draft",
+      review_packet_endpoint: "GET /api/admin/listing-quality-review-packet",
     },
     summary: {
       expected_review_rows: report.rows.length,
