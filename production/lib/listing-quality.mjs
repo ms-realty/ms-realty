@@ -27,6 +27,7 @@ const MEDIA_FIELDS_BY_ISSUE = {
 };
 const KNOWN_ISSUES = [...Object.keys(FACT_FIELDS_BY_ISSUE), ...Object.keys(MEDIA_FIELDS_BY_ISSUE)];
 const LISTING_QUALITY_REVIEW_STATUSES = new Set(["missing_review", "invalid_review", "pass"]);
+const LEGACY_SOURCE_DOMAINS = new Set(["makler-realty.com", "makler-realty.ru"]);
 
 function filled(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
@@ -62,6 +63,59 @@ function reviewStatus(issues) {
 
 function requiredEditorFields(issues) {
   return issues.map((issue) => FACT_FIELDS_BY_ISSUE[issue] || MEDIA_FIELDS_BY_ISSUE[issue]).filter(Boolean);
+}
+
+function assertNonNegativeInteger(value, message) {
+  if (!Number.isInteger(value) || value < 0) throw new Error(message);
+}
+
+function assertCountMap(actual, expected, label) {
+  if (!actual || typeof actual !== "object" || Array.isArray(actual)) {
+    throw new Error(`Listing quality report must include ${label}`);
+  }
+  const actualKeys = Object.keys(actual).sort();
+  const expectedKeys = Object.keys(expected).sort();
+  if (actualKeys.join("|") !== expectedKeys.join("|")) {
+    throw new Error(`Listing quality report ${label} keys must match rows`);
+  }
+  for (const key of expectedKeys) {
+    assertNonNegativeInteger(actual[key], `Listing quality report ${label} must use non-negative integers`);
+    if (actual[key] !== expected[key]) {
+      throw new Error(`Listing quality report ${label} must match rows`);
+    }
+  }
+}
+
+function assertListingQualityRow(row, seen) {
+  if (!filled(row?.listing_id)) throw new Error("Listing quality rows must include listing_id");
+  if (seen.has(row.listing_id)) throw new Error(`Listing quality rows must be unique: ${row.listing_id}`);
+  seen.add(row.listing_id);
+  if (!filled(row.source_locale)) throw new Error(`Listing quality row ${row.listing_id} must include source_locale`);
+  if (!LEGACY_SOURCE_DOMAINS.has(row.source_domain)) {
+    throw new Error(`Listing quality row ${row.listing_id} must include a legacy source domain`);
+  }
+  if (!filled(row.target_path)) throw new Error(`Listing quality row ${row.listing_id} must include target_path`);
+  if (!row.editor_path?.startsWith("/admin/listings/edit?listingId=")) {
+    throw new Error("Listing quality rows must link to the admin listing editor");
+  }
+  if (!Array.isArray(row.issues) || row.issues.length < 1) {
+    throw new Error(`Listing quality row ${row.listing_id} must include issues`);
+  }
+  for (const issue of row.issues) {
+    if (!KNOWN_ISSUES.includes(issue)) throw new Error(`Listing quality row ${row.listing_id} has unknown issue ${issue}`);
+  }
+  if (row.review_status !== reviewStatus(row.issues)) {
+    throw new Error(`Listing quality row ${row.listing_id} review status must match issues`);
+  }
+  if (JSON.stringify(row.required_editor_fields) !== JSON.stringify(requiredEditorFields(row.issues))) {
+    throw new Error(`Listing quality row ${row.listing_id} required editor fields must match issues`);
+  }
+  for (const key of ["public_gallery_assets", "missing_alt_text_assets", "review_gated_assets"]) {
+    assertNonNegativeInteger(row[key], `Listing quality row ${row.listing_id} ${key} must be a non-negative integer`);
+  }
+  if (!Array.isArray(row.public_gallery_sample)) {
+    throw new Error(`Listing quality row ${row.listing_id} must include public_gallery_sample`);
+  }
 }
 
 function publicGallerySample(publicPhotos) {
@@ -144,7 +198,16 @@ export function buildListingQualityReport({
 }
 
 export function assertListingQualityReport(report) {
+  if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
+    throw new Error("Listing quality report must include valid generated_at");
+  }
+  if (!report.summary || typeof report.summary !== "object") throw new Error("Listing quality report must include summary");
   if (report.summary.listings !== 165) throw new Error("Listing quality report must cover CMS listing inventory");
+  assertNonNegativeInteger(report.summary.affected_listings, "Listing quality report must count affected listings");
+  if (!Array.isArray(report.rows)) throw new Error("Listing quality report must include rows");
+  if (report.rows.length !== report.summary.affected_listings) {
+    throw new Error("Listing quality report rows must cover every affected listing");
+  }
   if (!Object.hasOwn(report.summary.issue_counts, "missing_price")) {
     throw new Error("Listing quality report must expose missing price counts");
   }
@@ -154,9 +217,11 @@ export function assertListingQualityReport(report) {
   if (!Object.hasOwn(report.summary.issue_counts, "missing_alt_text")) {
     throw new Error("Listing quality report must expose missing media alt text");
   }
-  if (report.rows.some((row) => !row.editor_path.startsWith("/admin/listings/edit?listingId="))) {
-    throw new Error("Listing quality rows must link to the admin listing editor");
-  }
+  const seen = new Set();
+  for (const row of report.rows) assertListingQualityRow(row, seen);
+  assertCountMap(report.summary.issue_counts, issueCounts(report.rows), "issue counts");
+  assertCountMap(report.summary.by_source_locale, countBy(report.rows, (row) => row.source_locale), "source locale counts");
+  assertCountMap(report.summary.by_source_domain, countBy(report.rows, (row) => row.source_domain), "source domain counts");
   return true;
 }
 

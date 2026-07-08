@@ -73,6 +73,49 @@ test("listing quality report exposes actionable source listing gaps", () => {
       .filter((row) => row.required_editor_fields.includes("public_gallery"))
       .every((row) => row.public_gallery_sample.some((item) => item.includes("wp-content/uploads"))),
   );
+
+  assert.throws(
+    () => assertListingQualityReport({ ...report, rows: report.rows.slice(1) }),
+    /cover every affected listing/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          issue_counts: {
+            ...report.summary.issue_counts,
+            thin_public_gallery: report.summary.issue_counts.thin_public_gallery + 1,
+          },
+        },
+      }),
+    /issue counts must match rows/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityReport({
+        ...report,
+        rows: [report.rows[0], report.rows[0], ...report.rows.slice(2)],
+      }),
+    /rows must be unique/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityReport({
+        ...report,
+        rows: [{ ...report.rows[0], source_domain: "example.test" }, ...report.rows.slice(1)],
+      }),
+    /legacy source domain/,
+  );
+  assert.throws(
+    () =>
+      assertListingQualityReport({
+        ...report,
+        rows: [{ ...report.rows[0], required_editor_fields: [] }, ...report.rows.slice(1)],
+      }),
+    /required editor fields must match issues/,
+  );
 });
 
 test("listing quality treats explicit price-on-request as reviewed pricing", () => {
