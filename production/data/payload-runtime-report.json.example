@@ -1,4 +1,5 @@
 {
+  "example": true,
   "generated_at": "2026-07-06T00:00:00Z",
   "ready": false,
   "status": "blocked",

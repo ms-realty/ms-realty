@@ -499,6 +499,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         env: {},
         generatedAt: "2026-07-06T00:00:00Z",
       });
+      const examplePayloadRuntimeReport = JSON.parse(fs.readFileSync("production/data/payload-runtime-report.json.example", "utf8"));
       const localPayloadRuntimeReport = {
         ...payloadRuntimeReport,
         summary: { ...payloadRuntimeReport.summary, database: { ...payloadRuntimeReport.summary.database, host: "127.0.0.1" } },
@@ -511,6 +512,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify(blockedPayloadRuntimeReport),
+        }),
+      );
+      const payloadImportExample = await payloadRuntimeImportRoute.POST(
+        new Request("https://example.test/api/admin/payload-runtime/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify(examplePayloadRuntimeReport),
         }),
       );
       const payloadImportLocal = await payloadRuntimeImportRoute.POST(
@@ -529,6 +537,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       );
       const payloadImportBody = await payloadImport.json();
       const payloadImportBlockedBody = await payloadImportBlocked.json();
+      const payloadImportExampleBody = await payloadImportExample.json();
       const payloadImportLocalBody = await payloadImportLocal.json();
       assert.equal(payloadImportBlocked.status, 202);
       assert.equal(payloadImportBlockedBody.runtime.ready, false);
@@ -540,6 +549,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.ok(payloadImportBlockedBody.runtime.blockedChecks.includes("database_url"));
       assert.ok(payloadImportBlockedBody.runtime.blockedChecks.includes("database_tcp"));
       assert.equal(payloadImportBlockedBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "blocked");
+      assert.equal(payloadImportExample.status, 400);
+      assert.match(payloadImportExampleBody.message, /example reports cannot/);
       assert.equal(payloadImportLocal.status, 400);
       assert.match(payloadImportLocalBody.message, /database network scope evidence/);
       assert.equal(payloadImport.status, 201);

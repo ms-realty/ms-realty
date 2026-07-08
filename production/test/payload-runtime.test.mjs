@@ -46,6 +46,14 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.ok(report.next_actions.some((action) => action.includes("payload:bootstrap")));
 });
 
+test("Payload runtime example report is not launch evidence", () => {
+  const example = JSON.parse(fs.readFileSync("production/data/payload-runtime-report.json.example", "utf8"));
+
+  assert.equal(example.example, true);
+  assert.throws(() => assertPayloadRuntimeReport(example), /example reports cannot be used as launch evidence/);
+  assert.throws(() => payloadRuntimeImportSummary(example), /example reports cannot be used as launch evidence/);
+});
+
 test("Payload runtime import summary exposes blocked operator feedback", async () => {
   const report = await buildPayloadRuntimeReport({
     env: {},

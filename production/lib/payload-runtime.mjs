@@ -287,6 +287,9 @@ export async function buildPayloadRuntimeReport({
 
 export function assertPayloadRuntimeReport(report) {
   assertPayloadRuntimeReportHasNoSecrets(report);
+  if (report.example === true || report.template === true) {
+    throw new Error("Payload runtime example reports cannot be used as launch evidence");
+  }
   if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
     throw new Error("Payload runtime report must include valid generated_at");
   }

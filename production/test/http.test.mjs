@@ -1561,6 +1561,12 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     headers: { authorization: "Bearer local-admin-smoke" },
     body: blockedPayloadReport,
   });
+  const payloadExampleImport = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/payload-runtime/import",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: JSON.parse(fs.readFileSync("production/data/payload-runtime-report.json.example", "utf8")),
+  });
   const payloadImport = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/payload-runtime/import",
@@ -1676,6 +1682,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.ok(payloadBlockedImport.body.runtime.blockedChecks.includes("database_url"));
   assert.ok(payloadBlockedImport.body.runtime.blockedChecks.includes("database_tcp"));
   assert.equal(payloadBlockedImport.body.report.gates.find((gate) => gate.id === "payload_runtime").status, "blocked");
+  assert.equal(payloadExampleImport.status, 400);
+  assert.match(payloadExampleImport.body.message, /example reports cannot/);
   assert.equal(payloadImport.status, 201);
   assert.equal(payloadImport.body.imported.outPath, payloadRuntimeReportPath);
   assert.equal(payloadImport.body.runtime.ready, true);
