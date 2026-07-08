@@ -58,6 +58,7 @@ function readySeoEvidenceFixture() {
       signal_rows: 2,
       placeholder_rows: 0,
       matched_source_domains: ["makler-realty.com", "makler-realty.ru"],
+      signal_source_domains: ["makler-realty.com", "makler-realty.ru"],
     };
   }
   return seoEvidence;
@@ -591,6 +592,7 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
   });
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
   seoGate.evidence.sources.search_console.signal_rows = 0;
+  seoGate.evidence.sources.search_console.signal_source_domains = [];
 
   assert.throws(() => assertLaunchReadinessReport(report), /complete search_console evidence/);
   seoGate.evidence.sources.search_console.signal_rows = 1;

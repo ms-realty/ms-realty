@@ -138,7 +138,8 @@
           "unmatched_rows": 0,
           "duplicate_rows": 0,
           "placeholder_rows": 0,
-          "matched_source_domains": []
+          "matched_source_domains": [],
+          "signal_source_domains": []
         },
         "sources": {
           "search_console": {
@@ -151,7 +152,8 @@
             "unmatched_rows": 0,
             "duplicate_rows": 0,
             "placeholder_rows": 0,
-            "matched_source_domains": []
+            "matched_source_domains": [],
+            "signal_source_domains": []
           },
           "yandex_webmaster": {
             "source": "yandex_webmaster",
@@ -163,7 +165,8 @@
             "unmatched_rows": 0,
             "duplicate_rows": 0,
             "placeholder_rows": 0,
-            "matched_source_domains": []
+            "matched_source_domains": [],
+            "signal_source_domains": []
           },
           "backlinks": {
             "source": "backlinks",
@@ -175,7 +178,8 @@
             "unmatched_rows": 0,
             "duplicate_rows": 0,
             "placeholder_rows": 0,
-            "matched_source_domains": []
+            "matched_source_domains": [],
+            "signal_source_domains": []
           },
           "analytics_export": {
             "source": "analytics_export",
@@ -187,7 +191,8 @@
             "unmatched_rows": 0,
             "duplicate_rows": 0,
             "placeholder_rows": 0,
-            "matched_source_domains": []
+            "matched_source_domains": [],
+            "signal_source_domains": []
           },
           "privacy_events": {
             "source": "privacy_events",

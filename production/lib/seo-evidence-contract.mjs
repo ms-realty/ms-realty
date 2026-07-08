@@ -8,7 +8,8 @@ export function missingRequiredExport(summary) {
     summary.matched_rows < 1 ||
     summary.signal_rows < 1 ||
     summary.placeholder_rows > 0 ||
-    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
+    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain)) ||
+    REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.signal_source_domains?.includes(domain))
   );
 }
 
@@ -30,12 +31,26 @@ export function assertSeoSourceSummary(summary, source) {
   if (!Array.isArray(summary.matched_source_domains)) {
     throw new Error(`SEO evidence ${source} matched domains must be an array`);
   }
+  if (!Array.isArray(summary.signal_source_domains)) {
+    throw new Error(`SEO evidence ${source} signal domains must be an array`);
+  }
   if (new Set(summary.matched_source_domains).size !== summary.matched_source_domains.length) {
     throw new Error(`SEO evidence ${source} matched domains must be unique`);
+  }
+  if (new Set(summary.signal_source_domains).size !== summary.signal_source_domains.length) {
+    throw new Error(`SEO evidence ${source} signal domains must be unique`);
   }
   for (const domain of summary.matched_source_domains) {
     if (!REQUIRED_SOURCE_DOMAINS.includes(domain)) {
       throw new Error(`SEO evidence ${source} matched domains must be legacy source domains`);
+    }
+  }
+  for (const domain of summary.signal_source_domains) {
+    if (!REQUIRED_SOURCE_DOMAINS.includes(domain)) {
+      throw new Error(`SEO evidence ${source} signal domains must be legacy source domains`);
+    }
+    if (!summary.matched_source_domains.includes(domain)) {
+      throw new Error(`SEO evidence ${source} signal domains must match matched domains`);
     }
   }
   const rowCount = summary?.row_count ?? 0;
@@ -50,6 +65,9 @@ export function assertSeoSourceSummary(summary, source) {
   }
   if ((summary?.matched_source_domains || []).length > matchedRows) {
     throw new Error(`SEO evidence ${source} matched domains must not exceed matched rows`);
+  }
+  if ((summary?.signal_source_domains || []).length > (summary?.signal_rows ?? 0)) {
+    throw new Error(`SEO evidence ${source} signal domains must not exceed signal rows`);
   }
 }
 

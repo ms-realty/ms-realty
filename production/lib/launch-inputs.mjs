@@ -34,7 +34,8 @@ function sourceLine(source, summary) {
   const state = summary.sources[source];
   const filename = SEO_EXPORTS[source].filename;
   const domains = (state.matched_source_domains || []).join(", ") || "none";
-  return `- \`migration/external/seo/${filename}\`: ${state.status}, rows ${state.row_count}, matched ${state.matched_rows}, signal ${state.signal_rows}, unmatched ${state.unmatched_rows}, duplicates ${state.duplicate_rows}, placeholders ${state.placeholder_rows}, domains: ${domains}`;
+  const signalDomains = (state.signal_source_domains || []).join(", ") || "none";
+  return `- \`migration/external/seo/${filename}\`: ${state.status}, rows ${state.row_count}, matched ${state.matched_rows}, signal ${state.signal_rows}, unmatched ${state.unmatched_rows}, duplicates ${state.duplicate_rows}, placeholders ${state.placeholder_rows}, domains: ${domains}, signal domains: ${signalDomains}`;
 }
 
 function importLine(source) {
