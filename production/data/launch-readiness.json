@@ -107,6 +107,14 @@
       "status": "blocked",
       "message": "Search Console, Yandex, and backlink exports are required before launch.",
       "evidence": {
+        "crawl_urls": 457,
+        "url_types": {
+          "page": 104,
+          "post": 42,
+          "taxonomy": 146,
+          "listing": 165
+        },
+        "urls_with_any_evidence": 2,
         "missing_required_sources": [
           "search_console",
           "yandex_webmaster",

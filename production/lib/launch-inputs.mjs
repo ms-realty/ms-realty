@@ -47,6 +47,13 @@ function sourceDomainSampleLines(seoEvidence) {
   }).join("\n");
 }
 
+function seoCoverageLine(summary) {
+  const types = Object.entries(summary.url_types || {})
+    .map(([type, count]) => `${type} ${count}`)
+    .join(", ");
+  return `- Crawl coverage: ${summary.crawl_urls} URLs${types ? ` (${types})` : ""}; URLs with any evidence: ${summary.urls_with_any_evidence}`;
+}
+
 function missingSeoSourcesLine(evidence) {
   const missing = Array.isArray(evidence.missing_required_sources) ? evidence.missing_required_sources : [];
   return missing.length ? missing.join(", ") : "none";
@@ -164,6 +171,7 @@ Blockers: ${launchReadiness.blockers.join(", ") || "none"}
 ## External SEO Exports
 
 - Missing required sources: ${missingSeoSourcesLine(seoGateEvidence)}
+${seoCoverageLine(seoEvidence.summary)}
 ${["search_console", "yandex_webmaster", "backlinks"].map((source) => sourceLine(source, seoEvidence.summary)).join("\n")}
 
 - Minimum required domain coverage:

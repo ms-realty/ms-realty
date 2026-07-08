@@ -22,6 +22,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 ## External SEO Exports
 
 - Missing required sources: search_console, yandex_webmaster, backlinks
+- Crawl coverage: 457 URLs (page 104, post 42, taxonomy 146, listing 165); URLs with any evidence: 2
 - `migration/external/seo/search-console.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none
 - `migration/external/seo/yandex-webmaster.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none
 - `migration/external/seo/backlinks.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none

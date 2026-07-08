@@ -701,6 +701,9 @@ export function buildLaunchReadinessReport({
       "external_seo_exports",
       seoExportsReady ? "pass" : "blocked",
       {
+        crawl_urls: seoEvidence.summary.crawl_urls,
+        url_types: seoEvidence.summary.url_types,
+        urls_with_any_evidence: seoEvidence.summary.urls_with_any_evidence,
         missing_required_sources: seoEvidence.summary.missing_required_sources,
         privacy_events: seoEvidence.summary.sources.privacy_events,
         analytics_export: seoEvidence.summary.sources.analytics_export,
