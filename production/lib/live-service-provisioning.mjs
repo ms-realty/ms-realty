@@ -22,6 +22,12 @@ const REQUIRED_CHECK_IDS = [
 ];
 const REQUIRED_SERVICES = ["typesense", "meilisearch", "hermes"];
 const CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "fail"]);
+const REQUIRED_ENV_BY_CHECK = {
+  typesense_url: "TYPESENSE_URL",
+  typesense_api_key: "TYPESENSE_API_KEY",
+  meili_url: "MEILI_URL",
+  meili_api_key: "MEILI_API_KEY",
+};
 
 function redactUrl(value) {
   if (!value) return null;
@@ -176,6 +182,9 @@ export function assertLiveServiceProvisioningReport(report) {
     if (!check?.id) throw new Error("Live service provisioning checks must include ids");
     if (!CHECK_STATUSES.has(check.status)) throw new Error(`Live service provisioning check ${check.id} has unknown status`);
     if (checkIds.has(check.id)) throw new Error(`Live service provisioning report has duplicate check ${check.id}`);
+    if (REQUIRED_ENV_BY_CHECK[check.id] && check.env !== REQUIRED_ENV_BY_CHECK[check.id]) {
+      throw new Error(`Live service provisioning ${check.id} check must reference ${REQUIRED_ENV_BY_CHECK[check.id]}`);
+    }
     checkIds.add(check.id);
   }
   for (const id of REQUIRED_CHECK_IDS) {

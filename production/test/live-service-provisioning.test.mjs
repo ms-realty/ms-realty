@@ -160,6 +160,21 @@ test("live service provisioning report requires complete evidence shape", async 
       }),
     /unknown status/,
   );
+  for (const [id, env] of [
+    ["typesense_url", "TYPESENSE_URL"],
+    ["typesense_api_key", "TYPESENSE_API_KEY"],
+    ["meili_url", "MEILI_URL"],
+    ["meili_api_key", "MEILI_API_KEY"],
+  ]) {
+    assert.throws(
+      () =>
+        assertLiveServiceProvisioningReport({
+          ...report,
+          checks: report.checks.map((check) => (check.id === id ? { ...check, env: "WRONG_ENV" } : check)),
+        }),
+      new RegExp(`${id} check must reference ${env}`),
+    );
+  }
   assert.throws(
     () => assertLiveServiceProvisioningReport({ ...report, summary: { ...report.summary, services: ["typesense"] } }),
     /required services/,
