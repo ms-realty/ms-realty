@@ -29,6 +29,7 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
   assert.deepEqual(report.agent_runtime.tool_gateway.required_tools, HERMES_AGENT_TOOL_GATEWAY_TOOLS);
   assert.deepEqual(report.agent_runtime.terminal_backends, HERMES_AGENT_TERMINAL_BACKENDS);
+  assert.ok(report.agent_runtime.terminal_backends.includes("daytona"));
   assert.equal(report.agent_runtime.project_context.file, "AGENTS.md");
   assert.equal(report.agent_runtime.project_context.present, true);
   assert.equal(report.agent_runtime.project_context.complete, true);

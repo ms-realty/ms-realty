@@ -34,6 +34,7 @@ export const HERMES_AGENT_TERMINAL_BACKENDS = Object.freeze([
   "local",
   "docker",
   "ssh",
+  "daytona",
   "singularity",
   "modal",
 ]);
