@@ -600,6 +600,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.deepEqual(seoImportBody.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);
       assert.equal(seoImportBody.sources.search_console.status, "imported");
       assert.ok(!seoImportBody.missingRequiredSources.includes("search_console"));
+      assert.equal(seoImportBody.seoImport.ready, false);
+      assert.equal(seoImportBody.seoImport.status, "blocked");
+      assert.equal(seoImportBody.seoImport.importedSource, "search_console");
+      assert.deepEqual(seoImportBody.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
       assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
 
       const postSeoReadiness = await launchReadinessRoute.GET(

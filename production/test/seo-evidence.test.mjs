@@ -702,6 +702,35 @@ test("app SEO evidence import validates joined evidence before persisting upload
   assert.equal(JSON.parse(fs.readFileSync(evidencePath, "utf8")).summary.sources.yandex_webmaster.row_count, 99);
 });
 
+test("app SEO evidence import summary exposes remaining launch sources", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-seo-import-summary-`);
+  const evidencePath = `${dir}/seo-evidence.json`;
+  const { com, ru } = legacyDomainSampleUrls();
+  fs.writeFileSync(
+    evidencePath,
+    `${JSON.stringify(
+      buildSeoEvidence({
+        generatedAt: "2026-07-05T00:00:00Z",
+        events: [{ type: "page_view", path: "/bg/" }],
+      }),
+      null,
+      2,
+    )}\n`,
+  );
+
+  const result = importAppSeoEvidenceRows(
+    { source: "search_console", csv: `url,clicks,impressions,position\n${com},3,30,7\n${ru},2,20,8\n` },
+    { seoEvidenceInputDir: dir, seoEvidenceOutputPath: evidencePath, reviewedAt: "2026-07-05T00:01:00Z" },
+  );
+
+  assert.equal(result.seoImport.ready, false);
+  assert.equal(result.seoImport.status, "blocked");
+  assert.equal(result.seoImport.importedSource, "search_console");
+  assert.equal(result.seoImport.rowCount, 2);
+  assert.deepEqual(result.seoImport.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
+  assert.ok(result.seoImport.nextActions.some((action) => action.includes("seo:preflight")));
+});
+
 test("external SEO export templates are present but real CSVs stay local", () => {
   const dir = fromRoot("migration", "external", "seo");
   for (const file of ["search-console.csv", "yandex-webmaster.csv", "backlinks.csv"]) {

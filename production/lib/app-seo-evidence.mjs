@@ -83,6 +83,26 @@ export function seoEvidencePayload(evidence) {
   };
 }
 
+export function seoEvidenceImportSummary(source, rowCount, evidence) {
+  const missing = evidence.summary.missing_required_sources;
+  const ready = missing.length === 0;
+  return {
+    ready,
+    status: ready ? "ready" : "blocked",
+    importedSource: source,
+    rowCount,
+    missingRequiredSources: missing,
+    requiredSourceDomains: REQUIRED_SOURCE_DOMAINS,
+    urlsWithAnyEvidence: evidence.summary.urls_with_any_evidence,
+    nextActions: ready
+      ? ["Run npm run seo:preflight and npm run launch:preflight with the same SEO evidence paths."]
+      : [
+          "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
+          "Run npm run seo:preflight after all required exports are imported.",
+        ],
+  };
+}
+
 export function readAppSeoEvidenceTemplate(url, config) {
   const source = url.searchParams.get("source");
   const filename = SEO_EXPORTS[source];
@@ -117,5 +137,9 @@ export function importAppSeoEvidenceRows(input, config) {
   fs.writeFileSync(/*turbopackIgnore: true*/ outPath, csv);
   fs.mkdirSync(path.dirname(/*turbopackIgnore: true*/ evidencePath), { recursive: true });
   fs.writeFileSync(/*turbopackIgnore: true*/ evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
-  return { imported: { source: input.source, outPath, row_count: rows.length }, ...seoEvidencePayload(evidence) };
+  return {
+    imported: { source: input.source, outPath, row_count: rows.length },
+    seoImport: seoEvidenceImportSummary(input.source, rows.length, evidence),
+    ...seoEvidencePayload(evidence),
+  };
 }
