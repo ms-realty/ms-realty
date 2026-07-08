@@ -142,7 +142,15 @@ const readyLiveServiceProvisioning = {
   status: "pass",
   path: "production/data/live-service-provisioning-report.json",
   summary: { checks: 7, missing_env: [], placeholder_env: [], services: ["typesense", "meilisearch", "hermes"] },
-  checks: [{ id: "typesense_health", status: "pass" }],
+  checks: [
+    { id: "typesense_url", env: "TYPESENSE_URL", status: "pass" },
+    { id: "typesense_api_key", env: "TYPESENSE_API_KEY", status: "pass" },
+    { id: "meili_url", env: "MEILI_URL", status: "pass" },
+    { id: "meili_api_key", env: "MEILI_API_KEY", status: "pass" },
+    { id: "typesense_health", redacted_url: "https://typesense.ms-realty.bg", status: "pass", status_code: 200 },
+    { id: "meilisearch_health", redacted_url: "https://meili.ms-realty.bg", status: "pass", status_code: 200 },
+    { id: "hermes_provider", missing: [], mode: "self_hosted", status: "pass" },
+  ],
   hermes: { ready: true, endpoint: "https://hermes.ms-realty.bg/v1/chat/completions" },
   next_actions: ["Run npm run live:capture, then npm run live:preflight."],
 };
@@ -678,6 +686,30 @@ test("launch readiness validator rejects weak live service pass summaries", () =
   });
 
   assert.throws(() => assertLaunchReadinessReport(report), /search sync summary evidence/);
+});
+
+test("launch readiness validator rejects weak live provisioning pass evidence", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    liveServiceProvisioning: {
+      ...readyLiveServiceProvisioning,
+      summary: { ...readyLiveServiceProvisioning.summary, checks: readyLiveServiceProvisioning.summary.checks - 1 },
+      checks: readyLiveServiceProvisioning.checks.filter((check) => check.id !== "meilisearch_health"),
+    },
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+
+  assert.throws(() => assertLaunchReadinessReport(report), /provisioning check meilisearch_health/);
 });
 
 test("launch readiness blocks live services until provisioning passes", () => {

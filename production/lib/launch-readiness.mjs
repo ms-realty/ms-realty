@@ -45,6 +45,15 @@ const LIVE_SERVICE_REPORT_WRITERS = {
   typesense_meilisearch_query: { write: writeSearchEngineQueryReport, pathKey: "queryReportPath" },
   hermes_draft_worker: { write: writeHermesDraftWorkerReport, pathKey: "hermesReportPath" },
 };
+const REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS = [
+  "typesense_url",
+  "typesense_api_key",
+  "meili_url",
+  "meili_api_key",
+  "typesense_health",
+  "meilisearch_health",
+  "hermes_provider",
+];
 const REQUIRED_LAUNCH_GATE_IDS = [
   "crawl_inventory",
   "redirect_reviews",
@@ -382,14 +391,41 @@ function assertLiveServiceReportPassEvidence(item) {
   assertLiveServiceSummaryEvidence(item);
 }
 
+function assertLiveServiceProvisioningPassEvidence(provisioning) {
+  if (provisioning.status !== "pass" || !provisioning.path || !provisioning.summary || !Array.isArray(provisioning.checks)) {
+    throw new Error("Launch readiness live services require provisioning pass evidence");
+  }
+  if (
+    provisioning.summary.checks !== provisioning.checks.length ||
+    provisioning.summary.missing_env?.length !== 0 ||
+    provisioning.summary.placeholder_env?.length !== 0 ||
+    JSON.stringify(provisioning.summary.services) !== JSON.stringify(["typesense", "meilisearch", "hermes"])
+  ) {
+    throw new Error("Launch readiness live services require complete provisioning summary evidence");
+  }
+  const checks = new Map(provisioning.checks.map((check) => [check.id, check]));
+  for (const id of REQUIRED_LIVE_SERVICE_PROVISIONING_CHECK_IDS) {
+    if (checks.get(id)?.status !== "pass") throw new Error(`Launch readiness live services require provisioning check ${id}`);
+  }
+  for (const id of ["typesense_health", "meilisearch_health"]) {
+    const check = checks.get(id);
+    if (!check.redacted_url || !Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299) {
+      throw new Error(`Launch readiness live services require ${id} endpoint evidence`);
+    }
+    assertLaunchServiceUrl(check.redacted_url, id);
+  }
+  if (provisioning.hermes?.ready !== true || !provisioning.hermes.endpoint) {
+    throw new Error("Launch readiness live services require Hermes provisioning endpoint evidence");
+  }
+  assertLaunchServiceUrl(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
+  assertHermesChatCompletionsEndpoint(provisioning.hermes.endpoint, "Live service provisioning Hermes endpoint");
+}
+
 function assertPassRuntimeEvidence(report) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
     const reports = liveServices.evidence?.reports || [];
-    const provisioning = liveServices.evidence?.provisioning || {};
-    if (provisioning.status !== "pass" || !provisioning.path || !provisioning.summary || !Array.isArray(provisioning.checks)) {
-      throw new Error("Launch readiness live services require provisioning pass evidence");
-    }
+    assertLiveServiceProvisioningPassEvidence(liveServices.evidence?.provisioning || {});
     const sources = new Set(reports.map((item) => item.source));
     for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
       if (!sources.has(source)) throw new Error(`Launch readiness live services missing ${source} evidence`);
