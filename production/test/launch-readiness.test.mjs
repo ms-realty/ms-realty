@@ -973,6 +973,21 @@ test("live service report preflight fails missing reports and passes valid repor
     wrongHermesPathResult.reports.find((report) => report.source === "hermes_draft_worker").error,
     /\/v1\/chat\/completions/,
   );
+
+  const hostedHermesDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hosted-hermes-`);
+  const hostedHermesReports = writeLiveReportFixtures(hostedHermesDir);
+  const hostedHermes = JSON.parse(fs.readFileSync(hostedHermesReports.hermesReportPath, "utf8"));
+  hostedHermes.provider.mode = "openrouter";
+  hostedHermes.provider.endpoint = "https://openrouter.ai/api/v1/chat/completions";
+  hostedHermes.provider.sensitive_data_allowed = false;
+  fs.writeFileSync(hostedHermesReports.hermesReportPath, `${JSON.stringify(hostedHermes)}\n`);
+  const hostedHermesResult = validateLiveServiceReports(hostedHermesReports);
+  assert.equal(hostedHermesResult.ready, false);
+  assert.equal(hostedHermesResult.reports.find((report) => report.source === "hermes_draft_worker").status, "invalid_report");
+  assert.match(
+    hostedHermesResult.reports.find((report) => report.source === "hermes_draft_worker").error,
+    /self-hosted sensitive-data provider/,
+  );
 });
 
 test("live service preflight report rejects hand-edited status counts", () => {

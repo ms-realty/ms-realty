@@ -171,6 +171,7 @@ test("Hermes draft worker report rejects no-op launch evidence", () => {
     mode: "self_hosted",
     model: "NousResearch/Hermes-4-14B",
     tool_call_parser: "hermes",
+    sensitive_data_allowed: true,
   };
   assert.throws(
     () =>
@@ -215,6 +216,7 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
       mode: "self_hosted",
       model: "NousResearch/Hermes-4-14B",
       tool_call_parser: "hermes",
+      sensitive_data_allowed: true,
     },
     summary: { attempted: 1, persisted: 1, rejected: 0 },
     persisted: [{ id: "translation-listing-MS-TEST-1-he", status: "hermes_drafted", public_indexable: false }],
@@ -260,6 +262,22 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
   assert.throws(
     () => assertHermesDraftWorkerReport({ ...report, provider: { ...report.provider, tool_call_parser: "generic" } }),
     /Hermes tool parser/,
+  );
+  assert.throws(
+    () =>
+      assertHermesDraftWorkerReport({
+        ...report,
+        provider: { ...report.provider, sensitive_data_allowed: false },
+      }),
+    /Self-hosted Hermes/,
+  );
+  assert.throws(
+    () =>
+      assertHermesDraftWorkerReport({
+        ...report,
+        provider: { ...report.provider, mode: "openrouter", sensitive_data_allowed: true },
+      }),
+    /Hosted Hermes/,
   );
   assert.throws(
     () =>

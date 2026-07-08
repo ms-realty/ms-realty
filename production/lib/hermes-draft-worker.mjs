@@ -248,6 +248,12 @@ export function assertHermesDraftWorkerReport(report) {
   if (!String(report.provider?.mode || "").trim()) throw new Error("Hermes worker report must include provider mode");
   if (!String(report.provider?.model || "").trim()) throw new Error("Hermes worker report must include provider model");
   if (report.provider?.endpoint) assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker endpoint");
+  if (report.provider?.mode === "self_hosted" && report.provider.sensitive_data_allowed !== true) {
+    throw new Error("Self-hosted Hermes worker reports must allow sensitive data");
+  }
+  if (report.provider?.mode === "openrouter" && report.provider.sensitive_data_allowed !== false) {
+    throw new Error("Hosted Hermes worker reports must be marked non-sensitive only");
+  }
   if (report.summary.attempted < 1) throw new Error("Hermes worker must attempt at least one draft");
   if (report.summary.persisted < 1) throw new Error("Hermes worker must persist at least one draft");
   if (report.summary.attempted !== report.summary.persisted + report.summary.rejected) {

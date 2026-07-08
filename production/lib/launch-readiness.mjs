@@ -109,6 +109,9 @@ function assertLaunchLiveServiceEvidence(source, report) {
   if (source === "hermes_draft_worker") {
     assertLaunchServiceUrl(report.provider?.endpoint, "Hermes worker report");
     assertHermesChatCompletionsEndpoint(report.provider.endpoint, "Hermes worker report endpoint");
+    if (report.provider?.mode !== "self_hosted" || report.provider?.sensitive_data_allowed !== true) {
+      throw new Error("Hermes worker launch evidence must use the self-hosted sensitive-data provider");
+    }
   }
 }
 
