@@ -34,17 +34,31 @@ export const HERMES_AGENT_TERMINAL_BACKENDS = Object.freeze([
   "local",
   "docker",
   "ssh",
+  "daytona",
   "singularity",
   "modal",
 ]);
 export const HERMES_AGENT_MESSAGING_PLATFORMS = Object.freeze([
+  "CLI",
   "Telegram",
   "Discord",
   "Slack",
   "WhatsApp",
   "Signal",
+  "Matrix",
+  "Mattermost",
   "Email",
-  "CLI",
+  "SMS",
+  "DingTalk",
+  "Feishu",
+  "WeCom",
+  "Weixin",
+  "QQ Bot",
+  "Yuanbao",
+  "BlueBubbles",
+  "Home Assistant",
+  "Microsoft Teams",
+  "Google Chat",
 ]);
 const PROJECT_CONTEXT_FILE = "AGENTS.md";
 const REQUIRED_PROJECT_CONTEXT_MARKERS = Object.freeze([

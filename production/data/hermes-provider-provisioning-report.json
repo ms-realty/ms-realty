@@ -25,13 +25,26 @@
       "sandboxed_backends"
     ],
     "messaging_platforms": [
+      "CLI",
       "Telegram",
       "Discord",
       "Slack",
       "WhatsApp",
       "Signal",
+      "Matrix",
+      "Mattermost",
       "Email",
-      "CLI"
+      "SMS",
+      "DingTalk",
+      "Feishu",
+      "WeCom",
+      "Weixin",
+      "QQ Bot",
+      "Yuanbao",
+      "BlueBubbles",
+      "Home Assistant",
+      "Microsoft Teams",
+      "Google Chat"
     ],
     "tool_gateway": {
       "required_tools": [
@@ -46,6 +59,7 @@
       "local",
       "docker",
       "ssh",
+      "daytona",
       "singularity",
       "modal"
     ],

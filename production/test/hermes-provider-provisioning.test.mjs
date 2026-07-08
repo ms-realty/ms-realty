@@ -32,9 +32,11 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.deepEqual(report.agent_runtime.messaging_platforms, HERMES_AGENT_MESSAGING_PLATFORMS);
   assert.ok(report.agent_runtime.messaging_platforms.includes("WhatsApp"));
   assert.ok(report.agent_runtime.messaging_platforms.includes("CLI"));
+  assert.ok(report.agent_runtime.messaging_platforms.includes("Microsoft Teams"));
+  assert.ok(report.agent_runtime.messaging_platforms.includes("Google Chat"));
   assert.deepEqual(report.agent_runtime.tool_gateway.required_tools, HERMES_AGENT_TOOL_GATEWAY_TOOLS);
   assert.deepEqual(report.agent_runtime.terminal_backends, HERMES_AGENT_TERMINAL_BACKENDS);
-  assert.deepEqual(report.agent_runtime.terminal_backends, ["local", "docker", "ssh", "singularity", "modal"]);
+  assert.deepEqual(report.agent_runtime.terminal_backends, ["local", "docker", "ssh", "daytona", "singularity", "modal"]);
   assert.equal(report.agent_runtime.project_context.file, "AGENTS.md");
   assert.equal(report.agent_runtime.project_context.present, true);
   assert.equal(report.agent_runtime.project_context.complete, true);
