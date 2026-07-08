@@ -870,6 +870,7 @@ export function buildLiveServicePreflightReport({ generatedAt = new Date().toISO
           "Run npm run search:sync && npm run search:query.",
           "Run npm run hermes:provisioning to verify the self-hosted Hermes/vLLM provider settings.",
           "Run npm run hermes:worker.",
+          "Run npm run live:capture to generate the three live service reports.",
           "Run npm run live:preflight before launch:preflight.",
         ],
   };

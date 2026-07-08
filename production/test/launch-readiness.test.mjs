@@ -1502,6 +1502,7 @@ test("live service preflight report records blockers without clearing the gate",
   assert.equal(missingReport.status, "blocked");
   assert.equal(missingReport.summary.missing_report, 3);
   assert.match(missingReport.next_actions.join(" "), /npm run hermes:provisioning/);
+  assert.match(missingReport.next_actions.join(" "), /npm run live:capture/);
   assert.match(missingReport.next_actions.join(" "), /npm run live:preflight/);
   const missingOutputPath = `${missingDir}/live-service-preflight-report.json`;
   const missingResult = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-live-service-preflight-report.mjs")], {
