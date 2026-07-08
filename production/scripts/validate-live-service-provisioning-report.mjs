@@ -6,7 +6,7 @@ import {
 
 const reportPath = process.env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH || DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT;
 const NEXT =
-  "Next: set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and HERMES_CHAT_COMPLETIONS_URL, run `npm run live:provisioning`, then rerun `npm run live:provisioning:preflight`.";
+  "Next: set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, and HERMES_API_KEY, run `npm run live:provisioning`, then rerun `npm run live:provisioning:preflight`.";
 
 if (!fs.existsSync(reportPath)) {
   console.error(`LIVE SERVICE PROVISIONING FAILED: missing_report ${reportPath}`);

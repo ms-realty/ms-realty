@@ -81,10 +81,11 @@
     "sensitive_data_allowed": true,
     "hosted_fallback_allowed_for_sensitive_data": false,
     "api_key_configured": false,
-    "endpoint_requires_auth": false
+    "endpoint_requires_auth": true
   },
   "missing": [
-    "HERMES_CHAT_COMPLETIONS_URL"
+    "HERMES_CHAT_COMPLETIONS_URL",
+    "HERMES_API_KEY"
   ],
   "vllm": {
     "serving_stack": "vllm",
@@ -120,12 +121,11 @@
   },
   "env_contract": {
     "required": [
-      "HERMES_CHAT_COMPLETIONS_URL"
+      "HERMES_CHAT_COMPLETIONS_URL",
+      "HERMES_API_KEY"
     ],
     "optional": [
       "HERMES_MODEL",
-      "HERMES_API_KEY",
-      "HERMES_ENDPOINT_REQUIRES_AUTH",
       "MS_REALTY_HERMES_WORKER_REPORT_PATH"
     ],
     "never_persist": [
@@ -136,7 +136,7 @@
   "next_actions": [
     "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
     "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
-    "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
+    "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint and HERMES_API_KEY to the provider token.",
     "Run npm run hermes:provisioning, then npm run hermes:worker."
   ]
 }

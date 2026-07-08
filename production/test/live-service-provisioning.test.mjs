@@ -30,6 +30,7 @@ test("live service provisioning report fails closed until service env is configu
   assert.ok(report.summary.missing_env.includes("MEILI_URL"));
   assert.ok(report.summary.missing_env.includes("MEILI_API_KEY"));
   assert.ok(report.summary.missing_env.includes("HERMES_CHAT_COMPLETIONS_URL"));
+  assert.ok(report.summary.missing_env.includes("HERMES_API_KEY"));
   assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "missing_env");
   assert.equal(report.checks.find((check) => check.id === "meilisearch_health").status, "missing_env");
   assert.equal(report.hermes.official_url, "https://hermes-agent.nousresearch.com/");
@@ -52,6 +53,7 @@ test("live service provisioning report verifies live endpoints without persistin
       MEILI_URL: "https://user:pass@meili.internal?token=secret",
       MEILI_API_KEY: "meili-test-secret",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-test-secret",
     },
     fetchImpl: async (url, options) => {
       calls.push({ url, headers: options.headers });
@@ -83,6 +85,7 @@ test("live service provisioning rejects copied placeholder env values before hea
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-key",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: async (url) => {
       assert.equal(String(url).startsWith("https://meili.internal"), true);
@@ -118,7 +121,7 @@ test("live service provisioning preflight CLI explains blocked remediation", asy
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /LIVE SERVICE PROVISIONING FAILED/);
-  assert.match(result.stderr, /Next: set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(result.stderr, /Next: set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, and HERMES_API_KEY/);
 });
 
 test("live service provisioning rejects local service URLs before capture", async () => {
@@ -130,6 +133,7 @@ test("live service provisioning rejects local service URLs before capture", asyn
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-key",
       HERMES_CHAT_COMPLETIONS_URL: "http://localhost:8000/v1/chat/completions",
+      HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: async (url) => {
       calls.push(String(url));
@@ -155,6 +159,7 @@ test("live service provisioning rejects non-chat Hermes endpoints before capture
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-key",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/models",
+      HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: async () => ({ ok: true, status: 200 }),
     generatedAt: "2026-07-06T00:00:00Z",
@@ -226,7 +231,7 @@ test("live service provisioning report requires complete evidence shape", async 
         ...report,
         summary: {
           ...report.summary,
-          missing_env: report.summary.missing_env.filter((env) => env !== "HERMES_CHAT_COMPLETIONS_URL"),
+          missing_env: report.summary.missing_env.filter((env) => !env.startsWith("HERMES_")),
         },
         checks: report.checks.map((check) =>
           check.id === "hermes_provider" ? { id: "hermes_provider", status: "missing_env", mode: check.mode } : check,
@@ -240,7 +245,7 @@ test("live service provisioning report requires complete evidence shape", async 
         ...report,
         summary: {
           ...report.summary,
-          missing_env: report.summary.missing_env.filter((env) => env !== "HERMES_CHAT_COMPLETIONS_URL"),
+          missing_env: report.summary.missing_env.filter((env) => !env.startsWith("HERMES_")),
         },
         checks: report.checks.map((check) =>
           check.id === "hermes_provider" ? { ...check, missing: [] } : check,
@@ -254,9 +259,9 @@ test("live service provisioning report requires complete evidence shape", async 
         ...report,
         summary: {
           ...report.summary,
-          missing_env: report.summary.missing_env.map((env) =>
-            env === "HERMES_CHAT_COMPLETIONS_URL" ? "HERMES_URL" : env,
-          ),
+          missing_env: report.summary.missing_env
+            .filter((env) => env !== "HERMES_API_KEY")
+            .map((env) => (env === "HERMES_CHAT_COMPLETIONS_URL" ? "HERMES_URL" : env)),
         },
         checks: report.checks.map((check) =>
           check.id === "hermes_provider" ? { ...check, missing: ["HERMES_URL"] } : check,
@@ -294,6 +299,7 @@ test("live service provisioning ready report requires endpoint evidence", async 
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-key",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: async () => ({ ok: true, status: 200 }),
     generatedAt: "2026-07-06T00:00:00Z",
@@ -355,6 +361,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
       MEILI_URL: "https://meili.internal",
       MEILI_API_KEY: "meili-test-secret",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-test-secret",
     },
     fetchImpl: async () => ({ ok: true, status: 200 }),
     generatedAt: "2026-07-06T00:00:00Z",
@@ -387,7 +394,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
 
   assert.equal(cli.status, 0, cli.stderr);
   assert.match(cli.stdout, /Live service provisioning blocked: typesense_url, typesense_api_key, meili_url, meili_api_key, typesense_health, meilisearch_health, hermes_provider/);
-  assert.match(cli.stdout, /Missing env: TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(cli.stdout, /Missing env: TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
   assert.match(cli.stdout, /Next: set real Typesense, Meilisearch, and Hermes provider env/);
   assert.equal(fs.readFileSync(cliOutPath, "utf8").includes("typesense-test-secret"), false);
   assert.equal(assertLiveServiceProvisioningReport(JSON.parse(fs.readFileSync(cliOutPath, "utf8"))), true);

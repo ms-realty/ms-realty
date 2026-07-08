@@ -57,8 +57,6 @@ const REQUIRED_PROJECT_CONTEXT_MARKERS = Object.freeze([
 const VALID_PROVIDER_MODES = new Set(["self_hosted", "openrouter"]);
 const HERMES_ENV_CONTRACT_OPTIONAL = Object.freeze([
   "HERMES_MODEL",
-  "HERMES_API_KEY",
-  "HERMES_ENDPOINT_REQUIRES_AUTH",
   "MS_REALTY_HERMES_WORKER_REPORT_PATH",
 ]);
 const HERMES_ENV_CONTRACT_NEVER_PERSIST = Object.freeze(["HERMES_API_KEY", "OPENROUTER_API_KEY"]);
@@ -96,10 +94,6 @@ export function assertHermesChatCompletionsEndpoint(endpoint, label = "Hermes en
   return true;
 }
 
-function boolFromEnv(value) {
-  return value === "1" || value === "true" || value === "yes";
-}
-
 export function hermesProviderConfigFromEnv(env = process.env) {
   const mode = cleanMode(env.HERMES_PROVIDER_MODE);
   const endpoint = endpointFor(mode, env);
@@ -108,16 +102,15 @@ export function hermesProviderConfigFromEnv(env = process.env) {
     endpoint,
     endpoint_redacted: redactedEndpoint(endpoint),
     model: String(env.HERMES_MODEL || DEFAULT_SELF_HOSTED_HERMES_MODEL).trim(),
-    has_api_key: Boolean(env.HERMES_API_KEY || env.OPENROUTER_API_KEY),
-    endpoint_requires_auth: boolFromEnv(env.HERMES_ENDPOINT_REQUIRES_AUTH),
+    has_api_key: Boolean(env.HERMES_API_KEY),
+    endpoint_requires_auth: true,
   };
 }
 
 function missingInputs(config) {
   const missing = [];
   if (!config.endpoint) missing.push("HERMES_CHAT_COMPLETIONS_URL");
-  if (config.endpoint_requires_auth && !config.has_api_key) missing.push("HERMES_API_KEY");
-  if (config.mode === "openrouter" && !config.has_api_key) missing.push("HERMES_API_KEY");
+  if (!config.has_api_key) missing.push("HERMES_API_KEY");
   return missing;
 }
 
@@ -138,15 +131,12 @@ function vllmLaunchCommand(config) {
 
 function requiredEnvContract(config) {
   if (config.mode === "openrouter") return ["HERMES_PROVIDER_MODE=openrouter", "HERMES_API_KEY"];
-  return ["HERMES_CHAT_COMPLETIONS_URL", ...(config.endpoint_requires_auth ? ["HERMES_API_KEY"] : [])];
+  return ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"];
 }
 
 function requiredEnvContractForReport(report) {
   if (report.provider?.mode === "openrouter") return ["HERMES_PROVIDER_MODE=openrouter", "HERMES_API_KEY"];
-  return [
-    "HERMES_CHAT_COMPLETIONS_URL",
-    ...(report.provider?.endpoint_requires_auth ? ["HERMES_API_KEY"] : []),
-  ];
+  return ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"];
 }
 
 function projectContextState() {
@@ -203,7 +193,7 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
       sensitive_data_allowed: selfHosted,
       hosted_fallback_allowed_for_sensitive_data: false,
       api_key_configured: config.has_api_key,
-      endpoint_requires_auth: config.endpoint_requires_auth || config.mode === "openrouter",
+      endpoint_requires_auth: true,
     },
     missing,
     vllm: {
@@ -236,7 +226,7 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
       ? [
           "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
           "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
-          "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
+          "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint and HERMES_API_KEY to the provider token.",
           "Run npm run hermes:provisioning, then npm run hermes:worker.",
         ]
       : ["Run npm run hermes:worker against this endpoint and import the generated live report."],

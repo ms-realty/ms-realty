@@ -1312,6 +1312,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
         MEILI_URL: "https://meili.ms-realty.bg",
         MEILI_API_KEY: "meili-key",
         HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+        HERMES_API_KEY: "hermes-key",
       },
       fetchImpl: async () => ({ ok: true, status: 200 }),
       generatedAt: "2026-07-06T00:00:00Z",

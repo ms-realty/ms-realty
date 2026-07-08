@@ -20,7 +20,7 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(assertHermesProviderProvisioningReport(report), true);
   assert.equal(report.ready, false);
   assert.equal(report.status, "blocked");
-  assert.deepEqual(report.missing, ["HERMES_CHAT_COMPLETIONS_URL"]);
+  assert.deepEqual(report.missing, ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
   assert.equal(report.agent_runtime.product, "Nous Hermes Agent");
   assert.equal(report.agent_runtime.license, "MIT");
   assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
@@ -43,8 +43,8 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.agent_runtime.gateway_security.allow_all_users, false);
   assert.equal(report.provider.mode, "self_hosted");
   assert.equal(report.provider.sensitive_data_allowed, true);
-  assert.deepEqual(report.env_contract.required, ["HERMES_CHAT_COMPLETIONS_URL"]);
-  assert.ok(report.env_contract.optional.includes("HERMES_ENDPOINT_REQUIRES_AUTH"));
+  assert.deepEqual(report.env_contract.required, ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
+  assert.equal(report.provider.endpoint_requires_auth, true);
   assert.ok(report.env_contract.never_persist.includes("OPENROUTER_API_KEY"));
   assert.equal(report.vllm.tool_call_parser, "hermes");
   assert.equal(report.vllm.enable_auto_tool_choice, true);
@@ -61,7 +61,7 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   });
 
   assert.equal(cli.status, 0, cli.stderr);
-  assert.match(cli.stdout, /Hermes provider provisioning blocked: missing HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(cli.stdout, /Hermes provider provisioning blocked: missing HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
   assert.match(cli.stdout, /Official Hermes Agent: https:\/\/hermes-agent\.nousresearch\.com\//);
   assert.match(cli.stdout, /Next: install Hermes Agent/);
 });
@@ -107,7 +107,7 @@ test("Hermes hosted fallback is configured as non-sensitive only", () => {
 
 test("Hermes provisioning report rejects incomplete ready endpoint evidence", () => {
   const report = buildHermesProviderProvisioningReport({
-    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions" },
+    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions", HERMES_API_KEY: "test-secret-key" },
     generatedAt: "2026-07-06T00:00:00Z",
   });
   const blockedReport = buildHermesProviderProvisioningReport({ env: {}, generatedAt: "2026-07-06T00:00:00Z" });
@@ -160,7 +160,7 @@ test("Hermes provisioning report rejects incomplete ready endpoint evidence", ()
 
 test("Hermes provisioning report rejects publish-capable safety flags", () => {
   const report = buildHermesProviderProvisioningReport({
-    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions" },
+    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions", HERMES_API_KEY: "test-secret-key" },
     generatedAt: "2026-07-06T00:00:00Z",
   });
 
@@ -172,7 +172,7 @@ test("Hermes provisioning report rejects publish-capable safety flags", () => {
 
 test("Hermes provisioning report rejects generic agent runtime evidence", () => {
   const report = buildHermesProviderProvisioningReport({
-    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions" },
+    env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions", HERMES_API_KEY: "test-secret-key" },
     generatedAt: "2026-07-06T00:00:00Z",
   });
 

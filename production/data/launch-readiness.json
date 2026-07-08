@@ -385,7 +385,8 @@
               "TYPESENSE_API_KEY",
               "MEILI_URL",
               "MEILI_API_KEY",
-              "HERMES_CHAT_COMPLETIONS_URL"
+              "HERMES_CHAT_COMPLETIONS_URL",
+              "HERMES_API_KEY"
             ],
             "placeholder_env": [],
             "services": [
@@ -428,7 +429,8 @@
               "mode": "self_hosted",
               "status": "missing_env",
               "missing": [
-                "HERMES_CHAT_COMPLETIONS_URL"
+                "HERMES_CHAT_COMPLETIONS_URL",
+                "HERMES_API_KEY"
               ]
             }
           ],
@@ -470,7 +472,7 @@
             "next_actions": [
               "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
               "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
-              "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
+              "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint and HERMES_API_KEY to the provider token.",
               "Run npm run hermes:provisioning, then npm run hermes:worker."
             ]
           },

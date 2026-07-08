@@ -372,6 +372,7 @@ async function writeLiveProvisioningFixture(dir) {
       MEILI_URL: "https://meili.ms-realty.bg",
       MEILI_API_KEY: "meili-key",
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: async () => ({ ok: true, status: 200 }),
     generatedAt: "2026-07-06T00:00:00Z",
@@ -1629,7 +1630,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(markdown, /typesense_meilisearch_query: missing_report .*search-engine-query-report\.json/);
   assert.match(markdown, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
-  assert.match(markdown, /blocked_report .*live-service-provisioning-report\.json.*missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(markdown, /blocked_report .*live-service-provisioning-report\.json.*missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
   assert.match(markdown, /TYPESENSE_URL/);
   assert.match(markdown, /MEILI_API_KEY/);
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);

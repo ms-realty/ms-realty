@@ -60,9 +60,9 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - typesense_meilisearch_query: missing_report (path /Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json)
 - hermes_draft_worker: missing_report (path /Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json)
 - Current provisioning evidence:
-- blocked_report (path /Users/ivan/Code/MS-Realty/production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL)
+- blocked_report (path /Users/ivan/Code/MS-Realty/production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
 - Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
-- Hermes worker: set `HERMES_CHAT_COMPLETIONS_URL`; set `HERMES_API_KEY` when the endpoint requires auth.
+- Hermes worker: set `HERMES_CHAT_COMPLETIONS_URL` and `HERMES_API_KEY`; production Hermes evidence must be authenticated.
 - Hermes default: self-host vLLM with `--enable-auto-tool-choice --tool-call-parser hermes`; hosted OpenRouter fallback is non-sensitive only.
 - Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.
 - Live service provisioning report: `npm run live:provisioning` writes `production/data/live-service-provisioning-report.json` with redacted endpoint health and missing-env evidence.
