@@ -64,8 +64,30 @@ function readySeoEvidenceFixture() {
   return seoEvidence;
 }
 
+function csvCell(value) {
+  const text = Array.isArray(value) ? value.join("|") : String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
+}
+
 function writeListingQualityReviewFixture(dir) {
   const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
+  const headers = [
+    "listing_id",
+    "price_eur",
+    "bedrooms",
+    "location",
+    "description",
+    "facts_reviewer",
+    "media_reviewer",
+    "review_notes",
+    "editor_path",
+    "review_status",
+    "issues",
+    "required_editor_fields",
+    "public_gallery_assets",
+    "public_gallery_sample",
+    "missing_alt_text_assets",
+  ];
   const reviewPath = `${dir}/listing-quality.csv`;
   const rows = listingQuality.rows.map((row) => {
     const fields = row.required_editor_fields || [];
@@ -82,12 +104,19 @@ function writeListingQualityReviewFixture(dir) {
       needsFacts ? "editor_bg" : "",
       needsMedia ? "media_editor" : "",
       "Reviewed from source evidence",
-    ].join(",");
+      row.editor_path,
+      row.review_status,
+      row.issues,
+      row.required_editor_fields,
+      row.public_gallery_assets,
+      row.public_gallery_sample,
+      row.missing_alt_text_assets,
+    ].map(csvCell).join(",");
   });
   fs.writeFileSync(
     reviewPath,
     [
-      "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+      headers.join(","),
       ...rows,
       "",
     ].join("\n"),
@@ -97,14 +126,47 @@ function writeListingQualityReviewFixture(dir) {
 
 function writePartialListingQualityReviewFixture(dir) {
   const listingQuality = readJson(["production", "data", "listing-quality-report.json"]);
+  const headers = [
+    "listing_id",
+    "price_eur",
+    "bedrooms",
+    "location",
+    "description",
+    "facts_reviewer",
+    "media_reviewer",
+    "review_notes",
+    "editor_path",
+    "review_status",
+    "issues",
+    "required_editor_fields",
+    "public_gallery_assets",
+    "public_gallery_sample",
+    "missing_alt_text_assets",
+  ];
   const row = listingQuality.rows.find((candidate) => candidate.review_status.includes("media"));
   assert.ok(row, "expected a listing quality row that still requires media review");
   const reviewPath = `${dir}/listing-quality.csv`;
   fs.writeFileSync(
     reviewPath,
     [
-      "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
-      `${row.listing_id},,,,,,media_editor,Reviewed public gallery selection`,
+      headers.join(","),
+      [
+        row.listing_id,
+        "",
+        "",
+        "",
+        "",
+        "",
+        "media_editor",
+        "Reviewed public gallery selection",
+        row.editor_path,
+        row.review_status,
+        row.issues,
+        row.required_editor_fields,
+        row.public_gallery_assets,
+        row.public_gallery_sample,
+        row.missing_alt_text_assets,
+      ].map(csvCell).join(","),
       "",
     ].join("\n"),
   );

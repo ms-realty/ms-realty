@@ -446,7 +446,11 @@ function assertOptionalSnapshotList(listingId, label, actual, expected) {
   }
 }
 
-export function validateListingQualityReviewCsv(report, csvText, { allowExtraRows = false, requireComplete = false } = {}) {
+export function validateListingQualityReviewCsv(
+  report,
+  csvText,
+  { allowExtraRows = false, requireComplete = false, requireSnapshots = false } = {},
+) {
   const rows = parseCsv(csvText);
   if (!rows.length) throw new Error("Listing quality review CSV has no rows");
 
@@ -459,7 +463,7 @@ export function validateListingQualityReviewCsv(report, csvText, { allowExtraRow
     if (!quality) throw new Error(`Listing quality review requires a known listing_id: ${listingId || ""}`);
     if (seen.has(listingId)) throw new Error(`Duplicate listing quality review row: ${listingId}`);
     seen.add(listingId);
-    if (requireComplete) {
+    if (requireComplete || requireSnapshots) {
       const expectedSnapshots = {
         editor_path: quality.editor_path,
         review_status: quality.review_status,
@@ -557,7 +561,7 @@ function reviewState(report, reviewPath, csvText = null) {
 
   try {
     const text = csvText ?? fs.readFileSync(reviewPath, "utf8");
-    const validation = validateListingQualityReviewCsv(report, text, { allowExtraRows: true });
+    const validation = validateListingQualityReviewCsv(report, text, { allowExtraRows: true, requireSnapshots: true });
     if (validation.summary.missing_review_rows > 0) {
       const reviewed = new Set(validation.reviews.map((review) => review.listing_id));
       const missingRows = report.rows.filter((row) => !reviewed.has(row.listing_id));

@@ -903,7 +903,7 @@ function listingQualityReviewPacket(config) {
 
 function importListingQualityRows(inputCsv, config) {
   const report = currentListingQualityReport(config);
-  const review = validateListingQualityReviewCsv(report, inputCsv);
+  const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
   let reviewPath = null;
   let reviewPersistenceError = "";
   if (review.summary.missing_review_rows === 0) {

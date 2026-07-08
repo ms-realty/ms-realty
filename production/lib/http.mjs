@@ -1018,7 +1018,7 @@ export function createHttpApp({
       try {
         const inputCsv = csvInput(request);
         const report = currentListingQualityReport();
-        const review = validateListingQualityReviewCsv(report, inputCsv);
+        const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
         let reviewPath = null;
         let reviewPersistenceError = "";
         if (review.summary.missing_review_rows === 0) {

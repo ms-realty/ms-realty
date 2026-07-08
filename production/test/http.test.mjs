@@ -149,7 +149,7 @@ function csvCell(value) {
   return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
 }
 
-function completeListingQualityReviewCsv(workbookCsv) {
+function completeListingQualityReviewCsv(workbookCsv, limit = null) {
   const headers = [
     "listing_id",
     "price_eur",
@@ -167,7 +167,9 @@ function completeListingQualityReviewCsv(workbookCsv) {
     "public_gallery_sample",
     "missing_alt_text_assets",
   ];
-  const rows = parseCsv(workbookCsv).map((row) => {
+  const workbookRows = parseCsv(workbookCsv);
+  const reviewRows = limit === null ? workbookRows : workbookRows.slice(0, limit);
+  const rows = reviewRows.map((row) => {
     const fields = (row.required_editor_fields || "").split("|").filter(Boolean);
     const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
     const needsMedia = fields.some((field) => ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field));
@@ -863,7 +865,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     method: "POST",
     url: "/api/admin/listing-quality/import",
     headers: { "content-type": "text/csv" },
-    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0006,,,,,,media_editor,Reviewed gallery selection\n",
+    body: completeListingQualityReviewCsv(qualityReviewDraft.body, 1),
   });
   const qualityImported = await dispatchHttp(app, {
     method: "POST",
@@ -872,7 +874,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
       authorization: "Bearer local-admin-smoke",
       "content-type": "text/csv",
     },
-    body: "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes\nMS-CRAWL-0006,,,,,,media_editor,Reviewed gallery selection\n",
+    body: completeListingQualityReviewCsv(qualityReviewDraft.body, 1),
   });
   const launchChecklistUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/launch-input-checklist",

@@ -41,7 +41,7 @@ function actionCounts(rows) {
   }, {});
 }
 
-function completeListingQualityReviewCsv(workbookCsv) {
+function completeListingQualityReviewCsv(workbookCsv, limit = null) {
   const headers = [
     "listing_id",
     "price_eur",
@@ -59,7 +59,9 @@ function completeListingQualityReviewCsv(workbookCsv) {
     "public_gallery_sample",
     "missing_alt_text_assets",
   ];
-  const rows = parseCsv(workbookCsv).map((row) => {
+  const workbookRows = parseCsv(workbookCsv);
+  const reviewRows = limit === null ? workbookRows : workbookRows.slice(0, limit);
+  const rows = reviewRows.map((row) => {
     const fields = (row.required_editor_fields || "").split("|").filter(Boolean);
     const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
     const needsMedia = fields.some((field) => ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field));
@@ -782,7 +784,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/api/admin/listing-quality/import", {
           method: "POST",
           headers: { ...auth, "content-type": "text/csv" },
-          body: "listing_id,media_reviewer,review_notes\nMS-CRAWL-0006,media_editor,Gallery reviewed for launch.\n",
+          body: completeListingQualityReviewCsv(listingQualityReviewDraftCsv, 1),
         }),
       );
       const listingQualityImportBody = await listingQualityImport.json();

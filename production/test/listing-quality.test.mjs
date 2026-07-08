@@ -360,6 +360,10 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
     () => validateListingQualityReviewCsv(report, completeWithoutSnapshots, { requireComplete: true }),
     /complete review requires editor_path/,
   );
+  assert.throws(
+    () => validateListingQualityReviewCsv(report, completeWithoutSnapshots, { requireSnapshots: true }),
+    /complete review requires editor_path/,
+  );
   const reviewValues = { price_eur: "123000", bedrooms: "2", description: "Reviewed listing description" };
   const expectedPatch = Object.fromEntries(
     Object.entries(reviewValues).filter(([field]) => row.required_editor_fields.includes(field)),
