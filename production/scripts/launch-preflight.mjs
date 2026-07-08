@@ -1,4 +1,4 @@
-import { assertLaunchReadinessReport, buildLaunchReadinessReport } from "../lib/launch-readiness.mjs";
+import { assertLaunchReadinessReport, buildLaunchReadinessReport, launchBlockerSummary } from "../lib/launch-readiness.mjs";
 import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 
 function blockerDetails(report) {
@@ -27,12 +27,19 @@ function blockerDetails(report) {
     });
 }
 
+function blockerActions(report) {
+  return launchBlockerSummary(report).blocked_gates.flatMap((gate) =>
+    gate.next_actions.map((action) => `${gate.id} next: ${action}`),
+  );
+}
+
 const report = buildLaunchReadinessReport(launchReadinessInputsFromEnv());
 assertLaunchReadinessReport(report);
 
 if (!report.launch_ready) {
   console.error(`LAUNCH BLOCKED: ${report.blockers.join(", ")}`);
   for (const line of blockerDetails(report)) console.error(`- ${line}`);
+  for (const line of blockerActions(report)) console.error(`- ${line}`);
   console.error("Next: provide the missing evidence, then run `npm run launch:inputs` and `npm run launch:preflight`.");
   process.exitCode = 1;
 } else {

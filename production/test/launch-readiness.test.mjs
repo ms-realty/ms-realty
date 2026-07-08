@@ -782,6 +782,10 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
   assert.match(result.stderr, /payload_runtime: blocked_report .*payload-runtime-report\.json .*missing PAYLOAD_SECRET, DATABASE_URL/);
+  assert.match(result.stderr, /external_seo_exports next: Import Search Console/);
+  assert.match(result.stderr, /listing_quality_review next: Download \/api\/admin\/listing-quality-review-packet/);
+  assert.match(result.stderr, /live_services next: Run npm run live:provisioning:preflight/);
+  assert.match(result.stderr, /payload_runtime next: Run npm run payload:runtime/);
   assert.match(result.stderr, /npm run launch:inputs/);
 
   const partialReviewPath = writePartialListingQualityReviewFixture(
@@ -808,6 +812,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   assert.notEqual(withReviewPath.status, 0);
   assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services, payload_runtime/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
+  assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
 
   const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-evidence-`);
   writeCompleteSeoInputFixture(seoDir);
@@ -871,6 +876,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
 
   assert.notEqual(blocked.status, 0);
   assert.match(blocked.stderr, /LAUNCH BLOCKED: redirect_reviews/);
+  assert.match(blocked.stderr, /redirect_reviews next: Download \/api\/admin\/redirect-approval-workbook\?pending=1/);
 
   const reviewPath = writeListingQualityReviewFixture(fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-review-`));
   const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-seo-`);
