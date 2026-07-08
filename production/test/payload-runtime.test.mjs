@@ -165,7 +165,15 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(report.summary.database.host, "db.internal");
   assert.equal(report.summary.database.credentials_configured, true);
   assert.ok(report.next_actions.some((action) => action.includes("redacted Payload runtime report")));
-  assert.ok(report.next_actions.some((action) => action.includes("payload:preflight")));
+  assert.ok(report.next_actions.some((action) => action.includes("payload:preflight") && action.includes("launch:preflight")));
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        next_actions: ["Run npm run launch:preflight with the same PAYLOAD_SECRET and DATABASE_URL."],
+      }),
+    /payload:preflight before launch:preflight/,
+  );
   assert.equal(JSON.stringify(report).includes("not-written-to-report-32-byte-minimum"), false);
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
 });

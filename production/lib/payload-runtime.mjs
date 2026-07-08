@@ -219,6 +219,12 @@ export function assertPayloadRuntimeReport(report) {
     throw new Error("Payload runtime blocked report must point to payload:bootstrap");
   }
   if (
+    ready &&
+    !report.next_actions.some((action) => action.includes("payload:preflight") && action.includes("launch:preflight"))
+  ) {
+    throw new Error("Payload runtime ready report must point to payload:preflight before launch:preflight");
+  }
+  if (
     !report.summary ||
     !Array.isArray(report.summary.missing_env) ||
     !Array.isArray(report.summary.placeholder_env) ||
