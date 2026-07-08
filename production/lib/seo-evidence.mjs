@@ -12,8 +12,7 @@ import {
 import {
   SEO_EXPORTS,
   addMetric,
-  externalRowDedupeKey,
-  invalidBacklinkReferral,
+  joinExternalRows,
   normalizeExternalRow,
   routeKeys,
 } from "./seo-evidence-shared.mjs";
@@ -101,69 +100,6 @@ function indexEvidence(records, routeMap) {
   return { evidence, byKey, byListingReference };
 }
 
-function joinExternal(source, sourceData, byKey) {
-  let matched = 0;
-  let signalRows = 0;
-  let unmatched = 0;
-  let duplicateRows = 0;
-  let placeholderRows = 0;
-  const matchedSourceDomains = new Set();
-  const referringDomains = new Set();
-  const seenRows = new Set();
-
-  for (const row of sourceData.rows) {
-    const target = row.keys.map((key) => byKey.get(key)).find(Boolean);
-    if (!target) {
-      unmatched += 1;
-      continue;
-    }
-
-    const dedupeKey = externalRowDedupeKey(source, target, row);
-    if (seenRows.has(dedupeKey)) {
-      duplicateRows += 1;
-      continue;
-    }
-    seenRows.add(dedupeKey);
-
-    matched += 1;
-    matchedSourceDomains.add(target.source_domain);
-
-    if (source === "search_console") {
-      if (row.clicks > 0 || row.impressions > 0) signalRows += 1;
-      addMetric(target.search_console, "clicks", row.clicks);
-      addMetric(target.search_console, "impressions", row.impressions);
-      if (row.position) target.search_console.avg_position = row.position;
-    } else if (source === "yandex_webmaster") {
-      if (row.indexed || row.issue) signalRows += 1;
-      addMetric(target.yandex_webmaster, "rows", 1);
-      if (row.issue) addMetric(target.yandex_webmaster, "issues", 1);
-    } else if (source === "backlinks") {
-      if (invalidBacklinkReferral(row, target)) placeholderRows += 1;
-      else if (row.source_url || row.referring_domain) signalRows += 1;
-      addMetric(target.backlinks, "backlinks", 1);
-      if (row.referring_domain) referringDomains.add(`${target.old_url}|${row.referring_domain}`);
-    } else if (source === "analytics_export") {
-      if (row.page_views > 0) signalRows += 1;
-      addMetric(target.analytics, "exported_page_views", row.page_views);
-    }
-  }
-
-  for (const key of referringDomains) {
-    const [oldUrl] = key.split("|");
-    const target = byKey.get(oldUrl);
-    if (target) addMetric(target.backlinks, "referring_domains", 1);
-  }
-
-  return {
-    matched_rows: matched,
-    signal_rows: signalRows,
-    unmatched_rows: unmatched,
-    duplicate_rows: duplicateRows,
-    placeholder_rows: placeholderRows,
-    matched_source_domains: [...matchedSourceDomains].sort(),
-  };
-}
-
 function joinPrivacyEvents(events, byKey, byListingReference) {
   let matched = 0;
   for (const event of events) {
@@ -211,7 +147,7 @@ export function buildSeoEvidence({
 
   for (const source of Object.keys(SEO_EXPORTS)) {
     const sourceData = readExternalSource(source, inputDir);
-    sourceSummaries[source] = { ...sourceData, rows: undefined, ...joinExternal(source, sourceData, byKey) };
+    sourceSummaries[source] = { ...sourceData, rows: undefined, ...joinExternalRows(source, sourceData.rows, byKey) };
   }
 
   sourceSummaries.privacy_events = {

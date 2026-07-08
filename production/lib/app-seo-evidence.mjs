@@ -4,11 +4,10 @@ import { parseCsv } from "./csv.mjs";
 import { REQUIRED_SOURCE_DOMAINS, assertSeoEvidence, missingRequiredSources } from "./seo-evidence-contract.mjs";
 import {
   SEO_EXPORTS,
-  addMetric,
-  externalRowDedupeKey,
-  invalidBacklinkReferral,
+  countUrlsWithSeoEvidence,
+  joinExternalRows,
   normalizeExternalRow,
-  routeKeys,
+  seoEvidenceIndex,
 } from "./seo-evidence-shared.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -42,7 +41,7 @@ function overlayInputDirectoryEvidence(config) {
       input_path: inputPath,
       status: rows.length ? "imported" : "empty_export",
       row_count: rows.length,
-      ...joinSource(source, rows, evidence),
+      ...joinExternalRows(source, rows, seoEvidenceIndex(evidence), { resetEvidence: evidence }),
     };
   }
   updateMissingRequiredSources(evidence);
@@ -60,102 +59,12 @@ export function readAppSeoEvidence(config) {
   return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ filePath, "utf8"));
 }
 
-function evidenceIndex(evidence) {
-  const byKey = new Map();
-  for (const row of evidence.url_evidence || []) {
-    for (const key of routeKeys(row.old_url)) byKey.set(key, row);
-    for (const key of routeKeys(row.target_path)) byKey.set(key, row);
-  }
-  return byKey;
-}
-
-function resetSourceMetrics(source, evidence) {
-  for (const row of evidence.url_evidence || []) {
-    if (source === "search_console") row.search_console = { clicks: 0, impressions: 0, avg_position: 0 };
-    if (source === "yandex_webmaster") row.yandex_webmaster = { rows: 0, issues: 0 };
-    if (source === "backlinks") row.backlinks = { backlinks: 0, referring_domains: 0 };
-    if (source === "analytics_export") row.analytics = { ...row.analytics, exported_page_views: 0 };
-  }
-}
-
-function joinSource(source, rows, evidence) {
-  const byKey = evidenceIndex(evidence);
-  const seenRows = new Set();
-  const referringDomains = new Set();
-  const matchedSourceDomains = new Set();
-  let matched = 0;
-  let signalRows = 0;
-  let unmatched = 0;
-  let duplicateRows = 0;
-  let placeholderRows = 0;
-
-  resetSourceMetrics(source, evidence);
-
-  for (const row of rows) {
-    const target = row.keys.map((key) => byKey.get(key)).find(Boolean);
-    if (!target) {
-      unmatched += 1;
-      continue;
-    }
-
-    const dedupeKey = externalRowDedupeKey(source, target, row);
-    if (seenRows.has(dedupeKey)) {
-      duplicateRows += 1;
-      continue;
-    }
-    seenRows.add(dedupeKey);
-    matched += 1;
-    matchedSourceDomains.add(target.source_domain);
-
-    if (source === "search_console") {
-      if (row.clicks > 0 || row.impressions > 0) signalRows += 1;
-      addMetric(target.search_console, "clicks", row.clicks);
-      addMetric(target.search_console, "impressions", row.impressions);
-      if (row.position) target.search_console.avg_position = row.position;
-    } else if (source === "yandex_webmaster") {
-      if (row.indexed || row.issue) signalRows += 1;
-      addMetric(target.yandex_webmaster, "rows", 1);
-      if (row.issue) addMetric(target.yandex_webmaster, "issues", 1);
-    } else if (source === "backlinks") {
-      if (invalidBacklinkReferral(row, target)) placeholderRows += 1;
-      else if (row.source_url || row.referring_domain) signalRows += 1;
-      addMetric(target.backlinks, "backlinks", 1);
-      if (row.referring_domain) referringDomains.add(`${target.old_url}|${row.referring_domain}`);
-    } else if (source === "analytics_export") {
-      if (row.page_views > 0) signalRows += 1;
-      addMetric(target.analytics, "exported_page_views", row.page_views);
-    }
-  }
-
-  for (const key of referringDomains) {
-    const [oldUrl] = key.split("|");
-    const target = byKey.get(oldUrl);
-    if (target) addMetric(target.backlinks, "referring_domains", 1);
-  }
-
-  return {
-    matched_rows: matched,
-    signal_rows: signalRows,
-    unmatched_rows: unmatched,
-    duplicate_rows: duplicateRows,
-    placeholder_rows: placeholderRows,
-    matched_source_domains: [...matchedSourceDomains].sort(),
-  };
-}
-
 function updateMissingRequiredSources(evidence) {
   evidence.summary.missing_required_sources = missingRequiredSources(evidence.summary.sources || {});
 }
 
 function updateEvidenceCounts(evidence) {
-  evidence.summary.urls_with_any_evidence = (evidence.url_evidence || []).filter(
-    (row) =>
-      row.search_console?.impressions ||
-      row.yandex_webmaster?.rows ||
-      row.backlinks?.backlinks ||
-      row.analytics?.page_views ||
-      row.analytics?.exported_page_views,
-  ).length;
+  evidence.summary.urls_with_any_evidence = countUrlsWithSeoEvidence(evidence);
 }
 
 export function seoEvidencePayload(evidence) {
@@ -197,7 +106,7 @@ export function importAppSeoEvidenceRows(input, config) {
     input_path: outPath,
     status: rows.length ? "imported" : "empty_export",
     row_count: rows.length,
-    ...joinSource(input.source, rows, evidence),
+    ...joinExternalRows(input.source, rows, seoEvidenceIndex(evidence), { resetEvidence: evidence }),
   };
   updateMissingRequiredSources(evidence);
   updateEvidenceCounts(evidence);
