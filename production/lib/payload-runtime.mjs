@@ -182,7 +182,7 @@ export async function buildPayloadRuntimeReport({
     next_actions: ready
       ? ["Run npm run launch:preflight with the same PAYLOAD_SECRET and DATABASE_URL."]
       : [
-          "Set PAYLOAD_SECRET and DATABASE_URL in the production runtime.",
+          "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
           "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
           "Run npm run payload:preflight before launch:preflight.",
         ],
@@ -212,6 +212,12 @@ export function assertPayloadRuntimeReport(report) {
   const ready = report.checks.every((item) => item.status === "pass");
   if (report.ready !== ready) throw new Error("Payload runtime ready flag must match checks");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("Payload runtime status must match ready flag");
+  if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
+    throw new Error("Payload runtime report must include next actions");
+  }
+  if (!ready && !report.next_actions.some((action) => action.includes("payload:bootstrap"))) {
+    throw new Error("Payload runtime blocked report must point to payload:bootstrap");
+  }
   if (
     !report.summary ||
     !Array.isArray(report.summary.missing_env) ||

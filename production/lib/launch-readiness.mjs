@@ -562,6 +562,7 @@ export function payloadRuntimeState(reportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT)
       path: reportPath,
       summary: report.summary,
       checks: report.checks,
+      next_actions: report.next_actions,
     };
   } catch (error) {
     return { status: "invalid_report", path: reportPath, error: error.message };

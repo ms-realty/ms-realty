@@ -40,6 +40,7 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.deepEqual(report.summary.weak_env, []);
   assert.equal(report.summary.database.status, "missing_env");
   assert.equal(report.checks.find((check) => check.id === "payload_config_import").status, "pass");
+  assert.ok(report.next_actions.some((action) => action.includes("payload:bootstrap")));
 });
 
 test("Payload runtime preflight CLI explains missing report remediation", () => {
@@ -303,6 +304,14 @@ test("Payload runtime report requires the full launch check set", async () => {
   assert.throws(
     () => assertPayloadRuntimeReport({ ...report, summary: { ...report.summary, route_files: 0 } }),
     /route summary evidence/,
+  );
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, next_actions: [] }),
+    /next actions/,
+  );
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, next_actions: ["Set PAYLOAD_SECRET and DATABASE_URL."] }),
+    /payload:bootstrap/,
   );
   assert.throws(
     () =>
