@@ -281,6 +281,17 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
 });
 
+test("OpenAI-compatible Hermes provider rejects non chat-completions endpoints", () => {
+  assert.throws(
+    () =>
+      openAiCompatibleHermesProvider({
+        endpoint: "https://hermes.local/v1/models",
+        fetchImpl: async () => ({ ok: true }),
+      }),
+    /\/v1\/chat\/completions/,
+  );
+});
+
 test("live Hermes draft worker CLI fails closed when provider env is missing", () => {
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "run-hermes-draft-worker.mjs")], {
     cwd: fromRoot(),
