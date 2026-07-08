@@ -245,7 +245,7 @@ function updateEvidenceCounts(evidence) {
   ).length;
 }
 
-function evidencePayload(evidence) {
+export function seoEvidencePayload(evidence) {
   return {
     missingRequiredSources: evidence.summary.missing_required_sources,
     requiredSourceDomains: REQUIRED_SOURCE_DOMAINS,
@@ -295,5 +295,5 @@ export function importAppSeoEvidenceRows(input, config) {
   fs.writeFileSync(/*turbopackIgnore: true*/ outPath, csv);
   fs.mkdirSync(path.dirname(/*turbopackIgnore: true*/ evidencePath), { recursive: true });
   fs.writeFileSync(/*turbopackIgnore: true*/ evidencePath, `${JSON.stringify(evidence, null, 2)}\n`);
-  return { imported: { source: input.source, outPath, row_count: rows.length }, ...evidencePayload(evidence) };
+  return { imported: { source: input.source, outPath, row_count: rows.length }, ...seoEvidencePayload(evidence) };
 }
