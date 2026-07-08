@@ -375,6 +375,7 @@ export function createHttpApp({
         queryReportPath: searchQueryReportPath || undefined,
         hermesReportPath: hermesWorkerReportPath || undefined,
       }),
+      liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
     });
   };

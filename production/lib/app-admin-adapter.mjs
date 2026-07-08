@@ -387,6 +387,7 @@ function launchReadiness(config) {
       queryReportPath: config.searchQueryReportPath || undefined,
       hermesReportPath: config.hermesWorkerReportPath || undefined,
     }),
+    liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
     payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
   });
 }

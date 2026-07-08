@@ -325,6 +325,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
   assert.equal(report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
+  const liveGate = report.gates.find((gate) => gate.id === "live_services");
   assert.equal(listingGate.status, "blocked");
   assert.deepEqual(listingGate.evidence.summary, {
     expected_review_rows: 7,
@@ -333,7 +334,9 @@ test("launch readiness stays blocked until production launch blockers are cleare
     facts_review_rows: 0,
     media_review_rows: 0,
   });
-  assert.equal(report.gates.find((gate) => gate.id === "live_services").status, "blocked");
+  assert.equal(liveGate.status, "blocked");
+  assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
+  assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {

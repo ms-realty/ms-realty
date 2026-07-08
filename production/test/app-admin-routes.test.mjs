@@ -261,6 +261,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(launchReadinessBody.status, "blocked");
       assert.ok(launchReadinessBody.blockers.includes("external_seo_exports"));
       assert.ok(launchReadinessBody.blockers.includes("listing_quality_review"));
+      assert.equal(
+        launchReadinessBody.gates.find((gate) => gate.id === "live_services").evidence.provisioning.path,
+        liveServiceProvisioningReportPath,
+      );
 
       const launchChecklist = await launchInputChecklistRoute.GET(
         new Request("https://example.test/api/admin/launch-input-checklist", { headers: auth }),

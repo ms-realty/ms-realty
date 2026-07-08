@@ -239,7 +239,71 @@
             "status": "missing_report",
             "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
           }
-        ]
+        ],
+        "provisioning": {
+          "status": "blocked_report",
+          "path": "/Users/ivan/Code/MS-Realty/production/data/live-service-provisioning-report.json",
+          "summary": {
+            "checks": 7,
+            "missing_env": [
+              "TYPESENSE_URL",
+              "TYPESENSE_API_KEY",
+              "MEILI_URL",
+              "MEILI_API_KEY",
+              "HERMES_CHAT_COMPLETIONS_URL"
+            ],
+            "placeholder_env": [],
+            "services": [
+              "typesense",
+              "meilisearch",
+              "hermes"
+            ]
+          },
+          "checks": [
+            {
+              "id": "typesense_url",
+              "env": "TYPESENSE_URL",
+              "status": "missing_env"
+            },
+            {
+              "id": "typesense_api_key",
+              "env": "TYPESENSE_API_KEY",
+              "status": "missing_env"
+            },
+            {
+              "id": "meili_url",
+              "env": "MEILI_URL",
+              "status": "missing_env"
+            },
+            {
+              "id": "meili_api_key",
+              "env": "MEILI_API_KEY",
+              "status": "missing_env"
+            },
+            {
+              "id": "typesense_health",
+              "status": "missing_env"
+            },
+            {
+              "id": "meilisearch_health",
+              "status": "missing_env"
+            },
+            {
+              "id": "hermes_provider",
+              "mode": "self_hosted",
+              "status": "missing_env",
+              "missing": [
+                "HERMES_CHAT_COMPLETIONS_URL"
+              ]
+            }
+          ],
+          "hermes": {
+            "mode": "self_hosted",
+            "endpoint": null,
+            "model": "NousResearch/Hermes-4-14B",
+            "ready": false
+          }
+        }
       }
     },
     {

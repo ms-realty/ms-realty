@@ -14,6 +14,7 @@ import {
   writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
 import { assertHermesChatCompletionsEndpoint } from "./hermes-provider-provisioning.mjs";
+import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { buildListingQualityPreflightReport, DEFAULT_LISTING_QUALITY_REVIEW_INPUT } from "./listing-quality.mjs";
 import {
   assertPayloadRuntimeReport,
@@ -626,6 +627,7 @@ export function buildLaunchReadinessReport({
   httpSmoke = readJson(fromRoot("production", "data", "http-smoke.json")),
   nodeServerSmoke = readJson(fromRoot("production", "data", "node-server-smoke.json")),
   liveServices = liveServiceReports(),
+  liveServiceProvisioning = liveServiceProvisioningState(),
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(),
 } = {}) {
@@ -724,7 +726,7 @@ export function buildLaunchReadinessReport({
     gate(
       "live_services",
       liveServicesReady ? "pass" : "blocked",
-      { reports: liveServices },
+      { reports: liveServices, provisioning: liveServiceProvisioning },
       liveServicesReady
         ? ""
         : "Run live Typesense/Meilisearch sync/query and Hermes draft worker commands after provisioning.",
