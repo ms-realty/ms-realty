@@ -962,6 +962,7 @@ function importListingQualityRows(inputCsv, config) {
     edited: edits.length,
     mediaReviewRows: review.summary.media_review_rows,
     missingReviewRows: review.summary.missing_review_rows,
+    report: launchReadiness(config),
     reviewImport,
     reviewSummary: review.summary,
     reviewPersisted: Boolean(reviewPath),

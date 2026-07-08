@@ -1011,6 +1011,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.body.reviewImport.reviewRows, qualityImported.body.imported);
   assert.equal(qualityImported.body.reviewImport.missingReviewRows, qualityImported.body.missingReviewRows);
   assert.ok(qualityImported.body.reviewImport.pendingReviewSample.length > 0);
+  assert.equal(qualityImported.body.report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
+  assert.equal(qualityImported.body.report.blockers.includes("listing_quality_review"), true);
   assert.equal(qualityImported.body.reviewPersisted, false);
   assert.equal(qualityImported.body.reviewPath, null);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
@@ -1230,6 +1232,8 @@ test("HTTP admin persists complete listing quality review CSV as launch evidence
   assert.deepEqual(imported.body.reviewImport.pendingReviewSample, []);
   assert.equal(imported.body.reviewPath, listingQualityReviewPath);
   assert.equal(imported.body.reviewPersistenceError, "");
+  assert.equal(imported.body.report.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+  assert.equal(imported.body.report.blockers.includes("listing_quality_review"), false);
   assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
   assert.equal(readiness.body.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
   assert.equal(readiness.body.blockers.includes("listing_quality_review"), false);

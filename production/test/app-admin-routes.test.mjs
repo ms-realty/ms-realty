@@ -768,6 +768,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityImportBody.reviewImport.reviewRows, listingQualityImportBody.imported);
       assert.equal(listingQualityImportBody.reviewImport.missingReviewRows, listingQualityImportBody.missingReviewRows);
       assert.ok(listingQualityImportBody.reviewImport.pendingReviewSample.length > 0);
+      assert.equal(listingQualityImportBody.report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
+      assert.equal(listingQualityImportBody.report.blockers.includes("listing_quality_review"), true);
       assert.equal(listingQualityImportBody.reviewPersisted, false);
       assert.equal(listingQualityImportBody.reviewPath, null);
       assert.equal(listingQualityImportBody.edits[0].edit.media_reviewer, "media_editor");
@@ -1023,6 +1025,8 @@ test("Next admin listing-quality import persists complete launch review CSV", as
       assert.deepEqual(importedBody.reviewImport.pendingReviewSample, []);
       assert.equal(importedBody.reviewPath, listingQualityReviewPath);
       assert.equal(importedBody.reviewPersistenceError, "");
+      assert.equal(importedBody.report.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+      assert.equal(importedBody.report.blockers.includes("listing_quality_review"), false);
       assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
       assert.equal(readinessBody.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
       assert.equal(readinessBody.blockers.includes("listing_quality_review"), false);
@@ -1097,6 +1101,8 @@ test("Next admin listing-quality import persists complete review for mounted lis
       assert.deepEqual(importedBody.reviewImport.pendingReviewSample, []);
       assert.equal(importedBody.reviewPath, listingQualityReviewPath);
       assert.equal(importedBody.reviewPersistenceError, "");
+      assert.equal(importedBody.report.gates.find((gate) => gate.id === "listing_quality_review").status, "pass");
+      assert.equal(importedBody.report.blockers.includes("listing_quality_review"), false);
       assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
       assert.equal(importedBody.edits.some((row) => row.edit.listing_id === "MS-CRAWL-0003"), true);
       assert.equal(readiness.status, 200);

@@ -1071,6 +1071,7 @@ export function createHttpApp({
           edited: edits.length,
           mediaReviewRows: review.summary.media_review_rows,
           missingReviewRows: review.summary.missing_review_rows,
+          report: currentLaunchReadiness(),
           reviewImport,
           reviewSummary: review.summary,
           reviewPersisted: Boolean(reviewPath),
