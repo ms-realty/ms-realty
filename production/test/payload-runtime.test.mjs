@@ -212,6 +212,10 @@ test("Payload runtime report requires the full launch check set", async () => {
     /duplicate check payload_secret/,
   );
   assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, checks: [...report.checks, { id: "operator_note", status: "pass" }] }),
+    /unknown check operator_note/,
+  );
+  assert.throws(
     () =>
       assertPayloadRuntimeReport({
         ...report,

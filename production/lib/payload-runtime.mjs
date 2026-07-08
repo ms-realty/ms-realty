@@ -19,6 +19,7 @@ const REQUIRED_CHECK_IDS = [
   "payload_config_import",
   "database_tcp",
 ];
+const REQUIRED_CHECK_ID_SET = new Set(REQUIRED_CHECK_IDS);
 const PAYLOAD_RUNTIME_CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "weak_secret", "fail"]);
 
 function check(id, status, evidence = {}) {
@@ -176,6 +177,7 @@ export function assertPayloadRuntimeReport(report) {
   const checkIds = new Set();
   for (const item of report.checks) {
     if (!item?.id) throw new Error("Payload runtime report checks must include ids");
+    if (!REQUIRED_CHECK_ID_SET.has(item.id)) throw new Error(`Payload runtime report has unknown check ${item.id}`);
     if (!PAYLOAD_RUNTIME_CHECK_STATUSES.has(item.status)) throw new Error("Payload runtime report checks must use known statuses");
     if (checkIds.has(item.id)) throw new Error(`Payload runtime report has duplicate check ${item.id}`);
     checkIds.add(item.id);
