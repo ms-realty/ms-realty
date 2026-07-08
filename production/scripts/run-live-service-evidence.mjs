@@ -15,6 +15,9 @@ import {
   writeHermesDraftWorkerReport,
 } from "../lib/hermes-draft-worker.mjs";
 
+const PROVISIONING_NEXT =
+  "Next: run `npm run live:provisioning:preflight`; after it passes, rerun `npm run live:capture`, then `npm run live:preflight`.";
+
 async function capture() {
   const runAt = new Date().toISOString();
   const provisioning = await buildLiveServiceProvisioningReport({ generatedAt: runAt });
@@ -64,5 +67,6 @@ try {
   );
 } catch (error) {
   console.error(`LIVE SERVICE EVIDENCE FAILED: ${error.message}`);
+  if (/live service provisioning must pass before capture/.test(error.message)) console.error(PROVISIONING_NEXT);
   process.exitCode = 1;
 }

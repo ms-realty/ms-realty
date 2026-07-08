@@ -1138,6 +1138,7 @@ test("live service evidence command refuses localhost launch evidence", async ()
       result.stderr,
       /LIVE SERVICE EVIDENCE FAILED: live service provisioning must pass before capture: typesense_health, meilisearch_health, hermes_provider/,
     );
+    assert.match(result.stderr, /Next: run `npm run live:provisioning:preflight`/);
     const validation = validateLiveServiceReports(paths);
     assert.equal(validation.ready, false);
     assert.equal(validation.reports.every((report) => report.status === "missing_report"), true);
