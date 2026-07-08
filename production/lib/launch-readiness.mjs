@@ -185,6 +185,49 @@ function assertLaunchLiveServiceEvidence(source, report) {
   }
 }
 
+function operationSnapshot(operation = {}) {
+  return {
+    method: operation.method,
+    url: operation.url,
+    status: operation.status,
+    ...(Number.isInteger(operation.bytes) ? { bytes: operation.bytes } : {}),
+  };
+}
+
+function liveServiceEvidenceSnapshot(source, report) {
+  if (source === "typesense_meilisearch_sync") {
+    return {
+      engines: (report.engines || []).map((engine) => ({
+        engine: engine.engine,
+        target: engine.collection || engine.index,
+        operations: (engine.operations || []).map(operationSnapshot),
+      })),
+    };
+  }
+  if (source === "typesense_meilisearch_query") {
+    return {
+      engines: (report.engines || []).map((engine) => ({
+        engine: engine.engine,
+        target: engine.collection || engine.index,
+        operation: operationSnapshot(engine.operation),
+      })),
+    };
+  }
+  if (source === "hermes_draft_worker") {
+    return {
+      provider: {
+        mode: report.provider?.mode,
+        endpoint: report.provider?.endpoint,
+        model: report.provider?.model,
+        tool_call_parser: report.provider?.tool_call_parser,
+        sensitive_data_allowed: report.provider?.sensitive_data_allowed,
+      },
+      audit_log_rows: Number.isInteger(report.audit_log_rows) ? report.audit_log_rows : null,
+    };
+  }
+  return {};
+}
+
 function packageState(filePath = fromRoot("package.json")) {
   const pkg = readJson(filePath);
   const hasPayload = Boolean(pkg.dependencies?.payload || pkg.devDependencies?.payload);
@@ -402,6 +445,127 @@ function assertLiveServiceReportPassEvidence(item) {
     throw new Error("Launch readiness live services require validated non-example reports");
   }
   assertLiveServiceSummaryEvidence(item);
+  assertLiveServiceReportDetailedEvidence(item);
+}
+
+function assertLiveServiceEngineEvidence(item, expectedMessage) {
+  const engines = item.evidence?.engines || [];
+  if (engines.length !== 2) throw new Error(expectedMessage);
+  const engineNames = engines.map((engine) => engine.engine).sort().join("|");
+  if (engineNames !== "meilisearch|typesense") throw new Error(expectedMessage);
+  for (const engine of engines) {
+    const target = item.summary?.targets?.[engine.engine];
+    if (!target || engine.target !== target) throw new Error(expectedMessage);
+  }
+  return engines;
+}
+
+function assertLiveServiceSyncOperationEvidence(item) {
+  const engines = assertLiveServiceEngineEvidence(item, "Launch readiness live services require search sync operation evidence");
+  const operations = engines.flatMap((engine) => (engine.operations || []).map((operation) => ({ engine: engine.engine, operation })));
+  if (operations.length !== item.summary.total_operations) {
+    throw new Error("Launch readiness live services require search sync operation evidence");
+  }
+  for (const { engine, operation } of operations) {
+    assertLaunchServiceUrl(operation.url, `${engine} sync operation`);
+    if (!["PATCH", "POST"].includes(operation.method) || ![200, 201, 202, 409].includes(operation.status)) {
+      throw new Error("Launch readiness live services require search sync operation evidence");
+    }
+    if (!Number.isInteger(operation.bytes) || operation.bytes <= 0) {
+      throw new Error("Launch readiness live services require search sync operation evidence");
+    }
+  }
+  for (const engine of engines) {
+    const encoded = encodeURIComponent(engine.target);
+    if (engine.engine === "typesense") {
+      if (
+        !hasLiveServiceOperation(engine, { method: "POST", path: "/collections", statuses: [200, 201, 409] }) ||
+        !hasLiveServiceOperation(engine, {
+          method: "POST",
+          path: `/collections/${encoded}/documents/import`,
+          searchParam: { key: "action", value: "upsert" },
+          statuses: [200, 201, 202],
+        })
+      ) {
+        throw new Error("Launch readiness live services require search sync operation evidence");
+      }
+    }
+    if (engine.engine === "meilisearch") {
+      if (
+        !hasLiveServiceOperation(engine, { method: "PATCH", path: `/indexes/${encoded}/settings`, statuses: [200, 201, 202] }) ||
+        !hasLiveServiceOperation(engine, {
+          method: "POST",
+          path: `/indexes/${encoded}/documents`,
+          searchParam: { key: "primaryKey", value: "id" },
+          statuses: [200, 201, 202],
+        })
+      ) {
+        throw new Error("Launch readiness live services require search sync operation evidence");
+      }
+    }
+  }
+}
+
+function assertLiveServiceQueryOperationEvidence(item) {
+  const engines = assertLiveServiceEngineEvidence(item, "Launch readiness live services require search query operation evidence");
+  for (const engine of engines) {
+    const operation = engine.operation || {};
+    assertLaunchServiceUrl(operation.url, `${engine.engine} query operation`);
+    const parsed = new URL(operation.url);
+    const encoded = encodeURIComponent(engine.target);
+    if (
+      engine.engine === "typesense" &&
+      (operation.method !== "GET" ||
+        operation.status !== 200 ||
+        parsed.pathname !== `/collections/${encoded}/documents/search` ||
+        !parsed.searchParams.get("q") ||
+        !parsed.searchParams.get("filter_by"))
+    ) {
+      throw new Error("Launch readiness live services require search query operation evidence");
+    }
+    if (
+      engine.engine === "meilisearch" &&
+      (operation.method !== "POST" || operation.status !== 200 || parsed.pathname !== `/indexes/${encoded}/search`)
+    ) {
+      throw new Error("Launch readiness live services require search query operation evidence");
+    }
+  }
+}
+
+function hasLiveServiceOperation(engine, { method, path: operationPath, searchParam = null, statuses }) {
+  return (engine.operations || []).some((operation) => {
+    let parsed;
+    try {
+      parsed = new URL(operation.url);
+    } catch {
+      return false;
+    }
+    return (
+      operation.method === method &&
+      parsed.pathname === operationPath &&
+      (!searchParam || parsed.searchParams.get(searchParam.key) === searchParam.value) &&
+      statuses.includes(operation.status)
+    );
+  });
+}
+
+function assertLiveServiceHermesProviderEvidence(item) {
+  const provider = item.evidence?.provider || {};
+  assertLaunchServiceUrl(provider.endpoint, "Hermes worker launch evidence");
+  assertHermesChatCompletionsEndpoint(provider.endpoint, "Hermes worker launch evidence endpoint");
+  if (
+    provider.mode !== "self_hosted" ||
+    provider.tool_call_parser !== "hermes" ||
+    provider.sensitive_data_allowed !== true
+  ) {
+    throw new Error("Launch readiness live services require self-hosted Hermes provider evidence");
+  }
+}
+
+function assertLiveServiceReportDetailedEvidence(item) {
+  if (item.source === "typesense_meilisearch_sync") assertLiveServiceSyncOperationEvidence(item);
+  if (item.source === "typesense_meilisearch_query") assertLiveServiceQueryOperationEvidence(item);
+  if (item.source === "hermes_draft_worker") assertLiveServiceHermesProviderEvidence(item);
 }
 
 function assertLiveServiceProvisioningPassEvidence(provisioning) {
@@ -603,7 +767,13 @@ function reportStatus(source, filePath, assertReport) {
     }
     assertLiveServiceReportTimestamp(report);
     assertLaunchLiveServiceEvidence(source, report);
-    return { source, status: "pass", path: filePath, summary: report.summary };
+    return {
+      source,
+      status: "pass",
+      path: filePath,
+      summary: report.summary,
+      evidence: liveServiceEvidenceSnapshot(source, report),
+    };
   } catch (error) {
     return { source, status: "invalid_report", path: filePath, error: error.message };
   }
@@ -768,7 +938,7 @@ export function writeLiveServiceReport(source, report, options = {}) {
   assertLiveServiceReportHasNoSecrets(report);
   assertLaunchLiveServiceEvidence(source, report);
   const outPath = writer.write(report, options[writer.pathKey]);
-  return { source, outPath, summary: report.summary };
+  return { source, outPath, summary: report.summary, evidence: liveServiceEvidenceSnapshot(source, report) };
 }
 
 export function buildLaunchReadinessReport({

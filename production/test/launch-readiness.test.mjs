@@ -119,6 +119,36 @@ const readyLiveServices = [
       documents_per_engine: [167, 167],
       total_operations: 4,
     },
+    evidence: {
+      engines: [
+        {
+          engine: "typesense",
+          target: "ms_realty_listings",
+          operations: [
+            { method: "POST", url: "https://typesense.ms-realty.bg/collections", status: 201, bytes: 1 },
+            {
+              method: "POST",
+              url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert",
+              status: 200,
+              bytes: 1,
+            },
+          ],
+        },
+        {
+          engine: "meilisearch",
+          target: "ms_realty_listings",
+          operations: [
+            { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
+            {
+              method: "POST",
+              url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=id",
+              status: 202,
+              bytes: 1,
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     source: "typesense_meilisearch_query",
@@ -130,12 +160,44 @@ const readyLiveServices = [
       total_hits: 2,
       first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"],
     },
+    evidence: {
+      engines: [
+        {
+          engine: "typesense",
+          target: "ms_realty_listings",
+          operation: {
+            method: "GET",
+            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg",
+            status: 200,
+          },
+        },
+        {
+          engine: "meilisearch",
+          target: "ms_realty_listings",
+          operation: {
+            method: "POST",
+            url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
+            status: 200,
+          },
+        },
+      ],
+    },
   },
   {
     source: "hermes_draft_worker",
     status: "pass",
     path: "production/data/hermes-draft-worker-report.json",
     summary: { attempted: 1, persisted: 1, rejected: 0 },
+    evidence: {
+      provider: {
+        mode: "self_hosted",
+        model: "NousResearch/Hermes-4-14B",
+        endpoint: "https://hermes.ms-realty.bg/v1/chat/completions",
+        tool_call_parser: "hermes",
+        sensitive_data_allowed: true,
+      },
+      audit_log_rows: null,
+    },
   },
 ];
 const readyLiveServiceProvisioning = {
@@ -730,6 +792,100 @@ test("launch readiness validator rejects weak live service pass summaries", () =
   });
 
   assert.throws(() => assertLaunchReadinessReport(report), /search sync summary evidence/);
+});
+
+test("launch readiness validator rejects weak live service operation evidence", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  const seoEvidence = readySeoEvidenceFixture();
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const withoutQueryOperation = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "typesense_meilisearch_query" ? { ...item, evidence: { engines: [] } } : item,
+    ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+  const weakHermesProvider = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "hermes_draft_worker"
+        ? { ...item, evidence: { provider: { ...item.evidence.provider, mode: "openrouter", sensitive_data_allowed: false } } }
+        : item,
+    ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+  const weakSyncOperation = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "typesense_meilisearch_sync"
+        ? {
+            ...item,
+            evidence: {
+              engines: item.evidence.engines.map((engine) =>
+                engine.engine === "typesense"
+                  ? { ...engine, operations: engine.operations.map((operation) => ({ ...operation, bytes: 0 })) }
+                  : engine,
+              ),
+            },
+          }
+        : item,
+    ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+  const wrongSyncPath = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "typesense_meilisearch_sync"
+        ? {
+            ...item,
+            evidence: {
+              engines: item.evidence.engines.map((engine) =>
+                engine.engine === "meilisearch"
+                  ? {
+                      ...engine,
+                      operations: engine.operations.map((operation) =>
+                        operation.method === "PATCH" ? { ...operation, url: "https://meili.ms-realty.bg/indexes/wrong/settings" } : operation,
+                      ),
+                    }
+                  : engine,
+              ),
+            },
+          }
+        : item,
+    ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+
+  assert.throws(() => assertLaunchReadinessReport(withoutQueryOperation), /search query operation evidence/);
+  assert.throws(() => assertLaunchReadinessReport(weakHermesProvider), /self-hosted Hermes provider evidence/);
+  assert.throws(() => assertLaunchReadinessReport(weakSyncOperation), /search sync operation evidence/);
+  assert.throws(() => assertLaunchReadinessReport(wrongSyncPath), /search sync operation evidence/);
 });
 
 test("launch readiness validator rejects weak live provisioning pass evidence", () => {
