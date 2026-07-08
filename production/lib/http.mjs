@@ -280,6 +280,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    seoPreflightEndpoint: "/api/admin/seo-preflight",
     liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
@@ -386,6 +387,12 @@ export function createHttpApp({
         },
       },
     });
+  const currentSeoPreflightReport = () =>
+    buildSeoEvidencePreflightReport({
+      inputDir: seoEvidenceInputDir || undefined,
+      events: readEventLedger(eventLedgerPath || undefined),
+      generatedAt: reviewedAt || new Date().toISOString(),
+    });
   const currentPreflightReports = () => {
     const listingReport = currentListingQualityReport({
       generatedAt: listingQualityGeneratedAt || reviewedAt || new Date().toISOString(),
@@ -394,11 +401,7 @@ export function createHttpApp({
       kind: "admin_preflight_reports",
       generated_at: reviewedAt || new Date().toISOString(),
       reports: {
-        seo: buildSeoEvidencePreflightReport({
-          inputDir: seoEvidenceInputDir || undefined,
-          events: readEventLedger(eventLedgerPath || undefined),
-          generatedAt: reviewedAt || new Date().toISOString(),
-        }),
+        seo: currentSeoPreflightReport(),
         listing_quality: buildListingQualityPreflightReport({
           report: listingReport,
           reviewPath: listingQualityReviewPath || undefined,
@@ -676,6 +679,11 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminJson(200, currentPreflightReports());
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-preflight") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, { kind: "admin_seo_preflight", seo: currentSeoPreflightReport() });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality") {

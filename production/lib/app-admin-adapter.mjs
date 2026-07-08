@@ -502,6 +502,7 @@ function migrationReviewPayload(registry, url, config) {
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    seoPreflightEndpoint: "/api/admin/seo-preflight",
     liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
@@ -972,6 +973,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
       return jsonResponse(200, preflightReports(config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/seo-preflight") {
+      return jsonResponse(200, { kind: "admin_seo_preflight", seo: seoPreflightReport(config) });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality") {
       const generatedAt = config.reviewedAt || new Date().toISOString();

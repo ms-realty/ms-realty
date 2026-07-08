@@ -1140,6 +1140,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /GET \/api\/admin\/seo-evidence\/template\?source=search_console/);
   assert.match(markdown, /MS_REALTY_SEO_EVIDENCE_INPUT_DIR/);
   assert.match(markdown, /npm run seo:preflight:report/);
+  assert.match(markdown, /GET \/api\/admin\/seo-preflight/);
   assert.match(markdown, /MS_REALTY_SEO_PREFLIGHT_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH/);
   assert.match(markdown, /Live Service Provisioning/);

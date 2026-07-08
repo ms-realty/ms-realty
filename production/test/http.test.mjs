@@ -859,6 +859,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/preflight-reports",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const seoPreflightUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/seo-preflight",
+  });
+  const seoPreflight = await dispatchHttp(app, {
+    url: "/api/admin/seo-preflight",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const liveServicesUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/live-services",
   });
@@ -993,6 +1000,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
   assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
   assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
+  assert.equal(seoPreflightUnauthorized.status, 401);
+  assert.equal(seoPreflight.status, 200);
+  assert.equal(seoPreflight.body.kind, "admin_seo_preflight");
+  assert.equal(seoPreflight.body.seo.status, "blocked");
+  assert.ok(seoPreflight.body.seo.summary.missing_required_sources.includes("search_console"));
   assert.equal(liveServicesUnauthorized.status, 401);
   assert.equal(liveServices.status, 200);
   assert.equal(liveServices.body.kind, "admin_live_services");
@@ -1054,6 +1066,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.launchReadinessExportEndpoint, "/api/admin/launch-readiness/export");
   assert.equal(review.body.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
   assert.equal(review.body.preflightReportsEndpoint, "/api/admin/preflight-reports");
+  assert.equal(review.body.seoPreflightEndpoint, "/api/admin/seo-preflight");
   assert.equal(review.body.liveServicesEndpoint, "/api/admin/live-services");
   assert.equal(review.body.liveServiceProvisioningEndpoint, "/api/admin/live-service-provisioning");
   assert.equal(review.body.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
@@ -1078,6 +1091,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-launch-readiness-export-endpoint="/api/admin/launch-readiness/export"'), true);
   assert.equal(reviewHtml.body.includes('data-launch-input-checklist-endpoint="/api/admin/launch-input-checklist"'), true);
   assert.equal(reviewHtml.body.includes('data-preflight-reports-endpoint="/api/admin/preflight-reports"'), true);
+  assert.equal(reviewHtml.body.includes('data-seo-preflight-endpoint="/api/admin/seo-preflight"'), true);
   assert.equal(reviewHtml.body.includes('data-live-services-endpoint="/api/admin/live-services"'), true);
   assert.equal(reviewHtml.body.includes('data-live-service-provisioning-endpoint="/api/admin/live-service-provisioning"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
