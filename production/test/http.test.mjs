@@ -887,6 +887,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/payload-runtime",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const payloadRuntimeBootstrapUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/payload-runtime-bootstrap",
+  });
+  const payloadRuntimeBootstrap = await dispatchHttp(app, {
+    url: "/api/admin/payload-runtime-bootstrap",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const listingQualityUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/listing-quality",
   });
@@ -1019,6 +1026,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(payloadRuntime.status, 200);
   assert.equal(payloadRuntime.body.kind, "admin_payload_runtime");
   assert.equal(payloadRuntime.body.runtime.status, "blocked_report");
+  assert.equal(payloadRuntimeBootstrapUnauthorized.status, 401);
+  assert.equal(payloadRuntimeBootstrap.status, 200);
+  assert.equal(payloadRuntimeBootstrap.body.kind, "admin_payload_runtime_bootstrap");
+  assert.match(payloadRuntimeBootstrap.body.env_example, /PAYLOAD_SECRET=replace-with-output-of-openssl-rand-base64-32/);
+  assert.match(payloadRuntimeBootstrap.body.compose_file, /payload-postgres/);
+  assert.ok(payloadRuntimeBootstrap.body.checklist.some((item) => item.includes("npm run payload:runtime")));
   assert.equal(listingQualityUnauthorized.status, 401);
   assert.equal(listingQualityStatus.status, 200);
   assert.equal(listingQualityStatus.body.kind, "admin_listing_quality");
@@ -1070,6 +1083,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.liveServicesEndpoint, "/api/admin/live-services");
   assert.equal(review.body.liveServiceProvisioningEndpoint, "/api/admin/live-service-provisioning");
   assert.equal(review.body.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
+  assert.equal(review.body.payloadRuntimeBootstrapEndpoint, "/api/admin/payload-runtime-bootstrap");
   assert.equal(review.body.cmsCollectionsEndpoint, "/api/admin/cms-collections");
   assert.equal(review.body.payloadCollectionsEndpoint, "/api/admin/payload-collections");
   assert.equal(review.body.listingQualityEndpoint, "/api/admin/listing-quality");
@@ -1095,6 +1109,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-live-services-endpoint="/api/admin/live-services"'), true);
   assert.equal(reviewHtml.body.includes('data-live-service-provisioning-endpoint="/api/admin/live-service-provisioning"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
+  assert.equal(reviewHtml.body.includes('data-payload-runtime-bootstrap-endpoint="/api/admin/payload-runtime-bootstrap"'), true);
   assert.equal(reviewHtml.body.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
   assert.equal(reviewHtml.body.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);

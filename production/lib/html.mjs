@@ -484,6 +484,8 @@ function renderAdminMigrationReview(page) {
     page.liveServiceProvisioningEndpoint,
   )}" data-payload-runtime-endpoint="${escapeHtml(
     page.payloadRuntimeEndpoint,
+  )}" data-payload-runtime-bootstrap-endpoint="${escapeHtml(
+    page.payloadRuntimeBootstrapEndpoint,
   )}" data-cms-collections-endpoint="${escapeHtml(
     page.cmsCollectionsEndpoint,
   )}" data-payload-collections-endpoint="${escapeHtml(
@@ -499,6 +501,7 @@ function renderAdminMigrationReview(page) {
   <p><a href="${escapeHtml(page.liveServicesEndpoint)}">Live services JSON</a></p>
   <p><a href="${escapeHtml(page.liveServiceProvisioningEndpoint)}">Live service provisioning JSON</a></p>
   <p><a href="${escapeHtml(page.payloadRuntimeEndpoint)}">Payload runtime JSON</a></p>
+  <p><a href="${escapeHtml(page.payloadRuntimeBootstrapEndpoint)}">Payload runtime bootstrap JSON</a></p>
   <p><a href="${escapeHtml(page.cmsCollectionsEndpoint)}">CMS collection contracts</a></p>
   <p><a href="${escapeHtml(page.payloadCollectionsEndpoint)}">Payload collection configs</a></p>
   <p><a href="${escapeHtml(page.listingQualityEndpoint)}">Listing quality JSON</a></p>

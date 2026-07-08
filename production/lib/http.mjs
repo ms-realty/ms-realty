@@ -69,6 +69,7 @@ import {
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { writePayloadRuntimeReport } from "./payload-runtime.mjs";
+import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
@@ -284,6 +285,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
+    payloadRuntimeBootstrapEndpoint: "/api/admin/payload-runtime-bootstrap",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     listingQualityEndpoint: "/api/admin/listing-quality",
@@ -726,6 +728,11 @@ export function createHttpApp({
         kind: "admin_payload_runtime",
         runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
       });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime-bootstrap") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, payloadRuntimeBootstrapPayload());
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {

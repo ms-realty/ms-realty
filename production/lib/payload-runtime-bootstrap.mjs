@@ -56,6 +56,15 @@ export function payloadRuntimeBootstrapChecklist() {
   ];
 }
 
+export function payloadRuntimeBootstrapPayload() {
+  return {
+    kind: "admin_payload_runtime_bootstrap",
+    env_example: payloadRuntimeEnvExample(),
+    compose_file: payloadRuntimeComposeFile(),
+    checklist: payloadRuntimeBootstrapChecklist(),
+  };
+}
+
 export function assertPayloadRuntimeBootstrap({ compose = payloadRuntimeComposeFile(), envExample = payloadRuntimeEnvExample() } = {}) {
   for (const key of ["PAYLOAD_SECRET", "DATABASE_URL", "PAYLOAD_POSTGRES_PASSWORD"]) {
     if (!envExample.includes(`${key}=`)) throw new Error(`Payload runtime env example must include ${key}`);
