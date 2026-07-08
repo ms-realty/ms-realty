@@ -138,7 +138,7 @@ export function buildSeoEvidencePreflightReportFromEvidence(evidence) {
           "Place them in migration/external/seo or set MS_REALTY_SEO_EVIDENCE_INPUT_DIR.",
           "Run npm run seo:preflight before launch:preflight.",
         ]
-      : ["Run npm run launch:preflight with the same SEO evidence input path."],
+      : ["Run npm run seo:preflight, then npm run launch:preflight with the same SEO evidence input path."],
   };
 }
 
@@ -164,6 +164,12 @@ export function assertSeoEvidencePreflightReport(report) {
   }
   if (!ready && !report.next_actions.some((action) => action.includes("seo:preflight"))) {
     throw new Error("SEO preflight blocked report must point to seo:preflight");
+  }
+  if (
+    ready &&
+    !report.next_actions.some((action) => action.includes("seo:preflight") && action.includes("launch:preflight"))
+  ) {
+    throw new Error("SEO preflight ready report must point to seo:preflight before launch:preflight");
   }
   for (const source of REQUIRED_EXPORTS) {
     if (ready && missingRequiredExport(sourceStatuses[source])) {

@@ -257,6 +257,17 @@ test("SEO evidence preflight report records missing and valid export state", () 
   assert.deepEqual(readyReport.summary.missing_required_sources, []);
   assert.equal(readyReport.summary.sources.analytics_export.status, "missing_export");
   assert.equal(readyReport.summary.sources.privacy_events.status, "imported");
+  assert.ok(
+    readyReport.next_actions.some((action) => action.includes("seo:preflight") && action.includes("launch:preflight")),
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidencePreflightReport({
+        ...readyReport,
+        next_actions: ["Run npm run launch:preflight with the same SEO evidence input path."],
+      }),
+    /seo:preflight before launch:preflight/,
+  );
 });
 
 test("SEO evidence preflight report blocks complete exports without analytics source", () => {

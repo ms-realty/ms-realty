@@ -581,7 +581,7 @@ export function buildListingQualityPreflightReport({
     },
     next_actions:
       review.status === "pass"
-        ? ["Run npm run launch:preflight with the same listing quality review path."]
+        ? ["Run npm run listing:preflight, then npm run launch:preflight with the same listing quality review path."]
         : [
             "Review production/data/listing-quality-workbook.csv.",
             "Write migration/reviews/listing-quality.csv or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH.",
@@ -629,6 +629,12 @@ export function assertListingQualityPreflightReport(report) {
   }
   if (!ready && !report.next_actions.some((action) => action.includes("listing:preflight"))) {
     throw new Error("Listing quality preflight blocked report must point to listing:preflight");
+  }
+  if (
+    ready &&
+    !report.next_actions.some((action) => action.includes("listing:preflight") && action.includes("launch:preflight"))
+  ) {
+    throw new Error("Listing quality preflight ready report must point to listing:preflight before launch:preflight");
   }
   if (!report.summary || !report.review?.summary || report.summary.expected_review_rows < report.summary.review_rows) {
     throw new Error("Listing quality preflight summary must count expected and reviewed rows");

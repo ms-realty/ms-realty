@@ -630,6 +630,17 @@ test("listing quality preflight report records missing and valid human review st
   assert.equal(assertListingQualityPreflightReport(readyReport), true);
   assert.equal(readyReport.ready, true);
   assert.equal(readyReport.summary.review_rows, report.rows.length);
+  assert.ok(
+    readyReport.next_actions.some((action) => action.includes("listing:preflight") && action.includes("launch:preflight")),
+  );
+  assert.throws(
+    () =>
+      assertListingQualityPreflightReport({
+        ...readyReport,
+        next_actions: ["Run npm run launch:preflight with the same listing quality review path."],
+      }),
+    /listing:preflight before launch:preflight/,
+  );
   assert.throws(
     () => assertListingQualityPreflightReport({ ...readyReport, review: { ...readyReport.review, path: "" } }),
     /non-example review path/,
