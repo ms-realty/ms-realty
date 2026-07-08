@@ -1174,6 +1174,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /payload\.config\.js/);
   assert.match(markdown, /npm run payload:runtime/);
   assert.match(markdown, /npm run payload:preflight/);
+  assert.match(markdown, /GET \/api\/admin\/payload-runtime/);
   assert.match(markdown, /POST \/api\/admin\/payload-runtime\/import/);
   assert.match(markdown, /MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH/);
   assert.match(markdown, /interim admin workbenches do not count/);

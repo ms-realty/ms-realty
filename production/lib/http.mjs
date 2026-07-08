@@ -281,6 +281,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
+    payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     deployablePreview: buildDeployableRedirects(routes, approvals),
@@ -680,6 +681,14 @@ export function createHttpApp({
       return adminJson(200, {
         kind: "admin_live_service_provisioning",
         provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, {
+        kind: "admin_payload_runtime",
+        runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
       });
     }
 

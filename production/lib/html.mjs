@@ -478,6 +478,8 @@ function renderAdminMigrationReview(page) {
     page.preflightReportsEndpoint,
   )}" data-live-service-provisioning-endpoint="${escapeHtml(
     page.liveServiceProvisioningEndpoint,
+  )}" data-payload-runtime-endpoint="${escapeHtml(
+    page.payloadRuntimeEndpoint,
   )}" data-cms-collections-endpoint="${escapeHtml(
     page.cmsCollectionsEndpoint,
   )}" data-payload-collections-endpoint="${escapeHtml(
@@ -488,6 +490,7 @@ function renderAdminMigrationReview(page) {
   <p><a href="${escapeHtml(page.launchInputChecklistEndpoint)}">Launch input checklist</a></p>
   <p><a href="${escapeHtml(page.preflightReportsEndpoint)}">Preflight reports JSON</a></p>
   <p><a href="${escapeHtml(page.liveServiceProvisioningEndpoint)}">Live service provisioning JSON</a></p>
+  <p><a href="${escapeHtml(page.payloadRuntimeEndpoint)}">Payload runtime JSON</a></p>
   <p><a href="${escapeHtml(page.cmsCollectionsEndpoint)}">CMS collection contracts</a></p>
   <p><a href="${escapeHtml(page.payloadCollectionsEndpoint)}">Payload collection configs</a></p>
   <form method="post" action="${escapeHtml(page.launchReadinessExportEndpoint)}">

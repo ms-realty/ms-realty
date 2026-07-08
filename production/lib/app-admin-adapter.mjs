@@ -503,6 +503,7 @@ function migrationReviewPayload(registry, url, config) {
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
+    payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     deployablePreview: currentDeployableRedirects(config),
@@ -974,6 +975,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(200, {
         kind: "admin_live_service_provisioning",
         provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
+      });
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {
+      return jsonResponse(200, {
+        kind: "admin_payload_runtime",
+        runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
       });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
