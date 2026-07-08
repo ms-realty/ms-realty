@@ -67,6 +67,12 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(report.rows.every((row) => row.review_status));
   assert.ok(report.rows.every((row) => row.required_editor_fields.length > 0));
   assert.ok(report.rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
+  assert.ok(report.rows.every((row) => Array.isArray(row.public_gallery_sample)));
+  assert.ok(
+    report.rows
+      .filter((row) => row.required_editor_fields.includes("public_gallery"))
+      .every((row) => row.public_gallery_sample.some((item) => item.includes("wp-content/uploads"))),
+  );
 });
 
 test("listing quality treats explicit price-on-request as reviewed pricing", () => {
@@ -189,6 +195,8 @@ test("listing quality workbook gives editors importable review rows without appr
   assert.match(mediaRow.issues, /thin_public_gallery/);
   assert.equal(mediaRow.review_status, "needs_media_review");
   assert.match(mediaRow.required_editor_fields, /public_gallery/);
+  assert.match(mediaRow.public_gallery_sample, /wp-content\/uploads/);
+  assert.match(mediaRow.public_gallery_sample, /alt:/);
   assert.equal(mediaRow.facts_reviewer, "");
   assert.equal(mediaRow.media_reviewer, "");
   assert.match(mediaRow.editor_path, /^\/admin\/listings\/edit\?listingId=/);
@@ -216,6 +224,7 @@ test("listing quality review packet is a complete draft but not launch evidence"
   assert.ok(rows.every((row) => row.media_reviewer === ""));
   assert.ok(rows.every((row) => row.facts_reviewer === ""));
   assert.ok(rows.every((row) => row.review_notes.includes("Review public gallery")));
+  assert.ok(rows.every((row) => row.public_gallery_sample.includes("wp-content/uploads")));
   assert.equal(packet.paths.draft_review_csv === packet.paths.launch_review_csv, false);
   assert.throws(() => validateListingQualityReviewCsv(report, draft, { requireComplete: true }), /media_reviewer/);
 });
@@ -636,6 +645,7 @@ test("generated listing quality workbook is valid when present", () => {
   assert.equal(rows.length, report.rows.length);
   assert.ok(rows.every((row) => row.review_status));
   assert.ok(rows.every((row) => row.required_editor_fields));
+  assert.ok(rows.every((row) => row.public_gallery_sample.includes("wp-content/uploads")));
   assert.ok(rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });
 

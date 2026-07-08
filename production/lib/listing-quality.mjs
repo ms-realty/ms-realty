@@ -64,6 +64,19 @@ function requiredEditorFields(issues) {
   return issues.map((issue) => FACT_FIELDS_BY_ISSUE[issue] || MEDIA_FIELDS_BY_ISSUE[issue]).filter(Boolean);
 }
 
+function publicGallerySample(publicPhotos) {
+  const seen = new Set();
+  return publicPhotos
+    .map((media) => ({ url: media.asset_url || media.url, alt: media.alt || "" }))
+    .filter((media) => {
+      if (!media.url || seen.has(media.url)) return false;
+      seen.add(media.url);
+      return true;
+    })
+    .slice(0, 3)
+    .map((media) => (media.alt ? `${media.url} [alt: ${media.alt}]` : media.url));
+}
+
 function qualityRow(record, approvedTour = null) {
   const facts = record.facts || {};
   const tour = approvedTour || record.tour;
@@ -100,6 +113,7 @@ function qualityRow(record, approvedTour = null) {
     bedrooms: facts.bedrooms,
     bedrooms_not_applicable: facts.bedrooms_not_applicable === true,
     public_gallery_assets: publicGalleryAssets,
+    public_gallery_sample: publicGallerySample(publicPhotos),
     missing_alt_text_assets: missingAltTextAssets,
     review_gated_assets: record.media_workflow?.review_gated_assets || 0,
   };
@@ -161,6 +175,7 @@ export function renderListingQualityWorkbook(report) {
     "price_eur",
     "bedrooms",
     "public_gallery_assets",
+    "public_gallery_sample",
     "missing_alt_text_assets",
     "review_gated_assets",
     "facts_reviewer",
@@ -201,6 +216,7 @@ export function renderListingQualityReviewDraft(report) {
     "issues",
     "required_editor_fields",
     "public_gallery_assets",
+    "public_gallery_sample",
     "missing_alt_text_assets",
   ];
   const rows = report.rows.map((row) => ({
@@ -217,6 +233,7 @@ export function renderListingQualityReviewDraft(report) {
     issues: row.issues,
     required_editor_fields: row.required_editor_fields,
     public_gallery_assets: row.public_gallery_assets,
+    public_gallery_sample: row.public_gallery_sample,
     missing_alt_text_assets: row.missing_alt_text_assets,
   }));
   return `${[headers.join(","), ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
@@ -405,6 +422,7 @@ function pendingReviewSample(rows) {
     issues: row.issues,
     required_editor_fields: row.required_editor_fields,
     public_gallery_assets: row.public_gallery_assets,
+    public_gallery_sample: row.public_gallery_sample,
   }));
 }
 

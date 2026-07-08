@@ -8919,6 +8919,9 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дава под наем промишлена сграда в Сандански]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 0
           },
@@ -8943,6 +8946,10 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 2,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]",
+              "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 0
           },
@@ -8967,6 +8974,11 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 11,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава земя на Е79 в Сандански]",
+              "https://makler-realty.com/wp-content/uploads/2019/08/719-1-680x510.jpg [alt: Продава земя на Е79 в Сандански]",
+              "https://makler-realty.com/wp-content/uploads/2019/08/719-1-72x72.jpg [alt: продава имот на е79 Сандански]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 1
           },
@@ -8991,6 +9003,9 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща с двор в гр.Сандански]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 0
           },
@@ -9015,6 +9030,9 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава 15дка земя в района на с.Капатово]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 0
           },
@@ -9039,6 +9057,9 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава бизнес сграда в центъра на Петрич]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 0
           },
@@ -9063,6 +9084,9 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Стопански двор]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 0
           },
@@ -9087,6 +9111,10 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 2,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Земеделска земя в землището на с.Джигурово]",
+              "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg [alt: Земеделска земя в землището на с.Джигурово]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 0
           },
@@ -9111,6 +9139,11 @@
             "bedrooms": null,
             "bedrooms_not_applicable": false,
             "public_gallery_assets": 13,
+            "public_gallery_sample": [
+              "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка на международной трассе София — Салоники]",
+              "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка на международной трассе София — Салоники]",
+              "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка на международной трассе София — Салоники]"
+            ],
             "missing_alt_text_assets": 0,
             "review_gated_assets": 1
           }

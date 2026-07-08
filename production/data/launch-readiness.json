@@ -225,7 +225,10 @@
             "required_editor_fields": [
               "public_gallery"
             ],
-            "public_gallery_assets": 1
+            "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дава под наем промишлена сграда в Сандански]"
+            ]
           },
           {
             "listing_id": "MS-CRAWL-0012",
@@ -237,7 +240,11 @@
             "required_editor_fields": [
               "public_gallery"
             ],
-            "public_gallery_assets": 2
+            "public_gallery_assets": 2,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]",
+              "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]"
+            ]
           },
           {
             "listing_id": "MS-CRAWL-0049",
@@ -249,7 +256,10 @@
             "required_editor_fields": [
               "public_gallery"
             ],
-            "public_gallery_assets": 1
+            "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща с двор в гр.Сандански]"
+            ]
           },
           {
             "listing_id": "MS-CRAWL-0068",
@@ -261,7 +271,10 @@
             "required_editor_fields": [
               "public_gallery"
             ],
-            "public_gallery_assets": 1
+            "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава 15дка земя в района на с.Капатово]"
+            ]
           },
           {
             "listing_id": "MS-CRAWL-0070",
@@ -273,7 +286,10 @@
             "required_editor_fields": [
               "public_gallery"
             ],
-            "public_gallery_assets": 1
+            "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава бизнес сграда в центъра на Петрич]"
+            ]
           },
           {
             "listing_id": "MS-CRAWL-0082",
@@ -285,7 +301,10 @@
             "required_editor_fields": [
               "public_gallery"
             ],
-            "public_gallery_assets": 1
+            "public_gallery_assets": 1,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Стопански двор]"
+            ]
           },
           {
             "listing_id": "MS-CRAWL-0112",
@@ -297,7 +316,11 @@
             "required_editor_fields": [
               "public_gallery"
             ],
-            "public_gallery_assets": 2
+            "public_gallery_assets": 2,
+            "public_gallery_sample": [
+              "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Земеделска земя в землището на с.Джигурово]",
+              "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg [alt: Земеделска земя в землището на с.Джигурово]"
+            ]
           }
         ]
       }

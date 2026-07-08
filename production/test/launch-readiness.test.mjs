@@ -346,6 +346,9 @@ test("launch readiness stays blocked until production launch blockers are cleare
     issues: ["thin_public_gallery"],
     required_editor_fields: ["public_gallery"],
     public_gallery_assets: 1,
+    public_gallery_sample: [
+      "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дава под наем промишлена сграда в Сандански]",
+    ],
   });
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
