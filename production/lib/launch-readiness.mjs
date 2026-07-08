@@ -439,7 +439,7 @@ export function publicLaunchReadinessHeaders(report) {
 }
 
 function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
-  const { status, path: reportPath, summary, error } = buildListingQualityPreflightReport({
+  const { status, path: reportPath, summary, error, pending_review_sample: pendingReviewSample } = buildListingQualityPreflightReport({
     report: listingQuality,
     reviewPath,
   }).review;
@@ -448,6 +448,7 @@ function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_
     path: reportPath,
     ...(summary ? { summary } : {}),
     ...(error ? { error } : {}),
+    ...(pendingReviewSample ? { pending_review_sample: pendingReviewSample } : {}),
   };
 }
 

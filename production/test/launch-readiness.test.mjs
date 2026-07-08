@@ -338,6 +338,15 @@ test("launch readiness stays blocked until production launch blockers are cleare
     facts_review_rows: 0,
     media_review_rows: 0,
   });
+  assert.equal(listingGate.evidence.pending_review_sample.length, 7);
+  assert.deepEqual(listingGate.evidence.pending_review_sample[0], {
+    listing_id: "MS-CRAWL-0006",
+    target_path: "/bg/imoti/MS-CRAWL-0006",
+    editor_path: "/admin/listings/edit?listingId=MS-CRAWL-0006",
+    issues: ["thin_public_gallery"],
+    required_editor_fields: ["public_gallery"],
+    public_gallery_assets: 1,
+  });
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
   assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
@@ -1296,6 +1305,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /Current review evidence/);
   assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv.*expected 7.*reviewed 0.*missing 7/);
+  assert.match(markdown, /Pending review sample/);
+  assert.match(markdown, /MS-CRAWL-0006: public_gallery \(thin_public_gallery\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0006/);
+  assert.match(markdown, /MS-CRAWL-0112: public_gallery \(thin_public_gallery\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0112/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);

@@ -97,6 +97,14 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 
 - Current review evidence:
 - missing_review (path /Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv; expected 7; reviewed 0; missing 7)
+- Pending review sample:
+- MS-CRAWL-0006: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0006
+- MS-CRAWL-0012: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0012
+- MS-CRAWL-0049: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0049
+- MS-CRAWL-0068: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0068
+- MS-CRAWL-0070: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0070
+- MS-CRAWL-0082: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0082
+- MS-CRAWL-0112: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0112
 - Workbook: `production/data/listing-quality-workbook.csv`
 - Review packet: `production/data/listing-quality-review-packet.json`
 - Draft review CSV: `production/data/listing-quality-review-draft.csv`

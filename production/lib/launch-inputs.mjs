@@ -113,6 +113,18 @@ function listingReviewEvidenceLine(evidence) {
   return `- ${evidence.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;
 }
 
+function listingPendingReviewLines(evidence) {
+  const rows = Array.isArray(evidence.pending_review_sample) ? evidence.pending_review_sample : [];
+  if (!rows.length) return "- none";
+  return rows
+    .map((row) => {
+      const fields = Array.isArray(row.required_editor_fields) ? row.required_editor_fields.join("|") : "unknown";
+      const issues = Array.isArray(row.issues) ? row.issues.join("|") : "unknown";
+      return `- ${row.listing_id}: ${fields} (${issues}) ${row.editor_path}`;
+    })
+    .join("\n");
+}
+
 export function renderLaunchInputChecklist({
   generatedAt,
   launchReadiness,
@@ -237,6 +249,8 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 
 - Current review evidence:
 ${listingReviewEvidenceLine(listingReviewEvidence)}
+- Pending review sample:
+${listingPendingReviewLines(listingReviewEvidence)}
 - Workbook: \`production/data/listing-quality-workbook.csv\`
 - Review packet: \`production/data/listing-quality-review-packet.json\`
 - Draft review CSV: \`production/data/listing-quality-review-draft.csv\`
