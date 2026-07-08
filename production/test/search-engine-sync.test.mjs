@@ -231,6 +231,31 @@ test("Typesense sync accepts existing collection response before upsert import",
   assert.equal(report.operations[1].status, 201);
 });
 
+test("search engine runtime rejects copied placeholder env before network calls", async () => {
+  const fetchImpl = async () => {
+    throw new Error("placeholder search env should not be called");
+  };
+
+  await assert.rejects(
+    () =>
+      runSearchEngineSync({
+        fetchImpl,
+        typesense: { baseUrl: "https://example.com", apiKey: "replace-with-typesense-key" },
+        meilisearch: { baseUrl: "https://meili.internal", apiKey: "meili-key" },
+      }),
+    /TYPESENSE_URL must not be a placeholder/,
+  );
+  await assert.rejects(
+    () =>
+      runSearchEngineQuerySmoke({
+        fetchImpl,
+        typesense: { baseUrl: "https://typesense.internal", apiKey: "change-me" },
+        meilisearch: { baseUrl: "https://meili.internal", apiKey: "meili-key" },
+      }),
+    /TYPESENSE_API_KEY must not be a placeholder/,
+  );
+});
+
 test("Typesense sync rejects non-accepted collection creation statuses even when fetch reports ok", async () => {
   await assert.rejects(
     () =>

@@ -33,7 +33,9 @@ function redactedUrl(value) {
 }
 
 function required(value, name) {
-  if (!value) throw new Error(`${name} is required`);
+  const text = String(value || "").trim();
+  if (!text) throw new Error(`${name} is required`);
+  if (/replace-with|change-me|example/i.test(text)) throw new Error(`${name} must not be a placeholder`);
   return value;
 }
 
