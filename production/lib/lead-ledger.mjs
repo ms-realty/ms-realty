@@ -29,6 +29,11 @@ function contactFingerprint(contact = {}) {
   return key ? crypto.createHash("sha256").update(key).digest("hex") : null;
 }
 
+function optionalMessage(value) {
+  const text = String(value || "").trim();
+  return text ? text.slice(0, 2000) : null;
+}
+
 export function appendLead(
   lead,
   { filePath = DEFAULT_LEAD_LEDGER_PATH, receivedAt = new Date().toISOString(), slaMinutes = 15, escalationMinutes = 60 } = {},
@@ -39,6 +44,7 @@ export function appendLead(
   const possibleDuplicate = contact_fingerprint
     ? readLeadLedger(filePath).find((candidate) => candidate.contact_fingerprint === contact_fingerprint)
     : null;
+  const messageOriginal = optionalMessage(lead.message_original || lead.message || lead.lead?.message);
   const row = {
     received_at: receivedAt,
     id: lead.id,
@@ -48,6 +54,8 @@ export function appendLead(
     listing_reference: lead.lead?.listingReference || null,
     original_language: lead.original_language,
     admin_locale: lead.admin_locale,
+    message_original: messageOriginal,
+    show_original_available: Boolean(messageOriginal),
     contact_preference: lead.contact_preference,
     broker_approval_required: lead.hermes_reply_draft?.broker_approval_required === true,
     confirmation_status: lead.confirmation?.status || null,

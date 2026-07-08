@@ -21,6 +21,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
         leadType: "buyer",
         listingReference: "MS-CRAWL-0001",
         contact: { email: "Noa@example.com" },
+        message: "Interested in this property.",
       },
       hermes_reply_draft: { broker_approval_required: true },
     },
@@ -50,6 +51,8 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
   assert.equal(rows[0].original_language, "he");
   assert.equal(rows[0].admin_locale, "en");
   assert.equal(rows[0].source, "website_listing_detail");
+  assert.equal(rows[0].message_original, "Interested in this property.");
+  assert.equal(rows[0].show_original_available, true);
   assert.equal(rows[0].contact_preference, "whatsapp");
   assert.equal(rows[0].confirmation_status, "ready");
   assert.equal(rows[0].confirmation_message_key, "lead_received");
