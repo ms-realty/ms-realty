@@ -864,7 +864,7 @@ export function buildLiveServicePreflightReport({ generatedAt = new Date().toISO
     },
     reports: result.reports,
     next_actions: result.ready
-      ? ["Run npm run launch:preflight with the same mounted live report paths."]
+      ? ["Run npm run live:preflight, then npm run launch:preflight with the same mounted live report paths."]
       : [
           "Provision Typesense, Meilisearch, and Hermes provider credentials.",
           "Run npm run search:sync && npm run search:query.",

@@ -1267,6 +1267,7 @@ test("live service report preflight fails missing reports and passes valid repor
 
   const readyReport = buildLiveServicePreflightReport({ generatedAt: "2026-07-06T00:00:00Z", ...paths });
   assert.equal(assertLiveServicePreflightReport(readyReport), true);
+  assert.match(readyReport.next_actions.join(" "), /npm run live:preflight/);
   const duplicateSourceReport = {
     ...readyReport,
     reports: readyReport.reports.map((report, index) =>
@@ -1590,6 +1591,9 @@ test("live service report import writes only validated source reports", () => {
   assert.equal(importSummary.status, "blocked");
   assert.equal(importSummary.importedSource, "typesense_meilisearch_query");
   assert.equal(importSummary.importedReportStatus, "pass");
+  const readyImportSummary = liveServiceImportSummary(imported, buildLiveServicePreflightReport(paths));
+  assert.equal(readyImportSummary.ready, true);
+  assert.match(readyImportSummary.nextActions.join(" "), /npm run live:preflight/);
   assert.deepEqual(
     importSummary.blockedReports.map((report) => report.source),
     ["typesense_meilisearch_sync", "hermes_draft_worker"],
