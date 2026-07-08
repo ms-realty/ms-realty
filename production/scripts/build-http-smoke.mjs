@@ -418,6 +418,23 @@ smoke.translationDraft = await dispatchHttp(app, {
       description: "Reviewed listing description for Sandanski.",
     },
     propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+    draftOutput: {
+      title: "MS-CRAWL-0001 Sandanski el",
+      body: "MS-CRAWL-0001 Sandanski reviewed el translation draft",
+      seo_title: "MS-CRAWL-0001 Sandanski",
+      meta_description: "MS-CRAWL-0001 Sandanski reviewed el translation draft for approved MS Realty listing content.",
+      citations: [{ source: "cms", field: "title" }],
+    },
+  },
+});
+smoke.translationApprove = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/translations/approve",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    taskId: smoke.translationDraft.body.id,
+    reviewer: "translator_el",
+    approvedAt: "2026-07-04T00:02:00Z",
   },
 });
 smoke.translationPublish = await dispatchHttp(app, {
@@ -425,9 +442,7 @@ smoke.translationPublish = await dispatchHttp(app, {
   url: "/api/admin/translations/publish",
   headers: { authorization: "Bearer local-admin-smoke" },
   body: {
-    taskId: smoke.translationDraft.body.id,
-    reviewer: "translator_el",
-    approvedAt: "2026-07-04T00:02:00Z",
+    taskId: smoke.translationApprove.body.id,
   },
 });
 smoke.listingEditorHtml = await dispatchHttp(app, {

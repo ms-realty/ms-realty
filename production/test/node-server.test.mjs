@@ -390,15 +390,29 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             description: "Reviewed listing description for Sandanski.",
           },
           propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+          draftOutput: {
+            title: "MS-CRAWL-0001 Sandanski el",
+            body: "MS-CRAWL-0001 Sandanski reviewed el translation draft",
+            seo_title: "MS-CRAWL-0001 Sandanski",
+            meta_description: "MS-CRAWL-0001 Sandanski reviewed el translation draft for approved MS Realty listing content.",
+            citations: [{ source: "cms", field: "title" }],
+          },
         }),
       });
-      smoke.translationPublish = await jsonFetch(baseUrl, "/api/admin/translations/publish", {
+      smoke.translationApprove = await jsonFetch(baseUrl, "/api/admin/translations/approve", {
         method: "POST",
         headers: { authorization: "Bearer local-admin-smoke" },
         body: JSON.stringify({
           taskId: smoke.translationDraft.body.id,
           reviewer: "translator_el",
           approvedAt: "2026-07-04T00:02:00Z",
+        }),
+      });
+      smoke.translationPublish = await jsonFetch(baseUrl, "/api/admin/translations/publish", {
+        method: "POST",
+        headers: { authorization: "Bearer local-admin-smoke" },
+        body: JSON.stringify({
+          taskId: smoke.translationApprove.body.id,
         }),
       });
       smoke.listingEdit = await jsonFetch(baseUrl, "/api/admin/listings/edit", {
@@ -520,6 +534,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         viewing_booked: 1,
         deal_closed: 1,
         translation_drafted: 1,
+        translation_approved: 1,
         translation_published: 1,
         listing_edited: 1,
       });

@@ -1147,13 +1147,36 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/translations/approve") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = parseJsonBody(request);
+        const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
+        if (!task) throw new Error("Known translation task is required");
+        const approved = appendTranslationTask(approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt), {
+          filePath: translationLedgerPath || undefined,
+        });
+        recordAudit({
+          action: "translation_approved",
+          actor: approved.reviewer,
+          objectType: approved.object_type,
+          objectId: approved.id,
+          locale: approved.target_locale,
+          metadata: { object_id: approved.object_id, status: approved.status, public_indexable: approved.public_indexable },
+        });
+        return adminJson(201, approved);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
         const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
-        const published = publishApprovedTranslation(activeRegistry, approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt));
+        const published = publishApprovedTranslation(activeRegistry, task);
         const persisted = appendTranslationTask(published, { filePath: translationLedgerPath || undefined });
         recordAudit({
           action: "translation_published",
@@ -1652,6 +1675,9 @@ export function assertHttpSmoke(smoke) {
   }
   if (smoke.translationDraft.status !== 201 || smoke.translationDraft.body.public_indexable !== false) {
     throw new Error("HTTP smoke must store non-indexable Hermes translation draft");
+  }
+  if (smoke.translationApprove.status !== 201 || smoke.translationApprove.body.status !== "approved") {
+    throw new Error("HTTP smoke must require human approval before translation publish");
   }
   if (smoke.translationPublish.status !== 201 || smoke.translationPublish.body.public_indexable !== true) {
     throw new Error("HTTP smoke must publish only human-approved translation");

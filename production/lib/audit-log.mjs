@@ -23,6 +23,7 @@ const ADMIN_ACTIONS = new Set([
   "seo_evidence_imported",
   "tour_approved",
   "translation_drafted",
+  "translation_approved",
   "translation_published",
   "viewing_booked",
 ]);

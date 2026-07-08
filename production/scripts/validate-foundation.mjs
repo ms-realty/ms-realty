@@ -38,6 +38,7 @@ const expectedHttpAuditActions = {
   reply_approved: 2,
   tour_approved: 1,
   translation_drafted: 1,
+  translation_approved: 1,
   translation_published: 1,
   viewing_booked: 1,
 };
@@ -49,6 +50,7 @@ const expectedNodeServerAuditActions = {
   reply_approved: 1,
   tour_approved: 1,
   translation_drafted: 1,
+  translation_approved: 1,
   translation_published: 1,
   viewing_booked: 1,
 };
@@ -533,6 +535,9 @@ if (httpSmoke.localeFallback.status !== 200 || httpSmoke.localeFallback.body.loc
 if (httpSmoke.translationDraft.status !== 201 || httpSmoke.translationDraft.body.public_indexable !== false) {
   throw new Error("HTTP smoke must store non-indexable Hermes translation draft");
 }
+if (httpSmoke.translationApprove.status !== 201 || httpSmoke.translationApprove.body.status !== "approved") {
+  throw new Error("HTTP smoke must require human approval before publishing translation");
+}
 if (httpSmoke.translationPublish.status !== 201 || httpSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("HTTP smoke must publish human-approved translation");
 }
@@ -647,7 +652,7 @@ if (httpSmoke.dealLedger.rows !== 1) throw new Error("HTTP smoke must persist on
 if (httpSmoke.tourApprovalLedger.rows !== 1) throw new Error("HTTP smoke must persist one tour approval row");
 if (!httpSmoke.eventLedger.byType.cta_click) throw new Error("HTTP smoke must persist one CTA analytics event row");
 if (httpSmoke.languageRequestLedger.rows !== 1) throw new Error("HTTP smoke must persist one language request row");
-if (httpSmoke.translationLedger.rows !== 3) throw new Error("HTTP smoke must persist draft, published, and stale translation rows");
+if (httpSmoke.translationLedger.rows !== 4) throw new Error("HTTP smoke must persist draft, approved, published, and stale translation rows");
 if (httpSmoke.listingEditLedger.rows !== 1) throw new Error("HTTP smoke must persist one listing edit row");
 if (httpSmoke.slugHistoryLedger.rows !== 1) throw new Error("HTTP smoke must persist one slug-history row");
 
@@ -757,6 +762,9 @@ if (nodeServerSmoke.languageRequestLedger.rows !== 1) {
 if (nodeServerSmoke.translationDraft.status !== 201 || nodeServerSmoke.translationDraft.body.public_indexable !== false) {
   throw new Error("Node server smoke must store non-indexable Hermes translation draft");
 }
+if (nodeServerSmoke.translationApprove.status !== 201 || nodeServerSmoke.translationApprove.body.status !== "approved") {
+  throw new Error("Node server smoke must require human approval before publishing translation");
+}
 if (nodeServerSmoke.translationPublish.status !== 201 || nodeServerSmoke.translationPublish.body.public_indexable !== true) {
   throw new Error("Node server smoke must publish human-approved translation");
 }
@@ -774,8 +782,8 @@ if (
 ) {
   throw new Error("Node server smoke must mark stale search cards as fallback");
 }
-if (nodeServerSmoke.translationLedger.rows !== 3) {
-  throw new Error("Node server smoke must persist draft, published, and stale translation rows");
+if (nodeServerSmoke.translationLedger.rows !== 4) {
+  throw new Error("Node server smoke must persist draft, approved, published, and stale translation rows");
 }
 if (nodeServerSmoke.listingEditLedger.rows !== 1) {
   throw new Error("Node server smoke must persist one listing edit row");

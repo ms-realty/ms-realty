@@ -144,6 +144,21 @@ function tempRegistry() {
   return file;
 }
 
+function hermesDraftOutput(propertyFacts, targetLocale = "el") {
+  const factText = Object.values(propertyFacts)
+    .filter((value) => ["string", "number"].includes(typeof value))
+    .map(String)
+    .filter(Boolean)
+    .join(" ");
+  return {
+    title: `${propertyFacts.id} ${propertyFacts.location} ${targetLocale}`,
+    body: `${factText} reviewed ${targetLocale} translation draft`,
+    seo_title: `${propertyFacts.id} ${propertyFacts.location}`,
+    meta_description: `${factText} reviewed ${targetLocale} translation draft for approved MS Realty listing content.`,
+    citations: [{ source: "cms", field: "title" }],
+  };
+}
+
 function csvCell(value) {
   const text = String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
@@ -502,6 +517,17 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         description: "Reviewed listing description for Sandanski.",
       },
       propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+      draftOutput: hermesDraftOutput({ id: "MS-CRAWL-0001", location: "Sandanski" }, "el"),
+    },
+  });
+  smoke.translationApprove = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/translations/approve",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      taskId: smoke.translationDraft.body.id,
+      reviewer: "translator_el",
+      approvedAt: "2026-07-04T00:02:00Z",
     },
   });
   smoke.translationPublish = await dispatchHttp(app, {
@@ -509,9 +535,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/translations/publish",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      taskId: smoke.translationDraft.body.id,
-      reviewer: "translator_el",
-      approvedAt: "2026-07-04T00:02:00Z",
+      taskId: smoke.translationApprove.body.id,
     },
   });
   smoke.listingEditorHtml = await dispatchHttp(app, {
@@ -690,6 +714,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     viewing_booked: 1,
     deal_closed: 1,
     translation_drafted: 1,
+    translation_approved: 1,
     translation_published: 1,
     listing_edited: 1,
     locale_created: 1,
@@ -1791,6 +1816,17 @@ test("HTTP admin can publish an approved translation for a newly added public lo
         description: "Reviewed listing description for Sandanski.",
       },
       propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+      draftOutput: hermesDraftOutput({ id: "MS-CRAWL-0001", location: "Sandanski" }, "es"),
+    },
+  });
+  const approve = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/translations/approve",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      taskId: draft.body.id,
+      reviewer: "translator_es",
+      approvedAt: "2026-07-05T00:00:00Z",
     },
   });
   const publish = await dispatchHttp(app, {
@@ -1798,9 +1834,7 @@ test("HTTP admin can publish an approved translation for a newly added public lo
     url: "/api/admin/translations/publish",
     headers: { authorization: "Bearer local-admin-smoke" },
     body: {
-      taskId: draft.body.id,
-      reviewer: "translator_es",
-      approvedAt: "2026-07-05T00:00:00Z",
+      taskId: approve.body.id,
     },
   });
   const page = await dispatchHttp(app, { url: "/es/propiedades/MS-CRAWL-0001" });
@@ -1809,6 +1843,7 @@ test("HTTP admin can publish an approved translation for a newly added public lo
   const card = search.body.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
 
   assert.equal(draft.status, 201);
+  assert.equal(approve.status, 201);
   assert.equal(publish.status, 201);
   assert.equal(page.status, 200);
   assert.equal(page.body.locale, "es");

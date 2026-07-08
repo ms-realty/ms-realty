@@ -231,12 +231,25 @@ export function createTranslationReviewTask(registry, input) {
   };
 }
 
+function assertValidatedHermesDraftOutput(task) {
+  const output = task.hermes?.output;
+  if (
+    !output ||
+    output.status !== "hermes_drafted" ||
+    output.public_indexable !== false ||
+    output.source_snapshot?.source_hash !== task.source_hash
+  ) {
+    throw new Error("Validated Hermes draft output is required before approval");
+  }
+}
+
 export function approveTranslationTask(registry, task, reviewer, approvedAt = "2026-07-04T00:00:00Z") {
   const target = getLocale(registry, task.target_locale);
   if (!reviewer) throw new Error("reviewer is required");
   if (task.status !== "hermes_drafted" && task.status !== "human_edited") {
     throw new Error(`Cannot approve translation in state: ${task.status}`);
   }
+  assertValidatedHermesDraftOutput(task);
 
   return {
     ...task,
@@ -253,6 +266,7 @@ export function publishApprovedTranslation(registry, task) {
   if (task.status !== "approved" || task.human_approved !== true) {
     throw new Error("Only human-approved translations can be published");
   }
+  assertValidatedHermesDraftOutput(task);
   assertHermesActionAllowed("draft_translation");
   return {
     ...task,
@@ -324,6 +338,18 @@ export function buildAdminWorkflowFixture(registry, listing) {
     price_eur: listing.price_eur,
     image_count: listing.image_count,
   };
+  const factText = Object.values(propertyFacts)
+    .filter((value) => ["string", "number"].includes(typeof value))
+    .map(String)
+    .filter(Boolean)
+    .join(" ");
+  const draftOutput = (targetLocale) => ({
+    title: `${listing.id} ${listing.location} ${targetLocale}`,
+    body: `${factText} reviewed ${targetLocale} translation draft`,
+    seo_title: `${listing.id} ${listing.location}`,
+    meta_description: `${factText} reviewed ${targetLocale} translation draft for approved MS Realty listing content.`,
+    citations: [{ source: "cms", field: "title" }],
+  });
 
   const hebrewTask = createTranslationReviewTask(registry, {
     objectType: "listing",
@@ -332,6 +358,7 @@ export function buildAdminWorkflowFixture(registry, listing) {
     targetLocale: "he",
     sourceContent,
     propertyFacts,
+    draftOutput: draftOutput("he"),
   });
   const greekTask = createTranslationReviewTask(registry, {
     objectType: "listing",
@@ -340,6 +367,7 @@ export function buildAdminWorkflowFixture(registry, listing) {
     targetLocale: "el",
     sourceContent,
     propertyFacts,
+    draftOutput: draftOutput("el"),
   });
 
   return {

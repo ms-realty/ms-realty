@@ -15,6 +15,21 @@ import {
 const registry = loadLocaleRegistry();
 const listing = findListingById(loadListings(), "MS-CRAWL-0001");
 
+function hermesDraftOutput(propertyFacts, targetLocale = "he") {
+  const factText = Object.values(propertyFacts)
+    .filter((value) => ["string", "number"].includes(typeof value))
+    .map(String)
+    .filter(Boolean)
+    .join(" ");
+  return {
+    title: `${propertyFacts.id} ${propertyFacts.location} ${targetLocale}`,
+    body: `${factText} reviewed ${targetLocale} translation draft`,
+    seo_title: `${propertyFacts.id} ${propertyFacts.location}`,
+    meta_description: `${factText} reviewed ${targetLocale} translation draft for approved MS Realty listing content.`,
+    citations: [{ source: "cms", field: "title" }],
+  };
+}
+
 test("admin workspace is available in BG, RU, and EN with fallback for website-only languages", () => {
   assert.equal(renderAdminWorkspace({ registry, requestedLocale: "bg" }).locale, "bg");
   assert.equal(renderAdminWorkspace({ registry, requestedLocale: "ru" }).locale, "ru");
@@ -46,22 +61,34 @@ test("admin CRM and CMS surfaces have localized BG, RU, and EN labels", () => {
 });
 
 test("Hermes translation tasks are drafts until human approval and publication", () => {
+  const propertyFacts = { id: listing.id, location: listing.location };
+  const draftOnlyTask = createTranslationReviewTask(registry, {
+    objectType: "listing",
+    objectId: listing.id,
+    sourceLocale: "bg",
+    targetLocale: "he",
+    sourceContent: { title: listing.h1, description: listing.description || listing.h1 },
+    propertyFacts,
+  });
+
+  assert.equal(draftOnlyTask.status, "hermes_drafted");
+  assert.equal(draftOnlyTask.public_indexable, false);
+  assert.equal(draftOnlyTask.hermes.can_publish, false);
+  assert.match(draftOnlyTask.hermes.prompt.rules.join(" "), /Do not describe Sandanski as a sea destination/);
+  assert.match(draftOnlyTask.hermes.prompt.forbiddenClaims.join(" "), /Sandanski/);
+  assert.equal(draftOnlyTask.hermes.prompt.capabilities.requires_human_approval, true);
+  assert.equal(draftOnlyTask.hermes.prompt.seoTargets.meta_description_max_chars, 160);
+  assert.throws(() => approveTranslationTask(registry, draftOnlyTask, "translator_he"), /Validated Hermes draft output/);
+
   const task = createTranslationReviewTask(registry, {
     objectType: "listing",
     objectId: listing.id,
     sourceLocale: "bg",
     targetLocale: "he",
     sourceContent: { title: listing.h1, description: listing.description || listing.h1 },
-    propertyFacts: { id: listing.id, location: listing.location },
+    propertyFacts,
+    draftOutput: hermesDraftOutput(propertyFacts, "he"),
   });
-
-  assert.equal(task.status, "hermes_drafted");
-  assert.equal(task.public_indexable, false);
-  assert.equal(task.hermes.can_publish, false);
-  assert.match(task.hermes.prompt.rules.join(" "), /Do not describe Sandanski as a sea destination/);
-  assert.match(task.hermes.prompt.forbiddenClaims.join(" "), /Sandanski/);
-  assert.equal(task.hermes.prompt.capabilities.requires_human_approval, true);
-  assert.equal(task.hermes.prompt.seoTargets.meta_description_max_chars, 160);
 
   const approved = approveTranslationTask(registry, task, "translator_he");
   assert.equal(approved.status, "approved");

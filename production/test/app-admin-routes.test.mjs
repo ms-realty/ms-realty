@@ -194,6 +194,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
       const listingSlugRoute = await import("../../app/api/admin/listings/slug/route.js");
       const translationDraftRoute = await import("../../app/api/admin/translations/draft/route.js");
+      const translationApproveRoute = await import("../../app/api/admin/translations/approve/route.js");
       const translationPublishRoute = await import("../../app/api/admin/translations/publish/route.js");
       const tourApprovalRoute = await import("../../app/api/admin/tours/approve/route.js");
       const viewingRoute = await import("../../app/api/admin/viewings/route.js");
@@ -822,6 +823,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
               description: "Reviewed source text for a Sandanski property.",
             },
             propertyFacts: { id: "MS-CRAWL-0001", location: "Sandanski", price: "100000 EUR" },
+            draftOutput: {
+              title: "MS-CRAWL-0001 Sandanski 100000 EUR",
+              body: "MS-CRAWL-0001 Sandanski 100000 EUR reviewed Spanish translation draft",
+              seo_title: "MS-CRAWL-0001 Sandanski",
+              meta_description: "MS-CRAWL-0001 Sandanski 100000 EUR reviewed Spanish translation draft for approved content.",
+              citations: [{ source: "cms", field: "title" }],
+            },
           }),
         }),
       );
@@ -831,14 +839,39 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(draftBody.public_indexable, false);
       assert.equal(draftBody.hermes.can_publish, false);
 
-      const published = await translationPublishRoute.POST(
+      const directPublished = await translationPublishRoute.POST(
         new Request("https://example.test/api/admin/translations/publish", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({ taskId: draftBody.id }),
+        }),
+      );
+      const directPublishedBody = await directPublished.json();
+      assert.equal(directPublished.status, 400);
+      assert.match(directPublishedBody.message, /Only human-approved translations/);
+
+      const approved = await translationApproveRoute.POST(
+        new Request("https://example.test/api/admin/translations/approve", {
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
             taskId: draftBody.id,
             reviewer: "translation_editor",
             approvedAt: "2026-07-06T00:00:00Z",
+          }),
+        }),
+      );
+      const approvedBody = await approved.json();
+      assert.equal(approved.status, 201);
+      assert.equal(approvedBody.status, "approved");
+      assert.equal(approvedBody.human_approved, true);
+
+      const published = await translationPublishRoute.POST(
+        new Request("https://example.test/api/admin/translations/publish", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            taskId: approvedBody.id,
           }),
         }),
       );
@@ -1007,6 +1040,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         deployable_redirects_exported: 1,
         listing_quality_imported: 1,
         translation_drafted: 1,
+        translation_approved: 1,
         translation_published: 1,
         reply_approved: 1,
         broker_contact_approved: 1,

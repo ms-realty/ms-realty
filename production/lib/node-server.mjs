@@ -206,6 +206,9 @@ export function assertServerSmoke(smoke) {
   if (smoke.translationDraft.status !== 201 || smoke.translationDraft.body.public_indexable !== false) {
     throw new Error("Server must store non-indexable Hermes translation draft");
   }
+  if (smoke.translationApprove.status !== 201 || smoke.translationApprove.body.status !== "approved") {
+    throw new Error("Server must require human approval before translation publish");
+  }
   if (smoke.translationPublish.status !== 201 || smoke.translationPublish.body.public_indexable !== true) {
     throw new Error("Server must publish only human-approved translation");
   }

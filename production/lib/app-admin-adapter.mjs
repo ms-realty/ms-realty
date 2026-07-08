@@ -670,11 +670,30 @@ function appendTranslationDraft(registry, input, config) {
   return task;
 }
 
+function appendApprovedTranslation(registry, input, config) {
+  const task = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)).find((row) => row.id === input.taskId);
+  if (!task) throw new Error("Known translation task is required");
+  const approved = appendTranslationTask(approveTranslationTask(registry, task, input.reviewer, input.approvedAt || config.reviewedAt), {
+    filePath: config.translationLedgerPath,
+  });
+  recordAudit(
+    {
+      action: "translation_approved",
+      actor: approved.reviewer,
+      objectType: approved.object_type,
+      objectId: approved.id,
+      locale: approved.target_locale,
+      metadata: { object_id: approved.object_id, status: approved.status, public_indexable: approved.public_indexable },
+    },
+    config,
+  );
+  return approved;
+}
+
 function appendPublishedTranslation(registry, input, config) {
   const task = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)).find((row) => row.id === input.taskId);
   if (!task) throw new Error("Known translation task is required");
-  const approved = approveTranslationTask(registry, task, input.reviewer, input.approvedAt || config.reviewedAt);
-  const published = appendTranslationTask(publishApprovedTranslation(registry, approved), { filePath: config.translationLedgerPath });
+  const published = appendTranslationTask(publishApprovedTranslation(registry, task), { filePath: config.translationLedgerPath });
   recordAudit(
     {
       action: "translation_published",
@@ -1089,6 +1108,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
       return jsonResponse(201, appendTranslationDraft(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/translations/approve") {
+      return jsonResponse(201, appendApprovedTranslation(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
       return jsonResponse(201, appendPublishedTranslation(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
