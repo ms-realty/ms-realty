@@ -216,6 +216,14 @@ test("Payload runtime report requires the full launch check set", async () => {
     /unknown check operator_note/,
   );
   assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty" }),
+    /must not persist secrets/,
+  );
+  assert.throws(
+    () => assertPayloadRuntimeReport({ ...report, operator_note: "Bearer test-token" }),
+    /must not persist secrets/,
+  );
+  assert.throws(
     () =>
       assertPayloadRuntimeReport({
         ...report,

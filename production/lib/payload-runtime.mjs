@@ -21,6 +21,7 @@ const REQUIRED_CHECK_IDS = [
 ];
 const REQUIRED_CHECK_ID_SET = new Set(REQUIRED_CHECK_IDS);
 const PAYLOAD_RUNTIME_CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "weak_secret", "fail"]);
+const PAYLOAD_RUNTIME_SECRET_FIELD_NAMES = new Set(["apikey", "authorization", "databaseurl", "password", "payloadsecret", "secret", "token"]);
 
 function check(id, status, evidence = {}) {
   return { id, status, ...evidence };
@@ -43,6 +44,21 @@ function configuredDatabaseUrl(value) {
     return { status: "pass" };
   } catch (error) {
     return { error: error.message, status: "fail" };
+  }
+}
+
+function hasSecretField(value) {
+  if (!value || typeof value !== "object") return false;
+  if (Array.isArray(value)) return value.some(hasSecretField);
+  return Object.entries(value).some(([key, nested]) => {
+    const normalized = key.toLowerCase().replace(/[^a-z0-9]/g, "");
+    return PAYLOAD_RUNTIME_SECRET_FIELD_NAMES.has(normalized) || hasSecretField(nested);
+  });
+}
+
+function assertPayloadRuntimeReportHasNoSecrets(report) {
+  if (hasSecretField(report) || /Bearer\s+|sk-[A-Za-z0-9_-]+|:\/\/[^/@\s]+:[^/@\s]+@/i.test(JSON.stringify(report))) {
+    throw new Error("Payload runtime report must not persist secrets");
   }
 }
 
@@ -170,6 +186,7 @@ export async function buildPayloadRuntimeReport({
 }
 
 export function assertPayloadRuntimeReport(report) {
+  assertPayloadRuntimeReportHasNoSecrets(report);
   if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
     throw new Error("Payload runtime report must include valid generated_at");
   }
