@@ -5,6 +5,7 @@
   "ready": false,
   "agent_runtime": {
     "product": "Nous Hermes Agent",
+    "license": "MIT",
     "official_url": "https://hermes-agent.nousresearch.com/",
     "install_command": "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
     "setup_commands": [
@@ -22,6 +23,15 @@
       "scheduled_automations",
       "isolated_subagents",
       "sandboxed_backends"
+    ],
+    "messaging_platforms": [
+      "Telegram",
+      "Discord",
+      "Slack",
+      "WhatsApp",
+      "Signal",
+      "Email",
+      "CLI"
     ],
     "tool_gateway": {
       "required_tools": [

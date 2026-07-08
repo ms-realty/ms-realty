@@ -37,6 +37,15 @@ export const HERMES_AGENT_TERMINAL_BACKENDS = Object.freeze([
   "singularity",
   "modal",
 ]);
+export const HERMES_AGENT_MESSAGING_PLATFORMS = Object.freeze([
+  "Telegram",
+  "Discord",
+  "Slack",
+  "WhatsApp",
+  "Signal",
+  "Email",
+  "CLI",
+]);
 const PROJECT_CONTEXT_FILE = "AGENTS.md";
 const REQUIRED_PROJECT_CONTEXT_MARKERS = Object.freeze([
   "Do not call the system production-ready while any launch gate is blocked.",
@@ -169,11 +178,13 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
     ready: missing.length === 0,
     agent_runtime: {
       product: "Nous Hermes Agent",
+      license: "MIT",
       official_url: HERMES_AGENT_OFFICIAL_URL,
       install_command: HERMES_AGENT_INSTALL_COMMAND,
       setup_commands: ["hermes setup --portal", "hermes model"],
       gateway_setup_command: "hermes gateway setup",
       required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
+      messaging_platforms: HERMES_AGENT_MESSAGING_PLATFORMS,
       tool_gateway: {
         required_tools: HERMES_AGENT_TOOL_GATEWAY_TOOLS,
       },
@@ -241,6 +252,7 @@ export function assertHermesProviderProvisioningReport(report) {
   const noMissingInputs = (report.missing || []).length === 0;
   if (report.ready !== noMissingInputs) throw new Error("Hermes provisioning ready flag must match missing inputs");
   if (report.agent_runtime?.product !== "Nous Hermes Agent") throw new Error("Hermes provisioning must target Nous Hermes Agent");
+  if (report.agent_runtime?.license !== "MIT") throw new Error("Hermes provisioning must record the Hermes Agent MIT license");
   if (report.agent_runtime?.official_url !== HERMES_AGENT_OFFICIAL_URL) {
     throw new Error("Hermes provisioning must link the official Hermes Agent runtime");
   }
@@ -259,6 +271,11 @@ export function assertHermesProviderProvisioningReport(report) {
   for (const capability of HERMES_AGENT_REQUIRED_CAPABILITIES) {
     if (!report.agent_runtime?.required_capabilities?.includes(capability)) {
       throw new Error("Hermes provisioning must include official Hermes Agent capabilities");
+    }
+  }
+  for (const platform of HERMES_AGENT_MESSAGING_PLATFORMS) {
+    if (!report.agent_runtime?.messaging_platforms?.includes(platform)) {
+      throw new Error("Hermes provisioning must include official Hermes Agent messaging platforms");
     }
   }
   for (const tool of HERMES_AGENT_TOOL_GATEWAY_TOOLS) {

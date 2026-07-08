@@ -5,6 +5,7 @@ import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
 import {
   HERMES_AGENT_TERMINAL_BACKENDS,
+  HERMES_AGENT_MESSAGING_PLATFORMS,
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_OFFICIAL_URL,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
@@ -119,9 +120,11 @@ function providerMetadataFromEnv(env = process.env) {
 function agentRuntimeMetadata() {
   return {
     product: "Nous Hermes Agent",
+    license: "MIT",
     official_url: HERMES_AGENT_OFFICIAL_URL,
     project_context_file: "AGENTS.md",
     required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
+    messaging_platforms: HERMES_AGENT_MESSAGING_PLATFORMS,
     tool_gateway: {
       required_tools: HERMES_AGENT_TOOL_GATEWAY_TOOLS,
     },
@@ -223,6 +226,7 @@ export function assertHermesDraftWorkerReport(report) {
     throw new Error("Hermes worker report must include valid generated_at");
   }
   if (report.agent_runtime?.product !== "Nous Hermes Agent") throw new Error("Hermes worker report must target Nous Hermes Agent");
+  if (report.agent_runtime?.license !== "MIT") throw new Error("Hermes worker report must record the Hermes Agent MIT license");
   if (report.agent_runtime?.official_url !== HERMES_AGENT_OFFICIAL_URL) {
     throw new Error("Hermes worker report must link the official Hermes Agent runtime");
   }
@@ -232,6 +236,11 @@ export function assertHermesDraftWorkerReport(report) {
   for (const capability of HERMES_AGENT_REQUIRED_CAPABILITIES) {
     if (!report.agent_runtime?.required_capabilities?.includes(capability)) {
       throw new Error("Hermes worker report must include official Hermes Agent capabilities");
+    }
+  }
+  for (const platform of HERMES_AGENT_MESSAGING_PLATFORMS) {
+    if (!report.agent_runtime?.messaging_platforms?.includes(platform)) {
+      throw new Error("Hermes worker report must include official Hermes Agent messaging platforms");
     }
   }
   for (const tool of HERMES_AGENT_TOOL_GATEWAY_TOOLS) {

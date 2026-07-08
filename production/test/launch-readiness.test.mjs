@@ -17,6 +17,7 @@ import {
 } from "../lib/launch-readiness.mjs";
 import { renderLaunchInputChecklist } from "../lib/launch-inputs.mjs";
 import {
+  HERMES_AGENT_MESSAGING_PLATFORMS,
   HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
@@ -337,9 +338,11 @@ function writeLiveReportFixtures(dir) {
       generated_at: "2026-07-06T00:00:00Z",
       agent_runtime: {
         product: "Nous Hermes Agent",
+        license: "MIT",
         official_url: "https://hermes-agent.nousresearch.com/",
         project_context_file: "AGENTS.md",
         required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
+        messaging_platforms: HERMES_AGENT_MESSAGING_PLATFORMS,
         tool_gateway: {
           required_tools: HERMES_AGENT_TOOL_GATEWAY_TOOLS,
         },

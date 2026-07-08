@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import {
+  HERMES_AGENT_MESSAGING_PLATFORMS,
   HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
@@ -21,12 +22,16 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.status, "blocked");
   assert.deepEqual(report.missing, ["HERMES_CHAT_COMPLETIONS_URL"]);
   assert.equal(report.agent_runtime.product, "Nous Hermes Agent");
+  assert.equal(report.agent_runtime.license, "MIT");
   assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
   assert.match(report.agent_runtime.install_command, /hermes-agent\.nousresearch\.com\/install\.sh/);
   assert.ok(report.agent_runtime.setup_commands.includes("hermes setup --portal"));
   assert.ok(report.agent_runtime.setup_commands.includes("hermes model"));
   assert.equal(report.agent_runtime.gateway_setup_command, "hermes gateway setup");
   assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
+  assert.deepEqual(report.agent_runtime.messaging_platforms, HERMES_AGENT_MESSAGING_PLATFORMS);
+  assert.ok(report.agent_runtime.messaging_platforms.includes("WhatsApp"));
+  assert.ok(report.agent_runtime.messaging_platforms.includes("CLI"));
   assert.deepEqual(report.agent_runtime.tool_gateway.required_tools, HERMES_AGENT_TOOL_GATEWAY_TOOLS);
   assert.deepEqual(report.agent_runtime.terminal_backends, HERMES_AGENT_TERMINAL_BACKENDS);
   assert.deepEqual(report.agent_runtime.terminal_backends, ["local", "docker", "ssh", "singularity", "modal"]);
@@ -176,12 +181,24 @@ test("Hermes provisioning report rejects generic agent runtime evidence", () => 
     /Nous Hermes Agent/,
   );
   assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, agent_runtime: { ...report.agent_runtime, license: "Proprietary" } }),
+    /MIT license/,
+  );
+  assert.throws(
     () =>
       assertHermesProviderProvisioningReport({
         ...report,
         agent_runtime: { ...report.agent_runtime, required_capabilities: report.agent_runtime.required_capabilities.slice(1) },
       }),
     /official Hermes Agent capabilities/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, messaging_platforms: report.agent_runtime.messaging_platforms.slice(0, -1) },
+      }),
+    /messaging platforms/,
   );
   assert.throws(
     () =>

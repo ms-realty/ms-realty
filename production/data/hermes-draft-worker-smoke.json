@@ -2,6 +2,7 @@
   "generated_at": "2026-07-06T00:00:00Z",
   "agent_runtime": {
     "product": "Nous Hermes Agent",
+    "license": "MIT",
     "official_url": "https://hermes-agent.nousresearch.com/",
     "project_context_file": "AGENTS.md",
     "required_capabilities": [
@@ -14,6 +15,15 @@
       "scheduled_automations",
       "isolated_subagents",
       "sandboxed_backends"
+    ],
+    "messaging_platforms": [
+      "Telegram",
+      "Discord",
+      "Slack",
+      "WhatsApp",
+      "Signal",
+      "Email",
+      "CLI"
     ],
     "tool_gateway": {
       "required_tools": [

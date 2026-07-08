@@ -11,6 +11,7 @@ import {
   taskFromHermesDraft,
 } from "../lib/hermes-draft-worker.mjs";
 import {
+  HERMES_AGENT_MESSAGING_PLATFORMS,
   HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
@@ -130,9 +131,12 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
 
   assert.equal(assertHermesDraftWorkerReport(report), true);
   assert.equal(report.agent_runtime.product, "Nous Hermes Agent");
+  assert.equal(report.agent_runtime.license, "MIT");
   assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
   assert.equal(report.agent_runtime.project_context_file, "AGENTS.md");
   assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
+  assert.deepEqual(report.agent_runtime.messaging_platforms, HERMES_AGENT_MESSAGING_PLATFORMS);
+  assert.ok(report.agent_runtime.messaging_platforms.includes("WhatsApp"));
   assert.deepEqual(report.agent_runtime.tool_gateway.required_tools, HERMES_AGENT_TOOL_GATEWAY_TOOLS);
   assert.deepEqual(report.agent_runtime.terminal_backends, HERMES_AGENT_TERMINAL_BACKENDS);
   assert.deepEqual(report.agent_runtime.terminal_backends, ["local", "docker", "ssh", "singularity", "modal"]);
@@ -159,9 +163,11 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
 test("Hermes draft worker report rejects no-op launch evidence", () => {
   const agentRuntime = {
     product: "Nous Hermes Agent",
+    license: "MIT",
     official_url: "https://hermes-agent.nousresearch.com/",
     project_context_file: "AGENTS.md",
     required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
+    messaging_platforms: HERMES_AGENT_MESSAGING_PLATFORMS,
     tool_gateway: {
       required_tools: HERMES_AGENT_TOOL_GATEWAY_TOOLS,
     },
@@ -204,9 +210,11 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     generated_at: "2026-07-06T00:00:00Z",
     agent_runtime: {
       product: "Nous Hermes Agent",
+      license: "MIT",
       official_url: "https://hermes-agent.nousresearch.com/",
       project_context_file: "AGENTS.md",
       required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
+      messaging_platforms: HERMES_AGENT_MESSAGING_PLATFORMS,
       tool_gateway: {
         required_tools: HERMES_AGENT_TOOL_GATEWAY_TOOLS,
       },
@@ -232,6 +240,10 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
     /Nous Hermes Agent/,
   );
   assert.throws(
+    () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, license: "Proprietary" } }),
+    /MIT license/,
+  );
+  assert.throws(
     () => assertHermesDraftWorkerReport({ ...report, agent_runtime: { ...report.agent_runtime, project_context_file: "" } }),
     /AGENTS\.md/,
   );
@@ -250,6 +262,14 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
         agent_runtime: { ...report.agent_runtime, tool_gateway: { required_tools: ["web_search"] } },
       }),
     /tool gateway/,
+  );
+  assert.throws(
+    () =>
+      assertHermesDraftWorkerReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, messaging_platforms: report.agent_runtime.messaging_platforms.slice(0, -1) },
+      }),
+    /messaging platforms/,
   );
   assert.throws(
     () =>
