@@ -150,7 +150,23 @@ function csvCell(value) {
 }
 
 function completeListingQualityReviewCsv(workbookCsv) {
-  const headers = ["listing_id", "price_eur", "bedrooms", "location", "description", "facts_reviewer", "media_reviewer", "review_notes"];
+  const headers = [
+    "listing_id",
+    "price_eur",
+    "bedrooms",
+    "location",
+    "description",
+    "facts_reviewer",
+    "media_reviewer",
+    "review_notes",
+    "editor_path",
+    "review_status",
+    "issues",
+    "required_editor_fields",
+    "public_gallery_assets",
+    "public_gallery_sample",
+    "missing_alt_text_assets",
+  ];
   const rows = parseCsv(workbookCsv).map((row) => {
     const fields = (row.required_editor_fields || "").split("|").filter(Boolean);
     const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
@@ -164,6 +180,13 @@ function completeListingQualityReviewCsv(workbookCsv) {
       needsFacts ? "editor_bg" : "",
       needsMedia ? "media_editor" : "",
       "Reviewed source gallery evidence from admin listing-quality workbook",
+      row.editor_path,
+      row.review_status,
+      row.issues,
+      row.required_editor_fields,
+      row.public_gallery_assets,
+      row.public_gallery_sample,
+      row.missing_alt_text_assets,
     ]
       .map(csvCell)
       .join(",");

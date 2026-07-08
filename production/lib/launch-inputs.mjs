@@ -278,6 +278,7 @@ ${listingPendingReviewLines(listingReviewEvidence)}
 - Build path overrides: \`MS_REALTY_LISTING_EDIT_LEDGER_PATH\`, \`MS_REALTY_TOUR_APPROVAL_LEDGER_PATH\`, \`MS_REALTY_LISTING_QUALITY_REPORT_PATH\`, \`MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH\`
 - Preflight report override: \`MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH\`
 - Review columns: \`review_status\`, \`required_editor_fields\`, \`price_eur\`, \`bedrooms\`, \`location\`, \`description\`, \`facts_reviewer\`, \`media_reviewer\`, \`review_notes\`
+- Launch review CSVs must retain draft snapshot columns: \`editor_path\`, \`review_status\`, \`issues\`, \`required_editor_fields\`, \`public_gallery_assets\`, \`public_gallery_sample\`, \`missing_alt_text_assets\`.
 - Admin review packet endpoint: \`GET /api/admin/listing-quality-review-packet\`
 - Admin draft endpoint: \`GET /api/admin/listing-quality-review-draft\`
 - Admin status endpoint: \`GET /api/admin/listing-quality\`

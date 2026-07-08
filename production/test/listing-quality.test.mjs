@@ -34,9 +34,31 @@ function needsMediaReview(row) {
   );
 }
 
+function reviewCsvCell(value) {
+  const text = Array.isArray(value) ? value.join("|") : String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
+}
+
 function completeListingQualityReviewCsv(report) {
+  const headers = [
+    "listing_id",
+    "price_eur",
+    "bedrooms",
+    "location",
+    "description",
+    "facts_reviewer",
+    "media_reviewer",
+    "review_notes",
+    "editor_path",
+    "review_status",
+    "issues",
+    "required_editor_fields",
+    "public_gallery_assets",
+    "public_gallery_sample",
+    "missing_alt_text_assets",
+  ];
   return [
-    "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+    headers.join(","),
     ...report.rows.map((row) =>
       [
         row.listing_id,
@@ -47,7 +69,14 @@ function completeListingQualityReviewCsv(report) {
         needsFactReview(row) ? "editor_bg" : "",
         needsMediaReview(row) ? "media_editor" : "",
         "Reviewed from source evidence",
-      ].join(","),
+        row.editor_path,
+        row.review_status,
+        row.issues,
+        row.required_editor_fields,
+        row.public_gallery_assets,
+        row.public_gallery_sample,
+        row.missing_alt_text_assets,
+      ].map(reviewCsvCell).join(","),
     ),
     "",
   ].join("\n");
@@ -311,6 +340,26 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   const completeImportSummary = listingQualityImportSummary(report, completeResult, { reviewPath: "/tmp/listing-quality.csv" });
   assert.equal(completeImportSummary.ready, true);
   assert.ok(completeImportSummary.nextActions.some((action) => action.includes("listing:preflight")));
+  const completeWithoutSnapshots = [
+    "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+    ...parseCsv(completeListingQualityReviewCsv(report)).map((review) =>
+      [
+        review.listing_id,
+        review.price_eur,
+        review.bedrooms,
+        review.location,
+        review.description,
+        review.facts_reviewer,
+        review.media_reviewer,
+        review.review_notes,
+      ].map(reviewCsvCell).join(","),
+    ),
+    "",
+  ].join("\n");
+  assert.throws(
+    () => validateListingQualityReviewCsv(report, completeWithoutSnapshots, { requireComplete: true }),
+    /complete review requires editor_path/,
+  );
   const reviewValues = { price_eur: "123000", bedrooms: "2", description: "Reviewed listing description" };
   const expectedPatch = Object.fromEntries(
     Object.entries(reviewValues).filter(([field]) => row.required_editor_fields.includes(field)),
@@ -321,7 +370,10 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
     () => validateListingQualityReviewCsv(report, `listing_id,price_eur,bedrooms\n${row.listing_id},,2\n`),
     /facts_reviewer|price_eur/,
   );
-  assert.throws(() => validateListingQualityReviewCsv(report, csv, { requireComplete: true }), /incomplete/);
+  assert.throws(
+    () => validateListingQualityReviewCsv(report, completeListingQualityReviewCsv({ ...report, rows: [row] }), { requireComplete: true }),
+    /incomplete/,
+  );
   assert.throws(() => validateListingQualityReviewCsv(report, `${csv}\n${csv.split("\n")[1]}\n`), /Duplicate/);
   const mediaReviewRow = report.rows.find((candidate) => candidate.review_status.includes("media"));
   assert.throws(

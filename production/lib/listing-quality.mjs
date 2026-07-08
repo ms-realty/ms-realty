@@ -28,6 +28,15 @@ const MEDIA_FIELDS_BY_ISSUE = {
 const KNOWN_ISSUES = [...Object.keys(FACT_FIELDS_BY_ISSUE), ...Object.keys(MEDIA_FIELDS_BY_ISSUE)];
 const LISTING_QUALITY_REVIEW_STATUSES = new Set(["missing_review", "invalid_review", "pass"]);
 const LEGACY_SOURCE_DOMAINS = new Set(["makler-realty.com", "makler-realty.ru"]);
+const REQUIRED_REVIEW_SNAPSHOT_FIELDS = [
+  "editor_path",
+  "review_status",
+  "issues",
+  "required_editor_fields",
+  "public_gallery_assets",
+  "public_gallery_sample",
+  "missing_alt_text_assets",
+];
 
 function filled(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
@@ -450,12 +459,30 @@ export function validateListingQualityReviewCsv(report, csvText, { allowExtraRow
     if (!quality) throw new Error(`Listing quality review requires a known listing_id: ${listingId || ""}`);
     if (seen.has(listingId)) throw new Error(`Duplicate listing quality review row: ${listingId}`);
     seen.add(listingId);
+    if (requireComplete) {
+      const expectedSnapshots = {
+        editor_path: quality.editor_path,
+        review_status: quality.review_status,
+        issues: quality.issues,
+        required_editor_fields: quality.required_editor_fields,
+        public_gallery_assets: quality.public_gallery_assets,
+        public_gallery_sample: quality.public_gallery_sample,
+        missing_alt_text_assets: quality.missing_alt_text_assets,
+      };
+      for (const field of REQUIRED_REVIEW_SNAPSHOT_FIELDS) {
+        if (!Object.hasOwn(row, field)) throw new Error(`Listing ${listingId} complete review requires ${field}`);
+        const expected = expectedSnapshots[field];
+        const expectedValue = Array.isArray(expected) ? expected.length > 0 : expected !== null && expected !== undefined;
+        if (expectedValue && !filled(row[field])) throw new Error(`Listing ${listingId} complete review requires ${field}`);
+      }
+    }
     assertOptionalSnapshotValue(listingId, "review_status", row.review_status, quality.review_status);
     assertOptionalSnapshotValue(listingId, "editor_path", row.editor_path, quality.editor_path);
     assertOptionalSnapshotValue(listingId, "public_gallery_assets", row.public_gallery_assets, quality.public_gallery_assets);
     assertOptionalSnapshotValue(listingId, "missing_alt_text_assets", row.missing_alt_text_assets, quality.missing_alt_text_assets);
     assertOptionalSnapshotList(listingId, "issues", row.issues, quality.issues);
     assertOptionalSnapshotList(listingId, "required_editor_fields", row.required_editor_fields, quality.required_editor_fields);
+    assertOptionalSnapshotList(listingId, "public_gallery_sample", row.public_gallery_sample, quality.public_gallery_sample);
 
     const factIssues = quality.issues.filter((issue) => FACT_FIELDS_BY_ISSUE[issue]);
     const mediaIssues = quality.issues.filter((issue) => MEDIA_FIELDS_BY_ISSUE[issue]);

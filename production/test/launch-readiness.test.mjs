@@ -1780,6 +1780,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH/);
   assert.match(markdown, /review_status/);
   assert.match(markdown, /required_editor_fields/);
+  assert.match(markdown, /Launch review CSVs must retain draft snapshot columns/);
+  assert.match(markdown, /public_gallery_sample/);
   assert.match(markdown, /POST \/api\/admin\/listings\/edit/);
   assert.match(markdown, /one valid row for every workbook row/);
   assert.match(markdown, /Broker Verification/);
