@@ -988,6 +988,14 @@ test("live service preflight report rejects hand-edited status counts", () => {
     () =>
       assertLiveServicePreflightReport({
         ...report,
+        reports: report.reports.map((item, index) => (index === 0 ? { ...item, api_key: "test-secret-key" } : item)),
+      }),
+    /must not persist secrets/,
+  );
+  assert.throws(
+    () =>
+      assertLiveServicePreflightReport({
+        ...report,
         summary: {
           ...report.summary,
           configured_paths: {
@@ -1138,6 +1146,15 @@ test("live service report import writes only validated source reports", () => {
   assert.throws(
     () => writeLiveServiceReport("typesense_meilisearch_query", { ...queryReport, generated_at: "" }, { queryReportPath: outPath }),
     /valid generated_at/,
+  );
+  assert.throws(
+    () =>
+      writeLiveServiceReport(
+        "typesense_meilisearch_query",
+        { ...queryReport, api_key: "test-secret-key" },
+        { queryReportPath: outPath },
+      ),
+    /must not persist secrets/,
   );
   assert.throws(
     () =>

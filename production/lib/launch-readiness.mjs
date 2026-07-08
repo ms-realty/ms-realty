@@ -79,6 +79,12 @@ function assertLaunchServiceUrl(value, label) {
   }
 }
 
+function assertLiveServiceReportHasNoSecrets(report) {
+  if (/Bearer\s+|api[_-]?key|x-typesense-api-key|:\/\/[^/@\s]+:[^/@\s]+@/i.test(JSON.stringify(report))) {
+    throw new Error("Live service reports must not persist secrets");
+  }
+}
+
 function assertLaunchLiveServiceEvidence(source, report) {
   if (source === "typesense_meilisearch_sync") {
     for (const engine of report.engines || []) {
@@ -426,6 +432,7 @@ function reportStatus(source, filePath, assertReport) {
   try {
     const report = readJson(filePath);
     assertReport(report);
+    assertLiveServiceReportHasNoSecrets(report);
     if (report.example === true || filePath.endsWith(".example")) {
       return { source, status: "example_report", path: filePath, summary: report.summary };
     }
@@ -524,6 +531,7 @@ export function assertLiveServicePreflightReport(report) {
     throw new Error("Live service preflight summary must count reports");
   }
   for (const item of report.reports) {
+    assertLiveServiceReportHasNoSecrets(item);
     if (!LIVE_SERVICE_REPORT_STATUSES.has(item.status)) {
       throw new Error("Live service preflight report statuses must be known");
     }
@@ -575,6 +583,7 @@ export function writeLiveServiceReport(source, report, options = {}) {
   if (!writer) throw new Error(`Unknown live service report source: ${source}`);
   if (report.example === true) throw new Error("Example live service reports cannot be imported as launch evidence");
   assertLiveServiceReportTimestamp(report);
+  assertLiveServiceReportHasNoSecrets(report);
   assertLaunchLiveServiceEvidence(source, report);
   const outPath = writer.write(report, options[writer.pathKey]);
   return { source, outPath, summary: report.summary };
