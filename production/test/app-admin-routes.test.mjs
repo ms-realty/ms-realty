@@ -584,7 +584,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         }),
       );
       const seoImportBody = await seoImport.json();
-      assert.equal(seoImport.status, 201);
+      assert.equal(seoImport.status, 202);
       assert.equal(seoImportBody.imported.row_count, 2);
       assert.equal(seoImportBody.crawlCoverage.urls, 457);
       assert.deepEqual(seoImportBody.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);

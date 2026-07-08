@@ -110,7 +110,7 @@ test("production server entrypoint serves runtime routes with env config", async
         csv: `url,clicks,impressions,position\n${listing.old_url},1,10,4\n`,
       }),
     });
-    assert.equal(seoImport.status, 201);
+    assert.equal(seoImport.status, 202);
     assert.equal(fs.existsSync(`${seoEvidenceInputDir}/search-console.csv`), true);
     assert.equal(fs.existsSync(seoEvidenceOutputPath), true);
 

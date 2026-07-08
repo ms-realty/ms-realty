@@ -824,7 +824,7 @@ export function createHttpApp({
             missing_required_sources: result.missingRequiredSources,
           },
         });
-        return adminJson(201, result);
+        return adminJson(result.missingRequiredSources.length ? 202 : 201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

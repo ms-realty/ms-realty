@@ -1492,7 +1492,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(badTemplate.status, 400);
   assert.equal(invalidSearchConsole.status, 400);
   assert.equal(invalidSearchConsolePersisted, false);
-  assert.equal(searchConsole.status, 201);
+  assert.equal(searchConsole.status, 202);
   assert.equal(searchConsole.body.crawlCoverage.urls, 457);
   assert.deepEqual(searchConsole.body.crawlCoverage.urlTypes, { page: 104, post: 42, taxonomy: 146, listing: 165 });
   assert.equal(searchConsole.body.crawlCoverage.urlsWithAnyEvidence, 3);
@@ -1502,7 +1502,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "makler-realty.com",
     "makler-realty.ru",
   ]);
-  assert.equal(yandex.status, 201);
+  assert.equal(yandex.status, 202);
   assert.deepEqual(yandex.body.missingRequiredSources, ["backlinks"]);
   assert.equal(backlinks.status, 201);
   assert.deepEqual(backlinks.body.missingRequiredSources, []);
