@@ -373,6 +373,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
   assert.equal(written.includes("meili-test-secret"), false);
   assert.equal(assertLiveServiceProvisioningReport(JSON.parse(written)), true);
   assert.equal(liveServiceProvisioningState(outPath).status, "pass");
+  assert.ok(liveServiceProvisioningState(outPath).next_actions.some((action) => action.includes("live:provisioning:preflight")));
   assert.ok(liveServiceProvisioningState(outPath).next_actions.some((action) => action.includes("live:capture")));
   const missingState = liveServiceProvisioningState(`${dir}/missing.json`);
   assert.equal(missingState.status, "missing_report");

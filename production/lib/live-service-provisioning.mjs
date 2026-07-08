@@ -182,7 +182,7 @@ export async function buildLiveServiceProvisioningReport({
       next_actions: hermes.next_actions,
     },
     next_actions: ready
-      ? ["Run npm run live:capture, then npm run live:preflight."]
+      ? ["Run npm run live:provisioning:preflight, then npm run live:capture and npm run live:preflight."]
       : [
           "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",
           "Run npm run live:provisioning until all service checks pass.",
