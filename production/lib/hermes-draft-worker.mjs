@@ -56,6 +56,7 @@ export function openAiCompatibleHermesProvider({
 } = {}) {
   if (!endpoint) throw new Error("HERMES_CHAT_COMPLETIONS_URL is required");
   assertHermesChatCompletionsEndpoint(endpoint);
+  if (!apiKey) throw new Error("HERMES_API_KEY is required");
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Hermes provider");
 
   return async function callHermes(row) {

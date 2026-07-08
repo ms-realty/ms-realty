@@ -361,6 +361,18 @@ test("OpenAI-compatible Hermes provider rejects non chat-completions endpoints",
   );
 });
 
+test("OpenAI-compatible Hermes provider requires an API key", () => {
+  assert.throws(
+    () =>
+      openAiCompatibleHermesProvider({
+        endpoint: "https://hermes.local/v1/chat/completions",
+        apiKey: "",
+        fetchImpl: async () => ({ ok: true }),
+      }),
+    /HERMES_API_KEY is required/,
+  );
+});
+
 test("live Hermes draft worker CLI fails closed when provider env is missing", () => {
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "run-hermes-draft-worker.mjs")], {
     cwd: fromRoot(),
