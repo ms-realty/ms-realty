@@ -51,6 +51,15 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.vllm.tool_call_parser, "hermes");
   assert.equal(report.vllm.enable_auto_tool_choice, true);
   assert.deepEqual(report.vllm.launch_command.slice(-3), ["--enable-auto-tool-choice", "--tool-call-parser", "hermes"]);
+  assert.ok(report.next_actions.some((action) => action.includes("hermes:provisioning") && action.includes("hermes:worker")));
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, next_actions: [] }),
+    /next actions/,
+  );
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...report, next_actions: ["Install Hermes Agent."] }),
+    /hermes:provisioning before hermes:worker/,
+  );
 
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-provisioning-blocked-`);
   const cli = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-hermes-provider-provisioning-report.mjs")], {
@@ -85,6 +94,15 @@ test("Hermes provisioning report redacts self-hosted credentials and keeps sensi
   assert.equal(report.provider.endpoint, "http://127.0.0.1:8000/v1/chat/completions");
   assert.equal(report.provider.api_key_configured, true);
   assert.equal(report.provider.sensitive_data_allowed, true);
+  assert.ok(report.next_actions.some((action) => action.includes("hermes:worker") && action.includes("import")));
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        next_actions: ["Run npm run hermes:worker against this endpoint."],
+      }),
+    /hermes:worker and live report import/,
+  );
   assert.equal(JSON.stringify(report).includes("test-secret-key"), false);
   assert.equal(JSON.stringify(report).includes("user:pass"), false);
 });

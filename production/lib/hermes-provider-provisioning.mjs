@@ -255,6 +255,21 @@ export function assertHermesProviderProvisioningReport(report) {
   if (report.status !== (report.ready ? "configured" : "blocked")) throw new Error("Hermes provisioning status must match ready flag");
   const noMissingInputs = (report.missing || []).length === 0;
   if (report.ready !== noMissingInputs) throw new Error("Hermes provisioning ready flag must match missing inputs");
+  if (!Array.isArray(report.next_actions) || report.next_actions.length === 0) {
+    throw new Error("Hermes provisioning report must include next actions");
+  }
+  if (
+    !report.ready &&
+    !report.next_actions.some((action) => action.includes("hermes:provisioning") && action.includes("hermes:worker"))
+  ) {
+    throw new Error("Blocked Hermes provisioning report must point to hermes:provisioning before hermes:worker");
+  }
+  if (
+    report.ready &&
+    !report.next_actions.some((action) => action.includes("hermes:worker") && action.includes("import"))
+  ) {
+    throw new Error("Ready Hermes provisioning report must point to hermes:worker and live report import");
+  }
   if (report.agent_runtime?.product !== "Nous Hermes Agent") throw new Error("Hermes provisioning must target Nous Hermes Agent");
   if (report.agent_runtime?.license !== "MIT") throw new Error("Hermes provisioning must record the Hermes Agent MIT license");
   if (report.agent_runtime?.official_url !== HERMES_AGENT_OFFICIAL_URL) {
