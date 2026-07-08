@@ -1364,6 +1364,16 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     url: "/api/admin/seo-evidence/template?source=unknown",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const invalidSearchConsole = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/seo-evidence/import",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      source: "search_console",
+      csv: `url,clicks,impressions,position\n${com.old_url},-3,30,7\n`,
+    },
+  });
+  const invalidSearchConsolePersisted = fs.existsSync(`${seoEvidenceInputDir}/search-console.csv`);
   const searchConsole = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/seo-evidence/import",
@@ -1470,6 +1480,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(template.headers["content-type"], "text/csv; charset=utf-8");
   assert.match(template.body, /url,clicks,impressions,position/);
   assert.equal(badTemplate.status, 400);
+  assert.equal(invalidSearchConsole.status, 400);
+  assert.equal(invalidSearchConsolePersisted, false);
   assert.equal(searchConsole.status, 201);
   assert.equal(searchConsole.body.crawlCoverage.urls, 457);
   assert.deepEqual(searchConsole.body.crawlCoverage.urlTypes, { page: 104, post: 42, taxonomy: 146, listing: 165 });

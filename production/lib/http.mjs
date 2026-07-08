@@ -53,10 +53,8 @@ import {
   buildSeoEvidence,
   buildSeoEvidencePreflightReport,
   readSeoExportTemplate,
-  writeExternalSeoExport,
-  writeSeoEvidence,
 } from "./seo-evidence.mjs";
-import { seoEvidencePayload } from "./app-seo-evidence.mjs";
+import { importAppSeoEvidenceRows, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
@@ -811,23 +809,22 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = seoExportInput(request, url);
-        const imported = writeExternalSeoExport(input.source, input.csv, { inputDir: seoEvidenceInputDir || undefined });
-        const evidence = currentSeoEvidence();
-        writeSeoEvidence(evidence, seoEvidenceOutputPath || undefined);
+        const result = importAppSeoEvidenceRows(input, {
+          seoEvidenceInputDir: seoEvidenceInputDir || undefined,
+          seoEvidenceOutputPath: seoEvidenceOutputPath || undefined,
+          reviewedAt: reviewedAt || new Date().toISOString(),
+        });
         recordAudit({
           action: "seo_evidence_imported",
           actor: "seo_editor",
           objectType: "seo_evidence",
           objectId: input.source,
           metadata: {
-            row_count: imported.row_count,
-            missing_required_sources: evidence.summary.missing_required_sources,
+            row_count: result.imported.row_count,
+            missing_required_sources: result.missingRequiredSources,
           },
         });
-        return adminJson(201, {
-          imported,
-          ...seoEvidencePayload(evidence),
-        });
+        return adminJson(201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
