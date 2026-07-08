@@ -1736,6 +1736,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /MS_REALTY_HERMES_WORKER_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH/);
   assert.match(markdown, /MS_REALTY_HERMES_AUDIT_PATH/);
+  assert.match(markdown, /MS_REALTY_AUDIT_LOG_PATH/);
   assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /Payload Runtime/);
