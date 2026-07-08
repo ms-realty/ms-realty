@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
-import { assertSeoEvidence } from "./seo-evidence-contract.mjs";
+import { REQUIRED_SOURCE_DOMAINS, assertSeoEvidence, missingRequiredSources } from "./seo-evidence-contract.mjs";
 import { fromRoot } from "./paths.mjs";
 
 const SEO_EXPORTS = {
@@ -10,9 +10,6 @@ const SEO_EXPORTS = {
   backlinks: "backlinks.csv",
   analytics_export: "analytics.csv",
 };
-
-const REQUIRED_EXPORTS = ["search_console", "yandex_webmaster", "backlinks"];
-const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"];
 
 function seoEvidencePath(config) {
   return config.seoEvidenceOutputPath || fromRoot("production", "data", "seo-evidence.json");
@@ -234,19 +231,7 @@ function joinSource(source, rows, evidence) {
 }
 
 function updateMissingRequiredSources(evidence) {
-  const sources = evidence.summary.sources || {};
-  const missing = REQUIRED_EXPORTS.filter((source) => {
-    const summary = sources[source];
-    return (
-      summary?.status !== "imported" ||
-      summary.matched_rows < 1 ||
-      summary.signal_rows < 1 ||
-      summary.placeholder_rows > 0 ||
-      REQUIRED_SOURCE_DOMAINS.some((domain) => !summary.matched_source_domains?.includes(domain))
-    );
-  });
-  const analyticsReady = sources.privacy_events?.status === "imported" || sources.analytics_export?.status === "imported";
-  evidence.summary.missing_required_sources = analyticsReady ? missing : [...missing, "privacy_or_ga4_analytics"];
+  evidence.summary.missing_required_sources = missingRequiredSources(evidence.summary.sources || {});
 }
 
 function updateEvidenceCounts(evidence) {
