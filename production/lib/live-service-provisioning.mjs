@@ -294,6 +294,14 @@ export function assertLiveServiceProvisioningReport(report) {
   if (!ready && !report.next_actions.some((action) => action.includes("live:provisioning"))) {
     throw new Error("Blocked live service provisioning report must point to live:provisioning");
   }
+  if (
+    ready &&
+    !report.next_actions.some((action) =>
+      ["live:provisioning:preflight", "live:capture", "live:preflight"].every((term) => action.includes(term)),
+    )
+  ) {
+    throw new Error("Ready live service provisioning report must point to provisioning preflight, capture, and live preflight");
+  }
   const serialized = JSON.stringify(report);
   if (/secret|Bearer\s+|sk-[A-Za-z0-9_-]+|user:pass/i.test(serialized)) {
     throw new Error("Live service provisioning report must not persist secrets");

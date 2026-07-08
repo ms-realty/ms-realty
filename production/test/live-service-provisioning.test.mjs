@@ -315,6 +315,19 @@ test("live service provisioning ready report requires endpoint evidence", async 
     hermes: { ...report.hermes, endpoint: null },
   };
 
+  assert.ok(
+    report.next_actions.some((action) =>
+      ["live:provisioning:preflight", "live:capture", "live:preflight"].every((term) => action.includes(term)),
+    ),
+  );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        next_actions: ["Run npm run live:preflight."],
+      }),
+    /provisioning preflight, capture, and live preflight/,
+  );
   assert.throws(
     () => assertLiveServiceProvisioningReport(withoutEndpointEvidence),
     /typesense_health must include successful endpoint evidence/,
