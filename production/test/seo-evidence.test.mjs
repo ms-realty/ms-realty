@@ -403,6 +403,40 @@ test("SEO evidence assertion rejects hand-cleared missing source state", () => {
     () =>
       assertSeoEvidence({
         ...evidence,
+        summary: {
+          ...evidence.summary,
+          sources: {
+            ...evidence.summary.sources,
+            search_console: {
+              ...evidence.summary.sources.search_console,
+              status: "uploaded",
+            },
+          },
+        },
+      }),
+    /status must be known/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
+        summary: {
+          ...evidence.summary,
+          sources: {
+            ...evidence.summary.sources,
+            search_console: {
+              ...evidence.summary.sources.search_console,
+              matched_source_domains: ["makler-realty.com", "example.com"],
+            },
+          },
+        },
+      }),
+    /legacy source domains/,
+  );
+  assert.throws(
+    () =>
+      assertSeoEvidence({
+        ...evidence,
         url_evidence: evidence.url_evidence.map((row, index) => (index === 0 ? { ...row, old_url: "" } : row)),
       }),
     /old_url/,

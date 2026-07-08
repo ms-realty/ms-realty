@@ -1,5 +1,6 @@
 export const REQUIRED_EXPORTS = ["search_console", "yandex_webmaster", "backlinks"];
 export const REQUIRED_SOURCE_DOMAINS = ["makler-realty.com", "makler-realty.ru"];
+const SEO_SOURCE_STATUSES = new Set(["missing_export", "empty_export", "imported"]);
 
 export function missingRequiredExport(summary) {
   return (
@@ -20,6 +21,7 @@ export function missingRequiredSources(sourceSummaries) {
 
 export function assertSeoSourceSummary(summary, source) {
   if (summary?.source && summary.source !== source) throw new Error(`SEO evidence ${source} source name mismatch`);
+  if (!SEO_SOURCE_STATUSES.has(summary?.status)) throw new Error(`SEO evidence ${source} status must be known`);
   for (const key of ["row_count", "matched_rows", "unmatched_rows", "duplicate_rows", "signal_rows", "placeholder_rows"]) {
     if (!Number.isInteger(summary?.[key]) || summary[key] < 0) {
       throw new Error(`SEO evidence ${source} counts must be non-negative integers`);
@@ -27,6 +29,14 @@ export function assertSeoSourceSummary(summary, source) {
   }
   if (!Array.isArray(summary.matched_source_domains)) {
     throw new Error(`SEO evidence ${source} matched domains must be an array`);
+  }
+  if (new Set(summary.matched_source_domains).size !== summary.matched_source_domains.length) {
+    throw new Error(`SEO evidence ${source} matched domains must be unique`);
+  }
+  for (const domain of summary.matched_source_domains) {
+    if (!REQUIRED_SOURCE_DOMAINS.includes(domain)) {
+      throw new Error(`SEO evidence ${source} matched domains must be legacy source domains`);
+    }
   }
   const rowCount = summary?.row_count ?? 0;
   const matchedRows = summary?.matched_rows ?? 0;
