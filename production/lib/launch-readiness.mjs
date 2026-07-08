@@ -103,11 +103,11 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   listing_quality_review: [
     "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
-    "Import a complete human-reviewed CSV through /api/admin/listing-quality/import.",
+    "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.",
   ],
   live_services: [
     "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
-    "Import or mount the three live service reports before launch.",
+    "Import or mount the three live service reports, then run npm run live:preflight before launch.",
   ],
   runtime_smoke: [
     "Run npm run runtime:build and npm run server:smoke against the production Node adapter and HTTP listing route.",
@@ -123,7 +123,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   payload_runtime: [
     "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
-    "Run npm run payload:runtime and import the redacted report through /api/admin/payload-runtime/import.",
+    "Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.",
   ],
 };
 

@@ -455,6 +455,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.ok(seoGate.evidence.next_actions.some((action) => action.includes("seo:preflight")));
   assert.equal(listingGate.status, "blocked");
   assert.ok(listingGate.evidence.next_actions.some((action) => action.includes("listing:preflight")));
+  assert.match(listingGate.next_actions.join(" "), /npm run listing:preflight/);
   assert.deepEqual(listingGate.evidence.summary, {
     expected_review_rows: 7,
     review_rows: 0,
@@ -477,7 +478,9 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(liveGate.status, "blocked");
   assert.equal(liveGate.evidence.provisioning.status, "blocked_report");
   assert.ok(liveGate.evidence.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.match(liveGate.next_actions.join(" "), /npm run live:preflight/);
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
+  assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
   for (const id of ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]) {
     const blockedGate = report.gates.find((gate) => gate.id === id);
     assert.ok(blockedGate.next_actions.length > 0);

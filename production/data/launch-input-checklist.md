@@ -10,11 +10,11 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
 - external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
 - listing_quality_review: Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.
-- listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import.
+- listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.
 - live_services: Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.
-- live_services: Import or mount the three live service reports before launch.
+- live_services: Import or mount the three live service reports, then run npm run live:preflight before launch.
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
-- payload_runtime: Run npm run payload:runtime and import the redacted report through /api/admin/payload-runtime/import.
+- payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
 
 ## Redirect Reviews
 
