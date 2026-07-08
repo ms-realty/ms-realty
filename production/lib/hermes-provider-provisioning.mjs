@@ -47,6 +47,14 @@ const REQUIRED_PROJECT_CONTEXT_MARKERS = Object.freeze([
 ]);
 
 const VALID_PROVIDER_MODES = new Set(["self_hosted", "openrouter"]);
+const HERMES_ENV_CONTRACT_OPTIONAL = Object.freeze([
+  "HERMES_MODEL",
+  "HERMES_API_KEY",
+  "HERMES_ENDPOINT_REQUIRES_AUTH",
+  "MS_REALTY_HERMES_WORKER_REPORT_PATH",
+]);
+const HERMES_ENV_CONTRACT_NEVER_PERSIST = Object.freeze(["HERMES_API_KEY", "OPENROUTER_API_KEY"]);
+const HERMES_REQUIRED_ENV_NAMES = new Set(["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
 
 function cleanMode(value) {
   const mode = String(value || "self_hosted").trim();
@@ -123,6 +131,14 @@ function vllmLaunchCommand(config) {
 function requiredEnvContract(config) {
   if (config.mode === "openrouter") return ["HERMES_PROVIDER_MODE=openrouter", "HERMES_API_KEY"];
   return ["HERMES_CHAT_COMPLETIONS_URL", ...(config.endpoint_requires_auth ? ["HERMES_API_KEY"] : [])];
+}
+
+function requiredEnvContractForReport(report) {
+  if (report.provider?.mode === "openrouter") return ["HERMES_PROVIDER_MODE=openrouter", "HERMES_API_KEY"];
+  return [
+    "HERMES_CHAT_COMPLETIONS_URL",
+    ...(report.provider?.endpoint_requires_auth ? ["HERMES_API_KEY"] : []),
+  ];
 }
 
 function projectContextState() {
@@ -203,8 +219,8 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
     },
     env_contract: {
       required: requiredEnvContract(config),
-      optional: ["HERMES_MODEL", "HERMES_API_KEY", "HERMES_ENDPOINT_REQUIRES_AUTH", "MS_REALTY_HERMES_WORKER_REPORT_PATH"],
-      never_persist: ["HERMES_API_KEY", "OPENROUTER_API_KEY"],
+      optional: HERMES_ENV_CONTRACT_OPTIONAL,
+      never_persist: HERMES_ENV_CONTRACT_NEVER_PERSIST,
     },
     next_actions: missing.length
       ? [
@@ -294,6 +310,19 @@ export function assertHermesProviderProvisioningReport(report) {
   }
   if (report.provider?.hosted_fallback_allowed_for_sensitive_data !== false) {
     throw new Error("Hosted Hermes fallback must never be allowed for sensitive data");
+  }
+  for (const env of report.missing || []) {
+    if (!HERMES_REQUIRED_ENV_NAMES.has(env)) throw new Error(`Hermes provisioning missing env must use canonical label ${env}`);
+  }
+  const requiredEnv = requiredEnvContractForReport(report);
+  if (JSON.stringify(report.env_contract?.required) !== JSON.stringify(requiredEnv)) {
+    throw new Error("Hermes provisioning env contract must match provider mode");
+  }
+  if (JSON.stringify(report.env_contract?.optional) !== JSON.stringify(HERMES_ENV_CONTRACT_OPTIONAL)) {
+    throw new Error("Hermes provisioning env contract optional labels changed");
+  }
+  if (JSON.stringify(report.env_contract?.never_persist) !== JSON.stringify(HERMES_ENV_CONTRACT_NEVER_PERSIST)) {
+    throw new Error("Hermes provisioning env contract must keep secret labels out of reports");
   }
   const serialized = JSON.stringify(report);
   if (/secret|sk-[A-Za-z0-9_-]+|Bearer\s+/i.test(serialized)) {

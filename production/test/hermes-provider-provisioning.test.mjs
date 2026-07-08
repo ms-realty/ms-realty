@@ -38,6 +38,9 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.agent_runtime.gateway_security.allow_all_users, false);
   assert.equal(report.provider.mode, "self_hosted");
   assert.equal(report.provider.sensitive_data_allowed, true);
+  assert.deepEqual(report.env_contract.required, ["HERMES_CHAT_COMPLETIONS_URL"]);
+  assert.ok(report.env_contract.optional.includes("HERMES_ENDPOINT_REQUIRES_AUTH"));
+  assert.ok(report.env_contract.never_persist.includes("OPENROUTER_API_KEY"));
   assert.equal(report.vllm.tool_call_parser, "hermes");
   assert.equal(report.vllm.enable_auto_tool_choice, true);
   assert.deepEqual(report.vllm.launch_command.slice(-3), ["--enable-auto-tool-choice", "--tool-call-parser", "hermes"]);
@@ -79,6 +82,7 @@ test("Hermes hosted fallback is configured as non-sensitive only", () => {
   assert.equal(report.provider.endpoint, "https://openrouter.ai/api/v1/chat/completions");
   assert.equal(report.provider.sensitive_data_allowed, false);
   assert.equal(report.provider.hosted_fallback_allowed_for_sensitive_data, false);
+  assert.deepEqual(report.env_contract.required, ["HERMES_PROVIDER_MODE=openrouter", "HERMES_API_KEY"]);
 });
 
 test("Hermes provisioning report rejects incomplete ready endpoint evidence", () => {
@@ -86,6 +90,7 @@ test("Hermes provisioning report rejects incomplete ready endpoint evidence", ()
     env: { HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8000/v1/chat/completions" },
     generatedAt: "2026-07-06T00:00:00Z",
   });
+  const blockedReport = buildHermesProviderProvisioningReport({ env: {}, generatedAt: "2026-07-06T00:00:00Z" });
 
   assert.throws(
     () => assertHermesProviderProvisioningReport({ ...report, generated_at: "" }),
@@ -102,6 +107,26 @@ test("Hermes provisioning report rejects incomplete ready endpoint evidence", ()
   assert.throws(
     () => assertHermesProviderProvisioningReport({ ...report, provider: { ...report.provider, model: " " } }),
     /provider model/,
+  );
+  assert.throws(
+    () => assertHermesProviderProvisioningReport({ ...blockedReport, missing: ["HERMES_CHAT_COMPLETION_URL"] }),
+    /canonical label/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        env_contract: { ...report.env_contract, required: ["HERMES_URL"] },
+      }),
+    /env contract/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        env_contract: { ...report.env_contract, never_persist: ["HERMES_API_KEY"] },
+      }),
+    /secret labels/,
   );
   assert.throws(
     () =>

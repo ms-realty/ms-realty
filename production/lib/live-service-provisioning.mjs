@@ -28,6 +28,7 @@ const REQUIRED_ENV_BY_CHECK = {
   meili_url: "MEILI_URL",
   meili_api_key: "MEILI_API_KEY",
 };
+const HERMES_REQUIRED_ENV_NAMES = new Set(["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
 
 function redactUrl(value) {
   if (!value) return null;
@@ -221,6 +222,17 @@ export function assertLiveServiceProvisioningReport(report) {
     if (ready && check.redacted_url) assertProvisioningServiceUrl(check.redacted_url, id);
   }
   const hermesProvider = report.checks.find((check) => check.id === "hermes_provider");
+  if (!Array.isArray(hermesProvider?.missing)) {
+    throw new Error("Live service provisioning Hermes check must include missing env labels");
+  }
+  if (hermesProvider.status === "missing_env" && hermesProvider.missing.length === 0) {
+    throw new Error("Live service provisioning Hermes check must explain missing env labels");
+  }
+  for (const env of hermesProvider.missing) {
+    if (!HERMES_REQUIRED_ENV_NAMES.has(env)) {
+      throw new Error(`Live service provisioning Hermes check must use canonical env label ${env}`);
+    }
+  }
   if ((ready || hermesProvider?.status === "pass") && (!report.hermes?.endpoint || report.hermes.ready !== true)) {
     throw new Error("Live service provisioning ready report must include Hermes endpoint evidence");
   }

@@ -187,6 +187,50 @@ test("live service provisioning report requires complete evidence shape", async 
     () => assertLiveServiceProvisioningReport({ ...report, summary: { ...report.summary, placeholder_env: ["TYPESENSE_URL"] } }),
     /placeholder env summary/,
   );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          missing_env: report.summary.missing_env.filter((env) => env !== "HERMES_CHAT_COMPLETIONS_URL"),
+        },
+        checks: report.checks.map((check) =>
+          check.id === "hermes_provider" ? { id: "hermes_provider", status: "missing_env", mode: check.mode } : check,
+        ),
+      }),
+    /Hermes check must include missing env labels/,
+  );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          missing_env: report.summary.missing_env.filter((env) => env !== "HERMES_CHAT_COMPLETIONS_URL"),
+        },
+        checks: report.checks.map((check) =>
+          check.id === "hermes_provider" ? { ...check, missing: [] } : check,
+        ),
+      }),
+    /Hermes check must explain missing env labels/,
+  );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        summary: {
+          ...report.summary,
+          missing_env: report.summary.missing_env.map((env) =>
+            env === "HERMES_CHAT_COMPLETIONS_URL" ? "HERMES_URL" : env,
+          ),
+        },
+        checks: report.checks.map((check) =>
+          check.id === "hermes_provider" ? { ...check, missing: ["HERMES_URL"] } : check,
+        ),
+      }),
+    /canonical env label/,
+  );
 });
 
 test("live service provisioning ready report requires endpoint evidence", async () => {
