@@ -50,10 +50,19 @@ async function checkedFetch(fetchImpl, url, options, acceptedStatuses = [200, 20
   };
 }
 
-async function checkedJson(fetchImpl, url, options) {
+async function checkedJson(fetchImpl, url, options, acceptedStatuses = [200]) {
   const response = await fetchImpl(url, options);
-  if (response.ok !== true) throw new Error(`Search engine query failed: ${options.method} ${url} returned ${response.status}`);
-  return response.json();
+  if (!acceptedStatuses.includes(response.status)) {
+    throw new Error(`Search engine query failed: ${options.method} ${url} returned ${response.status}`);
+  }
+  return {
+    payload: await response.json(),
+    operation: {
+      method: options.method,
+      url: redactedUrl(url),
+      status: response.status,
+    },
+  };
 }
 
 function searchHit(doc) {
@@ -159,6 +168,35 @@ function assertSearchSyncOperations(engine, target) {
       })
     ) {
       throw new Error("meilisearch sync report must include document import operation evidence");
+    }
+  }
+}
+
+function assertSearchQueryOperation(engine, target) {
+  const operation = engine.operation || {};
+  assertReportUrl(operation.url, `${engine.engine} query operation`);
+  let parsed;
+  try {
+    parsed = new URL(operation.url);
+  } catch {
+    throw new Error(`${engine.engine} query operation must include valid service URL evidence`);
+  }
+  const encoded = encodeURIComponent(target);
+  if (engine.engine === "typesense") {
+    if (
+      operation.method !== "GET" ||
+      operation.status !== 200 ||
+      parsed.pathname !== `/collections/${encoded}/documents/search` ||
+      !parsed.searchParams.get("q") ||
+      !parsed.searchParams.get("filter_by")
+    ) {
+      throw new Error("typesense query report must include document search operation evidence");
+    }
+    return;
+  }
+  if (engine.engine === "meilisearch") {
+    if (operation.method !== "POST" || operation.status !== 200 || parsed.pathname !== `/indexes/${encoded}/search`) {
+      throw new Error("meilisearch query report must include index search operation evidence");
     }
   }
 }
@@ -318,7 +356,7 @@ export async function queryTypesense({
     filter_by: filterBy,
     per_page: "5",
   });
-  const payload = await checkedJson(
+  const { payload, operation } = await checkedJson(
     fetchImpl,
     joinUrl(baseUrl, `/collections/${encodeURIComponent(collectionName)}/documents/search?${params}`),
     { method: "GET", headers: { "x-typesense-api-key": apiKey } },
@@ -330,6 +368,7 @@ export async function queryTypesense({
     collection: collectionName,
     query: q,
     filter: filterBy,
+    operation,
     total: Number(payload.found || 0),
     hits: (payload.hits || []).map((hit) => searchHit(hit.document || hit)),
   };
@@ -347,7 +386,7 @@ export async function queryMeilisearch({
   required(apiKey, "MEILI_API_KEY");
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Meilisearch query");
 
-  const payload = await checkedJson(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/search`), {
+  const { payload, operation } = await checkedJson(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/search`), {
     method: "POST",
     headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
     body: JSON.stringify({ q, filter, limit: 5 }),
@@ -359,6 +398,7 @@ export async function queryMeilisearch({
     index: indexName,
     query: q,
     filter,
+    operation,
     total: Number(payload.estimatedTotalHits ?? payload.totalHits ?? 0),
     hits: (payload.hits || []).map(searchHit),
   };
@@ -401,6 +441,7 @@ export function assertSearchEngineQueryReport(report) {
     assertReportUrl(engine.service_url, `${engine.engine} query report`);
     const { target } = assertSearchEngineTarget(engine, `${engine.engine} query report`);
     if (report.summary.targets?.[engine.engine] !== target) throw new Error("Search query summary targets must match engine rows");
+    assertSearchQueryOperation(engine, target);
     if (!String(engine.query || "").trim()) throw new Error(`${engine.engine} query report must include query evidence`);
     if (!String(engine.filter || "").includes("translation_indexable") || !String(engine.filter || "").includes("locale")) {
       throw new Error(`${engine.engine} query report must prove reviewed locale filtering`);

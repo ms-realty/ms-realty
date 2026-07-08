@@ -244,6 +244,11 @@ function writeLiveReportFixtures(dir) {
           collection: "ms_realty_listings",
           query: "Sandanski",
           filter: "translation_indexable:=true && locale:=bg",
+          operation: {
+            method: "GET",
+            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg",
+            status: 200,
+          },
           total: 1,
           hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }],
         },
@@ -253,6 +258,11 @@ function writeLiveReportFixtures(dir) {
           index: "ms_realty_listings",
           query: "Sandanski",
           filter: "translation_indexable = true AND locale = bg",
+          operation: {
+            method: "POST",
+            url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
+            status: 200,
+          },
           total: 1,
           hits: [{ id: "MS-CRAWL-0001:bg", locale: "bg" }],
         },

@@ -321,6 +321,8 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.equal(calls[1].url, "http://meili.local/indexes/ms_realty_listings/search");
   assert.equal(calls[1].options.method, "POST");
   assert.equal(JSON.parse(calls[1].options.body).filter, "translation_indexable = true AND locale = bg");
+  assert.equal(report.engines.find((engine) => engine.engine === "typesense").operation.method, "GET");
+  assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").operation.url, "http://meili.local/indexes/ms_realty_listings/search");
   assert.throws(
     () => assertSearchEngineQueryReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
     /exactly once/,
@@ -372,6 +374,24 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
     () =>
       assertSearchEngineQueryReport({
         ...report,
+        engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, operation: null } : engine)),
+      }),
+    /query operation/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
+          index === 1 ? { ...engine, operation: { ...engine.operation, method: "GET" } } : engine,
+        ),
+      }),
+    /index search operation evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
         engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, query: "" } : engine)),
       }),
     /query evidence/,
@@ -383,6 +403,18 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
         engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, filter: "" } : engine)),
       }),
     /reviewed locale filtering/,
+  );
+});
+
+test("search engine query rejects non-accepted statuses even when fetch reports ok", async () => {
+  await assert.rejects(
+    () =>
+      runSearchEngineQuerySmoke({
+        typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+        meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+        fetchImpl: async () => ({ ok: true, status: 202, async json() { return {}; } }),
+      }),
+    /returned 202/,
   );
 });
 

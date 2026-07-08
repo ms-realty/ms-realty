@@ -17,6 +17,11 @@
       "collection": "ms_realty_listings",
       "query": "Sandanski",
       "filter": "translation_indexable:=true && locale:=bg",
+      "operation": {
+        "method": "GET",
+        "url": "https://typesense.example.com/collections/ms_realty_listings/documents/search?q=Sandanski&query_by=title%2Cdescription%2Csearch_text%2Clocation&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg&per_page=5",
+        "status": 200
+      },
       "total": 1,
       "hits": [
         {
@@ -34,6 +39,11 @@
       "index": "ms_realty_listings",
       "query": "Sandanski",
       "filter": "translation_indexable = true AND locale = bg",
+      "operation": {
+        "method": "POST",
+        "url": "https://meili.example.com/indexes/ms_realty_listings/search",
+        "status": 200
+      },
       "total": 1,
       "hits": [
         {
