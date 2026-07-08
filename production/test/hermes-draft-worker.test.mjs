@@ -347,6 +347,41 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(request.options.headers.authorization, "Bearer test-key");
   assert.equal(request.body.model, "NousResearch/Hermes-4-14B");
   assert.equal(request.body.response_format.type, "json_object");
+  assert.equal(request.body.tools[0].function.name, "draft_translation");
+  assert.equal(request.body.tool_choice, "auto");
+  assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
+});
+
+test("OpenAI-compatible Hermes provider accepts Hermes tool-call draft arguments", async () => {
+  const provider = openAiCompatibleHermesProvider({
+    endpoint: "https://hermes.local/v1/chat/completions",
+    apiKey: "test-key",
+    fetchImpl: async () => ({
+      ok: true,
+      async json() {
+        return {
+          choices: [
+            {
+              message: {
+                content: "",
+                tool_calls: [
+                  {
+                    type: "function",
+                    function: {
+                      name: "draft_translation",
+                      arguments: JSON.stringify(validDraft()),
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        };
+      },
+    }),
+  });
+
+  const output = await provider(dispatchRow());
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
 });
 

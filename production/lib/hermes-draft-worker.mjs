@@ -21,11 +21,41 @@ export const DEFAULT_HERMES_WORKER_SMOKE_LEDGER_PATH = fromRoot("production", "d
 export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_PATH = fromRoot("production", "data", "hermes-worker-smoke-audit.jsonl");
 export const DEFAULT_HERMES_WORKER_SMOKE_AUDIT_LOG_PATH = fromRoot("production", "data", "hermes-worker-smoke-audit-log.jsonl");
 
-function parseJsonObject(text) {
-  const trimmed = String(text || "")
+function parseJsonObject(value) {
+  if (value && typeof value === "object" && !Array.isArray(value)) return value;
+  const trimmed = String(value || "")
     .trim()
     .replace(/^```(?:json)?\s*|\s*```$/g, "");
   return JSON.parse(trimmed);
+}
+
+function draftToolSchema() {
+  return {
+    type: "function",
+    function: {
+      name: "draft_translation",
+      description: "Return a non-publishing, human-reviewed translation draft for an MS Realty CMS object.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["title", "body", "seo_title", "meta_description", "citations"],
+        properties: {
+          title: { type: "string" },
+          body: { type: "string" },
+          seo_title: { type: "string" },
+          meta_description: { type: "string" },
+          citations: {
+            type: "array",
+            minItems: 1,
+            items: {
+              type: "object",
+              additionalProperties: true,
+            },
+          },
+        },
+      },
+    },
+  };
 }
 
 function providerRequestBody(row, model) {
@@ -33,15 +63,45 @@ function providerRequestBody(row, model) {
     model,
     temperature: 0.2,
     response_format: { type: "json_object" },
+    tools: [draftToolSchema()],
+    tool_choice: "auto",
     messages: [
       {
         role: "system",
         content:
-          "You are Hermes Agent. Return only JSON with title, body, seo_title, meta_description, citations. Draft only; never publish.",
+          "You are Hermes Agent. Return only JSON or call draft_translation with title, body, seo_title, meta_description, citations. Draft only; never publish.",
       },
       { role: "user", content: JSON.stringify(row.prompt) },
     ],
   };
+}
+
+function contentPayload(content) {
+  if (typeof content === "string" && content.trim()) return content;
+  if (content && typeof content === "object" && !Array.isArray(content)) return content;
+  if (Array.isArray(content)) {
+    const text = content
+      .map((part) => (typeof part === "string" ? part : part?.text || ""))
+      .join("")
+      .trim();
+    if (text) return text;
+  }
+  return null;
+}
+
+function toolArgumentsPayload(message) {
+  const toolCall = message.tool_calls?.find((call) => call?.function?.arguments);
+  if (toolCall) return toolCall.function.arguments;
+  if (message.function_call?.arguments) return message.function_call.arguments;
+  return null;
+}
+
+function draftPayloadFromMessage(message) {
+  const content = contentPayload(message.content);
+  if (content) return content;
+  const toolArguments = toolArgumentsPayload(message);
+  if (toolArguments) return toolArguments;
+  throw new Error("Hermes provider returned no draft JSON");
 }
 
 export function readHermesDraftDispatch(filePath = DEFAULT_HERMES_DRAFT_DISPATCH_PATH) {
@@ -70,9 +130,9 @@ export function openAiCompatibleHermesProvider({
     });
     if (!response.ok) throw new Error(`Hermes provider failed: ${response.status}`);
     const payload = await response.json();
-    const content = payload.choices?.[0]?.message?.content;
-    if (!content) throw new Error("Hermes provider returned no message content");
-    return parseJsonObject(content);
+    const message = payload.choices?.[0]?.message;
+    if (!message) throw new Error("Hermes provider returned no message");
+    return parseJsonObject(draftPayloadFromMessage(message));
   };
 }
 
