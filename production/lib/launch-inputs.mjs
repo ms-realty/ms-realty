@@ -310,9 +310,14 @@ npm run redirects:preflight
 npm run redirects:build
 npm run seo:preflight
 npm run seo:evidence
+npm run seo:preflight:report
+npm run live:provisioning
 npm run live:provisioning:preflight
+npm run live:capture
+npm run live:report
 npm run live:preflight
 npm run payload:bootstrap
+npm run payload:runtime
 npm run payload:preflight
 npm run listing:review-pack
 npm run listing:preflight

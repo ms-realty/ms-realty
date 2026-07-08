@@ -1753,6 +1753,10 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /search_console: missing_export/);
   assert.match(markdown, /Rollback steps: 4/);
   assert.match(markdown, /GET \/api\/admin\/preflight-reports/);
+  assert.match(
+    markdown,
+    /## Validate After Inputs[\s\S]*npm run seo:preflight:report[\s\S]*npm run live:provisioning[\s\S]*npm run live:capture[\s\S]*npm run live:report[\s\S]*npm run payload:runtime[\s\S]*npm run launch:preflight/,
+  );
   assert.match(markdown, /npm run launch:inputs/);
   assert.match(markdown, /npm run launch:preflight/);
 });
