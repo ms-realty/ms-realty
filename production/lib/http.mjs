@@ -911,6 +911,7 @@ export function createHttpApp({
         return adminJson(201, {
           approval,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
+          report: currentLaunchReadiness(),
         });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -936,6 +937,7 @@ export function createHttpApp({
           imported: imported.length,
           approvals: imported,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
+          report: currentLaunchReadiness(),
         });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -954,7 +956,7 @@ export function createHttpApp({
           objectId: "deployable-redirects",
           metadata: { exported: rows.length, total: written.summary?.total },
         });
-        return adminJson(201, { exported: rows.length, ...written });
+        return adminJson(201, { exported: rows.length, ...written, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

@@ -975,6 +975,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(approved.body.approval.deployable, true);
   assert.equal(approved.body.deployablePreview.length, 1);
   assert.equal(approved.body.deployablePreview[0].target_path, listing.target_path);
+  assert.equal(approved.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.equal(formApproved.status, 201);
   assert.equal(formApproved.body.deployablePreview.length, 2);
   assert.equal(rejected.status, 400);
@@ -1099,9 +1100,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(imported.body.imported, 1);
   assert.equal(imported.body.approvals[0].old_url, importListing.old_url);
   assert.equal(imported.body.deployablePreview.length, 3);
+  assert.equal(imported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.equal(formImported.status, 201);
   assert.equal(formImported.body.imported, 1);
   assert.equal(formImported.body.deployablePreview.length, 4);
+  assert.equal(formImported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   const pendingRows = parseCsv(pendingWorkbook.body);
   assert.equal(pendingRows.length, 161);
   assert.equal(pendingRows.some((row) => row.old_url === listing.old_url), false);
@@ -1110,6 +1113,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(exported.status, 201);
   assert.equal(exported.body.exported, 4);
   assert.equal(exported.body.summary.total, 4);
+  assert.equal(exported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.equal(fs.existsSync(deployableRedirectOutputPath), true);
   assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 4);
   assert.equal(review.body.workspace.locale, "ru");

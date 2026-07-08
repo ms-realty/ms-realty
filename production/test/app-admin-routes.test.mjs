@@ -699,6 +699,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectApproval.status, 201);
       assert.equal(redirectApprovalBody.approval.target_path, firstRedirect.target_path);
       assert.equal(redirectApprovalBody.deployablePreview.length, 1);
+      assert.equal(redirectApprovalBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
 
       const redirectImport = await redirectApprovalsImportRoute.POST(
         new Request("https://example.test/api/admin/redirect-approvals/import", {
@@ -711,6 +712,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectImport.status, 201);
       assert.equal(redirectImportBody.imported, 1);
       assert.equal(redirectImportBody.deployablePreview.length, 2);
+      assert.equal(redirectImportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
 
       const pendingRedirectWorkbook = await redirectApprovalWorkbookRoute.GET(
         new Request("https://example.test/api/admin/redirect-approval-workbook?pending=1", { headers: auth }),
@@ -727,6 +729,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectExport.status, 201);
       assert.equal(redirectExportBody.exported, 2);
       assert.equal(redirectExportBody.summary.total, 2);
+      assert.equal(redirectExportBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
       assert.equal(JSON.parse(fs.readFileSync(deployableRedirectOutputPath, "utf8")).redirects.length, 2);
 
       const listingQualityWorkbook = await listingQualityWorkbookRoute.GET(

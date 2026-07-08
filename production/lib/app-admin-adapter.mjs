@@ -722,6 +722,7 @@ function appendRedirectApprovalRow(input, config) {
   return {
     approval,
     deployablePreview: currentDeployableRedirects(config),
+    report: launchReadiness(config),
   };
 }
 
@@ -744,6 +745,7 @@ function importRedirectApprovalRows(csvText, config) {
     imported: imported.length,
     approvals: imported,
     deployablePreview: currentDeployableRedirects(config),
+    report: launchReadiness(config),
   };
 }
 
@@ -760,7 +762,7 @@ function exportDeployableRedirectRows(config) {
     },
     config,
   );
-  return exported;
+  return { ...exported, report: launchReadiness(config) };
 }
 
 function exportLaunchReadiness(config) {
