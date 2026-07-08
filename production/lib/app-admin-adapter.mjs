@@ -1053,10 +1053,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, exportLaunchReadiness(config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-reports/import") {
-      return jsonResponse(
-        201,
-        importLiveServiceReport(liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config),
-      );
+      const result = importLiveServiceReport(liveServiceReportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.livePreflight.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
       const report = parseJsonBody(await readRequestBody(request, config.maxBodyBytes));

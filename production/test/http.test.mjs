@@ -1542,12 +1542,12 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(JSON.parse(liveTemplate.body).example, true);
   assert.equal(JSON.parse(liveTemplate.body).summary.engines, 2);
   assert.equal(liveImportUnauthorized.status, 401);
-  assert.equal(liveSyncImport.status, 201);
+  assert.equal(liveSyncImport.status, 202);
   assert.equal(liveSyncImport.body.imported.outPath, searchSyncReportPath);
   assert.equal(liveSyncImport.body.livePreflight.status, "blocked");
   assert.equal(liveSyncImport.body.livePreflight.summary.pass, 1);
   assert.equal(liveSyncImport.body.livePreflight.summary.missing_report, 2);
-  assert.equal(liveQueryImport.status, 201);
+  assert.equal(liveQueryImport.status, 202);
   assert.equal(liveHermesImport.status, 201);
   assert.equal(liveHermesImport.body.livePreflight.ready, true);
   assert.equal(liveHermesImport.body.livePreflight.summary.pass, 3);

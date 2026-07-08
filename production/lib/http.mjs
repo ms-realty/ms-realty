@@ -767,7 +767,7 @@ export function createHttpApp({
           objectId: input.source,
           metadata: { status: input.report?.status, out_path: imported.outPath },
         });
-        return adminJson(201, { imported, livePreflight, report: currentLaunchReadiness() });
+        return adminJson(livePreflight.ready ? 201 : 202, { imported, livePreflight, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
