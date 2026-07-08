@@ -198,7 +198,14 @@
       "message": "Human listing quality review CSV is required before launch.",
       "evidence": {
         "status": "missing_review",
-        "path": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv"
+        "path": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv",
+        "summary": {
+          "expected_review_rows": 7,
+          "review_rows": 0,
+          "missing_review_rows": 7,
+          "facts_review_rows": 0,
+          "media_review_rows": 0
+        }
       }
     },
     {

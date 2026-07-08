@@ -324,7 +324,15 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(report.launch_ready, false);
   assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
   assert.equal(report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
-  assert.equal(report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
+  const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
+  assert.equal(listingGate.status, "blocked");
+  assert.deepEqual(listingGate.evidence.summary, {
+    expected_review_rows: 7,
+    review_rows: 0,
+    missing_review_rows: 7,
+    facts_review_rows: 0,
+    media_review_rows: 0,
+  });
   assert.equal(report.gates.find((gate) => gate.id === "live_services").status, "blocked");
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
@@ -1278,7 +1286,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /interim admin workbenches do not count/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /Current review evidence/);
-  assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv/);
+  assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv.*expected 7.*reviewed 0.*missing 7/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);

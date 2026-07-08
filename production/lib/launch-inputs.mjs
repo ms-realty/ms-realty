@@ -82,8 +82,12 @@ function payloadCheckLines(payloadEvidence) {
 }
 
 function listingReviewEvidenceLine(evidence) {
+  const summary = evidence.summary || {};
   const details = [
     evidence.path ? `path ${evidence.path}` : "",
+    Number.isInteger(summary.expected_review_rows) ? `expected ${summary.expected_review_rows}` : "",
+    Number.isInteger(summary.review_rows) ? `reviewed ${summary.review_rows}` : "",
+    Number.isInteger(summary.missing_review_rows) ? `missing ${summary.missing_review_rows}` : "",
     evidence.error ? `error ${evidence.error}` : "",
   ].filter(Boolean);
   return `- ${evidence.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;

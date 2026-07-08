@@ -14,7 +14,7 @@ import {
   writeHermesDraftWorkerReport,
 } from "./hermes-draft-worker.mjs";
 import { assertHermesChatCompletionsEndpoint } from "./hermes-provider-provisioning.mjs";
-import { DEFAULT_LISTING_QUALITY_REVIEW_INPUT, validateListingQualityReviewCsv } from "./listing-quality.mjs";
+import { buildListingQualityPreflightReport, DEFAULT_LISTING_QUALITY_REVIEW_INPUT } from "./listing-quality.mjs";
 import {
   assertPayloadRuntimeReport,
   assertProductionDatabaseHost,
@@ -438,19 +438,16 @@ export function publicLaunchReadinessHeaders(report) {
 }
 
 function listingQualityReviewState(listingQuality, reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
-  if (!fs.existsSync(reviewPath)) return { status: "missing_review", path: reviewPath };
-  try {
-    return {
-      status: "pass",
-      path: reviewPath,
-      summary: validateListingQualityReviewCsv(listingQuality, fs.readFileSync(reviewPath, "utf8"), {
-        allowExtraRows: true,
-        requireComplete: true,
-      }).summary,
-    };
-  } catch (error) {
-    return { status: "invalid_review", path: reviewPath, error: error.message };
-  }
+  const { status, path: reportPath, summary, error } = buildListingQualityPreflightReport({
+    report: listingQuality,
+    reviewPath,
+  }).review;
+  return {
+    status,
+    path: reportPath,
+    ...(summary ? { summary } : {}),
+    ...(error ? { error } : {}),
+  };
 }
 
 function reportStatus(source, filePath, assertReport) {
