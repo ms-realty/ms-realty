@@ -74,12 +74,14 @@ function assertSearchEngines(report, label) {
 }
 
 function assertReportUrl(value, label) {
+  let parsed;
   try {
-    const parsed = new URL(value);
-    if (!["http:", "https:"].includes(parsed.protocol)) throw new Error("bad protocol");
+    parsed = new URL(value);
   } catch {
     throw new Error(`${label} must include valid service URL evidence`);
   }
+  if (!["http:", "https:"].includes(parsed.protocol)) throw new Error(`${label} must include valid service URL evidence`);
+  if (parsed.username || parsed.password) throw new Error(`${label} must not include URL credentials`);
 }
 
 function targetFieldForEngine(engine) {

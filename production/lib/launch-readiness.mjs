@@ -70,6 +70,7 @@ function assertLaunchServiceUrl(value, label) {
     throw new Error(`${label} must include valid service URL evidence`);
   }
   if (!["http:", "https:"].includes(parsed.protocol)) throw new Error(`${label} must use http or https`);
+  if (parsed.username || parsed.password) throw new Error(`${label} must not include URL credentials`);
   const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
   const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
   const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];

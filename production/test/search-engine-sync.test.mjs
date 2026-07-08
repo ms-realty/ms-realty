@@ -155,6 +155,24 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
       assertSearchEngineSyncReport({
         ...report,
         engines: report.engines.map((engine, index) =>
+          index === 0
+            ? {
+                ...engine,
+                operations: [
+                  { ...engine.operations[0], url: "https://operator:secret@typesense.ms-realty.bg/collections" },
+                  engine.operations[1],
+                ],
+              }
+            : engine,
+        ),
+      }),
+    /URL credentials/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineSyncReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
           index === 0 ? { ...engine, operations: [{ ...engine.operations[0], method: "GET" }, engine.operations[1]] } : engine,
         ),
       }),
@@ -299,6 +317,16 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
         engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, service_url: "" } : engine)),
       }),
     /service URL evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
+          index === 0 ? { ...engine, service_url: "https://operator:secret@typesense.ms-realty.bg" } : engine,
+        ),
+      }),
+    /URL credentials/,
   );
   assert.throws(
     () =>
