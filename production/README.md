@@ -257,12 +257,14 @@ Generated production data:
 - `production/data/app-route-manifest.json`
 - `production/data/launch-readiness.json`
 - `production/data/launch-input-checklist.md`
+- `production/data/audit-log.jsonl.example`
 - `production/data/language-requests.jsonl`
 - `production/data/locale-rollout-report.json`
 - `production/data/hermes-draft-dispatch.json`
 - `production/data/hermes-draft-worker-smoke.json`
 - `production/data/hermes-worker-smoke-translations.jsonl`
 - `production/data/hermes-worker-smoke-audit.jsonl`
+- `production/data/hermes-worker-smoke-audit-log.jsonl`
 - `production/data/translation-tasks.jsonl`
 - `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`

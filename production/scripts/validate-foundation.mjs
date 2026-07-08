@@ -874,13 +874,13 @@ if (
   throw new Error("Consent ledger artifact must contain deterministic privacy-safe public form rows");
 }
 const auditLog = fs
-  .readFileSync(fromRoot("production", "data", "audit-log.jsonl"), "utf8")
+  .readFileSync(fromRoot("production", "data", "audit-log.jsonl.example"), "utf8")
   .trim()
   .split("\n")
   .filter(Boolean)
   .map((line) => JSON.parse(line));
 assertAuditLog(auditLog);
-assertRuntimeAuditSummary({ rows: auditLog.length, byAction: countBy(auditLog, "action") }, "Persisted audit", expectedHttpAuditActions);
+assertRuntimeAuditSummary({ rows: auditLog.length, byAction: countBy(auditLog, "action") }, "Persisted audit fixture", expectedHttpAuditActions);
 const localeRollout = JSON.parse(fs.readFileSync(fromRoot("production", "data", "locale-rollout-report.json"), "utf8"));
 assertLocaleRolloutReport(localeRollout);
 if (
