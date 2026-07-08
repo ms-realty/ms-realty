@@ -29,7 +29,6 @@
       "local",
       "docker",
       "ssh",
-      "daytona",
       "singularity",
       "modal"
     ]

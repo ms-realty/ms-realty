@@ -135,7 +135,7 @@ test("Hermes draft worker persists validated drafts to the requested ledger", as
   assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
   assert.deepEqual(report.agent_runtime.tool_gateway.required_tools, HERMES_AGENT_TOOL_GATEWAY_TOOLS);
   assert.deepEqual(report.agent_runtime.terminal_backends, HERMES_AGENT_TERMINAL_BACKENDS);
-  assert.ok(report.agent_runtime.terminal_backends.includes("daytona"));
+  assert.deepEqual(report.agent_runtime.terminal_backends, ["local", "docker", "ssh", "singularity", "modal"]);
   assert.equal(report.summary.persisted, 1);
   assert.equal(report.summary.rejected, 0);
   assert.equal(report.audit_log_rows, 1);
