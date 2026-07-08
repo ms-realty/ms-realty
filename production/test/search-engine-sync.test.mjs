@@ -79,7 +79,7 @@ async function withSearchServer(fn) {
 test("search engine sync posts existing fixtures to Typesense and Meilisearch", async () => {
   const calls = [];
   const report = await runSearchEngineSync({
-    fetchImpl: fakeFetch(calls),
+    fetchImpl: fakeFetch(calls, [201, 202, 202, 202]),
     typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
     meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
   });
@@ -145,6 +145,34 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
       assertSearchEngineSyncReport({
         ...report,
         engines: report.engines.map((engine, index) =>
+          index === 0 ? { ...engine, operations: [{ ...engine.operations[0], status: 202 }, engine.operations[1]] } : engine,
+        ),
+      }),
+    /collection create operation evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineSyncReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
+          index === 1
+            ? {
+                ...engine,
+                operations: [
+                  { ...engine.operations[0], url: "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=id" },
+                  engine.operations[1],
+                ],
+              }
+            : engine,
+        ),
+      }),
+    /settings operation evidence/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineSyncReport({
+        ...report,
+        engines: report.engines.map((engine, index) =>
           index === 0 ? { ...engine, operations: [{ ...engine.operations[0], url: "" }, engine.operations[1]] } : engine,
         ),
       }),
@@ -201,6 +229,18 @@ test("Typesense sync accepts existing collection response before upsert import",
   assert.equal(report.documents, 167);
   assert.equal(report.operations[0].status, 409);
   assert.equal(report.operations[1].status, 201);
+});
+
+test("Typesense sync rejects non-accepted collection creation statuses even when fetch reports ok", async () => {
+  await assert.rejects(
+    () =>
+      syncTypesense({
+        baseUrl: "http://typesense.local/",
+        apiKey: "type-key",
+        fetchImpl: async () => ({ ok: true, status: 202 }),
+      }),
+    /returned 202/,
+  );
 });
 
 test("generated search sync smoke report is valid when present", () => {

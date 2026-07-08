@@ -39,7 +39,7 @@ function required(value, name) {
 
 async function checkedFetch(fetchImpl, url, options, acceptedStatuses = [200, 201, 202]) {
   const response = await fetchImpl(url, options);
-  if (!acceptedStatuses.includes(response.status) && response.ok !== true) {
+  if (!acceptedStatuses.includes(response.status)) {
     throw new Error(`Search engine sync failed: ${options.method} ${url} returned ${response.status}`);
   }
   return {
@@ -109,6 +109,58 @@ function operationUrlsIncludeTarget(engine, target) {
       return false;
     }
   });
+}
+
+function hasSyncOperation(engine, { method, path, searchParam = null, statuses }) {
+  return (engine.operations || []).some((operation) => {
+    let parsed;
+    try {
+      parsed = new URL(operation.url);
+    } catch {
+      return false;
+    }
+    return (
+      operation.method === method &&
+      parsed.pathname === path &&
+      (!searchParam || parsed.searchParams.get(searchParam.key) === searchParam.value) &&
+      statuses.includes(operation.status)
+    );
+  });
+}
+
+function assertSearchSyncOperations(engine, target) {
+  const encoded = encodeURIComponent(target);
+  if (engine.engine === "typesense") {
+    if (!hasSyncOperation(engine, { method: "POST", path: "/collections", statuses: [200, 201, 409] })) {
+      throw new Error("typesense sync report must include collection create operation evidence");
+    }
+    if (
+      !hasSyncOperation(engine, {
+        method: "POST",
+        path: `/collections/${encoded}/documents/import`,
+        searchParam: { key: "action", value: "upsert" },
+        statuses: [200, 201, 202],
+      })
+    ) {
+      throw new Error("typesense sync report must include document import operation evidence");
+    }
+    return;
+  }
+  if (engine.engine === "meilisearch") {
+    if (!hasSyncOperation(engine, { method: "PATCH", path: `/indexes/${encoded}/settings`, statuses: [200, 201, 202] })) {
+      throw new Error("meilisearch sync report must include settings operation evidence");
+    }
+    if (
+      !hasSyncOperation(engine, {
+        method: "POST",
+        path: `/indexes/${encoded}/documents`,
+        searchParam: { key: "primaryKey", value: "id" },
+        statuses: [200, 201, 202],
+      })
+    ) {
+      throw new Error("meilisearch sync report must include document import operation evidence");
+    }
+  }
 }
 
 function searchEngineTargets(engines) {
@@ -236,6 +288,7 @@ export function assertSearchEngineSyncReport(report) {
     if (engine.operations.some((operation) => operation.bytes <= 0)) {
       throw new Error(`${engine.engine} operations must send non-empty request bodies`);
     }
+    assertSearchSyncOperations(engine, target);
   }
   return true;
 }
