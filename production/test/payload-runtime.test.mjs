@@ -55,6 +55,27 @@ test("Payload runtime preflight CLI explains missing report remediation", () => 
   assert.match(result.stderr, /Next: run `npm run payload:bootstrap`/);
 });
 
+test("Payload runtime generator explains blocked remediation", () => {
+  const reportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-build-`)}/payload-runtime-report.json`;
+  const result = spawnSync(process.execPath, ["production/scripts/build-payload-runtime-report.mjs"], {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      DATABASE_URL: "",
+      MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: reportPath,
+      PAYLOAD_SECRET: "",
+    },
+  });
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /Wrote Payload runtime report/);
+  assert.match(result.stdout, /Payload runtime blocked: payload_secret, database_url, database_tcp/);
+  assert.match(result.stdout, /Missing env: PAYLOAD_SECRET, DATABASE_URL/);
+  assert.match(result.stdout, /Next: run `npm run payload:bootstrap`/);
+  assert.ok(fs.existsSync(reportPath));
+});
+
 test("Payload runtime report rejects copied placeholder env values", async () => {
   const report = await buildPayloadRuntimeReport({
     databaseProbe: async () => {
