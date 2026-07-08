@@ -395,6 +395,10 @@ test("listing quality review packet writer and CLI honor output overrides", () =
 
   assert.equal(cli.status, 0, cli.stderr);
   assert.match(cli.stdout, /Wrote listing quality review packet/);
+  assert.match(cli.stdout, new RegExp(`Listing quality review rows required: ${report.rows.length}`));
+  assert.match(cli.stdout, /Admin import endpoint: POST \/api\/admin\/listing-quality\/import/);
+  assert.match(cli.stdout, /Next: complete the draft CSV with reviewer signoff/);
+  assert.match(cli.stdout, /npm run listing:preflight/);
   assert.equal(fs.existsSync(cliPacketPath), true);
   assert.equal(fs.existsSync(cliDraftPath), true);
 });

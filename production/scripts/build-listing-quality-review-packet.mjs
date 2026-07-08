@@ -37,3 +37,9 @@ const result = writeListingQualityReviewPacket(packet, {
 
 console.log(`Wrote listing quality review packet to ${result.packetPath}`);
 console.log(`Wrote listing quality review draft CSV to ${result.draftCsvPath}`);
+console.log(`Listing quality review rows required: ${packet.summary.expected_review_rows}`);
+console.log(`Launch review CSV: ${packet.paths.launch_review_csv}`);
+console.log(`Admin import endpoint: ${packet.admin.import_endpoint}`);
+console.log(
+  `Next: complete the draft CSV with reviewer signoff, write ${packet.paths.launch_review_csv} or set MS_REALTY_LISTING_QUALITY_REVIEW_PATH, then run \`npm run listing:preflight\`.`,
+);
