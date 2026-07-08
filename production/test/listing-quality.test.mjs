@@ -318,6 +318,17 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
         report,
         [
           "listing_id,media_reviewer,review_notes",
+          `${mediaReviewRow.listing_id},media_editor,Reviewed listing facts against CRM note`,
+        ].join("\n"),
+      ),
+    /media review_notes/,
+  );
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        [
+          "listing_id,media_reviewer,review_notes",
           `${mediaReviewRow.listing_id},media_editor,Review public gallery: currently ${mediaReviewRow.public_gallery_assets} public asset(s).`,
         ].join("\n"),
       ),

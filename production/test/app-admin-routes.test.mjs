@@ -54,7 +54,7 @@ function completeListingQualityReviewCsv(workbookCsv) {
       fields.includes("description") ? "Reviewed listing description" : "",
       needsFacts ? "editor_bg" : "",
       needsMedia ? "media_editor" : "",
-      "Reviewed from admin listing-quality workbook",
+      "Reviewed source gallery evidence from admin listing-quality workbook",
     ]
       .map(csvCell)
       .join(",");

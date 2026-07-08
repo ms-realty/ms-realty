@@ -314,7 +314,7 @@ function assertReviewerValue(listingId, field, value) {
   }
 }
 
-function assertReviewNotes(listingId, value) {
+function assertReviewNotes(listingId, value, { mediaRequired = false } = {}) {
   if (!filled(value)) throw new Error(`Listing ${listingId} requires review_notes`);
   const notes = String(value).trim();
   if (/^(done|example|n\/?a|none|ok|placeholder|reviewed|sample|tbd|test|todo|unknown)$/i.test(notes)) {
@@ -322,6 +322,14 @@ function assertReviewNotes(listingId, value) {
   }
   if (/^Review (public gallery|media alt text|gated media|360 tour)\b/i.test(notes)) {
     throw new Error(`Listing ${listingId} requires resolved review_notes, not draft instructions`);
+  }
+  if (
+    mediaRequired &&
+    !/(source|gallery|media|photo|image|asset|alt|tour|panorama|източник|галер|меди|сним|тур|панорам|источник|галере|фото)/i.test(
+      notes,
+    )
+  ) {
+    throw new Error(`Listing ${listingId} media review_notes must cite media or source evidence`);
   }
 }
 
@@ -346,7 +354,7 @@ export function validateListingQualityReviewCsv(report, csvText, { allowExtraRow
       assertReviewFactValue(listingId, FACT_FIELDS_BY_ISSUE[issue], row[FACT_FIELDS_BY_ISSUE[issue]]);
     }
     if (mediaIssues.length) assertReviewerValue(listingId, "media_reviewer", row.media_reviewer);
-    assertReviewNotes(listingId, row.review_notes);
+    assertReviewNotes(listingId, row.review_notes, { mediaRequired: mediaIssues.length > 0 });
 
     return {
       listing_id: listingId,
