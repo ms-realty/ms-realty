@@ -44,6 +44,21 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.vllm.tool_call_parser, "hermes");
   assert.equal(report.vllm.enable_auto_tool_choice, true);
   assert.deepEqual(report.vllm.launch_command.slice(-3), ["--enable-auto-tool-choice", "--tool-call-parser", "hermes"]);
+
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-hermes-provisioning-blocked-`);
+  const cli = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-hermes-provider-provisioning-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      PATH: process.env.PATH,
+      MS_REALTY_HERMES_PROVIDER_PROVISIONING_REPORT_PATH: `${dir}/hermes-provider-provisioning-report.json`,
+    },
+  });
+
+  assert.equal(cli.status, 0, cli.stderr);
+  assert.match(cli.stdout, /Hermes provider provisioning blocked: missing HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(cli.stdout, /Official Hermes Agent: https:\/\/hermes-agent\.nousresearch\.com\//);
+  assert.match(cli.stdout, /Next: install Hermes Agent/);
 });
 
 test("Hermes provisioning report redacts self-hosted credentials and keeps sensitive data local", () => {

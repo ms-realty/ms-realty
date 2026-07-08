@@ -12,3 +12,11 @@ const outPath = writeHermesProviderProvisioningReport(
 );
 
 console.log(`Wrote Hermes provider provisioning report to ${outPath}`);
+
+if (!report.ready) {
+  console.log(`Hermes provider provisioning blocked: missing ${report.missing.join(", ")}`);
+  console.log(`Official Hermes Agent: ${report.agent_runtime.official_url}`);
+  console.log(
+    "Next: install Hermes Agent, provision self-hosted vLLM with Hermes tool parsing, set HERMES_CHAT_COMPLETIONS_URL, then run `npm run hermes:provisioning` and `npm run hermes:worker`.",
+  );
+}
