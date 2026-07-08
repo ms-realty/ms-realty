@@ -7,6 +7,7 @@ import config from "../../payload.config.js";
 import {
   assertPayloadRuntimeReport,
   buildPayloadRuntimeReport,
+  payloadRuntimeImportSummary,
 } from "../lib/payload-runtime.mjs";
 import { payloadRuntimeState } from "../lib/launch-readiness.mjs";
 
@@ -42,6 +43,24 @@ test("Payload runtime report blocks missing launch env without leaking defaults"
   assert.equal(report.summary.database.status, "missing_env");
   assert.equal(report.checks.find((check) => check.id === "payload_config_import").status, "pass");
   assert.ok(report.next_actions.some((action) => action.includes("payload:bootstrap")));
+});
+
+test("Payload runtime import summary exposes blocked operator feedback", async () => {
+  const report = await buildPayloadRuntimeReport({
+    env: {},
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+  const summary = payloadRuntimeImportSummary(report);
+
+  assert.equal(summary.ready, false);
+  assert.equal(summary.status, "blocked");
+  assert.deepEqual(summary.missingEnv, ["PAYLOAD_SECRET", "DATABASE_URL"]);
+  assert.deepEqual(summary.placeholderEnv, []);
+  assert.deepEqual(summary.weakEnv, []);
+  assert.ok(summary.blockedChecks.includes("payload_secret"));
+  assert.ok(summary.blockedChecks.includes("database_url"));
+  assert.ok(summary.blockedChecks.includes("database_tcp"));
+  assert.ok(summary.nextActions.some((action) => action.includes("payload:bootstrap")));
 });
 
 test("Payload runtime preflight CLI explains missing report remediation", () => {

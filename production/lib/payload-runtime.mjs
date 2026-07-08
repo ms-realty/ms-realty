@@ -286,6 +286,19 @@ export function assertPayloadRuntimeReport(report) {
   return true;
 }
 
+export function payloadRuntimeImportSummary(report) {
+  assertPayloadRuntimeReport(report);
+  return {
+    ready: report.ready === true,
+    status: report.status,
+    missingEnv: report.summary.missing_env,
+    placeholderEnv: report.summary.placeholder_env,
+    weakEnv: report.summary.weak_env,
+    blockedChecks: report.checks.filter((item) => item.status !== "pass").map((item) => item.id),
+    nextActions: report.next_actions,
+  };
+}
+
 export function writePayloadRuntimeReport(report, outPath = DEFAULT_PAYLOAD_RUNTIME_REPORT) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
   assertPayloadRuntimeReport(report);

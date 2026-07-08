@@ -466,11 +466,21 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const payloadImportBlockedBody = await payloadImportBlocked.json();
       const payloadImportLocalBody = await payloadImportLocal.json();
       assert.equal(payloadImportBlocked.status, 202);
+      assert.equal(payloadImportBlockedBody.runtime.ready, false);
+      assert.equal(payloadImportBlockedBody.runtime.status, "blocked");
+      assert.deepEqual(payloadImportBlockedBody.runtime.missingEnv, ["PAYLOAD_SECRET", "DATABASE_URL"]);
+      assert.deepEqual(payloadImportBlockedBody.runtime.placeholderEnv, []);
+      assert.deepEqual(payloadImportBlockedBody.runtime.weakEnv, []);
+      assert.ok(payloadImportBlockedBody.runtime.blockedChecks.includes("payload_secret"));
+      assert.ok(payloadImportBlockedBody.runtime.blockedChecks.includes("database_url"));
+      assert.ok(payloadImportBlockedBody.runtime.blockedChecks.includes("database_tcp"));
       assert.equal(payloadImportBlockedBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "blocked");
       assert.equal(payloadImportLocal.status, 400);
       assert.match(payloadImportLocalBody.message, /localhost or placeholder/);
       assert.equal(payloadImport.status, 201);
       assert.equal(payloadImportBody.imported.outPath, payloadRuntimeReportPath);
+      assert.equal(payloadImportBody.runtime.ready, true);
+      assert.deepEqual(payloadImportBody.runtime.blockedChecks, []);
       assert.equal(payloadImportBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
       assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
 

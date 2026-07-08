@@ -68,7 +68,7 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
-import { writePayloadRuntimeReport } from "./payload-runtime.mjs";
+import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
@@ -778,14 +778,22 @@ export function createHttpApp({
       try {
         const report = parseJsonBody(request);
         const outPath = writePayloadRuntimeReport(report, payloadRuntimeReportPath || undefined);
+        const runtime = payloadRuntimeImportSummary(report);
         recordAudit({
           action: "payload_runtime_report_imported",
           actor: "operations",
           objectType: "payload_runtime_report",
           objectId: "payload-runtime",
-          metadata: { status: report.status, out_path: outPath },
+          metadata: {
+            blocked_checks: runtime.blockedChecks,
+            missing_env: runtime.missingEnv,
+            out_path: outPath,
+            placeholder_env: runtime.placeholderEnv,
+            status: report.status,
+            weak_env: runtime.weakEnv,
+          },
         });
-        return adminJson(report.ready ? 201 : 202, { imported: { outPath, summary: report.summary }, report: currentLaunchReadiness() });
+        return adminJson(report.ready ? 201 : 202, { imported: { outPath, summary: report.summary }, report: currentLaunchReadiness(), runtime });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

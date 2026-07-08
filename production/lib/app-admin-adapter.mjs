@@ -42,7 +42,7 @@ import {
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
-import { writePayloadRuntimeReport } from "./payload-runtime.mjs";
+import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -803,17 +803,25 @@ function importLiveServiceReport(input, config) {
 
 function importPayloadRuntimeReport(report, config) {
   const outPath = writePayloadRuntimeReport(report, config.payloadRuntimeReportPath || undefined);
+  const runtime = payloadRuntimeImportSummary(report);
   recordAudit(
     {
       action: "payload_runtime_report_imported",
       actor: "operations",
       objectType: "payload_runtime_report",
       objectId: "payload-runtime",
-      metadata: { status: report.status, out_path: outPath },
+      metadata: {
+        blocked_checks: runtime.blockedChecks,
+        missing_env: runtime.missingEnv,
+        out_path: outPath,
+        placeholder_env: runtime.placeholderEnv,
+        status: report.status,
+        weak_env: runtime.weakEnv,
+      },
     },
     config,
   );
-  return { imported: { outPath, summary: report.summary }, report: launchReadiness(config) };
+  return { imported: { outPath, summary: report.summary }, report: launchReadiness(config), runtime };
 }
 
 function importSeoEvidence(input, config) {
