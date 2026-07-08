@@ -165,6 +165,7 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(report.summary.database.host, "db.internal");
   assert.equal(report.summary.database.credentials_configured, true);
   assert.ok(report.next_actions.some((action) => action.includes("redacted Payload runtime report")));
+  assert.ok(report.next_actions.some((action) => action.includes("payload:preflight")));
   assert.equal(JSON.stringify(report).includes("not-written-to-report-32-byte-minimum"), false);
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
 });

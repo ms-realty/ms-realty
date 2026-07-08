@@ -180,7 +180,7 @@ export async function buildPayloadRuntimeReport({
     },
     checks,
     next_actions: ready
-      ? ["Import or mount the redacted Payload runtime report, then run npm run launch:preflight with the same PAYLOAD_SECRET and DATABASE_URL."]
+      ? ["Import or mount the redacted Payload runtime report, then run npm run payload:preflight and npm run launch:preflight with the same PAYLOAD_SECRET and DATABASE_URL."]
       : [
           "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
           "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
