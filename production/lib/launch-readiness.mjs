@@ -20,7 +20,13 @@ import {
   assertProductionDatabaseHost,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
-import { REQUIRED_EXPORTS, assertSeoEvidence, assertSeoSourceSummary, missingRequiredExport } from "./seo-evidence-contract.mjs";
+import {
+  REQUIRED_EXPORTS,
+  assertSeoEvidence,
+  assertSeoSourceSummary,
+  missingRequiredExport,
+  missingRequiredSources,
+} from "./seo-evidence-contract.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -226,19 +232,28 @@ function assertPassExternalSeoEvidence(report) {
   const seo = gateById(report, "external_seo_exports");
   if (seo?.status !== "pass") return;
   const evidence = seo.evidence || {};
-  if (
-    !Array.isArray(evidence.missing_required_sources) ||
-    evidence.missing_required_sources.length !== 0 ||
-    evidence.privacy_events?.status !== "imported"
-  ) {
-    throw new Error("Launch readiness external SEO requires imported privacy events and no missing sources");
+  const sourceSummaries = {
+    ...(evidence.sources || {}),
+    ...(evidence.analytics_export ? { analytics_export: evidence.analytics_export } : {}),
+    ...(evidence.privacy_events ? { privacy_events: evidence.privacy_events } : {}),
+  };
+  if (sourceSummaries.analytics_export?.status === "imported") {
+    assertSeoSourceSummary(sourceSummaries.analytics_export, "analytics_export");
   }
   for (const source of REQUIRED_EXPORTS) {
-    const sourceSummary = evidence.sources?.[source];
+    const sourceSummary = sourceSummaries[source];
     assertSeoSourceSummary(sourceSummary, source);
     if (missingRequiredExport(sourceSummary)) {
       throw new Error(`Launch readiness external SEO requires complete ${source} evidence`);
     }
+  }
+  const expectedMissing = missingRequiredSources(sourceSummaries);
+  if (
+    !Array.isArray(evidence.missing_required_sources) ||
+    JSON.stringify(evidence.missing_required_sources) !== JSON.stringify(expectedMissing) ||
+    expectedMissing.length !== 0
+  ) {
+    throw new Error("Launch readiness external SEO requires imported privacy or analytics evidence and no missing sources");
   }
 }
 
@@ -384,6 +399,14 @@ function warningsFrom(structuredData, listingQuality) {
   return Object.entries(warnings)
     .filter(([, count]) => count > 0)
     .map(([id, count]) => ({ id, count }));
+}
+
+function seoLaunchSourceSummaries(sourceSummaries) {
+  return Object.fromEntries(
+    [...REQUIRED_EXPORTS, "analytics_export", "privacy_events"]
+      .filter((source) => sourceSummaries[source])
+      .map((source) => [source, sourceSummaries[source]]),
+  );
 }
 
 export function publicLaunchReadinessPayload(report) {
@@ -678,7 +701,8 @@ export function buildLaunchReadinessReport({
       {
         missing_required_sources: seoEvidence.summary.missing_required_sources,
         privacy_events: seoEvidence.summary.sources.privacy_events,
-        sources: Object.fromEntries(REQUIRED_EXPORTS.map((source) => [source, seoEvidence.summary.sources[source]])),
+        analytics_export: seoEvidence.summary.sources.analytics_export,
+        sources: seoLaunchSourceSummaries(seoEvidence.summary.sources),
       },
       seoExportsReady ? "" : "Search Console, Yandex, and backlink exports are required before launch.",
     ),
@@ -771,13 +795,13 @@ export function assertLaunchReadinessReport(report) {
   assertPassRuntimeEvidence(report);
   assertPassAppLayerEvidence(report);
   assertPassMonitoringRollbackEvidence(report);
-  if (!report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
+  if (report.launch_ready && !report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }
   if (!Array.isArray(report.rollback_plan) || report.rollback_plan.length < 3) {
     throw new Error("Launch readiness must include a rollback plan");
   }
-  if (!report.gates.some((item) => item.id === "monitoring_rollback" && item.status === "pass")) {
+  if (report.launch_ready && !report.gates.some((item) => item.id === "monitoring_rollback" && item.status === "pass")) {
     throw new Error("Launch readiness must prove monitoring and rollback gate passed");
   }
   return true;

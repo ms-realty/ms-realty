@@ -670,6 +670,8 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
+  assert.equal(report.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
+  assert.equal(assertLaunchReadinessReport(report), true);
   assert.deepEqual(report.blockers, ["monitoring_rollback"]);
 });
 
