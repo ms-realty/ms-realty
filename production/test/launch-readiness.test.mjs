@@ -237,12 +237,20 @@ const readyPayloadRuntime = {
   status: "pass",
   path: "production/data/payload-runtime-report.json",
   summary: {
-    checks: 8,
+    checks: 9,
     missing_env: [],
     placeholder_env: [],
     weak_env: [],
     route_files: 4,
-    database: { status: "pass", credentials_configured: true, database: "ms_realty", host: "db.internal", port: 5432 },
+    database: {
+      status: "pass",
+      credentials_configured: true,
+      database: "ms_realty",
+      host: "db.ms-realty.bg",
+      network_scope: "public_dns",
+      port: 5432,
+      private_network_allowed: false,
+    },
   },
   checks: [
     { id: "payload_secret", status: "pass" },
@@ -252,7 +260,22 @@ const readyPayloadRuntime = {
     { id: "route:app/(payload)/graphql/route.js", status: "pass" },
     { id: "route:app/(payload)/graphql-playground/route.js", status: "pass" },
     { id: "payload_config_import", status: "pass" },
-    { id: "database_tcp", status: "pass", credentials_configured: true, database: "ms_realty", host: "db.internal", port: 5432 },
+    {
+      id: "database_network_scope",
+      status: "pass",
+      host: "db.ms-realty.bg",
+      network_scope: "public_dns",
+      private_network_allowed: false,
+    },
+    {
+      id: "database_tcp",
+      status: "pass",
+      credentials_configured: true,
+      database: "ms_realty",
+      host: "db.ms-realty.bg",
+      network_scope: "public_dns",
+      port: 5432,
+    },
   ],
 };
 
@@ -727,7 +750,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     payloadRuntime: {
       ...readyPayloadRuntime,
       checks: readyPayloadRuntime.checks.map((check) =>
-        check.id === "database_tcp" ? { ...check, host: "other-db.internal", port: "5432" } : check,
+        check.id === "database_tcp" ? { ...check, host: "other-db.ms-realty.bg", port: "5432" } : check,
       ),
     },
   });

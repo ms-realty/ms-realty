@@ -15,6 +15,8 @@ export function payloadRuntimeEnvExample() {
     "PAYLOAD_POSTGRES_HOST=127.0.0.1",
     "PAYLOAD_POSTGRES_PORT=5432",
     "DATABASE_URL=postgres://ms_realty_payload:replace-with-postgres-password@127.0.0.1:5432/ms_realty_payload",
+    "# Set to 1 only for a production private-network database host reachable by the app runtime.",
+    "MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST=0",
     "MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH=production/data/payload-runtime-report.json",
     "",
   ].join("\n");
@@ -52,7 +54,8 @@ export function payloadRuntimeBootstrapChecklist() {
     "2. Replace `PAYLOAD_SECRET` with `openssl rand -base64 32` output and replace the Postgres password placeholders.",
     "3. Start Postgres with `docker compose --env-file .env.payload-runtime -f production/docker-compose.payload.yml up -d payload-postgres`.",
     "4. Export or source the same private env file in the application runtime.",
-    "5. Run `npm run payload:runtime`, import or mount the redacted report, then run `npm run payload:preflight` and `npm run launch:preflight`.",
+    "5. If DATABASE_URL uses a production private-network host, set `MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST=1` in that private env.",
+    "6. Run `npm run payload:runtime`, import or mount the redacted report, then run `npm run payload:preflight` and `npm run launch:preflight`.",
   ];
 }
 

@@ -100,7 +100,7 @@ test("Payload runtime generator explains blocked remediation", () => {
 
   assert.equal(result.status, 0);
   assert.match(result.stdout, /Wrote Payload runtime report/);
-  assert.match(result.stdout, /Payload runtime blocked: payload_secret, database_url, database_tcp/);
+  assert.match(result.stdout, /Payload runtime blocked: payload_secret, database_url, database_network_scope, database_tcp/);
   assert.match(result.stdout, /Missing env: PAYLOAD_SECRET, DATABASE_URL/);
   assert.match(result.stdout, /Next: run `npm run payload:bootstrap`/);
   assert.ok(fs.existsSync(reportPath));
@@ -152,7 +152,7 @@ test("Payload runtime report passes with env and database reachability proof", a
   const report = await buildPayloadRuntimeReport({
     databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
     env: {
-      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
       PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
     },
     generatedAt: "2026-07-06T00:00:00Z",
@@ -162,8 +162,11 @@ test("Payload runtime report passes with env and database reachability proof", a
   assert.equal(report.ready, true);
   assert.deepEqual(report.summary.missing_env, []);
   assert.equal(report.summary.database.database, "ms_realty");
-  assert.equal(report.summary.database.host, "db.internal");
+  assert.equal(report.summary.database.host, "db.ms-realty.bg");
+  assert.equal(report.summary.database.network_scope, "public_dns");
+  assert.equal(report.summary.database.private_network_allowed, false);
   assert.equal(report.summary.database.credentials_configured, true);
+  assert.equal(report.checks.find((check) => check.id === "database_network_scope").status, "pass");
   assert.ok(report.next_actions.some((action) => action.includes("redacted Payload runtime report")));
   assert.ok(report.next_actions.some((action) => action.includes("payload:preflight") && action.includes("launch:preflight")));
   assert.throws(
@@ -176,6 +179,56 @@ test("Payload runtime report passes with env and database reachability proof", a
   );
   assert.equal(JSON.stringify(report).includes("not-written-to-report-32-byte-minimum"), false);
   assert.equal(JSON.stringify(report).includes("payload:secret"), false);
+});
+
+test("Payload runtime report blocks private database hosts without explicit launch evidence", async () => {
+  const probeCalls = [];
+  const blocked = await buildPayloadRuntimeReport({
+    databaseProbe: async (target) => {
+      probeCalls.push(target);
+      return { ...target, status: "pass" };
+    },
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertPayloadRuntimeReport(blocked), true);
+  assert.equal(blocked.ready, false);
+  assert.equal(probeCalls.length, 0);
+  assert.equal(blocked.summary.database.network_scope, "private_dns");
+  assert.equal(blocked.summary.database.private_network_allowed, false);
+  assert.equal(blocked.checks.find((check) => check.id === "database_network_scope").status, "fail");
+  assert.match(blocked.checks.find((check) => check.id === "database_tcp").error, /Private database host/);
+
+  const allowed = await buildPayloadRuntimeReport({
+    databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
+    env: {
+      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: "1",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertPayloadRuntimeReport(allowed), true);
+  assert.equal(allowed.ready, true);
+  assert.equal(allowed.summary.database.network_scope, "private_dns");
+  assert.equal(allowed.summary.database.private_network_allowed, true);
+  assert.equal(allowed.checks.find((check) => check.id === "database_network_scope").status, "pass");
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...allowed,
+        summary: { ...allowed.summary, database: { ...allowed.summary.database, private_network_allowed: false } },
+        checks: allowed.checks.map((check) =>
+          check.id === "database_network_scope" ? { ...check, private_network_allowed: false } : check,
+        ),
+      }),
+    /private-network approval/,
+  );
 });
 
 test("Payload runtime report rejects DATABASE_URL without a database name", async () => {
@@ -370,7 +423,7 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
   const report = await buildPayloadRuntimeReport({
     databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
     env: {
-      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
       PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
     },
     generatedAt: "2026-07-06T00:00:00Z",
@@ -406,7 +459,7 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
     () =>
       assertPayloadRuntimeReport({
         ...report,
-        checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, host: "other-db.internal" } : check)),
+        checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, host: "other-db.ms-realty.bg" } : check)),
       }),
     /database TCP target must match summary evidence/,
   );
@@ -426,7 +479,7 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
         summary: { ...report.summary, database: { ...report.summary.database, host: "127.0.0.1" } },
         checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, host: "127.0.0.1" } : check)),
       }),
-    /localhost or placeholder/,
+    /database network scope evidence/,
   );
 });
 
@@ -434,7 +487,7 @@ test("Payload runtime ready report requires route and config evidence", async ()
   const report = await buildPayloadRuntimeReport({
     databaseProbe: async ({ host, port, database }) => ({ database, host, port, status: "pass" }),
     env: {
-      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
       PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
     },
     generatedAt: "2026-07-06T00:00:00Z",

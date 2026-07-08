@@ -4,7 +4,7 @@
   "status": "blocked",
   "summary": {
     "admin_route": "/payload-admin",
-    "checks": 8,
+    "checks": 9,
     "database": {
       "status": "missing_env"
     },
@@ -52,6 +52,11 @@
       "status": "pass",
       "admin_route": "/payload-admin",
       "collections": 6
+    },
+    {
+      "id": "database_network_scope",
+      "status": "missing_env",
+      "env": "DATABASE_URL"
     },
     {
       "id": "database_tcp",

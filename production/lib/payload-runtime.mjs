@@ -17,11 +17,14 @@ const REQUIRED_CHECK_IDS = [
   "database_url",
   ...REQUIRED_ROUTE_FILES.map((file) => `route:${file}`),
   "payload_config_import",
+  "database_network_scope",
   "database_tcp",
 ];
 const REQUIRED_CHECK_ID_SET = new Set(REQUIRED_CHECK_IDS);
 const PAYLOAD_RUNTIME_CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "weak_secret", "fail"]);
 const PAYLOAD_RUNTIME_SECRET_FIELD_NAMES = new Set(["apikey", "authorization", "databaseurl", "password", "payloadsecret", "secret", "token"]);
+const PUBLIC_DATABASE_NETWORK_SCOPES = new Set(["public_dns", "public_ip"]);
+const PRIVATE_DATABASE_NETWORK_SCOPES = new Set(["private_dns", "private_ip"]);
 const REQUIRED_ENV_BY_CHECK = {
   payload_secret: "PAYLOAD_SECRET",
   database_url: "DATABASE_URL",
@@ -60,6 +63,48 @@ function hasSecretField(value) {
   });
 }
 
+function normalizeDatabaseHost(value) {
+  return String(value || "").toLowerCase().replace(/^\[|\]$/g, "");
+}
+
+function ipv4Octets(host) {
+  const parts = host.split(".").map((part) => Number(part));
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return null;
+  return parts;
+}
+
+function databaseHostNetworkScope(value) {
+  const host = normalizeDatabaseHost(value);
+  const ipVersion = net.isIP(host);
+  if (ipVersion === 4) {
+    const octets = ipv4Octets(host);
+    if (!octets) return "reserved";
+    const [a, b, c] = octets;
+    if (
+      a === 0 ||
+      a === 127 ||
+      (a === 169 && b === 254) ||
+      (a === 192 && b === 0 && c === 2) ||
+      (a === 198 && b === 51 && c === 100) ||
+      (a === 203 && b === 0 && c === 113)
+    ) {
+      return "reserved";
+    }
+    if (a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127)) {
+      return "private_ip";
+    }
+    return "public_ip";
+  }
+  if (ipVersion === 6) {
+    if (host === "::" || host === "::1" || host.startsWith("fe80:")) return "reserved";
+    if (host.startsWith("fc") || host.startsWith("fd")) return "private_ip";
+    return "public_ip";
+  }
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) return "reserved";
+  if (host.endsWith(".internal") || host.endsWith(".corp") || host.endsWith(".lan") || host.endsWith(".private")) return "private_dns";
+  return "public_dns";
+}
+
 function assertPayloadRuntimeReportHasNoSecrets(report) {
   if (hasSecretField(report) || /Bearer\s+|sk-[A-Za-z0-9_-]+|:\/\/[^/@\s]+:[^/@\s]+@/i.test(JSON.stringify(report))) {
     throw new Error("Payload runtime report must not persist secrets");
@@ -67,12 +112,38 @@ function assertPayloadRuntimeReportHasNoSecrets(report) {
 }
 
 export function assertProductionDatabaseHost(value) {
-  const host = String(value || "").toLowerCase().replace(/^\[|\]$/g, "");
+  const host = normalizeDatabaseHost(value);
+  const networkScope = databaseHostNetworkScope(host);
   const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
   const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
-  if (!host || reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
+  if (!host || networkScope === "reserved" || reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
     throw new Error("Payload runtime database host must not use localhost or placeholder database hosts");
   }
+}
+
+function privateDatabaseHostAllowed(env) {
+  return ["1", "true", "yes"].includes(String(env.MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST || "").trim().toLowerCase());
+}
+
+function databaseNetworkScopeCheck(target, env) {
+  const privateNetworkAllowed = privateDatabaseHostAllowed(env);
+  const evidence = {
+    host: target.host,
+    network_scope: target.network_scope,
+    private_network_allowed: privateNetworkAllowed,
+  };
+  if (PUBLIC_DATABASE_NETWORK_SCOPES.has(target.network_scope)) return check("database_network_scope", "pass", evidence);
+  if (PRIVATE_DATABASE_NETWORK_SCOPES.has(target.network_scope)) {
+    if (privateNetworkAllowed) return check("database_network_scope", "pass", evidence);
+    return check("database_network_scope", "fail", {
+      ...evidence,
+      error: "Private database host requires MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST=1 launch evidence",
+    });
+  }
+  return check("database_network_scope", "fail", {
+    ...evidence,
+    error: "Payload runtime database host must be public or explicitly approved private network evidence",
+  });
 }
 
 function databaseTarget(connectionString) {
@@ -89,6 +160,7 @@ function databaseTarget(connectionString) {
     credentials_configured: true,
     database,
     host: parsed.hostname,
+    network_scope: databaseHostNetworkScope(parsed.hostname),
     port: Number(parsed.port || 5432),
   };
 }
@@ -143,21 +215,45 @@ export async function buildPayloadRuntimeReport({
   if (databaseUrl.status === "pass") {
     try {
       const target = databaseTarget(env.DATABASE_URL);
-      const probe = await databaseProbe(target);
-      database = { ...target, ...probe };
-      checks.push(
-        check("database_tcp", probe.status, {
-          credentials_configured: target.credentials_configured,
-          database: target.database,
-          host: target.host,
-          port: target.port,
-        }),
-      );
+      const networkScope = databaseNetworkScopeCheck(target, env);
+      checks.push(networkScope);
+      if (networkScope.status !== "pass") {
+        database = {
+          ...target,
+          private_network_allowed: networkScope.private_network_allowed,
+          status: "fail",
+          error: networkScope.error,
+        };
+        checks.push(
+          check("database_tcp", "fail", {
+            error: networkScope.error,
+            host: target.host,
+            network_scope: target.network_scope,
+            port: target.port,
+          }),
+        );
+      } else {
+        const probe = await databaseProbe(target);
+        database = { ...target, private_network_allowed: networkScope.private_network_allowed, ...probe };
+        checks.push(
+          check("database_tcp", probe.status, {
+            credentials_configured: target.credentials_configured,
+            database: target.database,
+            host: target.host,
+            network_scope: target.network_scope,
+            port: target.port,
+          }),
+        );
+      }
     } catch (error) {
       database = { error: error.message, status: "fail" };
+      checks.push(check("database_network_scope", "fail", { error: error.message }));
       checks.push(check("database_tcp", "fail", { error: error.message }));
     }
   } else {
+    checks.push(
+      check("database_network_scope", databaseUrl.status, { env: "DATABASE_URL", ...(databaseUrl.error ? { error: databaseUrl.error } : {}) }),
+    );
     checks.push(check("database_tcp", databaseUrl.status, { env: "DATABASE_URL", ...(databaseUrl.error ? { error: databaseUrl.error } : {}) }));
   }
 
@@ -246,13 +342,31 @@ export function assertPayloadRuntimeReport(report) {
     throw new Error("Payload runtime weak env summary must match checks");
   }
   const databaseTcp = report.checks.find((item) => item.id === "database_tcp");
+  const databaseNetworkScope = report.checks.find((item) => item.id === "database_network_scope");
   if (report.summary.database?.status !== databaseTcp.status) {
     throw new Error("Payload runtime database summary must match database_tcp check");
+  }
+  if (
+    databaseNetworkScope.status === "pass" &&
+    (!databaseNetworkScope.host ||
+      !databaseNetworkScope.network_scope ||
+      ![...PUBLIC_DATABASE_NETWORK_SCOPES, ...PRIVATE_DATABASE_NETWORK_SCOPES].includes(databaseNetworkScope.network_scope) ||
+      typeof databaseNetworkScope.private_network_allowed !== "boolean")
+  ) {
+    throw new Error("Payload runtime database network scope must include host, scope, and private-network evidence");
+  }
+  if (
+    databaseNetworkScope.status === "pass" &&
+    PRIVATE_DATABASE_NETWORK_SCOPES.has(databaseNetworkScope.network_scope) &&
+    databaseNetworkScope.private_network_allowed !== true
+  ) {
+    throw new Error("Payload runtime private database network scope must include explicit private-network approval");
   }
   if (
     databaseTcp.status === "pass" &&
     (report.summary.database.database !== databaseTcp.database ||
       report.summary.database.host !== databaseTcp.host ||
+      report.summary.database.network_scope !== databaseTcp.network_scope ||
       report.summary.database.port !== databaseTcp.port ||
       report.summary.database.credentials_configured !== databaseTcp.credentials_configured)
   ) {
@@ -276,14 +390,25 @@ export function assertPayloadRuntimeReport(report) {
     ready &&
     (!report.summary.database.database ||
       !report.summary.database.host ||
+      !report.summary.database.network_scope ||
       !Number.isInteger(report.summary.database.port) ||
       report.summary.database.credentials_configured !== true ||
       !databaseTcp.database ||
       !databaseTcp.host ||
+      !databaseTcp.network_scope ||
       !Number.isInteger(databaseTcp.port) ||
       databaseTcp.credentials_configured !== true)
   ) {
     throw new Error("Payload runtime ready report must include database TCP target evidence");
+  }
+  if (
+    ready &&
+    (databaseNetworkScope.status !== "pass" ||
+      report.summary.database.host !== databaseNetworkScope.host ||
+      report.summary.database.network_scope !== databaseNetworkScope.network_scope ||
+      report.summary.database.private_network_allowed !== databaseNetworkScope.private_network_allowed)
+  ) {
+    throw new Error("Payload runtime ready report must include database network scope evidence");
   }
   if (ready) {
     assertProductionDatabaseHost(report.summary.database.host);

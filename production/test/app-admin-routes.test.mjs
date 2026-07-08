@@ -487,7 +487,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const payloadRuntimeReport = await buildPayloadRuntimeReport({
         databaseProbe: async ({ database, host, port }) => ({ database, host, port, status: "pass" }),
         env: {
-          DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+          DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
           PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
         },
         generatedAt: "2026-07-06T00:00:00Z",
@@ -538,7 +538,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.ok(payloadImportBlockedBody.runtime.blockedChecks.includes("database_tcp"));
       assert.equal(payloadImportBlockedBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "blocked");
       assert.equal(payloadImportLocal.status, 400);
-      assert.match(payloadImportLocalBody.message, /localhost or placeholder/);
+      assert.match(payloadImportLocalBody.message, /database network scope evidence/);
       assert.equal(payloadImport.status, 201);
       assert.equal(payloadImportBody.imported.outPath, payloadRuntimeReportPath);
       assert.equal(payloadImportBody.runtime.ready, true);

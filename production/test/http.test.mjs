@@ -1351,7 +1351,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const payloadReport = await buildPayloadRuntimeReport({
     databaseProbe: async ({ database, host, port }) => ({ database, host, port, status: "pass" }),
     env: {
-      DATABASE_URL: "postgres://payload:secret@db.internal:5432/ms_realty",
+      DATABASE_URL: "postgres://payload:secret@db.ms-realty.bg:5432/ms_realty",
       PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
     },
     generatedAt: "2026-07-06T00:00:00Z",
