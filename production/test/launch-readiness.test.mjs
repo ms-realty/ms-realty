@@ -1154,6 +1154,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /npm run hermes:worker/);
   assert.match(markdown, /npm run live:report/);
   assert.match(markdown, /npm run live:preflight/);
+  assert.match(markdown, /GET \/api\/admin\/live-services/);
   assert.match(markdown, /GET \/api\/admin\/live-service-provisioning/);
   assert.match(markdown, /search-engine-sync-report\.json\.example/);
   assert.match(markdown, /live-service-report-template\?source=typesense_meilisearch_sync/);

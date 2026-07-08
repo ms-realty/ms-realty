@@ -280,6 +280,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
@@ -686,6 +687,19 @@ export function createHttpApp({
           report: currentListingQualityReport({ generatedAt }),
           reviewPath: listingQualityReviewPath || undefined,
           generatedAt,
+        }),
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/live-services") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, {
+        kind: "admin_live_services",
+        live_services: buildLiveServicePreflightReport({
+          generatedAt: reviewedAt || new Date().toISOString(),
+          syncReportPath: searchSyncReportPath || undefined,
+          queryReportPath: searchQueryReportPath || undefined,
+          hermesReportPath: hermesWorkerReportPath || undefined,
         }),
       });
     }

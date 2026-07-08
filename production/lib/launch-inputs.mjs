@@ -120,6 +120,7 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 - Live evidence capture: \`npm run live:capture\` runs search sync, search query, Hermes draft worker, and validates the three report outputs.
 - Individual debug commands: \`npm run search:sync\`, \`npm run search:query\`, \`npm run hermes:worker\`.
 - Status report: \`npm run live:report\` writes current missing/invalid live-service report state without clearing the launch gate.
+- Admin live-services status endpoint: \`GET /api/admin/live-services\`.
 - Report preflight: \`npm run live:preflight\`.
 - Report examples: \`production/data/search-engine-sync-report.json.example\`, \`production/data/search-engine-query-report.json.example\`, \`production/data/hermes-draft-worker-report.json.example\`.
 - Admin template endpoint: \`GET /api/admin/live-service-report-template?source=typesense_meilisearch_sync\`, \`?source=typesense_meilisearch_query\`, \`?source=hermes_draft_worker\`.

@@ -502,6 +502,7 @@ function migrationReviewPayload(registry, url, config) {
     launchReadinessExportEndpoint: "/api/admin/launch-readiness/export",
     launchInputChecklistEndpoint: "/api/admin/launch-input-checklist",
     preflightReportsEndpoint: "/api/admin/preflight-reports",
+    liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
@@ -980,6 +981,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
           report: currentListingQualityReport(config, { generatedAt }),
           reviewPath: config.listingQualityReviewPath || undefined,
           generatedAt,
+        }),
+      });
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/live-services") {
+      const generatedAt = config.reviewedAt || new Date().toISOString();
+      return jsonResponse(200, {
+        kind: "admin_live_services",
+        live_services: buildLiveServicePreflightReport({
+          generatedAt,
+          syncReportPath: config.searchSyncReportPath || undefined,
+          queryReportPath: config.searchQueryReportPath || undefined,
+          hermesReportPath: config.hermesWorkerReportPath || undefined,
         }),
       });
     }

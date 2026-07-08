@@ -140,6 +140,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const launchReadinessExportRoute = await import("../../app/api/admin/launch-readiness/export/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const preflightReportsRoute = await import("../../app/api/admin/preflight-reports/route.js");
+      const liveServicesRoute = await import("../../app/api/admin/live-services/route.js");
       const liveServiceProvisioningRoute = await import("../../app/api/admin/live-service-provisioning/route.js");
       const payloadRuntimeRoute = await import("../../app/api/admin/payload-runtime/route.js");
       const listingQualityRoute = await import("../../app/api/admin/listing-quality/route.js");
@@ -276,6 +277,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.ok(preflightReportsBody.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
       assert.equal(preflightReportsBody.reports.payload_runtime.status, "missing_report");
 
+      const liveServices = await liveServicesRoute.GET(new Request("https://example.test/api/admin/live-services", { headers: auth }));
+      const liveServicesBody = await liveServices.json();
+      assert.equal(liveServices.status, 200);
+      assert.equal(liveServicesBody.kind, "admin_live_services");
+      assert.equal(liveServicesBody.live_services.status, "blocked");
+      assert.ok(liveServicesBody.live_services.summary.missing_report > 0);
+
       const liveServiceProvisioning = await liveServiceProvisioningRoute.GET(
         new Request("https://example.test/api/admin/live-service-provisioning", { headers: auth }),
       );
@@ -405,6 +413,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.routeMap.mappedListings, 165);
       assert.equal(migrationReviewBody.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
       assert.equal(migrationReviewBody.preflightReportsEndpoint, "/api/admin/preflight-reports");
+      assert.equal(migrationReviewBody.liveServicesEndpoint, "/api/admin/live-services");
       assert.equal(migrationReviewBody.liveServiceProvisioningEndpoint, "/api/admin/live-service-provisioning");
       assert.equal(migrationReviewBody.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
@@ -419,6 +428,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtml.status, 200);
       assert.equal(migrationReviewHtml.headers.get("content-type"), "text/html; charset=utf-8");
       assert.equal(migrationReviewHtmlBody.includes('data-preflight-reports-endpoint="/api/admin/preflight-reports"'), true);
+      assert.equal(migrationReviewHtmlBody.includes('data-live-services-endpoint="/api/admin/live-services"'), true);
       assert.equal(
         migrationReviewHtmlBody.includes('data-live-service-provisioning-endpoint="/api/admin/live-service-provisioning"'),
         true,
