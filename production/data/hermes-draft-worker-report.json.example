@@ -59,6 +59,8 @@
   },
   "ledger_path": "production/data/translation-tasks.jsonl",
   "audit_path": "production/data/hermes-audit.jsonl",
+  "audit_log_path": "production/data/audit-log.jsonl",
+  "audit_log_rows": 1,
   "summary": {
     "attempted": 1,
     "persisted": 1,

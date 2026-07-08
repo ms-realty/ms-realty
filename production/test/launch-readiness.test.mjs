@@ -198,7 +198,7 @@ const readyLiveServices = [
         tool_call_parser: "hermes",
         sensitive_data_allowed: true,
       },
-      audit_log_rows: null,
+      audit_log_rows: 1,
     },
   },
 ];
@@ -357,6 +357,8 @@ function writeLiveReportFixtures(dir) {
         tool_call_parser: "hermes",
         sensitive_data_allowed: true,
       },
+      audit_log_path: `${dir}/audit-log.jsonl`,
+      audit_log_rows: 1,
       persisted: [{ status: "hermes_drafted", public_indexable: false }],
       rejected: [],
     })}\n`,
@@ -836,6 +838,19 @@ test("launch readiness validator rejects weak live service operation evidence", 
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
+  const weakHermesAudit = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices.map((item) =>
+      item.source === "hermes_draft_worker" ? { ...item, evidence: { ...item.evidence, audit_log_rows: 0 } } : item,
+    ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
   const weakSyncOperation = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
     routeMap,
@@ -892,6 +907,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
 
   assert.throws(() => assertLaunchReadinessReport(withoutQueryOperation), /search query operation evidence/);
   assert.throws(() => assertLaunchReadinessReport(weakHermesProvider), /self-hosted Hermes provider evidence/);
+  assert.throws(() => assertLaunchReadinessReport(weakHermesAudit), /Hermes audit coverage evidence/);
   assert.throws(() => assertLaunchReadinessReport(weakSyncOperation), /search sync operation evidence/);
   assert.throws(() => assertLaunchReadinessReport(wrongSyncPath), /search sync operation evidence/);
 });

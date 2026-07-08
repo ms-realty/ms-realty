@@ -188,6 +188,9 @@ function assertLaunchLiveServiceEvidence(source, report) {
     if (report.provider?.mode !== "self_hosted" || report.provider?.sensitive_data_allowed !== true) {
       throw new Error("Hermes worker launch evidence must use the self-hosted sensitive-data provider");
     }
+    if (!report.audit_log_path || report.audit_log_rows !== report.summary?.attempted) {
+      throw new Error("Hermes worker launch evidence audit log must cover every attempted model call");
+    }
   }
 }
 
@@ -565,6 +568,9 @@ function assertLiveServiceHermesProviderEvidence(item) {
     provider.sensitive_data_allowed !== true
   ) {
     throw new Error("Launch readiness live services require self-hosted Hermes provider evidence");
+  }
+  if (item.evidence?.audit_log_rows !== item.summary?.attempted) {
+    throw new Error("Launch readiness live services require Hermes audit coverage evidence");
   }
 }
 

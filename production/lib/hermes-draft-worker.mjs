@@ -335,7 +335,7 @@ export function assertHermesDraftWorkerReport(report) {
   if (report.persisted.length !== report.summary.persisted || report.rejected.length !== report.summary.rejected) {
     throw new Error("Hermes worker row counts must match summary");
   }
-  if (report.audit_log_path && report.audit_log_rows !== report.summary.attempted) {
+  if (!report.audit_log_path || report.audit_log_rows !== report.summary.attempted) {
     throw new Error("Hermes worker audit log must cover every attempted model call");
   }
   for (const row of report.persisted) {

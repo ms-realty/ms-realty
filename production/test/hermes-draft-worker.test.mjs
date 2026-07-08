@@ -228,6 +228,8 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
       tool_call_parser: "hermes",
       sensitive_data_allowed: true,
     },
+    audit_log_path: "production/data/audit-log.jsonl",
+    audit_log_rows: 1,
     summary: { attempted: 1, persisted: 1, rejected: 0 },
     persisted: [{ id: "translation-listing-MS-TEST-1-he", status: "hermes_drafted", public_indexable: false }],
     rejected: [],
@@ -312,6 +314,10 @@ test("Hermes draft worker report rejects generic runtime evidence", () => {
   assert.throws(
     () => assertHermesDraftWorkerReport({ ...report, persisted: [], rejected: [] }),
     /row counts/,
+  );
+  assert.throws(
+    () => assertHermesDraftWorkerReport({ ...report, audit_log_path: null, audit_log_rows: 0 }),
+    /audit log/,
   );
 });
 
