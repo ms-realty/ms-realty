@@ -15,6 +15,7 @@ import {
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   buildListingQualityReviewPacket,
+  listingQualityImportSummary,
   renderListingQualityReviewDraft,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
@@ -291,10 +292,17 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   ].join("\n");
 
   const result = validateListingQualityReviewCsv(report, csv);
+  const importSummary = listingQualityImportSummary(report, result);
 
   assert.equal(result.summary.review_rows, 1);
   assert.equal(result.summary.expected_review_rows, report.rows.length);
   assert.equal(result.summary.missing_review_rows, report.rows.length - 1);
+  assert.equal(importSummary.ready, false);
+  assert.equal(importSummary.status, "blocked");
+  assert.equal(importSummary.reviewRows, 1);
+  assert.equal(importSummary.missingReviewRows, report.rows.length - 1);
+  assert.ok(importSummary.pendingReviewSample.length > 0);
+  assert.notEqual(importSummary.pendingReviewSample[0].listing_id, row.listing_id);
   assert.equal(result.summary.facts_review_rows, 1);
   const expectedMediaRows = row.issues.some((issue) => ["media_review_pending", "thin_public_gallery"].includes(issue)) ? 1 : 0;
   assert.equal(result.summary.media_review_rows, expectedMediaRows);

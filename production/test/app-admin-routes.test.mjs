@@ -718,6 +718,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         listingQualityImportBody.reviewSummary.expected_review_rows,
         listingQualityImportBody.imported + listingQualityImportBody.missingReviewRows,
       );
+      assert.equal(listingQualityImportBody.reviewImport.ready, false);
+      assert.equal(listingQualityImportBody.reviewImport.status, "blocked");
+      assert.equal(listingQualityImportBody.reviewImport.reviewRows, listingQualityImportBody.imported);
+      assert.equal(listingQualityImportBody.reviewImport.missingReviewRows, listingQualityImportBody.missingReviewRows);
+      assert.ok(listingQualityImportBody.reviewImport.pendingReviewSample.length > 0);
       assert.equal(listingQualityImportBody.reviewPersisted, false);
       assert.equal(listingQualityImportBody.reviewPath, null);
       assert.equal(listingQualityImportBody.edits[0].edit.media_reviewer, "media_editor");
@@ -967,6 +972,9 @@ test("Next admin listing-quality import persists complete launch review CSV", as
       assert.equal(imported.status, 201);
       assert.equal(importedBody.imported, parseCsv(workbookCsv).length);
       assert.equal(importedBody.reviewPersisted, true);
+      assert.equal(importedBody.reviewImport.ready, true);
+      assert.equal(importedBody.reviewImport.status, "ready");
+      assert.deepEqual(importedBody.reviewImport.pendingReviewSample, []);
       assert.equal(importedBody.reviewPath, listingQualityReviewPath);
       assert.equal(importedBody.reviewPersistenceError, "");
       assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);
@@ -1038,6 +1046,9 @@ test("Next admin listing-quality import persists complete review for mounted lis
       assert.equal(imported.status, 201);
       assert.equal(importedBody.imported, parseCsv(workbookCsv).length);
       assert.equal(importedBody.reviewPersisted, true);
+      assert.equal(importedBody.reviewImport.ready, true);
+      assert.equal(importedBody.reviewImport.status, "ready");
+      assert.deepEqual(importedBody.reviewImport.pendingReviewSample, []);
       assert.equal(importedBody.reviewPath, listingQualityReviewPath);
       assert.equal(importedBody.reviewPersistenceError, "");
       assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);

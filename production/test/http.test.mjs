@@ -1007,6 +1007,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     qualityImported.body.reviewSummary.expected_review_rows,
     qualityImported.body.imported + qualityImported.body.missingReviewRows,
   );
+  assert.equal(qualityImported.body.reviewImport.ready, false);
+  assert.equal(qualityImported.body.reviewImport.status, "blocked");
+  assert.equal(qualityImported.body.reviewImport.reviewRows, qualityImported.body.imported);
+  assert.equal(qualityImported.body.reviewImport.missingReviewRows, qualityImported.body.missingReviewRows);
+  assert.ok(qualityImported.body.reviewImport.pendingReviewSample.length > 0);
   assert.equal(qualityImported.body.reviewPersisted, false);
   assert.equal(qualityImported.body.reviewPath, null);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
@@ -1216,6 +1221,9 @@ test("HTTP admin persists complete listing quality review CSV as launch evidence
   assert.equal(imported.status, 201);
   assert.equal(imported.body.imported, parseCsv(workbookCsv).length);
   assert.equal(imported.body.reviewPersisted, true);
+  assert.equal(imported.body.reviewImport.ready, true);
+  assert.equal(imported.body.reviewImport.status, "ready");
+  assert.deepEqual(imported.body.reviewImport.pendingReviewSample, []);
   assert.equal(imported.body.reviewPath, listingQualityReviewPath);
   assert.equal(imported.body.reviewPersistenceError, "");
   assert.equal(fs.readFileSync(listingQualityReviewPath, "utf8"), reviewCsv);

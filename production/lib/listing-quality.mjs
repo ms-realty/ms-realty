@@ -590,6 +590,30 @@ export function buildListingQualityPreflightReport({
   };
 }
 
+export function listingQualityImportSummary(report, review, { reviewPath = null, reviewPersistenceError = "" } = {}) {
+  const reviewed = new Set(review.reviews.map((row) => row.listing_id));
+  const missingRows = report.rows.filter((row) => !reviewed.has(row.listing_id));
+  const ready = review.summary.missing_review_rows === 0 && Boolean(reviewPath);
+  return {
+    ready,
+    status: ready ? "ready" : "blocked",
+    expectedReviewRows: review.summary.expected_review_rows,
+    reviewRows: review.summary.review_rows,
+    missingReviewRows: review.summary.missing_review_rows,
+    reviewPersisted: Boolean(reviewPath),
+    reviewPath,
+    reviewPersistenceError,
+    pendingReviewSample: pendingReviewSample(missingRows),
+    nextActions: ready
+      ? ["Run npm run launch:preflight with the same listing quality review path."]
+      : [
+          "Complete the missing listing review rows in production/data/listing-quality-workbook.csv.",
+          "Import the complete CSV through /api/admin/listing-quality/import.",
+          "Run npm run listing:preflight before launch:preflight.",
+        ],
+  };
+}
+
 export function assertListingQualityPreflightReport(report) {
   if (!report.generated_at || Number.isNaN(Date.parse(report.generated_at))) {
     throw new Error("Listing quality preflight report must include valid generated_at");
