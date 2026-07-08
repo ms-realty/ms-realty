@@ -307,6 +307,10 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   const expectedMediaRows = row.issues.some((issue) => ["media_review_pending", "thin_public_gallery"].includes(issue)) ? 1 : 0;
   assert.equal(result.summary.media_review_rows, expectedMediaRows);
   assert.equal(result.reviews[0].listing_id, row.listing_id);
+  const completeResult = validateListingQualityReviewCsv(report, completeListingQualityReviewCsv(report));
+  const completeImportSummary = listingQualityImportSummary(report, completeResult, { reviewPath: "/tmp/listing-quality.csv" });
+  assert.equal(completeImportSummary.ready, true);
+  assert.ok(completeImportSummary.nextActions.some((action) => action.includes("listing:preflight")));
   const reviewValues = { price_eur: "123000", bedrooms: "2", description: "Reviewed listing description" };
   const expectedPatch = Object.fromEntries(
     Object.entries(reviewValues).filter(([field]) => row.required_editor_fields.includes(field)),

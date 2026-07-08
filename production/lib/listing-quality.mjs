@@ -605,7 +605,7 @@ export function listingQualityImportSummary(report, review, { reviewPath = null,
     reviewPersistenceError,
     pendingReviewSample: pendingReviewSample(missingRows),
     nextActions: ready
-      ? ["Run npm run launch:preflight with the same listing quality review path."]
+      ? ["Run npm run listing:preflight, then npm run launch:preflight with the same listing quality review path."]
       : [
           "Complete the missing listing review rows in production/data/listing-quality-workbook.csv.",
           "Import the complete CSV through /api/admin/listing-quality/import.",
