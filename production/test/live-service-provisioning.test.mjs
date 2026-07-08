@@ -153,6 +153,18 @@ test("live service provisioning report requires complete evidence shape", async 
     /duplicate check typesense_url/,
   );
   assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        checks: report.checks.map((check) => (check.id === "typesense_health" ? { ...check, status: "skipped" } : check)),
+      }),
+    /unknown status/,
+  );
+  assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, summary: { ...report.summary, services: ["typesense"] } }),
+    /required services/,
+  );
+  assert.throws(
     () => assertLiveServiceProvisioningReport({ ...report, summary: { ...report.summary, missing_env: [] } }),
     /missing env summary/,
   );

@@ -20,6 +20,8 @@ const REQUIRED_CHECK_IDS = [
   "meilisearch_health",
   "hermes_provider",
 ];
+const REQUIRED_SERVICES = ["typesense", "meilisearch", "hermes"];
+const CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "fail"]);
 
 function redactUrl(value) {
   if (!value) return null;
@@ -143,7 +145,7 @@ export async function buildLiveServiceProvisioningReport({
       checks: checks.length,
       missing_env: [...new Set(missingEnv)],
       placeholder_env: [...new Set(placeholderEnv)],
-      services: ["typesense", "meilisearch", "hermes"],
+      services: REQUIRED_SERVICES,
     },
     checks,
     hermes: {
@@ -172,6 +174,7 @@ export function assertLiveServiceProvisioningReport(report) {
   const checkIds = new Set();
   for (const check of report.checks) {
     if (!check?.id) throw new Error("Live service provisioning checks must include ids");
+    if (!CHECK_STATUSES.has(check.status)) throw new Error(`Live service provisioning check ${check.id} has unknown status`);
     if (checkIds.has(check.id)) throw new Error(`Live service provisioning report has duplicate check ${check.id}`);
     checkIds.add(check.id);
   }
@@ -185,6 +188,9 @@ export function assertLiveServiceProvisioningReport(report) {
   }
   if (!report.summary || !Array.isArray(report.summary.missing_env) || !Array.isArray(report.summary.placeholder_env)) {
     throw new Error("Live service provisioning report must summarize missing and placeholder env");
+  }
+  if (JSON.stringify(report.summary.services) !== JSON.stringify(REQUIRED_SERVICES)) {
+    throw new Error("Live service provisioning services summary must match required services");
   }
   if (report.summary.checks !== report.checks.length) throw new Error("Live service provisioning summary check count must match checks");
   const missingEnv = [
