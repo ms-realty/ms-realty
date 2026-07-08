@@ -46,6 +46,26 @@
         "duplicate_rows": 0,
         "placeholder_rows": 0,
         "matched_source_domains": []
+      },
+      "analytics_export": {
+        "source": "analytics_export",
+        "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/analytics.csv",
+        "status": "missing_export",
+        "row_count": 0,
+        "matched_rows": 0,
+        "signal_rows": 0,
+        "unmatched_rows": 0,
+        "duplicate_rows": 0,
+        "placeholder_rows": 0,
+        "matched_source_domains": []
+      },
+      "privacy_events": {
+        "source": "privacy_events",
+        "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
+        "status": "imported",
+        "row_count": 25,
+        "matched_rows": 11,
+        "unmatched_rows": 14
       }
     }
   },

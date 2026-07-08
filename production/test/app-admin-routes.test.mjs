@@ -287,6 +287,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(seoPreflightBody.kind, "admin_seo_preflight");
       assert.equal(seoPreflightBody.seo.status, "blocked");
       assert.ok(seoPreflightBody.seo.summary.missing_required_sources.includes("search_console"));
+      assert.equal(seoPreflightBody.seo.summary.sources.privacy_events.status, "imported");
 
       const liveServices = await liveServicesRoute.GET(new Request("https://example.test/api/admin/live-services", { headers: auth }));
       const liveServicesBody = await liveServices.json();

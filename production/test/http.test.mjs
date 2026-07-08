@@ -1019,6 +1019,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(seoPreflight.body.kind, "admin_seo_preflight");
   assert.equal(seoPreflight.body.seo.status, "blocked");
   assert.ok(seoPreflight.body.seo.summary.missing_required_sources.includes("search_console"));
+  assert.equal(seoPreflight.body.seo.summary.sources.privacy_events.status, "imported");
   assert.equal(liveServicesUnauthorized.status, 401);
   assert.equal(liveServices.status, 200);
   assert.equal(liveServices.body.kind, "admin_live_services");

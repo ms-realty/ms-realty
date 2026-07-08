@@ -341,8 +341,15 @@ export function validateSeoEvidenceInputs(options = {}) {
   };
 }
 
-export function buildSeoEvidencePreflightReport(options = {}) {
-  const evidence = buildSeoEvidence(options);
+function seoPreflightSourceSummaries(sourceSummaries) {
+  return Object.fromEntries(
+    [...REQUIRED_EXPORTS, "analytics_export", "privacy_events"]
+      .filter((source) => sourceSummaries[source])
+      .map((source) => [source, sourceSummaries[source]]),
+  );
+}
+
+export function buildSeoEvidencePreflightReportFromEvidence(evidence) {
   assertSeoEvidence(evidence);
   const missing = evidence.summary.missing_required_sources;
   return {
@@ -353,7 +360,7 @@ export function buildSeoEvidencePreflightReport(options = {}) {
       crawl_urls: evidence.summary.crawl_urls,
       urls_with_any_evidence: evidence.summary.urls_with_any_evidence,
       missing_required_sources: missing,
-      sources: Object.fromEntries(REQUIRED_EXPORTS.map((source) => [source, evidence.summary.sources[source]])),
+      sources: seoPreflightSourceSummaries(evidence.summary.sources),
     },
     next_actions: missing.length
       ? [
@@ -363,6 +370,11 @@ export function buildSeoEvidencePreflightReport(options = {}) {
         ]
       : ["Run npm run launch:preflight with the same SEO evidence input path."],
   };
+}
+
+export function buildSeoEvidencePreflightReport(options = {}) {
+  const evidence = buildSeoEvidence(options);
+  return buildSeoEvidencePreflightReportFromEvidence(evidence);
 }
 
 export function assertSeoEvidencePreflightReport(report) {
@@ -382,14 +394,14 @@ export function assertSeoEvidencePreflightReport(report) {
   const ready = report.summary.missing_required_sources.length === 0;
   if (report.ready !== ready) throw new Error("SEO preflight ready flag must match missing required sources");
   if (report.status !== (ready ? "ready" : "blocked")) throw new Error("SEO preflight status must match ready flag");
-  const expectedMissing = REQUIRED_EXPORTS.filter((source) => missingRequiredExport(sourceStatuses[source]));
-  if (!ready && report.summary.missing_required_sources.join("|") !== expectedMissing.join("|")) {
-    throw new Error("SEO preflight missing required sources must match source statuses");
-  }
   for (const source of REQUIRED_EXPORTS) {
     if (ready && missingRequiredExport(sourceStatuses[source])) {
       throw new Error(`SEO preflight ready report requires complete ${source} evidence`);
     }
+  }
+  const expectedMissing = missingRequiredSources({ ...report.summary.sources, ...sourceStatuses });
+  if (report.summary.missing_required_sources.join("|") !== expectedMissing.join("|")) {
+    throw new Error("SEO preflight missing required sources must match source statuses");
   }
   return true;
 }

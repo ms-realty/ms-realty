@@ -230,6 +230,35 @@ test("SEO evidence preflight report records missing and valid export state", () 
   assert.equal(assertSeoEvidencePreflightReport(readyReport), true);
   assert.equal(readyReport.ready, true);
   assert.deepEqual(readyReport.summary.missing_required_sources, []);
+  assert.equal(readyReport.summary.sources.analytics_export.status, "missing_export");
+  assert.equal(readyReport.summary.sources.privacy_events.status, "imported");
+});
+
+test("SEO evidence preflight report blocks complete exports without analytics source", () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seo-preflight-report-analytics-`);
+  writeCompleteSeoInputFixture(dir);
+  const report = buildSeoEvidencePreflightReport({
+    inputDir: dir,
+    events: [],
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertSeoEvidencePreflightReport(report), true);
+  assert.equal(report.ready, false);
+  assert.equal(report.status, "blocked");
+  assert.deepEqual(report.summary.missing_required_sources, ["privacy_or_ga4_analytics"]);
+  assert.equal(report.summary.sources.analytics_export.status, "missing_export");
+  assert.equal(report.summary.sources.privacy_events.status, "missing_export");
+  assert.throws(
+    () =>
+      assertSeoEvidencePreflightReport({
+        ...report,
+        ready: true,
+        status: "ready",
+        summary: { ...report.summary, missing_required_sources: [] },
+      }),
+    /missing required sources must match source statuses/,
+  );
 });
 
 test("SEO preflight ready report requires complete source evidence", () => {
