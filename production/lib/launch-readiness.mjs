@@ -17,6 +17,7 @@ import { assertHermesChatCompletionsEndpoint } from "./hermes-provider-provision
 import { DEFAULT_LISTING_QUALITY_REVIEW_INPUT, validateListingQualityReviewCsv } from "./listing-quality.mjs";
 import {
   assertPayloadRuntimeReport,
+  assertProductionDatabaseHost,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
 import { REQUIRED_EXPORTS, assertSeoEvidence, assertSeoSourceSummary, missingRequiredExport } from "./seo-evidence-contract.mjs";
@@ -328,6 +329,8 @@ function assertPassRuntimeEvidence(report) {
     ) {
       throw new Error("Launch readiness payload runtime requires database TCP target evidence");
     }
+    assertProductionDatabaseHost(database.host);
+    assertProductionDatabaseHost(databaseTcp.host);
   }
 }
 

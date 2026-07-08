@@ -511,10 +511,30 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
       ),
     },
   });
+  const weakPayloadPlaceholderHost = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence,
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    appState: readyAppState,
+    payloadRuntime: {
+      ...readyPayloadRuntime,
+      summary: {
+        ...readyPayloadRuntime.summary,
+        database: { ...readyPayloadRuntime.summary.database, host: "127.0.0.1" },
+      },
+      checks: readyPayloadRuntime.checks.map((check) =>
+        check.id === "database_tcp" ? { ...check, host: "127.0.0.1" } : check,
+      ),
+    },
+  });
 
   assert.throws(() => assertLaunchReadinessReport(weakPayload), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakPayloadCredentials), /Payload runtime requires database TCP target evidence/i);
   assert.throws(() => assertLaunchReadinessReport(weakPayloadTcpTarget), /Payload runtime requires database TCP target evidence/i);
+  assert.throws(() => assertLaunchReadinessReport(weakPayloadPlaceholderHost), /localhost or placeholder/);
   assert.throws(() => assertLaunchReadinessReport(weakLiveServices), /non-example reports/);
 });
 

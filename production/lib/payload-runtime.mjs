@@ -40,7 +40,7 @@ function configuredDatabaseUrl(value) {
   return "pass";
 }
 
-function assertProductionDatabaseHost(value) {
+export function assertProductionDatabaseHost(value) {
   const host = String(value || "").toLowerCase().replace(/^\[|\]$/g, "");
   const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
   const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
