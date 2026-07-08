@@ -350,6 +350,9 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
   });
 
   assert.equal(cli.status, 0, cli.stderr);
+  assert.match(cli.stdout, /Live service provisioning blocked: typesense_url, typesense_api_key, meili_url, meili_api_key, typesense_health, meilisearch_health, hermes_provider/);
+  assert.match(cli.stdout, /Missing env: TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL/);
+  assert.match(cli.stdout, /Next: set real Typesense, Meilisearch, and Hermes provider env/);
   assert.equal(fs.readFileSync(cliOutPath, "utf8").includes("typesense-test-secret"), false);
   assert.equal(assertLiveServiceProvisioningReport(JSON.parse(fs.readFileSync(cliOutPath, "utf8"))), true);
 });
