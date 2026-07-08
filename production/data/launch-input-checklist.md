@@ -85,11 +85,10 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 ## Payload Runtime
 
 - Current gate: blocked
-- Runtime report: `production/data/payload-runtime-report.json`
+- Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
+- Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- payload_secret: missing_env (env PAYLOAD_SECRET)
-- database_url: missing_env (env DATABASE_URL)
-- database_tcp: missing_env (env DATABASE_URL)
+- no Payload runtime check rows available
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`
@@ -103,6 +102,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - Admin import endpoint: `POST /api/admin/payload-runtime/import` accepts the redacted JSON from `npm run payload:runtime`.
 - Admin status endpoint: `GET /api/admin/payload-runtime`.
 - Production/CLI path overrides: `MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
+- Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
 
 ## Content Quality Warnings

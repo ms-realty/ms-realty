@@ -1126,11 +1126,11 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(result.stderr, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
-  assert.match(result.stderr, /payload_runtime: blocked_report .*payload-runtime-report\.json .*missing PAYLOAD_SECRET, DATABASE_URL/);
+  assert.match(result.stderr, /payload_runtime: missing_report .*payload-runtime-report\.json/);
   assert.match(result.stderr, /external_seo_exports next: Import Search Console/);
   assert.match(result.stderr, /listing_quality_review next: Download \/api\/admin\/listing-quality-review-packet/);
   assert.match(result.stderr, /live_services next: Run npm run live:provisioning:preflight/);
-  assert.match(result.stderr, /payload_runtime next: Run npm run payload:runtime/);
+  assert.match(result.stderr, /payload_runtime next: Use \/api\/admin\/payload-runtime-bootstrap/);
   assert.match(result.stderr, /production\/data\/launch-input-checklist\.md/);
   assert.match(result.stderr, /npm run launch:inputs/);
 
@@ -1742,10 +1742,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /Payload Runtime/);
   assert.match(markdown, /Current gate: blocked/);
   assert.match(markdown, /Current check evidence/);
-  assert.match(markdown, /payload_secret: missing_env \(env PAYLOAD_SECRET\)/);
-  assert.match(markdown, /database_url: missing_env \(env DATABASE_URL\)/);
-  assert.match(markdown, /database_tcp: missing_env \(env DATABASE_URL\)/);
+  assert.match(markdown, /no Payload runtime check rows available/);
   assert.match(markdown, /production\/data\/payload-runtime-report\.json/);
+  assert.match(markdown, /production\/data\/payload-runtime-report\.json\.example/);
   assert.match(markdown, /production\/data\/payload-collections\.json/);
   assert.match(markdown, /\/payload-admin/);
   assert.match(markdown, /Required env: `PAYLOAD_SECRET`, `DATABASE_URL`; currently missing: `PAYLOAD_SECRET`, `DATABASE_URL`/);
@@ -1757,6 +1756,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /GET \/api\/admin\/payload-runtime/);
   assert.match(markdown, /POST \/api\/admin\/payload-runtime\/import/);
   assert.match(markdown, /MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH/);
+  assert.match(markdown, /Real Payload runtime reports stay local and ignored/);
+  assert.match(markdown, /examples do not count as launch evidence/);
   assert.match(markdown, /interim admin workbenches do not count/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /Current review evidence/);
