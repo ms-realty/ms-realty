@@ -1333,7 +1333,9 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     }
   }
   for (const engine of queryReport.engines) {
-    engine.service_url = engine.engine === "typesense" ? "https://typesense.ms-realty.bg" : "https://meili.ms-realty.bg";
+    const baseUrl = engine.engine === "typesense" ? "https://typesense.ms-realty.bg" : "https://meili.ms-realty.bg";
+    engine.operation.url = engine.operation.url.replace(engine.service_url, baseUrl);
+    engine.service_url = baseUrl;
   }
   hermesReport.provider.endpoint = "https://hermes.ms-realty.bg/v1/chat/completions";
   const app = createHttpApp({

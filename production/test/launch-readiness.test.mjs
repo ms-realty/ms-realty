@@ -1310,6 +1310,34 @@ test("live service report preflight fails missing reports and passes valid repor
     /localhost or placeholder/,
   );
 
+  const mixedOriginDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-mixed-origin-live-reports-`);
+  const mixedOriginPaths = writeLiveReportFixtures(mixedOriginDir);
+  const mixedOriginSync = JSON.parse(fs.readFileSync(mixedOriginPaths.syncReportPath, "utf8"));
+  mixedOriginSync.engines[0].operations[1].url =
+    "https://staging-typesense.ms-realty.bg/collections/ms_realty_listings/documents/import?action=upsert";
+  fs.writeFileSync(mixedOriginPaths.syncReportPath, `${JSON.stringify(mixedOriginSync)}\n`);
+  const mixedOriginResult = validateLiveServiceReports(mixedOriginPaths);
+  assert.equal(mixedOriginResult.ready, false);
+  assert.equal(mixedOriginResult.reports.find((report) => report.source === "typesense_meilisearch_sync").status, "invalid_report");
+  assert.match(
+    mixedOriginResult.reports.find((report) => report.source === "typesense_meilisearch_sync").error,
+    /one service origin/,
+  );
+
+  const mixedQueryOriginDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-mixed-query-origin-live-reports-`);
+  const mixedQueryOriginPaths = writeLiveReportFixtures(mixedQueryOriginDir);
+  const mixedQueryOrigin = JSON.parse(fs.readFileSync(mixedQueryOriginPaths.queryReportPath, "utf8"));
+  mixedQueryOrigin.engines[0].operation.url =
+    "https://staging-typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg";
+  fs.writeFileSync(mixedQueryOriginPaths.queryReportPath, `${JSON.stringify(mixedQueryOrigin)}\n`);
+  const mixedQueryOriginResult = validateLiveServiceReports(mixedQueryOriginPaths);
+  assert.equal(mixedQueryOriginResult.ready, false);
+  assert.equal(mixedQueryOriginResult.reports.find((report) => report.source === "typesense_meilisearch_query").status, "invalid_report");
+  assert.match(
+    mixedQueryOriginResult.reports.find((report) => report.source === "typesense_meilisearch_query").error,
+    /reported service origin/,
+  );
+
   const reservedDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reserved-live-reports-`);
   const reservedPaths = writeLiveReportFixtures(reservedDir);
   const reservedQuery = JSON.parse(fs.readFileSync(reservedPaths.queryReportPath, "utf8"));

@@ -153,6 +153,7 @@ function assertLaunchServiceUrl(value, label) {
   if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
     throw new Error(`${label} must not use localhost or placeholder service URLs`);
   }
+  return parsed;
 }
 
 function assertLiveServiceReportHasNoSecrets(report) {
@@ -166,13 +167,18 @@ function assertLaunchLiveServiceEvidence(source, report) {
     for (const engine of report.engines || []) {
       const urls = (engine.operations || []).map((operation) => operation.url);
       if (!urls.length) throw new Error(`${engine.engine} sync report must include operation URL evidence`);
-      for (const url of urls) assertLaunchServiceUrl(url, `${engine.engine} sync report`);
+      const origins = new Set(urls.map((url) => assertLaunchServiceUrl(url, `${engine.engine} sync report`).origin));
+      if (origins.size !== 1) throw new Error(`${engine.engine} sync report operations must use one service origin`);
     }
     return;
   }
   if (source === "typesense_meilisearch_query") {
     for (const engine of report.engines || []) {
-      assertLaunchServiceUrl(engine.service_url, `${engine.engine} query report`);
+      const serviceOrigin = assertLaunchServiceUrl(engine.service_url, `${engine.engine} query report`).origin;
+      const operationOrigin = assertLaunchServiceUrl(engine.operation?.url, `${engine.engine} query operation`).origin;
+      if (operationOrigin !== serviceOrigin) {
+        throw new Error(`${engine.engine} query operation must use the reported service origin`);
+      }
     }
     return;
   }
