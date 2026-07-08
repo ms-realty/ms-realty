@@ -91,6 +91,8 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 
 ## Content Quality Warnings
 
+- Current review evidence:
+- missing_review (path /Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv)
 - Workbook: `production/data/listing-quality-workbook.csv`
 - Review packet: `production/data/listing-quality-review-packet.json`
 - Draft review CSV: `production/data/listing-quality-review-draft.csv`

@@ -76,6 +76,14 @@ function payloadCheckLines(payloadEvidence) {
   return (failing.length ? failing : checks).map(payloadCheckLine);
 }
 
+function listingReviewEvidenceLine(evidence) {
+  const details = [
+    evidence.path ? `path ${evidence.path}` : "",
+    evidence.error ? `error ${evidence.error}` : "",
+  ].filter(Boolean);
+  return `- ${evidence.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;
+}
+
 export function renderLaunchInputChecklist({
   generatedAt,
   launchReadiness,
@@ -104,6 +112,8 @@ export function renderLaunchInputChecklist({
   const weakPayloadEnv = Array.isArray(payloadSummary.weak_env) ? payloadSummary.weak_env : [];
   const liveServiceGate = launchReadiness.gates.find((gate) => gate.id === "live_services");
   const liveServiceEvidence = liveServiceGate?.evidence || {};
+  const listingQualityGate = launchReadiness.gates.find((gate) => gate.id === "listing_quality_review");
+  const listingReviewEvidence = listingQualityGate?.evidence || {};
 
   return `# Launch Input Checklist
 
@@ -189,6 +199,8 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 
 ## Content Quality Warnings
 
+- Current review evidence:
+${listingReviewEvidenceLine(listingReviewEvidence)}
 - Workbook: \`production/data/listing-quality-workbook.csv\`
 - Review packet: \`production/data/listing-quality-review-packet.json\`
 - Draft review CSV: \`production/data/listing-quality-review-draft.csv\`

@@ -1276,6 +1276,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH/);
   assert.match(markdown, /interim admin workbenches do not count/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
+  assert.match(markdown, /Current review evidence/);
+  assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
