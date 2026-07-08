@@ -3,6 +3,10 @@
   "example": true,
   "summary": {
     "engines": 2,
+    "targets": {
+      "typesense": "ms_realty_listings",
+      "meilisearch": "ms_realty_listings"
+    },
     "documents_per_engine": [167, 167],
     "total_operations": 4
   },

@@ -87,6 +87,7 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
   assert.equal(assertSearchEngineSyncReport(report), true);
   assert.equal(report.engines.find((engine) => engine.engine === "typesense").collection, "ms_realty_listings");
   assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").index, "ms_realty_listings");
+  assert.deepEqual(report.summary.targets, { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" });
   assert.deepEqual(report.summary.documents_per_engine, [167, 167]);
   assert.equal(calls.length, 4);
   assert.equal(calls[0].url, "http://typesense.local/collections");
@@ -114,6 +115,14 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
     () =>
       assertSearchEngineSyncReport({
         ...report,
+        summary: { ...report.summary, targets: { ...report.summary.targets, typesense: "other_listings" } },
+      }),
+    /summary targets/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineSyncReport({
+        ...report,
         engines: report.engines.map((engine, index) => (index === 0 ? { ...engine, collection: "" } : engine)),
       }),
     /collection evidence/,
@@ -122,6 +131,7 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
     () =>
       assertSearchEngineSyncReport({
         ...report,
+        summary: { ...report.summary, targets: { ...report.summary.targets, typesense: "other_listings" } },
         engines: report.engines.map((engine, index) =>
           index === 0
             ? { ...engine, collection: "other_listings", operations: [{ ...engine.operations[0] }, { ...engine.operations[1] }] }
@@ -247,6 +257,7 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.equal(assertSearchEngineQueryReport(report), true);
   assert.equal(report.engines.find((engine) => engine.engine === "typesense").collection, "ms_realty_listings");
   assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").index, "ms_realty_listings");
+  assert.deepEqual(report.summary.targets, { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" });
   assert.equal(calls[0].url.includes("/documents/search?"), true);
   assert.equal(calls[0].options.method, "GET");
   assert.equal(calls[1].url, "http://meili.local/indexes/ms_realty_listings/search");
@@ -264,6 +275,14 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.throws(
     () => assertSearchEngineQueryReport({ ...report, summary: { ...report.summary, first_hit_ids: ["wrong", "wrong"] } }),
     /summary first hits/,
+  );
+  assert.throws(
+    () =>
+      assertSearchEngineQueryReport({
+        ...report,
+        summary: { ...report.summary, targets: { ...report.summary.targets, meilisearch: "other_listings" } },
+      }),
+    /summary targets/,
   );
   assert.throws(
     () =>

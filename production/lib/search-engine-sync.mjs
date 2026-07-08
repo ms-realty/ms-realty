@@ -109,6 +109,10 @@ function operationUrlsIncludeTarget(engine, target) {
   });
 }
 
+function searchEngineTargets(engines) {
+  return Object.fromEntries(engines.map((engine) => [engine.engine, engine.collection || engine.index]));
+}
+
 export async function syncTypesense({
   baseUrl = process.env.TYPESENSE_URL,
   apiKey = process.env.TYPESENSE_API_KEY,
@@ -195,6 +199,7 @@ export async function runSearchEngineSync({
     generated_at: generatedAt,
     summary: {
       engines: engines.length,
+      targets: searchEngineTargets(engines),
       documents_per_engine: engines.map((engine) => engine.documents),
       total_operations: engines.reduce((sum, engine) => sum + engine.operations.length, 0),
     },
@@ -216,6 +221,7 @@ export function assertSearchEngineSyncReport(report) {
   if (report.summary.total_operations !== operationCount) throw new Error("Search sync summary operations must match engine rows");
   for (const engine of report.engines) {
     const { target } = assertSearchEngineTarget(engine, `${engine.engine} sync report`);
+    if (report.summary.targets?.[engine.engine] !== target) throw new Error("Search sync summary targets must match engine rows");
     if (!operationUrlsIncludeTarget(engine, target)) {
       throw new Error(`${engine.engine} sync report must include operation URL evidence for its target`);
     }
@@ -317,6 +323,7 @@ export async function runSearchEngineQuerySmoke({
     generated_at: generatedAt,
     summary: {
       engines: engines.length,
+      targets: searchEngineTargets(engines),
       total_hits: engines.reduce((sum, engine) => sum + engine.total, 0),
       first_hit_ids: engines.map((engine) => engine.hits[0]?.id || null),
     },
@@ -337,7 +344,8 @@ export function assertSearchEngineQueryReport(report) {
   }
   for (const engine of report.engines) {
     assertReportUrl(engine.service_url, `${engine.engine} query report`);
-    assertSearchEngineTarget(engine, `${engine.engine} query report`);
+    const { target } = assertSearchEngineTarget(engine, `${engine.engine} query report`);
+    if (report.summary.targets?.[engine.engine] !== target) throw new Error("Search query summary targets must match engine rows");
     if (!String(engine.query || "").trim()) throw new Error(`${engine.engine} query report must include query evidence`);
     if (!String(engine.filter || "").includes("translation_indexable") || !String(engine.filter || "").includes("locale")) {
       throw new Error(`${engine.engine} query report must prove reviewed locale filtering`);

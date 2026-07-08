@@ -250,9 +250,15 @@ function assertPassRuntimeSmokeEvidence(report) {
 
 function assertLiveServiceSummaryEvidence(item) {
   const summary = item.summary || {};
+  const hasSearchTargets =
+    typeof summary.targets?.typesense === "string" &&
+    summary.targets.typesense.trim() &&
+    typeof summary.targets?.meilisearch === "string" &&
+    summary.targets.meilisearch.trim();
   if (
     item.source === "typesense_meilisearch_sync" &&
     (summary.engines !== 2 ||
+      !hasSearchTargets ||
       !Array.isArray(summary.documents_per_engine) ||
       summary.documents_per_engine.length !== 2 ||
       summary.documents_per_engine.some((count) => !Number.isInteger(count) || count < 167) ||
@@ -264,6 +270,7 @@ function assertLiveServiceSummaryEvidence(item) {
   if (
     item.source === "typesense_meilisearch_query" &&
     (summary.engines !== 2 ||
+      !hasSearchTargets ||
       !Number.isInteger(summary.total_hits) ||
       summary.total_hits < 1 ||
       !Array.isArray(summary.first_hit_ids) ||

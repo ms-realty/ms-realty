@@ -109,13 +109,23 @@ const readyLiveServices = [
     source: "typesense_meilisearch_sync",
     status: "pass",
     path: "production/data/search-engine-sync-report.json",
-    summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 4 },
+    summary: {
+      engines: 2,
+      targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
+      documents_per_engine: [167, 167],
+      total_operations: 4,
+    },
   },
   {
     source: "typesense_meilisearch_query",
     status: "pass",
     path: "production/data/search-engine-query-report.json",
-    summary: { engines: 2, total_hits: 2, first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"] },
+    summary: {
+      engines: 2,
+      targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
+      total_hits: 2,
+      first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"],
+    },
   },
   {
     source: "hermes_draft_worker",
@@ -160,7 +170,12 @@ function writeLiveReportFixtures(dir) {
     syncReportPath,
     `${JSON.stringify({
       generated_at: "2026-07-06T00:00:00Z",
-      summary: { engines: 2, documents_per_engine: [167, 167], total_operations: 4 },
+      summary: {
+        engines: 2,
+        targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
+        documents_per_engine: [167, 167],
+        total_operations: 4,
+      },
       engines: [
         {
           engine: "typesense",
@@ -187,7 +202,12 @@ function writeLiveReportFixtures(dir) {
     queryReportPath,
     `${JSON.stringify({
       generated_at: "2026-07-06T00:00:00Z",
-      summary: { engines: 2, total_hits: 2, first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"] },
+      summary: {
+        engines: 2,
+        targets: { typesense: "ms_realty_listings", meilisearch: "ms_realty_listings" },
+        total_hits: 2,
+        first_hit_ids: ["MS-CRAWL-0001:bg", "MS-CRAWL-0001:bg"],
+      },
       engines: [
         {
           engine: "typesense",

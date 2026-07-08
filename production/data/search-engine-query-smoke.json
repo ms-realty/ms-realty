@@ -2,6 +2,10 @@
   "generated_at": "2026-07-06T00:00:00Z",
   "summary": {
     "engines": 2,
+    "targets": {
+      "typesense": "ms_realty_listings",
+      "meilisearch": "ms_realty_listings"
+    },
     "total_hits": 2,
     "first_hit_ids": [
       "MS-CRAWL-0001:bg",
