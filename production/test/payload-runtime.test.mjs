@@ -290,6 +290,15 @@ test("Payload runtime ready report requires concrete database TCP evidence", asy
       }),
     /database TCP target evidence/,
   );
+  assert.throws(
+    () =>
+      assertPayloadRuntimeReport({
+        ...report,
+        summary: { ...report.summary, database: { ...report.summary.database, host: "127.0.0.1" } },
+        checks: report.checks.map((check) => (check.id === "database_tcp" ? { ...check, host: "127.0.0.1" } : check)),
+      }),
+    /localhost or placeholder/,
+  );
 });
 
 test("Payload runtime ready report requires route and config evidence", async () => {

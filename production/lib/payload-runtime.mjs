@@ -40,6 +40,15 @@ function configuredDatabaseUrl(value) {
   return "pass";
 }
 
+function assertProductionDatabaseHost(value) {
+  const host = String(value || "").toLowerCase().replace(/^\[|\]$/g, "");
+  const reservedHosts = ["example.com", "example.net", "example.org", "localhost", "127.0.0.1", "0.0.0.0", "::1"];
+  const reservedSuffixes = [".example", ".example.com", ".example.net", ".example.org", ".invalid", ".localhost", ".local", ".test"];
+  if (!host || reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
+    throw new Error("Payload runtime database host must not use localhost or placeholder database hosts");
+  }
+}
+
 function databaseTarget(connectionString) {
   const parsed = new URL(connectionString);
   if (!["postgres:", "postgresql:"].includes(parsed.protocol)) {
@@ -48,12 +57,7 @@ function databaseTarget(connectionString) {
   const database = decodeURIComponent(parsed.pathname.replace(/^\//, "")).trim();
   if (!database) throw new Error("DATABASE_URL must include a database name");
   if (!parsed.hostname) throw new Error("DATABASE_URL must include a database host");
-  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  const reservedHosts = ["localhost", "127.0.0.1", "0.0.0.0", "::1"];
-  const reservedSuffixes = [".example", ".invalid", ".localhost", ".local", ".test"];
-  if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
-    throw new Error("DATABASE_URL must not use localhost or placeholder database hosts for launch evidence");
-  }
+  assertProductionDatabaseHost(parsed.hostname);
   if (!parsed.username || !parsed.password) throw new Error("DATABASE_URL must include database credentials");
   return {
     credentials_configured: true,
@@ -236,6 +240,10 @@ export function assertPayloadRuntimeReport(report) {
       databaseTcp.credentials_configured !== true)
   ) {
     throw new Error("Payload runtime ready report must include database TCP target evidence");
+  }
+  if (ready) {
+    assertProductionDatabaseHost(report.summary.database.host);
+    assertProductionDatabaseHost(databaseTcp.host);
   }
   return true;
 }

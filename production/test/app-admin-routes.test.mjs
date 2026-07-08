@@ -413,6 +413,20 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         },
         generatedAt: "2026-07-06T00:00:00Z",
       });
+      const localPayloadRuntimeReport = {
+        ...payloadRuntimeReport,
+        summary: { ...payloadRuntimeReport.summary, database: { ...payloadRuntimeReport.summary.database, host: "127.0.0.1" } },
+        checks: payloadRuntimeReport.checks.map((check) =>
+          check.id === "database_tcp" ? { ...check, host: "127.0.0.1" } : check,
+        ),
+      };
+      const payloadImportLocal = await payloadRuntimeImportRoute.POST(
+        new Request("https://example.test/api/admin/payload-runtime/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify(localPayloadRuntimeReport),
+        }),
+      );
       const payloadImport = await payloadRuntimeImportRoute.POST(
         new Request("https://example.test/api/admin/payload-runtime/import", {
           method: "POST",
@@ -421,6 +435,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         }),
       );
       const payloadImportBody = await payloadImport.json();
+      const payloadImportLocalBody = await payloadImportLocal.json();
+      assert.equal(payloadImportLocal.status, 400);
+      assert.match(payloadImportLocalBody.message, /localhost or placeholder/);
       assert.equal(payloadImport.status, 201);
       assert.equal(payloadImportBody.imported.outPath, payloadRuntimeReportPath);
       assert.equal(payloadImportBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
