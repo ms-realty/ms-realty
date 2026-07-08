@@ -154,6 +154,25 @@ test("Payload runtime report rejects DATABASE_URL without database credentials",
   assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "fail");
 });
 
+test("Payload runtime report rejects localhost database launch evidence", async () => {
+  const report = await buildPayloadRuntimeReport({
+    databaseProbe: async () => {
+      throw new Error("localhost DATABASE_URL should not be probed");
+    },
+    env: {
+      DATABASE_URL: "postgres://payload:secret@127.0.0.1:5432/ms_realty",
+      PAYLOAD_SECRET: "not-written-to-report-32-byte-minimum",
+    },
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertPayloadRuntimeReport(report), true);
+  assert.equal(report.ready, false);
+  assert.equal(report.summary.database.status, "fail");
+  assert.match(report.summary.database.error, /localhost or placeholder/);
+  assert.equal(report.checks.find((check) => check.id === "database_tcp").status, "fail");
+});
+
 test("Payload runtime report rejects missing generated timestamp", async () => {
   const report = await buildPayloadRuntimeReport({
     env: {},

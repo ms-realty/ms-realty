@@ -48,6 +48,12 @@ function databaseTarget(connectionString) {
   const database = decodeURIComponent(parsed.pathname.replace(/^\//, "")).trim();
   if (!database) throw new Error("DATABASE_URL must include a database name");
   if (!parsed.hostname) throw new Error("DATABASE_URL must include a database host");
+  const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  const reservedHosts = ["localhost", "127.0.0.1", "0.0.0.0", "::1"];
+  const reservedSuffixes = [".example", ".invalid", ".localhost", ".local", ".test"];
+  if (reservedHosts.includes(host) || reservedSuffixes.some((suffix) => host.endsWith(suffix))) {
+    throw new Error("DATABASE_URL must not use localhost or placeholder database hosts for launch evidence");
+  }
   if (!parsed.username || !parsed.password) throw new Error("DATABASE_URL must include database credentials");
   return {
     credentials_configured: true,
