@@ -506,6 +506,7 @@ function migrationReviewPayload(registry, url, config) {
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
+    listingQualityEndpoint: "/api/admin/listing-quality",
     deployablePreview: currentDeployableRedirects(config),
   };
 }
@@ -970,6 +971,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
       return jsonResponse(200, preflightReports(config));
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/listing-quality") {
+      const generatedAt = config.reviewedAt || new Date().toISOString();
+      return jsonResponse(200, {
+        kind: "admin_listing_quality",
+        listing_quality: buildListingQualityPreflightReport({
+          report: currentListingQualityReport(config, { generatedAt }),
+          reviewPath: config.listingQualityReviewPath || undefined,
+          generatedAt,
+        }),
+      });
     }
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-provisioning") {
       return jsonResponse(200, {

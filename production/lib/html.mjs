@@ -484,6 +484,8 @@ function renderAdminMigrationReview(page) {
     page.cmsCollectionsEndpoint,
   )}" data-payload-collections-endpoint="${escapeHtml(
     page.payloadCollectionsEndpoint,
+  )}" data-listing-quality-endpoint="${escapeHtml(
+    page.listingQualityEndpoint,
   )}">
   <h1>Migration review</h1>
   <p><a href="${escapeHtml(page.launchReadinessEndpoint)}">Launch readiness JSON</a></p>
@@ -493,6 +495,7 @@ function renderAdminMigrationReview(page) {
   <p><a href="${escapeHtml(page.payloadRuntimeEndpoint)}">Payload runtime JSON</a></p>
   <p><a href="${escapeHtml(page.cmsCollectionsEndpoint)}">CMS collection contracts</a></p>
   <p><a href="${escapeHtml(page.payloadCollectionsEndpoint)}">Payload collection configs</a></p>
+  <p><a href="${escapeHtml(page.listingQualityEndpoint)}">Listing quality JSON</a></p>
   <form method="post" action="${escapeHtml(page.launchReadinessExportEndpoint)}">
     <button type="submit">Export launch readiness</button>
   </form>

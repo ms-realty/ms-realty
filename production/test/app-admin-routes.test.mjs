@@ -142,6 +142,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const preflightReportsRoute = await import("../../app/api/admin/preflight-reports/route.js");
       const liveServiceProvisioningRoute = await import("../../app/api/admin/live-service-provisioning/route.js");
       const payloadRuntimeRoute = await import("../../app/api/admin/payload-runtime/route.js");
+      const listingQualityRoute = await import("../../app/api/admin/listing-quality/route.js");
       const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
       const listingQualityReviewDraftRoute = await import("../../app/api/admin/listing-quality-review-draft/route.js");
       const listingQualityWorkbookRoute = await import("../../app/api/admin/listing-quality-workbook/route.js");
@@ -290,6 +291,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(payloadRuntimeBody.kind, "admin_payload_runtime");
       assert.equal(payloadRuntimeBody.runtime.status, "missing_report");
 
+      const listingQuality = await listingQualityRoute.GET(new Request("https://example.test/api/admin/listing-quality", { headers: auth }));
+      const listingQualityBody = await listingQuality.json();
+      assert.equal(listingQuality.status, 200);
+      assert.equal(listingQualityBody.kind, "admin_listing_quality");
+      assert.equal(listingQualityBody.listing_quality.status, "blocked");
+      assert.ok(listingQualityBody.listing_quality.summary.affected_listings > 0);
+
       const cmsCollectionsUnauthorized = await cmsCollectionsRoute.GET(new Request("https://example.test/api/admin/cms-collections"));
       const cmsCollections = await cmsCollectionsRoute.GET(new Request("https://example.test/api/admin/cms-collections", { headers: auth }));
       const cmsCollectionsBody = await cmsCollections.json();
@@ -401,6 +409,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
       assert.equal(migrationReviewBody.payloadCollectionsEndpoint, "/api/admin/payload-collections");
+      assert.equal(migrationReviewBody.listingQualityEndpoint, "/api/admin/listing-quality");
       assert.equal(migrationReviewBody.routeMap.approvableSample.length > 0, true);
 
       const migrationReviewHtml = await migrationReviewHtmlRoute.GET(
@@ -417,6 +426,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
       assert.equal(migrationReviewHtmlBody.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
+      assert.equal(migrationReviewHtmlBody.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-approvable-listing="true"/);

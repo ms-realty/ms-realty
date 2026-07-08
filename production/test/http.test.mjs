@@ -873,6 +873,13 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/payload-runtime",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const listingQualityUnauthorized = await dispatchHttp(app, {
+    url: "/api/admin/listing-quality",
+  });
+  const listingQualityStatus = await dispatchHttp(app, {
+    url: "/api/admin/listing-quality",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
   const cmsCollectionsUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/cms-collections",
   });
@@ -988,6 +995,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(payloadRuntime.status, 200);
   assert.equal(payloadRuntime.body.kind, "admin_payload_runtime");
   assert.equal(payloadRuntime.body.runtime.status, "blocked_report");
+  assert.equal(listingQualityUnauthorized.status, 401);
+  assert.equal(listingQualityStatus.status, 200);
+  assert.equal(listingQualityStatus.body.kind, "admin_listing_quality");
+  assert.equal(listingQualityStatus.body.listing_quality.status, "blocked");
+  assert.ok(listingQualityStatus.body.listing_quality.summary.affected_listings > 0);
   assert.equal(cmsCollectionsUnauthorized.status, 401);
   assert.equal(cmsCollections.status, 200);
   assert.equal(cmsCollections.headers["cache-control"], "no-store");
@@ -1034,6 +1046,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
   assert.equal(review.body.cmsCollectionsEndpoint, "/api/admin/cms-collections");
   assert.equal(review.body.payloadCollectionsEndpoint, "/api/admin/payload-collections");
+  assert.equal(review.body.listingQualityEndpoint, "/api/admin/listing-quality");
   assert.equal(review.body.listingQuality.generated_at, "2026-07-05T00:09:00Z");
   assert.equal(review.body.listingQuality.summary.listings, 165);
   assert.equal(Object.hasOwn(review.body.listingQuality.summary.issue_counts, "missing_price"), true);
@@ -1056,6 +1069,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(reviewHtml.body.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
   assert.equal(reviewHtml.body.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
+  assert.equal(reviewHtml.body.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-workbook-endpoint="/api/admin/listing-quality-workbook"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-review-draft-endpoint="/api/admin/listing-quality-review-draft"'), true);
   assert.equal(reviewHtml.body.includes('data-quality-import-endpoint="/api/admin/listing-quality/import"'), true);

@@ -92,6 +92,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - Preflight report override: `MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH`
 - Review columns: `review_status`, `required_editor_fields`, `price_eur`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
 - Admin draft endpoint: `GET /api/admin/listing-quality-review-draft`
+- Admin status endpoint: `GET /api/admin/listing-quality`
 - Admin import endpoint: `POST /api/admin/listing-quality/import`
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - Review pack command: `npm run listing:review-pack`.

@@ -226,6 +226,7 @@ function MigrationReviewBody({ page }) {
       "data-payload-runtime-endpoint": page.payloadRuntimeEndpoint,
       "data-cms-collections-endpoint": page.cmsCollectionsEndpoint,
       "data-payload-collections-endpoint": page.payloadCollectionsEndpoint,
+      "data-listing-quality-endpoint": page.listingQualityEndpoint,
     },
     h("h1", null, "Migration review"),
     h(
@@ -238,6 +239,7 @@ function MigrationReviewBody({ page }) {
       h("a", { href: page.payloadRuntimeEndpoint }, "Payload runtime JSON"),
       h("a", { href: page.cmsCollectionsEndpoint }, "CMS collection contracts"),
       h("a", { href: page.payloadCollectionsEndpoint }, "Payload collection configs"),
+      h("a", { href: page.listingQualityEndpoint }, "Listing quality JSON"),
     ),
     h(
       "form",
