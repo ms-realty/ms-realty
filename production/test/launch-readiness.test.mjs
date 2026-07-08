@@ -1160,6 +1160,23 @@ test("live service preflight report records blockers without clearing the gate",
   assert.equal(missingReport.summary.missing_report, 3);
   assert.match(missingReport.next_actions.join(" "), /npm run hermes:provisioning/);
   assert.match(missingReport.next_actions.join(" "), /npm run live:preflight/);
+  const missingOutputPath = `${missingDir}/live-service-preflight-report.json`;
+  const missingResult = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-live-service-preflight-report.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_SEARCH_SYNC_REPORT_PATH: `${missingDir}/search-engine-sync-report.json`,
+      MS_REALTY_SEARCH_QUERY_REPORT_PATH: `${missingDir}/search-engine-query-report.json`,
+      MS_REALTY_HERMES_WORKER_REPORT_PATH: `${missingDir}/hermes-draft-worker-report.json`,
+      MS_REALTY_LIVE_SERVICE_PREFLIGHT_REPORT_PATH: missingOutputPath,
+    },
+  });
+
+  assert.equal(missingResult.status, 0, missingResult.stderr);
+  assert.match(missingResult.stdout, /Live service reports blocked: typesense_meilisearch_sync, typesense_meilisearch_query, hermes_draft_worker/);
+  assert.match(missingResult.stdout, /Missing reports: 3/);
+  assert.match(missingResult.stdout, /Next: run `npm run live:provisioning:preflight`/);
 
   const validDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-preflight-report-valid-`);
   const paths = writeLiveReportFixtures(validDir);
