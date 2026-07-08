@@ -13,12 +13,29 @@ export const HERMES_AGENT_OFFICIAL_URL = "https://hermes-agent.nousresearch.com/
 export const HERMES_AGENT_INSTALL_COMMAND = "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash";
 export const HERMES_CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
 export const HERMES_AGENT_REQUIRED_CAPABILITIES = Object.freeze([
+  "tool_gateway",
   "messaging_gateway",
   "persistent_memory",
   "skills",
   "mcp",
+  "web_search_browser",
   "scheduled_automations",
   "isolated_subagents",
+  "sandboxed_backends",
+]);
+export const HERMES_AGENT_TOOL_GATEWAY_TOOLS = Object.freeze([
+  "web_search",
+  "browser",
+  "vision",
+  "image_generation",
+  "text_to_speech",
+]);
+export const HERMES_AGENT_TERMINAL_BACKENDS = Object.freeze([
+  "local",
+  "docker",
+  "ssh",
+  "singularity",
+  "modal",
 ]);
 const PROJECT_CONTEXT_FILE = "AGENTS.md";
 const REQUIRED_PROJECT_CONTEXT_MARKERS = Object.freeze([
@@ -141,6 +158,10 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
       setup_commands: ["hermes setup --portal", "hermes model"],
       gateway_setup_command: "hermes gateway setup",
       required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
+      tool_gateway: {
+        required_tools: HERMES_AGENT_TOOL_GATEWAY_TOOLS,
+      },
+      terminal_backends: HERMES_AGENT_TERMINAL_BACKENDS,
       project_context: projectContext,
       gateway_security: {
         allow_all_users: false,
@@ -210,12 +231,28 @@ export function assertHermesProviderProvisioningReport(report) {
   if (report.agent_runtime?.install_command !== HERMES_AGENT_INSTALL_COMMAND) {
     throw new Error("Hermes provisioning must include the official Hermes Agent installer");
   }
-  if (!report.agent_runtime?.setup_commands?.includes("hermes model")) {
+  if (
+    !report.agent_runtime?.setup_commands?.includes("hermes setup --portal") ||
+    !report.agent_runtime?.setup_commands?.includes("hermes model")
+  ) {
     throw new Error("Hermes provisioning must include Hermes model setup");
+  }
+  if (report.agent_runtime?.gateway_setup_command !== "hermes gateway setup") {
+    throw new Error("Hermes provisioning must include Hermes gateway setup");
   }
   for (const capability of HERMES_AGENT_REQUIRED_CAPABILITIES) {
     if (!report.agent_runtime?.required_capabilities?.includes(capability)) {
       throw new Error("Hermes provisioning must include official Hermes Agent capabilities");
+    }
+  }
+  for (const tool of HERMES_AGENT_TOOL_GATEWAY_TOOLS) {
+    if (!report.agent_runtime?.tool_gateway?.required_tools?.includes(tool)) {
+      throw new Error("Hermes provisioning must include Hermes tool gateway tools");
+    }
+  }
+  for (const backend of HERMES_AGENT_TERMINAL_BACKENDS) {
+    if (!report.agent_runtime?.terminal_backends?.includes(backend)) {
+      throw new Error("Hermes provisioning must include Hermes sandbox backends");
     }
   }
   if (report.agent_runtime?.project_context?.file !== PROJECT_CONTEXT_FILE || report.agent_runtime.project_context.present !== true) {

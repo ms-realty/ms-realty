@@ -4,8 +4,10 @@ import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
 import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
 import {
+  HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_OFFICIAL_URL,
+  HERMES_AGENT_TOOL_GATEWAY_TOOLS,
   assertHermesChatCompletionsEndpoint,
   hermesProviderConfigFromEnv,
 } from "./hermes-provider-provisioning.mjs";
@@ -120,6 +122,10 @@ function agentRuntimeMetadata() {
     official_url: HERMES_AGENT_OFFICIAL_URL,
     project_context_file: "AGENTS.md",
     required_capabilities: HERMES_AGENT_REQUIRED_CAPABILITIES,
+    tool_gateway: {
+      required_tools: HERMES_AGENT_TOOL_GATEWAY_TOOLS,
+    },
+    terminal_backends: HERMES_AGENT_TERMINAL_BACKENDS,
   };
 }
 
@@ -226,6 +232,16 @@ export function assertHermesDraftWorkerReport(report) {
   for (const capability of HERMES_AGENT_REQUIRED_CAPABILITIES) {
     if (!report.agent_runtime?.required_capabilities?.includes(capability)) {
       throw new Error("Hermes worker report must include official Hermes Agent capabilities");
+    }
+  }
+  for (const tool of HERMES_AGENT_TOOL_GATEWAY_TOOLS) {
+    if (!report.agent_runtime?.tool_gateway?.required_tools?.includes(tool)) {
+      throw new Error("Hermes worker report must include Hermes tool gateway tools");
+    }
+  }
+  for (const backend of HERMES_AGENT_TERMINAL_BACKENDS) {
+    if (!report.agent_runtime?.terminal_backends?.includes(backend)) {
+      throw new Error("Hermes worker report must include Hermes sandbox backends");
     }
   }
   if (report.provider?.tool_call_parser !== "hermes") throw new Error("Hermes worker report must use Hermes tool parser");

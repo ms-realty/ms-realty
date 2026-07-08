@@ -5,12 +5,31 @@
     "official_url": "https://hermes-agent.nousresearch.com/",
     "project_context_file": "AGENTS.md",
     "required_capabilities": [
+      "tool_gateway",
       "messaging_gateway",
       "persistent_memory",
       "skills",
       "mcp",
+      "web_search_browser",
       "scheduled_automations",
-      "isolated_subagents"
+      "isolated_subagents",
+      "sandboxed_backends"
+    ],
+    "tool_gateway": {
+      "required_tools": [
+        "web_search",
+        "browser",
+        "vision",
+        "image_generation",
+        "text_to_speech"
+      ]
+    },
+    "terminal_backends": [
+      "local",
+      "docker",
+      "ssh",
+      "singularity",
+      "modal"
     ]
   },
   "ledger_path": "/Users/ivan/Code/MS-Realty/production/data/hermes-worker-smoke-translations.jsonl",

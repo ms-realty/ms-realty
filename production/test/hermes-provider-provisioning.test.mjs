@@ -4,7 +4,9 @@ import fs from "node:fs";
 import os from "node:os";
 import { spawnSync } from "node:child_process";
 import {
+  HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_REQUIRED_CAPABILITIES,
+  HERMES_AGENT_TOOL_GATEWAY_TOOLS,
   assertHermesProviderProvisioningReport,
   buildHermesProviderProvisioningReport,
   writeHermesProviderProvisioningReport,
@@ -21,8 +23,12 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.equal(report.agent_runtime.product, "Nous Hermes Agent");
   assert.equal(report.agent_runtime.official_url, "https://hermes-agent.nousresearch.com/");
   assert.match(report.agent_runtime.install_command, /hermes-agent\.nousresearch\.com\/install\.sh/);
+  assert.ok(report.agent_runtime.setup_commands.includes("hermes setup --portal"));
   assert.ok(report.agent_runtime.setup_commands.includes("hermes model"));
+  assert.equal(report.agent_runtime.gateway_setup_command, "hermes gateway setup");
   assert.deepEqual(report.agent_runtime.required_capabilities, HERMES_AGENT_REQUIRED_CAPABILITIES);
+  assert.deepEqual(report.agent_runtime.tool_gateway.required_tools, HERMES_AGENT_TOOL_GATEWAY_TOOLS);
+  assert.deepEqual(report.agent_runtime.terminal_backends, HERMES_AGENT_TERMINAL_BACKENDS);
   assert.equal(report.agent_runtime.project_context.file, "AGENTS.md");
   assert.equal(report.agent_runtime.project_context.present, true);
   assert.equal(report.agent_runtime.project_context.complete, true);
@@ -135,6 +141,30 @@ test("Hermes provisioning report rejects generic agent runtime evidence", () => 
         agent_runtime: { ...report.agent_runtime, required_capabilities: report.agent_runtime.required_capabilities.slice(1) },
       }),
     /official Hermes Agent capabilities/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, gateway_setup_command: "" },
+      }),
+    /gateway setup/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, tool_gateway: { required_tools: ["web_search"] } },
+      }),
+    /tool gateway/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, terminal_backends: report.agent_runtime.terminal_backends.slice(0, -1) },
+      }),
+    /sandbox backends/,
   );
   assert.throws(
     () =>

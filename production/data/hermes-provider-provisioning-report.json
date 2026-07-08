@@ -13,12 +13,31 @@
     ],
     "gateway_setup_command": "hermes gateway setup",
     "required_capabilities": [
+      "tool_gateway",
       "messaging_gateway",
       "persistent_memory",
       "skills",
       "mcp",
+      "web_search_browser",
       "scheduled_automations",
-      "isolated_subagents"
+      "isolated_subagents",
+      "sandboxed_backends"
+    ],
+    "tool_gateway": {
+      "required_tools": [
+        "web_search",
+        "browser",
+        "vision",
+        "image_generation",
+        "text_to_speech"
+      ]
+    },
+    "terminal_backends": [
+      "local",
+      "docker",
+      "ssh",
+      "singularity",
+      "modal"
     ],
     "project_context": {
       "file": "AGENTS.md",
