@@ -58,9 +58,21 @@ const REQUIRED_LAUNCH_GATE_IDS = [
   "payload_runtime",
 ];
 const BLOCKED_GATE_NEXT_ACTIONS = {
+  crawl_inventory: [
+    "Run npm run migration:build and confirm both makler-realty.com and makler-realty.ru inventories are complete.",
+    "Regenerate production/data/migration-records.json before rebuilding launch readiness.",
+  ],
   redirect_reviews: [
     "Download /api/admin/redirect-approval-workbook?pending=1 for unresolved legacy listing redirects.",
     "Import reviewed same-content approvals through /api/admin/redirect-approvals/import.",
+  ],
+  localized_sitemap: [
+    "Run npm run sitemap:build after approved locale routes are generated.",
+    "Review the generated localized sitemap for approved listing, location, seller, contact, and guide routes.",
+  ],
+  structured_data: [
+    "Run npm run structured:data and fix any failing schema entries before launch.",
+    "Confirm schema text is sourced from approved CMS/listing content only.",
   ],
   external_seo_exports: [
     "Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.",
@@ -73,6 +85,18 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   live_services: [
     "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
     "Import or mount the three live service reports before launch.",
+  ],
+  runtime_smoke: [
+    "Run npm run runtime:build and npm run server:smoke against the production Node adapter and HTTP listing route.",
+    "Fix any failing route status evidence before launch readiness is rebuilt.",
+  ],
+  monitoring_rollback: [
+    "Import privacy-safe monitoring evidence through the launch input checklist.",
+    "Confirm rollback steps cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.",
+  ],
+  production_app_layer: [
+    "Keep the production Node adapter wired and rebuild the app layer readiness report.",
+    "Do not clear launch readiness until the production app route evidence is present.",
   ],
   payload_runtime: [
     "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
@@ -162,6 +186,16 @@ function gate(id, status, evidence, message = "") {
 
 function blockersFrom(gates) {
   return gates.filter((item) => item.status === "blocked").map((item) => item.id);
+}
+
+function assertBlockedGateNextActions(report) {
+  for (const item of report.gates || []) {
+    if (item.status !== "blocked") continue;
+    const actions = Array.isArray(item.next_actions)
+      ? item.next_actions.filter((action) => typeof action === "string" && action.trim())
+      : [];
+    if (!actions.length) throw new Error(`Launch readiness blocked gate ${item.id} must include next actions`);
+  }
 }
 
 function gateById(report, id) {
@@ -828,6 +862,7 @@ export function assertLaunchReadinessReport(report) {
   if (!report.gates.some((item) => item.id === "live_services")) {
     throw new Error("Launch readiness must include live service provisioning gate");
   }
+  assertBlockedGateNextActions(report);
   assertPassCrawlInventoryEvidence(report);
   assertPassRedirectReviewEvidence(report);
   assertPassLocalizedSitemapEvidence(report);

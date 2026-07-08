@@ -402,6 +402,23 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
 });
 
+test("launch readiness validator requires blocked gate next actions", () => {
+  for (const nextActions of [undefined, [], [""]]) {
+    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+    const gate = report.gates.find((item) => item.id === "external_seo_exports");
+    if (nextActions === undefined) {
+      delete gate.next_actions;
+    } else {
+      gate.next_actions = nextActions;
+    }
+
+    assert.throws(
+      () => assertLaunchReadinessReport(report),
+      /Launch readiness blocked gate external_seo_exports must include next actions/,
+    );
+  }
+});
+
 test("launch readiness rejects hand-cleared external SEO blockers", () => {
   const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
