@@ -15,6 +15,7 @@ import {
   writeLaunchInputChecklist,
 } from "../lib/launch-inputs.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { liveServiceProvisioningState } from "../lib/live-service-provisioning.mjs";
 import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 
 function readJson(filePath) {
@@ -42,6 +43,7 @@ const inputs = launchReadinessInputsFromEnv();
 const routeMap = inputs.routeMap || readJson(fromRoot("production", "data", "legacy-route-map.json"));
 const seoEvidence = currentSeoEvidence(inputs);
 const deployableRedirects = currentDeployableRedirects(routeMap, inputs);
+const liveServiceProvisioning = liveServiceProvisioningState(process.env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH || undefined);
 const outputPath = process.env.MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH || DEFAULT_LAUNCH_INPUT_CHECKLIST_OUTPUT;
 
 const outPath = writeLaunchInputChecklist(
@@ -58,6 +60,7 @@ const outPath = writeLaunchInputChecklist(
     redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap.routes)),
     deployableRedirects,
     routeMap,
+    liveServiceProvisioning,
   }),
   outputPath,
 );

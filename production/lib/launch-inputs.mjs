@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { parseCsv } from "./csv.mjs";
+import { liveServiceProvisioningState } from "./live-service-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_INPUT_CHECKLIST_OUTPUT = fromRoot("production", "data", "launch-input-checklist.md");
@@ -65,6 +66,18 @@ function liveServiceReportLines(liveEvidence) {
   return reports.map(liveServiceReportLine);
 }
 
+function liveServiceProvisioningLine(provisioning) {
+  const summary = provisioning.summary || {};
+  const details = [
+    provisioning.path ? `path ${provisioning.path}` : "",
+    Array.isArray(summary.missing_env) && summary.missing_env.length ? `missing ${summary.missing_env.join(", ")}` : "",
+    Array.isArray(summary.placeholder_env) && summary.placeholder_env.length
+      ? `placeholders ${summary.placeholder_env.join(", ")}`
+      : "",
+  ].filter(Boolean);
+  return `- ${provisioning.status || "unknown"}${details.length ? ` (${details.join("; ")})` : ""}`;
+}
+
 function payloadCheckLine(check) {
   const details = [
     check.env ? `env ${check.env}` : "",
@@ -101,6 +114,7 @@ export function renderLaunchInputChecklist({
   deployableRedirects,
   routeMap,
   listingVerification = defaultListingVerification(),
+  liveServiceProvisioning = liveServiceProvisioningState(),
 }) {
   const mapped = routeMap.summary.mappedListings;
   const approved = deployableRedirects.summary.total;
@@ -168,6 +182,8 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 
 - Current report evidence:
 ${liveServiceReportLines(liveServiceEvidence).join("\n")}
+- Current provisioning evidence:
+${liveServiceProvisioningLine(liveServiceProvisioning)}
 - Search engines: set \`TYPESENSE_URL\`, \`TYPESENSE_API_KEY\`, \`MEILI_URL\`, and \`MEILI_API_KEY\`.
 - Hermes worker: set \`HERMES_CHAT_COMPLETIONS_URL\`; set \`HERMES_API_KEY\` when the endpoint requires auth.
 - Hermes default: self-host vLLM with \`--enable-auto-tool-choice --tool-call-parser hermes\`; hosted OpenRouter fallback is non-sensitive only.

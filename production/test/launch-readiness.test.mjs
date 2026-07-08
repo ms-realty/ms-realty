@@ -1243,6 +1243,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
   assert.match(markdown, /typesense_meilisearch_query: missing_report .*search-engine-query-report\.json/);
   assert.match(markdown, /hermes_draft_worker: missing_report .*hermes-draft-worker-report\.json/);
+  assert.match(markdown, /blocked_report .*live-service-provisioning-report\.json.*missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL/);
   assert.match(markdown, /TYPESENSE_URL/);
   assert.match(markdown, /MEILI_API_KEY/);
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
