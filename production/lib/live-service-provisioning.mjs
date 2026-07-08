@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  HERMES_AGENT_INSTALL_COMMAND,
+  HERMES_AGENT_OFFICIAL_URL,
+  HERMES_CHAT_COMPLETIONS_PATH,
   assertHermesChatCompletionsEndpoint,
   buildHermesProviderProvisioningReport,
 } from "./hermes-provider-provisioning.mjs";
@@ -160,6 +163,23 @@ export async function buildLiveServiceProvisioningReport({
       endpoint: hermes.provider.endpoint,
       model: hermes.provider.model,
       ready: hermes.ready,
+      official_url: hermes.agent_runtime.official_url,
+      install_command: hermes.agent_runtime.install_command,
+      setup_commands: hermes.agent_runtime.setup_commands,
+      gateway_setup_command: hermes.agent_runtime.gateway_setup_command,
+      vllm: {
+        launch_command: hermes.vllm.launch_command,
+        chat_completions_path: hermes.vllm.chat_completions_path,
+        tool_call_parser: hermes.vllm.tool_call_parser,
+        enable_auto_tool_choice: hermes.vllm.enable_auto_tool_choice,
+      },
+      safety: {
+        draft_only: hermes.safety.draft_only,
+        human_approval_required: hermes.safety.human_approval_required,
+        can_publish: hermes.safety.can_publish,
+        can_send_customer_messages: hermes.safety.can_send_customer_messages,
+      },
+      next_actions: hermes.next_actions,
     },
     next_actions: ready
       ? ["Run npm run live:capture, then npm run live:preflight."]
@@ -239,6 +259,34 @@ export function assertLiveServiceProvisioningReport(report) {
   if ((ready || hermesProvider?.status === "pass") && report.hermes?.endpoint) {
     assertProvisioningServiceUrl(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
     assertHermesChatCompletionsEndpoint(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
+  }
+  if (report.hermes?.official_url !== HERMES_AGENT_OFFICIAL_URL || report.hermes?.install_command !== HERMES_AGENT_INSTALL_COMMAND) {
+    throw new Error("Live service provisioning Hermes handoff must include official install source");
+  }
+  if (
+    !report.hermes?.setup_commands?.includes("hermes setup --portal") ||
+    report.hermes?.gateway_setup_command !== "hermes gateway setup"
+  ) {
+    throw new Error("Live service provisioning Hermes handoff must include setup commands");
+  }
+  if (
+    !report.hermes?.vllm?.launch_command?.includes("--tool-call-parser") ||
+    report.hermes?.vllm?.chat_completions_path !== HERMES_CHAT_COMPLETIONS_PATH ||
+    report.hermes?.vllm?.tool_call_parser !== "hermes" ||
+    report.hermes?.vllm?.enable_auto_tool_choice !== true
+  ) {
+    throw new Error("Live service provisioning Hermes handoff must include vLLM Hermes tool parsing");
+  }
+  if (
+    report.hermes?.safety?.draft_only !== true ||
+    report.hermes?.safety?.human_approval_required !== true ||
+    report.hermes?.safety?.can_publish !== false ||
+    report.hermes?.safety?.can_send_customer_messages !== false
+  ) {
+    throw new Error("Live service provisioning Hermes handoff must preserve draft-only safety");
+  }
+  if (!Array.isArray(report.hermes?.next_actions) || report.hermes.next_actions.length === 0) {
+    throw new Error("Live service provisioning Hermes handoff must include next actions");
   }
   const serialized = JSON.stringify(report);
   if (/secret|Bearer\s+|sk-[A-Za-z0-9_-]+|user:pass/i.test(serialized)) {

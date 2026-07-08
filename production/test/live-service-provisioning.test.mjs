@@ -32,6 +32,14 @@ test("live service provisioning report fails closed until service env is configu
   assert.ok(report.summary.missing_env.includes("HERMES_CHAT_COMPLETIONS_URL"));
   assert.equal(report.checks.find((check) => check.id === "typesense_health").status, "missing_env");
   assert.equal(report.checks.find((check) => check.id === "meilisearch_health").status, "missing_env");
+  assert.equal(report.hermes.official_url, "https://hermes-agent.nousresearch.com/");
+  assert.match(report.hermes.install_command, /hermes-agent\.nousresearch\.com\/install\.sh/);
+  assert.ok(report.hermes.setup_commands.includes("hermes setup --portal"));
+  assert.equal(report.hermes.gateway_setup_command, "hermes gateway setup");
+  assert.deepEqual(report.hermes.vllm.launch_command.slice(-3), ["--enable-auto-tool-choice", "--tool-call-parser", "hermes"]);
+  assert.equal(report.hermes.vllm.chat_completions_path, "/v1/chat/completions");
+  assert.equal(report.hermes.safety.can_publish, false);
+  assert.ok(report.hermes.next_actions.some((action) => action.includes("Install Hermes Agent")));
 });
 
 test("live service provisioning report verifies live endpoints without persisting secrets", async () => {
@@ -254,6 +262,18 @@ test("live service provisioning report requires complete evidence shape", async 
         ),
       }),
     /canonical env label/,
+  );
+  assert.throws(
+    () => assertLiveServiceProvisioningReport({ ...report, hermes: { ...report.hermes, next_actions: [] } }),
+    /next actions/,
+  );
+  assert.throws(
+    () =>
+      assertLiveServiceProvisioningReport({
+        ...report,
+        hermes: { ...report.hermes, safety: { ...report.hermes.safety, can_publish: true } },
+      }),
+    /draft-only safety/,
   );
 });
 

@@ -60,7 +60,43 @@
     "mode": "self_hosted",
     "endpoint": null,
     "model": "NousResearch/Hermes-4-14B",
-    "ready": false
+    "ready": false,
+    "official_url": "https://hermes-agent.nousresearch.com/",
+    "install_command": "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash",
+    "setup_commands": [
+      "hermes setup --portal",
+      "hermes model"
+    ],
+    "gateway_setup_command": "hermes gateway setup",
+    "vllm": {
+      "launch_command": [
+        "vllm",
+        "serve",
+        "NousResearch/Hermes-4-14B",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--enable-auto-tool-choice",
+        "--tool-call-parser",
+        "hermes"
+      ],
+      "chat_completions_path": "/v1/chat/completions",
+      "tool_call_parser": "hermes",
+      "enable_auto_tool_choice": true
+    },
+    "safety": {
+      "draft_only": true,
+      "human_approval_required": true,
+      "can_publish": false,
+      "can_send_customer_messages": false
+    },
+    "next_actions": [
+      "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
+      "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
+      "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint.",
+      "Run npm run hermes:provisioning, then npm run hermes:worker."
+    ]
   },
   "next_actions": [
     "Set TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, and Hermes provider env.",

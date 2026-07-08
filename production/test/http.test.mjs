@@ -1036,6 +1036,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(liveServiceProvisioning.body.kind, "admin_live_service_provisioning");
   assert.equal(liveServiceProvisioning.body.provisioning.status, "blocked_report");
   assert.ok(liveServiceProvisioning.body.provisioning.summary.missing_env.includes("TYPESENSE_URL"));
+  assert.equal(liveServiceProvisioning.body.provisioning.hermes.install_command, "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash");
+  assert.equal(liveServiceProvisioning.body.provisioning.hermes.safety.can_publish, false);
   assert.equal(payloadRuntimeUnauthorized.status, 401);
   assert.equal(payloadRuntime.status, 200);
   assert.equal(payloadRuntime.body.kind, "admin_payload_runtime");
