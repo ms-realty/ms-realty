@@ -416,6 +416,27 @@ function assertReviewNotes(listingId, value, { mediaRequired = false } = {}) {
   }
 }
 
+function listValue(value) {
+  return String(value || "")
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function assertOptionalSnapshotValue(listingId, label, actual, expected) {
+  if (!filled(actual)) return;
+  if (String(actual).trim() !== String(expected ?? "").trim()) {
+    throw new Error(`Listing ${listingId} review ${label} is stale`);
+  }
+}
+
+function assertOptionalSnapshotList(listingId, label, actual, expected) {
+  if (!filled(actual)) return;
+  if (JSON.stringify(listValue(actual)) !== JSON.stringify(expected)) {
+    throw new Error(`Listing ${listingId} review ${label} is stale`);
+  }
+}
+
 export function validateListingQualityReviewCsv(report, csvText, { allowExtraRows = false, requireComplete = false } = {}) {
   const rows = parseCsv(csvText);
   if (!rows.length) throw new Error("Listing quality review CSV has no rows");
@@ -429,6 +450,12 @@ export function validateListingQualityReviewCsv(report, csvText, { allowExtraRow
     if (!quality) throw new Error(`Listing quality review requires a known listing_id: ${listingId || ""}`);
     if (seen.has(listingId)) throw new Error(`Duplicate listing quality review row: ${listingId}`);
     seen.add(listingId);
+    assertOptionalSnapshotValue(listingId, "review_status", row.review_status, quality.review_status);
+    assertOptionalSnapshotValue(listingId, "editor_path", row.editor_path, quality.editor_path);
+    assertOptionalSnapshotValue(listingId, "public_gallery_assets", row.public_gallery_assets, quality.public_gallery_assets);
+    assertOptionalSnapshotValue(listingId, "missing_alt_text_assets", row.missing_alt_text_assets, quality.missing_alt_text_assets);
+    assertOptionalSnapshotList(listingId, "issues", row.issues, quality.issues);
+    assertOptionalSnapshotList(listingId, "required_editor_fields", row.required_editor_fields, quality.required_editor_fields);
 
     const factIssues = quality.issues.filter((issue) => FACT_FIELDS_BY_ISSUE[issue]);
     const mediaIssues = quality.issues.filter((issue) => MEDIA_FIELDS_BY_ISSUE[issue]);

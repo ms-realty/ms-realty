@@ -409,6 +409,74 @@ test("listing quality review CSV can ignore rows outside the current report for 
   assert.equal(validation.reviews[0].listing_id, currentReport.rows[0].listing_id);
 });
 
+test("listing quality review CSV rejects stale draft snapshot columns", () => {
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const row = report.rows[0];
+  const staleRequiredFields = row.required_editor_fields.includes("media_review") ? "public_gallery" : "media_review";
+  const headers = [
+    "listing_id",
+    "price_eur",
+    "bedrooms",
+    "location",
+    "description",
+    "facts_reviewer",
+    "media_reviewer",
+    "review_notes",
+    "editor_path",
+    "review_status",
+    "issues",
+    "required_editor_fields",
+    "public_gallery_assets",
+    "missing_alt_text_assets",
+  ];
+  const values = {
+    listing_id: row.listing_id,
+    price_eur: row.required_editor_fields.includes("price_eur") ? row.price_eur || 123000 : "",
+    bedrooms: row.required_editor_fields.includes("bedrooms") ? row.bedrooms ?? 2 : "",
+    location: row.required_editor_fields.includes("location") ? row.location || "Sandanski" : "",
+    description: row.required_editor_fields.includes("description") ? "Reviewed listing description" : "",
+    facts_reviewer: needsFactReview(row) ? "editor_bg" : "",
+    media_reviewer: needsMediaReview(row) ? "media_editor" : "",
+    review_notes: "Reviewed source gallery media evidence",
+    editor_path: row.editor_path,
+    review_status: row.review_status,
+    issues: row.issues.join("|"),
+    required_editor_fields: row.required_editor_fields.join("|"),
+    public_gallery_assets: row.public_gallery_assets,
+    missing_alt_text_assets: row.missing_alt_text_assets,
+  };
+  const reviewCsv = (overrides = {}) =>
+    [headers.join(","), headers.map((header) => ({ ...values, ...overrides })[header]).join(",")].join("\n");
+  const validCsv = reviewCsv();
+
+  const validation = validateListingQualityReviewCsv(report, validCsv);
+
+  assert.equal(validation.summary.review_rows, 1);
+  assert.throws(
+    () => validateListingQualityReviewCsv(report, reviewCsv({ review_status: "stale_review_status" })),
+    /review_status is stale/,
+  );
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        reviewCsv({ required_editor_fields: staleRequiredFields }),
+      ),
+    /required_editor_fields is stale/,
+  );
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(
+        report,
+        reviewCsv({ public_gallery_assets: row.public_gallery_assets + 1 }),
+      ),
+    /public_gallery_assets is stale/,
+  );
+});
+
 test("listing quality review packet writer and CLI honor output overrides", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-review-pack-`);
   const packetPath = `${dir}/listing-quality-review-packet.json`;
