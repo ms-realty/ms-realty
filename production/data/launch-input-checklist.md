@@ -66,6 +66,10 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 
 - Current gate: blocked
 - Runtime report: `production/data/payload-runtime-report.json`
+- Current check evidence:
+- payload_secret: missing_env (env PAYLOAD_SECRET)
+- database_url: missing_env (env DATABASE_URL)
+- database_tcp: missing_env (env DATABASE_URL)
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`

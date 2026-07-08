@@ -46,6 +46,22 @@ function sourceDomainSampleLines(seoEvidence) {
   }).join("\n");
 }
 
+function payloadCheckLine(check) {
+  const details = [
+    check.env ? `env ${check.env}` : "",
+    check.file ? `file ${check.file}` : "",
+    check.error ? `error ${check.error}` : "",
+  ].filter(Boolean);
+  return `- ${check.id}: ${check.status}${details.length ? ` (${details.join("; ")})` : ""}`;
+}
+
+function payloadCheckLines(payloadEvidence) {
+  const checks = Array.isArray(payloadEvidence.checks) ? payloadEvidence.checks : [];
+  if (!checks.length) return ["- no Payload runtime check rows available"];
+  const failing = checks.filter((check) => check.status !== "pass");
+  return (failing.length ? failing : checks).map(payloadCheckLine);
+}
+
 export function renderLaunchInputChecklist({
   generatedAt,
   launchReadiness,
@@ -136,6 +152,8 @@ ${["search_console", "yandex_webmaster", "backlinks"].map(importLine).join("\n")
 
 - Current gate: ${launchReadiness.gates.find((gate) => gate.id === "payload_runtime")?.status || "unknown"}
 - Runtime report: \`production/data/payload-runtime-report.json\`
+- Current check evidence:
+${payloadCheckLines(payloadEvidence).join("\n")}
 - Runtime env example: \`production/data/payload-runtime.env.example\`
 - Local Postgres compose file: \`production/docker-compose.payload.yml\`
 - Collection export: \`production/data/payload-collections.json\`

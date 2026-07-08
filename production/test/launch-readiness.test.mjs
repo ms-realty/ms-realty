@@ -1255,6 +1255,10 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /checked-in smoke commands remain local contract tests only/);
   assert.match(markdown, /Payload Runtime/);
   assert.match(markdown, /Current gate: blocked/);
+  assert.match(markdown, /Current check evidence/);
+  assert.match(markdown, /payload_secret: missing_env \(env PAYLOAD_SECRET\)/);
+  assert.match(markdown, /database_url: missing_env \(env DATABASE_URL\)/);
+  assert.match(markdown, /database_tcp: missing_env \(env DATABASE_URL\)/);
   assert.match(markdown, /production\/data\/payload-runtime-report\.json/);
   assert.match(markdown, /production\/data\/payload-collections\.json/);
   assert.match(markdown, /\/payload-admin/);
