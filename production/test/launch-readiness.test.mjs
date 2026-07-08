@@ -21,6 +21,10 @@ import {
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
 } from "../lib/hermes-provider-provisioning.mjs";
+import {
+  buildLiveServiceProvisioningReport,
+  writeLiveServiceProvisioningReport,
+} from "../lib/live-service-provisioning.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function readJson(path) {
@@ -134,6 +138,14 @@ const readyLiveServices = [
     summary: { attempted: 1, persisted: 1, rejected: 0 },
   },
 ];
+const readyLiveServiceProvisioning = {
+  status: "pass",
+  path: "production/data/live-service-provisioning-report.json",
+  summary: { checks: 7, missing_env: [], placeholder_env: [], services: ["typesense", "meilisearch", "hermes"] },
+  checks: [{ id: "typesense_health", status: "pass" }],
+  hermes: { ready: true, endpoint: "https://hermes.ms-realty.bg/v1/chat/completions" },
+  next_actions: ["Run npm run live:capture, then npm run live:preflight."],
+};
 const readyListingQualityReview = {
   status: "pass",
   path: "migration/reviews/listing-quality.csv",
@@ -257,6 +269,22 @@ function writeLiveReportFixtures(dir) {
     })}\n`,
   );
   return { syncReportPath, queryReportPath, hermesReportPath };
+}
+
+async function writeLiveProvisioningFixture(dir) {
+  const reportPath = `${dir}/live-service-provisioning-report.json`;
+  const report = await buildLiveServiceProvisioningReport({
+    env: {
+      TYPESENSE_URL: "https://typesense.ms-realty.bg",
+      TYPESENSE_API_KEY: "typesense-key",
+      MEILI_URL: "https://meili.ms-realty.bg",
+      MEILI_API_KEY: "meili-key",
+      HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+    },
+    fetchImpl: async () => ({ ok: true, status: 200 }),
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+  return writeLiveServiceProvisioningReport(report, reportPath);
 }
 
 function runScript(script, env) {
@@ -392,6 +420,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -457,6 +486,7 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
     seoEvidence: readySeoEvidenceFixture(),
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -528,6 +558,7 @@ test("launch readiness validator rejects weak runtime smoke pass evidence", () =
     seoEvidence: readySeoEvidenceFixture(),
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -550,6 +581,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: { ...readyPayloadRuntime, summary: { missing_env: [], database: { status: "pass" } } },
   });
@@ -562,6 +594,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     liveServices: readyLiveServices.map((item) =>
       item.source === "hermes_draft_worker" ? { ...item, path: "production/data/hermes-draft-worker-report.json.example" } : item,
     ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -572,6 +605,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: {
       ...readyPayloadRuntime,
@@ -587,6 +621,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: {
       ...readyPayloadRuntime,
@@ -602,6 +637,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: {
       ...readyPayloadRuntime,
@@ -636,11 +672,41 @@ test("launch readiness validator rejects weak live service pass summaries", () =
     liveServices: readyLiveServices.map((item) =>
       item.source === "typesense_meilisearch_sync" ? { ...item, summary: { ...item.summary, total_operations: 0 } } : item,
     ),
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
 
   assert.throws(() => assertLaunchReadinessReport(report), /search sync summary evidence/);
+});
+
+test("launch readiness blocks live services until provisioning passes", () => {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+    seoEvidence: readySeoEvidenceFixture(),
+    listingQualityReview: readyListingQualityReview,
+    liveServices: readyLiveServices,
+    liveServiceProvisioning: {
+      status: "blocked_report",
+      path: "production/data/live-service-provisioning-report.json",
+      summary: { checks: 7, missing_env: ["TYPESENSE_URL"], placeholder_env: [], services: ["typesense", "meilisearch", "hermes"] },
+      checks: [{ id: "typesense_health", status: "missing_env" }],
+      next_actions: ["Run npm run live:provisioning until all service checks pass."],
+    },
+    appState: readyAppState,
+    payloadRuntime: readyPayloadRuntime,
+  });
+
+  const liveGate = report.gates.find((gate) => gate.id === "live_services");
+  assert.equal(assertLaunchReadinessReport(report), true);
+  assert.equal(liveGate.status, "blocked");
+  assert.deepEqual(report.blockers, ["live_services"]);
 });
 
 test("launch readiness validator rejects weak production app layer pass evidence", () => {
@@ -674,6 +740,7 @@ test("launch readiness validator rejects weak listing quality pass evidence", ()
       summary: { ...readyListingQualityReview.summary, review_rows: 6, missing_review_rows: 1 },
     },
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -717,6 +784,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -743,6 +811,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -758,6 +827,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     seoEvidence,
     listingQualityReview: readyListingQualityReview,
     liveServices: readyLiveServices,
+    liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
   });
@@ -787,7 +857,7 @@ test("launch readiness build honors output path override", () => {
   assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
 });
 
-test("launch preflight fails closed while launch blockers remain", () => {
+test("launch preflight fails closed while launch blockers remain", async () => {
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
@@ -837,6 +907,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
   writeCompleteSeoInputFixture(seoDir);
   const liveDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-live-reports-`);
   const livePaths = writeLiveReportFixtures(liveDir);
+  const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir);
   const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
@@ -847,6 +918,7 @@ test("launch preflight fails closed while launch blockers remain", () => {
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
+      MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
     },
   });
 
@@ -875,13 +947,14 @@ test("launch preflight fails closed while launch blockers remain", () => {
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
+      MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
     },
   });
   assert.notEqual(readyFromSeoOutput.status, 0);
   assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: payload_runtime/);
 });
 
-test("launch preflight and input checklist honor env-mounted redirect and evidence paths", () => {
+test("launch preflight and input checklist honor env-mounted redirect and evidence paths", async () => {
   const emptyRedirectsPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-empty-redirects-`)}/deployable-redirects.json`;
   fs.writeFileSync(
     emptyRedirectsPath,
@@ -900,7 +973,9 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   const reviewPath = writeListingQualityReviewFixture(fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-review-`));
   const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-seo-`);
   writeCompleteSeoInputFixture(seoDir);
-  const livePaths = writeLiveReportFixtures(fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-live-`));
+  const liveDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-live-`);
+  const livePaths = writeLiveReportFixtures(liveDir);
+  const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir);
   const checklistPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-checklist-`)}/launch-inputs.md`;
   const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-input-checklist.mjs")], {
     cwd: fromRoot(),
@@ -912,6 +987,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
+      MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
       MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH: checklistPath,
     },
   });

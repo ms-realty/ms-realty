@@ -386,6 +386,10 @@ function assertPassRuntimeEvidence(report) {
   const liveServices = gateById(report, "live_services");
   if (liveServices?.status === "pass") {
     const reports = liveServices.evidence?.reports || [];
+    const provisioning = liveServices.evidence?.provisioning || {};
+    if (provisioning.status !== "pass" || !provisioning.path || !provisioning.summary || !Array.isArray(provisioning.checks)) {
+      throw new Error("Launch readiness live services require provisioning pass evidence");
+    }
     const sources = new Set(reports.map((item) => item.source));
     for (const source of Object.keys(LIVE_SERVICE_REPORT_TEMPLATES)) {
       if (!sources.has(source)) throw new Error(`Launch readiness live services missing ${source} evidence`);
@@ -721,7 +725,7 @@ export function buildLaunchReadinessReport({
     deployableRedirects.summary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
-  const liveServicesReady = liveServices.every((item) => item.status === "pass");
+  const liveServicesReady = liveServices.every((item) => item.status === "pass") && liveServiceProvisioning.status === "pass";
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
   const payloadRuntimeReady = payloadRuntime.status === "pass";
   const monitoringPlan = [

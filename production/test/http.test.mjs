@@ -19,6 +19,10 @@ import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../l
 import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
 import { assertSlugHistory, readSlugHistory, resetSlugHistory } from "../lib/slug-history.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import {
+  buildLiveServiceProvisioningReport,
+  writeLiveServiceProvisioningReport,
+} from "../lib/live-service-provisioning.mjs";
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -1287,6 +1291,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   const searchSyncReportPath = `${seoEvidenceInputDir}/search-engine-sync-report.json`;
   const searchQueryReportPath = `${seoEvidenceInputDir}/search-engine-query-report.json`;
   const hermesWorkerReportPath = `${seoEvidenceInputDir}/hermes-draft-worker-report.json`;
+  const liveServiceProvisioningReportPath = `${seoEvidenceInputDir}/live-service-provisioning-report.json`;
   const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
   const syncReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-sync-report.json.example"), "utf8"));
   const queryReport = JSON.parse(fs.readFileSync(fromRoot("production", "data", "search-engine-query-report.json.example"), "utf8"));
@@ -1299,6 +1304,20 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     },
     generatedAt: "2026-07-06T00:00:00Z",
   });
+  writeLiveServiceProvisioningReport(
+    await buildLiveServiceProvisioningReport({
+      env: {
+        TYPESENSE_URL: "https://typesense.ms-realty.bg",
+        TYPESENSE_API_KEY: "typesense-key",
+        MEILI_URL: "https://meili.ms-realty.bg",
+        MEILI_API_KEY: "meili-key",
+        HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
+      },
+      fetchImpl: async () => ({ ok: true, status: 200 }),
+      generatedAt: "2026-07-06T00:00:00Z",
+    }),
+    liveServiceProvisioningReportPath,
+  );
   delete syncReport.example;
   delete queryReport.example;
   delete hermesReport.example;
@@ -1320,6 +1339,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     searchSyncReportPath,
     searchQueryReportPath,
     hermesWorkerReportPath,
+    liveServiceProvisioningReportPath,
     payloadRuntimeReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
   });
