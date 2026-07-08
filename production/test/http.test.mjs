@@ -1001,6 +1001,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.body.imported, 1);
   assert.equal(qualityImported.body.edited, 1);
   assert.equal(qualityImported.body.mediaReviewRows, 1);
+  assert.equal(qualityImported.body.reviewSummary.review_rows, qualityImported.body.imported);
+  assert.equal(qualityImported.body.reviewSummary.missing_review_rows, qualityImported.body.missingReviewRows);
+  assert.equal(
+    qualityImported.body.reviewSummary.expected_review_rows,
+    qualityImported.body.imported + qualityImported.body.missingReviewRows,
+  );
   assert.equal(qualityImported.body.reviewPersisted, false);
   assert.equal(qualityImported.body.reviewPath, null);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);

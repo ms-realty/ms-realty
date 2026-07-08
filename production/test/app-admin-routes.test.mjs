@@ -702,6 +702,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityImportBody.imported, 1);
       assert.equal(listingQualityImportBody.edited, 1);
       assert.equal(listingQualityImportBody.mediaReviewRows, 1);
+      assert.equal(listingQualityImportBody.reviewSummary.review_rows, listingQualityImportBody.imported);
+      assert.equal(listingQualityImportBody.reviewSummary.missing_review_rows, listingQualityImportBody.missingReviewRows);
+      assert.equal(
+        listingQualityImportBody.reviewSummary.expected_review_rows,
+        listingQualityImportBody.imported + listingQualityImportBody.missingReviewRows,
+      );
       assert.equal(listingQualityImportBody.reviewPersisted, false);
       assert.equal(listingQualityImportBody.reviewPath, null);
       assert.equal(listingQualityImportBody.edits[0].edit.media_reviewer, "media_editor");

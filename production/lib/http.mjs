@@ -1022,6 +1022,7 @@ export function createHttpApp({
             imported: review.summary.review_rows,
             edited: edits.length,
             media_review_rows: review.summary.media_review_rows,
+            missing_review_rows: review.summary.missing_review_rows,
             review_persisted: Boolean(reviewPath),
           },
         });
@@ -1029,6 +1030,8 @@ export function createHttpApp({
           imported: review.summary.review_rows,
           edited: edits.length,
           mediaReviewRows: review.summary.media_review_rows,
+          missingReviewRows: review.summary.missing_review_rows,
+          reviewSummary: review.summary,
           reviewPersisted: Boolean(reviewPath),
           reviewPath,
           reviewPersistenceError,
