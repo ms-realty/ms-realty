@@ -5,6 +5,12 @@
   "type": "module",
   "scripts": {
     "start": "node production/server.mjs",
+    "docker:up": "node production/scripts/local-production.mjs up",
+    "docker:seed": "node production/scripts/local-production.mjs seed",
+    "docker:status": "node production/scripts/local-production.mjs status",
+    "docker:logs": "node production/scripts/local-production.mjs logs",
+    "docker:down": "node production/scripts/local-production.mjs down",
+    "docker:reset": "node production/scripts/local-production.mjs reset",
     "test": "node --test production/test/*.test.mjs",
     "search:validate": "python3 search/validate_search_imports.py",
     "search:sync": "node production/scripts/run-search-engine-sync.mjs",
@@ -68,6 +74,7 @@
   "dependencies": {
     "@payloadcms/db-postgres": "3.85.2",
     "@payloadcms/next": "3.85.2",
+    "@payloadcms/translations": "3.85.2",
     "next": "16.2.10",
     "payload": "3.85.2",
     "react": "19.2.7",

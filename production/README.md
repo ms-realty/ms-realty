@@ -176,6 +176,35 @@ Start the local production adapter:
 MS_REALTY_ADMIN_TOKEN=replace-me npm start
 ```
 
+Run the complete loopback-only production preview in Docker:
+
+```bash
+npm run docker:up
+```
+
+This builds the Next/Payload application in `NODE_ENV=production`, starts PostgreSQL,
+Typesense, Meilisearch, and Caddy, applies versioned Payload database migrations, then
+imports the reviewed search documents into both search engines. The public entry point
+defaults to `http://127.0.0.1:3200/ru/`.
+Operator workbenches under `/admin/` receive the generated local bearer token at the
+loopback-only Caddy boundary. Payload keeps its own login and first-admin setup flow at
+`/payload-admin`.
+
+The command creates an ignored, mode-`0600` `.env.local-production` file with local
+secrets. Add real `HERMES_CHAT_COMPLETIONS_URL` and `HERMES_API_KEY` values there only
+when a real Hermes endpoint is available. A missing Hermes endpoint remains visible as
+a launch blocker; the Docker preview does not manufacture AI evidence.
+
+Useful lifecycle commands:
+
+```bash
+npm run docker:status
+npm run docker:logs
+npm run docker:seed
+npm run docker:down
+npm run docker:reset
+```
+
 Useful operator endpoints:
 
 - `GET /api/health` returns `status: ok` plus current launch blockers.

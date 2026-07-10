@@ -43,7 +43,7 @@
         },
         {
           "method": "POST",
-          "url": "https://meili.example.com/indexes/ms_realty_listings/documents?primaryKey=id",
+          "url": "https://meili.example.com/indexes/ms_realty_listings/documents?primaryKey=meili_id",
           "status": 202,
           "bytes": 8192
         }

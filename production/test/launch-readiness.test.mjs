@@ -206,7 +206,7 @@ const readyLiveServices = [
             { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
             {
               method: "POST",
-              url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=id",
+              url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id",
               status: 202,
               bytes: 1,
             },
@@ -232,7 +232,7 @@ const readyLiveServices = [
           target: "ms_realty_listings",
           operation: {
             method: "GET",
-            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg",
+            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001",
             status: 200,
           },
         },
@@ -371,7 +371,7 @@ function writeLiveReportFixtures(dir) {
           documents: 167,
           operations: [
             { method: "PATCH", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/settings", status: 202, bytes: 1 },
-            { method: "POST", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=id", status: 202, bytes: 1 },
+            { method: "POST", url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/documents?primaryKey=meili_id", status: 202, bytes: 1 },
           ],
         },
       ],
@@ -393,10 +393,10 @@ function writeLiveReportFixtures(dir) {
           service_url: "https://typesense.ms-realty.bg",
           collection: "ms_realty_listings",
           query: "Sandanski",
-          filter: "translation_indexable:=true && locale:=bg",
+          filter: "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
           operation: {
             method: "GET",
-            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg",
+            url: "https://typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001",
             status: 200,
           },
           total: 1,
@@ -407,7 +407,7 @@ function writeLiveReportFixtures(dir) {
           service_url: "https://meili.ms-realty.bg",
           index: "ms_realty_listings",
           query: "Sandanski",
-          filter: "translation_indexable = true AND locale = bg",
+          filter: 'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
           operation: {
             method: "POST",
             url: "https://meili.ms-realty.bg/indexes/ms_realty_listings/search",
@@ -1447,7 +1447,7 @@ test("live service report preflight fails missing reports and passes valid repor
   const mixedQueryOriginPaths = writeLiveReportFixtures(mixedQueryOriginDir);
   const mixedQueryOrigin = JSON.parse(fs.readFileSync(mixedQueryOriginPaths.queryReportPath, "utf8"));
   mixedQueryOrigin.engines[0].operation.url =
-    "https://staging-typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg";
+    "https://staging-typesense.ms-realty.bg/collections/ms_realty_listings/documents/search?q=Sandanski&filter_by=translation_indexable%3A%3Dtrue+%26%26+locale%3A%3Dbg+%26%26+source_listing_id%3A%3DMS-CRAWL-0001";
   fs.writeFileSync(mixedQueryOriginPaths.queryReportPath, `${JSON.stringify(mixedQueryOrigin)}\n`);
   const mixedQueryOriginResult = validateLiveServiceReports(mixedQueryOriginPaths);
   assert.equal(mixedQueryOriginResult.ready, false);

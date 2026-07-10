@@ -53,6 +53,13 @@ def textish(value: str | None) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
 
 
+def meilisearch_document(document: dict[str, object]) -> dict[str, object]:
+    meili_id = re.sub(r"[^A-Za-z0-9_-]", "_", str(document.get("id", "")))
+    if not meili_id:
+        raise ValueError("Meilisearch document id is required")
+    return {**document, "meili_id": meili_id}
+
+
 def public_upload_image_url(value: str | None) -> str:
     raw = textish(value)
     if not raw:
@@ -435,7 +442,7 @@ def main() -> int:
     write_json(args.out_dir / "listings.json", source_docs)
     write_json(args.out_dir / "index-listings.json", index_docs)
     write_jsonl(args.out_dir / "typesense-listings.jsonl", index_docs)
-    write_jsonl(args.out_dir / "meilisearch-listings.ndjson", index_docs)
+    write_jsonl(args.out_dir / "meilisearch-listings.ndjson", [meilisearch_document(doc) for doc in index_docs])
     write_typesense_schema(args.out_dir / "typesense-schema.json")
     write_meili_settings(args.out_dir / "meilisearch-settings.json")
 

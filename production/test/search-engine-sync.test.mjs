@@ -93,11 +93,12 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
   assert.equal(calls[0].url, "http://typesense.local/collections");
   assert.equal(calls[1].url, "http://typesense.local/collections/ms_realty_listings/documents/import?action=upsert");
   assert.equal(calls[2].url, "http://meili.local/indexes/ms_realty_listings/settings");
-  assert.equal(calls[3].url, "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=id");
+  assert.equal(calls[3].url, "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id");
   assert.equal(calls[1].options.headers["x-typesense-api-key"], "type-key");
   assert.equal(calls[3].options.headers.authorization, "Bearer meili-key");
   assert.match(calls[1].body, /MS-CRAWL-0001:bg/);
   assert.match(calls[3].body, /MS-CRAWL-0001:bg/);
+  assert.match(calls[3].body, /"meili_id":"MS-CRAWL-0001_bg"/);
   assert.throws(
     () => assertSearchEngineSyncReport({ ...report, engines: [report.engines[0], { ...report.engines[0] }] }),
     /exactly once/,
@@ -159,7 +160,7 @@ test("search engine sync posts existing fixtures to Typesense and Meilisearch", 
             ? {
                 ...engine,
                 operations: [
-                  { ...engine.operations[0], url: "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=id" },
+                  { ...engine.operations[0], url: "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id" },
                   engine.operations[1],
                 ],
               }
@@ -345,7 +346,10 @@ test("search engine query smoke normalizes Typesense and Meilisearch hits", asyn
   assert.equal(calls[0].options.method, "GET");
   assert.equal(calls[1].url, "http://meili.local/indexes/ms_realty_listings/search");
   assert.equal(calls[1].options.method, "POST");
-  assert.equal(JSON.parse(calls[1].options.body).filter, "translation_indexable = true AND locale = bg");
+  assert.equal(
+    JSON.parse(calls[1].options.body).filter,
+    'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
+  );
   assert.equal(report.engines.find((engine) => engine.engine === "typesense").operation.method, "GET");
   assert.equal(report.engines.find((engine) => engine.engine === "meilisearch").operation.url, "http://meili.local/indexes/ms_realty_listings/search");
   assert.throws(

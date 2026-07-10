@@ -45,9 +45,9 @@
         },
         {
           "method": "POST",
-          "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=id",
+          "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id",
           "status": 201,
-          "bytes": 560337
+          "bytes": 565341
         }
       ]
     }
@@ -73,9 +73,9 @@
     },
     {
       "method": "POST",
-      "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=id",
+      "url": "http://meili.local/indexes/ms_realty_listings/documents?primaryKey=meili_id",
       "content_type": "application/x-ndjson",
-      "bytes": 560337
+      "bytes": 565341
     }
   ]
 }

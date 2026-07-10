@@ -2,6 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { postgresAdapter } from "@payloadcms/db-postgres";
+import { bg } from "@payloadcms/translations/languages/bg";
+import { en } from "@payloadcms/translations/languages/en";
+import { ru } from "@payloadcms/translations/languages/ru";
 import { buildConfig } from "payload";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
@@ -43,6 +46,10 @@ export default buildConfig({
   routes: { admin: "/payload-admin" },
   // ponytail: local defaults keep build/test importable; launch readiness still requires real env values.
   secret: process.env.PAYLOAD_SECRET || "ms-realty-local-payload-secret",
+  i18n: {
+    fallbackLanguage: "en",
+    supportedLanguages: { bg, ru, en },
+  },
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || "postgres://payload:payload@127.0.0.1:5432/ms_realty",

@@ -20,6 +20,22 @@ function rowCount(body) {
   return body.split("\n").filter(Boolean).length;
 }
 
+function meilisearchImportBody(body) {
+  const identifiers = new Set();
+  const documents = body
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      const document = JSON.parse(line);
+      const meiliId = String(document.id || "").replace(/[^A-Za-z0-9_-]/g, "_");
+      if (!meiliId) throw new Error("Meilisearch document id is required");
+      if (identifiers.has(meiliId)) throw new Error(`Duplicate Meilisearch document id: ${meiliId}`);
+      identifiers.add(meiliId);
+      return JSON.stringify({ ...document, meili_id: meiliId });
+    });
+  return `${documents.join("\n")}\n`;
+}
+
 function joinUrl(baseUrl, route) {
   return `${String(baseUrl).replace(/\/+$/, "")}${route}`;
 }
@@ -165,7 +181,7 @@ function assertSearchSyncOperations(engine, target) {
       !hasSyncOperation(engine, {
         method: "POST",
         path: `/indexes/${encoded}/documents`,
-        searchParam: { key: "primaryKey", value: "id" },
+        searchParam: { key: "primaryKey", value: "meili_id" },
         statuses: [200, 201, 202],
       })
     ) {
@@ -255,7 +271,7 @@ export async function syncMeilisearch({
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Meilisearch sync");
 
   const settings = readJson(path.join(dataDir, "meilisearch-settings.json"));
-  const body = readBody(path.join(dataDir, "meilisearch-listings.ndjson"));
+  const body = meilisearchImportBody(readBody(path.join(dataDir, "meilisearch-listings.ndjson")));
   const auth = { authorization: `Bearer ${apiKey}` };
   const operations = [
     await checkedFetch(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/settings`), {
@@ -263,7 +279,7 @@ export async function syncMeilisearch({
       headers: { ...auth, "content-type": "application/json" },
       body: JSON.stringify(settings),
     }),
-    await checkedFetch(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/documents?primaryKey=id`), {
+    await checkedFetch(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/documents?primaryKey=meili_id`), {
       method: "POST",
       headers: { ...auth, "content-type": "application/x-ndjson" },
       body,
@@ -345,7 +361,7 @@ export async function queryTypesense({
   apiKey = process.env.TYPESENSE_API_KEY,
   collectionName = process.env.TYPESENSE_COLLECTION || "ms_realty_listings",
   q = "Sandanski",
-  filterBy = "translation_indexable:=true && locale:=bg",
+  filterBy = "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
   fetchImpl = globalThis.fetch,
 } = {}) {
   required(baseUrl, "TYPESENSE_URL");
@@ -381,7 +397,7 @@ export async function queryMeilisearch({
   apiKey = process.env.MEILI_API_KEY,
   indexName = process.env.MEILI_INDEX || "ms_realty_listings",
   q = "Sandanski",
-  filter = "translation_indexable = true AND locale = bg",
+  filter = 'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
   fetchImpl = globalThis.fetch,
 } = {}) {
   required(baseUrl, "MEILI_URL");
@@ -445,7 +461,11 @@ export function assertSearchEngineQueryReport(report) {
     if (report.summary.targets?.[engine.engine] !== target) throw new Error("Search query summary targets must match engine rows");
     assertSearchQueryOperation(engine, target);
     if (!String(engine.query || "").trim()) throw new Error(`${engine.engine} query report must include query evidence`);
-    if (!String(engine.filter || "").includes("translation_indexable") || !String(engine.filter || "").includes("locale")) {
+    if (
+      !String(engine.filter || "").includes("translation_indexable") ||
+      !String(engine.filter || "").includes("locale") ||
+      !String(engine.filter || "").includes("source_listing_id")
+    ) {
       throw new Error(`${engine.engine} query report must prove reviewed locale filtering`);
     }
     if (engine.total < 1 || !engine.hits.length) throw new Error(`${engine.engine} query must return search hits`);

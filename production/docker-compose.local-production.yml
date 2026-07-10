@@ -1,0 +1,196 @@
+name: ms-realty-local-production
+
+x-app-image: &app-image
+  image: ms-realty-local-app:latest
+
+x-app-environment: &app-environment
+  NODE_ENV: production
+  PAYLOAD_SECRET: ${PAYLOAD_SECRET:?PAYLOAD_SECRET is required}
+  DATABASE_URL: postgresql://ms_realty_payload:${MS_REALTY_POSTGRES_PASSWORD:?MS_REALTY_POSTGRES_PASSWORD is required}@postgres:5432/ms_realty_payload
+  MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: "1"
+  MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN:?MS_REALTY_ADMIN_TOKEN is required}
+  TYPESENSE_URL: http://typesense:8108
+  TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
+  TYPESENSE_COLLECTION: ms_realty_listings
+  MEILI_URL: http://meilisearch:7700
+  MEILI_API_KEY: ${MEILI_MASTER_KEY:?MEILI_MASTER_KEY is required}
+  MEILI_INDEX: ms_realty_listings
+  HERMES_CHAT_COMPLETIONS_URL: ${HERMES_CHAT_COMPLETIONS_URL:-}
+  HERMES_API_KEY: ${HERMES_API_KEY:-}
+  MS_REALTY_SEARCH_SYNC_REPORT_PATH: /runtime-evidence/search-engine-sync-report.json
+  MS_REALTY_SEARCH_QUERY_REPORT_PATH: /runtime-evidence/search-engine-query-report.json
+  MS_REALTY_HERMES_WORKER_REPORT_PATH: /runtime-evidence/hermes-draft-worker-report.json
+  MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: /runtime-evidence/payload-runtime-report.json
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ms_realty_payload
+      POSTGRES_PASSWORD: ${MS_REALTY_POSTGRES_PASSWORD}
+      POSTGRES_DB: ms_realty_payload
+    ports:
+      - "127.0.0.1:${MS_REALTY_POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - payload-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ms_realty_payload -d ms_realty_payload"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+    networks:
+      - backend
+
+  typesense:
+    image: typesense/typesense:27.1
+    restart: unless-stopped
+    command:
+      - --data-dir=/data
+      - --api-key=${TYPESENSE_API_KEY}
+      - --enable-cors
+    ports:
+      - "127.0.0.1:${MS_REALTY_TYPESENSE_PORT:-8108}:8108"
+    volumes:
+      - typesense-data:/data
+    networks:
+      - backend
+      - frontend
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.11.3
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_NO_ANALYTICS: "true"
+    ports:
+      - "127.0.0.1:${MS_REALTY_MEILI_PORT:-7700}:7700"
+    volumes:
+      - meilisearch-data:/meili_data
+    networks:
+      - backend
+      - frontend
+
+  payload-migrate:
+    <<: *app-image
+    restart: "no"
+    environment:
+      <<: *app-environment
+      PAYLOAD_CONFIG_PATH: /app/payload.config.js
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["./node_modules/.bin/payload", "migrate"]
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+
+  app:
+    <<: *app-image
+    build:
+      context: ..
+      dockerfile: production/Dockerfile
+    restart: unless-stopped
+    environment: *app-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+      payload-migrate:
+        condition: service_completed_successfully
+      typesense:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+    volumes:
+      - runtime-evidence:/runtime-evidence
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    networks:
+      - backend
+      - egress
+
+  edge:
+    image: caddy:2.8.4-alpine
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN}
+    ports:
+      - "127.0.0.1:${MS_REALTY_APP_PORT:-3200}:8080"
+    volumes:
+      - ./Caddyfile.local-production:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - frontend
+      - backend
+
+  search-seed:
+    <<: *app-image
+    profiles: ["tools"]
+    restart: "no"
+    environment: *app-environment
+    depends_on:
+      typesense:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+    command:
+      - sh
+      - -c
+      - >-
+        npm run search:sync &&
+        for attempt in 1 2 3 4 5 6 7 8 9 10; do
+          npm run search:query && exit 0;
+          sleep 2;
+        done;
+        exit 1
+    volumes:
+      - runtime-evidence:/runtime-evidence
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - backend
+
+  runtime-init:
+    <<: *app-image
+    profiles: ["tools"]
+    user: "0:0"
+    restart: "no"
+    command: ["chown", "-R", "1001:1001", "/runtime-evidence"]
+    volumes:
+      - runtime-evidence:/runtime-evidence
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  frontend:
+  backend:
+    internal: true
+  egress:
+
+volumes:
+  payload-postgres-data:
+  typesense-data:
+  meilisearch-data:
+  runtime-evidence:
+  caddy-data:
+  caddy-config:

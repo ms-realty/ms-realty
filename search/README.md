@@ -94,7 +94,7 @@ curl -X PATCH "http://localhost:7700/indexes/ms_realty_listings/settings" \
   -H "Content-Type: application/json" \
   --data-binary @search/data/meilisearch-settings.json
 
-curl -X POST "http://localhost:7700/indexes/ms_realty_listings/documents?primaryKey=id" \
+curl -X POST "http://localhost:7700/indexes/ms_realty_listings/documents?primaryKey=meili_id" \
   -H "Authorization: Bearer dev-ms-realty" \
   -H "Content-Type: application/x-ndjson" \
   --data-binary @search/data/meilisearch-listings.ndjson

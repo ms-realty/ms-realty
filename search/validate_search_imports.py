@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 
@@ -39,15 +40,24 @@ def main() -> int:
     meili_docs = load_jsonl(DATA / "meilisearch-listings.ndjson")
     schema = load_json(DATA / "typesense-schema.json")
     settings = load_json(DATA / "meilisearch-settings.json")
+    meili_common_docs = [
+        {key: value for key, value in document.items() if key != "meili_id"}
+        for document in meili_docs
+    ]
 
     if len(source_docs) != 165:
         raise SystemExit("Expected 165 source listing docs")
-    if len(index_docs) != 167 or typesense_docs != index_docs or meili_docs != index_docs:
+    if len(index_docs) != 167 or typesense_docs != index_docs or meili_common_docs != index_docs:
         raise SystemExit("Search import feeds must match the 167-document locale index")
 
     ids = [doc["id"] for doc in index_docs]
     if len(ids) != len(set(ids)):
         raise SystemExit("Search index document ids must be unique")
+
+    meili_ids = [str(doc.get("meili_id") or "") for doc in meili_docs]
+    expected_meili_ids = [re.sub(r"[^A-Za-z0-9_-]", "_", doc_id) for doc_id in ids]
+    if meili_ids != expected_meili_ids or len(meili_ids) != len(set(meili_ids)):
+        raise SystemExit("Meilisearch primary keys must be safe, stable, and unique")
 
     fields = {field["name"]: field for field in schema["fields"]}
     for doc in typesense_docs:

@@ -505,7 +505,7 @@ function assertLiveServiceSyncOperationEvidence(item) {
         !hasLiveServiceOperation(engine, {
           method: "POST",
           path: `/indexes/${encoded}/documents`,
-          searchParam: { key: "primaryKey", value: "id" },
+          searchParam: { key: "primaryKey", value: "meili_id" },
           statuses: [200, 201, 202],
         })
       ) {
