@@ -10,6 +10,7 @@ import {
   buildLiveServicePreflightReport,
   buildLaunchReadinessReport,
   liveServiceImportSummary,
+  materializeLocalLaunchReadiness,
   publicLaunchReadinessHeaders,
   publicLaunchReadinessPayload,
   readLiveServiceReportTemplate,
@@ -27,6 +28,7 @@ import {
   buildLiveServiceProvisioningReport,
   writeLiveServiceProvisioningReport,
 } from "../lib/live-service-provisioning.mjs";
+import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function healthyHermesAgentFetch(url) {
@@ -47,6 +49,22 @@ function healthyHermesAgentFetch(url) {
 
 function readJson(path) {
   return JSON.parse(fs.readFileSync(fromRoot(...path), "utf8"));
+}
+
+function writeJson(path, value) {
+  fs.writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+async function localPayloadRuntimeReport(generatedAt) {
+  return buildPayloadRuntimeReport({
+    databaseProbe: async () => ({ error: "", status: "pass" }),
+    env: {
+      DATABASE_URL: "postgresql://ms_realty_payload:local-password@postgres:5432/ms_realty_payload",
+      MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: "1",
+      PAYLOAD_SECRET: "local-payload-runtime-secret-that-is-long-enough",
+    },
+    generatedAt,
+  });
 }
 
 function writeCompleteSeoInputFixture(dir) {
@@ -1214,6 +1232,74 @@ test("launch readiness build honors output path override", () => {
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
+});
+
+test("local readiness materializer promotes only fresh local Payload proof and preserves external blockers", async () => {
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-local-readiness-`);
+  const sourcePath = fromRoot("production", "data", "launch-readiness.json");
+  const source = JSON.parse(fs.readFileSync(sourcePath, "utf8"));
+  const generatedAt = "2026-07-10T12:00:00.000Z";
+  const syncPath = `${directory}/search-engine-sync-report.json`;
+  const queryPath = `${directory}/search-engine-query-report.json`;
+  const payloadPath = `${directory}/payload-runtime-report.json`;
+  const outputPath = `${directory}/local-launch-readiness.json`;
+  const sync = readJson(["production", "data", "search-engine-sync-report.json.example"]);
+  const query = readJson(["production", "data", "search-engine-query-report.json.example"]);
+  delete sync.example;
+  delete query.example;
+  sync.generated_at = "2026-07-10T11:59:00.000Z";
+  query.generated_at = "2026-07-10T11:59:30.000Z";
+  writeJson(syncPath, sync);
+  writeJson(queryPath, query);
+  const payload = await localPayloadRuntimeReport("2026-07-10T11:59:45.000Z");
+  writeJson(payloadPath, payload);
+
+  const result = materializeLocalLaunchReadiness({
+    sourceReadinessPath: sourcePath,
+    outPath: outputPath,
+    syncReportPath: syncPath,
+    queryReportPath: queryPath,
+    hermesReportPath: `${directory}/hermes-draft-worker-report.json`,
+    payloadRuntimeReportPath: payloadPath,
+    generatedAt,
+    maxReportAgeMs: 15 * 60 * 1000,
+  });
+
+  assert.equal(result.outPath, outputPath);
+  assert.equal(assertLaunchReadinessReport(result.report), true);
+  assert.equal(result.report.launch_ready, false);
+  assert.deepEqual(result.report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "local_preview_only"]);
+  assert.equal(result.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
+  assert.equal(result.report.gates.find((gate) => gate.id === "local_preview_only").status, "blocked");
+  assert.deepEqual(
+    result.report.local_preview.reports.map((report) => [report.id, report.status]),
+    [
+      ["typesense_meilisearch_sync", "pass"],
+      ["typesense_meilisearch_query", "pass"],
+      ["hermes_draft_worker", "missing_report"],
+      ["payload_runtime", "pass"],
+    ],
+  );
+  for (const sourceGate of source.gates.filter((gate) => gate.id !== "payload_runtime")) {
+    assert.deepEqual(result.report.gates.find((gate) => gate.id === sourceGate.id), sourceGate);
+  }
+  assert.deepEqual(JSON.parse(fs.readFileSync(outputPath, "utf8")), result.report);
+
+  payload.generated_at = "2026-07-10T11:40:00.000Z";
+  writeJson(payloadPath, payload);
+  const stale = materializeLocalLaunchReadiness({
+    sourceReadinessPath: sourcePath,
+    outPath: `${directory}/stale-local-launch-readiness.json`,
+    syncReportPath: syncPath,
+    queryReportPath: queryPath,
+    hermesReportPath: `${directory}/hermes-draft-worker-report.json`,
+    payloadRuntimeReportPath: payloadPath,
+    generatedAt,
+    maxReportAgeMs: 15 * 60 * 1000,
+  });
+  assert.equal(stale.report.gates.find((gate) => gate.id === "payload_runtime").status, "blocked");
+  assert.equal(stale.report.local_preview.reports.find((report) => report.id === "payload_runtime").status, "stale_report");
+  assert.equal(stale.report.launch_ready, false);
 });
 
 test("launch preflight fails closed while launch blockers remain", async () => {

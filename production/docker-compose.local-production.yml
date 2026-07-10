@@ -20,10 +20,34 @@ x-app-environment: &app-environment
   HERMES_MODEL: ${HERMES_MODEL:-}
   HERMES_PROVIDER_MODE: ${HERMES_PROVIDER_MODE:-self_hosted}
   MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: ${MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE:-live}
+  # Local Docker preview state only. This named volume is not production persistence.
+  MS_REALTY_AUDIT_LOG_PATH: /runtime-data/audit-log.jsonl
+  MS_REALTY_BROKER_CONTACT_LEDGER_PATH: /runtime-data/broker-contacts.jsonl
+  MS_REALTY_CONSENT_LEDGER_PATH: /runtime-data/consent-ledger.jsonl
+  MS_REALTY_DEAL_LEDGER_PATH: /runtime-data/deals.jsonl
+  MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: /runtime-data/deployable-redirects.json
+  MS_REALTY_EVENT_LEDGER_PATH: /runtime-data/events.jsonl
+  MS_REALTY_HERMES_AUDIT_PATH: /runtime-data/hermes-audit.jsonl
+  MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: /runtime-data/language-requests.jsonl
+  MS_REALTY_LEAD_LEDGER_PATH: /runtime-data/lead-ledger.jsonl
+  MS_REALTY_LISTING_EDIT_LEDGER_PATH: /runtime-data/listing-edits.jsonl
+  MS_REALTY_LOCALE_REGISTRY_PATH: /runtime-data/locales.json
+  MS_REALTY_REDIRECT_APPROVALS_PATH: /runtime-data/redirect-approvals.jsonl
+  MS_REALTY_REPLY_OUTBOX_PATH: /runtime-data/reply-outbox.jsonl
+  MS_REALTY_SAVED_SEARCH_LEDGER_PATH: /runtime-data/saved-searches.jsonl
+  MS_REALTY_SELLER_PIPELINE_PATH: /runtime-data/seller-pipeline.jsonl
+  MS_REALTY_SLUG_HISTORY_PATH: /runtime-data/slug-history.jsonl
+  MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: /runtime-data/tour-approvals.jsonl
+  MS_REALTY_TRANSLATION_LEDGER_PATH: /runtime-data/translation-tasks.jsonl
+  MS_REALTY_VIEWING_LEDGER_PATH: /runtime-data/viewings.jsonl
+  MS_REALTY_LOCAL_READINESS_SOURCE_PATH: /app/production/data/launch-readiness.json
+  MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: /runtime-evidence/local-launch-readiness.json
+  MS_REALTY_LOCAL_READINESS_MAX_AGE_SECONDS: "900"
   MS_REALTY_SEARCH_SYNC_REPORT_PATH: /runtime-evidence/search-engine-sync-report.json
   MS_REALTY_SEARCH_QUERY_REPORT_PATH: /runtime-evidence/search-engine-query-report.json
   MS_REALTY_HERMES_WORKER_REPORT_PATH: /runtime-evidence/hermes-draft-worker-report.json
   MS_REALTY_HERMES_AGENT_RUNTIME_REPORT_PATH: /runtime-evidence/hermes-agent-runtime-report.json
+  MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: /runtime-evidence/live-service-provisioning-report.json
   MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: /runtime-evidence/payload-runtime-report.json
 
 services:
@@ -159,12 +183,15 @@ services:
         condition: service_healthy
       payload-migrate:
         condition: service_completed_successfully
+      runtime-init:
+        condition: service_completed_successfully
       typesense:
         condition: service_started
       meilisearch:
         condition: service_started
     volumes:
       - runtime-evidence:/runtime-evidence
+      - local-dev-app-data:/runtime-data
     tmpfs:
       - /tmp
     security_opt:
@@ -233,12 +260,18 @@ services:
 
   runtime-init:
     <<: *app-image
-    profiles: ["tools"]
     user: "0:0"
     restart: "no"
-    command: ["chown", "-R", "1001:1001", "/runtime-evidence"]
+    command:
+      - sh
+      - -ec
+      - |
+        mkdir -p /runtime-evidence /runtime-data
+        if [ ! -f /runtime-data/locales.json ]; then cp /app/locales/registry.json /runtime-data/locales.json; fi
+        chown -R 1001:1001 /runtime-evidence /runtime-data
     volumes:
       - runtime-evidence:/runtime-evidence
+      - local-dev-app-data:/runtime-data
     security_opt:
       - no-new-privileges:true
 
@@ -255,6 +288,8 @@ volumes:
   payload-postgres-data:
   typesense-data:
   meilisearch-data:
+  # Local preview only: JSONL CRM/CMS state survives app recreate, not production deployment.
+  local-dev-app-data:
   runtime-evidence:
   hermes-agent-data:
   caddy-data:

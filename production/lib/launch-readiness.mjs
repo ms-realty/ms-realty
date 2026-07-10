@@ -33,6 +33,13 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
 export const DEFAULT_LIVE_SERVICE_PREFLIGHT_REPORT = fromRoot("production", "data", "live-service-preflight-report.json");
+export const DEFAULT_LOCAL_READINESS_MAX_AGE_MS = 15 * 60 * 1000;
+
+const LOCAL_PREVIEW_GATE_ID = "local_preview_only";
+const LOCAL_PREVIEW_GATE_NEXT_ACTIONS = [
+  "Treat this Docker-only report as local verification, not production launch evidence.",
+  "Complete the external SEO, human-review, and live production evidence gates before launch.",
+];
 
 const LIVE_SERVICE_REPORT_TEMPLATES = {
   typesense_meilisearch_sync: "search-engine-sync-report.json.example",
@@ -1188,4 +1195,188 @@ export function writeLaunchReadinessReport(report, outPath = DEFAULT_LAUNCH_READ
   assertLaunchReadinessReport(report);
   fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
   return outPath;
+}
+
+function localReportSnapshot({ id, path: reportPath, assertReport, generatedAtMs, maxReportAgeMs, requiresReady = false }) {
+  if (!reportPath || !fs.existsSync(reportPath)) return { id, status: "missing_report", path: reportPath || null };
+  try {
+    const report = readJson(reportPath);
+    assertReport(report);
+    if (report.example === true || reportPath.endsWith(".example")) {
+      throw new Error("Example reports cannot be materialized as local runtime evidence");
+    }
+    const reportedAtMs = Date.parse(report.generated_at);
+    if (Number.isNaN(reportedAtMs)) throw new Error("Report must include valid generated_at");
+    if (reportedAtMs > generatedAtMs + 60_000) throw new Error("Report generated_at is in the future");
+    const ageMs = Math.max(0, generatedAtMs - reportedAtMs);
+    if (ageMs > maxReportAgeMs) {
+      return {
+        id,
+        status: "stale_report",
+        path: reportPath,
+        generated_at: report.generated_at,
+        age_seconds: Math.floor(ageMs / 1000),
+      };
+    }
+    if (requiresReady && report.ready !== true) {
+      return {
+        id,
+        status: "blocked_report",
+        path: reportPath,
+        generated_at: report.generated_at,
+        age_seconds: Math.floor(ageMs / 1000),
+      };
+    }
+    return {
+      id,
+      status: "pass",
+      path: reportPath,
+      generated_at: report.generated_at,
+      age_seconds: Math.floor(ageMs / 1000),
+    };
+  } catch (error) {
+    return { id, status: "invalid_report", path: reportPath, error: error.message };
+  }
+}
+
+function writeJsonAtomically(report, outPath) {
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  const tempPath = path.join(path.dirname(outPath), `.${path.basename(outPath)}.${process.pid}.${Date.now()}.tmp`);
+  let fileDescriptor;
+  try {
+    fileDescriptor = fs.openSync(tempPath, "wx", 0o600);
+    fs.writeFileSync(fileDescriptor, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    fs.closeSync(fileDescriptor);
+    fileDescriptor = null;
+    fs.renameSync(tempPath, outPath);
+  } finally {
+    if (fileDescriptor !== undefined && fileDescriptor !== null) fs.closeSync(fileDescriptor);
+    if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+  }
+  return outPath;
+}
+
+function localPayloadRuntimeGate(sourceGate, snapshot) {
+  const runtime = snapshot.status === "pass" ? payloadRuntimeState(snapshot.path) : null;
+  if (runtime?.status === "pass") {
+    return {
+      id: "payload_runtime",
+      status: "pass",
+      message: "Current local Docker Payload runtime report passed; it remains local verification only.",
+      evidence: {
+        ...runtime,
+        local_preview: { scope: "local_docker_preview", report: snapshot },
+      },
+    };
+  }
+  return {
+    id: "payload_runtime",
+    status: "blocked",
+    message: "Current local Docker Payload runtime evidence is missing, invalid, stale, or blocked.",
+    evidence: {
+      ...(sourceGate?.evidence || {}),
+      local_preview: { scope: "local_docker_preview", report: snapshot },
+    },
+    next_actions: [
+      "Run npm run docker:up or npm run docker:seed to regenerate the local Payload runtime report.",
+      "Use production Payload evidence and launch preflight before treating this as a launch gate.",
+    ],
+  };
+}
+
+function localPreviewGate(localPreview) {
+  return {
+    id: LOCAL_PREVIEW_GATE_ID,
+    status: "blocked",
+    message: "Local Docker preview evidence is deliberately excluded from production launch readiness.",
+    evidence: localPreview,
+    next_actions: LOCAL_PREVIEW_GATE_NEXT_ACTIONS,
+  };
+}
+
+/**
+ * Materialize fresh local Docker reports without allowing them to clear external launch gates.
+ * The extra local-preview gate is intentionally always blocked, so this manifest can never make
+ * /api/ready report production readiness.
+ */
+export function materializeLocalLaunchReadiness({
+  sourceReadinessPath = DEFAULT_LAUNCH_READINESS_OUTPUT,
+  outPath,
+  syncReportPath = DEFAULT_SEARCH_ENGINE_SYNC_REPORT,
+  queryReportPath = DEFAULT_SEARCH_ENGINE_QUERY_REPORT,
+  hermesReportPath = DEFAULT_HERMES_DRAFT_WORKER_REPORT_PATH,
+  payloadRuntimeReportPath = DEFAULT_PAYLOAD_RUNTIME_REPORT,
+  generatedAt = new Date().toISOString(),
+  maxReportAgeMs = DEFAULT_LOCAL_READINESS_MAX_AGE_MS,
+} = {}) {
+  if (!outPath) throw new Error("Local readiness materialization requires an output path");
+  if (path.resolve(sourceReadinessPath) === path.resolve(outPath)) {
+    throw new Error("Local readiness materialization output must not replace its source report");
+  }
+  if (!Number.isInteger(maxReportAgeMs) || maxReportAgeMs < 1) {
+    throw new Error("Local readiness materialization maxReportAgeMs must be a positive integer");
+  }
+  const generatedAtMs = Date.parse(generatedAt);
+  if (Number.isNaN(generatedAtMs)) throw new Error("Local readiness materialization requires valid generatedAt");
+
+  const source = readJson(sourceReadinessPath);
+  assertLaunchReadinessReport(source);
+  if (source.gates.some((gate) => gate.id === LOCAL_PREVIEW_GATE_ID)) {
+    throw new Error("Local readiness materialization source must be the non-local launch readiness report");
+  }
+
+  const reports = [
+    localReportSnapshot({
+      id: "typesense_meilisearch_sync",
+      path: syncReportPath,
+      assertReport: assertSearchEngineSyncReport,
+      generatedAtMs,
+      maxReportAgeMs,
+    }),
+    localReportSnapshot({
+      id: "typesense_meilisearch_query",
+      path: queryReportPath,
+      assertReport: assertSearchEngineQueryReport,
+      generatedAtMs,
+      maxReportAgeMs,
+    }),
+    localReportSnapshot({
+      id: "hermes_draft_worker",
+      path: hermesReportPath,
+      assertReport: assertHermesDraftWorkerReport,
+      generatedAtMs,
+      maxReportAgeMs,
+    }),
+    localReportSnapshot({
+      id: "payload_runtime",
+      path: payloadRuntimeReportPath,
+      assertReport: assertPayloadRuntimeReport,
+      generatedAtMs,
+      maxReportAgeMs,
+      requiresReady: true,
+    }),
+  ];
+  const payloadSnapshot = reports.find((report) => report.id === "payload_runtime");
+  const localPreview = {
+    scope: "local_docker_preview",
+    production_launch_evidence: false,
+    generated_at: generatedAt,
+    expires_at: new Date(generatedAtMs + maxReportAgeMs).toISOString(),
+    max_report_age_seconds: Math.floor(maxReportAgeMs / 1000),
+    source_launch_readiness: { path: sourceReadinessPath, generated_at: source.generated_at },
+    reports,
+  };
+  const gates = source.gates.map((gate) => (gate.id === "payload_runtime" ? localPayloadRuntimeGate(gate, payloadSnapshot) : gate));
+  gates.push(localPreviewGate(localPreview));
+  const report = {
+    ...source,
+    generated_at: generatedAt,
+    launch_ready: false,
+    status: "blocked",
+    blockers: blockersFrom(gates),
+    gates,
+    local_preview: localPreview,
+  };
+  assertLaunchReadinessReport(report);
+  return { outPath: writeJsonAtomically(report, outPath), report };
 }

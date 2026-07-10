@@ -190,6 +190,16 @@ Operator workbenches under `/admin/` receive the generated local bearer token at
 loopback-only Caddy boundary. Payload keeps its own login and first-admin setup flow at
 `/payload-admin`.
 
+The compose stack keeps CRM/CMS JSONL preview state and the admin locale registry in the
+named `local-dev-app-data` Docker volume. App rebuilds, recreates, and `npm run docker:down`
+preserve that local state; `npm run docker:reset` intentionally removes it. This is a local
+development convenience, not production persistence, backup, or a substitute for Payload/Postgres.
+
+After `docker:up` or `docker:seed`, the app atomically materializes schema-valid runtime reports
+that are no older than 15 minutes into `/runtime-evidence/local-launch-readiness.json`. It preserves
+all external launch blockers and adds a local-preview-only block, so `/api/ready` remains `503` until
+the real production evidence gates are complete.
+
 The command creates an ignored, mode-`0600` `.env.local-production` file with local
 secrets. Add real `HERMES_CHAT_COMPLETIONS_URL` and `HERMES_API_KEY` values there only
 when a real Hermes endpoint is available. A missing Hermes endpoint remains visible as
