@@ -62,8 +62,9 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - Current provisioning evidence:
 - blocked_report (path /Users/ivan/Code/MS-Realty/production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
 - Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
-- Hermes worker: set `HERMES_CHAT_COMPLETIONS_URL` and `HERMES_API_KEY`; production Hermes evidence must be authenticated.
-- Hermes default: self-host vLLM with `--enable-auto-tool-choice --tool-call-parser hermes`; hosted OpenRouter fallback is non-sensitive only.
+- Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.
+- Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.
+- Managed local profile: set `HERMES_AGENT_MODEL`, `HERMES_AGENT_LLM_BASE_URL`, and `HERMES_AGENT_LLM_API_KEY`, then run `npm run docker:hermes:up`. The Agent only forwards to a private OpenAI-compatible model provider; its tools and persistent memory are disabled.
 - Hermes provider report: `npm run hermes:provisioning` writes `production/data/hermes-provider-provisioning-report.json` without persisting API keys.
 - Live service provisioning report: `npm run live:provisioning` writes `production/data/live-service-provisioning-report.json` with redacted endpoint health and missing-env evidence.
 - Admin provisioning status endpoint: `GET /api/admin/live-service-provisioning`.

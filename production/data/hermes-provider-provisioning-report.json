@@ -85,6 +85,18 @@
         "TELEGRAM_ALLOWED_USERS",
         "DISCORD_ALLOWED_USERS"
       ]
+    },
+    "managed_profile": {
+      "docker_image": "nousresearch/hermes-agent:v2026.7.7.2",
+      "local_start_command": "npm run docker:hermes:up",
+      "runtime_probe_command": "npm run hermes:runtime",
+      "api_endpoint": "/v1/chat/completions",
+      "capabilities_endpoint": "/v1/capabilities",
+      "health_endpoint": "/health",
+      "upstream_provider": "self_hosted_openai_compatible",
+      "customer_data_external_aggregators_forbidden": true,
+      "managed_tool_access": "none",
+      "persistent_memory": false
     }
   },
   "provider": {
@@ -149,8 +161,9 @@
   },
   "next_actions": [
     "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
-    "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
-    "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint and HERMES_API_KEY to the provider token.",
+    "Provision a self-hosted vLLM endpoint with Hermes tool parsing as the Hermes Agent model provider.",
+    "Set HERMES_CHAT_COMPLETIONS_URL to the Hermes Agent /v1/chat/completions endpoint and HERMES_API_KEY to its API-server token.",
+    "For the managed local profile, set the private model endpoint then run npm run docker:hermes:up and npm run hermes:runtime.",
     "Run npm run hermes:provisioning, then npm run hermes:worker."
   ]
 }

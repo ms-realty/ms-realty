@@ -365,8 +365,8 @@ test("OpenAI-compatible Hermes provider posts JSON draft requests", async () => 
   assert.equal(request.options.headers.authorization, "Bearer test-key");
   assert.equal(request.body.model, "NousResearch/Hermes-4-14B");
   assert.equal(request.body.response_format.type, "json_object");
-  assert.equal(request.body.tools[0].function.name, "draft_translation");
-  assert.equal(request.body.tool_choice, "auto");
+  assert.equal(request.body.tools, undefined);
+  assert.equal(request.body.tool_choice, "none");
   assert.equal(output.title, "MS-TEST-1 Sandanski 50000");
 });
 

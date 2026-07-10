@@ -29,47 +29,17 @@ function parseJsonObject(value) {
   return JSON.parse(trimmed);
 }
 
-function draftToolSchema() {
-  return {
-    type: "function",
-    function: {
-      name: "draft_translation",
-      description: "Return a non-publishing, human-reviewed translation draft for an MS Realty CMS object.",
-      parameters: {
-        type: "object",
-        additionalProperties: false,
-        required: ["title", "body", "seo_title", "meta_description", "citations"],
-        properties: {
-          title: { type: "string" },
-          body: { type: "string" },
-          seo_title: { type: "string" },
-          meta_description: { type: "string" },
-          citations: {
-            type: "array",
-            minItems: 1,
-            items: {
-              type: "object",
-              additionalProperties: true,
-            },
-          },
-        },
-      },
-    },
-  };
-}
-
 function providerRequestBody(row, model) {
   return {
     model,
     temperature: 0.2,
     response_format: { type: "json_object" },
-    tools: [draftToolSchema()],
-    tool_choice: "auto",
+    tool_choice: "none",
     messages: [
       {
         role: "system",
         content:
-          "You are Hermes Agent. Return only JSON or call draft_translation with title, body, seo_title, meta_description, citations. Draft only; never publish.",
+          "You are Hermes Agent. Return exactly one JSON object with title, body, seo_title, meta_description, citations. Draft only; never publish or invoke tools.",
       },
       { role: "user", content: JSON.stringify(row.prompt) },
     ],

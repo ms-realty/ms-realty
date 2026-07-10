@@ -56,30 +56,11 @@ function replyProviderRequestBody(prompt, model) {
     model,
     temperature: 0.2,
     response_format: { type: "json_object" },
-    tools: [
-      {
-        type: "function",
-        function: {
-          name: "draft_reply",
-          description: "Return a broker-reviewed, non-sending reply draft.",
-          parameters: {
-            type: "object",
-            additionalProperties: false,
-            required: ["text", "language", "citations"],
-            properties: {
-              text: { type: "string" },
-              language: { type: "string" },
-              citations: { type: "array", minItems: 1, items: { type: "object", additionalProperties: true } },
-            },
-          },
-        },
-      },
-    ],
-    tool_choice: "auto",
+    tool_choice: "none",
     messages: [
       {
         role: "system",
-        content: "You are Hermes Agent. Draft only. Never send customer messages. Return JSON or call draft_reply.",
+        content: "You are Hermes Agent. Draft only. Never send customer messages or invoke tools. Return exactly one JSON object with text, language, citations.",
       },
       { role: "user", content: JSON.stringify(prompt) },
     ],

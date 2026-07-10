@@ -254,8 +254,9 @@ review-gated until explicitly approved. No unreviewed crawl media is published a
 
 The AI layer is named after, and built on, **Nous Research's open-source Hermes system**. It is
 **assistive, never authoritative**, added **after** deterministic workflows exist. The engine and
-contracts below are the Phase-5 specification the current `Hermes*` guardrails target — they define the
-chosen system, not an already-wired model. Hermes is chosen because it lets the assistant be:
+contracts below are the Phase-5 specification the current `Hermes*` guardrails target. The local
+production stack now runs the official Hermes Agent as a bounded, authenticated draft gateway in front
+of a private model provider. Hermes is chosen because it lets the assistant be:
 
 - **Self-hosted on the EU box** — owner/buyer PII never leaves the platform (GDPR; §18).
 - **Open-weight** — no per-token vendor lock; the model-agnostic seam is a config change, not a rewrite.
@@ -269,21 +270,21 @@ chosen system, not an already-wired model. Hermes is chosen because it lets the 
 | **Quality step-up** | `Hermes-4.3-36B` (Nov 2025) or `Hermes-4-70B` (Llama-3.1 base) | When a task needs more capability; GGUF/FP8 builds keep serving cheap |
 | **Zero-ops fallback** | Hosted Nous Hermes via **OpenRouter** | Same prompts/format; **non-sensitive tasks only**; a config switch |
 
-Serving: **vLLM** with its built-in `--tool-call-parser hermes`. The Hermes **function-calling
-format/dataset is Apache-2.0**; individual model licenses vary by base (Qwen3 = Apache-2.0; Llama-3.1 =
-Llama Community License) — **verify the exact license on each model card before shipping.** Pick the
-model on **BG/RU/Greek/Hebrew quality against the real migrated corpus** before committing (same
-discipline as the search-engine choice in §9).
+Serving: a private **vLLM** or another OpenAI-compatible endpoint sits behind the official Hermes Agent
+gateway; the application connects only to the Agent's authenticated `/v1/chat/completions` API. The
+Hermes **function-calling format/dataset is Apache-2.0**; individual model licenses vary by base (Qwen3
+= Apache-2.0; Llama-3.1 = Llama Community License) — **verify the exact license on each model card
+before shipping.** Pick the model on **BG/RU/Greek/Hebrew quality against the real migrated corpus**
+before committing (same discipline as the search-engine choice in §9).
 
 ### 11.2 Tool-use / structured-output contract (how "agentic" is bounded)
-Every call uses the standard ChatML Hermes format: tool schemas are supplied in the system prompt inside
-`<tools>…</tools>`; the model emits `<tool_call>{"name":…,"arguments":…}</tool_call>`; the app executes
-the tool and returns `<tool_response>{…}</tool_response>`. **Tools are read-only over approved CMS/search
-data** (listing lookup, approved-content retrieval, comparable search) — the model has **no tool that
-writes public state.** Structured drafts (translation, lead score, listing-quality, valuation range,
-matching) come back as **schema-validated JSON**, checked by the deterministic pipeline before a human
-sees them; an out-of-schema or ungrounded field is rejected, not displayed. Invented listings/prices are
-structurally impossible because every fact must appear in a tool response.
+In the deployed MS Realty profile, Hermes Agent receives **no tools**. Every Agent toolset is disabled,
+persistent memory is off, requests force `tool_choice: "none"`, and the Agent receives only the
+approved CMS/listing source snapshot required for the single draft. Structured drafts (translation, lead
+score, listing-quality, valuation range, matching) come back as **schema-validated JSON**, checked by
+the deterministic pipeline before a human sees them; an out-of-schema or ungrounded field is rejected,
+not displayed. A future read-only retrieval integration must be reviewed as a separate capability; it
+cannot grant the Agent write access to public, CRM, or messaging state.
 
 ### 11.3 Capability map
 - **Public:** conversational property search; guided buyer questionnaire with explainable matches;
@@ -300,21 +301,24 @@ structurally impossible because every fact must appear in a tool response.
 ### 11.4 The Hermes Agent framework — adopted, but bounded
 Nous also ships **`hermes-agent`** (`github.com/NousResearch/hermes-agent`, MIT): an autonomous agent
 with persistent memory, reusable **skills** (agentskills.io standard), a multi-channel gateway
-(Telegram/Discord/Slack/WhatsApp/Signal/CLI), and sandboxed local/Docker/SSH/browser execution. We adopt
-its **tool-registry, persistent-memory, and skill patterns** for internal broker/editor productivity —
-but **its autonomy is deliberately disabled in this deployment:** no unattended browser control, no code
-execution against production, no auto-send to customers. Its messaging gateway may drive **internal**
-broker notifications (Telegram); every customer-facing message stays behind the existing human-approval
-and broker-contact-approval ledgers. We take the machinery, not the autonomy — an agent with browser +
-code + WhatsApp is exactly what a family agency's production must not run unsupervised.
+(Telegram/Discord/Slack/WhatsApp/Signal/CLI), and sandboxed local/Docker/SSH/browser execution. The
+local production compose profile runs `nousresearch/hermes-agent:v2026.7.7.2` as an authenticated,
+private service. A runtime probe requires `/health` and bearer-authenticated `/v1/capabilities` before
+the deployment accepts Agent evidence.
+
+We deliberately use only its gateway for draft generation: all toolsets are disabled, persistent memory
+is disabled, and browser, terminal, code, skills, messaging, and autonomous loops have no access. The
+Agent cannot reach CMS, CRM, a customer, or public publishing directly. The application persists a
+draft and its audit entry; a human broker/editor must approve every visible, indexable, or sent action.
 
 ### 11.5 Guardrails (hard)
 AI never publishes listings, translations, valuations, legal/tax answers, or listing changes without
 human approval. Hermes translation drafts cannot publish or mark pages indexable. Legal/tax/process
-answers must cite approved CMS content. Users must know when they are chatting with AI. **By default all
-inference runs on the self-hosted Hermes model so sensitive owner/buyer data stays on the EU box;** the
-hosted OpenRouter fallback is used only for explicitly non-sensitive tasks. Every Hermes call is logged
-in the AuditLog (model, prompt version, tool calls, tokens, sensitive-vs-not).
+answers must cite approved CMS content. Users must know when they are chatting with AI. **Sensitive
+owner/buyer inference goes only through the self-hosted Hermes Agent to a private EU model endpoint;**
+hosted OpenRouter is forbidden for that data and is allowed only for explicitly non-sensitive tasks.
+Every Hermes call is logged in the AuditLog (model, prompt version, tool calls, tokens,
+sensitive-vs-not).
 
 ---
 

@@ -11,6 +11,22 @@ import {
 } from "../lib/live-service-provisioning.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
+function healthyFetch(url, options = {}) {
+  if (String(url).endsWith("/v1/capabilities")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        platform: "hermes-agent",
+        model: "hermes-agent",
+        auth: { type: "bearer", required: true },
+        features: { chat_completions: true, responses_api: true, run_submission: true },
+      }),
+    };
+  }
+  return { ok: true, status: 200 };
+}
+
 test("live service provisioning report fails closed until service env is configured", async () => {
   const report = await buildLiveServiceProvisioningReport({
     env: {},
@@ -57,7 +73,7 @@ test("live service provisioning report verifies live endpoints without persistin
     },
     fetchImpl: async (url, options) => {
       calls.push({ url, headers: options.headers });
-      return { ok: true, status: 200 };
+      return healthyFetch(url, options);
     },
     generatedAt: "2026-07-06T00:00:00Z",
   });
@@ -69,7 +85,8 @@ test("live service provisioning report verifies live endpoints without persistin
   assert.equal(report.summary.placeholder_env.length, 0);
   assert.equal(report.checks.find((check) => check.id === "typesense_health").redacted_url, "https://typesense.internal");
   assert.equal(report.checks.find((check) => check.id === "meilisearch_health").redacted_url, "https://meili.internal");
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 4);
+  assert.equal(calls[3].headers.authorization, "Bearer hermes-test-secret");
   const serialized = JSON.stringify(report);
   assert.equal(serialized.includes("typesense-test-secret"), false);
   assert.equal(serialized.includes("meili-test-secret"), false);
@@ -88,8 +105,11 @@ test("live service provisioning rejects copied placeholder env values before hea
       HERMES_API_KEY: "hermes-key",
     },
     fetchImpl: async (url) => {
-      assert.equal(String(url).startsWith("https://meili.internal"), true);
-      return { ok: true, status: 200 };
+      assert.equal(
+        String(url).startsWith("https://meili.internal") || String(url).startsWith("https://hermes.ms-realty.bg"),
+        true,
+      );
+      return healthyFetch(url);
     },
     generatedAt: "2026-07-06T00:00:00Z",
   });
@@ -161,7 +181,7 @@ test("live service provisioning rejects non-chat Hermes endpoints before capture
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/models",
       HERMES_API_KEY: "hermes-key",
     },
-    fetchImpl: async () => ({ ok: true, status: 200 }),
+    fetchImpl: healthyFetch,
     generatedAt: "2026-07-06T00:00:00Z",
   });
 
@@ -301,7 +321,7 @@ test("live service provisioning ready report requires endpoint evidence", async 
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-key",
     },
-    fetchImpl: async () => ({ ok: true, status: 200 }),
+    fetchImpl: healthyFetch,
     generatedAt: "2026-07-06T00:00:00Z",
   });
   const withoutEndpointEvidence = {
@@ -376,7 +396,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-test-secret",
     },
-    fetchImpl: async () => ({ ok: true, status: 200 }),
+    fetchImpl: healthyFetch,
     generatedAt: "2026-07-06T00:00:00Z",
   });
   writeLiveServiceProvisioningReport(report, outPath);
@@ -408,7 +428,7 @@ test("live service provisioning writer and CLI do not persist secrets", async ()
   });
 
   assert.equal(cli.status, 0, cli.stderr);
-  assert.match(cli.stdout, /Live service provisioning blocked: typesense_url, typesense_api_key, meili_url, meili_api_key, typesense_health, meilisearch_health, hermes_provider/);
+  assert.match(cli.stdout, /Live service provisioning blocked: typesense_url, typesense_api_key, meili_url, meili_api_key, typesense_health, meilisearch_health, hermes_provider, hermes_agent_health, hermes_agent_capabilities/);
   assert.match(cli.stdout, /Missing env: TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY/);
   assert.match(cli.stdout, /Next: set real Typesense, Meilisearch, and Hermes provider env/);
   assert.equal(fs.readFileSync(cliOutPath, "utf8").includes("typesense-test-secret"), false);

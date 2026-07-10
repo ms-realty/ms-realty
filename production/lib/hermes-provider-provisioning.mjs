@@ -11,6 +11,7 @@ export const DEFAULT_SELF_HOSTED_HERMES_MODEL = "NousResearch/Hermes-4-14B";
 export const DEFAULT_OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions";
 export const HERMES_AGENT_OFFICIAL_URL = "https://hermes-agent.nousresearch.com/";
 export const HERMES_AGENT_INSTALL_COMMAND = "curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash";
+export const HERMES_AGENT_DOCKER_IMAGE = "nousresearch/hermes-agent:v2026.7.7.2";
 export const HERMES_CHAT_COMPLETIONS_PATH = "/v1/chat/completions";
 export const HERMES_AGENT_REQUIRED_CAPABILITIES = Object.freeze([
   "tool_gateway",
@@ -198,6 +199,18 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
         allow_all_users: false,
         required_allowlist_env: ["GATEWAY_ALLOWED_USERS", "TELEGRAM_ALLOWED_USERS", "DISCORD_ALLOWED_USERS"],
       },
+      managed_profile: {
+        docker_image: HERMES_AGENT_DOCKER_IMAGE,
+        local_start_command: "npm run docker:hermes:up",
+        runtime_probe_command: "npm run hermes:runtime",
+        api_endpoint: HERMES_CHAT_COMPLETIONS_PATH,
+        capabilities_endpoint: "/v1/capabilities",
+        health_endpoint: "/health",
+        upstream_provider: "self_hosted_openai_compatible",
+        customer_data_external_aggregators_forbidden: true,
+        managed_tool_access: "none",
+        persistent_memory: false,
+      },
     },
     provider: {
       mode: config.mode,
@@ -239,8 +252,9 @@ export function buildHermesProviderProvisioningReport({ env = process.env, gener
     next_actions: missing.length
       ? [
           "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
-          "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
-          "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint and HERMES_API_KEY to the provider token.",
+          "Provision a self-hosted vLLM endpoint with Hermes tool parsing as the Hermes Agent model provider.",
+          "Set HERMES_CHAT_COMPLETIONS_URL to the Hermes Agent /v1/chat/completions endpoint and HERMES_API_KEY to its API-server token.",
+          "For the managed local profile, set the private model endpoint then run npm run docker:hermes:up and npm run hermes:runtime.",
           "Run npm run hermes:provisioning, then npm run hermes:worker.",
         ]
       : ["Run npm run hermes:worker against this endpoint and import the generated live report."],
@@ -315,6 +329,25 @@ export function assertHermesProviderProvisioningReport(report) {
   }
   if (report.agent_runtime?.gateway_security?.allow_all_users !== false) {
     throw new Error("Hermes gateway must not allow all users");
+  }
+  const managed = report.agent_runtime?.managed_profile;
+  if (
+    managed?.docker_image !== HERMES_AGENT_DOCKER_IMAGE ||
+    managed?.local_start_command !== "npm run docker:hermes:up" ||
+    managed?.runtime_probe_command !== "npm run hermes:runtime" ||
+    managed?.api_endpoint !== HERMES_CHAT_COMPLETIONS_PATH ||
+    managed?.capabilities_endpoint !== "/v1/capabilities" ||
+    managed?.health_endpoint !== "/health"
+  ) {
+    throw new Error("Hermes provisioning must include the managed Agent API profile");
+  }
+  if (
+    managed?.upstream_provider !== "self_hosted_openai_compatible" ||
+    managed?.customer_data_external_aggregators_forbidden !== true ||
+    managed?.managed_tool_access !== "none" ||
+    managed?.persistent_memory !== false
+  ) {
+    throw new Error("Hermes provisioning managed profile must keep customer data and tools isolated");
   }
   if (!VALID_PROVIDER_MODES.has(report.provider?.mode)) throw new Error("Hermes provisioning provider mode is invalid");
   if (!String(report.provider?.model || "").trim()) throw new Error("Hermes provisioning report must include provider model");

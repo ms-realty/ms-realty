@@ -1,0 +1,67 @@
+# Managed MS Realty Hermes Agent profile. Secrets are supplied by the deployment
+# environment; this file intentionally exposes no host filesystem or CRM tools.
+model:
+  provider: custom
+  default: "${HERMES_AGENT_MODEL}"
+  base_url: "${HERMES_AGENT_LLM_BASE_URL}"
+  api_key: "${HERMES_AGENT_LLM_API_KEY}"
+  api_mode: chat_completions
+
+agent:
+  max_turns: 1
+  tool_use_enforcement: false
+  disabled_toolsets:
+    - browser
+    - clarify
+    - code_execution
+    - computer_use
+    - context_engine
+    - cronjob
+    - debugging
+    - delegation
+    - discord
+    - discord_admin
+    - feishu_doc
+    - feishu_drive
+    - file
+    - homeassistant
+    - image_gen
+    - kanban
+    - memory
+    - messaging
+    - moa
+    - rl
+    - safe
+    - search
+    - session_search
+    - skills
+    - spotify
+    - terminal
+    - todo
+    - tts
+    - video
+    - video_gen
+    - vision
+    - web
+    - x_search
+    - yuanbao
+
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+  write_approval: true
+
+skills:
+  guard_agent_created: true
+  write_approval: true
+
+approvals:
+  mode: manual
+
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: true
+  hard_stop_after:
+    exact_failure: 2
+    same_tool_failure: 2
+    idempotent_no_progress: 2

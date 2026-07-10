@@ -26,6 +26,22 @@ import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
+function healthyHermesAgentFetch(url) {
+  if (String(url).endsWith("/v1/capabilities")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        platform: "hermes-agent",
+        model: "hermes-agent",
+        auth: { type: "bearer", required: true },
+        features: { chat_completions: true, responses_api: true, run_submission: true },
+      }),
+    };
+  }
+  return { ok: true, status: 200 };
+}
+
 function tempLedger() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-`)}/leads.jsonl`;
   resetLeadLedger(file);
@@ -1433,7 +1449,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-key",
     },
-    fetchImpl: async () => ({ ok: true, status: 200 }),
+    fetchImpl: healthyHermesAgentFetch,
     generatedAt: "2026-07-06T00:00:00Z",
   });
   delete syncReport.example;

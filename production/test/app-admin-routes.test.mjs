@@ -30,6 +30,22 @@ function tempDir(prefix) {
   return fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`);
 }
 
+function healthyHermesAgentFetch(url) {
+  if (String(url).endsWith("/v1/capabilities")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        platform: "hermes-agent",
+        model: "hermes-agent",
+        auth: { type: "bearer", required: true },
+        features: { chat_completions: true, responses_api: true, run_submission: true },
+      }),
+    };
+  }
+  return { ok: true, status: 200 };
+}
+
 function csvCell(value) {
   const text = String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replaceAll("\"", "\"\"")}"` : text;
@@ -369,7 +385,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
           HERMES_API_KEY: "hermes-key",
         },
-        fetchImpl: async () => ({ ok: true, status: 200 }),
+        fetchImpl: healthyHermesAgentFetch,
         generatedAt: "2026-07-06T00:00:00Z",
       });
       const liveServiceProvisioningImport = await liveServiceProvisioningImportRoute.POST(

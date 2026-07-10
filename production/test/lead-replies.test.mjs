@@ -190,5 +190,8 @@ test("Hermes reply provider requires self-hosted Hermes Agent endpoint", async (
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url, "http://127.0.0.1:8080/v1/chat/completions");
   assert.equal(calls[0].options.headers.authorization, "Bearer secret");
-  assert.match(JSON.parse(calls[0].options.body).messages[0].content, /Draft only/);
+  const body = JSON.parse(calls[0].options.body);
+  assert.match(body.messages[0].content, /Draft only/);
+  assert.equal(body.tool_choice, "none");
+  assert.equal(body.tools, undefined);
 });

@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-07-10T16:45:18.754Z",
+  "generated_at": "2026-07-10T18:06:37.527Z",
   "ready": false,
   "status": "blocked",
   "summary": {
-    "checks": 7,
+    "checks": 9,
     "missing_env": [
       "TYPESENSE_URL",
       "TYPESENSE_API_KEY",
@@ -56,6 +56,14 @@
         "HERMES_CHAT_COMPLETIONS_URL",
         "HERMES_API_KEY"
       ]
+    },
+    {
+      "id": "hermes_agent_health",
+      "status": "missing_env"
+    },
+    {
+      "id": "hermes_agent_capabilities",
+      "status": "missing_env"
     }
   ],
   "hermes": {
@@ -93,10 +101,46 @@
       "can_publish": false,
       "can_send_customer_messages": false
     },
+    "agent_runtime": {
+      "kind": "hermes_agent_runtime",
+      "evidence_scope": "live",
+      "generated_at": "2026-07-10T18:06:37.527Z",
+      "ready": false,
+      "status": "blocked",
+      "endpoint": null,
+      "service": "Nous Hermes Agent",
+      "model": null,
+      "checks": [
+        {
+          "id": "health",
+          "status": "missing_env"
+        },
+        {
+          "id": "capabilities",
+          "status": "missing_env"
+        }
+      ],
+      "missing": [
+        "HERMES_CHAT_COMPLETIONS_URL",
+        "HERMES_API_KEY"
+      ],
+      "safety": {
+        "draft_only": true,
+        "human_approval_required": true,
+        "can_publish": false,
+        "can_send_customer_messages": false,
+        "managed_tool_access": "none",
+        "persistent_memory": false
+      },
+      "next_actions": [
+        "Set HERMES_CHAT_COMPLETIONS_URL and HERMES_API_KEY, then run npm run hermes:runtime."
+      ]
+    },
     "next_actions": [
       "Install Hermes Agent with the official installer, then run hermes setup --portal or hermes model.",
-      "Provision a self-hosted vLLM endpoint with Hermes tool parsing.",
-      "Set HERMES_CHAT_COMPLETIONS_URL to the /v1/chat/completions endpoint and HERMES_API_KEY to the provider token.",
+      "Provision a self-hosted vLLM endpoint with Hermes tool parsing as the Hermes Agent model provider.",
+      "Set HERMES_CHAT_COMPLETIONS_URL to the Hermes Agent /v1/chat/completions endpoint and HERMES_API_KEY to its API-server token.",
+      "For the managed local profile, set the private model endpoint then run npm run docker:hermes:up and npm run hermes:runtime.",
       "Run npm run hermes:provisioning, then npm run hermes:worker."
     ]
   },

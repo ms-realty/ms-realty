@@ -29,6 +29,22 @@ import {
 } from "../lib/live-service-provisioning.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
+function healthyHermesAgentFetch(url) {
+  if (String(url).endsWith("/v1/capabilities")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        platform: "hermes-agent",
+        model: "hermes-agent",
+        auth: { type: "bearer", required: true },
+        features: { chat_completions: true, responses_api: true, run_submission: true },
+      }),
+    };
+  }
+  return { ok: true, status: 200 };
+}
+
 function readJson(path) {
   return JSON.parse(fs.readFileSync(fromRoot(...path), "utf8"));
 }
@@ -463,7 +479,7 @@ async function writeLiveProvisioningFixture(dir) {
       HERMES_CHAT_COMPLETIONS_URL: "https://hermes.ms-realty.bg/v1/chat/completions",
       HERMES_API_KEY: "hermes-key",
     },
-    fetchImpl: async () => ({ ok: true, status: 200 }),
+    fetchImpl: healthyHermesAgentFetch,
     generatedAt: "2026-07-06T00:00:00Z",
   });
   return writeLiveServiceProvisioningReport(report, reportPath);
@@ -1810,7 +1826,9 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /TYPESENSE_URL/);
   assert.match(markdown, /MEILI_API_KEY/);
   assert.match(markdown, /HERMES_CHAT_COMPLETIONS_URL/);
-  assert.match(markdown, /--enable-auto-tool-choice --tool-call-parser hermes/);
+  assert.match(markdown, /npm run hermes:runtime/);
+  assert.match(markdown, /private OpenAI-compatible model provider/);
+  assert.match(markdown, /tools and persistent memory are disabled/);
   assert.match(markdown, /npm run hermes:provisioning/);
   assert.match(markdown, /hermes-provider-provisioning-report\.json/);
   assert.match(markdown, /npm run live:capture/);

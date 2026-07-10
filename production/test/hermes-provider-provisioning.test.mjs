@@ -5,6 +5,7 @@ import os from "node:os";
 import { spawnSync } from "node:child_process";
 import {
   HERMES_AGENT_MESSAGING_PLATFORMS,
+  HERMES_AGENT_DOCKER_IMAGE,
   HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_REQUIRED_CAPABILITIES,
   HERMES_AGENT_TOOL_GATEWAY_TOOLS,
@@ -43,6 +44,12 @@ test("Hermes provisioning report fails closed until a self-hosted endpoint is co
   assert.deepEqual(report.agent_runtime.project_context.missing_markers, []);
   assert.ok(report.agent_runtime.project_context.required_markers.includes("Hermes must not publish pages"));
   assert.equal(report.agent_runtime.gateway_security.allow_all_users, false);
+  assert.equal(report.agent_runtime.managed_profile.docker_image, HERMES_AGENT_DOCKER_IMAGE);
+  assert.equal(report.agent_runtime.managed_profile.local_start_command, "npm run docker:hermes:up");
+  assert.equal(report.agent_runtime.managed_profile.runtime_probe_command, "npm run hermes:runtime");
+  assert.equal(report.agent_runtime.managed_profile.upstream_provider, "self_hosted_openai_compatible");
+  assert.equal(report.agent_runtime.managed_profile.customer_data_external_aggregators_forbidden, true);
+  assert.equal(report.agent_runtime.managed_profile.managed_tool_access, "none");
   assert.equal(report.provider.mode, "self_hosted");
   assert.equal(report.provider.sensitive_data_allowed, true);
   assert.deepEqual(report.env_contract.required, ["HERMES_CHAT_COMPLETIONS_URL", "HERMES_API_KEY"]);
@@ -274,6 +281,14 @@ test("Hermes provisioning report rejects generic agent runtime evidence", () => 
         agent_runtime: { ...report.agent_runtime, gateway_security: { ...report.agent_runtime.gateway_security, allow_all_users: true } },
       }),
     /allow all users/,
+  );
+  assert.throws(
+    () =>
+      assertHermesProviderProvisioningReport({
+        ...report,
+        agent_runtime: { ...report.agent_runtime, managed_profile: { ...report.agent_runtime.managed_profile, managed_tool_access: "all" } },
+      }),
+    /customer data and tools isolated/,
   );
 });
 

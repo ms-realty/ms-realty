@@ -17,9 +17,13 @@ x-app-environment: &app-environment
   MEILI_INDEX: ms_realty_listings
   HERMES_CHAT_COMPLETIONS_URL: ${HERMES_CHAT_COMPLETIONS_URL:-}
   HERMES_API_KEY: ${HERMES_API_KEY:-}
+  HERMES_MODEL: ${HERMES_MODEL:-}
+  HERMES_PROVIDER_MODE: ${HERMES_PROVIDER_MODE:-self_hosted}
+  MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: ${MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE:-live}
   MS_REALTY_SEARCH_SYNC_REPORT_PATH: /runtime-evidence/search-engine-sync-report.json
   MS_REALTY_SEARCH_QUERY_REPORT_PATH: /runtime-evidence/search-engine-query-report.json
   MS_REALTY_HERMES_WORKER_REPORT_PATH: /runtime-evidence/hermes-draft-worker-report.json
+  MS_REALTY_HERMES_AGENT_RUNTIME_REPORT_PATH: /runtime-evidence/hermes-agent-runtime-report.json
   MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: /runtime-evidence/payload-runtime-report.json
 
 services:
@@ -72,6 +76,62 @@ services:
       - backend
       - frontend
 
+  hermes-agent-bootstrap:
+    image: busybox:1.36.1
+    profiles: ["hermes"]
+    restart: "no"
+    user: "0:0"
+    command:
+      - sh
+      - -ec
+      - |
+        cp /bootstrap/config.yaml /opt/data/config.yaml
+        cp /bootstrap/SOUL.md /opt/data/SOUL.md
+        chmod 0644 /opt/data/config.yaml /opt/data/SOUL.md
+    volumes:
+      - hermes-agent-data:/opt/data
+      - ./hermes-agent/config.yaml:/bootstrap/config.yaml:ro
+      - ./hermes-agent/SOUL.md:/bootstrap/SOUL.md:ro
+    network_mode: none
+    security_opt:
+      - no-new-privileges:true
+
+  hermes-agent:
+    image: nousresearch/hermes-agent:v2026.7.7.2
+    profiles: ["hermes"]
+    restart: unless-stopped
+    command: ["gateway", "run"]
+    environment:
+      HERMES_HOME: /opt/data
+      API_SERVER_ENABLED: "true"
+      API_SERVER_HOST: 0.0.0.0
+      API_SERVER_PORT: "8642"
+      API_SERVER_KEY: ${HERMES_AGENT_API_SERVER_KEY:-}
+      HERMES_AGENT_MODEL: ${HERMES_AGENT_MODEL:-}
+      HERMES_AGENT_LLM_BASE_URL: ${HERMES_AGENT_LLM_BASE_URL:-}
+      HERMES_AGENT_LLM_API_KEY: ${HERMES_AGENT_LLM_API_KEY:-}
+    volumes:
+      - hermes-agent-data:/opt/data
+    depends_on:
+      hermes-agent-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/hermes/.venv/bin/python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8642/health', timeout=3)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 1g
+    cpus: "1.0"
+    networks:
+      - hermes
+      - hermes-egress
+
   payload-migrate:
     <<: *app-image
     restart: "no"
@@ -122,6 +182,7 @@ services:
     networks:
       - backend
       - egress
+      - hermes
 
   edge:
     image: caddy:2.8.4-alpine
@@ -186,11 +247,15 @@ networks:
   backend:
     internal: true
   egress:
+  hermes:
+    internal: true
+  hermes-egress:
 
 volumes:
   payload-postgres-data:
   typesense-data:
   meilisearch-data:
   runtime-evidence:
+  hermes-agent-data:
   caddy-data:
   caddy-config:

@@ -7,6 +7,7 @@ import {
   assertHermesChatCompletionsEndpoint,
   buildHermesProviderProvisioningReport,
 } from "./hermes-provider-provisioning.mjs";
+import { assertHermesAgentRuntimeReport, probeHermesAgentRuntime } from "./hermes-agent-runtime.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LIVE_SERVICE_PROVISIONING_REPORT = fromRoot(
@@ -22,9 +23,11 @@ const REQUIRED_CHECK_IDS = [
   "typesense_health",
   "meilisearch_health",
   "hermes_provider",
+  "hermes_agent_health",
+  "hermes_agent_capabilities",
 ];
 const REQUIRED_SERVICES = ["typesense", "meilisearch", "hermes"];
-const CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "fail"]);
+const CHECK_STATUSES = new Set(["pass", "missing_env", "placeholder", "fail", "not_run"]);
 const REQUIRED_ENV_BY_CHECK = {
   typesense_url: "TYPESENSE_URL",
   typesense_api_key: "TYPESENSE_API_KEY",
@@ -74,13 +77,26 @@ async function healthCheck({ fetchImpl, headers = {}, id, path: route, url }) {
   }
 }
 
-function hermesProviderCheck(hermes) {
+function runtimeChecks(runtime) {
+  return runtime.checks.map((check) => ({ ...check, id: `hermes_agent_${check.id}` }));
+}
+
+async function hermesProviderCheck(hermes, { env, fetchImpl, generatedAt }) {
   if (!hermes.ready) {
     return {
-      id: "hermes_provider",
-      mode: hermes.provider.mode,
-      status: "missing_env",
-      missing: hermes.missing,
+      provider: {
+        id: "hermes_provider",
+        mode: hermes.provider.mode,
+        status: "missing_env",
+        missing: hermes.missing,
+      },
+      runtime: await probeHermesAgentRuntime({
+        endpoint: env.HERMES_CHAT_COMPLETIONS_URL,
+        apiKey: env.HERMES_API_KEY,
+        fetchImpl,
+        generatedAt,
+        evidenceScope: "live",
+      }),
     };
   }
   const check = {
@@ -92,9 +108,45 @@ function hermesProviderCheck(hermes) {
   try {
     assertProvisioningServiceUrl(hermes.provider.endpoint, "Hermes provisioning endpoint");
     assertHermesChatCompletionsEndpoint(hermes.provider.endpoint, "Hermes provisioning endpoint");
-    return check;
+    const runtime = await probeHermesAgentRuntime({
+      endpoint: env.HERMES_CHAT_COMPLETIONS_URL,
+      apiKey: env.HERMES_API_KEY,
+      fetchImpl,
+      generatedAt,
+      evidenceScope: "live",
+    });
+    return {
+      provider: { ...check, status: runtime.ready ? "pass" : "fail", ...(runtime.ready ? {} : { error: "agent_runtime_unavailable" }) },
+      runtime,
+    };
   } catch (error) {
-    return { ...check, status: "fail", error: error.message };
+    return {
+      provider: { ...check, status: "fail", error: error.message },
+      runtime: {
+        kind: "hermes_agent_runtime",
+        evidence_scope: "live",
+        generated_at: generatedAt,
+        ready: false,
+        status: "blocked",
+        endpoint: hermes.provider.endpoint,
+        service: "Nous Hermes Agent",
+        model: null,
+        checks: [
+          { id: "health", status: "not_run" },
+          { id: "capabilities", status: "not_run" },
+        ],
+        missing: [],
+        safety: {
+          draft_only: true,
+          human_approval_required: true,
+          can_publish: false,
+          can_send_customer_messages: false,
+          managed_tool_access: "none",
+          persistent_memory: false,
+        },
+        next_actions: ["Correct the Hermes Agent endpoint before requesting runtime evidence."],
+      },
+    };
   }
 }
 
@@ -139,7 +191,8 @@ export async function buildLiveServiceProvisioningReport({
   }
 
   const hermes = buildHermesProviderProvisioningReport({ env, generatedAt });
-  checks.push(hermesProviderCheck(hermes));
+  const hermesChecks = await hermesProviderCheck(hermes, { env, fetchImpl, generatedAt });
+  checks.push(hermesChecks.provider, ...runtimeChecks(hermesChecks.runtime));
 
   const missingEnv = [
     ...checks.filter((check) => check.status === "missing_env").map((check) => check.env).filter(Boolean),
@@ -179,6 +232,7 @@ export async function buildLiveServiceProvisioningReport({
         can_publish: hermes.safety.can_publish,
         can_send_customer_messages: hermes.safety.can_send_customer_messages,
       },
+      agent_runtime: hermesChecks.runtime,
       next_actions: hermes.next_actions,
     },
     next_actions: ready
@@ -241,6 +295,12 @@ export function assertLiveServiceProvisioningReport(report) {
     }
     if (ready && check.redacted_url) assertProvisioningServiceUrl(check.redacted_url, id);
   }
+  for (const id of ["hermes_agent_health", "hermes_agent_capabilities"]) {
+    const check = report.checks.find((item) => item.id === id);
+    if (ready && (!Number.isInteger(check.status_code) || check.status_code < 200 || check.status_code > 299)) {
+      throw new Error(`${id} must include successful endpoint evidence`);
+    }
+  }
   const hermesProvider = report.checks.find((check) => check.id === "hermes_provider");
   if (!Array.isArray(hermesProvider?.missing)) {
     throw new Error("Live service provisioning Hermes check must include missing env labels");
@@ -260,6 +320,7 @@ export function assertLiveServiceProvisioningReport(report) {
     assertProvisioningServiceUrl(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
     assertHermesChatCompletionsEndpoint(report.hermes.endpoint, "Live service provisioning Hermes endpoint");
   }
+  assertHermesAgentRuntimeReport(report.hermes?.agent_runtime);
   if (report.hermes?.official_url !== HERMES_AGENT_OFFICIAL_URL || report.hermes?.install_command !== HERMES_AGENT_INSTALL_COMMAND) {
     throw new Error("Live service provisioning Hermes handoff must include official install source");
   }
