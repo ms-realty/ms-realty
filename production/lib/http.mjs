@@ -14,7 +14,7 @@ import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
-import { appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
+import { appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
@@ -333,6 +333,7 @@ export function createHttpApp({
   slugChangedAt,
   listingQualityGeneratedAt,
   leadSlaGeneratedAt,
+  hermesReplyProvider = null,
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeRedirects = redirects ?? loadDeployableRedirects(deployableRedirectOutputPath || undefined);
@@ -1256,6 +1257,20 @@ export function createHttpApp({
           metadata: { lead_id: reply.lead_id, hermes_draft_used: reply.hermes_draft_used, status: reply.status },
         });
         return adminJson(201, reply);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const draft = await createHermesReplyDraft(readLeadLedger(leadLedgerPath || undefined), parseJsonBody(request), {
+          auditLogPath: auditLogPath || undefined,
+          provider: hermesReplyProvider || undefined,
+          recordedAt: reviewedAt || editedAt || receivedAt,
+        });
+        return adminJson(201, draft);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

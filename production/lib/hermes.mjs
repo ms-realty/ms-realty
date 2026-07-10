@@ -95,3 +95,54 @@ export function validateHermesTranslationDraft({ draft, propertyFacts = {}, sour
     source_snapshot: sourceSnapshot,
   };
 }
+
+export function replyPrompt({ lead, language, listingFacts = {} }) {
+  if (!lead?.lead_id || !language || !lead.message_original) {
+    throw new Error("lead_id, language, and original message are required for Hermes reply drafts");
+  }
+  assertHermesActionAllowed("draft_reply");
+  return {
+    role: "reply_draft",
+    leadId: lead.lead_id,
+    language,
+    listingReference: lead.listing_reference || null,
+    originalMessage: lead.message_original,
+    contactPreference: lead.contact_preference || null,
+    listingFacts,
+    capabilities: {
+      can_send_customer_messages: false,
+      requires_broker_approval: true,
+    },
+    rules: [
+      "Draft only; never send.",
+      "Preserve listing reference, location, price, area, and contact facts exactly when provided.",
+      "Do not describe Sandanski as a sea destination.",
+      "Legal, tax, financing, and valuation claims require approved CMS source content.",
+    ],
+  };
+}
+
+export function validateHermesReplyDraft({ draft, lead, prompt }) {
+  if (!draft) throw new Error("Hermes reply draft output is required");
+  const text =
+    typeof draft === "string"
+      ? draft.trim()
+      : String(draft.text || draft.body || draft.message || draft.draft || "").trim();
+  if (!text) throw new Error("Hermes reply draft requires text");
+  if (/sandanski/i.test(text) && hasToken(text, SANDANSKI_SEA_TOKENS)) {
+    throw new Error("Hermes reply draft must not frame Sandanski as a sea destination");
+  }
+  if (hasToken(text, LEGAL_CLAIM_TOKENS) && prompt.approved_legal_content !== true) {
+    throw new Error("Hermes reply legal/tax/process claims require approved source content");
+  }
+  const citations = Array.isArray(draft.citations) ? draft.citations : [{ source: "lead", field: "message_original" }];
+  return {
+    status: "hermes_reply_draft",
+    lead_id: lead.lead_id,
+    language: draft.language || prompt.language,
+    text,
+    citations,
+    broker_approval_required: true,
+    can_send_without_approval: false,
+  };
+}

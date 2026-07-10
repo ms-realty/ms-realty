@@ -2,7 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { appendReviewedReply, assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
+import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
+import {
+  appendReviewedReply,
+  assertReplyOutbox,
+  createHermesReplyDraft,
+  openAiCompatibleHermesReplyProvider,
+  readReplyOutbox,
+  resetReplyOutbox,
+} from "../lib/lead-replies.mjs";
 
 test("reply outbox requires known lead and broker approval", () => {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-replies-`)}/replies.jsonl`;
@@ -19,6 +27,21 @@ test("reply outbox requires known lead and broker approval", () => {
   assert.throws(
     () => appendReviewedReply(leads, { leadId: "lead-test", reviewedReply: "Draft", reviewer: "broker_ru" }, { filePath: file }),
     /Broker approval/,
+  );
+  assert.throws(
+    () =>
+      appendReviewedReply(
+        leads,
+        {
+          leadId: "lead-test",
+          reviewedReply: "Reviewed reply approved by broker.",
+          reviewer: "broker_ru",
+          approved: true,
+          hermesDraft: "true",
+        },
+        { filePath: file },
+      ),
+    /Hermes draft text/,
   );
 
   appendReviewedReply(
@@ -44,4 +67,128 @@ test("reply outbox requires known lead and broker approval", () => {
   assert.equal(rows[0].show_original_available, true);
   assert.equal(rows[0].show_original_requested, true);
   assert.equal(assertReplyOutbox(rows), true);
+});
+
+test("Hermes reply draft calls provider and logs redacted model audit before broker approval", async () => {
+  const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reply-draft-`);
+  const auditLogPath = `${dir}/audit-log.jsonl`;
+  const replyOutboxPath = `${dir}/replies.jsonl`;
+  resetAuditLog(auditLogPath);
+  resetReplyOutbox(replyOutboxPath);
+  const leads = [
+    {
+      lead_id: "lead-draft-test",
+      listing_reference: "MS-CRAWL-0001",
+      original_language: "he",
+      message_original: "Interested in this property.",
+      contact_preference: "whatsapp",
+    },
+  ];
+  let capturedPrompt;
+
+  const draft = await createHermesReplyDraft(
+    leads,
+    { leadId: "lead-draft-test", language: "he", listingFacts: { id: "MS-CRAWL-0001", location: "Sandanski" } },
+    {
+      auditLogPath,
+      recordedAt: "2026-07-08T12:00:00Z",
+      provider: async (prompt) => {
+        capturedPrompt = prompt;
+        return {
+          text: "MS-CRAWL-0001 Sandanski reply draft for broker review.",
+          language: "he",
+          citations: [{ source: "listing", field: "id" }],
+        };
+      },
+    },
+  );
+
+  assert.equal(draft.status, "hermes_reply_draft");
+  assert.equal(draft.lead_id, "lead-draft-test");
+  assert.equal(draft.can_send_without_approval, false);
+  assert.equal(draft.broker_approval_required, true);
+  assert.equal(capturedPrompt.capabilities.can_send_customer_messages, false);
+  assert.equal(capturedPrompt.capabilities.requires_broker_approval, true);
+  assert.deepEqual(readReplyOutbox(replyOutboxPath), []);
+
+  const auditRows = readAuditLog(auditLogPath);
+  assert.equal(assertAuditLog(auditRows), true);
+  assert.equal(auditRows[0].action, "hermes_model_call");
+  assert.equal(auditRows[0].actor, "hermes_reply_worker");
+  assert.equal(auditRows[0].metadata.prompt_version, "reply_draft");
+  assert.equal(auditRows[0].metadata.sensitive_data, true);
+  assert.equal(JSON.stringify(auditRows).includes("Interested in this property"), false);
+
+  const queued = appendReviewedReply(
+    leads,
+    {
+      leadId: "lead-draft-test",
+      language: "he",
+      hermesDraftText: draft.text,
+      reviewedReply: "Reviewed reply approved by broker.",
+      reviewer: "broker_ru",
+      approved: true,
+    },
+    { filePath: replyOutboxPath, reviewedAt: "2026-07-08T12:05:00Z" },
+  );
+  assert.equal(queued.status, "queued_for_manual_send");
+  assert.equal(queued.hermes_draft_used, true);
+  assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
+});
+
+test("Hermes reply provider requires self-hosted Hermes Agent endpoint", async () => {
+  assert.throws(
+    () =>
+      openAiCompatibleHermesReplyProvider({
+        env: {
+          HERMES_PROVIDER_MODE: "openrouter",
+          HERMES_API_KEY: "secret",
+        },
+      }),
+    /self_hosted/,
+  );
+
+  const calls = [];
+  const provider = openAiCompatibleHermesReplyProvider({
+    env: {
+      HERMES_PROVIDER_MODE: "self_hosted",
+      HERMES_CHAT_COMPLETIONS_URL: "http://127.0.0.1:8080/v1/chat/completions",
+      HERMES_API_KEY: "secret",
+      HERMES_MODEL: "NousResearch/Hermes-4-14B",
+    },
+    fetchImpl: async (url, options) => {
+      calls.push({ url, options });
+      return {
+        ok: true,
+        async json() {
+          return {
+            choices: [
+              {
+                message: {
+                  tool_calls: [
+                    {
+                      function: {
+                        arguments: JSON.stringify({
+                          text: "Draft for broker review.",
+                          language: "en",
+                          citations: [{ source: "lead", field: "message_original" }],
+                        }),
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          };
+        },
+      };
+    },
+  });
+
+  const output = await provider({ role: "reply_draft", leadId: "lead-provider-test" });
+  assert.equal(output.text, "Draft for broker review.");
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url, "http://127.0.0.1:8080/v1/chat/completions");
+  assert.equal(calls[0].options.headers.authorization, "Bearer secret");
+  assert.match(JSON.parse(calls[0].options.body).messages[0].content, /Draft only/);
 });

@@ -29,7 +29,7 @@ import {
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
-import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, readReplyOutbox } from "./lead-replies.mjs";
+import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import {
   buildListingQualityReviewPacket,
@@ -556,6 +556,14 @@ function appendReply(input, config) {
     config,
   );
   return reply;
+}
+
+async function draftReply(input, config) {
+  return createHermesReplyDraft(readLeadLedger(config.leadLedgerPath), input, {
+    auditLogPath: config.auditLogPath,
+    provider: config.hermesReplyProvider || undefined,
+    recordedAt: config.reviewedAt || config.editedAt,
+  });
 }
 
 function appendEditorChange(input, config) {
@@ -1145,6 +1153,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       return jsonResponse(201, appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
+      return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       return jsonResponse(201, appendEditorChange(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));

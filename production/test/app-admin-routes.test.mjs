@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
+import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
 import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { buildLiveServiceProvisioningReport } from "../lib/live-service-provisioning.mjs";
@@ -251,8 +252,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-lead-queue-tabs="true"/);
       assert.match(inboxHtml, /data-lead-row="true"/);
       assert.match(inboxHtml, /data-original-language="he"/);
+      assert.match(inboxHtml, /action="\/api\/admin\/replies\/draft"/);
+      assert.match(inboxHtml, /data-hermes-draft-request="true"/);
       assert.match(inboxHtml, /data-reply-approval-required="true"/);
       assert.match(inboxHtml, /data-hermes-reply-draft="broker_review_required"/);
+      assert.match(inboxHtml, /name="hermesDraftText"/);
+      assert.equal(inboxHtml.includes('name="hermesDraft" value="true"'), false);
       assert.match(inboxHtml, /data-show-original-toggle="true"/);
       assert.match(inboxHtml, /he -&gt; en/);
 
@@ -1193,4 +1198,70 @@ test("Next admin listing-quality import persists complete review for mounted lis
       assert.deepEqual(actionCounts(auditRows), { listing_quality_imported: 1 });
     },
   );
+});
+
+test("Next admin adapter drafts Hermes replies without queueing broker send", async () => {
+  const leadLedgerPath = tempJsonl("app-admin-reply-draft-leads");
+  const auditLogPath = tempJsonl("app-admin-reply-draft-audit");
+  fs.appendFileSync(
+    leadLedgerPath,
+    `${JSON.stringify({
+      lead_id: "next-reply-draft-lead",
+      listing_reference: "MS-CRAWL-0001",
+      original_language: "el",
+      message_original: "Interested in this property.",
+      contact_preference: "email",
+    })}\n`,
+  );
+  const prompts = [];
+
+  await withEnv({ MS_REALTY_ADMIN_TOKEN: "next-admin-test" }, async () => {
+    const config = {
+      ...appAdminConfigFromEnv({
+        MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+        MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
+      }),
+      reviewedAt: "2026-07-08T12:30:00Z",
+      hermesReplyProvider: async (prompt) => {
+        prompts.push(prompt);
+        return {
+          text: "MS-CRAWL-0001 Sandanski reply draft for broker review.",
+          language: prompt.language,
+          citations: [{ source: "listing", field: "id" }],
+        };
+      },
+    };
+
+    const unauthorized = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/replies/draft", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ leadId: "next-reply-draft-lead", language: "el" }),
+      }),
+      { config },
+    );
+    assert.equal(unauthorized.status, 401);
+
+    const response = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/replies/draft", {
+        method: "POST",
+        headers: { authorization: "Bearer next-admin-test", "content-type": "application/json" },
+        body: JSON.stringify({ leadId: "next-reply-draft-lead", language: "el", listingFacts: { location: "Sandanski" } }),
+      }),
+      { config },
+    );
+    const body = await response.json();
+
+    assert.equal(response.status, 201);
+    assert.equal(body.status, "hermes_reply_draft");
+    assert.equal(body.can_send_without_approval, false);
+    assert.equal(body.broker_approval_required, true);
+    assert.equal(prompts[0].capabilities.can_send_customer_messages, false);
+
+    const auditRows = readAuditLog(auditLogPath);
+    assert.equal(assertAuditLog(auditRows), true);
+    assert.deepEqual(actionCounts(auditRows), { hermes_model_call: 1 });
+    assert.equal(auditRows[0].metadata.prompt_version, "reply_draft");
+    assert.equal(JSON.stringify(auditRows).includes("Interested in this property"), false);
+  });
 });

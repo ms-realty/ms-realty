@@ -238,6 +238,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const consentLedgerPath = tempConsents();
   const auditLogPath = tempAuditLog();
   const slugHistoryPath = tempSlugHistory();
+  const hermesReplyPrompts = [];
   const app = createHttpApp({
     leadLedgerPath,
     replyOutboxPath,
@@ -264,6 +265,14 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     dealClosedAt: "2026-07-10T10:00:00Z",
     slugChangedAt: "2026-07-04T00:09:00Z",
     leadSlaGeneratedAt: "2026-07-06T00:00:00Z",
+    hermesReplyProvider: async (prompt) => {
+      hermesReplyPrompts.push(prompt);
+      return {
+        text: "MS-CRAWL-0001 Sandanski reply draft for broker review.",
+        language: prompt.language,
+        citations: [{ source: "listing", field: "id" }],
+      };
+    },
   });
   const redirect = deployableRedirect();
   const smoke = {
@@ -390,6 +399,21 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         contact_preference: "whatsapp",
         message: "Interested in this property.",
       },
+    }),
+    replyDraft: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/replies/draft",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        leadId: "http-lead-test",
+        language: "he",
+        listingFacts: { id: "MS-CRAWL-0001", location: "Sandanski" },
+      },
+    }),
+    replyDraftUnauthorized: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/replies/draft",
+      body: { leadId: "http-lead-test", language: "he" },
     }),
     viewingLead: await dispatchHttp(app, {
       method: "POST",
@@ -660,6 +684,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
   assert.equal(smoke.lead.headers["cache-control"], "no-store");
+  assert.equal(smoke.replyDraft.status, 201);
+  assert.equal(smoke.replyDraft.body.status, "hermes_reply_draft");
+  assert.equal(smoke.replyDraft.body.can_send_without_approval, false);
+  assert.equal(smoke.replyDraft.body.broker_approval_required, true);
+  assert.equal(smoke.replyDraftUnauthorized.status, 401);
+  assert.equal(hermesReplyPrompts[0].capabilities.can_send_customer_messages, false);
   assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
   assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.viewing.body.feedback_request.status, "open");
@@ -708,6 +738,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertAuditLog(auditRows), true);
   assert.deepEqual(actionCounts(auditRows), {
     broker_contact_approved: 1,
+    hermes_model_call: 1,
     tour_approved: 1,
     listing_slug_changed: 1,
     reply_approved: 2,
@@ -734,6 +765,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminHtml.body.includes("Manager escalations"), true);
   assert.equal(smoke.adminHtml.body.includes('data-sla-status="manager_escalation_required"'), true);
   assert.equal(smoke.adminHtml.body.includes("Escalation due"), true);
+  assert.equal(smoke.adminHtml.body.includes('action="/api/admin/replies/draft"'), true);
+  assert.equal(smoke.adminHtml.body.includes('data-hermes-draft-request="true"'), true);
+  assert.equal(smoke.adminHtml.body.includes('name="hermesDraftText"'), true);
+  assert.equal(smoke.adminHtml.body.includes('name="hermesDraft" value="true"'), false);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);
   assert.equal(smoke.listingEditorHtml.body.includes("data-kind=\"admin-listing-editor\""), true);

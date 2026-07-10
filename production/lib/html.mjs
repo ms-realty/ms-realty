@@ -626,14 +626,21 @@ function renderAdminLeadInbox(page) {
         <td data-sla-status="${escapeHtml(slaStatus)}">${escapeHtml(slaLabel)}</td>
         <td>${escapeHtml(escalationDue)}</td>
         <td>
+          <form method="post" action="/api/admin/replies/draft" data-hermes-draft-request="true" data-hermes-draft-endpoint="/api/admin/replies/draft" data-original-language="${escapeHtml(
+            lead.original_language,
+          )}">
+            <input type="hidden" name="leadId" value="${escapeHtml(lead.lead_id)}">
+            <input type="hidden" name="language" value="${escapeHtml(lead.original_language)}">
+            <button type="submit">Draft with Hermes</button>
+          </form>
           <form method="post" action="/api/admin/replies" data-reply-approval-required="true" data-hermes-reply-draft="broker_review_required" data-original-language="${escapeHtml(
             lead.original_language,
           )}">
             <input type="hidden" name="leadId" value="${escapeHtml(lead.lead_id)}">
             <input type="hidden" name="language" value="${escapeHtml(lead.original_language)}">
             <input type="hidden" name="approved" value="true">
-            <input type="hidden" name="hermesDraft" value="true">
             <label data-show-original-toggle="true"><input type="checkbox" name="showOriginal"> Show original</label>
+            <label>Hermes draft text <textarea name="hermesDraftText"></textarea></label>
             <label>Reviewer <input name="reviewer" required autocomplete="name"></label>
             <label>Reviewed reply <textarea name="reviewedReply" required></textarea></label>
             <button type="submit">Queue reply</button>
