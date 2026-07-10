@@ -327,6 +327,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       },
     }),
     listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
+    listingHtmlAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" }),
     slugChange: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/listings/slug",
@@ -351,7 +352,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     }),
     slugRedirect: await dispatchHttp(app, { url: "/he/properties/old-sandanski-slug" }),
     search: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski" }),
+    searchPriceAsc: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&sort=price_asc" }),
     searchHtml: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski" }),
+    searchHtmlPriceDesc: await dispatchHttp(app, { url: "/he/search?format=html&q=Sandanski&sort=price_desc" }),
     location: await dispatchHttp(app, { url: "/he/locations/sandanski" }),
     locationHtml: await dispatchHttp(app, { url: "/he/locations/sandanski?format=html" }),
     searchFiltered: await dispatchHttp(app, { url: "/api/search?locale=he&q=Sandanski&property_type=apartment" }),
@@ -685,6 +688,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listingPrint.body.includes("data-react-public-ui="), false);
   assert.equal(smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\""), true);
   assert.equal(smoke.search.body.cards.length > 0, true);
+  assert.equal(smoke.searchPriceAsc.body.search.sort, "price_asc");
+  assert.deepEqual(
+    smoke.searchPriceAsc.body.cards.map((card) => Number(card.price_eur)).filter(Number.isFinite),
+    [...smoke.searchPriceAsc.body.cards.map((card) => Number(card.price_eur)).filter(Number.isFinite)].sort((left, right) => left - right),
+  );
+  assert.match(smoke.searchHtmlPriceDesc.body, /<option value="price_desc" selected>/);
   assert.equal(smoke.location.body.cards.length, 1);
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
@@ -726,6 +735,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.tourApproval.body.is_public, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
+  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-photo-sphere-viewer="psv-listing-tour"/);
+  assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/cdn\.example\.test\/tours\/MS-CRAWL-0001\.jpg"/);
   assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugChangeUnauthorized.status, 401);

@@ -209,8 +209,8 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
 
-export function searchRuntimeListings(registry, seed, { localeCode, query = "", filters = {}, translationTasks = [] }) {
-  return renderSearchPage({ registry, localeCode, listings: runtimeListings(seed, translationTasks), query, filters });
+export function searchRuntimeListings(registry, seed, { localeCode, query = "", filters = {}, sort = "recommended", translationTasks = [] }) {
+  return renderSearchPage({ registry, localeCode, listings: runtimeListings(seed, translationTasks), query, filters, sort });
 }
 
 export function submitRuntimeLead(registry, seed, input) {

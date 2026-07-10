@@ -12,7 +12,7 @@ FROM dependencies AS build
 
 ENV NODE_ENV=production
 COPY . .
-RUN npm run next:build
+RUN npm run design:build && npm run next:build
 
 FROM node:22-bookworm-slim AS runtime
 

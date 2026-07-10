@@ -8,9 +8,9 @@ export const PUBLIC_APP_JS = `(function () {
   "use strict";
   var I18N = window.MS_REALTY_I18N || {};
   var KEY = "ms-realty:saved-listings";
-  var PHOTO_SPHERE_VIEWER_VERSION = "5.14.3";
-  var PHOTO_SPHERE_VIEWER_MODULE_URL = "https://esm.sh/@photo-sphere-viewer/core@" + PHOTO_SPHERE_VIEWER_VERSION + "?bundle";
-  var PHOTO_SPHERE_VIEWER_CSS_URL = "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@" + PHOTO_SPHERE_VIEWER_VERSION + "/index.css";
+  var PHOTO_SPHERE_VIEWER_SCRIPT_URL = "/vendor/photo-sphere-viewer.js";
+  var PHOTO_SPHERE_VIEWER_CSS_URL = "/vendor/photo-sphere-viewer.css";
+  var photoSphereViewerPromise = null;
   function readSaved() {
     try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (error) { return []; }
   }
@@ -87,6 +87,28 @@ export const PUBLIC_APP_JS = `(function () {
     link.setAttribute("data-photo-sphere-viewer-styles", "true");
     document.head.appendChild(link);
   }
+  function loadPhotoSphereViewer() {
+    if (window.MSRealtyPhotoSphereViewer && typeof window.MSRealtyPhotoSphereViewer.Viewer === "function") {
+      return Promise.resolve(window.MSRealtyPhotoSphereViewer);
+    }
+    if (photoSphereViewerPromise) return photoSphereViewerPromise;
+    photoSphereViewerPromise = new Promise(function (resolve, reject) {
+      var script = document.createElement("script");
+      script.src = PHOTO_SPHERE_VIEWER_SCRIPT_URL;
+      script.async = true;
+      script.setAttribute("data-photo-sphere-viewer-script", "true");
+      script.onload = function () {
+        if (window.MSRealtyPhotoSphereViewer && typeof window.MSRealtyPhotoSphereViewer.Viewer === "function") {
+          resolve(window.MSRealtyPhotoSphereViewer);
+        } else {
+          reject(new Error("Photo Sphere Viewer bundle is unavailable"));
+        }
+      };
+      script.onerror = function () { reject(new Error("Photo Sphere Viewer bundle failed to load")); };
+      document.head.appendChild(script);
+    });
+    return photoSphereViewerPromise;
+  }
   function showTourFallback(section, mount) {
     if (mount && mount.parentNode) mount.parentNode.removeChild(mount);
     section.setAttribute("data-photo-sphere-viewer-state", "fallback");
@@ -148,7 +170,7 @@ export const PUBLIC_APP_JS = `(function () {
     }
     if (!tours.length) return;
     loadPhotoSphereStyles();
-    import(PHOTO_SPHERE_VIEWER_MODULE_URL)
+    loadPhotoSphereViewer()
       .then(function (module) {
         if (!module || typeof module.Viewer !== "function") throw new Error("Photo Sphere Viewer is unavailable");
         var viewers = [];

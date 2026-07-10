@@ -50,6 +50,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(homeHtml, /data-ms-realty-design-system="inline"/);
   assert.match(homeHtml, /role="search"/);
   assert.match(homeHtml, /data-action="seller"/);
+  assert.match(homeHtml, /data-hero-media="approved"/);
+  assert.match(homeHtml, /data-location-media="approved"/);
   assert.match(homeHtml, /aria-label="נכסים מובילים"/);
   assert.match(homeHtml, /data-card-thumbnail="true"/);
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
@@ -77,16 +79,14 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.equal(assertHtmlPage(searchHtml, { lang: "he", dir: "rtl", kind: "search" }), true);
   assert.match(searchHtml, /property="og:type" content="website"/);
   assert.match(searchHtml, /data-total-matches=/);
-  assert.match(searchHtml, /data-map-optional="true"/);
+  assert.match(searchHtml, /data-map-optional="false"/);
   assert.match(searchHtml, /שמירת חיפוש/);
   assert.match(contactHtml, /פעולות קשר/);
   assert.match(searchHtml, /data-save-search-endpoint="\/api\/saved-searches"/);
   assert.match(searchHtml, /data-search-card="true"/);
   assert.match(searchHtml, /data-card-thumbnail="true"/);
   assert.match(searchHtml, /<img src="https:\/\/makler-realty\./);
-  assert.match(searchHtml, /data-view-mode="list"/);
-  assert.match(searchHtml, /רשימה/);
-  assert.match(searchHtml, /מפה/);
+  assert.doesNotMatch(searchHtml, /data-view-mode=/);
   assert.doesNotMatch(searchHtml, /verified inventory/);
   assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);

@@ -490,7 +490,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-10T18:06:37.527Z",
+              "generated_at": "2026-07-10T19:04:24.988Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,

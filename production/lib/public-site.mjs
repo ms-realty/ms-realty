@@ -1059,6 +1059,46 @@ function matchesSearch(view, query, filters = {}) {
   return true;
 }
 
+const PUBLIC_SEARCH_SORTS = new Set(["recommended", "price_asc", "price_desc"]);
+
+function publicSearchSort(value) {
+  return PUBLIC_SEARCH_SORTS.has(value) ? value : "recommended";
+}
+
+function sortListingsForPublicSearch(listings, sort) {
+  if (sort === "recommended") return listings;
+
+  const direction = sort === "price_desc" ? -1 : 1;
+  return listings
+    .map((listing, index) => ({ listing, index, price: Number(listingToPublicViewModel(listing).price_eur) }))
+    .sort((left, right) => {
+      const leftHasPrice = Number.isFinite(left.price) && left.price > 0;
+      const rightHasPrice = Number.isFinite(right.price) && right.price > 0;
+      if (!leftHasPrice || !rightHasPrice) {
+        if (leftHasPrice === rightHasPrice) return left.index - right.index;
+        return leftHasPrice ? -1 : 1;
+      }
+      const comparison = (left.price - right.price) * direction;
+      return comparison || left.index - right.index;
+    })
+    .map(({ listing }) => listing);
+}
+
+const HOME_MEDIA_PROPERTY_TYPES = new Set(["apartment", "house", "villa", "multi_unit"]);
+
+function primaryCardMedia(cards = [], { preferResidential = false } = {}) {
+  const card =
+    (preferResidential ? cards.find((candidate) => HOME_MEDIA_PROPERTY_TYPES.has(candidate.property_type) && candidate.thumbnail?.url) : null) ||
+    cards.find((candidate) => candidate.thumbnail?.url);
+  if (!card) return null;
+  return {
+    url: card.thumbnail.url,
+    alt: card.thumbnail.alt || card.title,
+    listing_id: card.id,
+    path: card.path,
+  };
+}
+
 function contactChannelLabel(channel, labels) {
   if (channel === "phone") return labels.phone;
   if (channel === "whatsapp") return "WhatsApp";
@@ -1232,7 +1272,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
   };
 }
 
-export function renderSearchPage({ registry, localeCode, listings, query = "", filters = {} }) {
+export function renderSearchPage({ registry, localeCode, listings, query = "", filters = {}, sort = "recommended" }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const ui = uiCopyFor(locale.code);
@@ -1244,7 +1284,9 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
   const matchedListings = (localeMatches.length ? localeMatches : fallbackMatches).filter((listing) =>
     matchesSearch(listingToPublicViewModel(listing), query, filters),
   );
-  const cards = matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale));
+  const selectedSort = publicSearchSort(sort);
+  const sortedListings = sortListingsForPublicSearch(matchedListings, selectedSort);
+  const cards = sortedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale));
   const activeFilterChips = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "status"]
     .map((key) => ({ key, value: filters[key] || "", active: Boolean(filters[key]) }))
     .filter((chip) => chip.active);
@@ -1266,7 +1308,9 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
     },
     mobile_policy: {
       list_first_mobile: true,
-      map_optional: true,
+      // Listing coordinates are not reviewed yet. Do not expose a map switch
+      // that implies address-level geography until that source is available.
+      map_optional: false,
       sticky_contact_actions: true,
       minimum_tap_target_px: 44,
     },
@@ -1274,6 +1318,7 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
     search: {
       engines: ["typesense", "meilisearch"],
       query,
+      sort: selectedSort,
       filters: {
         locale: locale.code,
         public_enabled: true,
@@ -1283,13 +1328,9 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       total_matches: matchedListings.length,
       returned: cards.length,
       controls: {
-        view_modes: [
-          { id: "list", label: ui.list, default: true },
-          { id: "map", label: ui.map, optional: true },
-        ],
+        view_modes: [{ id: "list", label: ui.list, default: true }],
         sort_options: [
           { id: "recommended", label: ui.recommended, default: true },
-          { id: "newest", label: ui.newest },
           { id: "price_asc", label: ui.priceLowToHigh },
           { id: "price_desc", label: ui.priceHighToLow },
         ],
@@ -1324,7 +1365,14 @@ export function renderHomePage({ registry, localeCode, listings }) {
   const locations = locationNamesFromListings(listings)
     .map((location) => {
       const page = renderLocationPage({ registry, localeCode: locale.code, location, listings });
-      return page.indexable ? { location, path: page.path, listing_count: page.body.listing_count } : null;
+      return page.indexable
+        ? {
+            location,
+            path: page.path,
+            listing_count: page.body.listing_count,
+            image: primaryCardMedia(page.cards, { preferResidential: true }),
+          }
+        : null;
     })
     .filter(Boolean);
 
@@ -1352,6 +1400,9 @@ export function renderHomePage({ registry, localeCode, listings }) {
     body: {
       h1: copy.h1,
       intro: copy.description,
+      hero: {
+        image: primaryCardMedia(search.cards, { preferResidential: true }),
+      },
       search: {
         path: search.path,
         endpoint: "/api/search",

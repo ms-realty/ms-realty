@@ -1033,6 +1033,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(tourApprovalBody.is_public, true);
       assert.ok(tourApprovalBody.fallback_gallery.length > 0);
 
+      const editorAfterTourApproval = await listingEditorRoute.GET(
+        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
+      );
+      const editorAfterTourApprovalHtml = await editorAfterTourApproval.text();
+      assert.match(editorAfterTourApprovalHtml, /data-tour-review-status="available"/);
+      assert.match(editorAfterTourApprovalHtml, /value="https:\/\/cdn\.example\.test\/tours\/MS-CRAWL-0001\.jpg"/);
+      assert.match(editorAfterTourApprovalHtml, /Reviewed 360 tour of the property\./);
+
       const viewing = await viewingRoute.POST(
         new Request("https://example.test/api/admin/viewings", {
           method: "POST",

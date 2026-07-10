@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mediaWorkflow, normalizeMediaAsset, publicMediaLibrary } from "../lib/media.mjs";
+import { mediaWorkflow, normalizeMediaAsset, publicMediaLibrary, selectPublicThumbnail } from "../lib/media.mjs";
 
 test("media library exposes imported photos and gates plans or videos for review", () => {
   const media = [
@@ -50,4 +50,25 @@ test("imported public photos use listing fallback alt text", () => {
 
   assert.equal(photo.alt, "Reviewed listing title");
   assert.equal(floorPlan.alt, "");
+});
+
+test("large source imagery outranks an inherited 45px homepage thumbnail", () => {
+  const media = [
+    normalizeMediaAsset({
+      image_url:
+        "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg&h=45&w=45&zc=1",
+      alt: "Inherited small preview",
+    }, { width: 45, height: 45 }),
+    normalizeMediaAsset({
+      image_url:
+        "https://makler-realty.com/wp-content/themes/Avenue/timthumb.php?src=https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg&h=600&w=1000&zc=1",
+      alt: "Listing exterior",
+    }),
+  ];
+
+  const thumbnail = selectPublicThumbnail(media);
+  const gallery = publicMediaLibrary(media);
+
+  assert.equal(thumbnail.url, "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg");
+  assert.equal(gallery.gallery[0].url, thumbnail.url);
 });

@@ -64,7 +64,7 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "mobile_search_actions",
-      includes(pages.search, "data-map-optional=\"true\"") &&
+      includes(pages.search, "data-map-optional=\"false\"") &&
         includes(pages.search, "data-save-search-endpoint=\"/api/saved-searches\"") &&
         includes(pages.search, "data-search-card=\"true\"") &&
         includes(pages.search, "data-card-thumbnail=\"true\"") &&

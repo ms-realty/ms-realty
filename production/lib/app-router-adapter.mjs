@@ -53,6 +53,7 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
         localeCode: searchLocale.code,
         query: requestUrl.searchParams.get("q") || "",
         filters: searchFiltersFromParams(requestUrl.searchParams),
+        sort: requestUrl.searchParams.get("sort") || "recommended",
         translationTasks,
       })
     : renderRuntimePath(

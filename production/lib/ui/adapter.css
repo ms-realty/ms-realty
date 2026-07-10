@@ -121,10 +121,6 @@ main code {
   padding: 0.1em 0.35em;
 }
 
-/* ---- RTL patches for kit CSS that uses physical properties ---- */
-[dir="rtl"] .site-hd__nav { margin-left: 0; margin-right: 8px; }
-[dir="rtl"] .site-hd__right { margin-left: 0; margin-right: auto; }
-
 /* ---- Print: strip chrome, keep content ---- */
 @media print {
   .site-hd, .site-ft, .skip-link, [data-mobile-sticky-actions] { display: none !important; }

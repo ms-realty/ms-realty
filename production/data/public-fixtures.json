@@ -191,6 +191,14 @@
     "body": {
       "h1": "מצאו נכס עם MS Realty",
       "intro": "חפשו נכסים, אזורים ושירותי מוכרים מאושרים של MS Realty.",
+      "hero": {
+        "image": {
+          "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+          "alt": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+          "listing_id": "MS-CRAWL-0002",
+          "path": "/he/properties/MS-CRAWL-0002"
+        }
+      },
       "search": {
         "path": "/he/search",
         "endpoint": "/api/search",
@@ -211,7 +219,13 @@
         {
           "location": "Sandanski",
           "path": "/he/locations/sandanski",
-          "listing_count": 1
+          "listing_count": 1,
+          "image": {
+            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански",
+            "listing_id": "MS-CRAWL-0001",
+            "path": "/he/properties/MS-CRAWL-0001"
+          }
         }
       ]
     },
@@ -2035,7 +2049,7 @@
     },
     "mobile_policy": {
       "list_first_mobile": true,
-      "map_optional": true,
+      "map_optional": false,
       "sticky_contact_actions": true,
       "minimum_tap_target_px": 44
     },
@@ -2157,6 +2171,7 @@
         "meilisearch"
       ],
       "query": "Sandanski",
+      "sort": "recommended",
       "filters": {
         "locale": "he",
         "public_enabled": true,
@@ -2170,11 +2185,6 @@
             "id": "list",
             "label": "רשימה",
             "default": true
-          },
-          {
-            "id": "map",
-            "label": "מפה",
-            "optional": true
           }
         ],
         "sort_options": [
@@ -2182,10 +2192,6 @@
             "id": "recommended",
             "label": "מומלצים",
             "default": true
-          },
-          {
-            "id": "newest",
-            "label": "החדשים ביותר"
           },
           {
             "id": "price_asc",

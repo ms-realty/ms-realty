@@ -190,6 +190,10 @@ Operator workbenches under `/admin/` receive the generated local bearer token at
 loopback-only Caddy boundary. Payload keeps its own login and first-admin setup flow at
 `/payload-admin`.
 
+Approved 360 tours load Photo Sphere Viewer from the locally bundled
+`/vendor/photo-sphere-viewer.js` and `/vendor/photo-sphere-viewer.css` assets. The Docker
+preview does not depend on an external viewer CDN.
+
 The compose stack keeps CRM/CMS JSONL preview state and the admin locale registry in the
 named `local-dev-app-data` Docker volume. App rebuilds, recreates, and `npm run docker:down`
 preserve that local state; `npm run docker:reset` intentionally removes it. This is a local

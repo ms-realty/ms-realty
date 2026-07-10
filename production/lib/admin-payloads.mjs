@@ -1,5 +1,6 @@
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
 import { buildLeadSlaReport } from "./lead-sla.mjs";
+import { latestTourForListing } from "./tours.mjs";
 
 export const LISTING_EDIT_FIELDS = [
   "title",
@@ -19,10 +20,11 @@ function listingRecord(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
 }
 
-export function renderAdminListingEditorPayload(registry, requestedLocale, seed, listingId, edits, translationTasks) {
+export function renderAdminListingEditorPayload(registry, requestedLocale, seed, listingId, edits, translationTasks, tourApprovals = []) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const record = listingRecord(seed, listingId || "MS-CRAWL-0001");
   if (!record) throw new Error("Known listingId is required");
+  const reviewedTour = latestTourForListing(tourApprovals, record.id);
   return {
     kind: "admin_listing_editor",
     status: 200,
@@ -38,7 +40,7 @@ export function renderAdminListingEditorPayload(registry, requestedLocale, seed,
       robots: "noindex,nofollow",
     },
     workspace,
-    listing: record,
+    listing: reviewedTour ? { ...record, tour: reviewedTour } : record,
     edits: edits.filter((edit) => edit.listing_id === record.id),
     translationTasks: translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
     editableFields: LISTING_EDIT_FIELDS,

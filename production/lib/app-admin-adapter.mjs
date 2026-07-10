@@ -327,6 +327,7 @@ function listingEditorPayload(registry, url, config) {
     url.searchParams.get("listingId"),
     edits,
     latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    readTourApprovals(config.tourApprovalLedgerPath),
   );
 }
 

@@ -511,13 +511,15 @@ export function createHttpApp({
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
       const filters = searchFiltersFromParams(url.searchParams);
+      const sort = url.searchParams.get("sort") || "recommended";
       const result = searchRuntimeListings(activeRegistry, currentSeed(), {
         localeCode,
         query,
         filters,
+        sort,
         translationTasks: readTranslationLedger(translationLedgerPath || undefined),
       });
-      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters });
+      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort });
       return json(200, result);
     }
 
@@ -529,7 +531,8 @@ export function createHttpApp({
       if (searchLocale) {
         const query = url.searchParams.get("q") || "";
         const filters = searchFiltersFromParams(url.searchParams);
-        recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters });
+        const sort = url.searchParams.get("sort") || "recommended";
+        recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters, sort });
         return publicResponse(
           request,
           url,
@@ -537,6 +540,7 @@ export function createHttpApp({
             localeCode: searchLocale.code,
             query,
             filters,
+            sort,
             translationTasks: readTranslationLedger(translationLedgerPath || undefined),
           }),
         );
@@ -628,6 +632,7 @@ export function createHttpApp({
               url.searchParams.get("listingId"),
               readListingEdits(listingEditLedgerPath || undefined),
               latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+              readTourApprovals(tourApprovalLedgerPath || undefined),
             ),
           ),
           "text/html; charset=utf-8",

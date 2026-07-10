@@ -3,11 +3,19 @@ import fs from "node:fs";
 import test from "node:test";
 import { ADMIN_APP_JS, PUBLIC_APP_JS } from "../lib/ui/client.mjs";
 
-test("public client loads the pinned Photo Sphere Viewer only for approved HTTPS panorama markup", () => {
+test("public client loads the pinned local Photo Sphere Viewer bundle only for approved HTTPS panorama markup", () => {
   const packageJson = JSON.parse(fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
+  const bundle = new URL("../../public/vendor/photo-sphere-viewer.js", import.meta.url);
+  const styles = new URL("../../public/vendor/photo-sphere-viewer.css", import.meta.url);
 
   assert.equal(packageJson.dependencies["@photo-sphere-viewer/core"], "5.14.3");
-  assert.match(PUBLIC_APP_JS, /@photo-sphere-viewer\/core@" \+ PHOTO_SPHERE_VIEWER_VERSION \+ "\?bundle/);
+  assert.equal(fs.existsSync(bundle), true);
+  assert.equal(fs.existsSync(styles), true);
+  assert.match(fs.readFileSync(bundle, "utf8"), /MSRealtyPhotoSphereViewer/);
+  assert.match(PUBLIC_APP_JS, /PHOTO_SPHERE_VIEWER_SCRIPT_URL = "\/vendor\/photo-sphere-viewer\.js"/);
+  assert.match(PUBLIC_APP_JS, /PHOTO_SPHERE_VIEWER_CSS_URL = "\/vendor\/photo-sphere-viewer\.css"/);
+  assert.match(PUBLIC_APP_JS, /function loadPhotoSphereViewer/);
+  assert.doesNotMatch(PUBLIC_APP_JS, /esm\.sh|jsdelivr/);
   assert.match(PUBLIC_APP_JS, /\[data-photo-sphere-viewer="psv-listing-tour"\]/);
   assert.match(PUBLIC_APP_JS, /data-panorama-url/);
   assert.match(PUBLIC_APP_JS, /function isApprovedPanoramaUrl/);

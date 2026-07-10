@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node production/server.mjs",
-    "design:build": "node production/scripts/build-design-assets.mjs",
+    "design:build": "node production/scripts/build-design-assets.mjs && node production/scripts/build-photo-sphere-viewer.mjs",
+    "photo-sphere:build": "node production/scripts/build-photo-sphere-viewer.mjs",
     "docker:up": "node production/scripts/local-production.mjs up",
     "docker:hermes:up": "node production/scripts/local-production.mjs hermes:up",
     "docker:seed": "node production/scripts/local-production.mjs seed",
@@ -93,6 +94,7 @@
     "postcss": "8.5.10"
   },
   "devDependencies": {
+    "esbuild": "0.25.12",
     "lucide-static": "^1.24.0"
   }
 }

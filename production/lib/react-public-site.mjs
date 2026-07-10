@@ -357,13 +357,18 @@ function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
 function HomeBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
+  const heroImage = page.body.hero?.image;
   const main = h(
     "main",
     { id: "main", "data-kind": "home", "data-react-public-ui": "home" },
     h(
       "section",
       { className: "hp-hero" },
-      h("div", { className: "hp-hero__bg mk-photo mk-photo--pine", "aria-hidden": "true" }),
+      h(
+        "div",
+        { className: "hp-hero__bg", "data-hero-media": heroImage?.url ? "approved" : "fallback" },
+        heroImage?.url ? h("img", { src: heroImage.url, alt: heroImage.alt || page.body.h1, fetchPriority: "high" }) : null,
+      ),
       h(
         "div",
         { className: "hp-hero__in" },
@@ -404,10 +409,16 @@ function HomeBody({ page }) {
           h(
             "nav",
             { className: "hp-resorts", "aria-label": labels.locations, "data-home-locations": "true" },
-            ...(page.body.locations || []).map((location, index) =>
+            ...(page.body.locations || []).map((location) =>
               h(
                 "a",
-                { key: location.path, href: location.path, className: `hp-resort mk-photo mk-photo--${PHOTO_TONES[index % PHOTO_TONES.length]}` },
+                {
+                  key: location.path,
+                  href: location.path,
+                  className: "hp-resort",
+                  "data-location-media": location.image?.url ? "approved" : "fallback",
+                },
+                location.image?.url ? h("img", { src: location.image.url, alt: location.image.alt || location.location, loading: "lazy" }) : null,
                 location.listing_count ? h("span", { className: "hp-resort__c" }, location.listing_count) : null,
                 h("div", { className: "hp-resort__t" }, h("h3", null, location.location)),
               ),
@@ -458,6 +469,7 @@ function SearchBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
   const controls = page.search.controls || {};
+  const viewModes = controls.view_modes || [];
   const filter = (name, label) =>
     h(
       "div",
@@ -505,27 +517,29 @@ function SearchBody({ page }) {
                 "select",
                 { name: "sort" },
                 ...(controls.sort_options || []).map((option) =>
-                  h("option", { key: option.id, value: option.id, selected: option.default ? true : undefined }, option.label),
+                  h("option", { key: option.id, value: option.id, selected: page.search.sort === option.id ? true : undefined }, option.label),
                 ),
               ),
             ),
           ),
-          h(
-            "fieldset",
-            { className: "sr-fg sr-view", "data-view-mode-control": "true", "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false" },
-            h("legend", null, labels.view),
-            h(
-              "div",
-              { className: "sr-beds" },
-              ...(controls.view_modes || []).map((mode) =>
+          viewModes.length > 1
+            ? h(
+                "fieldset",
+                { className: "sr-fg sr-view", "data-view-mode-control": "true", "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false" },
+                h("legend", null, labels.view),
                 h(
-                  "button",
-                  { key: mode.id, type: "submit", name: "view", value: mode.id, "aria-pressed": mode.default ? "true" : "false", "data-view-mode": mode.id },
-                  mode.label,
+                  "div",
+                  { className: "sr-beds" },
+                  ...viewModes.map((mode) =>
+                    h(
+                      "button",
+                      { key: mode.id, type: "submit", name: "view", value: mode.id, "aria-pressed": mode.default ? "true" : "false", "data-view-mode": mode.id },
+                      mode.label,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
+              )
+            : null,
           h("div", { className: "sr-fg sr-fg--submit" }, h(Btn, { type: "submit", variant: "primary", full: true }, labels.search)),
         ),
         h(
@@ -543,7 +557,7 @@ function SearchBody({ page }) {
       ),
       h(
         "section",
-        { className: "sr-results" },
+        { className: "sr-results", "data-search-view": "list" },
         h(
           "div",
           { className: "sr-results__head" },
@@ -638,13 +652,14 @@ function ListingBody({ page }) {
   const gallery = (page.body.media.gallery || []).slice(0, 12);
   const channels = page.body.actions.direct_contact.channels || [];
   const tone = toneFor(page.body.facts?.id || page.path);
+  const breadcrumbChevron = page.dir === "rtl" ? "chevron-left" : "chevron-right";
 
   const crumbs = chrome
     ? h(
         "nav",
         { className: "mk-crumbs", "aria-label": ui.breadcrumb },
-        h("span", { className: "mk-crumbs__item" }, h("a", { href: chrome.home.href }, chrome.home.label), h("span", { className: "mk-crumbs__sep" }, h(Icon, { name: "chevron-right", size: 14 }))),
-        h("span", { className: "mk-crumbs__item" }, h("a", { href: chrome.nav[0].href }, labels.search), h("span", { className: "mk-crumbs__sep" }, h(Icon, { name: "chevron-right", size: 14 }))),
+        h("span", { className: "mk-crumbs__item" }, h("a", { href: chrome.home.href }, chrome.home.label), h("span", { className: "mk-crumbs__sep" }, h(Icon, { name: breadcrumbChevron, size: 14 }))),
+        h("span", { className: "mk-crumbs__item" }, h("a", { href: chrome.nav[0].href }, labels.search), h("span", { className: "mk-crumbs__sep" }, h(Icon, { name: breadcrumbChevron, size: 14 }))),
         h("span", { className: "mk-crumbs__item" }, h("span", { className: "mk-crumbs__current", "aria-current": "page" }, facts.location || page.body.h1)),
       )
     : null;
@@ -823,6 +838,7 @@ function ListingBody({ page }) {
               "aria-label": labels.tour360,
               "data-photo-sphere-viewer": tour.available ? tour.mount_target : "review_required",
               "data-tour-provider": tour.provider || "photo-sphere-viewer",
+              "data-panorama-url": tour.available ? tour.panorama_url : undefined,
             },
             h("p", null, tour.available ? tour.accessibility_caption : tour.review_status || labels.reviewRequired),
           ),

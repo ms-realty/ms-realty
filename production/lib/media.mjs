@@ -81,6 +81,20 @@ function hasLargeDimensions(url = "") {
   return Boolean(dimensions && dimensions.width >= 640 && dimensions.height >= 360);
 }
 
+function timthumbRenderDimensions(item = {}) {
+  const sourceUrl = item.url || item.image_url || item.source_url || "";
+  if (!/timthumb\.php/i.test(sourceUrl)) return null;
+
+  try {
+    const parsed = new URL(sourceUrl);
+    const width = Number(parsed.searchParams.get("w"));
+    const height = Number(parsed.searchParams.get("h"));
+    return Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0 ? { width, height } : null;
+  } catch {
+    return null;
+  }
+}
+
 function isPublicPropertyPhoto(item = {}) {
   if (item.kind !== "photo" || !item.is_public || !item.asset_url) return false;
   const source = `${item.asset_url} ${item.alt || ""}`;
@@ -97,8 +111,12 @@ function isPublicPropertyPhoto(item = {}) {
 
 function photoPriority(item = {}) {
   const url = item.asset_url || "";
+  const sourceUrl = item.url || item.image_url || item.source_url || url;
+  const renderDimensions = timthumbRenderDimensions(item);
   let score = 0;
-  if (!/timthumb\.php/i.test(url)) score += 40;
+  if (!/timthumb\.php/i.test(sourceUrl)) score += 40;
+  if (renderDimensions && renderDimensions.width >= 640 && renderDimensions.height >= 360) score += 40;
+  if (renderDimensions && (renderDimensions.width < 240 || renderDimensions.height < 180)) score -= 60;
   if (!isSmallDerivative(url)) score += 20;
   if (hasLargeDimensions(url) || Number(item.width) >= 800 || Number(item.height) >= 500) score += 20;
   if (item.alt && item.alt.trim()) score += 5;

@@ -112,13 +112,17 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.path, "/he/search");
   assert.equal(search.dir, "rtl");
   assert.equal(search.mobile_policy.list_first_mobile, true);
-  assert.equal(search.mobile_policy.map_optional, true);
+  assert.equal(search.mobile_policy.map_optional, false);
   assert.deepEqual(search.search.engines, ["typesense", "meilisearch"]);
   assert.equal(search.search.filters.locale, "he");
   assert.equal(search.search.controls.save_search.endpoint, "/api/saved-searches");
   assert.equal(search.search.controls.save_search.payload.language, "he");
   assert.equal(search.search.controls.view_modes.find((mode) => mode.id === "list").default, true);
-  assert.equal(search.search.controls.view_modes.find((mode) => mode.id === "map").optional, true);
+  assert.equal(search.search.controls.view_modes.some((mode) => mode.id === "map"), false);
+  assert.deepEqual(
+    search.search.controls.sort_options.map((option) => option.id),
+    ["recommended", "price_asc", "price_desc"],
+  );
   assert.ok(search.search.total_matches > search.cards.length);
   assert.equal(search.search.returned, search.cards.length);
   assert.ok(search.cards.length > 0);
@@ -169,6 +173,18 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_type", value: "apartment", active: true }]);
 });
 
+test("search price sorting is real and unavailable prices stay after priced listings", () => {
+  const lowToHigh = renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski", sort: "price_asc" });
+  const highToLow = renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski", sort: "price_desc" });
+  const lowPrices = lowToHigh.cards.map((card) => card.price_eur).filter((price) => Number.isFinite(Number(price))).map(Number);
+  const highPrices = highToLow.cards.map((card) => card.price_eur).filter((price) => Number.isFinite(Number(price))).map(Number);
+
+  assert.equal(lowToHigh.search.sort, "price_asc");
+  assert.equal(highToLow.search.sort, "price_desc");
+  assert.deepEqual(lowPrices, [...lowPrices].sort((left, right) => left - right));
+  assert.deepEqual(highPrices, [...highPrices].sort((left, right) => right - left));
+});
+
 test("home page exposes search, seller, location, and featured listing paths", () => {
   const he = renderHomePage({ registry, listings, localeCode: "he" });
 
@@ -180,6 +196,8 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.equal(he.body.seller.path, "/he/sell");
   assert.equal(he.body.contact.path, "/he/contact");
   assert.equal(he.body.locations.some((location) => location.path === "/he/locations/sandanski"), true);
+  assert.ok(he.body.hero.image?.url.includes("/wp-content/uploads/"));
+  assert.ok(he.body.locations.some((location) => location.image?.url.includes("/wp-content/uploads/")));
   assert.ok(he.cards.length > 0);
   assert.equal(he.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
