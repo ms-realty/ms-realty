@@ -199,6 +199,7 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
 
 test("contact callback page is locale-prefixed and posts generic CRM leads", () => {
   const he = renderContactPage({ registry, localeCode: "he" });
+  const el = renderContactPage({ registry, localeCode: "el" });
   const fr = renderContactPage({ registry, localeCode: "fr" });
 
   assert.equal(he.status, 200);
@@ -210,6 +211,8 @@ test("contact callback page is locale-prefixed and posts generic CRM leads", () 
   assert.equal(he.body.callback.payload.leadType, "general");
   assert.equal(he.body.callback.payload.contact_preference, "phone");
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
+  assert.equal(el.path, "/el/epikoinonia");
+  assert.equal(el.body.callback.label, "Επανάκληση");
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
 });

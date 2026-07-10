@@ -63,9 +63,9 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(home.headers["cache-control"], "public, max-age=300, s-maxage=3600");
   assert.match(home.html, /<html lang="he" dir="rtl">/);
   assert.match(home.html, /data-react-public-ui="home"/);
-  assert.match(home.html, /aria-label="Locations"/);
+  assert.match(home.html, /data-home-locations="true"/);
   assert.match(home.html, /\/he\/locations\/sandanski/);
-  assert.match(home.html, /aria-label="Featured listings"/);
+  assert.match(home.html, /data-featured-listings="true"/);
   assert.match(home.html, /data-card-thumbnail="true"/);
 
   const search = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?q=sandanski&property_type=apartment" });
@@ -89,11 +89,11 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(listing.html, /data-listing-content-grid="true"/);
   assert.match(listing.html, /data-listing-contact-panel="true"/);
   assert.match(listing.html, /<dl data-listing-facts="true">/);
-  assert.match(listing.html, /aria-label="Listing media"/);
+  assert.match(listing.html, /aria-label="מדיית נכס"/);
   assert.match(listing.html, /data-media-gallery-count=/);
   assert.match(listing.html, /data-listing-action="back_to_results"/);
   assert.match(listing.html, /href="\/he\/search"/);
-  assert.match(listing.html, /aria-label="Related listings"/);
+  assert.match(listing.html, /data-related-listings="true"/);
 
   const listingPrint = renderAppRoute({
     pathname: "/he/properties/MS-CRAWL-0001",
@@ -107,7 +107,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(location.status, 200);
   assert.equal(location.rendered.kind, "location");
   assert.match(location.html, /data-react-public-ui="location"/);
-  assert.match(location.html, /aria-label="Location listings"/);
+  assert.match(location.html, /data-location-listings="true"/);
   assert.match(location.html, /data-card-thumbnail="true"/);
 
   const seller = renderAppRoute({ pathname: "/he/sell", url: "https://example.test/he/sell" });

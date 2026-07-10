@@ -762,9 +762,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
   assert.equal(smoke.adminHtml.body.includes("data-react-admin-ui=\"lead-inbox\""), true);
-  assert.equal(smoke.adminHtml.body.includes("Manager escalations"), true);
+  assert.equal(smoke.adminHtml.body.includes("Эскалации менеджеру"), true);
   assert.equal(smoke.adminHtml.body.includes('data-sla-status="manager_escalation_required"'), true);
-  assert.equal(smoke.adminHtml.body.includes("Escalation due"), true);
+  assert.equal(smoke.adminHtml.body.includes("Срок эскалации"), true);
   assert.equal(smoke.adminHtml.body.includes('action="/api/admin/replies/draft"'), true);
   assert.equal(smoke.adminHtml.body.includes('data-hermes-draft-request="true"'), true);
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraftText"'), true);
@@ -1127,7 +1127,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
   assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
   assert.ok(preflightReports.body.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
-  assert.equal(preflightReports.body.reports.payload_runtime.status, "missing_report");
+  assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
+  assert.ok(preflightReports.body.reports.payload_runtime.summary.missing_env.includes("PAYLOAD_SECRET"));
   assert.ok(preflightReports.body.reports.payload_runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
   assert.equal(seoPreflightUnauthorized.status, 401);
   assert.equal(seoPreflight.status, 200);
@@ -1151,7 +1152,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(payloadRuntimeUnauthorized.status, 401);
   assert.equal(payloadRuntime.status, 200);
   assert.equal(payloadRuntime.body.kind, "admin_payload_runtime");
-  assert.equal(payloadRuntime.body.runtime.status, "missing_report");
+  assert.equal(payloadRuntime.body.runtime.status, "blocked_report");
+  assert.ok(payloadRuntime.body.runtime.summary.missing_env.includes("PAYLOAD_SECRET"));
   assert.ok(payloadRuntime.body.runtime.next_actions.some((action) => action.includes("payload:bootstrap")));
   assert.equal(payloadRuntimeBootstrapUnauthorized.status, 401);
   assert.equal(payloadRuntimeBootstrap.status, 200);

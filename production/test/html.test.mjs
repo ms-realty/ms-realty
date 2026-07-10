@@ -50,7 +50,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(homeHtml, /data-ms-realty-design-system="inline"/);
   assert.match(homeHtml, /role="search"/);
   assert.match(homeHtml, /data-action="seller"/);
-  assert.match(homeHtml, /aria-label="Featured listings"/);
+  assert.match(homeHtml, /aria-label="נכסים מובילים"/);
   assert.match(homeHtml, /data-card-thumbnail="true"/);
   assert.equal(assertHtmlPage(listingHtml, { lang: "he", dir: "rtl", kind: "listing" }), true);
   assert.match(listingHtml, /application\/ld\+json/);
@@ -78,6 +78,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /property="og:type" content="website"/);
   assert.match(searchHtml, /data-total-matches=/);
   assert.match(searchHtml, /data-map-optional="true"/);
+  assert.match(searchHtml, /שמירת חיפוש/);
+  assert.match(contactHtml, /פעולות קשר/);
   assert.match(searchHtml, /data-save-search-endpoint="\/api\/saved-searches"/);
   assert.match(searchHtml, /data-search-card="true"/);
   assert.match(searchHtml, /data-card-thumbnail="true"/);
@@ -87,7 +89,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);
   assert.equal(assertHtmlPage(locationHtml, { lang: "he", dir: "rtl", kind: "location" }), true);
   assert.match(locationHtml, /data-location="Sandanski"/);
-  assert.match(locationHtml, /aria-label="Location listings"/);
+  assert.match(locationHtml, /data-location-listings="true"/);
   assert.match(locationHtml, /data-card-thumbnail="true"/);
   assert.equal(assertHtmlPage(sellerHtml, { lang: "he", dir: "rtl", kind: "seller" }), true);
   assert.match(sellerHtml, /data-lead-type="seller"/);

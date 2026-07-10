@@ -73,7 +73,7 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "listing_sticky_actions",
-      includes(pages.listing, "data-mobile-sticky-actions=\"true\"") && includes(pages.listing, "aria-label=\"Listing actions\""),
+      includes(pages.listing, "data-mobile-sticky-actions=\"true\"") && includes(pages.listing, "data-listing-contact-panel=\"true\""),
     ),
     check(
       "listing_detail_media_actions",

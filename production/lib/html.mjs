@@ -1,3 +1,6 @@
+import { renderReactAdminBody } from "./react-admin-site.mjs";
+import { renderReactPublicBody } from "./react-public-site.mjs";
+
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => {
     if (char === "&") return "&amp;";
@@ -14,13 +17,13 @@ function designSystemStyle() {
 *,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%;background:var(--canvas)}body{margin:0;background:var(--canvas);color:var(--text-body);font-family:var(--font-sans);font-size:17px;line-height:1.5;font-weight:400;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}body::before{content:"";display:block;height:6px;background:linear-gradient(90deg,var(--brick-500),var(--ink-800))}
 h1,h2,h3{margin:0;color:var(--text-strong);font-family:var(--font-display);font-weight:600;line-height:1.12;letter-spacing:0}h1{font-size:40px;max-width:18ch}h2{font-size:24px}p{margin:0}a{color:var(--text-link);text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}img,svg,video{display:block;max-width:100%}code{font-family:var(--font-mono);font-size:.92em;color:var(--ink-800)}
 main{width:min(100%,var(--container-xl));margin:0 auto;padding:var(--space-8) var(--gutter) var(--space-12);display:grid;gap:var(--space-6)}main[data-kind="language-fallback"],main[data-kind="contact"],main[data-kind="seller"]{width:min(100%,var(--container-md))}
-button,input,textarea,select{min-height:44px;font:inherit;color:inherit}button,a[data-action],nav[aria-label="Listing actions"] button,article[data-search-card] nav button{border:1px solid var(--brand);border-radius:var(--radius-button);background:var(--brand);color:#fff;padding:.72rem 1rem;font-weight:600;cursor:pointer}button:hover,a[data-action]:hover,nav[aria-label="Listing actions"] button:hover,article[data-search-card] nav button:hover{background:var(--brand-hover);text-decoration:none}input,textarea,select{width:100%;border:1px solid var(--border-strong);border-radius:var(--radius-input);background:var(--surface);padding:.7rem .82rem}textarea{min-height:7rem;resize:vertical}label{display:grid;gap:.35rem;color:var(--text-strong);font-weight:600}:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
+button,input,textarea,select{min-height:44px;font:inherit;color:inherit}button,a[data-action],nav[data-mobile-sticky-actions] button,article[data-search-card] nav button{border:1px solid var(--brand);border-radius:var(--radius-button);background:var(--brand);color:#fff;padding:.72rem 1rem;font-weight:600;cursor:pointer}button:hover,a[data-action]:hover,nav[data-mobile-sticky-actions] button:hover,article[data-search-card] nav button:hover{background:var(--brand-hover);text-decoration:none}input,textarea,select{width:100%;border:1px solid var(--border-strong);border-radius:var(--radius-input);background:var(--surface);padding:.7rem .82rem}textarea{min-height:7rem;resize:vertical}label{display:grid;gap:.35rem;color:var(--text-strong);font-weight:600}:focus-visible{outline:none;box-shadow:var(--shadow-focus)}
 form[role="search"],main[data-kind="seller"] form,main[data-kind="contact"] form,form[data-editor-form="listing"]{display:grid;gap:var(--space-4);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}form[role="search"]{grid-template-columns:2fr 1fr 1fr 1fr auto;align-items:end}fieldset{margin:0;border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--space-3);display:flex;gap:var(--space-2);align-items:center}legend{padding:0 var(--space-2);color:var(--text-muted);font-weight:600}
 dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--space-3);margin:0}dt{color:var(--text-muted);font-size:13px;font-weight:600}dd{margin:0;color:var(--text-strong);font-weight:600}table{width:100%;border-collapse:collapse;background:var(--surface)}th,td{padding:.85rem;text-align:start;border-bottom:1px solid var(--border);vertical-align:top}th{background:var(--surface-sunken);color:var(--text-muted);font-size:13px;font-weight:700}section:has(> table){overflow-x:auto}
 article[data-search-card="true"],article[data-related-listing="true"],main[data-kind="home"] section article{display:grid;gap:var(--space-3);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}article[data-search-card="true"]:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}[data-card-badge],[data-listing-verification]{width:max-content;border-radius:var(--radius-pill);background:var(--ink-100);color:var(--ink-800);padding:.25rem .6rem;font-size:13px;font-weight:700}[data-card-price],[data-listing-price]{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--price)}
-main[data-kind="search"] section[aria-label="Search results"],main[data-kind="home"] section[aria-label="Featured listings"],main[data-kind="location"] section[aria-label="Location listings"],section[aria-label="Related listings"]{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-5)}section[aria-label="Active filters"]{display:flex;flex-wrap:wrap;gap:var(--space-2)}[data-filter-chip]{border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface);padding:.35rem .7rem;color:var(--text-muted);font-weight:600}article[data-search-card] nav,nav[aria-label="Save and share"],nav[aria-label="Broker contact"],nav[aria-label="Locations"]{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
+main[data-kind="search"] [data-search-results],main[data-kind="home"] [data-featured-listings],main[data-kind="location"] [data-location-listings],[data-related-listings]{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--space-5)}[data-active-filters]{display:flex;flex-wrap:wrap;gap:var(--space-2)}[data-filter-chip]{border:1px solid var(--border);border-radius:var(--radius-pill);background:var(--surface);padding:.35rem .7rem;color:var(--text-muted);font-weight:600}article[data-search-card] nav,nav[data-listing-tools],nav[data-broker-contact-actions],nav[data-home-locations]{display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center}
 article[data-search-card] [data-card-thumbnail]{margin:calc(var(--space-5) * -1) calc(var(--space-5) * -1) 0;display:block}article[data-search-card] [data-card-thumbnail] img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-card) var(--radius-card) 0 0;background:var(--surface-sunken)}
-main[data-kind="listing"]{grid-template-columns:1fr;align-items:start}nav[data-listing-tools="true"]{justify-content:flex-start;padding-block:var(--space-2)}main[data-kind="listing"]>[data-listing-summary]{display:grid;gap:var(--space-3);padding:var(--space-6);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-content-grid]{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:var(--space-6);align-items:start}[data-listing-main-column],[data-listing-contact-panel]{display:grid;gap:var(--space-4)}[data-listing-description]{max-width:72ch;font-size:18px}[data-listing-contact-panel]{position:sticky;top:var(--space-5);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-highlights]{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-listing-highlights] li{border-radius:var(--radius-pill);background:var(--surface-sunken);padding:.35rem .7rem;font-weight:600}#listing-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3)}#listing-gallery img{width:100%;height:180px;object-fit:cover;border-radius:var(--radius-card);background:var(--surface-sunken)}#listing-gallery img:first-child{grid-column:span 2;height:360px}nav[aria-label="Save and share"] a,nav[aria-label="Save and share"] button,nav[aria-label="Broker contact"] a,nav[aria-label="Broker contact"] span{min-height:44px;display:inline-flex;align-items:center;border:1px solid var(--border-strong);border-radius:var(--radius-button);background:var(--surface);padding:.62rem .85rem;font-weight:600}nav[aria-label="Save and share"] button{cursor:pointer}nav[aria-label="Broker contact"] span{opacity:.58}nav[data-mobile-sticky-actions="true"]{position:sticky;bottom:0;z-index:10;display:grid;gap:var(--space-2);padding:var(--space-3);background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
+main[data-kind="listing"]{grid-template-columns:1fr;align-items:start}nav[data-listing-tools="true"]{justify-content:flex-start;padding-block:var(--space-2)}main[data-kind="listing"]>[data-listing-summary]{display:grid;gap:var(--space-3);padding:var(--space-6);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-content-grid]{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,340px);gap:var(--space-6);align-items:start}[data-listing-main-column],[data-listing-contact-panel]{display:grid;gap:var(--space-4)}[data-listing-description]{max-width:72ch;font-size:18px}[data-listing-contact-panel]{position:sticky;top:var(--space-5);padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}[data-listing-highlights]{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-listing-highlights] li{border-radius:var(--radius-pill);background:var(--surface-sunken);padding:.35rem .7rem;font-weight:600}#listing-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3)}#listing-gallery img{width:100%;height:180px;object-fit:cover;border-radius:var(--radius-card);background:var(--surface-sunken)}#listing-gallery img:first-child{grid-column:span 2;height:360px}nav[data-listing-tools] a,nav[data-listing-tools] button,nav[data-broker-contact-actions] a,nav[data-broker-contact-actions] span{min-height:44px;display:inline-flex;align-items:center;border:1px solid var(--border-strong);border-radius:var(--radius-button);background:var(--surface);padding:.62rem .85rem;font-weight:600}nav[data-listing-tools] button{cursor:pointer}nav[data-broker-contact-actions] span{opacity:.58}nav[data-mobile-sticky-actions="true"]{position:sticky;bottom:0;z-index:10;display:grid;gap:var(--space-2);padding:var(--space-3);background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
 main[data-kind="seller"]>section,main[data-kind="contact"]>p,main[data-kind="guide"]>section{display:grid;gap:var(--space-3)}[data-seller-steps]{display:grid;gap:var(--space-2);padding:0;margin:0;list-style:none}[data-seller-steps] li{padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}
 main[data-admin-workbench]{width:min(100%,1440px)}main[data-admin-workbench] dl,main[data-kind="admin-migration-review"] dl{padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card)}main[data-admin-workbench]>section,main[data-kind="admin-migration-review"]>section{padding:var(--space-5);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);box-shadow:var(--shadow-card);display:grid;gap:var(--space-4)}nav[data-lead-queue-tabs],nav[data-editor-tabs]{display:flex;flex-wrap:wrap;gap:var(--space-2);padding:var(--space-2);background:var(--surface-sunken);border:1px solid var(--border);border-radius:var(--radius-card)}nav[data-editor-tabs] a,nav[data-lead-queue-tabs] button{background:var(--surface);color:var(--brand);border-color:var(--border);box-shadow:var(--shadow-card)}form[data-reply-approval-required]{display:grid;gap:var(--space-3);min-width:260px}
 @media (max-width:900px){main,main[data-kind="listing"]{display:grid;grid-template-columns:1fr;padding:var(--space-5) var(--space-4) var(--space-10)}h1{font-size:32px}form[role="search"],[data-listing-content-grid]{grid-template-columns:1fr}[data-listing-contact-panel]{position:static;order:-1;padding:var(--space-4)}#listing-gallery{grid-template-columns:1fr 1fr}#listing-gallery img:first-child{grid-column:1/-1;height:260px}fieldset{display:grid}table{min-width:760px}nav[data-mobile-sticky-actions="true"]{margin-inline:calc(var(--space-4) * -1);border-radius:0;border-inline:0}}
@@ -193,10 +196,10 @@ function renderListing(page) {
     </section>
     <aside aria-label="Contact broker" data-listing-contact-panel="true">
       <nav aria-label="Listing actions" data-mobile-sticky-actions="${escapeHtml(page.body.actions.sticky_mobile ? "true" : "false")}">${primary}</nav>
-      <nav aria-label="Broker contact">${direct}</nav>
+      <nav aria-label="Broker contact" data-broker-contact-actions="true">${direct}</nav>
     </aside>
   </section>
-  <section aria-label="Related listings">${related}</section>
+  <section aria-label="Related listings" data-related-listings="true">${related}</section>
 </main>`;
 }
 
@@ -227,7 +230,7 @@ function renderListingPrint(page) {
   <p>${escapeHtml(page.metadata.description)}</p>
   <dl>${renderFacts(page.body.facts)}</dl>
   <section aria-label="Listing photos">${gallery}</section>
-  <nav aria-label="Broker contact">${direct}</nav>
+  <nav aria-label="Broker contact" data-broker-contact-actions="true">${direct}</nav>
   <p><a href="${escapeHtml(page.canonical)}">${escapeHtml(page.canonical)}</a></p>
   <p>${escapeHtml(page.body.source.source_domain)} ${escapeHtml(page.body.source.old_url)}</p>
 </main>`;
@@ -249,8 +252,8 @@ function renderHome(page) {
   </form>
   <a href="${escapeHtml(page.body.seller.path)}" data-action="seller">${escapeHtml(page.body.seller.label)}</a>
   <a href="${escapeHtml(page.body.contact.path)}" data-action="contact">${escapeHtml(page.body.contact.label)}</a>
-  <nav aria-label="Locations">${locations}</nav>
-  <section aria-label="Featured listings">${cards}</section>
+  <nav aria-label="Locations" data-home-locations="true">${locations}</nav>
+  <section aria-label="Featured listings" data-featured-listings="true">${cards}</section>
 </main>`;
 }
 
@@ -305,9 +308,9 @@ function renderSearch(page) {
     <input type="hidden" name="query" value="${escapeHtml(page.search.query || "")}">
     <button type="submit">Save search</button>
   </form>
-  <section aria-label="Active filters" data-active-filter-count="${escapeHtml((controls.active_filter_chips || []).length)}">${chips}</section>
+  <section aria-label="Active filters" data-active-filters="true" data-active-filter-count="${escapeHtml((controls.active_filter_chips || []).length)}">${chips}</section>
   <p>${escapeHtml(page.search.total_matches)} matches</p>
-  <section aria-label="Search results">${cards}</section>
+  <section aria-label="Search results" data-search-results="true">${cards}</section>
 </main>`;
 }
 
@@ -318,7 +321,7 @@ function renderLocation(page) {
   return `
 <main data-kind="location" data-location="${escapeHtml(page.body.location)}" data-total-matches="${escapeHtml(page.body.listing_count)}">
   <h1>${escapeHtml(page.body.h1)}</h1>
-  <section aria-label="Location listings">${cards}</section>
+  <section aria-label="Location listings" data-location-listings="true">${cards}</section>
 </main>`;
 }
 
@@ -756,6 +759,12 @@ function renderAdminListingEditor(page) {
 }
 
 function renderBody(page, options = {}) {
+  if (!options.legacyBody && !options.print) {
+    const publicBody = renderReactPublicBody(page);
+    if (publicBody) return publicBody;
+    const adminBody = renderReactAdminBody(page);
+    if (adminBody) return adminBody;
+  }
   if (page.kind === "home") return renderHome(page);
   if (page.kind === "listing" && options.print) return renderListingPrint(page);
   if (page.kind === "listing") return renderListing(page);
