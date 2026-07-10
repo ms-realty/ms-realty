@@ -67,9 +67,9 @@
         "source": "privacy_events",
         "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
         "status": "imported",
-        "row_count": 25,
-        "matched_rows": 11,
-        "unmatched_rows": 14
+        "row_count": 44,
+        "matched_rows": 22,
+        "unmatched_rows": 22
       }
     }
   },

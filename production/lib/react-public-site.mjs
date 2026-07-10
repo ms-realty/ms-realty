@@ -1,5 +1,7 @@
 import { h, renderStaticElement } from "./react-static-html.mjs";
-import { labelsFor } from "./public-site.mjs";
+import { labelsFor, localizedListingValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
+import { Icon } from "./ui/icons.mjs";
+import { LOGO_ASPECT, LOGO_SRC, LOGO_SRC_REVERSED } from "./ui/design-assets.mjs";
 
 function uiLabels(page) {
   return labelsFor(page.locale || page.lang || "en");
@@ -11,10 +13,327 @@ function price(value, labels = labelsFor("en")) {
 }
 
 function cardSummary(card) {
-  return [card.location, card.property_type, card.offer_type].filter(Boolean).join(" / ");
+  return [card.location, card.property_type_label || card.property_type, card.offer_type_label || card.offer_type].filter(Boolean).join(" / ");
 }
 
-function factsList(facts = {}, labels = labelsFor("en")) {
+// Placeholder photo tones from the DS media tokens; deterministic per listing id
+// so cards keep a stable look between renders when no photo is available.
+const PHOTO_TONES = ["sand", "sea", "pine", "sunset"];
+function toneFor(seed) {
+  const text = String(seed || "");
+  let hash = 0;
+  for (let index = 0; index < text.length; index += 1) hash = (hash * 31 + text.charCodeAt(index)) % 997;
+  return PHOTO_TONES[hash % PHOTO_TONES.length];
+}
+
+function Btn({ tag = "button", variant = "primary", size = "md", iconStart, iconEnd, full = false, children, ...attrs }) {
+  const iconSize = size === "sm" ? 16 : size === "lg" ? 20 : 18;
+  const className = ["mk-btn", `mk-btn--${variant}`, `mk-btn--${size}`, full ? "mk-btn--full" : null].filter(Boolean).join(" ");
+  return h(
+    tag,
+    { className, ...(tag === "button" && !attrs.type ? { type: "button" } : {}), ...attrs },
+    iconStart ? h(Icon, { name: iconStart, size: iconSize }) : null,
+    children === null || children === undefined ? null : h("span", null, children),
+    iconEnd ? h(Icon, { name: iconEnd, size: iconSize }) : null,
+  );
+}
+
+function Badge({ variant = "neutral", solid = false, icon, children, ...attrs }) {
+  const className = ["mk-badge", `mk-badge--${variant}`, "mk-badge--sm", solid ? "mk-badge--solid" : null]
+    .filter(Boolean)
+    .join(" ");
+  return h("span", { className, ...attrs }, icon ? h(Icon, { name: icon, size: 12, strokeWidth: 2.25 }) : null, children);
+}
+
+/* ============================================================
+   Site chrome — header, footer, skip link (ui_kits/website/SiteChrome)
+   ============================================================ */
+
+function SiteHeader({ chrome }) {
+  const copy = chrome.copy;
+  return h(
+    "header",
+    { className: "site-hd" },
+    h(
+      "div",
+      { className: "site-hd__in" },
+      h(
+        "a",
+        { href: chrome.home.href, className: "site-hd__logo", "aria-label": chrome.home.label },
+        h("img", { src: LOGO_SRC, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
+      ),
+      h(
+        "nav",
+        { className: "site-hd__nav", "aria-label": copy.menuLabel },
+        ...chrome.nav.map((item) =>
+          h(
+            "a",
+            {
+              key: item.id,
+              href: item.href,
+              "data-active": item.active ? "true" : undefined,
+              "aria-current": item.active ? "page" : undefined,
+            },
+            item.label,
+          ),
+        ),
+      ),
+      h(
+        "div",
+        { className: "site-hd__right" },
+        h(
+          "nav",
+          { className: "site-hd__lang", "aria-label": copy.languageLabel },
+          ...chrome.languages.map((language) =>
+            h(
+              "a",
+              {
+                key: language.code,
+                href: language.href,
+                hrefLang: language.code,
+                lang: language.code,
+                title: language.label,
+                "aria-current": language.active ? "true" : undefined,
+              },
+              language.code.toUpperCase(),
+            ),
+          ),
+        ),
+        h(
+          Btn,
+          { tag: "a", variant: "accent", size: "sm", iconStart: "phone", href: chrome.contact.phone_href, className: "site-hd__call mk-btn mk-btn--accent mk-btn--sm" },
+          copy.callBroker,
+        ),
+      ),
+    ),
+  );
+}
+
+function SiteFooter({ chrome, labels }) {
+  const copy = chrome.copy;
+  const locations = chrome.footer.locations || [];
+  const buy = chrome.nav.find((item) => item.id === "buy");
+  return h(
+    "footer",
+    { className: "site-ft" },
+    h(
+      "div",
+      { className: "site-ft__in" },
+      h(
+        "div",
+        null,
+        h(
+          "a",
+          { href: chrome.home.href, "aria-label": chrome.home.label, className: "site-ft__logo" },
+          h("img", { src: LOGO_SRC_REVERSED, alt: chrome.home.label, height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+        ),
+        h("p", { className: "site-ft__intro" }, copy.tagline),
+        h(
+          "div",
+          { className: "site-ft__contact" },
+          h("span", null, h(Icon, { name: "phone", size: 16 }), h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
+          h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
+          h("span", null, h(Icon, { name: "map-pin", size: 16 }), copy.offices),
+        ),
+      ),
+      h(
+        "div",
+        null,
+        h("h4", null, copy.explore),
+        h("ul", null, ...chrome.nav.map((item) => h("li", { key: item.id }, h("a", { href: item.href }, item.label)))),
+      ),
+      h(
+        "div",
+        null,
+        h("h4", null, chrome.footer.locationsLabel),
+        h(
+          "ul",
+          null,
+          ...(locations.length
+            ? locations.map((location) => h("li", { key: location.href }, h("a", { href: location.href }, location.label)))
+            : [h("li", { key: "search" }, h("a", { href: buy?.href || chrome.home.href }, chrome.footer.searchLabel))]),
+        ),
+      ),
+      h(
+        "div",
+        null,
+        h("h4", null, copy.getInTouch),
+        h(
+          "ul",
+          null,
+          h("li", null, h("a", { href: chrome.nav.find((item) => item.id === "contact")?.href || chrome.home.href }, copy.navContact)),
+          h("li", null, h("a", { href: chrome.nav.find((item) => item.id === "sell")?.href || chrome.home.href }, labels.sellerValuation)),
+          h("li", null, h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
+          h("li", null, h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
+        ),
+      ),
+    ),
+    h(
+      "div",
+      { className: "site-ft__bar" },
+      h(
+        "div",
+        { className: "site-ft__bar-in" },
+        h("span", null, `© 2026 MS Realty · ${copy.copyright}`),
+        h(
+          "nav",
+          { "aria-label": copy.languageLabel },
+          ...chrome.languages.map((language) =>
+            h("a", { key: language.code, href: language.href, hrefLang: language.code, lang: language.code }, language.label),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+// Enquiry dialog opened by any [data-endpoint="/api/leads"] button; the client
+// script prefills source/listingReference and submits JSON (see ui/client.mjs).
+function EnquiryDialog({ page, labels, copy }) {
+  return h(
+    "dialog",
+    { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-label": labels.inquiry },
+    h(
+      "form",
+      { method: "post", action: "/api/leads", className: "ct-form", "data-enquiry-form": "true" },
+      h(
+        "div",
+        { className: "ct-modal__hd" },
+        h("div", null, h("h2", null, labels.inquiry)),
+        h(
+          "button",
+          { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-enquiry-close": "true", "aria-label": copy.close },
+          h(Icon, { name: "x", size: 20 }),
+        ),
+      ),
+      h("input", { type: "hidden", name: "source", defaultValue: "website_listing_detail" }),
+      h("input", { type: "hidden", name: "leadType", defaultValue: "buyer" }),
+      h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
+      h("input", { type: "hidden", name: "listingReference", defaultValue: "" }),
+      h("input", { type: "hidden", name: "contact_preference", defaultValue: "" }),
+      h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+      h("label", null, labels.phone, h("input", { name: "contact.phone", autoComplete: "tel", inputMode: "tel" })),
+      h("label", null, labels.message, h("textarea", { name: "message" })),
+      h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, labels.inquiry),
+    ),
+    h(
+      "div",
+      { className: "ct-done", hidden: true },
+      h("div", { className: "ct-done__ic" }, h(Icon, { name: "check", size: 30, strokeWidth: 2.5 })),
+      h("h2", null, copy.requestSent),
+      h(Btn, { variant: "primary", "data-enquiry-close": "true" }, copy.close),
+    ),
+  );
+}
+
+function shell(page, main) {
+  const chrome = page.chrome;
+  if (!chrome) return main;
+  const labels = uiLabels(page);
+  return [
+    h("a", { key: "skip", className: "skip-link", href: "#main" }, chrome.copy.skipToContent),
+    h(SiteHeader, { key: "header", chrome }),
+    main,
+    h(SiteFooter, { key: "footer", chrome, labels }),
+    h(EnquiryDialog, { key: "enquiry", page, labels, copy: chrome.copy }),
+  ];
+}
+
+/* ============================================================
+   Listing cards (components/display/PropertyCard)
+   ============================================================ */
+
+function cardBadge(card, localeCode) {
+  const copy = uiCopyFor(localeCode);
+  const verified = card.review_badge === "verified_inventory";
+  return {
+    variant: verified ? "for-sale" : "neutral",
+    label: verified ? copy.verifiedInventory : copy.sourceFallback,
+  };
+}
+
+function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs }) {
+  const badge = cardBadge(card, localeCode);
+  const tone = toneFor(card.id);
+  const mediaChildren = [
+    h(
+      "div",
+      { key: "badges", className: "mk-pcard__badges" },
+      h(Badge, { variant: badge.variant, solid: true, "data-card-badge": "true" }, badge.label),
+    ),
+    h(
+      "span",
+      { key: "count", className: "mk-pcard__count", "data-card-media-count": card.image_count },
+      h(Icon, { name: "camera", size: 13 }),
+      ` ${card.image_count || 0} ${labels.photos}`,
+    ),
+  ];
+  const media = card.thumbnail?.url
+    ? h(
+        "a",
+        { href: card.path, className: `mk-pcard__media mk-photo mk-photo--${tone}`, "data-card-thumbnail": "true", "aria-label": card.title },
+        h("img", { src: card.thumbnail.url, alt: card.thumbnail.alt || card.title, loading: "lazy" }),
+        ...mediaChildren,
+      )
+    : h("a", { href: card.path, className: `mk-pcard__media mk-photo mk-photo--${tone}`, "aria-label": card.title }, ...mediaChildren);
+  return h(
+    "article",
+    {
+      className: `mk-pcard mk-pcard--interactive${orientation === "horizontal" ? " mk-pcard--row" : ""}`,
+      "data-listing-id": card.id,
+      "data-translation-display": card.translation_display,
+      "data-review-badge": card.review_badge,
+      "data-listing-status": card.listing_status,
+      ...(rootAttrs || { "data-search-card": "true" }),
+    },
+    media,
+    h(
+      "div",
+      { className: "mk-pcard__body" },
+      h("div", { className: "mk-pcard__pricerow" }, h("span", { className: "mk-pcard__price", "data-card-price": "true" }, price(card.price_eur, labels))),
+      h("h2", { className: "mk-pcard__title" }, h("a", { href: card.path }, card.title)),
+      h(
+        "div",
+        { className: "mk-pcard__loc", "data-search-card-meta": "true" },
+        h(Icon, { name: "map-pin", size: 14 }),
+        ` ${cardSummary(card)}`,
+      ),
+      h(
+        "div",
+        { className: "mk-pcard__specs" },
+        card.bedrooms ? h("span", null, h(Icon, { name: "bed", size: 16 }), ` ${card.bedrooms}`) : null,
+        h("span", null, h(Icon, { name: "camera", size: 16 }), ` ${card.image_count || 0}`),
+        h("span", { className: "mk-pcard__ref" }, card.id),
+      ),
+      h(
+        "nav",
+        { className: "mk-pcard__actions", "aria-label": labels.searchResultActions },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: card.actions.detail.href }, h("span", null, card.actions.detail.label)),
+        h(
+          "button",
+          {
+            type: "button",
+            className: "mk-btn mk-btn--primary mk-btn--sm",
+            "data-endpoint": card.actions.inquiry.endpoint,
+            "data-listing-reference": card.actions.inquiry.payload.listingReference,
+            "data-lead-source": card.actions.inquiry.payload.source,
+          },
+          h("span", null, card.actions.inquiry.label),
+        ),
+        h(
+          "button",
+          { type: "button", className: "mk-btn mk-btn--subtle mk-btn--sm", "data-client-save-listing": card.actions.save.listing_id },
+          h(Icon, { name: "heart", size: 16 }),
+          h("span", null, card.actions.save.label),
+        ),
+      ),
+    ),
+  );
+}
+
+function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
+  // Attribute-only <dl>: tests assert the literal `<dl data-listing-facts="true">`;
+  // styling hooks onto the attribute selector in adapter-public.css.
   return h(
     "dl",
     { "data-listing-facts": "true" },
@@ -22,91 +341,134 @@ function factsList(facts = {}, labels = labelsFor("en")) {
       .filter(([, value]) => value !== null && value !== undefined && value !== "")
       .flatMap(([key, value]) => [
         h("dt", { key: `${key}-term` }, labels.factLabels?.[key] || key.replaceAll("_", " ")),
-        h("dd", { key: `${key}-value` }, value),
+        h(
+          "dd",
+          { key: `${key}-value` },
+          key === "property_type" || key === "offer_type" ? localizedListingValue(localeCode, key, value) : value,
+        ),
       ]),
   );
 }
 
-function SearchCard({ card, labels = labelsFor("en") }) {
-  return h(
-    "article",
-    {
-      "data-search-card": "true",
-      "data-listing-id": card.id,
-      "data-translation-display": card.translation_display,
-      "data-review-badge": card.review_badge,
-      "data-listing-status": card.listing_status,
-    },
-    card.thumbnail?.url
-      ? h(
-          "a",
-          { href: card.path, "data-card-thumbnail": "true" },
-          h("img", { src: card.thumbnail.url, alt: card.thumbnail.alt || card.title, loading: "lazy" }),
-        )
-      : null,
-    h("p", { "data-card-badge": "true" }, (card.review_badge || "").replaceAll("_", " ")),
-    h("h2", null, h("a", { href: card.path }, card.title)),
-    h("p", { "data-card-price": "true" }, price(card.price_eur, labels)),
-    h("p", { "data-search-card-meta": "true" }, cardSummary(card)),
-    h("p", { "data-card-media-count": card.image_count }, `${card.image_count || 0} ${labels.photos}`),
-    h(
-      "nav",
-      { "aria-label": labels.searchResultActions },
-      h("a", { href: card.actions.detail.href }, card.actions.detail.label),
-      h(
-        "button",
-        {
-          type: "button",
-          "data-endpoint": card.actions.inquiry.endpoint,
-          "data-listing-reference": card.actions.inquiry.payload.listingReference,
-        },
-        card.actions.inquiry.label,
-      ),
-      h("button", { type: "button", "data-client-save-listing": card.actions.save.listing_id }, card.actions.save.label),
-    ),
-  );
-}
+/* ============================================================
+   Home (ui_kits/website/HomePage)
+   ============================================================ */
 
 function HomeBody({ page }) {
   const labels = uiLabels(page);
-  return h(
+  const chrome = page.chrome || { copy: {} };
+  const main = h(
     "main",
-    { "data-kind": "home", "data-react-public-ui": "home" },
-    h("h1", null, page.body.h1),
-    h("p", null, page.body.intro),
+    { id: "main", "data-kind": "home", "data-react-public-ui": "home" },
     h(
-      "form",
-      { action: page.body.search.path, method: "get", role: "search" },
-      h("label", null, `${labels.search} `, h("input", { name: "q", type: "search", autoComplete: "off" })),
-      h("button", { type: "submit" }, labels.search),
+      "section",
+      { className: "hp-hero" },
+      h("div", { className: "hp-hero__bg mk-photo mk-photo--pine", "aria-hidden": "true" }),
+      h(
+        "div",
+        { className: "hp-hero__in" },
+        h(
+          "div",
+          { className: "hp-hero__copy" },
+          h("span", { className: "hp-hero__eyebrow" }, h(Icon, { name: "compass", size: 15 }), chrome.copy.offices || ""),
+          h("h1", null, page.body.h1),
+          h("p", null, page.body.intro),
+        ),
+        h(
+          "div",
+          { className: "hp-hero__search mk-search mk-search--lg" },
+          h(
+            "form",
+            { className: "mk-search__bar", action: page.body.search.path, method: "get", role: "search" },
+            h(
+              "div",
+              { className: "mk-search__seg mk-search__seg--grow" },
+              h(Icon, { name: "map-pin", size: 20 }),
+              h(
+                "div",
+                { className: "mk-search__field" },
+                h("label", { htmlFor: "home-search-q" }, labels.search),
+                h("input", { id: "home-search-q", name: "q", type: "search", autoComplete: "off", placeholder: labels.location }),
+              ),
+            ),
+            h("button", { className: "mk-search__go", type: "submit" }, h(Icon, { name: "search", size: 20, strokeWidth: 2.25 }), h("span", null, labels.search)),
+          ),
+        ),
+      ),
     ),
+    (page.body.locations || []).length
+      ? h(
+          "section",
+          { className: "hp-sec" },
+          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", null, labels.locations))),
+          h(
+            "nav",
+            { className: "hp-resorts", "aria-label": labels.locations, "data-home-locations": "true" },
+            ...(page.body.locations || []).map((location, index) =>
+              h(
+                "a",
+                { key: location.path, href: location.path, className: `hp-resort mk-photo mk-photo--${PHOTO_TONES[index % PHOTO_TONES.length]}` },
+                location.listing_count ? h("span", { className: "hp-resort__c" }, location.listing_count) : null,
+                h("div", { className: "hp-resort__t" }, h("h3", null, location.location)),
+              ),
+            ),
+          ),
+        )
+      : h("nav", { "aria-label": labels.locations, "data-home-locations": "true", hidden: true }),
     h(
-      "nav",
-      { "aria-label": labels.primaryActions },
-      h("a", { href: page.body.seller.path, "data-action": "seller" }, page.body.seller.label),
-      h("a", { href: page.body.contact.path, "data-action": "contact" }, page.body.contact.label),
-    ),
-    h(
-      "nav",
-      { "aria-label": labels.locations, "data-home-locations": "true" },
-      ...(page.body.locations || []).map((location) => h("a", { key: location.path, href: location.path }, location.location)),
+      "section",
+      { className: "hp-sec", style: "padding-top:0", "aria-label": labels.featuredListings, "data-featured-listings": "true" },
+      h(
+        "div",
+        { className: "hp-sec__head" },
+        h("div", null, h("h2", null, labels.featuredListings)),
+        h(Btn, { tag: "a", variant: "secondary", iconEnd: "arrow-right", href: page.body.search.path }, labels.searchResults),
+      ),
+      h(
+        "div",
+        { className: "hp-grid" },
+        ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
+      ),
     ),
     h(
       "section",
-      { "aria-label": labels.featuredListings, "data-featured-listings": "true" },
-      ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels })),
+      { className: "hp-sell" },
+      h("div", { className: "hp-sell__glow", "aria-hidden": "true" }),
+      h(
+        "div",
+        { className: "hp-sell__in" },
+        h("div", null, h("h2", null, page.body.seller.title || page.body.seller.label), h("p", null, page.body.seller.description || "")),
+        h(
+          "nav",
+          { "aria-label": labels.primaryActions, className: "hp-sell__actions" },
+          h(Btn, { tag: "a", variant: "accent", size: "lg", iconStart: "phone", href: page.body.seller.path, "data-action": "seller" }, page.body.seller.label),
+          h(Btn, { tag: "a", variant: "secondary", size: "lg", iconStart: "message-circle", href: page.body.contact.path, "data-action": "contact" }, page.body.contact.label),
+        ),
+      ),
     ),
   );
+  return shell(page, main);
 }
+
+/* ============================================================
+   Search results (ui_kits/website/SearchResults)
+   ============================================================ */
 
 function SearchBody({ page }) {
   const labels = uiLabels(page);
+  const chrome = page.chrome || { copy: {} };
   const controls = page.search.controls || {};
   const filter = (name, label) =>
-    h("label", { key: name }, `${label} `, h("input", { name, defaultValue: page.search.filters?.[name] || "" }));
-  return h(
+    h(
+      "div",
+      { key: name, className: "sr-fg" },
+      h("label", { className: "hdr", htmlFor: `sr-${name}` }, label),
+      h("input", { id: `sr-${name}`, name, defaultValue: page.search.filters?.[name] || "" }),
+    );
+  const main = h(
     "main",
     {
+      id: "main",
       "data-kind": "search",
       "data-react-public-ui": "search",
       "data-total-matches": page.search.total_matches,
@@ -114,104 +476,251 @@ function SearchBody({ page }) {
       "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false",
       "data-min-touch-target": page.mobile_policy?.minimum_tap_target_px || 44,
     },
-    h("h1", null, page.metadata.title),
     h(
-      "form",
-      { action: page.path, method: "get", role: "search" },
-      h("label", null, `${labels.search} `, h("input", { name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" })),
-      filter("location", labels.location),
-      filter("property_type", labels.propertyType),
+      "div",
+      { className: "sr-body" },
       h(
-        "label",
-        null,
-        `${labels.sort} `,
+        "aside",
+        { className: "sr-filters", "aria-label": chrome.copy.filters || labels.activeFilters },
+        h("h3", null, chrome.copy.filters || labels.activeFilters),
         h(
-          "select",
-          { name: "sort" },
-          ...(controls.sort_options || []).map((option) => h("option", { key: option.id, value: option.id, selected: option.default ? true : undefined }, option.label)),
+          "form",
+          { action: page.path, method: "get", role: "search" },
+          h(
+            "div",
+            { className: "sr-fg" },
+            h("label", { className: "hdr", htmlFor: "sr-q" }, labels.search),
+            h("input", { id: "sr-q", name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" }),
+          ),
+          filter("location", labels.location),
+          filter("property_type", labels.propertyType),
+          h(
+            "div",
+            { className: "sr-fg" },
+            h(
+              "label",
+              null,
+              h("span", { className: "hdr" }, labels.sort),
+              h(
+                "select",
+                { name: "sort" },
+                ...(controls.sort_options || []).map((option) =>
+                  h("option", { key: option.id, value: option.id, selected: option.default ? true : undefined }, option.label),
+                ),
+              ),
+            ),
+          ),
+          h(
+            "fieldset",
+            { className: "sr-fg sr-view", "data-view-mode-control": "true", "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false" },
+            h("legend", null, labels.view),
+            h(
+              "div",
+              { className: "sr-beds" },
+              ...(controls.view_modes || []).map((mode) =>
+                h(
+                  "button",
+                  { key: mode.id, type: "submit", name: "view", value: mode.id, "aria-pressed": mode.default ? "true" : "false", "data-view-mode": mode.id },
+                  mode.label,
+                ),
+              ),
+            ),
+          ),
+          h("div", { className: "sr-fg sr-fg--submit" }, h(Btn, { type: "submit", variant: "primary", full: true }, labels.search)),
+        ),
+        h(
+          "form",
+          {
+            className: "sr-save",
+            method: controls.save_search?.method || "POST",
+            action: controls.save_search?.endpoint || "/api/saved-searches",
+            "data-save-search-endpoint": controls.save_search?.endpoint || "/api/saved-searches",
+          },
+          h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
+          h("input", { type: "hidden", name: "query", defaultValue: page.search.query || "" }),
+          h(Btn, { type: "submit", variant: "secondary", full: true, iconStart: "bell" }, labels.saveSearch),
         ),
       ),
       h(
-        "fieldset",
-        { "data-view-mode-control": "true", "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false" },
-        h("legend", null, labels.view),
-        ...(controls.view_modes || []).map((mode) =>
-          h("button", { key: mode.id, type: "submit", name: "view", value: mode.id, "aria-pressed": mode.default ? "true" : "false", "data-view-mode": mode.id }, mode.label),
+        "section",
+        { className: "sr-results" },
+        h(
+          "div",
+          { className: "sr-results__head" },
+          h("h1", null, page.metadata.title, h("small", null, `${page.search.total_matches} ${labels.matches}`)),
+        ),
+        h(
+          "section",
+          {
+            className: "sr-active",
+            "aria-label": labels.activeFilters,
+            "data-active-filters": "true",
+            "data-active-filter-count": (controls.active_filter_chips || []).length,
+          },
+          ...(controls.active_filter_chips || []).map((chip) =>
+            h(
+              "span",
+              { key: chip.key, className: "mk-tag mk-tag--outline mk-tag--md", "data-filter-chip": chip.key },
+              localizedSearchFilterValue(page.locale, chip.key, chip.value),
+            ),
+          ),
+        ),
+        h(
+          "section",
+          { className: "sr-list", "aria-label": labels.searchResults, "data-search-results": "true" },
+          ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal" })),
         ),
       ),
-      h("button", { type: "submit" }, labels.search),
-    ),
-    h(
-      "form",
-      { method: controls.save_search?.method || "POST", action: controls.save_search?.endpoint || "/api/saved-searches", "data-save-search-endpoint": controls.save_search?.endpoint || "/api/saved-searches" },
-      h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
-      h("input", { type: "hidden", name: "query", defaultValue: page.search.query || "" }),
-      h("button", { type: "submit" }, labels.saveSearch),
-    ),
-    h(
-      "section",
-      { "aria-label": labels.activeFilters, "data-active-filters": "true", "data-active-filter-count": (controls.active_filter_chips || []).length },
-      ...(controls.active_filter_chips || []).map((chip) => h("span", { key: chip.key, "data-filter-chip": chip.key }, chip.value)),
-    ),
-    h("p", null, `${page.search.total_matches} ${labels.matches}`),
-    h(
-      "section",
-      { "aria-label": labels.searchResults, "data-search-results": "true" },
-      ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels })),
     ),
   );
+  return shell(page, main);
 }
+
+/* ============================================================
+   Location landing
+   ============================================================ */
 
 function LocationBody({ page }) {
   const labels = uiLabels(page);
-  return h(
+  const main = h(
     "main",
     {
+      id: "main",
       "data-kind": "location",
       "data-react-public-ui": "location",
       "data-location": page.body.location,
       "data-total-matches": page.body.listing_count,
       "data-list-first-mobile": "true",
     },
-    h("h1", null, page.body.h1),
-    h("p", null, `${page.body.listing_count} ${labels.reviewedListings}`),
     h(
       "section",
-      { "aria-label": labels.locationListings, "data-location-listings": "true" },
-      ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels })),
+      { className: "hp-sec" },
+      h(
+        "div",
+        { className: "hp-sec__head" },
+        h("div", null, h("h1", null, page.body.h1), h("p", null, `${page.body.listing_count} ${labels.reviewedListings}`)),
+      ),
+      h(
+        "div",
+        { className: "hp-grid", "aria-label": labels.locationListings, "data-location-listings": "true" },
+        ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
+      ),
     ),
   );
+  return shell(page, main);
+}
+
+/* ============================================================
+   Listing detail (ui_kits/website/ListingDetail)
+   ============================================================ */
+
+const LISTING_ACTION_ICONS = {
+  save: "heart",
+  share: "share-2",
+  print: "printer",
+  back_to_results: "arrow-left",
+};
+
+function channelIcon(href = "") {
+  if (href.startsWith("tel:")) return "phone";
+  if (href.includes("wa.me")) return "message-circle";
+  if (href.startsWith("viber:")) return "phone";
+  if (href.startsWith("mailto:")) return "mail";
+  return "message-circle";
 }
 
 function ListingBody({ page }) {
   const labels = uiLabels(page);
+  const ui = uiCopyFor(page.locale);
+  const chrome = page.chrome;
   const facts = page.body.facts || {};
   const tour = page.body.media.tour || {};
+  const gallery = (page.body.media.gallery || []).slice(0, 12);
   const channels = page.body.actions.direct_contact.channels || [];
-  const secondaryActions = h(
-    "nav",
-    { "aria-label": labels.saveAndShare, "data-listing-tools": "true" },
-    ...(page.body.actions.secondary || []).map((action) =>
-      action.kind === "share" || action.kind === "print" || action.kind === "link"
-        ? h("a", { key: action.id, href: action.url, "data-listing-action": action.id }, action.label)
-        : h("button", { key: action.id, type: "button", "data-listing-action": action.id, "data-client-save-listing": action.listing_id }, action.label),
-    ),
-  );
+  const tone = toneFor(page.body.facts?.id || page.path);
+
+  const crumbs = chrome
+    ? h(
+        "nav",
+        { className: "mk-crumbs", "aria-label": ui.breadcrumb },
+        h("span", { className: "mk-crumbs__item" }, h("a", { href: chrome.home.href }, chrome.home.label), h("span", { className: "mk-crumbs__sep" }, h(Icon, { name: "chevron-right", size: 14 }))),
+        h("span", { className: "mk-crumbs__item" }, h("a", { href: chrome.nav[0].href }, labels.search), h("span", { className: "mk-crumbs__sep" }, h(Icon, { name: "chevron-right", size: 14 }))),
+        h("span", { className: "mk-crumbs__item" }, h("span", { className: "mk-crumbs__current", "aria-current": "page" }, facts.location || page.body.h1)),
+      )
+    : null;
+
+  const toolButtons = (page.body.actions.secondary || []).map((action) => {
+    const icon = LISTING_ACTION_ICONS[action.id] || LISTING_ACTION_ICONS[action.kind] || "link";
+    if (action.kind === "share" || action.kind === "print" || action.kind === "link") {
+      return h(Btn, { key: action.id, tag: "a", variant: "secondary", size: "sm", iconStart: icon, href: action.url, "data-listing-action": action.id }, action.label);
+    }
+    return h(
+      Btn,
+      { key: action.id, variant: "secondary", size: "sm", iconStart: icon, "data-listing-action": action.id, "data-client-save-listing": action.listing_id },
+      action.label,
+    );
+  });
+
+  const specIcons = { bedrooms: "bed", property_type: "house", offer_type: "key", location: "map-pin" };
+  const specs = ["bedrooms", "property_type", "offer_type", "location"]
+    .filter((key) => facts[key])
+    .map((key) => {
+      const value = key === "property_type" || key === "offer_type" ? localizedListingValue(page.locale, key, facts[key]) : facts[key];
+      return h(
+        "div",
+        { key, className: "ld-spec" },
+        h(Icon, { name: specIcons[key], size: 22 }),
+        h("b", null, value),
+        h("span", null, labels.factLabels?.[key] || key.replaceAll("_", " ")),
+      );
+    });
+
+  const primaryIcons = ["calendar", "phone"];
   const primaryActions = h(
     "nav",
-    { "aria-label": labels.listingActions, "data-mobile-sticky-actions": page.body.actions.sticky_mobile ? "true" : "false" },
-    ...(page.body.actions.primary || []).map((action) => h("button", { key: action.id, type: "button", "data-endpoint": action.endpoint }, action.label)),
-  );
-  const brokerContact = h(
-    "nav",
-    { "aria-label": labels.brokerContact, "data-broker-contact-actions": "true" },
-    ...channels.map((channel) =>
-      channel.enabled ? h("a", { key: channel.label, href: channel.href }, channel.label) : h("span", { key: channel.label, "aria-disabled": "true" }, channel.label),
+    {
+      className: "ld-aside__btns",
+      "aria-label": labels.listingActions,
+      "data-mobile-sticky-actions": page.body.actions.sticky_mobile ? "true" : "false",
+    },
+    ...(page.body.actions.primary || []).map((action, index) =>
+      h(
+        Btn,
+        {
+          key: (action.id || action.endpoint) + index,
+          variant: index === 0 ? "accent" : "secondary",
+          size: "lg",
+          full: true,
+          iconStart: primaryIcons[index % primaryIcons.length],
+          "data-endpoint": action.endpoint,
+          "data-lead-source": action.payload?.source,
+          "data-listing-reference": action.payload?.listingReference,
+          "data-contact-preference": action.payload?.contact_preference,
+        },
+        action.label,
+      ),
     ),
   );
-  return h(
+
+  const brokerContact = h(
+    "nav",
+    { className: "ld-aside__contact", "aria-label": labels.brokerContact, "data-broker-contact-actions": "true" },
+    ...channels.map((channel) =>
+      channel.enabled
+        ? h(Btn, { key: channel.label, tag: "a", variant: "secondary", size: "md", full: true, iconStart: channelIcon(channel.href), href: channel.href }, channel.label)
+        : h(
+            "span",
+            { key: channel.label, className: "mk-btn mk-btn--subtle mk-btn--md mk-btn--full", "data-disabled": "", "aria-disabled": "true" },
+            h(Icon, { name: channelIcon(""), size: 18 }),
+            h("span", null, channel.label),
+          ),
+    ),
+  );
+
+  const main = h(
     "main",
     {
+      id: "main",
       "data-kind": "listing",
       "data-react-public-ui": "listing",
       "data-review-status": page.body.actions.direct_contact.review_status,
@@ -219,205 +728,340 @@ function ListingBody({ page }) {
       "data-active-in-search": page.body.lifecycle?.active_in_search ? "true" : "false",
       "data-min-touch-target": "44",
     },
-    secondaryActions,
     h(
-      "section",
-      { "aria-label": labels.listingSummary, "data-listing-summary": "true", "data-source-domain": page.body.source.source_domain, "data-schema-ready": page.schema ? "true" : "false" },
-      h("p", { "data-listing-verification": "true" }, page.translation.human_approved ? labels.reviewedTranslation : labels.approvedSource),
-      h("h1", null, page.body.h1),
-      h("p", { "data-listing-price": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
-      h(
-        "ul",
-        { "data-listing-highlights": "true" },
-        ...["location", "property_type", "offer_type", "bedrooms"]
-          .filter((key) => facts[key])
-          .map((key) => h("li", { key }, `${labels.factLabels?.[key] || key}: ${facts[key]}`)),
-      ),
-    ),
-    h(
-      "section",
-      { "aria-label": labels.listingContent, "data-listing-content-grid": "true" },
+      "div",
+      { className: "ld" },
+      crumbs,
       h(
         "section",
-        { "aria-label": labels.listingMediaFacts, "data-listing-main-column": "true" },
-        h("p", { "data-listing-description": "true" }, page.body.description || ""),
-        factsList(facts, labels),
+        {
+          className: "ld-top",
+          "aria-label": labels.listingSummary,
+          "data-listing-summary": "true",
+          "data-source-domain": page.body.source.source_domain,
+          "data-schema-ready": page.schema ? "true" : "false",
+        },
         h(
-          "nav",
-          {
-            "aria-label": labels.listingMedia,
-            "data-media-gallery-count": page.body.media.gallery_count || 0,
-            "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
-          },
-          h("a", { href: "#listing-gallery" }, labels.photos),
-          h("a", { href: "#listing-tour", "aria-disabled": tour.available ? "false" : "true" }, labels.tour360),
+          "div",
+          { className: "ld-top__main" },
+          h(
+            "p",
+            { className: "mk-badge mk-badge--new mk-badge--sm ld-top__badge", "data-listing-verification": "true" },
+            page.translation.human_approved ? labels.reviewedTranslation : labels.approvedSource,
+          ),
+          h("h1", null, page.body.h1),
+          h(
+            "div",
+            { className: "ld-top__loc" },
+            h(Icon, { name: "map-pin", size: 17 }),
+            ` ${[facts.location, localizedListingValue(page.locale, "property_type", facts.property_type)].filter(Boolean).join(" · ")}`,
+          ),
+          h(
+            "ul",
+            { className: "ld-feats", "data-listing-highlights": "true" },
+            ...["location", "property_type", "offer_type", "bedrooms"]
+              .filter((key) => facts[key])
+              .map((key) => {
+                const value = key === "property_type" || key === "offer_type" ? localizedListingValue(page.locale, key, facts[key]) : facts[key];
+                return h("li", { key, className: "mk-tag mk-tag--neutral mk-tag--md" }, h(Icon, { name: "check", size: 15 }), `${labels.factLabels?.[key] || key}: ${value}`);
+              }),
+          ),
         ),
+        h("nav", { className: "ld-top__acts", "aria-label": labels.saveAndShare, "data-listing-tools": "true" }, ...toolButtons),
+      ),
+      h(
+        "div",
+        { className: "ld-gallery" },
         h(
-          "section",
-          { id: "listing-gallery", "aria-label": labels.gallery, "data-photo-carousel": "true" },
-          ...(page.body.media.gallery || []).slice(0, 12).map((image) => h("img", { key: image.url, src: image.url, alt: image.alt || page.body.h1, loading: "lazy" })),
+          "div",
+          { className: `ld-g ld-g--main mk-photo mk-photo--${tone}` },
+          gallery[0] ? h("img", { src: gallery[0].url, alt: gallery[0].alt || page.body.h1, loading: "eager" }) : null,
         ),
+        h("div", { className: "ld-g mk-photo mk-photo--sand" }, gallery[1] ? h("img", { src: gallery[1].url, alt: gallery[1].alt || page.body.h1, loading: "lazy" }) : null),
         h(
-          "section",
-          {
-            id: "listing-tour",
-            "aria-label": labels.tour360,
-            "data-photo-sphere-viewer": tour.available ? tour.mount_target : "review_required",
-            "data-tour-provider": tour.provider || "photo-sphere-viewer",
-          },
-          h("p", null, tour.available ? tour.accessibility_caption : tour.review_status || labels.reviewRequired),
+          "div",
+          { className: "ld-g mk-photo mk-photo--sky" },
+          gallery[2] ? h("img", { src: gallery[2].url, alt: gallery[2].alt || page.body.h1, loading: "lazy" }) : null,
+          h("a", { className: "ld-g__more", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${labels.photos}`),
         ),
       ),
-      h("aside", { "aria-label": labels.contactBroker, "data-listing-contact-panel": "true" }, primaryActions, brokerContact),
+      h(
+        "section",
+        { className: "ld-cols", "aria-label": labels.listingContent, "data-listing-content-grid": "true" },
+        h(
+          "section",
+          { className: "ld-main", "aria-label": labels.listingMediaFacts, "data-listing-main-column": "true" },
+          h("div", { className: "ld-specs" }, ...specs),
+          h(
+            "div",
+            { className: "ld-sec" },
+            h("h2", null, labels.propertyDetails),
+            h("p", { className: "ld-desc", "data-listing-description": "true" }, page.body.description || ""),
+          ),
+          h("div", { className: "ld-sec" }, h("h2", null, labels.listingMediaFacts), factsList(facts, labels, page.locale)),
+          h(
+            "nav",
+            {
+              className: "mk-tabs mk-tabs--segmented ld-media-nav",
+              "aria-label": labels.listingMedia,
+              "data-media-gallery-count": page.body.media.gallery_count || 0,
+              "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
+            },
+            h("a", { className: "mk-tab", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 16 }), labels.gallery),
+            h("a", { className: "mk-tab", href: "#listing-tour", "aria-disabled": tour.available ? "false" : "true" }, h(Icon, { name: "globe", size: 16 }), labels.tour360),
+          ),
+          h(
+            "section",
+            { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
+            ...gallery.map((image) => h("img", { key: image.url, src: image.url, alt: image.alt || page.body.h1, loading: "lazy" })),
+          ),
+          h(
+            "section",
+            {
+              id: "listing-tour",
+              className: "ld-tour mk-card mk-card--sunken mk-card--pad-md",
+              "aria-label": labels.tour360,
+              "data-photo-sphere-viewer": tour.available ? tour.mount_target : "review_required",
+              "data-tour-provider": tour.provider || "photo-sphere-viewer",
+            },
+            h("p", null, tour.available ? tour.accessibility_caption : tour.review_status || labels.reviewRequired),
+          ),
+        ),
+        h(
+          "aside",
+          { className: "ld-aside", "aria-label": labels.contactBroker, "data-listing-contact-panel": "true" },
+          h(
+            "div",
+            { className: "mk-card mk-card--elevated mk-card--pad-lg ld-aside__card" },
+            h("div", { className: "ld-price", "data-listing-price": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
+            primaryActions,
+            brokerContact,
+            h("div", { className: "ld-trust" }, h(Icon, { name: "shield-check", size: 16 }), ` ${page.translation.human_approved ? labels.reviewedTranslation : labels.approvedSource}`),
+            h("div", { className: "ld-aside__ref" }, h("span", null, facts.id), h("span", null, page.body.source.source_domain)),
+          ),
+        ),
+      ),
     ),
     h(
       "section",
-      { "aria-label": labels.relatedListings, "data-related-listings": "true" },
-      ...(page.body.related_listings || []).map((card) =>
-        h("article", { key: card.id, "data-related-listing": "true" }, h("h2", null, h("a", { href: card.path }, card.title))),
+      { className: "ld-similar", "aria-label": labels.relatedListings, "data-related-listings": "true" },
+      h("h2", null, labels.relatedListings),
+      h(
+        "div",
+        { className: "ld-similar__grid" },
+        ...(page.body.related_listings || []).map((card) =>
+          h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, rootAttrs: { "data-related-listing": "true" } }),
+        ),
       ),
     ),
   );
+  return shell(page, main);
 }
+
+/* ============================================================
+   Seller valuation
+   ============================================================ */
 
 function SellerBody({ page }) {
   const labels = uiLabels(page);
   const valuation = page.body.valuation;
-  return h(
+  const steps = [labels.propertyDetails, labels.brokerReview, labels.callback];
+  const main = h(
     "main",
     {
+      id: "main",
       "data-kind": "seller",
       "data-react-public-ui": "seller",
       "data-phone-first": "true",
       "data-no-public-avm": "true",
       "data-broker-review-required": "true",
       "data-min-touch-target": "44",
+      className: "ct-page pg-narrow",
     },
     h(
       "section",
-      { "aria-label": "Seller valuation", "data-seller-valuation-flow": "broker_callback" },
+      { className: "ct-page__head", "aria-label": labels.sellerValuation, "data-seller-valuation-flow": "broker_callback" },
       h("h1", null, page.body.h1),
       h("p", null, page.body.intro),
       h(
         "ol",
-        { "data-seller-steps": "true" },
-        h("li", null, labels.propertyDetails),
-        h("li", null, labels.brokerReview),
-        h("li", null, labels.callback),
+        { className: "sell-steps", "data-seller-steps": "true" },
+        ...steps.map((step, index) => h("li", { key: step }, h("span", { className: "sell-steps__num", "aria-hidden": "true" }, index + 1), step)),
       ),
     ),
     h(
       "form",
-      { method: valuation.method || "POST", action: valuation.endpoint, "data-lead-type": "seller" },
+      { className: "mk-card mk-card--elevated mk-card--pad-lg ct-form", method: valuation.method || "POST", action: valuation.endpoint, "data-lead-type": "seller" },
       h("input", { type: "hidden", name: "source", defaultValue: valuation.payload.source }),
       h("input", { type: "hidden", name: "leadType", defaultValue: valuation.payload.leadType }),
       h("input", { type: "hidden", name: "language", defaultValue: valuation.payload.language }),
-      h("label", null, `${labels.name} `, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
-      h("label", null, `${labels.phone} `, h("input", { name: "contact.phone", required: true, autoComplete: "tel", inputMode: "tel" })),
       h(
-        "label",
-        null,
-        `${labels.preferredContact} `,
-        h(
-          "select",
-          { name: "contact_preference" },
-          h("option", { value: "phone" }, "Phone"),
-          h("option", { value: "whatsapp" }, "WhatsApp"),
-          h("option", { value: "viber" }, "Viber"),
-        ),
+        "div",
+        { className: "ct-form__row" },
+        h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+        h("label", null, labels.phone, h("input", { name: "contact.phone", required: true, autoComplete: "tel", inputMode: "tel" })),
       ),
-      h("label", null, `${labels.location} `, h("input", { name: "property.location", autoComplete: "address-level2" })),
-      h("label", null, `${labels.propertyType} `, h("input", { name: "property.type" })),
-      h("label", null, `${labels.propertyDetails} `, h("textarea", { name: "message", required: true })),
-      h("button", { type: "submit" }, valuation.label),
+      h(
+        "div",
+        { className: "ct-form__row" },
+        h(
+          "label",
+          null,
+          labels.preferredContact,
+          h(
+            "select",
+            { name: "contact_preference" },
+            h("option", { value: "phone" }, labels.phone),
+            h("option", { value: "whatsapp" }, "WhatsApp"),
+            h("option", { value: "viber" }, "Viber"),
+          ),
+        ),
+        h("label", null, labels.location, h("input", { name: "property.location", autoComplete: "address-level2" })),
+      ),
+      h("label", null, labels.propertyType, h("input", { name: "property.type" })),
+      h("label", null, labels.propertyDetails, h("textarea", { name: "message", required: true })),
+      h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, valuation.label),
     ),
   );
+  return shell(page, main);
 }
+
+/* ============================================================
+   Contact (ui_kits/website/ContactPanel → ContactPage)
+   ============================================================ */
 
 function ContactBody({ page }) {
   const labels = uiLabels(page);
+  const chrome = page.chrome;
   const callback = page.body.callback;
-  return h(
+  const main = h(
     "main",
-    { "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44" },
-    h("h1", null, page.body.h1),
-    h("p", null, page.body.intro),
+    { id: "main", "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
+    h("div", { className: "ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
     h(
-      "form",
-      {
-        method: callback.method || "POST",
-        action: callback.endpoint,
-        "data-lead-type": "general",
-        "data-source": callback.payload.source,
-      },
-      h("input", { type: "hidden", name: "source", defaultValue: callback.payload.source }),
-      h("input", { type: "hidden", name: "leadType", defaultValue: callback.payload.leadType }),
-      h("input", { type: "hidden", name: "language", defaultValue: callback.payload.language }),
-      h("input", { type: "hidden", name: "contact_preference", defaultValue: callback.payload.contact_preference }),
-      h("label", null, `${labels.name} `, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
-      h("label", null, `${labels.message} `, h("textarea", { name: "message", required: true })),
-      h("button", { type: "submit" }, callback.label),
-    ),
-    h(
-      "nav",
-      { "aria-label": labels.contactActions },
-      h("a", { href: page.body.search.path, "data-action": "search" }, labels.search),
-      h("a", { href: page.body.seller.path, "data-action": "seller" }, labels.sellerValuation),
+      "div",
+      { className: "ct-page__cols" },
+      h(
+        "div",
+        { className: "ct-offices" },
+        chrome
+          ? h(
+              "div",
+              { className: "ct-office" },
+              h("div", { className: "ct-office__ph mk-photo mk-photo--sand", "aria-hidden": "true" }),
+              h(
+                "div",
+                null,
+                h("h3", null, chrome.copy.getInTouch),
+                h(
+                  "div",
+                  { className: "ct-office__meta" },
+                  h("span", null, h(Icon, { name: "map-pin", size: 16 }), ` ${chrome.copy.offices}`),
+                  h("span", null, h(Icon, { name: "phone", size: 16 }), h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
+                  h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
+                ),
+              ),
+            )
+          : null,
+        h(
+          "nav",
+          { className: "ct-actions", "aria-label": labels.contactActions },
+          h(Btn, { tag: "a", variant: "secondary", iconStart: "search", href: page.body.search.path, "data-action": "search" }, labels.search),
+          h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.seller.path, "data-action": "seller" }, labels.sellerValuation),
+        ),
+      ),
+      h(
+        "form",
+        {
+          className: "mk-card mk-card--elevated mk-card--pad-lg ct-form",
+          method: callback.method || "POST",
+          action: callback.endpoint,
+          "data-lead-type": "general",
+          "data-source": callback.payload.source,
+        },
+        h("h2", { className: "ct-form__title" }, labels.message),
+        h("input", { type: "hidden", name: "source", defaultValue: callback.payload.source }),
+        h("input", { type: "hidden", name: "leadType", defaultValue: callback.payload.leadType }),
+        h("input", { type: "hidden", name: "language", defaultValue: callback.payload.language }),
+        h("input", { type: "hidden", name: "contact_preference", defaultValue: callback.payload.contact_preference }),
+        h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+        h("label", null, labels.message, h("textarea", { name: "message", required: true })),
+        h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, callback.label),
+      ),
     ),
   );
+  return shell(page, main);
 }
+
+/* ============================================================
+   Language fallback + guide
+   ============================================================ */
 
 function LanguageFallbackBody({ page }) {
   const labels = uiLabels(page);
-  return h(
+  const main = h(
     "main",
     {
+      id: "main",
       "data-kind": "language-fallback",
       "data-react-public-ui": "language-fallback",
       "data-hermes-chat-available": page.hermes_chat_available ? "true" : "false",
       "data-public-translation-available": page.public_translation_available ? "true" : "false",
+      className: "pg-narrow",
     },
-    h("h1", null, page.metadata.title),
-    h("p", null, page.metadata.description),
     h(
-      "form",
-      { method: "POST", action: "/api/language-requests", "data-request-language": "true" },
-      h("input", { type: "hidden", name: "requested_locale", defaultValue: page.requested_locale }),
-      h("input", { type: "hidden", name: "fallback_locale", defaultValue: page.locale }),
-      h("button", { type: "submit" }, labels.requestLanguage),
+      "div",
+      { className: "mk-empty" },
+      h("span", { className: "mk-empty__icon" }, h(Icon, { name: "languages", size: 24 })),
+      h("h1", { className: "mk-empty__title" }, page.metadata.title),
+      h("p", { className: "mk-empty__text" }, page.metadata.description),
+      h(
+        "div",
+        { className: "mk-empty__actions" },
+        h(
+          "form",
+          { method: "POST", action: "/api/language-requests", "data-request-language": "true" },
+          h("input", { type: "hidden", name: "requested_locale", defaultValue: page.requested_locale }),
+          h("input", { type: "hidden", name: "fallback_locale", defaultValue: page.locale }),
+          h(Btn, { type: "submit", variant: "primary", iconStart: "languages" }, labels.requestLanguage),
+        ),
+        h(Btn, { tag: "a", variant: "secondary", iconStart: "message-circle", href: "/api/hermes/chat", "data-action": "ask-hermes" }, labels.askInLanguage),
+      ),
     ),
-    h("a", { href: "/api/hermes/chat", "data-action": "ask-hermes" }, labels.askInLanguage),
   );
+  return shell(page, main);
 }
 
 function GuideBody({ page }) {
   const labels = uiLabels(page);
-  return h(
+  const main = h(
     "main",
     {
+      id: "main",
       "data-kind": "guide",
       "data-react-public-ui": "guide",
       "data-approved-source": "cms",
       "data-min-touch-target": "44",
+      className: "pg-narrow",
     },
-    h("h1", null, page.body.h1),
-    h("p", null, page.body.intro),
+    h("header", { className: "ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
     ...(page.body.sections || []).map((section) =>
       h(
         "section",
-        { key: section.id, id: section.id, "data-reviewer": section.reviewer },
+        { key: section.id, id: section.id, className: "mk-card mk-card--pad-lg guide-sec", "data-reviewer": section.reviewer },
         h("h2", null, section.title),
-        h("ul", null, ...(section.facts || []).map((fact) => h("li", { key: fact }, fact))),
+        h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 15 }), fact))),
       ),
     ),
     h(
       "nav",
-      { "aria-label": labels.guideActions },
-      h("a", { href: page.body.ctas.search.path }, labels.search),
-      h("a", { href: page.body.ctas.seller.path }, labels.sellerValuation),
-      h("a", { href: page.body.ctas.contact.path }, labels.contact),
+      { className: "pg-actions", "aria-label": labels.guideActions },
+      h(Btn, { tag: "a", variant: "primary", iconStart: "search", href: page.body.ctas.search.path }, labels.search),
+      h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
+      h(Btn, { tag: "a", variant: "secondary", iconStart: "phone", href: page.body.ctas.contact.path }, labels.contact),
     ),
   );
+  return shell(page, main);
 }
 
 export function renderReactPublicBody(page) {

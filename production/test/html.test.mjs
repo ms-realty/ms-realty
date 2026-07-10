@@ -85,6 +85,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /data-card-thumbnail="true"/);
   assert.match(searchHtml, /<img src="https:\/\/makler-realty\./);
   assert.match(searchHtml, /data-view-mode="list"/);
+  assert.match(searchHtml, /רשימה/);
+  assert.match(searchHtml, /מפה/);
+  assert.doesNotMatch(searchHtml, /verified inventory/);
   assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);
   assert.equal(assertHtmlPage(locationHtml, { lang: "he", dir: "rtl", kind: "location" }), true);
@@ -98,6 +101,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(sellerHtml, /data-seller-valuation-flow="broker_callback"/);
   assert.match(sellerHtml, /name="contact.phone"/);
   assert.match(sellerHtml, /name="contact_preference"/);
+  assert.match(sellerHtml, /טלפון/);
   assert.equal(assertHtmlPage(contactHtml, { lang: "he", dir: "rtl", kind: "contact" }), true);
   assert.match(contactHtml, /data-lead-type="general"/);
   assert.match(contactHtml, /website_contact_callback/);

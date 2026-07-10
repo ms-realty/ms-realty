@@ -4,6 +4,8 @@ import { approvedContentDocumentsForPath, readApprovedCmsContent } from "../lib/
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
+import { publicMediaLibrary } from "../lib/media.mjs";
+import { loadCmsSeed } from "../lib/runtime.mjs";
 import {
   renderAdminShell,
   renderContactPage,
@@ -128,6 +130,25 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").review_badge, "verified_inventory");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
+});
+
+test("public UI localizes structured values and excludes operational crawl imagery", () => {
+  const ruListing = findListingById(listings, "MS-CRAWL-0114");
+  const ruSearch = renderSearchPage({ registry, listings, localeCode: "ru", query: "Парк отеле" });
+  const ruPage = renderListingPage({ registry, listing: ruListing, localeCode: "ru" });
+  const card = ruSearch.cards.find((entry) => entry.id === ruListing.id);
+  const importedRecord = loadCmsSeed().records.find((record) => record.id === ruListing.id);
+  const importedGallery = publicMediaLibrary(importedRecord.media).gallery;
+
+  assert.equal(ruSearch.metadata.title, "Поиск недвижимости | MS Realty");
+  assert.equal(ruSearch.search.controls.view_modes.find((mode) => mode.id === "list").label, "Список");
+  assert.equal(card.actions.detail.label, "Подробнее");
+  assert.equal(card.property_type_label, "Апартаменты");
+  assert.equal(card.offer_type_label, "Продажа");
+  assert.equal(card.thumbnail, null);
+  assert.ok(ruPage.body.media.gallery.every((image) => !image.url.includes("taxi")));
+  assert.ok(importedGallery.some((image) => image.url.includes("/191-1.jpg")));
+  assert.ok(importedGallery.every((image) => !image.url.includes("taxi")));
 });
 
 test("search applies text and facet filters before paginating cards", () => {

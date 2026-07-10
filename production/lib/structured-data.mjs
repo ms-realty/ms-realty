@@ -53,7 +53,6 @@ export function schemaIssues(schema) {
   for (const field of ["@id", "url", "identifier", "name", "description"]) {
     if (!filled(schema?.[field])) issues.push(`missing_${field.replace("@", "")}`);
   }
-  if (!Array.isArray(schema?.image) || schema.image.length === 0) issues.push("missing_public_images");
   return issues;
 }
 

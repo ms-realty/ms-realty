@@ -8,7 +8,7 @@ import { applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { bedroomsRequired } from "./listing-facts.mjs";
 
 export const DEFAULT_STRUCTURED_DATA_REPORT = fromRoot("production", "data", "structured-data-report.json");
-const KNOWN_WARNINGS = ["missing_location", "missing_price", "missing_bedrooms", "media_review_pending"];
+const KNOWN_WARNINGS = ["missing_location", "missing_price", "missing_bedrooms", "missing_public_images", "media_review_pending"];
 
 function filled(value) {
   return value !== null && value !== undefined && value !== "";
@@ -32,6 +32,10 @@ function reportRow(registry, seed, entry) {
     ) {
       warnings.push("missing_bedrooms");
     }
+    // Image is recommended structured data, but it must not re-expose an
+    // unrelated crawl asset simply to satisfy schema validation. It remains a
+    // media-review warning and a publication gate, not a schema failure.
+    if (!Array.isArray(page.schema?.image) || page.schema.image.length === 0) warnings.push("missing_public_images");
     if (page.body?.media?.review?.review_gated_assets) warnings.push("media_review_pending");
   }
 

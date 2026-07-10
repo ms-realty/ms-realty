@@ -450,6 +450,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 18,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -759,6 +760,7 @@
       "media_workflow": {
         "total_assets": 20,
         "public_gallery_assets": 3,
+        "suppressed_public_assets": 1,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -1176,6 +1178,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 15,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -1545,6 +1548,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -1914,6 +1918,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -2203,6 +2208,7 @@
       "media_workflow": {
         "total_assets": 18,
         "public_gallery_assets": 1,
+        "suppressed_public_assets": 0,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -2532,6 +2538,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -2991,6 +2998,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 18,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -3360,6 +3368,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -3809,6 +3818,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -4298,6 +4308,7 @@
       "media_workflow": {
         "total_assets": 38,
         "public_gallery_assets": 21,
+        "suppressed_public_assets": 19,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -4597,6 +4608,7 @@
       "media_workflow": {
         "total_assets": 19,
         "public_gallery_assets": 2,
+        "suppressed_public_assets": 0,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -4930,6 +4942,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -5269,6 +5282,7 @@
       "media_workflow": {
         "total_assets": 23,
         "public_gallery_assets": 6,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -5768,6 +5782,7 @@
       "media_workflow": {
         "total_assets": 39,
         "public_gallery_assets": 22,
+        "suppressed_public_assets": 20,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -6257,6 +6272,7 @@
       "media_workflow": {
         "total_assets": 38,
         "public_gallery_assets": 21,
+        "suppressed_public_assets": 19,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -6656,6 +6672,7 @@
       "media_workflow": {
         "total_assets": 29,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 10,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -7225,6 +7242,7 @@
       "media_workflow": {
         "total_assets": 46,
         "public_gallery_assets": 29,
+        "suppressed_public_assets": 27,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -7644,6 +7662,7 @@
       "media_workflow": {
         "total_assets": 31,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -7963,6 +7982,7 @@
       "media_workflow": {
         "total_assets": 21,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 2,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -8504,6 +8524,7 @@
       "media_workflow": {
         "total_assets": 44,
         "public_gallery_assets": 27,
+        "suppressed_public_assets": 25,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -8923,6 +8944,7 @@
       "media_workflow": {
         "total_assets": 31,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -9342,6 +9364,7 @@
       "media_workflow": {
         "total_assets": 31,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -9731,6 +9754,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -10210,6 +10234,7 @@
       "media_workflow": {
         "total_assets": 37,
         "public_gallery_assets": 20,
+        "suppressed_public_assets": 18,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -10629,6 +10654,7 @@
       "media_workflow": {
         "total_assets": 31,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -10978,6 +11004,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -11397,6 +11424,7 @@
       "media_workflow": {
         "total_assets": 31,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -11756,6 +11784,7 @@
       "media_workflow": {
         "total_assets": 25,
         "public_gallery_assets": 8,
+        "suppressed_public_assets": 6,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -12125,6 +12154,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -12524,6 +12554,7 @@
       "media_workflow": {
         "total_assets": 29,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 10,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -12863,6 +12894,7 @@
       "media_workflow": {
         "total_assets": 23,
         "public_gallery_assets": 6,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -13272,6 +13304,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 13,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -13631,6 +13664,7 @@
       "media_workflow": {
         "total_assets": 25,
         "public_gallery_assets": 8,
+        "suppressed_public_assets": 6,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -14040,6 +14074,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 13,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -14369,6 +14404,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -14764,6 +14800,7 @@
       "media_workflow": {
         "total_assets": 29,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 1,
         "video_candidates": 0,
         "review_gated_assets": 1
@@ -15483,6 +15520,7 @@
       "media_workflow": {
         "total_assets": 61,
         "public_gallery_assets": 44,
+        "suppressed_public_assets": 42,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -15792,6 +15830,7 @@
       "media_workflow": {
         "total_assets": 20,
         "public_gallery_assets": 3,
+        "suppressed_public_assets": 1,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -16089,6 +16128,7 @@
       "media_workflow": {
         "total_assets": 20,
         "public_gallery_assets": 3,
+        "suppressed_public_assets": 1,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -16426,6 +16466,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -16785,6 +16826,7 @@
       "media_workflow": {
         "total_assets": 25,
         "public_gallery_assets": 8,
+        "suppressed_public_assets": 6,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -17224,6 +17266,7 @@
       "media_workflow": {
         "total_assets": 33,
         "public_gallery_assets": 16,
+        "suppressed_public_assets": 14,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -17553,6 +17596,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -17938,6 +17982,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -18317,6 +18362,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -18686,6 +18732,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -19125,6 +19172,7 @@
       "media_workflow": {
         "total_assets": 33,
         "public_gallery_assets": 16,
+        "suppressed_public_assets": 14,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -19414,6 +19462,7 @@
       "media_workflow": {
         "total_assets": 18,
         "public_gallery_assets": 1,
+        "suppressed_public_assets": 0,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -19783,6 +19832,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -20172,6 +20222,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -20581,6 +20632,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 13,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -20910,6 +20962,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -21355,6 +21408,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -21704,6 +21758,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -22013,6 +22068,7 @@
       "media_workflow": {
         "total_assets": 20,
         "public_gallery_assets": 3,
+        "suppressed_public_assets": 1,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -22330,6 +22386,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -22655,6 +22712,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -22980,6 +23038,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -23305,6 +23364,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -23750,6 +23810,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -24179,6 +24240,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 15,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -24518,6 +24580,7 @@
       "media_workflow": {
         "total_assets": 23,
         "public_gallery_assets": 6,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -24837,6 +24900,7 @@
       "media_workflow": {
         "total_assets": 21,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 2,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -25218,6 +25282,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -25747,6 +25812,7 @@
       "media_workflow": {
         "total_assets": 42,
         "public_gallery_assets": 25,
+        "suppressed_public_assets": 23,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -26116,6 +26182,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -26405,6 +26472,7 @@
       "media_workflow": {
         "total_assets": 18,
         "public_gallery_assets": 1,
+        "suppressed_public_assets": 0,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -26704,6 +26772,7 @@
       "media_workflow": {
         "total_assets": 21,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 2,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -26985,6 +27054,7 @@
       "media_workflow": {
         "total_assets": 18,
         "public_gallery_assets": 1,
+        "suppressed_public_assets": 0,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -27294,6 +27364,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -27659,6 +27730,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -28008,6 +28080,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -28517,6 +28590,7 @@
       "media_workflow": {
         "total_assets": 40,
         "public_gallery_assets": 23,
+        "suppressed_public_assets": 21,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -28986,6 +29060,7 @@
       "media_workflow": {
         "total_assets": 36,
         "public_gallery_assets": 19,
+        "suppressed_public_assets": 17,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -29325,6 +29400,7 @@
       "media_workflow": {
         "total_assets": 23,
         "public_gallery_assets": 6,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -29704,6 +29780,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -30083,6 +30160,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -30542,6 +30620,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 18,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -31091,6 +31170,7 @@
       "media_workflow": {
         "total_assets": 44,
         "public_gallery_assets": 27,
+        "suppressed_public_assets": 25,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -31440,6 +31520,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -31729,6 +31810,7 @@
       "media_workflow": {
         "total_assets": 18,
         "public_gallery_assets": 1,
+        "suppressed_public_assets": 0,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -32158,6 +32240,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -32607,6 +32690,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -32976,6 +33060,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -33375,6 +33460,7 @@
       "media_workflow": {
         "total_assets": 29,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 10,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -33744,6 +33830,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -34063,6 +34150,7 @@
       "media_workflow": {
         "total_assets": 21,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 2,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -34504,6 +34592,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -35273,6 +35362,7 @@
       "media_workflow": {
         "total_assets": 66,
         "public_gallery_assets": 49,
+        "suppressed_public_assets": 47,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -35682,6 +35772,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 13,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -36131,6 +36222,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -36490,6 +36582,7 @@
       "media_workflow": {
         "total_assets": 25,
         "public_gallery_assets": 8,
+        "suppressed_public_assets": 6,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -36819,6 +36912,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -37194,6 +37288,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -37583,6 +37678,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -37912,6 +38008,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 5,
+        "suppressed_public_assets": 3,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -38297,6 +38394,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -38806,6 +38904,7 @@
       "media_workflow": {
         "total_assets": 40,
         "public_gallery_assets": 23,
+        "suppressed_public_assets": 21,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -39195,6 +39294,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -39674,6 +39774,7 @@
       "media_workflow": {
         "total_assets": 37,
         "public_gallery_assets": 20,
+        "suppressed_public_assets": 18,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -40103,6 +40204,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -40482,6 +40584,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -41361,6 +41464,7 @@
       "media_workflow": {
         "total_assets": 77,
         "public_gallery_assets": 60,
+        "suppressed_public_assets": 58,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -41950,6 +42054,7 @@
       "media_workflow": {
         "total_assets": 48,
         "public_gallery_assets": 31,
+        "suppressed_public_assets": 29,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -42379,6 +42484,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 15,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -42808,6 +42914,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 15,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -43157,6 +43264,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -43616,6 +43724,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 18,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -44015,6 +44124,7 @@
       "media_workflow": {
         "total_assets": 29,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 10,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -44524,6 +44634,7 @@
       "media_workflow": {
         "total_assets": 40,
         "public_gallery_assets": 23,
+        "suppressed_public_assets": 21,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -44823,6 +44934,7 @@
       "media_workflow": {
         "total_assets": 19,
         "public_gallery_assets": 2,
+        "suppressed_public_assets": 0,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -45296,6 +45408,7 @@
       "media_workflow": {
         "total_assets": 38,
         "public_gallery_assets": 21,
+        "suppressed_public_assets": 19,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -45735,6 +45848,7 @@
       "media_workflow": {
         "total_assets": 33,
         "public_gallery_assets": 15,
+        "suppressed_public_assets": 14,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -46214,6 +46328,7 @@
       "media_workflow": {
         "total_assets": 37,
         "public_gallery_assets": 19,
+        "suppressed_public_assets": 18,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -46623,6 +46738,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -47032,6 +47148,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -47461,6 +47578,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -47990,6 +48108,7 @@
       "media_workflow": {
         "total_assets": 42,
         "public_gallery_assets": 24,
+        "suppressed_public_assets": 23,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -48549,6 +48668,7 @@
       "media_workflow": {
         "total_assets": 45,
         "public_gallery_assets": 27,
+        "suppressed_public_assets": 26,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -48878,6 +48998,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -49619,6 +49740,7 @@
       "media_workflow": {
         "total_assets": 64,
         "public_gallery_assets": 46,
+        "suppressed_public_assets": 45,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -50038,6 +50160,7 @@
       "media_workflow": {
         "total_assets": 31,
         "public_gallery_assets": 13,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -50587,6 +50710,7 @@
       "media_workflow": {
         "total_assets": 44,
         "public_gallery_assets": 26,
+        "suppressed_public_assets": 25,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -51046,6 +51170,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -51405,6 +51530,7 @@
       "media_workflow": {
         "total_assets": 25,
         "public_gallery_assets": 7,
+        "suppressed_public_assets": 6,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -51774,6 +51900,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 8,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -52173,6 +52300,7 @@
       "media_workflow": {
         "total_assets": 29,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 10,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -52632,6 +52760,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -53071,6 +53200,7 @@
       "media_workflow": {
         "total_assets": 33,
         "public_gallery_assets": 15,
+        "suppressed_public_assets": 14,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -53500,6 +53630,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -53959,6 +54090,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -54288,6 +54420,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -54689,6 +54822,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -55118,6 +55252,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -55497,6 +55632,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -55846,6 +55982,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 6,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -56225,6 +56362,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -56604,6 +56742,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -57223,6 +57362,7 @@
       "media_workflow": {
         "total_assets": 51,
         "public_gallery_assets": 33,
+        "suppressed_public_assets": 32,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -57612,6 +57752,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -58021,6 +58162,7 @@
       "media_workflow": {
         "total_assets": 30,
         "public_gallery_assets": 12,
+        "suppressed_public_assets": 11,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -58450,6 +58592,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 13,
+        "suppressed_public_assets": 12,
         "floor_plan_candidates": 1,
         "video_candidates": 0,
         "review_gated_assets": 1
@@ -58819,6 +58962,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 8,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -59148,6 +59292,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -59469,6 +59614,7 @@
       "media_workflow": {
         "total_assets": 22,
         "public_gallery_assets": 4,
+        "suppressed_public_assets": 4,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -59930,6 +60076,7 @@
       "media_workflow": {
         "total_assets": 36,
         "public_gallery_assets": 18,
+        "suppressed_public_assets": 17,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -60389,6 +60536,7 @@
       "media_workflow": {
         "total_assets": 35,
         "public_gallery_assets": 17,
+        "suppressed_public_assets": 16,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -60838,6 +60986,7 @@
       "media_workflow": {
         "total_assets": 34,
         "public_gallery_assets": 16,
+        "suppressed_public_assets": 15,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -61207,6 +61356,7 @@
       "media_workflow": {
         "total_assets": 26,
         "public_gallery_assets": 8,
+        "suppressed_public_assets": 7,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -61586,6 +61736,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -61975,6 +62126,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -62364,6 +62516,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -62793,6 +62946,7 @@
       "media_workflow": {
         "total_assets": 32,
         "public_gallery_assets": 14,
+        "suppressed_public_assets": 13,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -63142,6 +63296,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 6,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -63531,6 +63686,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -63880,6 +64036,7 @@
       "media_workflow": {
         "total_assets": 24,
         "public_gallery_assets": 6,
+        "suppressed_public_assets": 5,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -64269,6 +64426,7 @@
       "media_workflow": {
         "total_assets": 28,
         "public_gallery_assets": 10,
+        "suppressed_public_assets": 9,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -64748,6 +64906,7 @@
       "media_workflow": {
         "total_assets": 37,
         "public_gallery_assets": 19,
+        "suppressed_public_assets": 18,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -65147,6 +65306,7 @@
       "media_workflow": {
         "total_assets": 29,
         "public_gallery_assets": 11,
+        "suppressed_public_assets": 10,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -65526,6 +65686,7 @@
       "media_workflow": {
         "total_assets": 27,
         "public_gallery_assets": 9,
+        "suppressed_public_assets": 8,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -66045,6 +66206,7 @@
       "media_workflow": {
         "total_assets": 41,
         "public_gallery_assets": 23,
+        "suppressed_public_assets": 22,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -66514,6 +66676,7 @@
       "media_workflow": {
         "total_assets": 36,
         "public_gallery_assets": 18,
+        "suppressed_public_assets": 17,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -67033,6 +67196,7 @@
       "media_workflow": {
         "total_assets": 41,
         "public_gallery_assets": 23,
+        "suppressed_public_assets": 22,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0
@@ -67472,6 +67636,7 @@
       "media_workflow": {
         "total_assets": 33,
         "public_gallery_assets": 15,
+        "suppressed_public_assets": 14,
         "floor_plan_candidates": 0,
         "video_candidates": 0,
         "review_gated_assets": 0

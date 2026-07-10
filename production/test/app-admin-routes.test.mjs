@@ -260,6 +260,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(inboxHtml.includes('name="hermesDraft" value="true"'), false);
       assert.match(inboxHtml, /data-show-original-toggle="true"/);
       assert.match(inboxHtml, /he -&gt; en/);
+      assert.match(inboxHtml, /Входящие заявки/);
+      assert.match(inboxHtml, /Покупатель/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();

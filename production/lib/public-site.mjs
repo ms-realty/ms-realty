@@ -20,7 +20,7 @@ import {
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
-import { publicMediaLibrary } from "./media.mjs";
+import { publicMediaLibrary, selectPublicThumbnail } from "./media.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
 
@@ -405,6 +405,144 @@ const ACTION_LABELS = {
   },
 };
 
+// UI labels that are not sourced from a listing record. Keeping these values
+// here makes card facts, filters, and review states readable in every core
+// public locale while new locales continue to fall back to English safely.
+const UI_COPY = {
+  bg: {
+    searchTitle: "Търсене на имоти | MS Realty",
+    searchDescription: "Потърсете проверени имоти на MS Realty.",
+    details: "Детайли",
+    list: "Списък",
+    map: "Карта",
+    recommended: "Препоръчани",
+    newest: "Най-нови",
+    priceLowToHigh: "Цена: ниска към висока",
+    priceHighToLow: "Цена: висока към ниска",
+    verifiedInventory: "Проверена обява",
+    sourceFallback: "Версия на изходния език",
+    breadcrumb: "Навигационна пътека",
+    propertyTypes: { commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", land: "Парцел", property: "Имот" },
+    offerTypes: { sale: "За продажба", rent: "Под наем" },
+  },
+  en: {
+    searchTitle: "Property search | MS Realty",
+    searchDescription: "Search reviewed MS Realty property inventory.",
+    details: "Details",
+    list: "List",
+    map: "Map",
+    recommended: "Recommended",
+    newest: "Newest",
+    priceLowToHigh: "Price: low to high",
+    priceHighToLow: "Price: high to low",
+    verifiedInventory: "Verified listing",
+    sourceFallback: "Source-language version",
+    breadcrumb: "Breadcrumb",
+    propertyTypes: { commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", land: "Land", property: "Property" },
+    offerTypes: { sale: "For sale", rent: "For rent" },
+  },
+  de: {
+    searchTitle: "Immobiliensuche | MS Realty",
+    searchDescription: "Durchsuchen Sie geprüfte MS Realty Immobilien.",
+    details: "Details",
+    list: "Liste",
+    map: "Karte",
+    recommended: "Empfohlen",
+    newest: "Neueste",
+    priceLowToHigh: "Preis: niedrig zu hoch",
+    priceHighToLow: "Preis: hoch zu niedrig",
+    verifiedInventory: "Geprüfte Immobilie",
+    sourceFallback: "Version in Ausgangssprache",
+    breadcrumb: "Brotkrümelnavigation",
+    propertyTypes: { commercial: "Gewerbeimmobilie", multi_unit: "Apartments", apartment: "Wohnung", hotel: "Hotel", house: "Haus", land: "Grundstück", property: "Immobilie" },
+    offerTypes: { sale: "Zum Kauf", rent: "Zur Miete" },
+  },
+  nl: {
+    searchTitle: "Vastgoed zoeken | MS Realty",
+    searchDescription: "Zoek in beoordeeld vastgoed van MS Realty.",
+    details: "Details",
+    list: "Lijst",
+    map: "Kaart",
+    recommended: "Aanbevolen",
+    newest: "Nieuwste",
+    priceLowToHigh: "Prijs: laag naar hoog",
+    priceHighToLow: "Prijs: hoog naar laag",
+    verifiedInventory: "Beoordeeld object",
+    sourceFallback: "Versie in brontaal",
+    breadcrumb: "Kruimelpad",
+    propertyTypes: { commercial: "Commercieel vastgoed", multi_unit: "Appartementen", apartment: "Appartement", hotel: "Hotel", house: "Huis", land: "Grond", property: "Object" },
+    offerTypes: { sale: "Te koop", rent: "Te huur" },
+  },
+  ru: {
+    searchTitle: "Поиск недвижимости | MS Realty",
+    searchDescription: "Ищите проверенные объекты MS Realty.",
+    details: "Подробнее",
+    list: "Список",
+    map: "Карта",
+    recommended: "Рекомендуемые",
+    newest: "Новые",
+    priceLowToHigh: "Цена: по возрастанию",
+    priceHighToLow: "Цена: по убыванию",
+    verifiedInventory: "Проверенный объект",
+    sourceFallback: "Версия на исходном языке",
+    breadcrumb: "Навигационная цепочка",
+    propertyTypes: { commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", land: "Участок", property: "Объект" },
+    offerTypes: { sale: "Продажа", rent: "Аренда" },
+  },
+  el: {
+    searchTitle: "Αναζήτηση ακινήτων | MS Realty",
+    searchDescription: "Αναζητήστε ελεγμένα ακίνητα της MS Realty.",
+    details: "Λεπτομέρειες",
+    list: "Λίστα",
+    map: "Χάρτης",
+    recommended: "Προτεινόμενα",
+    newest: "Νεότερα",
+    priceLowToHigh: "Τιμή: χαμηλή προς υψηλή",
+    priceHighToLow: "Τιμή: υψηλή προς χαμηλή",
+    verifiedInventory: "Ελεγμένο ακίνητο",
+    sourceFallback: "Έκδοση στη γλώσσα προέλευσης",
+    breadcrumb: "Διαδρομή πλοήγησης",
+    propertyTypes: { commercial: "Επαγγελματικό ακίνητο", multi_unit: "Διαμερίσματα", apartment: "Διαμέρισμα", hotel: "Ξενοδοχείο", house: "Κατοικία", land: "Οικόπεδο", property: "Ακίνητο" },
+    offerTypes: { sale: "Προς πώληση", rent: "Προς ενοικίαση" },
+  },
+  he: {
+    searchTitle: "חיפוש נכסים | MS Realty",
+    searchDescription: "חפשו נכסים מאושרים של MS Realty.",
+    details: "פרטים",
+    list: "רשימה",
+    map: "מפה",
+    recommended: "מומלצים",
+    newest: "החדשים ביותר",
+    priceLowToHigh: "מחיר: מהנמוך לגבוה",
+    priceHighToLow: "מחיר: מהגבוה לנמוך",
+    verifiedInventory: "נכס מאושר",
+    sourceFallback: "גרסה בשפת המקור",
+    breadcrumb: "נתיב ניווט",
+    propertyTypes: { commercial: "נכס מסחרי", multi_unit: "דירות", apartment: "דירה", hotel: "מלון", house: "בית", land: "מגרש", property: "נכס" },
+    offerTypes: { sale: "למכירה", rent: "להשכרה" },
+  },
+};
+
+function humanizeIdentifier(value) {
+  return String(value || "").replaceAll("_", " ");
+}
+
+export function uiCopyFor(localeCode) {
+  return UI_COPY[localeCode] || UI_COPY.en;
+}
+
+export function localizedListingValue(localeCode, key, value) {
+  const copy = uiCopyFor(localeCode);
+  if (key === "property_type") return copy.propertyTypes[value] || humanizeIdentifier(value);
+  if (key === "offer_type") return copy.offerTypes[value] || humanizeIdentifier(value);
+  return humanizeIdentifier(value);
+}
+
+export function localizedSearchFilterValue(localeCode, key, value) {
+  if (key === "property_type" || key === "offer_type") return localizedListingValue(localeCode, key, value);
+  return humanizeIdentifier(value);
+}
+
 const PUBLIC_COPY = {
   en: {
     title: (view) => `MS Realty property ${view.id} in ${view.location || "Sandanski"}`,
@@ -546,6 +684,187 @@ const CONTACT_COPY = {
   },
 };
 
+// Site-chrome copy (header nav, footer, language switcher) per public locale.
+// Mirrors the design-system SiteChrome content model with production routes.
+const CHROME_COPY = {
+  bg: {
+    navBuy: "Купете",
+    navRent: "Под наем",
+    navSell: "Продайте",
+    navContact: "Контакти",
+    explore: "Разгледайте",
+    getInTouch: "Свържете се",
+    tagline:
+      "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция — с местни офиси и брокери, които говорят вашия език.",
+    copyright: "Всички права запазени.",
+    requestSent: "Запитването е изпратено. Брокер ще се свърже с вас.",
+    close: "Затвори",
+    callBroker: "Обади се на брокер",
+    languageLabel: "Език",
+    menuLabel: "Основна навигация",
+    skipToContent: "Към съдържанието",
+    filters: "Филтри",
+    offices: "Сандански · Банско · Свети Влас",
+  },
+  en: {
+    navBuy: "Buy",
+    navRent: "Rent",
+    navSell: "Sell",
+    navContact: "Contact",
+    explore: "Explore",
+    getInTouch: "Get in touch",
+    tagline:
+      "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+    copyright: "All rights reserved.",
+    requestSent: "Your inquiry was sent. A broker will contact you.",
+    close: "Close",
+    callBroker: "Call a broker",
+    languageLabel: "Language",
+    menuLabel: "Primary navigation",
+    skipToContent: "Skip to content",
+    filters: "Filters",
+    offices: "Sandanski · Bansko · Sveti Vlas",
+  },
+  de: {
+    navBuy: "Kaufen",
+    navRent: "Mieten",
+    navSell: "Verkaufen",
+    navContact: "Kontakt",
+    explore: "Entdecken",
+    getInTouch: "Kontakt aufnehmen",
+    tagline:
+      "Immobilien zum Kauf und zur Miete in Sandanski und im Pirin-Gebirge, an der Schwarzmeerküste und im benachbarten Griechenland — mit lokalen Büros und Maklern, die Ihre Sprache sprechen.",
+    copyright: "Alle Rechte vorbehalten.",
+    requestSent: "Ihre Anfrage wurde gesendet. Ein Makler meldet sich bei Ihnen.",
+    close: "Schließen",
+    callBroker: "Makler anrufen",
+    languageLabel: "Sprache",
+    menuLabel: "Hauptnavigation",
+    skipToContent: "Zum Inhalt springen",
+    filters: "Filter",
+    offices: "Sandanski · Bansko · Sveti Vlas",
+  },
+  nl: {
+    navBuy: "Kopen",
+    navRent: "Huren",
+    navSell: "Verkopen",
+    navContact: "Contact",
+    explore: "Ontdekken",
+    getInTouch: "Neem contact op",
+    tagline:
+      "Vastgoed te koop en te huur in Sandanski en het Pirin-gebergte, aan de Zwarte Zeekust en in buurland Griekenland — met lokale kantoren en makelaars die uw taal spreken.",
+    copyright: "Alle rechten voorbehouden.",
+    requestSent: "Uw aanvraag is verzonden. Een makelaar neemt contact met u op.",
+    close: "Sluiten",
+    callBroker: "Bel een makelaar",
+    languageLabel: "Taal",
+    menuLabel: "Hoofdnavigatie",
+    skipToContent: "Naar inhoud",
+    filters: "Filters",
+    offices: "Sandanski · Bansko · Sveti Vlas",
+  },
+  ru: {
+    navBuy: "Купить",
+    navRent: "Аренда",
+    navSell: "Продать",
+    navContact: "Контакты",
+    explore: "Обзор",
+    getInTouch: "Связаться с нами",
+    tagline:
+      "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции — с местными офисами и брокерами, говорящими на вашем языке.",
+    copyright: "Все права защищены.",
+    requestSent: "Запрос отправлен. Брокер свяжется с вами.",
+    close: "Закрыть",
+    callBroker: "Позвонить брокеру",
+    languageLabel: "Язык",
+    menuLabel: "Основная навигация",
+    skipToContent: "К содержанию",
+    filters: "Фильтры",
+    offices: "Сандански · Банско · Свети-Влас",
+  },
+  el: {
+    navBuy: "Αγορά",
+    navRent: "Ενοικίαση",
+    navSell: "Πώληση",
+    navContact: "Επικοινωνία",
+    explore: "Εξερευνήστε",
+    getInTouch: "Επικοινωνήστε",
+    tagline:
+      "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα — με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
+    copyright: "Με την επιφύλαξη παντός δικαιώματος.",
+    requestSent: "Το αίτημά σας εστάλη. Ένας μεσίτης θα επικοινωνήσει μαζί σας.",
+    close: "Κλείσιμο",
+    callBroker: "Καλέστε μεσίτη",
+    languageLabel: "Γλώσσα",
+    menuLabel: "Κύρια πλοήγηση",
+    skipToContent: "Μετάβαση στο περιεχόμενο",
+    filters: "Φίλτρα",
+    offices: "Σαντάνσκι · Μπάνσκο · Σβετί Βλας",
+  },
+  he: {
+    navBuy: "קנייה",
+    navRent: "השכרה",
+    navSell: "מכירה",
+    navContact: "צור קשר",
+    explore: "גלו עוד",
+    getInTouch: "יצירת קשר",
+    tagline:
+      "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+    copyright: "כל הזכויות שמורות.",
+    requestSent: "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+    close: "סגירה",
+    callBroker: "התקשרו למתווך",
+    languageLabel: "שפה",
+    menuLabel: "ניווט ראשי",
+    skipToContent: "דלגו לתוכן",
+    filters: "סינון",
+    offices: "סנדנסקי · בנסקו · סבטי ולאס",
+  },
+};
+
+// Reviewed brand office contact (design-system SiteChrome handoff).
+const BRAND_CONTACT = {
+  phone_label: "+359 879 69 68 70",
+  phone_href: "tel:+359879696870",
+  email: "office@makler-realty.com",
+};
+
+export function chromeCopyFor(localeCode) {
+  return CHROME_COPY[localeCode] || CHROME_COPY.en;
+}
+
+function publicChrome(registry, locale, { hreflang = [], active = null, locations = [] } = {}) {
+  const copy = chromeCopyFor(locale.code);
+  const labels = labelsFor(locale.code);
+  const searchBase = `/${locale.code}/${locale.route_segments.search}`;
+  const alternates = new Map(
+    (hreflang || []).filter((link) => link.hreflang !== "x-default").map((link) => [link.hreflang, link.href]),
+  );
+  return {
+    copy,
+    home: { href: homePath(registry, locale.code), label: "MS Realty" },
+    nav: [
+      { id: "buy", href: searchBase, label: copy.navBuy, active: active === "search" || active === "listing" || active === "location" },
+      { id: "rent", href: `${searchBase}?offer_type=rent`, label: copy.navRent, active: false },
+      { id: "sell", href: sellerPath(registry, locale.code), label: copy.navSell, active: active === "seller" },
+      { id: "contact", href: contactPath(registry, locale.code), label: copy.navContact, active: active === "contact" },
+    ],
+    languages: publicIndexableLocales(registry).map((entry) => ({
+      code: entry.code,
+      label: entry.native_name || entry.code.toUpperCase(),
+      href: alternates.get(entry.code) || homePath(registry, entry.code),
+      active: entry.code === locale.code,
+      dir: entry.direction || "ltr",
+    })),
+    contact: { ...BRAND_CONTACT, offices: copy.offices },
+    footer: {
+      locations: locations.slice(0, 5).map((entry) => ({ href: entry.path, label: entry.location })),
+      locationsLabel: labels.locations,
+      searchLabel: labels.search,
+    },
+  };
+}
+
 export function labelsFor(localeCode) {
   return ACTION_LABELS[localeCode] || ACTION_LABELS.en;
 }
@@ -640,7 +959,17 @@ function listingCard(registry, listing, locale) {
   const state = searchTranslationState(registry, listing, locale);
   const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
   const copy = localizedCopy(copyLocale, view);
+  const ui = uiCopyFor(locale.code);
   const verified = state.indexable || view.source_locale === locale.code || listing.locale === locale.code;
+  const thumbnail = selectPublicThumbnail(
+    view.media,
+    view.thumbnail_url
+      ? {
+          url: view.thumbnail_url,
+          alt: view.thumbnail_alt || copy.title,
+        }
+      : null,
+  );
   return {
     id: listing.id,
     title: copy.title,
@@ -654,7 +983,9 @@ function listingCard(registry, listing, locale) {
     source_locale: listing.locale,
     location: view.location,
     property_type: view.property_type,
+    property_type_label: localizedListingValue(locale.code, "property_type", view.property_type),
     offer_type: view.offer_type,
+    offer_type_label: localizedListingValue(locale.code, "offer_type", view.offer_type),
     bedrooms: view.bedrooms,
     bedrooms_not_applicable: view.bedrooms_not_applicable,
     price_eur: view.price_eur,
@@ -662,14 +993,9 @@ function listingCard(registry, listing, locale) {
     listing_status: view.listing_status,
     listing_active: isActiveListing(listing),
     image_count: Number(listing.image_count || 0),
-    thumbnail: view.thumbnail_url
-      ? {
-          url: view.thumbnail_url,
-          alt: view.thumbnail_alt || copy.title,
-        }
-      : null,
+    thumbnail,
     actions: {
-      detail: { label: "Details", href: listingPath(registry, locale.code, listing.id) },
+      detail: { label: ui.details, href: listingPath(registry, locale.code, listing.id) },
       inquiry: {
         label: labelsFor(locale.code).inquiry,
         endpoint: "/api/leads",
@@ -823,7 +1149,14 @@ export function renderListingPage({ registry, listing, localeCode, translations,
   const hreflang = indexable ? hreflangForListing(registry, listing.id, allTranslations) : [];
   const labels = labelsFor(locale.code);
   const copy = localizedCopy(locale.code, view);
-  const publicMedia = publicMediaLibrary(view.media);
+  const publicMedia = publicMediaLibrary(view.media, {
+    fallback: view.thumbnail_url
+      ? {
+          url: view.thumbnail_url,
+          alt: view.thumbnail_alt || copy.title,
+        }
+      : null,
+  });
 
   return {
     kind: "listing",
@@ -846,6 +1179,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       robots: indexable ? "index,follow" : "noindex,follow",
     },
     hreflang,
+    chrome: publicChrome(registry, locale, { hreflang, active: "listing" }),
     schema: buildListingSchema({ path, view, copy, publicMedia }),
     translation: {
       locale: translation?.locale || locale.code,
@@ -901,6 +1235,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
 export function renderSearchPage({ registry, localeCode, listings, query = "", filters = {} }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
+  const ui = uiCopyFor(locale.code);
   const activeListings = listings.filter(isActiveListing);
   const localeMatches = activeListings.filter((listing) => listing.locale === locale.code);
   const fallbackMatches = activeListings.filter(
@@ -925,8 +1260,8 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
     canonical: `/${locale.code}/${locale.route_segments.search}`,
     indexable: resolved.available,
     metadata: {
-      title: "MS Realty property search",
-      description: "Locale-scoped property search backed by reviewed MS Realty inventory.",
+      title: ui.searchTitle,
+      description: ui.searchDescription,
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     mobile_policy: {
@@ -935,6 +1270,7 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       sticky_contact_actions: true,
       minimum_tap_target_px: 44,
     },
+    chrome: publicChrome(registry, locale, { active: "search" }),
     search: {
       engines: ["typesense", "meilisearch"],
       query,
@@ -948,14 +1284,14 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       returned: cards.length,
       controls: {
         view_modes: [
-          { id: "list", label: "List", default: true },
-          { id: "map", label: "Map", optional: true },
+          { id: "list", label: ui.list, default: true },
+          { id: "map", label: ui.map, optional: true },
         ],
         sort_options: [
-          { id: "recommended", label: "Recommended", default: true },
-          { id: "newest", label: "Newest" },
-          { id: "price_asc", label: "Price low to high" },
-          { id: "price_desc", label: "Price high to low" },
+          { id: "recommended", label: ui.recommended, default: true },
+          { id: "newest", label: ui.newest },
+          { id: "price_asc", label: ui.priceLowToHigh },
+          { id: "price_desc", label: ui.priceHighToLow },
         ],
         save_search: {
           endpoint: "/api/saved-searches",
@@ -972,7 +1308,7 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       fallback: {
         enabled: true,
         locale: locale.fallback_locale || registry.source_locale,
-        label: "fallback_source_locale",
+        label: ui.sourceFallback,
       },
     },
     cards,
@@ -1008,6 +1344,11 @@ export function renderHomePage({ registry, localeCode, listings }) {
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     hreflang: resolved.available ? hreflangForHome(registry) : [],
+    chrome: publicChrome(registry, locale, {
+      hreflang: resolved.available ? hreflangForHome(registry) : [],
+      active: "home",
+      locations,
+    }),
     body: {
       h1: copy.h1,
       intro: copy.description,
@@ -1020,6 +1361,8 @@ export function renderHomePage({ registry, localeCode, listings }) {
       seller: {
         path: sellerPath(registry, locale.code),
         label: labelsFor(locale.code).valuation,
+        title: sellerCopy(locale.code).h1,
+        description: sellerCopy(locale.code).description,
       },
       contact: {
         path: contactPath(registry, locale.code),
@@ -1054,6 +1397,7 @@ export function renderContactPage({ registry, localeCode }) {
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     hreflang: resolved.available ? hreflangForContact(registry) : [],
+    chrome: publicChrome(registry, locale, { hreflang: resolved.available ? hreflangForContact(registry) : [], active: "contact" }),
     body: {
       h1: copy.h1,
       intro: copy.description,
@@ -1110,6 +1454,7 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
           { hreflang: "x-default", href: path },
         ]
       : [],
+    chrome: publicChrome(registry, locale, { active: null }),
     schema: indexable ? guideSchema({ path, locale, documents: docs }) : null,
     body: {
       h1: first.title,
@@ -1163,6 +1508,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
       robots: indexable ? "index,follow" : "noindex,follow",
     },
     hreflang: indexable ? hreflangForLocation(registry, location, locales) : [],
+    chrome: publicChrome(registry, locale, { hreflang: indexable ? hreflangForLocation(registry, location, locales) : [], active: "location" }),
     body: {
       h1: `Properties in ${location}`,
       location,
@@ -1195,6 +1541,7 @@ export function renderSellerPage({ registry, localeCode }) {
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     hreflang: resolved.available ? hreflangForSeller(registry) : [],
+    chrome: publicChrome(registry, locale, { hreflang: resolved.available ? hreflangForSeller(registry) : [], active: "seller" }),
     body: {
       h1: copy.h1,
       intro: copy.description,
@@ -1231,6 +1578,7 @@ export function renderLanguageFallback({ registry, requestedLocale }) {
   return {
     kind: "language_fallback",
     status: 200,
+    chrome: publicChrome(registry, resolved.locale, { active: null }),
     requested_locale: requestedLocale,
     locale: resolved.locale.code,
     lang: resolved.locale.code,

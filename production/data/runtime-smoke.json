@@ -38,6 +38,118 @@
         "href": "/bg/imoti/MS-CRAWL-0001"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/imoti/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/akinita/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/properties/MS-CRAWL-0001",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
+    },
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
@@ -49,23 +161,7 @@
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg"
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg"
       ],
       "additionalProperty": [
         {
@@ -125,110 +221,15 @@
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
           }
         ],
-        "gallery_count": 18,
+        "gallery_count": 2,
         "floor_plans": [],
         "videos": [],
         "review": {
           "total_assets": 35,
           "public_gallery_assets": 18,
+          "suppressed_public_assets": 16,
           "floor_plan_candidates": 0,
           "video_candidates": 0,
           "review_gated_assets": 0
@@ -383,7 +384,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "multi_unit",
+          "property_type_label": "דירות",
           "offer_type": "sale",
+          "offer_type_label": "למכירה",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "price_eur": null,
@@ -393,11 +396,13 @@
           "image_count": 20,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански"
+            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "פרטים",
               "href": "/he/properties/MS-CRAWL-0002"
             },
             "inquiry": {
@@ -432,7 +437,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
+          "property_type_label": "דירה",
           "offer_type": "rent",
+          "offer_type_label": "להשכרה",
           "bedrooms": 2,
           "bedrooms_not_applicable": false,
           "price_eur": 600,
@@ -442,11 +449,13 @@
           "image_count": 32,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански"
+            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "פרטים",
               "href": "/he/properties/MS-CRAWL-0003"
             },
             "inquiry": {
@@ -481,7 +490,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
+          "property_type_label": "דירה",
           "offer_type": "rent",
+          "offer_type_label": "להשכרה",
           "bedrooms": 1,
           "bedrooms_not_applicable": false,
           "price_eur": 355,
@@ -491,11 +502,13 @@
           "image_count": 26,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански"
+            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "פרטים",
               "href": "/he/properties/MS-CRAWL-0004"
             },
             "inquiry": {
@@ -552,6 +565,118 @@
         "href": "/ru/properties/MS-CRAWL-0114"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "Купить",
+        "navRent": "Аренда",
+        "navSell": "Продать",
+        "navContact": "Контакты",
+        "explore": "Обзор",
+        "getInTouch": "Связаться с нами",
+        "tagline": "Недвижимость для покупки и аренды в Сандански и горах Пирин, на черноморском побережье и в соседней Греции — с местными офисами и брокерами, говорящими на вашем языке.",
+        "copyright": "Все права защищены.",
+        "requestSent": "Запрос отправлен. Брокер свяжется с вами.",
+        "close": "Закрыть",
+        "callBroker": "Позвонить брокеру",
+        "languageLabel": "Язык",
+        "menuLabel": "Основная навигация",
+        "skipToContent": "К содержанию",
+        "filters": "Фильтры",
+        "offices": "Сандански · Банско · Свети-Влас"
+      },
+      "home": {
+        "href": "/ru/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/ru/search",
+          "label": "Купить",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/ru/search?offer_type=rent",
+          "label": "Аренда",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/ru/sell",
+          "label": "Продать",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/ru/contact",
+          "label": "Контакты",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/properties/MS-CRAWL-0114",
+          "active": true,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": false,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "Сандански · Банско · Свети-Влас"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "Локации",
+        "searchLabel": "Поиск"
+      }
+    },
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
@@ -562,21 +687,7 @@
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
       "category": "multi_unit",
       "image": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/06/-e1466494223645.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-1-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-2-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-3-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-4-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-5-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-6-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-7-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-8-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-9-72x72.jpg",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/191-сандански-парк-отель-пирин-72x72.jpg"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg"
       ],
       "additionalProperty": [
         {
@@ -626,102 +737,19 @@
       "media": {
         "gallery": [
           {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg",
-            "alt": "Апартаменты в Парк отеле Пирин — г.Сандански",
-            "width": 45,
-            "height": 45
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg",
-            "alt": "Апартаменты в Парк отеле Пирин — г.Сандански",
-            "width": 45,
-            "height": 45
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg",
-            "alt": "Апартаменты в Парк отеле Пирин — г.Сандански",
-            "width": 45,
-            "height": 45
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/06/-e1466494223645.jpg",
-            "alt": "Апартаменты в Парк отеле Пирин — г.Сандански",
-            "width": 45,
-            "height": 45
-          },
-          {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg",
             "alt": "Апартаменты в Парк отеле Пирин — г.Сандански",
             "width": null,
             "height": null
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-1-72x72.jpg",
-            "alt": "Апартаменты в Парк отеле Пирин — г.Сандански",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-2-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-3-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-4-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-5-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-6-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-7-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-8-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-9-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-сандански-парк-отель-пирин-72x72.jpg",
-            "alt": "Продажа квартир в Парк Отеле Пирин",
-            "width": 72,
-            "height": 72
           }
         ],
-        "gallery_count": 15,
+        "gallery_count": 1,
         "floor_plans": [],
         "videos": [],
         "review": {
           "total_assets": 33,
           "public_gallery_assets": 15,
+          "suppressed_public_assets": 14,
           "floor_plan_candidates": 0,
           "video_candidates": 0,
           "review_gated_assets": 0
@@ -876,7 +904,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "commercial",
+          "property_type_label": "Коммерческая недвижимость",
           "offer_type": "rent",
+          "offer_type_label": "Аренда",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "price_eur": null,
@@ -886,11 +916,13 @@
           "image_count": 35,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "Подробнее",
               "href": "/ru/properties/MS-CRAWL-0001"
             },
             "inquiry": {
@@ -925,7 +957,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "multi_unit",
+          "property_type_label": "Апартаменты",
           "offer_type": "sale",
+          "offer_type_label": "Продажа",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "price_eur": null,
@@ -935,11 +969,13 @@
           "image_count": 20,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански"
+            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "Подробнее",
               "href": "/ru/properties/MS-CRAWL-0002"
             },
             "inquiry": {
@@ -974,7 +1010,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
+          "property_type_label": "Квартира",
           "offer_type": "rent",
+          "offer_type_label": "Аренда",
           "bedrooms": 2,
           "bedrooms_not_applicable": false,
           "price_eur": 600,
@@ -984,11 +1022,13 @@
           "image_count": 32,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански"
+            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "Подробнее",
               "href": "/ru/properties/MS-CRAWL-0003"
             },
             "inquiry": {
@@ -1068,6 +1108,123 @@
         "href": "/bg/"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": false
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [
+          {
+            "href": "/he/locations/sandanski",
+            "label": "Sandanski"
+          }
+        ],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
+    },
     "body": {
       "h1": "מצאו נכס עם MS Realty",
       "intro": "חפשו נכסים, אזורים ושירותי מוכרים מאושרים של MS Realty.",
@@ -1079,7 +1236,9 @@
       },
       "seller": {
         "path": "/he/sell",
-        "label": "הערכת מוכר"
+        "label": "הערכת מוכר",
+        "title": "מכירת נכס",
+        "description": "בקשו הערכת מתווך וחזרה מצוות MS Realty."
       },
       "contact": {
         "path": "/he/contact",
@@ -1107,7 +1266,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -1117,11 +1278,13 @@
         "image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+          "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0001"
           },
           "inquiry": {
@@ -1156,7 +1319,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "multi_unit",
+        "property_type_label": "דירות",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -1166,11 +1331,13 @@
         "image_count": 20,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански"
+          "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0002"
           },
           "inquiry": {
@@ -1205,7 +1372,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "price_eur": 600,
@@ -1215,11 +1384,13 @@
         "image_count": 32,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански"
+          "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0003"
           },
           "inquiry": {
@@ -1254,7 +1425,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 355,
@@ -1264,11 +1437,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0004"
           },
           "inquiry": {
@@ -1303,7 +1478,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -1313,11 +1490,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Апартамент под наем в гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0005"
           },
           "inquiry": {
@@ -1352,7 +1531,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": 1,
@@ -1362,11 +1543,13 @@
         "image_count": 18,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Industrieel gebouw te huur in Sandanski"
+          "alt": "Дава под наем промишлена сграда в Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0006"
           },
           "inquiry": {
@@ -1439,6 +1622,118 @@
         "href": "/bg/prodai"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": false
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": true
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/prodai",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/sell",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/verkaufen",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/verkopen",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/sell",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/polisi",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/sell",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
+    },
     "body": {
       "h1": "מכירת נכס",
       "intro": "בקשו הערכת מתווך וחזרה מצוות MS Realty.",
@@ -1520,6 +1815,118 @@
         "href": "/bg/kontakt"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": false
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": true
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/kontakt",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/contact",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/kontakt",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/contact",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/contact",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/epikoinonia",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/contact",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
+    },
     "body": {
       "h1": "יצירת קשר עם מתווך",
       "intro": "שלחו שאלה או בקשה לשיחה חוזרת לצוות MS Realty.",
@@ -1572,6 +1979,118 @@
         "href": "/en/guides/foreign-buyers"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "Buy",
+        "navRent": "Rent",
+        "navSell": "Sell",
+        "navContact": "Contact",
+        "explore": "Explore",
+        "getInTouch": "Get in touch",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "copyright": "All rights reserved.",
+        "requestSent": "Your inquiry was sent. A broker will contact you.",
+        "close": "Close",
+        "callBroker": "Call a broker",
+        "languageLabel": "Language",
+        "menuLabel": "Primary navigation",
+        "skipToContent": "Skip to content",
+        "filters": "Filters",
+        "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "home": {
+        "href": "/en/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/en/search",
+          "label": "Buy",
+          "active": false
+        },
+        {
+          "id": "rent",
+          "href": "/en/search?offer_type=rent",
+          "label": "Rent",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/en/sell",
+          "label": "Sell",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/en/contact",
+          "label": "Contact",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": true,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": false,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "Locations",
+        "searchLabel": "Search"
+      }
+    },
     "schema": {
       "@context": "https://schema.org",
       "@type": "Article",
@@ -1657,6 +2176,118 @@
         "href": "/bg/lokacii/sandanski"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/lokacii/sandanski",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/locations/sandanski",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/topothesies/sandanski",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/locations/sandanski",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
+    },
     "body": {
       "h1": "Properties in Sandanski",
       "location": "Sandanski",
@@ -1676,7 +2307,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -1686,11 +2319,13 @@
         "image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+          "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0001"
           },
           "inquiry": {
@@ -1752,6 +2387,118 @@
         "href": "/bg/imoti/MS-CRAWL-0001"
       }
     ],
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/imoti/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/akinita/MS-CRAWL-0001",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/properties/MS-CRAWL-0001",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
+    },
     "schema": {
       "@context": "https://schema.org",
       "@type": "RealEstateListing",
@@ -1763,23 +2510,7 @@
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg"
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg"
       ],
       "additionalProperty": [
         {
@@ -1839,110 +2570,15 @@
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
-          },
-          {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": 72,
-            "height": 72
           }
         ],
-        "gallery_count": 18,
+        "gallery_count": 2,
         "floor_plans": [],
         "videos": [],
         "review": {
           "total_assets": 35,
           "public_gallery_assets": 18,
+          "suppressed_public_assets": 16,
           "floor_plan_candidates": 0,
           "video_candidates": 0,
           "review_gated_assets": 0
@@ -2097,7 +2733,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "multi_unit",
+          "property_type_label": "דירות",
           "offer_type": "sale",
+          "offer_type_label": "למכירה",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "price_eur": null,
@@ -2107,11 +2745,13 @@
           "image_count": 20,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански"
+            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "פרטים",
               "href": "/he/properties/MS-CRAWL-0002"
             },
             "inquiry": {
@@ -2146,7 +2786,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
+          "property_type_label": "דירה",
           "offer_type": "rent",
+          "offer_type_label": "להשכרה",
           "bedrooms": 2,
           "bedrooms_not_applicable": false,
           "price_eur": 600,
@@ -2156,11 +2798,13 @@
           "image_count": 32,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански"
+            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "פרטים",
               "href": "/he/properties/MS-CRAWL-0003"
             },
             "inquiry": {
@@ -2195,7 +2839,9 @@
           "source_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
+          "property_type_label": "דירה",
           "offer_type": "rent",
+          "offer_type_label": "להשכרה",
           "bedrooms": 1,
           "bedrooms_not_applicable": false,
           "price_eur": 355,
@@ -2205,11 +2851,13 @@
           "image_count": 26,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански"
+            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
-              "label": "Details",
+              "label": "פרטים",
               "href": "/he/properties/MS-CRAWL-0004"
             },
             "inquiry": {
@@ -2251,8 +2899,8 @@
     "canonical": "/he/search",
     "indexable": true,
     "metadata": {
-      "title": "MS Realty property search",
-      "description": "Locale-scoped property search backed by reviewed MS Realty inventory.",
+      "title": "חיפוש נכסים | MS Realty",
+      "description": "חפשו נכסים מאושרים של MS Realty.",
       "robots": "index,follow"
     },
     "mobile_policy": {
@@ -2260,6 +2908,118 @@
       "map_optional": true,
       "sticky_contact_actions": true,
       "minimum_tap_target_px": 44
+    },
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
     },
     "search": {
       "engines": [
@@ -2278,32 +3038,32 @@
         "view_modes": [
           {
             "id": "list",
-            "label": "List",
+            "label": "רשימה",
             "default": true
           },
           {
             "id": "map",
-            "label": "Map",
+            "label": "מפה",
             "optional": true
           }
         ],
         "sort_options": [
           {
             "id": "recommended",
-            "label": "Recommended",
+            "label": "מומלצים",
             "default": true
           },
           {
             "id": "newest",
-            "label": "Newest"
+            "label": "החדשים ביותר"
           },
           {
             "id": "price_asc",
-            "label": "Price low to high"
+            "label": "מחיר: מהנמוך לגבוה"
           },
           {
             "id": "price_desc",
-            "label": "Price high to low"
+            "label": "מחיר: מהגבוה לנמוך"
           }
         ],
         "save_search": {
@@ -2321,7 +3081,7 @@
       "fallback": {
         "enabled": true,
         "locale": "en",
-        "label": "fallback_source_locale"
+        "label": "גרסה בשפת המקור"
       }
     },
     "cards": [
@@ -2338,7 +3098,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "multi_unit",
+        "property_type_label": "דירות",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -2348,11 +3110,13 @@
         "image_count": 20,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански"
+          "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0002"
           },
           "inquiry": {
@@ -2387,7 +3151,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "price_eur": 600,
@@ -2397,11 +3163,13 @@
         "image_count": 32,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански"
+          "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0003"
           },
           "inquiry": {
@@ -2436,7 +3204,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 355,
@@ -2446,11 +3216,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0004"
           },
           "inquiry": {
@@ -2485,7 +3257,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -2495,11 +3269,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Апартамент под наем в гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0005"
           },
           "inquiry": {
@@ -2534,7 +3310,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": 1,
@@ -2544,11 +3322,13 @@
         "image_count": 18,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Industrieel gebouw te huur in Sandanski"
+          "alt": "Дава под наем промишлена сграда в Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0006"
           },
           "inquiry": {
@@ -2583,7 +3363,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 53289,
@@ -2593,11 +3375,13 @@
         "image_count": 24,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Продава двустаен апартамент в гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0007"
           },
           "inquiry": {
@@ -2632,7 +3416,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 350,
@@ -2642,11 +3428,13 @@
         "image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Двустаен апартамент в центъра на Сандански - наем - Недвижими имоти в Сандански"
+          "alt": "Двустаен апартамент в центъра на Сандански – наем",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0008"
           },
           "inquiry": {
@@ -2681,7 +3469,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 400,
@@ -2691,11 +3481,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Двустаен апартамент под наем в парка на Сандански - Недвижими имоти в Сандански"
+          "alt": "Двустаен апартамент под наем в парка на Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0009"
           },
           "inquiry": {
@@ -2730,7 +3522,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 130000,
@@ -2740,11 +3534,13 @@
         "image_count": 34,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Двустаен апартамент в идеалния център на гр. Сандански - Недвижими имоти в Сандански"
+          "alt": "Двустаен апартамент в идеалния център на гр. Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0010"
           },
           "inquiry": {
@@ -2779,7 +3575,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
+        "property_type_label": "מלון",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -2789,11 +3587,13 @@
         "image_count": 38,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Дългосрочен наем в Парк Хотел Пирин - гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0011"
           },
           "inquiry": {
@@ -2828,7 +3628,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
+        "property_type_label": "מלון",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": 950000,
@@ -2838,11 +3640,13 @@
         "image_count": 19,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Инвестиционен проект в Сандански - хотел ресторант - Недвижими имоти в Сандански"
+          "alt": "Инвестиционен проект в Сандански – хотел ресторант",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0012"
           },
           "inquiry": {
@@ -2877,7 +3681,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 230,
@@ -2887,11 +3693,13 @@
         "image_count": 23,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Наем - Двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Наем – Двустаен апартамент в гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0014"
           },
           "inquiry": {
@@ -2931,6 +3739,118 @@
       "robots": "noindex,follow"
     },
     "hreflang": [],
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
+    },
     "body": {
       "h1": "Properties in Sandanski",
       "location": "Sandanski",
@@ -2941,6 +3861,118 @@
   "fallback_fr": {
     "kind": "language_fallback",
     "status": 200,
+    "chrome": {
+      "copy": {
+        "navBuy": "Buy",
+        "navRent": "Rent",
+        "navSell": "Sell",
+        "navContact": "Contact",
+        "explore": "Explore",
+        "getInTouch": "Get in touch",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "copyright": "All rights reserved.",
+        "requestSent": "Your inquiry was sent. A broker will contact you.",
+        "close": "Close",
+        "callBroker": "Call a broker",
+        "languageLabel": "Language",
+        "menuLabel": "Primary navigation",
+        "skipToContent": "Skip to content",
+        "filters": "Filters",
+        "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "home": {
+        "href": "/en/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/en/search",
+          "label": "Buy",
+          "active": false
+        },
+        {
+          "id": "rent",
+          "href": "/en/search?offer_type=rent",
+          "label": "Rent",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/en/sell",
+          "label": "Sell",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/en/contact",
+          "label": "Contact",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": true,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": false,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "Locations",
+        "searchLabel": "Search"
+      }
+    },
     "requested_locale": "fr",
     "locale": "en",
     "lang": "en",
@@ -2968,8 +4000,8 @@
     "canonical": "/he/search",
     "indexable": true,
     "metadata": {
-      "title": "MS Realty property search",
-      "description": "Locale-scoped property search backed by reviewed MS Realty inventory.",
+      "title": "חיפוש נכסים | MS Realty",
+      "description": "חפשו נכסים מאושרים של MS Realty.",
       "robots": "index,follow"
     },
     "mobile_policy": {
@@ -2977,6 +4009,118 @@
       "map_optional": true,
       "sticky_contact_actions": true,
       "minimum_tap_target_px": 44
+    },
+    "chrome": {
+      "copy": {
+        "navBuy": "קנייה",
+        "navRent": "השכרה",
+        "navSell": "מכירה",
+        "navContact": "צור קשר",
+        "explore": "גלו עוד",
+        "getInTouch": "יצירת קשר",
+        "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
+        "copyright": "כל הזכויות שמורות.",
+        "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "close": "סגירה",
+        "callBroker": "התקשרו למתווך",
+        "languageLabel": "שפה",
+        "menuLabel": "ניווט ראשי",
+        "skipToContent": "דלגו לתוכן",
+        "filters": "סינון",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "home": {
+        "href": "/he/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/he/search",
+          "label": "קנייה",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/he/search?offer_type=rent",
+          "label": "השכרה",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/he/sell",
+          "label": "מכירה",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/he/contact",
+          "label": "צור קשר",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": true,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "סנדנסקי · בנסקו · סבטי ולאס"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "אזורים",
+        "searchLabel": "חיפוש"
+      }
     },
     "search": {
       "engines": [
@@ -2995,32 +4139,32 @@
         "view_modes": [
           {
             "id": "list",
-            "label": "List",
+            "label": "רשימה",
             "default": true
           },
           {
             "id": "map",
-            "label": "Map",
+            "label": "מפה",
             "optional": true
           }
         ],
         "sort_options": [
           {
             "id": "recommended",
-            "label": "Recommended",
+            "label": "מומלצים",
             "default": true
           },
           {
             "id": "newest",
-            "label": "Newest"
+            "label": "החדשים ביותר"
           },
           {
             "id": "price_asc",
-            "label": "Price low to high"
+            "label": "מחיר: מהנמוך לגבוה"
           },
           {
             "id": "price_desc",
-            "label": "Price high to low"
+            "label": "מחיר: מהגבוה לנמוך"
           }
         ],
         "save_search": {
@@ -3038,7 +4182,7 @@
       "fallback": {
         "enabled": true,
         "locale": "en",
-        "label": "fallback_source_locale"
+        "label": "גרסה בשפת המקור"
       }
     },
     "cards": [
@@ -3055,7 +4199,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -3065,11 +4211,13 @@
         "image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+          "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0001"
           },
           "inquiry": {
@@ -3104,7 +4252,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "multi_unit",
+        "property_type_label": "דירות",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -3114,11 +4264,13 @@
         "image_count": 20,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански"
+          "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0002"
           },
           "inquiry": {
@@ -3153,7 +4305,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "price_eur": 600,
@@ -3163,11 +4317,13 @@
         "image_count": 32,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански"
+          "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0003"
           },
           "inquiry": {
@@ -3202,7 +4358,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 355,
@@ -3212,11 +4370,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0004"
           },
           "inquiry": {
@@ -3251,7 +4411,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -3261,11 +4423,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Апартамент под наем в гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0005"
           },
           "inquiry": {
@@ -3300,7 +4464,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
+        "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": 1,
@@ -3310,11 +4476,13 @@
         "image_count": 18,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Industrieel gebouw te huur in Sandanski"
+          "alt": "Дава под наем промишлена сграда в Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0006"
           },
           "inquiry": {
@@ -3349,7 +4517,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 53289,
@@ -3359,11 +4529,13 @@
         "image_count": 24,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Продава двустаен апартамент в гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0007"
           },
           "inquiry": {
@@ -3398,7 +4570,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 350,
@@ -3408,11 +4582,13 @@
         "image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Двустаен апартамент в центъра на Сандански - наем - Недвижими имоти в Сандански"
+          "alt": "Двустаен апартамент в центъра на Сандански – наем",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0008"
           },
           "inquiry": {
@@ -3447,7 +4623,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 400,
@@ -3457,11 +4635,13 @@
         "image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Двустаен апартамент под наем в парка на Сандански - Недвижими имоти в Сандански"
+          "alt": "Двустаен апартамент под наем в парка на Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0009"
           },
           "inquiry": {
@@ -3496,7 +4676,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
+        "property_type_label": "דירה",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
         "price_eur": 130000,
@@ -3506,11 +4688,13 @@
         "image_count": 34,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Двустаен апартамент в идеалния център на гр. Сандански - Недвижими имоти в Сандански"
+          "alt": "Двустаен апартамент в идеалния център на гр. Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0010"
           },
           "inquiry": {
@@ -3545,7 +4729,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
+        "property_type_label": "מלון",
         "offer_type": "rent",
+        "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": null,
@@ -3555,11 +4741,13 @@
         "image_count": 38,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Дългосрочен наем в Парк Хотел Пирин - гр.Сандански - Недвижими имоти в Сандански"
+          "alt": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0011"
           },
           "inquiry": {
@@ -3594,7 +4782,9 @@
         "source_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
+        "property_type_label": "מלון",
         "offer_type": "sale",
+        "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
         "price_eur": 950000,
@@ -3604,11 +4794,13 @@
         "image_count": 19,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
-          "alt": "Инвестиционен проект в Сандански - хотел ресторант - Недвижими имоти в Сандански"
+          "alt": "Инвестиционен проект в Сандански – хотел ресторант",
+          "width": 45,
+          "height": 45
         },
         "actions": {
           "detail": {
-            "label": "Details",
+            "label": "פרטים",
             "href": "/he/properties/MS-CRAWL-0012"
           },
           "inquiry": {

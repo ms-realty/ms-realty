@@ -59,30 +59,101 @@ function publicAsset(item) {
   };
 }
 
+// Imported pages frequently include operational imagery (taxi, phone, logos)
+// beside the actual property gallery. Keep the source records for audit, but do
+// not put those assets into a property card or public gallery by default.
+const NON_PROPERTY_MEDIA = /(?:^|[\/_-])(taxi|phone|logo|flag|whatsapp|viber|avatar)(?:[\/_.-]|$)/i;
+const IMAGE_DIMENSIONS = /-(\d{1,4})x(\d{1,4})\.(?:avif|gif|jpe?g|png|webp)(?:\?|$)/i;
+
+function dimensionsInUrl(url = "") {
+  const match = String(url).match(IMAGE_DIMENSIONS);
+  if (!match) return null;
+  return { width: Number(match[1]), height: Number(match[2]) };
+}
+
+function isSmallDerivative(url = "") {
+  const dimensions = dimensionsInUrl(url);
+  return Boolean(dimensions && (dimensions.width < 240 || dimensions.height < 180));
+}
+
+function hasLargeDimensions(url = "") {
+  const dimensions = dimensionsInUrl(url);
+  return Boolean(dimensions && dimensions.width >= 640 && dimensions.height >= 360);
+}
+
+function isPublicPropertyPhoto(item = {}) {
+  if (item.kind !== "photo" || !item.is_public || !item.asset_url) return false;
+  const source = `${item.asset_url} ${item.alt || ""}`;
+  if (NON_PROPERTY_MEDIA.test(source)) return false;
+  if (isSmallDerivative(item.asset_url)) return false;
+  // Crawl chrome can report a 45px display box for a full WordPress asset.
+  // A large size embedded in the filename is more reliable than that box.
+  if (!hasLargeDimensions(item.asset_url)) {
+    if (Number.isFinite(Number(item.width)) && Number(item.width) > 0 && Number(item.width) < 160) return false;
+    if (Number.isFinite(Number(item.height)) && Number(item.height) > 0 && Number(item.height) < 120) return false;
+  }
+  return true;
+}
+
+function photoPriority(item = {}) {
+  const url = item.asset_url || "";
+  let score = 0;
+  if (!/timthumb\.php/i.test(url)) score += 40;
+  if (!isSmallDerivative(url)) score += 20;
+  if (hasLargeDimensions(url) || Number(item.width) >= 800 || Number(item.height) >= 500) score += 20;
+  if (item.alt && item.alt.trim()) score += 5;
+  return score;
+}
+
+export function selectPublicThumbnail(media = [], fallback = null) {
+  const candidates = media
+    .filter(isPublicPropertyPhoto)
+    .sort((left, right) => photoPriority(right) - photoPriority(left));
+  const selected = candidates[0];
+  if (selected) return publicAsset(selected);
+
+  // Do not render an unsafe legacy thumbnail. The design system has a stable
+  // photo placeholder for listings awaiting a human media review.
+  if (fallback && !NON_PROPERTY_MEDIA.test(`${fallback.url || ""} ${fallback.alt || ""}`)) return fallback;
+  return null;
+}
+
 export function mediaWorkflow(media = []) {
   const publicGalleryAssets = new Set(
     media.filter((item) => item.kind === "photo" && item.is_public).map((item) => item.asset_url).filter(Boolean),
   ).size;
+  const suppressedPublicAssets = new Set(
+    media
+      .filter((item) => item.kind === "photo" && item.is_public && item.asset_url && !isPublicPropertyPhoto(item))
+      .map((item) => item.asset_url),
+  ).size;
   return {
     total_assets: media.length,
     public_gallery_assets: publicGalleryAssets,
+    suppressed_public_assets: suppressedPublicAssets,
     floor_plan_candidates: media.filter((item) => item.kind === "floor_plan").length,
     video_candidates: media.filter((item) => item.kind === "video").length,
     review_gated_assets: media.filter((item) => !item.is_public && item.review_status !== "reviewed_private").length,
   };
 }
 
-export function publicMediaLibrary(media = []) {
+export function publicMediaLibrary(media = [], { fallback = null } = {}) {
   const seen = new Set();
   const gallery = media
-    .filter((item) => item.kind === "photo" && item.is_public && item.asset_url)
+    .filter(isPublicPropertyPhoto)
     .filter((item) => {
       if (seen.has(item.asset_url)) return false;
       seen.add(item.asset_url);
       return true;
     })
+    .sort((left, right) => photoPriority(right) - photoPriority(left))
     .slice(0, 30)
     .map(publicAsset);
+
+  if (!gallery.length) {
+    const thumbnail = selectPublicThumbnail(media, fallback);
+    if (thumbnail) gallery.push(thumbnail);
+  }
 
   return {
     gallery,

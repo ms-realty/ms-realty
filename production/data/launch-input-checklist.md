@@ -140,6 +140,7 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - Review pack command: `npm run listing:review-pack`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
+- structured_data.missing_public_images: 4
 - listing_quality.thin_public_gallery: 7
 
 ## Broker Verification

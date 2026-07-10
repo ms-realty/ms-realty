@@ -1,0 +1,133 @@
+/* ============================================================
+   MS Realty — production adapter (shared)
+   Hand-written production-only adaptations layered AFTER the
+   design-system tokens/components/kits by build-design-assets.mjs.
+   Keep everything here expressed in DS tokens — no raw hex.
+   ============================================================ */
+
+/* ---- Accessibility shell ---- */
+.skip-link {
+  position: absolute;
+  inset-inline-start: var(--space-3);
+  top: calc(var(--space-3) * -10);
+  z-index: 100;
+  background: var(--surface);
+  color: var(--text-strong);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-button);
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow-md);
+  transition: top var(--dur-fast) var(--ease-standard);
+}
+.skip-link:focus-visible { top: var(--space-3); }
+
+/* Elderly-first touch targets on public + admin form controls
+   (mirrors data-min-touch-target="44" contract markers). */
+button, input, select, textarea { min-height: 44px; }
+input, select, textarea { width: 100%; }
+textarea { min-height: 7rem; resize: vertical; }
+
+/* Bare form fields (non mk-field markup) inherit the DS input look. */
+main input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(.mk-input__field):not(.mk-searchbar__input),
+main select:not(.mk-select__field),
+main textarea:not(.mk-textarea__field) {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-input);
+  background: var(--surface);
+  padding: 0.62rem 0.82rem;
+  font-size: var(--text-base);
+  transition: var(--transition-color), box-shadow var(--dur-fast) var(--ease-standard);
+}
+main input:focus-visible, main select:focus-visible, main textarea:focus-visible {
+  border-color: var(--ink-500);
+  box-shadow: var(--shadow-focus);
+  outline: none;
+}
+main form label {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--text-strong);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+}
+main form label:has(> input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--fw-regular);
+}
+main input[type="checkbox"], main input[type="radio"] {
+  min-height: 0;
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--brand);
+}
+fieldset {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+legend {
+  padding: 0 var(--space-2);
+  color: var(--text-muted);
+  font-weight: var(--fw-semibold);
+  font-size: var(--text-sm);
+}
+
+/* ---- Data lists / tables outside mk-table markup ---- */
+main dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+main dt {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+main dd { margin: 0; color: var(--text-strong); font-weight: var(--fw-semibold); }
+main table { width: 100%; border-collapse: collapse; background: var(--surface); }
+main th, main td {
+  padding: 0.8rem 0.85rem;
+  text-align: start;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: var(--text-base);
+}
+main th {
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+main section:has(> table) { overflow-x: auto; }
+main code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  color: var(--ink-800);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-xs);
+  padding: 0.1em 0.35em;
+}
+
+/* ---- RTL patches for kit CSS that uses physical properties ---- */
+[dir="rtl"] .site-hd__nav { margin-left: 0; margin-right: 8px; }
+[dir="rtl"] .site-hd__right { margin-left: 0; margin-right: auto; }
+
+/* ---- Print: strip chrome, keep content ---- */
+@media print {
+  .site-hd, .site-ft, .skip-link, [data-mobile-sticky-actions] { display: none !important; }
+  body { background: #fff; }
+  main { box-shadow: none; }
+}

@@ -27,6 +27,29 @@ test("listing schema keeps launch-critical listing facts", () => {
   assert.equal(schema.image.length, 1);
 });
 
+test("missing approved media is a review warning instead of a schema failure", () => {
+  const schema = buildListingSchema({
+    path: "/ru/properties/MS-2",
+    view: { id: "MS-2", property_type: "apartment", offer_type: "sale", source_locale: "ru" },
+    copy: { title: "Apartment", description: "Reviewed listing." },
+    publicMedia: { gallery: [] },
+  });
+  const seed = loadCmsSeed();
+  const report = buildStructuredDataReport({
+    seed: {
+      ...seed,
+      records: seed.records.map((record) =>
+        record.id === "MS-CRAWL-0114" ? { ...record, media: [] } : record,
+      ),
+    },
+    generatedAt: "2026-07-10T00:00:00Z",
+  });
+
+  assert.equal(assertListingSchema(schema), true);
+  assert.ok(report.rows.filter((row) => row.listing_id === "MS-CRAWL-0114").every((row) => row.issues.length === 0));
+  assert.ok(report.rows.filter((row) => row.listing_id === "MS-CRAWL-0114").some((row) => row.warnings.includes("missing_public_images")));
+});
+
 test("structured data warnings use reviewed listing edits", () => {
   const seed = loadCmsSeed();
   const seedWithPriceGap = {
