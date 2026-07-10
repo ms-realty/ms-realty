@@ -966,6 +966,13 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /data-translation-panel="true"/);
       assert.match(editorHtml, /data-media-review-panel="true"/);
       assert.match(editorHtml, /data-tour-review-status=/);
+      assert.match(editorHtml, /data-tour-editor-form="true"/);
+      assert.match(editorHtml, /action="\/api\/admin\/tours\/approve"/);
+      assert.match(editorHtml, /name="panoramaUrl"/);
+      assert.match(editorHtml, /name="thumbnailUrl"/);
+      assert.match(editorHtml, /name="accessibilityCaption"/);
+      assert.match(editorHtml, /name="reviewer"/);
+      assert.match(editorHtml, /data-tour-review-confirmation="true"/);
       assert.match(editorHtml, /data-listing-id="MS-CRAWL-0001"/);
 
       const edit = await listingEditRoute.POST(
@@ -1009,13 +1016,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const tourApproval = await tourApprovalRoute.POST(
         new Request("https://example.test/api/admin/tours/approve", {
           method: "POST",
-          headers: { ...auth, "content-type": "application/json" },
-          body: JSON.stringify({
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
             listingId: "MS-CRAWL-0001",
             panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
             thumbnailUrl: "https://cdn.example.test/tours/MS-CRAWL-0001-thumb.jpg",
             accessibilityCaption: "Reviewed 360 tour of the property.",
             reviewer: "media_reviewer",
+            reviewConfirmed: "on",
           }),
         }),
       );

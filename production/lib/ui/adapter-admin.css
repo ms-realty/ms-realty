@@ -84,8 +84,49 @@ main.crm-scroll { display: block; }
 .adm-form label:has(> textarea) { grid-column: 1 / -1; }
 .adm-form__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
 .adm-editor-tabs .mk-tab { text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+
+/* Reviewed 360-tour publishing stays in the media panel and uses the same form scale. */
+.adm-tour-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  border-top: 1px solid var(--border);
+}
+.adm-tour-form__note,
+.adm-tour-form__field--caption,
+.adm-tour-form__confirmation,
+.adm-tour-form__actions { grid-column: 1 / -1; }
+.adm-tour-form__note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.adm-tour-form__field { display: grid; gap: 6px; min-width: 0; font-size: var(--text-sm); }
+.adm-tour-form input,
+.adm-tour-form textarea { min-width: 0; min-height: 40px; font-size: var(--text-sm); }
+.adm-tour-form textarea { min-height: 5.5rem; resize: vertical; }
+.adm-tour-form__confirmation { align-items: flex-start; max-width: 70ch; }
+.adm-tour-form__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.adm-tour-form__status {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.adm-tour-form__status[data-state="success"] { color: var(--success-500); }
+.adm-tour-form__status[data-state="error"] { color: var(--brick-600); }
+.adm-tour-form[aria-busy="true"] button[type="submit"] { cursor: progress; }
 @media (max-width: 760px) {
   .adm-form { grid-template-columns: 1fr; }
+  .adm-tour-form { grid-template-columns: 1fr; padding-inline: var(--space-4); }
+  .adm-tour-form__actions { align-items: stretch; flex-direction: column; }
+  .adm-tour-form__actions .mk-btn { width: 100%; justify-content: center; }
 }
 
 /* Panels: lists, evidence links, CSV forms */
