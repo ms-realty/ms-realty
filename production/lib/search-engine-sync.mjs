@@ -55,6 +55,26 @@ function required(value, name) {
   return value;
 }
 
+class SearchEngineUnavailableError extends Error {
+  constructor(message, { cause } = {}) {
+    super(message, { cause });
+    this.name = "SearchEngineUnavailableError";
+    this.unavailable = true;
+  }
+}
+
+function isUnavailableStatus(status) {
+  return status === 408 || status === 429 || status >= 500;
+}
+
+function isUnavailableError(error) {
+  return error?.unavailable === true;
+}
+
+function missingSearchEngineConfig({ baseUrl, apiKey }) {
+  return !String(baseUrl || "").trim() || !String(apiKey || "").trim();
+}
+
 async function checkedFetch(fetchImpl, url, options, acceptedStatuses = [200, 201, 202]) {
   const response = await fetchImpl(url, options);
   if (!acceptedStatuses.includes(response.status)) {
@@ -69,12 +89,25 @@ async function checkedFetch(fetchImpl, url, options, acceptedStatuses = [200, 20
 }
 
 async function checkedJson(fetchImpl, url, options, acceptedStatuses = [200]) {
-  const response = await fetchImpl(url, options);
+  let response;
+  try {
+    response = await fetchImpl(url, options);
+  } catch (cause) {
+    throw new SearchEngineUnavailableError(`Search engine query failed: ${options.method} ${url} could not connect`, { cause });
+  }
   if (!acceptedStatuses.includes(response.status)) {
-    throw new Error(`Search engine query failed: ${options.method} ${url} returned ${response.status}`);
+    const error = new Error(`Search engine query failed: ${options.method} ${url} returned ${response.status}`);
+    error.unavailable = isUnavailableStatus(response.status);
+    throw error;
+  }
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (cause) {
+    throw new SearchEngineUnavailableError(`Search engine query failed: ${options.method} ${url} returned invalid JSON`, { cause });
   }
   return {
-    payload: await response.json(),
+    payload,
     operation: {
       method: options.method,
       url: redactedUrl(url),
@@ -362,6 +395,7 @@ export async function queryTypesense({
   collectionName = process.env.TYPESENSE_COLLECTION || "ms_realty_listings",
   q = "Sandanski",
   filterBy = "translation_indexable:=true && locale:=bg && source_listing_id:=MS-CRAWL-0001",
+  perPage = 5,
   fetchImpl = globalThis.fetch,
 } = {}) {
   required(baseUrl, "TYPESENSE_URL");
@@ -369,10 +403,10 @@ export async function queryTypesense({
   if (typeof fetchImpl !== "function") throw new Error("fetch is required for Typesense query");
 
   const params = new URLSearchParams({
-    q,
+    q: String(q || "").trim() || "*",
     query_by: "title,description,search_text,location",
     filter_by: filterBy,
-    per_page: "5",
+    per_page: String(perPage),
   });
   const { payload, operation } = await checkedJson(
     fetchImpl,
@@ -398,6 +432,7 @@ export async function queryMeilisearch({
   indexName = process.env.MEILI_INDEX || "ms_realty_listings",
   q = "Sandanski",
   filter = 'translation_indexable = true AND locale = bg AND source_listing_id = "MS-CRAWL-0001"',
+  limit = 5,
   fetchImpl = globalThis.fetch,
 } = {}) {
   required(baseUrl, "MEILI_URL");
@@ -407,7 +442,7 @@ export async function queryMeilisearch({
   const { payload, operation } = await checkedJson(fetchImpl, joinUrl(baseUrl, `/indexes/${encodeURIComponent(indexName)}/search`), {
     method: "POST",
     headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json" },
-    body: JSON.stringify({ q, filter, limit: 5 }),
+    body: JSON.stringify({ q, filter, limit }),
   });
 
   return {
@@ -419,6 +454,104 @@ export async function queryMeilisearch({
     operation,
     total: Number(payload.estimatedTotalHits ?? payload.totalHits ?? 0),
     hits: (payload.hits || []).map(searchHit),
+  };
+}
+
+function normalizedLocaleCodes(localeCodes) {
+  const codes = [...new Set((localeCodes || []).map((code) => String(code || "").trim()).filter(Boolean))];
+  if (!codes.length) throw new Error("Public search requires at least one locale code");
+  return codes;
+}
+
+function typesenseLiteral(value) {
+  return `\`${String(value).replace(/\\/g, "\\\\").replace(/`/g, "\\`")}\``;
+}
+
+function typesensePublicFilter(localeCodes) {
+  const localeFilter = localeCodes.map((locale) => `locale:=${typesenseLiteral(locale)}`).join(" || ");
+  return [
+    "translation_indexable:=true",
+    "translation_human_approved:=true",
+    "locale_is_indexable:=true",
+    localeCodes.length === 1 ? localeFilter : `(${localeFilter})`,
+  ].join(" && ");
+}
+
+function meilisearchPublicFilter(localeCodes) {
+  const localeFilter = localeCodes.map((locale) => `locale = ${JSON.stringify(locale)}`).join(" OR ");
+  return [
+    "translation_indexable = true",
+    "translation_human_approved = true",
+    "locale_is_indexable = true",
+    localeCodes.length === 1 ? localeFilter : `(${localeFilter})`,
+  ].join(" AND ");
+}
+
+export async function queryPublicSearch({
+  typesense = {},
+  meilisearch = {},
+  q = "",
+  localeCodes,
+  perPage = 250,
+  fetchImpl = globalThis.fetch,
+} = {}) {
+  const normalizedLocales = normalizedLocaleCodes(localeCodes);
+  const unavailableEngines = [];
+
+  if (missingSearchEngineConfig(typesense)) {
+    unavailableEngines.push("typesense");
+  } else {
+    try {
+      const result = await queryTypesense({
+        ...typesense,
+        q,
+        filterBy: typesensePublicFilter(normalizedLocales),
+        perPage,
+        fetchImpl,
+      });
+      return {
+        engine: "typesense",
+        total: result.total,
+        hits: result.hits,
+        locale_codes: normalizedLocales,
+        unavailable_engines: unavailableEngines,
+      };
+    } catch (error) {
+      if (!isUnavailableError(error)) throw error;
+      unavailableEngines.push("typesense");
+    }
+  }
+
+  if (missingSearchEngineConfig(meilisearch)) {
+    unavailableEngines.push("meilisearch");
+  } else {
+    try {
+      const result = await queryMeilisearch({
+        ...meilisearch,
+        q,
+        filter: meilisearchPublicFilter(normalizedLocales),
+        limit: perPage,
+        fetchImpl,
+      });
+      return {
+        engine: "meilisearch",
+        total: result.total,
+        hits: result.hits,
+        locale_codes: normalizedLocales,
+        unavailable_engines: unavailableEngines,
+      };
+    } catch (error) {
+      if (!isUnavailableError(error)) throw error;
+      unavailableEngines.push("meilisearch");
+    }
+  }
+
+  return {
+    engine: "seed_fallback",
+    total: null,
+    hits: [],
+    locale_codes: normalizedLocales,
+    unavailable_engines: unavailableEngines,
   };
 }
 

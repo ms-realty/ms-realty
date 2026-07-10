@@ -7,6 +7,7 @@ import { spawn, spawnSync } from "node:child_process";
 import {
   assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
+  queryPublicSearch,
   runSearchEngineQuerySmoke,
   runSearchEngineSync,
   syncTypesense,
@@ -40,7 +41,7 @@ function runScript(script, env) {
   });
 }
 
-async function withSearchServer(fn) {
+async function withSearchServer(fn, { typesenseStatus = 200, meilisearchStatus = 200 } = {}) {
   const calls = [];
   const hit = {
     id: "MS-CRAWL-0001:bg",
@@ -58,8 +59,10 @@ async function withSearchServer(fn) {
       calls.push({ method: request.method, url: request.url, body });
       response.setHeader("content-type", "application/json");
       if (request.url.includes("/documents/search?")) {
+        response.statusCode = typesenseStatus;
         response.end(JSON.stringify({ found: 1, hits: [{ document: hit }] }));
       } else if (request.url.endsWith("/search")) {
+        response.statusCode = meilisearchStatus;
         response.end(JSON.stringify({ estimatedTotalHits: 1, hits: [hit] }));
       } else {
         response.statusCode = 201;
@@ -75,6 +78,80 @@ async function withSearchServer(fn) {
     await new Promise((resolve) => server.close(resolve));
   }
 }
+
+test("public search queries Typesense first with only reviewed locale documents", async () => {
+  await withSearchServer(async (baseUrl, calls) => {
+    const result = await queryPublicSearch({
+      typesense: { baseUrl, apiKey: "typesense-key" },
+      meilisearch: { baseUrl, apiKey: "meili-key" },
+      q: "Sandanski",
+      localeCodes: ["bg"],
+    });
+
+    assert.equal(result.engine, "typesense");
+    assert.equal(result.total, 1);
+    assert.deepEqual(result.hits.map((hit) => hit.source_listing_id), ["MS-CRAWL-0001"]);
+    assert.deepEqual(result.unavailable_engines, []);
+    assert.equal(calls.length, 1);
+    const request = new URL(`http://search.test${calls[0].url}`);
+    assert.equal(request.pathname, "/collections/ms_realty_listings/documents/search");
+    assert.equal(request.searchParams.get("q"), "Sandanski");
+    assert.equal(request.searchParams.get("per_page"), "250");
+    assert.match(request.searchParams.get("filter_by"), /translation_indexable:=true/);
+    assert.match(request.searchParams.get("filter_by"), /translation_human_approved:=true/);
+    assert.match(request.searchParams.get("filter_by"), /locale:=`bg`/);
+  });
+});
+
+test("public search uses Meilisearch only when Typesense is unavailable", async () => {
+  await withSearchServer(
+    async (baseUrl, calls) => {
+      const result = await queryPublicSearch({
+        typesense: { baseUrl, apiKey: "typesense-key" },
+        meilisearch: { baseUrl, apiKey: "meili-key" },
+        q: "Sandanski",
+        localeCodes: ["bg", "ru"],
+      });
+
+      assert.equal(result.engine, "meilisearch");
+      assert.deepEqual(result.unavailable_engines, ["typesense"]);
+      assert.equal(calls.length, 2);
+      assert.equal(calls[0].url.includes("/documents/search?"), true);
+      assert.equal(calls[1].url, "/indexes/ms_realty_listings/search");
+      const payload = JSON.parse(calls[1].body);
+      assert.equal(payload.limit, 250);
+      assert.match(payload.filter, /translation_indexable = true/);
+      assert.match(payload.filter, /locale = "bg" OR locale = "ru"/);
+    },
+    { typesenseStatus: 503 },
+  );
+});
+
+test("public search does not hide a configured Typesense failure behind a fallback", async () => {
+  await withSearchServer(
+    async (baseUrl, calls) => {
+      await assert.rejects(
+        () =>
+          queryPublicSearch({
+            typesense: { baseUrl, apiKey: "typesense-key" },
+            meilisearch: { baseUrl, apiKey: "meili-key" },
+            localeCodes: ["bg"],
+          }),
+        /returned 401/,
+      );
+      assert.equal(calls.length, 1);
+      assert.equal(calls[0].url.includes("/documents/search?"), true);
+    },
+    { typesenseStatus: 401 },
+  );
+});
+
+test("public search labels an unconfigured backend as a local seed fallback", async () => {
+  const result = await queryPublicSearch({ localeCodes: ["bg"] });
+  assert.equal(result.engine, "seed_fallback");
+  assert.equal(result.total, null);
+  assert.deepEqual(result.unavailable_engines, ["typesense", "meilisearch"]);
+});
 
 test("search engine sync posts existing fixtures to Typesense and Meilisearch", async () => {
   const calls = [];

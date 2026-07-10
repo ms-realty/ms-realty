@@ -10,6 +10,7 @@ import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead } from "./runtime.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, appendSavedSearch, createSavedSearch } from "./saved-searches.mjs";
+import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
@@ -48,6 +49,19 @@ export function appApiConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    search: {
+      typesense: {
+        baseUrl: env.TYPESENSE_URL,
+        apiKey: env.TYPESENSE_API_KEY,
+        collectionName: env.TYPESENSE_COLLECTION || "ms_realty_listings",
+      },
+      meilisearch: {
+        baseUrl: env.MEILI_URL,
+        apiKey: env.MEILI_API_KEY,
+        indexName: env.MEILI_INDEX || "ms_realty_listings",
+      },
+      fetchImpl: globalThis.fetch,
+    },
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     receivedAt: env.MS_REALTY_RECEIVED_AT,
     requestedAt: env.MS_REALTY_REQUESTED_AT,
@@ -138,18 +152,79 @@ function recordConsent(input, config) {
   });
 }
 
-function routeSearch(requestUrl, registry, seed, config) {
+function activeListingRecord(record) {
+  const status = String(record.facts?.listing_status || "available").trim().toLowerCase();
+  return record.collection === "listings" && ["available", "reserved"].includes(status);
+}
+
+function engineLocaleCodes(seed, registry, result) {
+  if (seed.records.some((record) => activeListingRecord(record) && record.source_locale === result.locale)) {
+    return [result.locale];
+  }
+  return [...new Set([result.search.fallback?.locale || registry.source_locale, registry.source_locale].filter(Boolean))];
+}
+
+function seedForSearchHits(seed, hits) {
+  const recordsById = new Map(
+    seed.records.filter((record) => record.collection === "listings").map((record) => [record.id, record]),
+  );
+  const seen = new Set();
+  const records = [];
+  for (const hit of hits) {
+    const id = String(hit.source_listing_id || "").trim();
+    const record = recordsById.get(id);
+    if (!record || seen.has(id)) continue;
+    seen.add(id);
+    records.push(record);
+  }
+  return { ...seed, records };
+}
+
+function withSearchBackend(result, engineResult) {
+  const backend = {
+    engine: engineResult.engine,
+    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : "local_fallback",
+    locale_codes: engineResult.locale_codes,
+    unavailable_engines: engineResult.unavailable_engines,
+  };
+  if (Number.isFinite(engineResult.total)) backend.indexed_matches = engineResult.total;
+  return {
+    ...result,
+    search: {
+      ...result.search,
+      engines: [engineResult.engine],
+      backend,
+    },
+  };
+}
+
+async function routeSearch(requestUrl, registry, seed, config) {
   const localeCode = requestUrl.searchParams.get("locale") || "bg";
   const query = requestUrl.searchParams.get("q") || "";
   const filters = searchFiltersFromParams(requestUrl.searchParams);
-  const result = searchRuntimeListings(registry, seed, {
+  const translationTasks = readTranslationLedger(config.translationLedgerPath);
+  const localResult = searchRuntimeListings(registry, seed, {
     localeCode,
     query,
     filters,
-    translationTasks: readTranslationLedger(config.translationLedgerPath),
+    translationTasks,
   });
+  const engineResult = await queryPublicSearch({
+    ...(config.search || {}),
+    q: query,
+    localeCodes: engineLocaleCodes(seed, registry, localResult),
+  });
+  const result =
+    engineResult.engine === "seed_fallback"
+      ? localResult
+      : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
+          localeCode,
+          query,
+          filters,
+          translationTasks,
+        });
   recordEvent({ type: "search", path: requestUrl.pathname, locale: localeCode, query, filters }, config);
-  return json(200, result);
+  return json(200, withSearchBackend(result, engineResult));
 }
 
 function routeLead(body, registry, seed, config) {
@@ -310,7 +385,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (request.method === "GET" && url.pathname === "/api/search") {
       const registry = loadLocaleRegistry(config.localeRegistryPath);
       const seed = currentSeed(config);
-      return webResponse(routeSearch(url, registry, seed, config));
+      return webResponse(await routeSearch(url, registry, seed, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
