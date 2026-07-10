@@ -21,3 +21,9 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
   assert.match(compose, /runtime-init:\n[\s\S]*local-dev-app-data:\n/);
   assert.match(compose, /# Local preview only: JSONL CRM\/CMS state survives app recreate, not production deployment\./);
 });
+
+test("local Docker startup recreates the edge after an app update", () => {
+  const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
+  assert.match(script, /Caddy resolves the app service address when it starts/);
+  assert.match(script, /\["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"\]/);
+});

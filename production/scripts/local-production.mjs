@@ -180,8 +180,11 @@ async function start(env, { withHermes = false } = {}) {
     "payload-migrate",
     ...(withHermes ? ["hermes-agent"] : []),
     "app",
-    "edge",
   ], { envOverrides });
+
+  // Caddy resolves the app service address when it starts. Recreate only the
+  // edge after an app rebuild so its upstream cannot retain a retired container IP.
+  compose(["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"], { envOverrides });
 
   await Promise.all([
     waitFor(`http://127.0.0.1:${env.MS_REALTY_APP_PORT}/api/health`),
