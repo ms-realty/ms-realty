@@ -61,8 +61,12 @@ unsourced, not used.)*
 
 ## 3. Ground-truth facts (from the crawl + registry)
 
-Authoritative crawl artifact: `migration/artifacts/20260704-211155/` (generated 2026-07-04, 150s,
-0 fetch failures, 0 homepage redirect targets).
+Authoritative launch baseline: `migration/artifacts/20260704-211155/` (generated 2026-07-04, 150s,
+0 fetch failures, 0 homepage redirect targets). A fresh verification snapshot lives at
+`migration/artifacts/20260710-211919/` (456 current sitemap URLs, 0 current fetch failures). Its
+`crawl-delta.md` records one historical `.com` listing URL that disappeared from the sitemap and now
+returns `404`; the baseline remains authoritative until a reviewer approves a same-content mapping or a
+410. No crawl refresh may silently remove a legacy URL or create a homepage/search redirect.
 
 **Two live domains — both first-class:**
 - `makler-realty.com` — multilingual main domain. Legacy WordPress sitemap index at `/sitemap.html`
@@ -72,11 +76,11 @@ Authoritative crawl artifact: `migration/artifacts/20260704-211155/` (generated 
   resort, floors, location, property, type). `.ru` stays first-class Russian unless the business makes
   an explicit consolidation decision.
 
-**URL universe — 457 URLs total:**
+**URL universe — 457 launch-baseline URLs total:**
 
 | Metric | Count |
 |---|---|
-| Total URLs | **457** (all HTTP 200) |
+| Total URLs | **457** (all HTTP 200 in the launch baseline) |
 | `.com` URLs | 278 |
 | `.ru` URLs | 179 |
 | Listings | **165** |

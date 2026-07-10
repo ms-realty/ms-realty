@@ -399,7 +399,7 @@ def crawl_page(row: dict[str, str], timeout: int) -> PageRecord:
 def write_csv(path: Path, rows: Iterable[dict[str, object]], fields: list[str]) -> int:
     count = 0
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore", lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow(row)

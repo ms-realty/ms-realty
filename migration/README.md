@@ -5,6 +5,10 @@ Run the crawler from the repository root:
 ```bash
 python3 migration/crawl_inventory.py --limit 20
 python3 migration/crawl_inventory.py
+python3 migration/compare_crawl_artifacts.py \
+  --baseline migration/artifacts/20260704-211155 \
+  --current migration/artifacts/<fresh-run> \
+  --probe-removed
 ```
 
 The script writes a versioned run under `migration/artifacts/` with:
@@ -18,6 +22,12 @@ The script writes a versioned run under `migration/artifacts/` with:
 If `CONTEXT_DEV_API_KEY` is set, sitemap discovery uses Context.dev's
 `/web/scrape/sitemap` endpoint. Page metadata crawling still uses the stdlib
 HTML crawler by default to avoid spending one API credit per page.
+
+Before replacing the launch baseline, compare the fresh artifact against it.
+The comparison writes `crawl-delta.md`, probes URLs that disappeared from the
+current sitemap when requested, and refuses to describe a changed sitemap as a
+safe promotion when an old URL disappeared or a current URL failed. It never
+generates a homepage or search-page redirect.
 
 Build the local structured migration database from the crawl CSVs:
 
