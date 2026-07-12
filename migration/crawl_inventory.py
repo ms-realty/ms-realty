@@ -4,9 +4,11 @@ from __future__ import annotations
 import argparse
 import csv
 import html
+import http.client
 import json
 import os
 import re
+import socket
 import sys
 import time
 from collections import Counter, deque
@@ -18,7 +20,7 @@ from pathlib import Path
 from typing import Iterable
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urljoin, urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPHandler, HTTPSHandler, Request, build_opener
 
 
 SEEDS = (
@@ -30,6 +32,60 @@ DEFAULT_WORKERS = 8
 DEFAULT_TIMEOUT = 25
 MAX_INTERNAL_LINKS = 120
 CONTEXT_BASE_URL = "https://api.context.dev/v1"
+
+
+def _create_ipv4_connection(
+    address: tuple[str, int],
+    timeout: object = socket._GLOBAL_DEFAULT_TIMEOUT,
+    source_address: tuple[str, int] | None = None,
+) -> socket.socket:
+    host, port = address
+    last_error: OSError | None = None
+    for family, socktype, proto, _, sockaddr in socket.getaddrinfo(
+        host, port, family=socket.AF_INET, type=socket.SOCK_STREAM
+    ):
+        sock: socket.socket | None = None
+        try:
+            sock = socket.socket(family, socktype, proto)
+            if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
+                sock.settimeout(timeout)
+            if source_address:
+                sock.bind(source_address)
+            sock.connect(sockaddr)
+            return sock
+        except OSError as exc:
+            last_error = exc
+            if sock is not None:
+                sock.close()
+    if last_error is not None:
+        raise last_error
+    raise OSError("getaddrinfo returns an empty list")
+
+
+class _IPv4HTTPConnection(http.client.HTTPConnection):
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        super().__init__(*args, **kwargs)
+        self._create_connection = _create_ipv4_connection
+
+
+class _IPv4HTTPSConnection(http.client.HTTPSConnection):
+    # Keep HTTPSConnection.connect so TLS wrapping retains its standard SNI behavior.
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        super().__init__(*args, **kwargs)
+        self._create_connection = _create_ipv4_connection
+
+
+class _IPv4HTTPHandler(HTTPHandler):
+    def http_open(self, req: Request):
+        return self.do_open(_IPv4HTTPConnection, req)
+
+
+class _IPv4HTTPSHandler(HTTPSHandler):
+    def https_open(self, req: Request):
+        return self.do_open(_IPv4HTTPSConnection, req, context=self._context)
+
+
+IPV4_OPENER = build_opener(_IPv4HTTPHandler(), _IPv4HTTPSHandler())
 
 
 @dataclass
@@ -216,7 +272,7 @@ def is_internal(base_url: str, target_url: str) -> bool:
 def fetch(url: str, timeout: int = DEFAULT_TIMEOUT) -> FetchResult:
     req = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xml;q=0.9,*/*;q=0.5"})
     try:
-        with urlopen(req, timeout=timeout) as res:
+        with IPV4_OPENER.open(req, timeout=timeout) as res:
             raw = res.read()
             content_type = res.headers.get("content-type", "")
             charset = res.headers.get_content_charset() or "utf-8"
@@ -258,7 +314,7 @@ def context_get_json(path: str, params: dict[str, object], timeout: int) -> dict
             "User-Agent": USER_AGENT,
         },
     )
-    with urlopen(req, timeout=timeout) as res:
+    with IPV4_OPENER.open(req, timeout=timeout) as res:
         raw = res.read()
         charset = res.headers.get_content_charset() or "utf-8"
         return json.loads(raw.decode(charset, errors="replace"))
