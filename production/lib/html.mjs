@@ -773,7 +773,7 @@ function renderBody(page, options = {}) {
 }
 
 function clientScript(page, options = {}) {
-  if (options.print || options.bodyHtml) return "";
+  if (options.print) return "";
   if (String(page.kind || "").startsWith("admin_")) return `<script>${ADMIN_APP_JS}</script>`;
   const copy = chromeCopyFor(page.locale || page.lang || "en");
   const i18n = { requestSent: copy.requestSent, close: copy.close };

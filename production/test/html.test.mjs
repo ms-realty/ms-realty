@@ -93,6 +93,10 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /id="sr-location-options"/);
   assert.match(searchHtml, /id="sr-mobile-location-options"/);
   assert.match(searchHtml, /data-mobile-search-filters="true"/);
+  assert.match(searchHtml, /data-hermes-assistant="true"/);
+  assert.match(searchHtml, /data-hermes-mode="retrieval_only"/);
+  assert.match(searchHtml, /data-hermes-chat-form="true"/);
+  assert.match(searchHtml, /action="\/api\/hermes\/chat"/);
   assert.match(filteredSearchHtml, /data-filter-chip="offer_type"/);
   assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski&amp;price_min=50000"/);
   assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski"/);

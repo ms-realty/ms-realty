@@ -185,6 +185,90 @@ export const PUBLIC_APP_JS = `(function () {
         for (var j = 0; j < tours.length; j += 1) showTourFallback(tours[j].section);
       });
   }
+  function hermesOutputFor(form) {
+    var assistant = form.closest("[data-hermes-assistant]");
+    return assistant ? assistant.querySelector("[data-hermes-chat-output]") : null;
+  }
+  function clearHermesOutput(output) {
+    while (output.firstChild) output.removeChild(output.firstChild);
+  }
+  function hermesMessage(output, value, state) {
+    clearHermesOutput(output);
+    var message = document.createElement("p");
+    message.className = "hermes-assistant__message";
+    message.textContent = value;
+    output.appendChild(message);
+    output.setAttribute("data-state", state);
+  }
+  function renderHermesReply(form, payload) {
+    var output = hermesOutputFor(form);
+    if (!output) return;
+    clearHermesOutput(output);
+    var answer = document.createElement("p");
+    answer.className = "hermes-assistant__answer";
+    answer.textContent = payload.answer || "";
+    output.appendChild(answer);
+    if (payload.disclosure) {
+      var disclosure = document.createElement("p");
+      disclosure.className = "hermes-assistant__disclosure";
+      disclosure.textContent = payload.disclosure;
+      output.appendChild(disclosure);
+    }
+    var citations = Array.isArray(payload.citations) ? payload.citations : [];
+    if (citations.length) {
+      var sources = document.createElement("section");
+      sources.className = "hermes-assistant__sources";
+      var heading = document.createElement("h3");
+      heading.textContent = form.getAttribute("data-hermes-sources-label") || "Approved sources";
+      sources.appendChild(heading);
+      var list = document.createElement("ul");
+      for (var i = 0; i < citations.length; i += 1) {
+        var citation = citations[i] || {};
+        if (typeof citation.path !== "string" || citation.path.indexOf("/") !== 0) continue;
+        var item = document.createElement("li");
+        var link = document.createElement("a");
+        link.href = citation.path;
+        link.textContent = citation.title || citation.id || citation.path;
+        item.appendChild(link);
+        list.appendChild(item);
+      }
+      if (list.childNodes.length) {
+        sources.appendChild(list);
+        output.appendChild(sources);
+      }
+    }
+    output.setAttribute("data-state", "ready");
+  }
+  function submitHermesChat(form) {
+    var output = hermesOutputFor(form);
+    var submit = form.querySelector('[type="submit"]');
+    if (submit) submit.setAttribute("data-loading", "");
+    if (output) {
+      output.setAttribute("aria-busy", "true");
+      hermesMessage(output, form.getAttribute("data-hermes-pending") || "Hermes is preparing an answer...", "loading");
+    }
+    var locale = form.elements.locale ? form.elements.locale.value : document.documentElement.lang;
+    var query = form.elements.query ? form.elements.query.value : "";
+    fetch(form.getAttribute("action") || "/api/hermes/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ locale: locale, query: query }),
+    })
+      .then(function (response) {
+        return response.json().catch(function () { return {}; }).then(function (payload) {
+          if (!response.ok || payload.kind !== "hermes_public_chat" || !payload.answer) throw new Error(payload.message || "Hermes chat failed");
+          return payload;
+        });
+      })
+      .then(function (payload) { renderHermesReply(form, payload); })
+      .catch(function () {
+        if (output) hermesMessage(output, form.getAttribute("data-hermes-failure") || "Hermes could not answer. Try again or contact a broker.", "error");
+      })
+      .then(function () {
+        if (output) output.removeAttribute("aria-busy");
+        if (submit) submit.removeAttribute("data-loading");
+      });
+  }
   document.addEventListener("click", function (event) {
     var save = event.target.closest("[data-client-save-listing]");
     if (save) {
@@ -227,6 +311,11 @@ export const PUBLIC_APP_JS = `(function () {
     var form = event.target;
     if (!(form instanceof HTMLFormElement)) return;
     var action = form.getAttribute("action") || "";
+    if (form.hasAttribute("data-hermes-chat-form")) {
+      event.preventDefault();
+      submitHermesChat(form);
+      return;
+    }
     var isEnquiry = form.hasAttribute("data-enquiry-form");
     var intercept = action === "/api/leads" || action === "/api/saved-searches" || action === "/api/language-requests" || form.hasAttribute("data-save-search-endpoint") || form.hasAttribute("data-request-language");
     if (!intercept && !isEnquiry) return;

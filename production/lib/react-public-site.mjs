@@ -267,6 +267,47 @@ function EnquiryDialog({ page, labels, copy }) {
   );
 }
 
+function HermesAssistant({ page, labels }) {
+  const assistant = labels.hermesAssistant || "Hermes assistant";
+  const prompt = labels.hermesAsk || "Ask about a property or area";
+  return h(
+    "details",
+    {
+      className: "hermes-assistant",
+      "data-hermes-assistant": "true",
+      "data-hermes-mode": "retrieval_only",
+      "data-hermes-chat-locale": page.locale,
+    },
+    h(
+      "summary",
+      { className: "hermes-assistant__toggle", "aria-label": assistant, title: assistant },
+      h(Icon, { name: "message-circle", size: 20 }),
+      h("span", { className: "hermes-assistant__toggle-label" }, assistant),
+    ),
+    h(
+      "div",
+      { className: "hermes-assistant__panel" },
+      h("p", { className: "hermes-assistant__prompt" }, prompt),
+      h(
+        "form",
+        {
+          action: "/api/hermes/chat",
+          method: "post",
+          className: "hermes-assistant__form",
+          "data-hermes-chat-form": "true",
+          "data-hermes-pending": labels.hermesThinking || "Hermes is preparing an answer...",
+          "data-hermes-failure": labels.hermesUnavailable || "Hermes could not answer. Try again or contact a broker.",
+          "data-hermes-sources-label": labels.hermesSources || "Approved sources",
+        },
+        h("input", { type: "hidden", name: "locale", defaultValue: page.locale }),
+        h("label", null, prompt, h("textarea", { name: "query", required: true, maxLength: 500, rows: 3, placeholder: labels.hermesPlaceholder || prompt })),
+        h(Btn, { type: "submit", variant: "primary", full: true, iconStart: "send" }, labels.hermesSend || "Ask"),
+      ),
+      h("div", { className: "hermes-assistant__output", role: "region", "aria-live": "polite", "data-hermes-chat-output": "true" }),
+    ),
+  );
+}
+
 function shell(page, main) {
   const chrome = page.chrome;
   if (!chrome) return main;
@@ -277,6 +318,7 @@ function shell(page, main) {
     main,
     h(SiteFooter, { key: "footer", chrome, labels }),
     h(EnquiryDialog, { key: "enquiry", page, labels, copy: chrome.copy }),
+    h(HermesAssistant, { key: "hermes", page, labels }),
   ];
 }
 

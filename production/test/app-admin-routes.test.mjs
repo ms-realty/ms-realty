@@ -987,6 +987,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /data-tour-review-status=/);
       assert.match(editorHtml, /data-tour-editor-form="true"/);
       assert.match(editorHtml, /action="\/api\/admin\/tours\/approve"/);
+      assert.match(editorHtml, /function initTourEditor/);
       assert.match(editorHtml, /name="panoramaUrl"/);
       assert.match(editorHtml, /name="thumbnailUrl"/);
       assert.match(editorHtml, /name="accessibilityCaption"/);

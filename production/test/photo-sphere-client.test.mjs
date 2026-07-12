@@ -33,3 +33,12 @@ test("admin client enhances the reviewed 360 form without disabling lead queue f
   assert.match(ADMIN_APP_JS, /payload\.is_public !== true/);
   assert.match(ADMIN_APP_JS, /data-tour-review-status", "available/);
 });
+
+test("public client submits Hermes questions without exposing provider credentials", () => {
+  assert.match(PUBLIC_APP_JS, /function submitHermesChat/);
+  assert.match(PUBLIC_APP_JS, /data-hermes-chat-form/);
+  assert.match(PUBLIC_APP_JS, /payload\.kind !== "hermes_public_chat"/);
+  assert.match(PUBLIC_APP_JS, /data-hermes-sources-label/);
+  assert.match(PUBLIC_APP_JS, /citation\.path\.indexOf\("\/"\) !== 0/);
+  assert.doesNotMatch(PUBLIC_APP_JS, /HERMES_API_KEY|HERMES_CHAT_COMPLETIONS_URL/);
+});
