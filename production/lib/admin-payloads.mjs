@@ -67,8 +67,8 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     canonical: "/admin/leads",
     indexable: false,
     metadata: {
-      title: "MS Realty lead inbox",
-      description: "Admin-only CRM lead inbox with broker-reviewed replies.",
+      title: `${workspace.copy.leadInbox || "Lead inbox"} | MS Realty`,
+      description: workspace.copy.leadInboxDescription || "CRM lead inbox with broker-reviewed replies.",
       robots: "noindex,nofollow",
     },
     workspace,

@@ -489,6 +489,16 @@ function LeadInboxBody({ page }) {
     [label(copy, "sellerPipeline", "Seller pipeline"), page.summary.sellerPipeline, "landmark", "sand"],
   ];
   const title = page.workspace.modules.find((module) => module.id === "crm")?.primary_view || "Lead inbox";
+  const leadColumns = {
+    lead: label(copy, "lead", "Lead"),
+    type: label(copy, "type", "Type"),
+    source: label(copy, "source", "Source"),
+    language: label(copy, "language", "Language"),
+    contact: label(copy, "contact", "Contact"),
+    sla: label(copy, "sla", "SLA"),
+    escalationDue: label(copy, "escalationDue", "Escalation due"),
+    reply: label(copy, "reply", "Reply"),
+  };
   const slaTone = (status) => (status === "ok" ? "success" : status?.includes("escalation") ? "brick" : status === "pending" ? "sun" : "sun");
   return adminShell(page, {
     title,
@@ -527,14 +537,14 @@ function LeadInboxBody({ page }) {
               h(
                 "tr",
                 null,
-                h("th", null, label(copy, "lead", "Lead")),
-                h("th", null, label(copy, "type", "Type")),
-                h("th", null, label(copy, "source", "Source")),
-                h("th", null, label(copy, "language", "Language")),
-                h("th", null, label(copy, "contact", "Contact")),
-                h("th", null, label(copy, "sla", "SLA")),
-                h("th", null, label(copy, "escalationDue", "Escalation due")),
-                h("th", null, label(copy, "reply", "Reply")),
+                h("th", { scope: "col" }, leadColumns.lead),
+                h("th", { scope: "col" }, leadColumns.type),
+                h("th", { scope: "col" }, leadColumns.source),
+                h("th", { scope: "col" }, leadColumns.language),
+                h("th", { scope: "col" }, leadColumns.contact),
+                h("th", { scope: "col" }, leadColumns.sla),
+                h("th", { scope: "col" }, leadColumns.escalationDue),
+                h("th", { scope: "col" }, leadColumns.reply),
               ),
             ),
             h(
@@ -560,19 +570,23 @@ function LeadInboxBody({ page }) {
                   },
                   h(
                     "td",
-                    null,
-                    h("code", { className: "crm-mono" }, lead.lead_id),
-                    leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
+                    { "data-lead-column": "lead", "data-label": leadColumns.lead },
+                    h(
+                      "div",
+                      { className: "adm-lead-identity" },
+                      h("code", { className: "crm-mono" }, lead.lead_id),
+                      leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
+                    ),
                   ),
-                  h("td", null, h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type))),
-                  h("td", { className: "crm-tbl__muted" }, valueText(ui, lead.source)),
-                  h("td", null, h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`)),
-                  h("td", { className: "crm-tbl__muted" }, valueText(ui, lead.contact_preference)),
-                  h("td", { "data-sla-status": slaStatus }, h(StatusPill, { tone: slaTone(slaStatus) }, statusText(ui, slaStatus))),
-                  h("td", { className: "crm-tbl__muted crm-mono" }, leadSla?.manager_escalation_due_at || ""),
+                  h("td", { "data-lead-column": "type", "data-label": leadColumns.type }, h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type))),
+                  h("td", { className: "crm-tbl__muted", "data-lead-column": "source", "data-label": leadColumns.source }, valueText(ui, lead.source)),
+                  h("td", { "data-lead-column": "language", "data-label": leadColumns.language }, h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`)),
+                  h("td", { className: "crm-tbl__muted", "data-lead-column": "contact", "data-label": leadColumns.contact }, valueText(ui, lead.contact_preference)),
+                  h("td", { "data-sla-status": slaStatus, "data-lead-column": "sla", "data-label": leadColumns.sla }, h(StatusPill, { tone: slaTone(slaStatus) }, statusText(ui, slaStatus))),
+                  h("td", { className: "crm-tbl__muted crm-mono", "data-lead-column": "escalation_due", "data-label": leadColumns.escalationDue }, leadSla?.manager_escalation_due_at || ""),
                   h(
                     "td",
-                    { className: "adm-reply-cell" },
+                    { className: "adm-reply-cell", "data-lead-column": "reply", "data-label": leadColumns.reply },
                     h(
                       "form",
                       {
