@@ -256,6 +256,24 @@ dl[data-listing-facts="true"] dt { font-size: var(--text-2xs); }
     padding: var(--space-3);
   }
 }
+@media (max-width: 560px) {
+  .ld-top__acts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) repeat(3, 44px);
+    align-items: stretch;
+    width: 100%;
+    flex: 1 1 100%;
+  }
+  .ld-top__acts .mk-btn { min-width: 0; padding-inline: 0; }
+  .ld-top__acts [data-listing-action="back_to_results"] {
+    justify-content: flex-start;
+    padding-inline: var(--space-3);
+    line-height: 1.2;
+    text-align: start;
+    white-space: normal;
+  }
+  .ld-top__acts [data-compact-mobile-action="true"] > span { display: none; }
+}
 
 /* ---- Narrow pages (seller / guide / fallback) + contact ---- */
 .pg-narrow { max-width: var(--container-md); margin: 0 auto; padding: var(--section-y-sm) var(--gutter) 64px; display: grid; gap: var(--space-6); }

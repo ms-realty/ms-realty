@@ -802,12 +802,18 @@ function ListingBody({ page }) {
 
   const toolButtons = (page.body.actions.secondary || []).map((action) => {
     const icon = LISTING_ACTION_ICONS[action.id] || LISTING_ACTION_ICONS[action.kind] || "link";
+    const compactOnMobile = ["save", "share_family", "print"].includes(action.id);
+    const actionAttrs = {
+      "aria-label": action.label,
+      "data-listing-action": action.id,
+      "data-compact-mobile-action": compactOnMobile ? "true" : undefined,
+    };
     if (action.kind === "share" || action.kind === "print" || action.kind === "link") {
-      return h(Btn, { key: action.id, tag: "a", variant: "secondary", size: "sm", iconStart: icon, href: action.url, "data-listing-action": action.id }, action.label);
+      return h(Btn, { key: action.id, tag: "a", variant: "secondary", size: "sm", iconStart: icon, href: action.url, ...actionAttrs }, action.label);
     }
     return h(
       Btn,
-      { key: action.id, variant: "secondary", size: "sm", iconStart: icon, "data-listing-action": action.id, "data-client-save-listing": action.listing_id },
+      { key: action.id, variant: "secondary", size: "sm", iconStart: icon, ...actionAttrs, "data-client-save-listing": action.listing_id },
       action.label,
     );
   });

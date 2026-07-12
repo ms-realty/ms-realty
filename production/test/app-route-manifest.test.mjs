@@ -92,6 +92,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(listing.html, /aria-label="מדיית נכס"/);
   assert.match(listing.html, /data-media-gallery-count=/);
   assert.match(listing.html, /data-listing-action="back_to_results"/);
+  assert.equal((listing.html.match(/<[^>]+data-compact-mobile-action="true"/g) || []).length, 3);
   assert.match(listing.html, /href="\/he\/search"/);
   assert.match(listing.html, /data-related-listings="true"/);
 
