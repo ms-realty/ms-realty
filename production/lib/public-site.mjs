@@ -1240,7 +1240,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
   const path = listingPath(registry, locale.code, listing.id);
   const hreflang = indexable ? hreflangForListing(registry, listing.id, allTranslations) : [];
   const labels = labelsFor(locale.code);
-  const copy = localizedCopy(locale.code, view);
+  const copy = localizedCopy(translationIndexable ? locale.code : view.source_locale, view);
   const publicMedia = publicMediaLibrary(view.media, {
     fallback: view.thumbnail_url
       ? {
@@ -1261,7 +1261,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
     canonical: path,
     indexable,
     fallback: {
-      active: !resolved.available,
+      active: !resolved.available || !translationIndexable,
       requested_locale: localeCode,
       resolved_locale: locale.code,
     },

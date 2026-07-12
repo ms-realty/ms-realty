@@ -38,19 +38,37 @@ function normalizeContactPreference(input) {
   return normalized;
 }
 
+export function normalizeLeadInput(input = {}) {
+  const contact = input.contact && typeof input.contact === "object" && !Array.isArray(input.contact) ? { ...input.contact } : {};
+  const property = input.property && typeof input.property === "object" && !Array.isArray(input.property) ? { ...input.property } : {};
+  for (const field of ["name", "email", "phone", "whatsapp", "viber", "preferred_channel"]) {
+    const value = input[`contact.${field}`];
+    if (value !== undefined && String(value).trim()) contact[field] = String(value).trim();
+    else if (typeof contact[field] === "string") contact[field] = contact[field].trim();
+  }
+  for (const field of ["location", "type", "area", "bedrooms"]) {
+    const value = input[`property.${field}`];
+    if (value !== undefined && String(value).trim()) property[field] = String(value).trim();
+    else if (typeof property[field] === "string") property[field] = property[field].trim();
+  }
+  return { ...input, contact, property };
+}
+
 export function createLeadDraft(registry, input) {
-  if (!input.source || !input.leadType || !input.contact?.name) {
+  const leadInput = normalizeLeadInput(input);
+  if (!leadInput.source || !leadInput.leadType || !leadInput.contact?.name) {
     throw new Error("source, leadType, and contact.name are required");
   }
-  const language = normalizeLeadLanguage(registry, input.language || registry.source_locale);
+  const language = normalizeLeadLanguage(registry, leadInput.language || registry.source_locale);
   return {
-    id: input.id || `lead-draft-${Date.now()}`,
-    source: input.source,
-    leadType: input.leadType,
-    listingReference: input.listingReference || null,
-    contact: input.contact,
-    contact_preference: normalizeContactPreference(input),
-    message: input.message || "",
+    id: leadInput.id || `lead-draft-${Date.now()}`,
+    source: leadInput.source,
+    leadType: leadInput.leadType,
+    listingReference: leadInput.listingReference || null,
+    contact: leadInput.contact,
+    property: leadInput.property,
+    contact_preference: normalizeContactPreference(leadInput),
+    message: leadInput.message || "",
     language,
     status: "draft",
     requiresBrokerApproval: true,

@@ -7,7 +7,7 @@ import { readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
-import { resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 
 function tempLedger(prefix, reset) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -148,6 +148,29 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(lead.headers.get("cache-control"), "no-store");
       assert.equal(leadBody.lead.listingReference, "MS-CRAWL-0001");
 
+      const sellerFormLead = await leadRoute.POST(
+        new Request("https://example.test/api/leads", {
+          method: "POST",
+          headers: { "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            id: "next-api-seller-form-test",
+            source: "website_seller_valuation",
+            leadType: "seller",
+            language: "bg",
+            "contact.name": "Mira Petkova",
+            "contact.phone": "+359880000000",
+            contact_preference: "phone",
+            "property.location": "Sandanski",
+            "property.type": "apartment",
+            message: "Please arrange a broker valuation.",
+          }),
+        }),
+      );
+      const sellerFormLeadBody = await sellerFormLead.json();
+      assert.equal(sellerFormLead.status, 201);
+      assert.deepEqual(sellerFormLeadBody.lead.property, { location: "Sandanski", type: "apartment" });
+      assert.deepEqual(sellerFormLeadBody.sellerPipeline.property, { location: "Sandanski", type: "apartment" });
+
       const event = await eventRoute.POST(
         new Request("https://example.test/api/events", {
           method: "POST",
@@ -213,15 +236,20 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
     },
   );
 
-  assert.equal(readLeadLedger(leadLedgerPath).length, 1);
+  assert.equal(readLeadLedger(leadLedgerPath).length, 2);
+  assert.deepEqual(readLeadLedger(leadLedgerPath).find((row) => row.lead_id === "next-api-seller-form-test").property, {
+    location: "Sandanski",
+    type: "apartment",
+  });
+  assert.deepEqual(readSellerPipeline(sellerPipelinePath)[0].property, { location: "Sandanski", type: "apartment" });
   assert.equal(readLanguageRequests(languageRequestPath).length, 1);
   assert.equal(readSavedSearches(savedSearchLedgerPath).length, 1);
   assert.deepEqual(
     readConsentLedger(consentLedgerPath).map((row) => row.consent_type),
-    ["inquiry_follow_up", "language_request", "saved_search_alerts"],
+    ["inquiry_follow_up", "inquiry_follow_up", "language_request", "saved_search_alerts"],
   );
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "search").length, 1);
-  assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "lead_submitted").length, 1);
+  assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "lead_submitted").length, 2);
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "cta_click").length, 1);
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "hermes_chat").length, 1);
 });

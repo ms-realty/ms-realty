@@ -1,6 +1,6 @@
 import { adminLocales, getLocale, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage } from "./locales.mjs";
 import { assertHermesActionAllowed, translationPrompt, validateHermesTranslationDraft } from "./hermes.mjs";
-import { assignLeadBroker, createLeadDraft } from "./leads.mjs";
+import { assignLeadBroker, createLeadDraft, normalizeLeadInput } from "./leads.mjs";
 import { contentHash } from "./translations.mjs";
 
 const ADMIN_COPY = {
@@ -385,22 +385,24 @@ export function publishApprovedTranslation(registry, task) {
 
 export function createCrmInboxItem(registry, input) {
   assertHermesActionAllowed("draft_reply");
+  const leadInput = normalizeLeadInput(input);
   const lead = createLeadDraft(registry, {
-    id: input.id,
-    source: input.source,
-    leadType: input.leadType,
-    language: input.language,
-    listingReference: input.listingReference,
-    contact: input.contact,
-    contact_preference: input.contact_preference,
-    contactPreference: input.contactPreference,
-    preferred_channel: input.preferred_channel,
-    message: input.message,
+    id: leadInput.id,
+    source: leadInput.source,
+    leadType: leadInput.leadType,
+    language: leadInput.language,
+    listingReference: leadInput.listingReference,
+    contact: leadInput.contact,
+    property: leadInput.property,
+    contact_preference: leadInput.contact_preference,
+    contactPreference: leadInput.contactPreference,
+    preferred_channel: leadInput.preferred_channel,
+    message: leadInput.message,
   });
   const brokerAssignment = assignLeadBroker(lead, {
-    manualBrokerId: input.manualBrokerId,
-    brokerProfiles: input.brokerProfiles,
-    listingContext: input.listingContext,
+    manualBrokerId: leadInput.manualBrokerId,
+    brokerProfiles: leadInput.brokerProfiles,
+    listingContext: leadInput.listingContext || { location: lead.property.location || null, property_type: lead.property.type || null },
   });
 
   return {

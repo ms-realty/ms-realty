@@ -1928,6 +1928,39 @@ test("HTTP admin can publish an approved translation for a newly added public lo
   assert.equal(card.translation_indexable, true);
 });
 
+test("HTTP fallback accepts a URL-encoded seller valuation form", async () => {
+  const leadLedgerPath = tempLedger();
+  const sellerPipelinePath = tempSellerPipeline();
+  const app = createHttpApp({
+    registry: loadLocaleRegistry(),
+    leadLedgerPath,
+    sellerPipelinePath,
+    consentLedgerPath: tempConsents(),
+    eventLedgerPath: tempEvents(),
+  });
+  const response = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/leads",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      source: "website_seller_valuation",
+      leadType: "seller",
+      language: "bg",
+      "contact.name": "Mira Petkova",
+      "contact.phone": "+359880000000",
+      contact_preference: "phone",
+      "property.location": "Sandanski",
+      "property.type": "apartment",
+      message: "Please arrange a broker valuation.",
+    }).toString(),
+  });
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(response.body.lead.property, { location: "Sandanski", type: "apartment" });
+  assert.deepEqual(response.body.sellerPipeline.property, { location: "Sandanski", type: "apartment" });
+  assert.deepEqual(readLeadLedger(leadLedgerPath)[0].property, { location: "Sandanski", type: "apartment" });
+});
+
 test("generated HTTP smoke file is valid when present", () => {
   const file = fromRoot("production", "data", "http-smoke.json");
   if (!fs.existsSync(file)) return;

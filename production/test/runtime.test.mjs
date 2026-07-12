@@ -131,11 +131,13 @@ test("runtime overlays stale translation ledger rows before public rendering", (
       public_indexable: false,
     },
   ]);
+  const source = renderRuntimePath(registry, seed, "/bg/imoti/MS-CRAWL-0001");
 
   assert.equal(stale.status, 200);
   assert.equal(stale.locale, "el");
   assert.equal(stale.indexable, false);
   assert.equal(stale.metadata.robots, "noindex,follow");
+  assert.equal(stale.body.description, source.body.description);
   assert.equal(stale.hreflang.some((link) => link.hreflang === "el"), false);
 });
 

@@ -1363,7 +1363,7 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
       try {
-        const input = parseJsonBody(request);
+        const input = parseBody(request);
         const lead = submitRuntimeLead(activeRegistry, currentSeed(), input);
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         const consent = recordConsent({

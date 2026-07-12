@@ -29,6 +29,7 @@ export function createSellerPipelineItem(lead, { createdAt = new Date().toISOStr
     lead_id: lead.lead.id,
     source: lead.lead.source,
     contact_name: lead.lead.contact.name,
+    property: lead.lead.property || {},
     original_language: lead.original_language,
     admin_locale: lead.admin_locale,
     stage: "valuation_requested",

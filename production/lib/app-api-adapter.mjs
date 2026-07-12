@@ -227,9 +227,9 @@ async function routeSearch(requestUrl, registry, seed, config) {
   return json(200, withSearchBackend(result, engineResult));
 }
 
-function routeLead(body, registry, seed, config) {
+function routeLead(request, body, registry, seed, config) {
   try {
-    const input = parseJsonBody(body);
+    const input = parseBody(request, body);
     const lead = submitRuntimeLead(registry, seed, input);
     const ledger = appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: config.receivedAt });
     const consent = recordConsent(
@@ -391,7 +391,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (request.method === "POST" && url.pathname === "/api/leads") {
       const registry = loadLocaleRegistry(config.localeRegistryPath);
       const seed = currentSeed(config);
-      return webResponse(routeLead(body, registry, seed, config));
+      return webResponse(routeLead(request, body, registry, seed, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/events") {

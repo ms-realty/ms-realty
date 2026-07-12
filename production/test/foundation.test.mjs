@@ -188,6 +188,17 @@ test("lead intake accepts Greek and Hebrew website languages but routes admin wo
   assert.equal(hebrewLead.language.direction, "rtl");
   assert.equal(hebrewLead.language.requiresTranslation, true);
   assert.equal(hebrewLead.contact_preference, "whatsapp");
+  const formLead = createLeadDraft(registry, {
+    source: "website_seller_valuation",
+    leadType: "seller",
+    language: "bg",
+    "contact.name": "  Mira Petkova ",
+    "contact.phone": " +359 88 000 0000 ",
+    "property.location": " Sandanski ",
+    "property.type": " apartment ",
+  });
+  assert.deepEqual(formLead.contact, { name: "Mira Petkova", phone: "+359 88 000 0000" });
+  assert.deepEqual(formLead.property, { location: "Sandanski", type: "apartment" });
   assert.throws(
     () =>
       createLeadDraft(registry, {
