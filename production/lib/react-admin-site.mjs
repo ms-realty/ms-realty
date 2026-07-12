@@ -80,10 +80,15 @@ const ADMIN_UI_COPY = {
     tourSaved: "360 обиколката е одобрена.",
     tourSaveFailed: "360 обиколката не беше запазена.",
     skipToContent: "Към съдържанието",
+    values: {
+      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
+      email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
+    },
     statuses: {
       buyer: "Купувач", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
+      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено",
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", price_eur: "Цена в EUR", bedrooms: "Спални" },
   },
@@ -153,10 +158,15 @@ const ADMIN_UI_COPY = {
     tourSaved: "360 тур одобрен.",
     tourSaveFailed: "Не удалось сохранить 360 тур.",
     skipToContent: "К содержанию",
+    values: {
+      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
+      email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
+    },
     statuses: {
       buyer: "Покупатель", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
+      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто",
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", price_eur: "Цена в EUR", bedrooms: "Спальни" },
   },
@@ -226,10 +236,15 @@ const ADMIN_UI_COPY = {
     tourSaved: "360 tour approved.",
     tourSaveFailed: "Could not save 360 tour.",
     skipToContent: "Skip to content",
+    values: {
+      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
+      email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber",
+    },
     statuses: {
       buyer: "Buyer", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
+      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open",
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", price_eur: "Price in EUR", bedrooms: "Bedrooms" },
   },
@@ -240,7 +255,11 @@ function workbenchCopy(page) {
 }
 
 function statusText(copy, value) {
-  return copy.statuses[value] || String(value || "").replaceAll("_", " ");
+  return copy.statuses[value] || valueText(copy, value);
+}
+
+function valueText(copy, value) {
+  return copy.values?.[value] || String(value || "").replaceAll("_", " ");
 }
 
 function fieldText(copy, field) {
@@ -540,9 +559,9 @@ function LeadInboxBody({ page }) {
                   },
                   h("td", null, h("code", { className: "crm-mono" }, lead.lead_id)),
                   h("td", null, h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type))),
-                  h("td", { className: "crm-tbl__muted" }, lead.source),
+                  h("td", { className: "crm-tbl__muted" }, valueText(ui, lead.source)),
                   h("td", null, h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`)),
-                  h("td", { className: "crm-tbl__muted" }, lead.contact_preference),
+                  h("td", { className: "crm-tbl__muted" }, valueText(ui, lead.contact_preference)),
                   h("td", { "data-sla-status": slaStatus }, h(StatusPill, { tone: slaTone(slaStatus) }, statusText(ui, slaStatus))),
                   h("td", { className: "crm-tbl__muted crm-mono" }, leadSla?.manager_escalation_due_at || ""),
                   h(

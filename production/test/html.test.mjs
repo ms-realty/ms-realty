@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { renderAdminLeadsPayload } from "../lib/admin-payloads.mjs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { assertHtmlPage, renderHtmlPage } from "../lib/html.mjs";
@@ -120,4 +121,37 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(guideHtml, /Non-EU buyers cannot own Bulgarian land directly/);
   assert.equal(assertHtmlPage(fallbackHtml, { lang: "en", dir: "ltr", kind: "language-fallback" }), true);
   assert.match(fallbackHtml, /noindex,follow/);
+});
+
+test("admin lead values are localized without exposing raw workflow codes", () => {
+  const page = renderAdminLeadsPayload(registry, "ru", {
+    leads: [
+      {
+        lead_id: "lead-ru-1",
+        lead_type: "buyer",
+        source: "website_listing_detail",
+        original_language: "he",
+        admin_locale: "ru",
+        contact_preference: "whatsapp",
+        broker_assignment: { broker_id: "broker_international" },
+      },
+    ],
+    replies: [],
+    languageRequests: [],
+    viewings: [],
+    savedSearches: [],
+    sellerPipeline: [],
+    deals: [],
+    leadSla: {
+      rows: [{ lead_id: "lead-ru-1", status: "manager_escalation_required" }],
+      summary: { manager_escalation_required: 1, reminder_required: 0 },
+    },
+  });
+  const html = renderHtmlPage(page);
+
+  assert.match(html, /Запрос со страницы объекта/);
+  assert.match(html, /WhatsApp/);
+  assert.match(html, /Нужна эскалация менеджеру/);
+  assert.doesNotMatch(html, />website_listing_detail</);
+  assert.doesNotMatch(html, />manager escalation required</);
 });
