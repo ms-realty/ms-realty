@@ -4,6 +4,8 @@ import { findListingById, loadListings } from "./content.mjs";
 import { assertHtmlPage, renderHtmlPage } from "./html.mjs";
 import { loadLocaleRegistry, websiteLanguageCoverage } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
+import { renderReactPublicBody } from "./react-public-site.mjs";
+import { createTourField } from "./tours.mjs";
 import {
   renderContactPage,
   renderHomePage,
@@ -23,20 +25,42 @@ function includes(html, marker) {
   return html.includes(marker);
 }
 
+function renderReactPage(page) {
+  const bodyHtml = renderReactPublicBody(page);
+  if (!bodyHtml) throw new Error(`Missing React public body for ${page.kind}`);
+  return renderHtmlPage(page, { bodyHtml });
+}
+
 export function buildMobileElderlyQaReport({
   generatedAt = new Date().toISOString(),
   registry = loadLocaleRegistry(),
   listings = loadListings(),
 } = {}) {
   const listing = findListingById(listings, "MS-CRAWL-0001");
-  const pages = {
-    home: renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" })),
-    listing: renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" })),
-    search: renderHtmlPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" })),
-    seller: renderHtmlPage(renderSellerPage({ registry, localeCode: "he" })),
-    contact: renderHtmlPage(renderContactPage({ registry, localeCode: "he" })),
-    fallback: renderHtmlPage(renderLanguageFallback({ registry, requestedLocale: "fr" })),
+  const tourListing = {
+    ...listing,
+    tour: createTourField({
+      listingId: listing.id,
+      panoramaUrl: "https://media.example.test/ms-realty/mobile-qa-tour.jpg",
+      accessibilityCaption: "Reviewed 360 panorama with a gallery fallback.",
+      isPublic: true,
+      media: [
+        {
+          url: "https://makler-realty.com/wp-content/uploads/2025/04/mobile-qa-fallback-1024x768.jpg",
+          alt: "Reviewed gallery fallback.",
+        },
+      ],
+    }),
   };
+  const pages = {
+    home: renderReactPage(renderHomePage({ registry, listings, localeCode: "he" })),
+    listing: renderReactPage(renderListingPage({ registry, listing, localeCode: "he" })),
+    search: renderReactPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" })),
+    seller: renderReactPage(renderSellerPage({ registry, localeCode: "he" })),
+    contact: renderReactPage(renderContactPage({ registry, localeCode: "he" })),
+    fallback: renderReactPage(renderLanguageFallback({ registry, requestedLocale: "fr" })),
+  };
+  const approvedTourHtml = renderReactPage(renderListingPage({ registry, listing: tourListing, localeCode: "he" }));
 
   for (const [kind, html] of Object.entries(pages)) {
     assertHtmlPage(html, {
@@ -55,6 +79,10 @@ export function buildMobileElderlyQaReport({
     check(
       "hebrew_rtl_public_pages",
       ["home", "listing", "search", "seller", "contact"].every((key) => includes(pages[key], "<html lang=\"he\" dir=\"rtl\">")),
+    ),
+    check(
+      "react_public_bodies",
+      ["home", "listing", "search", "seller", "contact"].every((key) => includes(pages[key], `data-react-public-ui=\"${key}\"`)),
     ),
     check(
       "mobile_search_form",
@@ -84,9 +112,15 @@ export function buildMobileElderlyQaReport({
         includes(pages.listing, "data-listing-contact-panel=\"true\"") &&
         includes(pages.listing, "data-listing-facts=\"true\"") &&
         includes(pages.listing, "data-photo-carousel=\"true\"") &&
-        includes(pages.listing, "data-photo-sphere-viewer=") &&
         includes(pages.listing, "data-listing-action=\"print\"") &&
         includes(pages.listing, "data-client-save-listing="),
+    ),
+    check(
+      "approved_360_tour_accessibility",
+      includes(approvedTourHtml, "data-photo-sphere-viewer=") &&
+        includes(approvedTourHtml, "data-tour-provider=\"photo-sphere-viewer\"") &&
+        includes(approvedTourHtml, "Reviewed 360 panorama with a gallery fallback.") &&
+        includes(approvedTourHtml, "data-photo-carousel=\"true\""),
     ),
     check("phone_first_forms", includes(pages.seller, "data-phone-first=\"true\"") && includes(pages.contact, "data-phone-first=\"true\"")),
     check(
@@ -96,6 +130,22 @@ export function buildMobileElderlyQaReport({
         includes(pages.seller, "data-seller-valuation-flow=\"broker_callback\"") &&
         includes(pages.seller, "name=\"contact.phone\"") &&
         includes(pages.seller, "name=\"contact_preference\""),
+    ),
+    check(
+      "seller_property_intake",
+      includes(pages.seller, "data-seller-property-fields=\"true\"") &&
+        includes(pages.seller, "name=\"property.location\"") &&
+        includes(pages.seller, "name=\"property.type\"") &&
+        includes(pages.seller, "name=\"property.area\"") &&
+        includes(pages.seller, "name=\"property.bedrooms\""),
+    ),
+    check(
+      "source_backed_search_filters",
+      includes(pages.search, "name=\"property_type\"") &&
+        includes(pages.search, "name=\"offer_type\"") &&
+        includes(pages.search, "name=\"price_min\"") &&
+        includes(pages.search, "name=\"price_max\"") &&
+        includes(pages.search, "name=\"bedrooms_min\""),
     ),
     check("fallback_noindex_request", includes(pages.fallback, "noindex,follow") && includes(pages.fallback, "Request this language")),
     check(
@@ -128,7 +178,11 @@ export function assertMobileElderlyQaReport(report) {
     "mobile_search_actions",
     "listing_sticky_actions",
     "listing_detail_media_actions",
+    "approved_360_tour_accessibility",
     "seller_valuation_broker_review",
+    "seller_property_intake",
+    "source_backed_search_filters",
+    "react_public_bodies",
     "admin_and_market_languages",
   ]) {
     if (!report.checks.some((check) => check.id === id && check.status === "pass")) {

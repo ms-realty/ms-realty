@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 10,
-    "passed": 10,
+    "checks": 14,
+    "passed": 14,
     "failed": 0
   },
   "checks": [
@@ -14,6 +14,11 @@
     },
     {
       "id": "hebrew_rtl_public_pages",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "react_public_bodies",
       "status": "pass",
       "evidence": {}
     },
@@ -38,12 +43,27 @@
       "evidence": {}
     },
     {
+      "id": "approved_360_tour_accessibility",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
       "id": "phone_first_forms",
       "status": "pass",
       "evidence": {}
     },
     {
       "id": "seller_valuation_broker_review",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "seller_property_intake",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "source_backed_search_filters",
       "status": "pass",
       "evidence": {}
     },

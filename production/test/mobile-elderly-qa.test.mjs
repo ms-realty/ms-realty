@@ -14,7 +14,11 @@ test("mobile elderly QA report covers rendered public pages and language policy"
   assert.equal(report.checks.find((check) => check.id === "mobile_search_form").status, "pass");
   assert.equal(report.checks.find((check) => check.id === "mobile_search_actions").status, "pass");
   assert.equal(report.checks.find((check) => check.id === "listing_detail_media_actions").status, "pass");
+  assert.equal(report.checks.find((check) => check.id === "approved_360_tour_accessibility").status, "pass");
   assert.equal(report.checks.find((check) => check.id === "seller_valuation_broker_review").status, "pass");
+  assert.equal(report.checks.find((check) => check.id === "seller_property_intake").status, "pass");
+  assert.equal(report.checks.find((check) => check.id === "source_backed_search_filters").status, "pass");
+  assert.equal(report.checks.find((check) => check.id === "react_public_bodies").status, "pass");
   assert.equal(report.checks.find((check) => check.id === "admin_and_market_languages").status, "pass");
 });
 
