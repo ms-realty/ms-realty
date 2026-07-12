@@ -27,6 +27,25 @@ test("listing schema keeps launch-critical listing facts", () => {
   assert.equal(schema.image.length, 1);
 });
 
+test("listing schema omits crawl placeholder prices and internal source metadata", () => {
+  const schema = buildListingSchema({
+    path: "/bg/imoti/MS-PLACEHOLDER",
+    view: {
+      id: "MS-PLACEHOLDER",
+      property_type: "commercial",
+      offer_type: "rent",
+      price_eur: 1,
+      price_on_request: false,
+      source_locale: "bg",
+    },
+    copy: { title: "Commercial property", description: "Source listing." },
+    publicMedia: { gallery: [] },
+  });
+
+  assert.equal(Object.hasOwn(schema, "offers"), false);
+  assert.equal(schema.additionalProperty.some((item) => item.name === "source_locale"), false);
+});
+
 test("missing approved media is a review warning instead of a schema failure", () => {
   const schema = buildListingSchema({
     path: "/ru/properties/MS-2",

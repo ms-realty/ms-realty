@@ -9,7 +9,8 @@ function asNumber(value) {
 }
 
 export function buildListingSchema({ path: listingPath, view, copy, publicMedia }) {
-  const price = asNumber(view.price_eur);
+  const candidatePrice = asNumber(view.price_eur);
+  const price = view.price_on_request === true || candidatePrice === null || candidatePrice <= 1 ? null : candidatePrice;
   const schema = {
     "@context": "https://schema.org",
     "@type": "RealEstateListing",
@@ -23,7 +24,6 @@ export function buildListingSchema({ path: listingPath, view, copy, publicMedia 
     additionalProperty: [
       { "@type": "PropertyValue", name: "offer_type", value: view.offer_type },
       { "@type": "PropertyValue", name: "bedrooms", value: view.bedrooms },
-      { "@type": "PropertyValue", name: "source_locale", value: view.source_locale },
     ].filter((item) => filled(item.value)),
   };
 
