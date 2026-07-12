@@ -60,6 +60,7 @@ main.crm-scroll { display: block; }
 
 /* Lead reply cell: Hermes draft button + collapsible review form */
 .adm-reply-cell { min-width: 300px; display: grid; gap: var(--space-2); }
+.adm-lead-context { display: block; margin-top: 3px; color: var(--text-muted); font-size: var(--text-xs); overflow-wrap: anywhere; }
 .adm-draft-form { display: inline-flex; }
 .adm-reply > summary {
   list-style: none;

@@ -137,6 +137,7 @@ test("admin lead values are localized without exposing raw workflow codes", () =
         original_language: "he",
         admin_locale: "ru",
         contact_preference: "whatsapp",
+        property: { location: "Sandanski", type: "apartment" },
         broker_assignment: { broker_id: "broker_international" },
       },
     ],
@@ -156,6 +157,7 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.match(html, /Запрос со страницы объекта/);
   assert.match(html, /WhatsApp/);
   assert.match(html, /Нужна эскалация менеджеру/);
+  assert.match(html, /data-lead-context="true">Sandanski/);
   assert.doesNotMatch(html, />website_listing_detail</);
   assert.doesNotMatch(html, />manager escalation required</);
 });

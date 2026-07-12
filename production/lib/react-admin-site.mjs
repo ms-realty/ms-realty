@@ -544,6 +544,7 @@ function LeadInboxBody({ page }) {
                 const leadSla = leadSlaById.get(lead.lead_id);
                 const slaStatus = leadSla?.status || "pending";
                 const brokerId = lead.broker_assignment?.broker_id || "";
+                const leadContext = [lead.listing_reference, lead.property?.location].filter(Boolean).join(" / ");
                 return h(
                   "tr",
                   {
@@ -557,7 +558,12 @@ function LeadInboxBody({ page }) {
                     "data-broker-assignment": brokerId,
                     "data-lead-replied": repliedLeadIds.has(lead.lead_id) ? "true" : "false",
                   },
-                  h("td", null, h("code", { className: "crm-mono" }, lead.lead_id)),
+                  h(
+                    "td",
+                    null,
+                    h("code", { className: "crm-mono" }, lead.lead_id),
+                    leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
+                  ),
                   h("td", null, h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type))),
                   h("td", { className: "crm-tbl__muted" }, valueText(ui, lead.source)),
                   h("td", null, h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`)),
