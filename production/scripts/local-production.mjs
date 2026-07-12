@@ -168,19 +168,25 @@ async function start(env, { withHermes = false } = {}) {
   const envOverrides = withHermes ? hermesAgentAppEnv(hermesEnv) : {};
   const profile = withHermes ? ["--profile", "hermes"] : [];
   if (withHermes) compose([...profile, "run", "--rm", "hermes-agent-bootstrap"], { envOverrides });
+  // payload-migrate and runtime-init share the app image but do not have a
+  // build stanza themselves. Build it before Compose starts either service.
+  compose([...profile, "build", "app"], { envOverrides });
   compose([
     ...profile,
     "up",
-    "--build",
     "--detach",
     "--wait",
     "postgres",
     "typesense",
     "meilisearch",
-    "payload-migrate",
     ...(withHermes ? ["hermes-agent"] : []),
-    "app",
   ], { envOverrides });
+  compose(["run", "--rm", "runtime-init"], { envOverrides });
+  compose(["run", "--rm", "payload-migrate"], { envOverrides });
+
+  // A rebuilt tag alone does not make Compose replace an already-running app
+  // container. Recreate it explicitly so local verification uses this build.
+  compose([...profile, "up", "--detach", "--wait", "--no-deps", "--force-recreate", "app"], { envOverrides });
 
   // Caddy resolves the app service address when it starts. Recreate only the
   // edge after an app rebuild so its upstream cannot retain a retired container IP.
