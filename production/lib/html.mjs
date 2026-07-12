@@ -1,8 +1,7 @@
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { chromeCopyFor } from "./public-site.mjs";
-import { DESIGN_CSS, DS_HASH, FONTS_URL } from "./ui/design-assets.mjs";
-import { ADMIN_APP_JS, PUBLIC_APP_JS } from "./ui/client.mjs";
+import { ADMIN_CLIENT_HASH, DESIGN_CSS, DS_HASH, FONTS_URL, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => {
@@ -774,11 +773,11 @@ function renderBody(page, options = {}) {
 
 function clientScript(page, options = {}) {
   if (options.print) return "";
-  if (String(page.kind || "").startsWith("admin_")) return `<script>${ADMIN_APP_JS}</script>`;
+  if (String(page.kind || "").startsWith("admin_")) {
+    return `<script defer src="/vendor/ms-realty-admin.js?v=${ADMIN_CLIENT_HASH}"></script>`;
+  }
   const copy = chromeCopyFor(page.locale || page.lang || "en");
-  const i18n = { requestSent: copy.requestSent, close: copy.close };
-  return `<script>window.MS_REALTY_I18N=${JSON.stringify(i18n).replace(/</g, "\\u003c")};</script>
-<script>${PUBLIC_APP_JS}</script>`;
+  return `<script defer src="/vendor/ms-realty-public.js?v=${PUBLIC_CLIENT_HASH}" data-ms-realty-public-client data-request-sent="${escapeHtml(copy.requestSent)}" data-request-failed="${escapeHtml(copy.requestFailed || "")}"></script>`;
 }
 
 export function renderHtmlPage(page, options = {}) {

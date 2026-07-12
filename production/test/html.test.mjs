@@ -97,6 +97,10 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /data-hermes-mode="retrieval_only"/);
   assert.match(searchHtml, /data-hermes-chat-form="true"/);
   assert.match(searchHtml, /action="\/api\/hermes\/chat"/);
+  assert.match(searchHtml, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
+  assert.match(searchHtml, /data-ms-realty-public-client/);
+  assert.match(searchHtml, /data-request-failed="לא ניתן היה לשלוח את הפנייה\. נסו שוב\."/);
+  assert.doesNotMatch(searchHtml, /window\.MS_REALTY_I18N/);
   assert.match(filteredSearchHtml, /data-filter-chip="offer_type"/);
   assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski&amp;price_min=50000"/);
   assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski"/);

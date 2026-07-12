@@ -7,11 +7,19 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   const packageJson = JSON.parse(fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8"));
   const bundle = new URL("../../public/vendor/photo-sphere-viewer.js", import.meta.url);
   const styles = new URL("../../public/vendor/photo-sphere-viewer.css", import.meta.url);
+  const publicClient = new URL("../../public/vendor/ms-realty-public.js", import.meta.url);
+  const adminClient = new URL("../../public/vendor/ms-realty-admin.js", import.meta.url);
 
   assert.equal(packageJson.dependencies["@photo-sphere-viewer/core"], "5.14.3");
   assert.equal(fs.existsSync(bundle), true);
   assert.equal(fs.existsSync(styles), true);
+  assert.equal(fs.existsSync(publicClient), true);
+  assert.equal(fs.existsSync(adminClient), true);
   assert.match(fs.readFileSync(bundle, "utf8"), /MSRealtyPhotoSphereViewer/);
+  assert.equal(fs.readFileSync(publicClient, "utf8").endsWith(`${PUBLIC_APP_JS}\n`), true);
+  assert.equal(fs.readFileSync(adminClient, "utf8").endsWith(`${ADMIN_APP_JS}\n`), true);
+  assert.doesNotThrow(() => new Function(PUBLIC_APP_JS));
+  assert.doesNotThrow(() => new Function(ADMIN_APP_JS));
   assert.match(PUBLIC_APP_JS, /PHOTO_SPHERE_VIEWER_SCRIPT_URL = "\/vendor\/photo-sphere-viewer\.js"/);
   assert.match(PUBLIC_APP_JS, /PHOTO_SPHERE_VIEWER_CSS_URL = "\/vendor\/photo-sphere-viewer\.css"/);
   assert.match(PUBLIC_APP_JS, /function loadPhotoSphereViewer/);
