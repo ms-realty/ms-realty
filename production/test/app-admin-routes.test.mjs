@@ -283,6 +283,21 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-lead-column="reply"/);
       assert.match(inboxHtml, /data-label="Ответ"/);
 
+      const russianEditor = await listingEditorRoute.GET(
+        new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
+      );
+      const russianEditorHtml = await russianEditor.text();
+      assert.equal(russianEditor.status, 200);
+      assert.match(russianEditorHtml, /data-editor-field="price_eur"/);
+      assert.match(russianEditorHtml, /inputmode="decimal"/);
+      assert.match(russianEditorHtml, /data-editor-name="true"/);
+      assert.match(russianEditorHtml, /data-editor-tab="translations" aria-label="Переводы" title="Переводы"/);
+      assert.match(russianEditorHtml, /class="adm-editor-tab__label">Переводы/);
+      assert.match(russianEditorHtml, /placeholder="Имя редактора"/);
+      assert.match(russianEditorHtml, /Содержание из источника/);
+      assert.match(russianEditorHtml, /Данные объекта/);
+      assert.match(russianEditorHtml, /Коммерческие условия/);
+
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();
       assert.equal(locales.status, 200);

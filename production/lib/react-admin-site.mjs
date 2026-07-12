@@ -671,8 +671,24 @@ function LeadInboxBody({ page }) {
    ============================================================ */
 
 function editorInputFor(field, value) {
-  if (field === "description") return h("textarea", { name: field, defaultValue: value });
-  return h("input", { name: field, defaultValue: value });
+  const shared = { name: field, defaultValue: value, "data-editor-field": field };
+  if (field === "description") return h("textarea", { ...shared, rows: 6 });
+  if (field === "price_eur") return h("input", { ...shared, inputMode: "decimal" });
+  if (field === "bedrooms") return h("input", { ...shared, inputMode: "numeric" });
+  return h("input", shared);
+}
+
+function editorField(copy, ui, field, value) {
+  return h("label", { key: field }, fieldText(ui, field), editorInputFor(field, value));
+}
+
+function editorFieldGroup(copy, ui, title, fields, facts) {
+  return h(
+    "fieldset",
+    { className: "adm-form__group" },
+    h("legend", null, title),
+    ...fields.map((field) => editorField(copy, ui, field, facts[field] ?? "")),
+  );
 }
 
 function ListingEditorBody({ page }) {
@@ -685,6 +701,9 @@ function ListingEditorBody({ page }) {
   const fallbackGalleryCount = (tour.fallback_gallery || []).length;
   const staleTranslations = page.translationTasks.filter((task) => task.status === "stale");
   const title = label(copy, "propertyEditor", "Property editor");
+  const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
+  const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
+  const detailFields = page.editableFields.filter((field) => !contentFields.includes(field) && !termsFields.includes(field));
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -706,10 +725,10 @@ function ListingEditorBody({ page }) {
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
-        h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts" }, h(Icon, { name: "pencil", size: 16 }), label(copy, "facts", "Facts")),
-        h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations" }, h(Icon, { name: "languages", size: 16 }), label(copy, "translations", "Translations")),
-        h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media" }, h(Icon, { name: "camera", size: 16 }), label(copy, "media", "Media")),
-        h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality" }, h(Icon, { name: "shield-check", size: 16 }), label(copy, "quality", "Quality")),
+        h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts", "aria-label": label(copy, "facts", "Facts"), title: label(copy, "facts", "Facts") }, h(Icon, { name: "pencil", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "facts", "Facts"))),
+        h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations", "aria-label": label(copy, "translations", "Translations"), title: label(copy, "translations", "Translations") }, h(Icon, { name: "languages", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "translations", "Translations"))),
+        h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media", "aria-label": label(copy, "media", "Media"), title: label(copy, "media", "Media") }, h(Icon, { name: "camera", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "media", "Media"))),
+        h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
       ),
       h(
         Panel,
@@ -718,8 +737,26 @@ function ListingEditorBody({ page }) {
           "form",
           { id: "listing-facts", method: "post", action: "/api/admin/listings/edit", className: "adm-form", "data-editor-form": "listing", "data-editor-panel": "facts" },
           h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
-          h("label", null, label(copy, "editor", "Editor"), h("input", { name: "editor", required: true, autoComplete: "name" })),
-          ...page.editableFields.map((field) => h("label", { key: field }, fieldText(ui, field), editorInputFor(field, facts[field] ?? ""))),
+          h(
+            "fieldset",
+            { className: "adm-form__group adm-form__group--editor" },
+            h("legend", null, label(copy, "editor", "Editor")),
+            h(
+              "label",
+              null,
+              label(copy, "editor", "Editor"),
+              h("input", {
+                name: "editor",
+                required: true,
+                autoComplete: "name",
+                placeholder: label(copy, "editorNamePlaceholder", "Editor name"),
+                "data-editor-name": "true",
+              }),
+            ),
+          ),
+          editorFieldGroup(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, facts),
+          editorFieldGroup(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, facts),
+          editorFieldGroup(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, facts),
           h(
             "div",
             { className: "adm-form__actions" },
