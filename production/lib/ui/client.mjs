@@ -200,6 +200,9 @@ export const PUBLIC_APP_JS = `(function () {
     output.appendChild(message);
     output.setAttribute("data-state", state);
   }
+  function isSafeInternalPath(value) {
+    return typeof value === "string" && /^\/(?![\/\\])/.test(value);
+  }
   function renderHermesReply(form, payload) {
     var output = hermesOutputFor(form);
     if (!output) return;
@@ -224,7 +227,7 @@ export const PUBLIC_APP_JS = `(function () {
       var list = document.createElement("ul");
       for (var i = 0; i < citations.length; i += 1) {
         var citation = citations[i] || {};
-        if (typeof citation.path !== "string" || citation.path.indexOf("/") !== 0) continue;
+        if (!isSafeInternalPath(citation.path)) continue;
         var item = document.createElement("li");
         var link = document.createElement("a");
         link.href = citation.path;

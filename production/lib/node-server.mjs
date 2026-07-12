@@ -176,7 +176,9 @@ export function assertServerSmoke(smoke) {
     smoke.hermesChat.body.kind !== "hermes_public_chat" ||
     smoke.hermesChat.body.mode !== "retrieval_only" ||
     smoke.hermesChat.body.can_publish !== false ||
-    !smoke.hermesChat.body.disclosure.includes("approved MS Realty") ||
+    smoke.hermesChat.body.can_send_customer_message !== false ||
+    smoke.hermesChat.body.source_policy !== "approved_ms_realty_only" ||
+    !smoke.hermesChat.body.disclosure ||
     !smoke.hermesChat.body.citations?.some((citation) => citation.path?.startsWith("/he/"))
   ) {
     throw new Error("Server must answer public Hermes chat from approved listing sources only");

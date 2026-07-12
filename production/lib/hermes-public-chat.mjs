@@ -4,6 +4,62 @@ import { searchRuntimeListings } from "./runtime.mjs";
 
 const BCP47 = /^[a-z]{2,3}(-[A-Z]{2})?$/;
 
+const CHAT_COPY = {
+  bg: {
+    disclosure: "Отговарям само с одобрени източници на MS Realty.",
+    fallback: "Отговарям само с одобрени източници на MS Realty. Част от резултатите използват одобрено резервно съдържание, защото преводът на заявения език още не е прегледан.",
+    noResults: "Не намерих одобрени съвпадащи обяви.",
+    found: (count) => `Намерих ${count} одобрени съвпадащи обяви.`,
+    firstOptions: "Първи варианти:",
+  },
+  en: {
+    disclosure: "I answer only from approved MS Realty listing and CMS sources.",
+    fallback: "I answer only from approved MS Realty listing and CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet.",
+    noResults: "I found no approved matching listings.",
+    found: (count) => `I found ${count} approved matching listing${count === 1 ? "" : "s"}.`,
+    firstOptions: "First options:",
+  },
+  de: {
+    disclosure: "Ich antworte nur auf Grundlage genehmigter Quellen von MS Realty.",
+    fallback: "Ich antworte nur auf Grundlage genehmigter Quellen von MS Realty. Einige Ergebnisse verwenden genehmigte Ersatzinhalte, weil die Übersetzung der angefragten Seite noch nicht geprüft ist.",
+    noResults: "Ich habe keine passenden genehmigten Immobilien gefunden.",
+    found: (count) => `Ich habe ${count} passende genehmigte Immobilien gefunden.`,
+    firstOptions: "Erste Optionen:",
+  },
+  nl: {
+    disclosure: "Ik antwoord alleen op basis van goedgekeurde bronnen van MS Realty.",
+    fallback: "Ik antwoord alleen op basis van goedgekeurde bronnen van MS Realty. Sommige resultaten gebruiken goedgekeurde terugvalinhoud omdat de vertaling van de gevraagde pagina nog niet is beoordeeld.",
+    noResults: "Ik heb geen passende goedgekeurde objecten gevonden.",
+    found: (count) => `Ik heb ${count} passende goedgekeurde objecten gevonden.`,
+    firstOptions: "Eerste opties:",
+  },
+  ru: {
+    disclosure: "Я отвечаю только на основе одобренных источников MS Realty.",
+    fallback: "Я отвечаю только на основе одобренных источников MS Realty. Часть результатов использует одобренный резервный контент, потому что перевод запрошенной страницы ещё не проверен.",
+    noResults: "Подходящих одобренных объектов не найдено.",
+    found: (count) => `Найдено одобренных подходящих объектов: ${count}.`,
+    firstOptions: "Первые варианты:",
+  },
+  el: {
+    disclosure: "Απαντώ μόνο από εγκεκριμένες πηγές της MS Realty.",
+    fallback: "Απαντώ μόνο από εγκεκριμένες πηγές της MS Realty. Ορισμένα αποτελέσματα χρησιμοποιούν εγκεκριμένο εφεδρικό περιεχόμενο, επειδή η μετάφραση της ζητούμενης σελίδας δεν έχει ακόμη ελεγχθεί.",
+    noResults: "Δεν βρήκα εγκεκριμένα ακίνητα που να ταιριάζουν.",
+    found: (count) => `Βρήκα ${count} εγκεκριμένα ακίνητα που ταιριάζουν.`,
+    firstOptions: "Πρώτες επιλογές:",
+  },
+  he: {
+    disclosure: "אני עונה רק מתוך מקורות מאושרים של MS Realty.",
+    fallback: "אני עונה רק מתוך מקורות מאושרים של MS Realty. חלק מהתוצאות משתמשות בתוכן חלופי מאושר, מפני שתרגום הדף המבוקש עדיין לא נבדק.",
+    noResults: "לא נמצאו נכסים מאושרים תואמים.",
+    found: (count) => `נמצאו ${count} נכסים מאושרים תואמים.`,
+    firstOptions: "אפשרויות ראשונות:",
+  },
+};
+
+function chatCopy(localeCode) {
+  return CHAT_COPY[localeCode] || CHAT_COPY.en;
+}
+
 function requestedLocale(registry, input) {
   const code = String(input.locale || input.language || registry.source_locale || "bg").trim();
   if (!BCP47.test(code)) throw new Error("Chat locale must be a valid BCP 47 language code");
@@ -17,18 +73,17 @@ function queryText(input) {
   return text;
 }
 
-function disclosure({ available, cards }) {
+function disclosure({ available, cards, localeCode }) {
+  const copy = chatCopy(localeCode);
   const fallbackCards = cards.filter((card) => !card.translation_indexable);
-  if (!available || fallbackCards.length) {
-    return "I answer only from approved MS Realty listing/CMS sources. Some results use approved fallback content because the requested page translation is not reviewed yet.";
-  }
-  return "I answer only from approved MS Realty listing/CMS sources.";
+  return !available || fallbackCards.length ? copy.fallback : copy.disclosure;
 }
 
-function answer(cards, totalMatches, note) {
-  if (!cards.length) return `${note} I found no approved matching listings.`;
+function answer(cards, totalMatches, note, localeCode) {
+  const copy = chatCopy(localeCode);
+  if (!cards.length) return `${note} ${copy.noResults}`;
   const options = cards.map((card) => `${card.title} (${card.location}, ${card.path})`).join("; ");
-  return `${note} I found ${totalMatches} approved matching listing${totalMatches === 1 ? "" : "s"}. First options: ${options}.`;
+  return `${note} ${copy.found(totalMatches)} ${copy.firstOptions} ${options}.`;
 }
 
 function contentAnswer(docs, note) {
@@ -66,7 +121,7 @@ export function buildHermesPublicChat(
   });
   const cards = search.cards.slice(0, 3);
   const contentFallback = cmsMatches.some((doc) => doc.locale !== resolved.locale.code);
-  const note = disclosure({ available: resolved.available && !contentFallback, cards });
+  const note = disclosure({ available: resolved.available && !contentFallback, cards, localeCode: resolved.locale.code });
   const citations = cmsMatches.length
     ? contentCitations(cmsMatches)
     : cards.map((card) => ({
@@ -89,8 +144,9 @@ export function buildHermesPublicChat(
     lang: search.lang,
     dir: search.dir,
     fallback_used: !resolved.available || contentFallback || cards.some((card) => !card.translation_indexable),
+    source_policy: "approved_ms_realty_only",
     query,
-    answer: cmsMatches.length ? contentAnswer(cmsMatches, note) : answer(cards, search.search.total_matches, note),
+    answer: cmsMatches.length ? contentAnswer(cmsMatches, note) : answer(cards, search.search.total_matches, note, resolved.locale.code),
     disclosure: note,
     citations,
     suggested_actions: [
@@ -107,11 +163,16 @@ export function assertHermesPublicChat(response) {
   if (response.can_publish !== false || response.can_send_customer_message !== false) {
     throw new Error("Hermes public chat cannot publish or send customer messages");
   }
-  if (!response.answer || !response.disclosure?.includes("approved MS Realty")) {
+  if (!response.answer || !response.disclosure || response.source_policy !== "approved_ms_realty_only") {
     throw new Error("Hermes public chat must disclose approved-source grounding");
   }
   for (const citation of response.citations || []) {
-    if (!["listing", "cms_page"].includes(citation.type) || !citation.id || !citation.path?.startsWith("/")) {
+    if (
+      !["listing", "cms_page"].includes(citation.type) ||
+      !citation.id ||
+      typeof citation.path !== "string" ||
+      !/^\/(?![\/\\])/.test(citation.path)
+    ) {
       throw new Error("Hermes public chat citations must point to approved listing or CMS sources");
     }
   }

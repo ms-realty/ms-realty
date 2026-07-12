@@ -39,6 +39,7 @@ test("public client submits Hermes questions without exposing provider credentia
   assert.match(PUBLIC_APP_JS, /data-hermes-chat-form/);
   assert.match(PUBLIC_APP_JS, /payload\.kind !== "hermes_public_chat"/);
   assert.match(PUBLIC_APP_JS, /data-hermes-sources-label/);
-  assert.match(PUBLIC_APP_JS, /citation\.path\.indexOf\("\/"\) !== 0/);
+  assert.match(PUBLIC_APP_JS, /function isSafeInternalPath/);
+  assert.match(PUBLIC_APP_JS, /if \(!isSafeInternalPath\(citation\.path\)\) continue;/);
   assert.doesNotMatch(PUBLIC_APP_JS, /HERMES_API_KEY|HERMES_CHAT_COMPLETIONS_URL/);
 });

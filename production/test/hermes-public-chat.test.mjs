@@ -17,10 +17,11 @@ test("Hermes public chat answers only from approved listing sources with fallbac
   assert.equal(response.dir, "rtl");
   assert.equal(response.can_publish, false);
   assert.equal(response.fallback_used, true);
+  assert.equal(response.source_policy, "approved_ms_realty_only");
   assert.ok(response.citations.length > 0);
   assert.ok(response.citations.every((citation) => citation.path.startsWith("/he/")));
-  assert.match(response.disclosure, /approved MS Realty/);
-  assert.match(response.disclosure, /not reviewed/);
+  assert.match(response.disclosure, /מקורות מאושרים/);
+  assert.match(response.disclosure, /עדיין לא נבדק/);
 });
 
 test("Hermes public chat cites approved CMS process facts for foreign-buyer questions", () => {
@@ -40,10 +41,39 @@ test("Hermes public chat cites approved CMS process facts for foreign-buyer ques
   assert.equal(response.fallback_used, true);
 });
 
+test("Hermes public chat localizes source-bound listing boilerplate for Greek", () => {
+  const response = buildHermesPublicChat(
+    loadLocaleRegistry(),
+    loadCmsSeed(),
+    { locale: "el", query: "Sandanski" },
+    { translationTasks: readTranslationLedger() },
+  );
+
+  assert.equal(assertHermesPublicChat(response), true);
+  assert.equal(response.source_policy, "approved_ms_realty_only");
+  assert.match(response.answer, /Βρήκα/);
+  assert.match(response.disclosure, /εγκεκριμένες πηγές/);
+});
+
 test("Hermes public chat rejects missing or invalid public questions", () => {
   const registry = loadLocaleRegistry();
   const seed = loadCmsSeed();
 
   assert.throws(() => buildHermesPublicChat(registry, seed, { locale: "bad code", query: "Sandanski" }), /BCP 47/);
   assert.throws(() => buildHermesPublicChat(registry, seed, { locale: "en", query: "" }), /required/);
+});
+
+test("Hermes public chat rejects protocol-relative and backslash citation paths", () => {
+  const response = buildHermesPublicChat(
+    loadLocaleRegistry(),
+    loadCmsSeed(),
+    { locale: "en", query: "Sandanski" },
+    { translationTasks: readTranslationLedger() },
+  );
+
+  response.citations[0].path = "//untrusted.example/listing";
+  assert.throws(() => assertHermesPublicChat(response), /citations/);
+
+  response.citations[0].path = "/\\untrusted.example/listing";
+  assert.throws(() => assertHermesPublicChat(response), /citations/);
 });
