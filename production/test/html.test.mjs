@@ -64,7 +64,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingHtml, /data-listing-facts="true"/);
   assert.match(listingHtml, /data-listing-price="true"/);
   assert.match(listingHtml, /data-photo-carousel="true"/);
-  assert.match(listingHtml, /data-photo-sphere-viewer="review_required"/);
+  assert.doesNotMatch(listingHtml, /data-photo-sphere-viewer="review_required"|needs_panorama_upload|review required/);
   assert.match(listingHtml, /data-listing-action="back_to_results"/);
   assert.match(listingHtml, /href="\/he\/search"/);
   assert.match(listingHtml, /data-listing-action="print"/);

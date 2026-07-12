@@ -9,7 +9,7 @@ function uiLabels(page) {
 
 function price(value, labels = labelsFor("en")) {
   const amount = Number(value);
-  return Number.isFinite(amount) && amount > 0 ? `EUR ${amount.toLocaleString("en-US")}` : labels.priceOnRequest;
+  return Number.isFinite(amount) && amount > 1 ? `EUR ${amount.toLocaleString("en-US")}` : labels.priceOnRequest;
 }
 
 function cardSummary(card) {
@@ -51,6 +51,45 @@ function Badge({ variant = "neutral", solid = false, icon, children, ...attrs })
 
 function SiteHeader({ chrome }) {
   const copy = chrome.copy;
+  const mobileMenu = h(
+    "details",
+    { className: "site-hd__mobile", "data-mobile-menu": "true" },
+    h("summary", { "aria-label": copy.menuLabel, title: copy.menuLabel }, h(Icon, { name: "menu", size: 22 })),
+    h(
+      "div",
+      { className: "site-hd__mobile-panel" },
+      h(
+        "nav",
+        { className: "site-hd__mobile-nav", "aria-label": copy.menuLabel },
+        ...chrome.nav.map((item) =>
+          h(
+            "a",
+            { key: item.id, href: item.href, "aria-current": item.active ? "page" : undefined },
+            item.label,
+          ),
+        ),
+      ),
+      h(
+        "nav",
+        { className: "site-hd__mobile-langs", "aria-label": copy.languageLabel },
+        ...chrome.languages.map((language) =>
+          h(
+            "a",
+            {
+              key: language.code,
+              href: language.href,
+              hrefLang: language.code,
+              lang: language.code,
+              "aria-current": language.active ? "true" : undefined,
+            },
+            h("b", null, language.code.toUpperCase()),
+            h("span", null, language.label),
+          ),
+        ),
+      ),
+      h(Btn, { tag: "a", variant: "accent", size: "md", full: true, iconStart: "phone", href: chrome.contact.phone_href }, copy.callBroker),
+    ),
+  );
   return h(
     "header",
     { className: "site-hd" },
@@ -105,6 +144,8 @@ function SiteHeader({ chrome }) {
           copy.callBroker,
         ),
       ),
+      h("a", { className: "site-hd__mobile-call", href: chrome.contact.phone_href, "aria-label": copy.callBroker, title: copy.callBroker }, h(Icon, { name: "phone", size: 20 })),
+      mobileMenu,
     ),
   );
 }
@@ -243,24 +284,22 @@ function shell(page, main) {
    Listing cards (components/display/PropertyCard)
    ============================================================ */
 
-function cardBadge(card, localeCode) {
-  const copy = uiCopyFor(localeCode);
-  const verified = card.review_badge === "verified_inventory";
-  return {
-    variant: verified ? "for-sale" : "neutral",
-    label: verified ? copy.verifiedInventory : copy.sourceFallback,
-  };
+function cardBadge(card, labels) {
+  if (card.review_badge !== "reviewed_translation") return null;
+  return { variant: "neutral", label: labels.reviewedTranslation };
 }
 
 function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs }) {
-  const badge = cardBadge(card, localeCode);
+  const badge = cardBadge(card, labels);
   const tone = toneFor(card.id);
   const mediaChildren = [
-    h(
-      "div",
-      { key: "badges", className: "mk-pcard__badges" },
-      h(Badge, { variant: badge.variant, solid: true, "data-card-badge": "true" }, badge.label),
-    ),
+    badge
+      ? h(
+          "div",
+          { key: "badges", className: "mk-pcard__badges" },
+          h(Badge, { variant: badge.variant, solid: true, "data-card-badge": "true" }, badge.label),
+        )
+      : null,
     h(
       "span",
       { key: "count", className: "mk-pcard__count", "data-card-media-count": card.image_count },
@@ -337,7 +376,8 @@ function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
   return h(
     "dl",
     { "data-listing-facts": "true" },
-    ...Object.entries(facts)
+    ...["property_type", "offer_type", "bedrooms"]
+      .map((key) => [key, facts[key]])
       .filter(([, value]) => value !== null && value !== undefined && value !== "")
       .flatMap(([key, value]) => [
         h("dt", { key: `${key}-term` }, labels.factLabels?.[key] || key.replaceAll("_", " ")),
@@ -651,8 +691,13 @@ function ListingBody({ page }) {
   const tour = page.body.media.tour || {};
   const gallery = (page.body.media.gallery || []).slice(0, 12);
   const channels = page.body.actions.direct_contact.channels || [];
+  const brokerChannels = channels.filter((channel) => channel.enabled);
   const tone = toneFor(page.body.facts?.id || page.path);
   const breadcrumbChevron = page.dir === "rtl" ? "chevron-left" : "chevron-right";
+  const sourceLocale = page.body.source.source_locale;
+  const reviewedTranslation = page.locale !== sourceLocale && page.translation.human_approved === true;
+  const translationLabel = reviewedTranslation ? labels.reviewedTranslation : null;
+  const hasDetailFacts = ["property_type", "offer_type", "bedrooms"].some((key) => facts[key] !== null && facts[key] !== undefined && facts[key] !== "");
 
   const crumbs = chrome
     ? h(
@@ -720,16 +765,7 @@ function ListingBody({ page }) {
   const brokerContact = h(
     "nav",
     { className: "ld-aside__contact", "aria-label": labels.brokerContact, "data-broker-contact-actions": "true" },
-    ...channels.map((channel) =>
-      channel.enabled
-        ? h(Btn, { key: channel.label, tag: "a", variant: "secondary", size: "md", full: true, iconStart: channelIcon(channel.href), href: channel.href }, channel.label)
-        : h(
-            "span",
-            { key: channel.label, className: "mk-btn mk-btn--subtle mk-btn--md mk-btn--full", "data-disabled": "", "aria-disabled": "true" },
-            h(Icon, { name: channelIcon(""), size: 18 }),
-            h("span", null, channel.label),
-          ),
-    ),
+    ...brokerChannels.map((channel) => h(Btn, { key: channel.label, tag: "a", variant: "secondary", size: "md", full: true, iconStart: channelIcon(channel.href), href: channel.href }, channel.label)),
   );
 
   const main = h(
@@ -759,11 +795,9 @@ function ListingBody({ page }) {
         h(
           "div",
           { className: "ld-top__main" },
-          h(
-            "p",
-            { className: "mk-badge mk-badge--new mk-badge--sm ld-top__badge", "data-listing-verification": "true" },
-            page.translation.human_approved ? labels.reviewedTranslation : labels.approvedSource,
-          ),
+          translationLabel
+            ? h("p", { className: "mk-badge mk-badge--new mk-badge--sm ld-top__badge", "data-listing-verification": "translation" }, translationLabel)
+            : null,
           h("h1", null, page.body.h1),
           h(
             "div",
@@ -771,6 +805,7 @@ function ListingBody({ page }) {
             h(Icon, { name: "map-pin", size: 17 }),
             ` ${[facts.location, localizedListingValue(page.locale, "property_type", facts.property_type)].filter(Boolean).join(" · ")}`,
           ),
+          h("div", { className: "ld-top__price", "data-listing-price-summary": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
           h(
             "ul",
             { className: "ld-feats", "data-listing-highlights": "true" },
@@ -813,35 +848,39 @@ function ListingBody({ page }) {
             h("h2", null, labels.propertyDetails),
             h("p", { className: "ld-desc", "data-listing-description": "true" }, page.body.description || ""),
           ),
-          h("div", { className: "ld-sec" }, h("h2", null, labels.listingMediaFacts), factsList(facts, labels, page.locale)),
-          h(
-            "nav",
-            {
-              className: "mk-tabs mk-tabs--segmented ld-media-nav",
-              "aria-label": labels.listingMedia,
-              "data-media-gallery-count": page.body.media.gallery_count || 0,
-              "data-tour-status": tour.available ? "available" : tour.review_status || "review_required",
-            },
-            h("a", { className: "mk-tab", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 16 }), labels.gallery),
-            h("a", { className: "mk-tab", href: "#listing-tour", "aria-disabled": tour.available ? "false" : "true" }, h(Icon, { name: "globe", size: 16 }), labels.tour360),
-          ),
+          hasDetailFacts ? h("div", { className: "ld-sec" }, h("h2", null, labels.listingMediaFacts), factsList(facts, labels, page.locale)) : null,
+          tour.available
+            ? h(
+                "nav",
+                {
+                  className: "mk-tabs mk-tabs--segmented ld-media-nav",
+                  "aria-label": labels.listingMedia,
+                  "data-media-gallery-count": page.body.media.gallery_count || 0,
+                  "data-tour-status": "available",
+                },
+                h("a", { className: "mk-tab", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 16 }), labels.gallery),
+                h("a", { className: "mk-tab", href: "#listing-tour" }, h(Icon, { name: "globe", size: 16 }), labels.tour360),
+              )
+            : null,
           h(
             "section",
             { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
             ...gallery.map((image) => h("img", { key: image.url, src: image.url, alt: image.alt || page.body.h1, loading: "lazy" })),
           ),
-          h(
-            "section",
-            {
-              id: "listing-tour",
-              className: "ld-tour mk-card mk-card--sunken mk-card--pad-md",
-              "aria-label": labels.tour360,
-              "data-photo-sphere-viewer": tour.available ? tour.mount_target : "review_required",
-              "data-tour-provider": tour.provider || "photo-sphere-viewer",
-              "data-panorama-url": tour.available ? tour.panorama_url : undefined,
-            },
-            h("p", null, tour.available ? tour.accessibility_caption : tour.review_status || labels.reviewRequired),
-          ),
+          tour.available
+            ? h(
+                "section",
+                {
+                  id: "listing-tour",
+                  className: "ld-tour mk-card mk-card--sunken mk-card--pad-md",
+                  "aria-label": labels.tour360,
+                  "data-photo-sphere-viewer": tour.mount_target,
+                  "data-tour-provider": tour.provider || "photo-sphere-viewer",
+                  "data-panorama-url": tour.panorama_url,
+                },
+                h("p", null, tour.accessibility_caption),
+              )
+            : null,
         ),
         h(
           "aside",
@@ -851,8 +890,8 @@ function ListingBody({ page }) {
             { className: "mk-card mk-card--elevated mk-card--pad-lg ld-aside__card" },
             h("div", { className: "ld-price", "data-listing-price": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
             primaryActions,
-            brokerContact,
-            h("div", { className: "ld-trust" }, h(Icon, { name: "shield-check", size: 16 }), ` ${page.translation.human_approved ? labels.reviewedTranslation : labels.approvedSource}`),
+            brokerChannels.length ? brokerContact : null,
+            translationLabel ? h("div", { className: "ld-trust" }, h(Icon, { name: "shield-check", size: 16 }), ` ${translationLabel}`) : null,
             h("div", { className: "ld-aside__ref" }, h("span", null, facts.id), h("span", null, page.body.source.source_domain)),
           ),
         ),

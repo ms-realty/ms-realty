@@ -157,14 +157,21 @@ export function mediaWorkflow(media = []) {
 
 export function publicMediaLibrary(media = [], { fallback = null } = {}) {
   const seen = new Set();
-  const gallery = media
+  const candidates = media
     .filter(isPublicPropertyPhoto)
     .filter((item) => {
       if (seen.has(item.asset_url)) return false;
       seen.add(item.asset_url);
       return true;
     })
-    .sort((left, right) => photoPriority(right) - photoPriority(left))
+    .sort((left, right) => photoPriority(right) - photoPriority(left));
+
+  // Keep alternate photos only when they are close to the strongest source
+  // image. This removes inherited 45px crawler thumbnails from galleries
+  // while retaining legitimate lower-priority listing shots.
+  const strongestPriority = candidates.length ? photoPriority(candidates[0]) : null;
+  const gallery = candidates
+    .filter((item) => strongestPriority === null || photoPriority(item) >= strongestPriority - 60)
     .slice(0, 30)
     .map(publicAsset);
 

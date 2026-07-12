@@ -876,10 +876,13 @@ function descriptionFor(listing) {
 function localizedCopy(localeCode, view) {
   const template = PUBLIC_COPY[localeCode];
   if (!template || localeCode === view.source_locale) {
+    const sourceTitle = view.h1 || view.title;
     return {
-      title: view.title,
-      h1: view.h1,
-      description: descriptionFor(view),
+      // A legacy metadata title can belong to a different site language. The
+      // visible H1 is the crawl's strongest source-language signal.
+      title: sourceTitle,
+      h1: sourceTitle,
+      description: view.description && view.description !== view.title ? view.description : sourceTitle,
     };
   }
   const title = template.title(view);
@@ -960,7 +963,7 @@ function listingCard(registry, listing, locale) {
   const copyLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
   const copy = localizedCopy(copyLocale, view);
   const ui = uiCopyFor(locale.code);
-  const verified = state.indexable || view.source_locale === locale.code || listing.locale === locale.code;
+  const reviewedTranslation = state.indexable && copyLocale !== view.source_locale && state.translation?.human_approved === true;
   const thumbnail = selectPublicThumbnail(
     view.media,
     view.thumbnail_url
@@ -974,7 +977,7 @@ function listingCard(registry, listing, locale) {
     id: listing.id,
     title: copy.title,
     path: listingPath(registry, locale.code, listing.id),
-    review_badge: verified ? "verified_inventory" : "source_locale_fallback",
+    review_badge: reviewedTranslation ? "reviewed_translation" : null,
     translation_display: state.display,
     translation_locale: state.translation?.locale || locale.code,
     translation_status: state.translation?.status || "missing",
@@ -1085,6 +1088,11 @@ function sortListingsForPublicSearch(listings, sort) {
 }
 
 const HOME_MEDIA_PROPERTY_TYPES = new Set(["apartment", "house", "villa", "multi_unit"]);
+const EDITORIAL_HERO_LISTING_IDS = ["MS-CRAWL-0074", "MS-CRAWL-0038", "MS-CRAWL-0003"];
+
+function isEditorialHeroAsset(media) {
+  return Boolean(media?.url) && !/DJI_0696|907-dron/i.test(media.url);
+}
 
 function primaryCardMedia(cards = [], { preferResidential = false } = {}) {
   const card =
@@ -1097,6 +1105,22 @@ function primaryCardMedia(cards = [], { preferResidential = false } = {}) {
     listing_id: card.id,
     path: card.path,
   };
+}
+
+function editorialHeroMedia(registry, listings, locale, fallbackCards) {
+  for (const listingId of EDITORIAL_HERO_LISTING_IDS) {
+    const listing = listings.find((candidate) => candidate.id === listingId && isActiveListing(candidate));
+    if (!listing) continue;
+    const card = listingCard(registry, listing, locale);
+    if (!isEditorialHeroAsset(card.thumbnail)) continue;
+    return {
+      url: card.thumbnail.url,
+      alt: card.thumbnail.alt || card.title,
+      listing_id: card.id,
+      path: card.path,
+    };
+  }
+  return primaryCardMedia(fallbackCards, { preferResidential: true });
 }
 
 function contactChannelLabel(channel, labels) {
@@ -1229,7 +1253,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
     },
     body: {
       h1: copy.h1,
-      description: descriptionFor(view),
+      description: copy.description,
       facts: {
         id: view.id,
         location: view.location,
@@ -1401,7 +1425,7 @@ export function renderHomePage({ registry, localeCode, listings }) {
       h1: copy.h1,
       intro: copy.description,
       hero: {
-        image: primaryCardMedia(search.cards, { preferResidential: true }),
+        image: editorialHeroMedia(registry, listings, locale, search.cards),
       },
       search: {
         path: search.path,

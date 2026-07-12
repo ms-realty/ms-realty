@@ -71,4 +71,5 @@ test("large source imagery outranks an inherited 45px homepage thumbnail", () =>
 
   assert.equal(thumbnail.url, "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg");
   assert.equal(gallery.gallery[0].url, thumbnail.url);
+  assert.equal(gallery.gallery.length, 1);
 });

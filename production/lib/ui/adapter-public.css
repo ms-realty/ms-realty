@@ -11,6 +11,8 @@
 .site-hd__nav { margin-left: 0; margin-right: 0; margin-inline-start: 8px; }
 .site-hd__right { margin-left: 0; margin-right: 0; margin-inline-start: auto; }
 .site-hd__lang { flex: none; }
+.site-hd__mobile,
+.site-hd__mobile-call { display: none; }
 .site-hd__lang a {
   display: inline-flex;
   align-items: center;
@@ -34,11 +36,81 @@
 .site-ft__bar-in nav { flex-wrap: wrap; }
 
 @media (max-width: 1080px) {
-  .site-hd__in { height: auto; padding-block: 10px; row-gap: 2px; flex-wrap: wrap; }
-  .site-hd__nav { order: 3; flex-basis: 100%; overflow-x: auto; padding-bottom: 4px; margin-inline-start: 0; scrollbar-width: none; }
-  .site-hd__lang { overflow-x: auto; max-width: 42vw; scrollbar-width: none; }
-  .site-hd__call span { display: none; }
-  .site-hd__call { padding-inline: 0.6rem; }
+  .site-hd { position: relative; z-index: 30; }
+  .site-hd__in { height: 64px; padding-block: 8px; flex-wrap: nowrap; gap: var(--space-2); }
+  .site-hd__nav,
+  .site-hd__right { display: none; }
+  .site-hd__mobile-call {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-inline-start: auto;
+    color: var(--text-strong);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-button);
+    background: var(--surface);
+  }
+  .site-hd__mobile { display: block; position: relative; }
+  .site-hd__mobile > summary {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--text-strong);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-button);
+    background: var(--surface);
+    cursor: pointer;
+    list-style: none;
+  }
+  .site-hd__mobile > summary::-webkit-details-marker { display: none; }
+  .site-hd__mobile > summary:focus-visible { box-shadow: var(--shadow-focus); outline: none; }
+  .site-hd__mobile-panel {
+    position: absolute;
+    inset-inline-end: 0;
+    top: calc(100% + var(--space-2));
+    z-index: 40;
+    display: grid;
+    gap: var(--space-4);
+    width: min(360px, calc(100vw - 2 * var(--gutter)));
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+  }
+  .site-hd__mobile-nav { display: grid; gap: var(--space-1); }
+  .site-hd__mobile-nav a {
+    padding: var(--space-3) var(--space-2);
+    color: var(--text-strong);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+  }
+  .site-hd__mobile-nav a[aria-current="page"] { color: var(--accent); }
+  .site-hd__mobile-langs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+  }
+  .site-hd__mobile-langs a {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-2);
+    align-items: center;
+    min-height: 44px;
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-body);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+  .site-hd__mobile-langs a[aria-current="true"] { border-color: var(--text-strong); color: var(--text-strong); }
+  .site-hd__mobile-langs b { font-size: var(--text-xs); }
+  .site-hd__mobile-langs span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 @media (max-width: 560px) {
   .site-ft__in { grid-template-columns: 1fr; padding-block: 40px 24px; }
@@ -127,6 +199,7 @@ a.mk-btn:hover { text-decoration: none; }
 .ld-top { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-5); margin: 14px 0 18px; flex-wrap: wrap; }
 .ld-top__main { display: grid; gap: var(--space-2); }
 .ld-top__badge { width: max-content; }
+.ld-top__price { color: var(--price); font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--fw-semibold); line-height: var(--lh-tight); }
 .ld-top__acts { display: flex; gap: var(--space-2); flex-wrap: wrap; flex: none; }
 .ld-feats { display: flex; flex-wrap: wrap; gap: 9px; padding: 0; margin: var(--space-2) 0 0; list-style: none; }
 .ld-g { position: relative; }

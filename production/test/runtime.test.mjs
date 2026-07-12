@@ -26,6 +26,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   const guide = renderRuntimePath(registry, seed, "/en/guides/foreign-buyers");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
+  const sourceLanguageRepair = renderRuntimePath(registry, seed, "/bg/imoti/MS-CRAWL-0006");
 
   assert.equal(he.status, 200);
   assert.equal(he.dir, "rtl");
@@ -64,6 +65,15 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
+  assert.equal(sourceLanguageRepair.metadata.title, "Дава под наем промишлена сграда в Сандански");
+  assert.equal(sourceLanguageRepair.body.description, "Дава под наем промишлена сграда в Сандански");
+});
+
+test("runtime home uses a source-backed curated hero instead of crawler annotation media", () => {
+  const home = renderRuntimePath(registry, seed, "/bg/");
+
+  assert.equal(home.body.hero.image.listing_id, "MS-CRAWL-0074");
+  assert.doesNotMatch(home.body.hero.image.url, /DJI_0696|907-dron/i);
 });
 
 test("runtime overlays approved broker contact links on listing routes", () => {
