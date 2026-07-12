@@ -505,17 +505,40 @@ function HomeBody({ page }) {
    Search results (ui_kits/website/SearchResults)
    ============================================================ */
 
+const SEARCH_FILTER_QUERY_KEYS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "status"];
+
+function searchHref(page, omitFilter) {
+  const params = new URLSearchParams();
+  if (page.search.query) params.set("q", page.search.query);
+  if (page.search.sort && page.search.sort !== "recommended") params.set("sort", page.search.sort);
+  for (const key of SEARCH_FILTER_QUERY_KEYS) {
+    if (omitFilter === "*" || omitFilter === key) continue;
+    const value = page.search.filters?.[key];
+    if (value) params.set(key, value);
+  }
+  const query = params.toString();
+  return query ? `${page.path}?${query}` : page.path;
+}
+
 function SearchBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
   const controls = page.search.controls || {};
   const viewModes = controls.view_modes || [];
-  const filter = (name, label) =>
+  const filterOptions = controls.filter_options || {};
+  const filterSelect = (name, label, values, optionLabel = (value) => value) =>
     h(
       "div",
       { key: name, className: "sr-fg" },
       h("label", { className: "hdr", htmlFor: `sr-${name}` }, label),
-      h("input", { id: `sr-${name}`, name, defaultValue: page.search.filters?.[name] || "" }),
+      h(
+        "select",
+        { id: `sr-${name}`, name },
+        h("option", { value: "" }, labels.any),
+        ...values.map((value) =>
+          h("option", { key: value, value, selected: page.search.filters?.[name] === String(value) ? true : undefined }, optionLabel(value)),
+        ),
+      ),
     );
   const main = h(
     "main",
@@ -544,8 +567,62 @@ function SearchBody({ page }) {
             h("label", { className: "hdr", htmlFor: "sr-q" }, labels.search),
             h("input", { id: "sr-q", name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" }),
           ),
-          filter("location", labels.location),
-          filter("property_type", labels.propertyType),
+          h(
+            "div",
+            { className: "sr-fg" },
+            h("label", { className: "hdr", htmlFor: "sr-location" }, labels.location),
+            h("input", {
+              id: "sr-location",
+              name: "location",
+              list: "sr-location-options",
+              defaultValue: page.search.filters?.location || "",
+              autoComplete: "off",
+            }),
+            h(
+              "datalist",
+              { id: "sr-location-options" },
+              ...(filterOptions.locations || []).map((location) => h("option", { key: location, value: location })),
+            ),
+          ),
+          filterSelect(
+            "property_type",
+            labels.propertyType,
+            filterOptions.property_types || [],
+            (value) => localizedListingValue(page.locale, "property_type", value),
+          ),
+          filterSelect(
+            "offer_type",
+            labels.factLabels?.offer_type || "Offer",
+            filterOptions.offer_types || [],
+            (value) => localizedListingValue(page.locale, "offer_type", value),
+          ),
+          h(
+            "fieldset",
+            { className: "sr-fg sr-fg--price" },
+            h("legend", { className: "hdr" }, "EUR"),
+            h(
+              "div",
+              { className: "sr-fg__pair" },
+              h(
+                "label",
+                { htmlFor: "sr-price_min" },
+                labels.priceMin,
+                h("input", { id: "sr-price_min", name: "price_min", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.price_min || "" }),
+              ),
+              h(
+                "label",
+                { htmlFor: "sr-price_max" },
+                labels.priceMax,
+                h("input", { id: "sr-price_max", name: "price_max", type: "number", min: "0", inputMode: "numeric", defaultValue: page.search.filters?.price_max || "" }),
+              ),
+            ),
+          ),
+          filterSelect(
+            "bedrooms_min",
+            labels.factLabels?.bedrooms || "Bedrooms",
+            filterOptions.bedrooms || [],
+            (value) => `${value}+`,
+          ),
           h(
             "div",
             { className: "sr-fg" },
@@ -580,7 +657,14 @@ function SearchBody({ page }) {
                 ),
               )
             : null,
-          h("div", { className: "sr-fg sr-fg--submit" }, h(Btn, { type: "submit", variant: "primary", full: true }, labels.search)),
+          h(
+            "div",
+            { className: "sr-filter-actions" },
+            h(Btn, { type: "submit", variant: "primary", full: true }, labels.search),
+            (controls.active_filter_chips || []).length
+              ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters)
+              : null,
+          ),
         ),
         h(
           "form",
@@ -613,9 +697,16 @@ function SearchBody({ page }) {
           },
           ...(controls.active_filter_chips || []).map((chip) =>
             h(
-              "span",
-              { key: chip.key, className: "mk-tag mk-tag--outline mk-tag--md", "data-filter-chip": chip.key },
+              "a",
+              {
+                key: chip.key,
+                className: "mk-tag mk-tag--outline mk-tag--md",
+                href: searchHref(page, chip.key),
+                "data-filter-chip": chip.key,
+                "aria-label": `${labels.clearFilters}: ${localizedSearchFilterValue(page.locale, chip.key, chip.value)}`,
+              },
               localizedSearchFilterValue(page.locale, chip.key, chip.value),
+              h(Icon, { name: "x", size: 14 }),
             ),
           ),
         ),

@@ -123,6 +123,10 @@ test("search route is locale-scoped and list-first on mobile", () => {
     search.search.controls.sort_options.map((option) => option.id),
     ["recommended", "price_asc", "price_desc"],
   );
+  assert.ok(search.search.controls.filter_options.locations.includes("Sandanski"));
+  assert.ok(search.search.controls.filter_options.property_types.includes("apartment"));
+  assert.ok(search.search.controls.filter_options.offer_types.includes("sale"));
+  assert.ok(search.search.controls.filter_options.bedrooms.includes(2));
   assert.ok(search.search.total_matches > search.cards.length);
   assert.equal(search.search.returned, search.cards.length);
   assert.ok(search.cards.length > 0);

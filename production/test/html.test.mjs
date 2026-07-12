@@ -40,6 +40,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
     }),
   );
   const searchHtml = renderHtmlPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" }));
+  const filteredSearchHtml = renderHtmlPage(
+    renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski", filters: { offer_type: "sale", price_min: "50000" } }),
+  );
   const locationHtml = renderHtmlPage(renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" }));
   const sellerHtml = renderHtmlPage(renderSellerPage({ registry, localeCode: "he" }));
   const contactHtml = renderHtmlPage(renderContactPage({ registry, localeCode: "he" }));
@@ -83,6 +86,13 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /שמירת חיפוש/);
   assert.match(contactHtml, /פעולות קשר/);
   assert.match(searchHtml, /data-save-search-endpoint="\/api\/saved-searches"/);
+  assert.match(searchHtml, /name="offer_type"/);
+  assert.match(searchHtml, /name="price_min"/);
+  assert.match(searchHtml, /name="bedrooms_min"/);
+  assert.match(searchHtml, /id="sr-location-options"/);
+  assert.match(filteredSearchHtml, /data-filter-chip="offer_type"/);
+  assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski&amp;price_min=50000"/);
+  assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski"/);
   assert.match(searchHtml, /data-search-card="true"/);
   assert.match(searchHtml, /data-card-thumbnail="true"/);
   assert.match(searchHtml, /<img src="https:\/\/makler-realty\./);

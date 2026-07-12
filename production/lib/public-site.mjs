@@ -44,6 +44,10 @@ const ACTION_LABELS = {
     photos: "снимки",
     location: "Локация",
     propertyType: "Тип",
+    priceMin: "Мин. цена (EUR)",
+    priceMax: "Макс. цена (EUR)",
+    clearFilters: "Изчисти филтрите",
+    any: "Всички",
     sort: "Сортиране",
     view: "Изглед",
     saveSearch: "Запази търсенето",
@@ -98,6 +102,10 @@ const ACTION_LABELS = {
     photos: "photos",
     location: "Location",
     propertyType: "Type",
+    priceMin: "Min. price (EUR)",
+    priceMax: "Max. price (EUR)",
+    clearFilters: "Clear filters",
+    any: "Any",
     sort: "Sort",
     view: "View",
     saveSearch: "Save search",
@@ -152,6 +160,10 @@ const ACTION_LABELS = {
     photos: "Fotos",
     location: "Ort",
     propertyType: "Typ",
+    priceMin: "Mindestpreis (EUR)",
+    priceMax: "Höchstpreis (EUR)",
+    clearFilters: "Filter löschen",
+    any: "Alle",
     sort: "Sortieren",
     view: "Ansicht",
     saveSearch: "Suche speichern",
@@ -206,6 +218,10 @@ const ACTION_LABELS = {
     photos: "foto's",
     location: "Locatie",
     propertyType: "Type",
+    priceMin: "Min. prijs (EUR)",
+    priceMax: "Max. prijs (EUR)",
+    clearFilters: "Filters wissen",
+    any: "Alle",
     sort: "Sorteren",
     view: "Weergave",
     saveSearch: "Zoekopdracht bewaren",
@@ -260,6 +276,10 @@ const ACTION_LABELS = {
     photos: "фото",
     location: "Локация",
     propertyType: "Тип",
+    priceMin: "Мин. цена (EUR)",
+    priceMax: "Макс. цена (EUR)",
+    clearFilters: "Очистить фильтры",
+    any: "Любые",
     sort: "Сортировка",
     view: "Вид",
     saveSearch: "Сохранить поиск",
@@ -314,6 +334,10 @@ const ACTION_LABELS = {
     photos: "φωτογραφίες",
     location: "Τοποθεσία",
     propertyType: "Τύπος",
+    priceMin: "Ελάχ. τιμή (EUR)",
+    priceMax: "Μέγ. τιμή (EUR)",
+    clearFilters: "Εκκαθάριση φίλτρων",
+    any: "Όλα",
     sort: "Ταξινόμηση",
     view: "Προβολή",
     saveSearch: "Αποθήκευση αναζήτησης",
@@ -368,6 +392,10 @@ const ACTION_LABELS = {
     photos: "תמונות",
     location: "מיקום",
     propertyType: "סוג",
+    priceMin: "מחיר מינימום (EUR)",
+    priceMax: "מחיר מקסימום (EUR)",
+    clearFilters: "ניקוי מסננים",
+    any: "הכול",
     sort: "מיון",
     view: "תצוגה",
     saveSearch: "שמירת חיפוש",
@@ -1305,7 +1333,15 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
   const fallbackMatches = activeListings.filter(
     (listing) => listing.locale === (locale.fallback_locale || registry.source_locale) || listing.locale === registry.source_locale,
   );
-  const matchedListings = (localeMatches.length ? localeMatches : fallbackMatches).filter((listing) =>
+  const searchableListings = localeMatches.length ? localeMatches : fallbackMatches;
+  const filterViews = searchableListings.map((listing) => listingToPublicViewModel(listing));
+  const filterOptions = {
+    locations: [...new Set(filterViews.map((listing) => listing.location).filter(Boolean))].sort(),
+    property_types: [...new Set(filterViews.map((listing) => listing.property_type).filter(Boolean))].sort(),
+    offer_types: [...new Set(filterViews.map((listing) => listing.offer_type).filter(Boolean))].sort(),
+    bedrooms: [...new Set(filterViews.map((listing) => listing.bedrooms).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
+  };
+  const matchedListings = searchableListings.filter((listing) =>
     matchesSearch(listingToPublicViewModel(listing), query, filters),
   );
   const selectedSort = publicSearchSort(sort);
@@ -1369,6 +1405,7 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
           },
         },
         active_filter_chips: activeFilterChips,
+        filter_options: filterOptions,
       },
       fallback: {
         enabled: true,
