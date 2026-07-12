@@ -1012,6 +1012,7 @@ function SellerBody({ page }) {
   const labels = uiLabels(page);
   const valuation = page.body.valuation;
   const steps = [labels.propertyDetails, labels.brokerReview, labels.callback];
+  const propertyTypes = Object.entries(uiCopyFor(page.locale).propertyTypes || {});
   const main = h(
     "main",
     {
@@ -1043,29 +1044,55 @@ function SellerBody({ page }) {
       h("input", { type: "hidden", name: "language", defaultValue: valuation.payload.language }),
       h(
         "div",
-        { className: "ct-form__row" },
-        h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
-        h("label", null, labels.phone, h("input", { name: "contact.phone", required: true, autoComplete: "tel", inputMode: "tel" })),
+        { className: "sell-form__section", "data-seller-property-fields": "true" },
+        h("h2", { className: "ct-form__title" }, labels.propertyDetails),
+        h("label", null, labels.location, h("input", { name: "property.location", required: true, autoComplete: "address-level2" })),
+        h(
+          "div",
+          { className: "sell-form__grid" },
+          h(
+            "label",
+            null,
+            labels.propertyType,
+            h(
+              "select",
+              { name: "property.type", required: true },
+              h("option", { value: "", disabled: true, selected: true }, labels.propertyType),
+              ...propertyTypes.map(([value, option]) => h("option", { key: value, value }, option)),
+            ),
+          ),
+          h("label", null, labels.area, h("input", { name: "property.area", type: "number", min: "0", inputMode: "decimal" })),
+          h("label", null, labels.factLabels?.bedrooms || "Bedrooms", h("input", { name: "property.bedrooms", type: "number", min: "0", inputMode: "numeric" })),
+        ),
       ),
       h(
         "div",
-        { className: "ct-form__row" },
+        { className: "sell-form__section" },
+        h("h2", { className: "ct-form__title" }, labels.contact),
         h(
-          "label",
-          null,
-          labels.preferredContact,
-          h(
-            "select",
-            { name: "contact_preference" },
-            h("option", { value: "phone" }, labels.phone),
-            h("option", { value: "whatsapp" }, "WhatsApp"),
-            h("option", { value: "viber" }, "Viber"),
-          ),
+          "div",
+          { className: "ct-form__row" },
+          h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+          h("label", null, labels.phone, h("input", { name: "contact.phone", required: true, autoComplete: "tel", inputMode: "tel" })),
         ),
-        h("label", null, labels.location, h("input", { name: "property.location", autoComplete: "address-level2" })),
+        h(
+          "div",
+          { className: "ct-form__row" },
+          h(
+            "label",
+            null,
+            labels.preferredContact,
+            h(
+              "select",
+              { name: "contact_preference" },
+              h("option", { value: "phone" }, labels.phone),
+              h("option", { value: "whatsapp" }, "WhatsApp"),
+              h("option", { value: "viber" }, "Viber"),
+            ),
+          ),
+          h("label", null, labels.propertyDetails, h("textarea", { name: "message", required: true })),
+        ),
       ),
-      h("label", null, labels.propertyType, h("input", { name: "property.type" })),
-      h("label", null, labels.propertyDetails, h("textarea", { name: "message", required: true })),
       h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, valuation.label),
     ),
   );

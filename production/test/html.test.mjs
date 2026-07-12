@@ -112,6 +112,10 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(sellerHtml, /data-seller-valuation-flow="broker_callback"/);
   assert.match(sellerHtml, /name="contact.phone"/);
   assert.match(sellerHtml, /name="contact_preference"/);
+  assert.match(sellerHtml, /data-seller-property-fields="true"/);
+  assert.match(sellerHtml, /name="property.area"/);
+  assert.match(sellerHtml, /name="property.bedrooms"/);
+  assert.match(sellerHtml, /name="property.type"/);
   assert.match(sellerHtml, /טלפון/);
   assert.equal(assertHtmlPage(contactHtml, { lang: "he", dir: "rtl", kind: "contact" }), true);
   assert.match(contactHtml, /data-lead-type="general"/);
