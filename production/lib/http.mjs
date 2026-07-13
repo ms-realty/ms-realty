@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { isAdminAuthorized } from "./admin-auth.mjs";
+import { bindAuthenticatedOperator, canAdminMutate, isAdminAuthorized, resolveAdminPrincipal, withAuthenticatedAuditActor } from "./admin-auth.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
 import {
@@ -154,6 +154,10 @@ function adminUnauthorized() {
   return adminResponse(401, { kind: "unauthorized" }, "application/json; charset=utf-8", {
     "www-authenticate": 'Bearer realm="ms-realty-admin"',
   });
+}
+
+function adminOperatorIdentityRequired() {
+  return adminJson(403, { kind: "operator_identity_required" });
 }
 
 function parseJsonBody(request) {
@@ -476,7 +480,7 @@ export function createHttpApp({
     consentLedgerPath
       ? appendConsentRecord(createConsentRecord(input, receivedAt || new Date().toISOString()), { filePath: consentLedgerPath })
       : null;
-  const recordAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
+  const writeAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
     auditLogPath
       ? appendAuditLog(createAuditLogEntry(input, recordedAt), {
           filePath: auditLogPath,
@@ -485,6 +489,11 @@ export function createHttpApp({
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
+    const adminRequest = url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
+    const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
+    if (adminRequest && !principal) return adminUnauthorized();
+    if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
+    const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
     const host =
       request.headers?.["x-forwarded-host"] ||
       request.headers?.["X-Forwarded-Host"] ||
@@ -637,6 +646,7 @@ export function createHttpApp({
         translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
         listingEdits: readListingEdits(listingEditLedgerPath || undefined),
         leadSlaGeneratedAt,
+        operatorId: principal?.id || null,
         ...currentViewingData(),
         savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
         ...currentSellerPipelineData(),
@@ -659,6 +669,7 @@ export function createHttpApp({
             translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
             listingEdits: readListingEdits(listingEditLedgerPath || undefined),
             leadSlaGeneratedAt,
+            operatorId: principal?.id || null,
             ...currentViewingData(),
             savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
             ...currentSellerPipelineData(),
@@ -1391,7 +1402,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const recordedAt = viewingFollowUpAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
-        const result = appendViewingFollowUp(readViewings(viewingLedgerPath || undefined), parseBody(request), {
+        const result = appendViewingFollowUp(readViewings(viewingLedgerPath || undefined), bindAuthenticatedOperator(parseBody(request), principal), {
           filePath: viewingFollowUpLedgerPath || undefined,
           recordedAt,
         });
@@ -1422,7 +1433,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const recordedAt = sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
-        const result = appendSellerPipelineOutcome(readSellerPipeline(sellerPipelinePath || undefined), parseBody(request), {
+        const result = appendSellerPipelineOutcome(readSellerPipeline(sellerPipelinePath || undefined), bindAuthenticatedOperator(parseBody(request), principal), {
           filePath: sellerPipelineOutcomeLedgerPath || undefined,
           recordedAt,
         });

@@ -52,6 +52,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
   const {
     leadSla: providedLeadSla,
     leadSlaGeneratedAt,
+    operatorId,
     viewingFollowUpQueue: providedViewingFollowUpQueue,
     sellerPipelineQueue: providedSellerPipelineQueue,
     ...payloadData
@@ -90,7 +91,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       description: workspace.copy.leadInboxDescription || "CRM lead inbox with broker-reviewed replies.",
       robots: "noindex,nofollow",
     },
-    workspace,
+    workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
     ...payloadData,
     leadSla,
     viewingFollowUpQueue,

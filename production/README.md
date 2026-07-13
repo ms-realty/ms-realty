@@ -174,7 +174,7 @@ report files are ignored and must be generated from provisioned services.
 Start the local production adapter:
 
 ```bash
-MS_REALTY_ADMIN_TOKEN=replace-me npm start
+MS_REALTY_ADMIN_TOKEN=replace-me MS_REALTY_ADMIN_ACTOR=operations_lead npm start
 ```
 
 Run the complete loopback-only production preview in Docker:
@@ -233,7 +233,20 @@ Useful operator endpoints:
 - `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest; launch readiness still blocks until the Payload runtime dependency and config exist.
 
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.
-Set `MS_REALTY_ADMIN_TOKEN` before running the production server.
+Set `MS_REALTY_ADMIN_TOKEN` before running the production server. Production
+mutations also require an attributable operator: either set
+`MS_REALTY_ADMIN_ACTOR` for a single named credential, or prefer a distinct
+per-person credential registry in the deployment secret store:
+
+```bash
+MS_REALTY_ADMIN_CREDENTIALS_JSON='[{"id":"broker_bg","token":"a-long-random-bearer-secret"}]'
+```
+
+The registry supersedes `MS_REALTY_ADMIN_TOKEN` when configured. Keep every
+token only in deployment secrets; never commit this value. A production shared
+token without an operator remains read-only and receives
+`403 operator_identity_required` for any mutation, so it cannot create a
+misattributed audit row.
 Set `MS_REALTY_MAX_BODY_BYTES` to tune the Node adapter request-body limit
 for large admin CSV imports. The default is 10 MiB.
 Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers

@@ -271,6 +271,10 @@ function adminHref(path, page) {
   return locale && locale !== "en" ? `${path}?locale=${locale}` : path;
 }
 
+function currentOperatorId(page, fallback) {
+  return page.workspace?.operator_id || fallback;
+}
+
 /* ============================================================
    CRM shell (ui_kits/crm/CrmKit — Sidebar, Topbar, Panel, StatTile)
    ============================================================ */
@@ -766,7 +770,7 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
                         },
                         h("input", { type: "hidden", name: "viewingId", defaultValue: row.viewing_id }),
                         h("input", { type: "hidden", name: "task", defaultValue: row.task }),
-                        h("label", null, label(copy, "broker", "Broker"), h("input", { name: "actor", required: true, autoComplete: "name", defaultValue: row.broker })),
+                        h("label", null, label(copy, "broker", "Broker"), h("input", { name: "actor", required: true, autoComplete: "name", defaultValue: currentOperatorId(page, row.broker), readOnly: Boolean(page.workspace?.operator_id) })),
                         row.task === "follow_up"
                           ? h("label", null, label(copy, "nextViewingAt", "New viewing time"), h("input", { name: "startsAt", type: "datetime-local", defaultValue: datetimeLocalValue(row.starts_at) }))
                           : null,
@@ -910,7 +914,7 @@ function SellerPipelineQueue({ page, copy, ui }) {
                           "data-seller-pipeline-failure": label(copy, "sellerPipelineSaveFailed", "Could not record seller outcome."),
                         },
                         h("input", { type: "hidden", name: "sellerPipelineId", defaultValue: row.seller_pipeline_id }),
-                        h("label", null, label(copy, "broker", "Broker"), h("input", { name: "actor", required: true, autoComplete: "name", defaultValue: row.owner })),
+                        h("label", null, label(copy, "broker", "Broker"), h("input", { name: "actor", required: true, autoComplete: "name", defaultValue: currentOperatorId(page, row.owner), readOnly: Boolean(page.workspace?.operator_id) })),
                         isAppraisal
                           ? h("label", null, label(copy, "appraisalAt", "Appraisal time"), h("input", { name: "appraisalAt", type: "datetime-local", required: true, defaultValue: datetimeLocalValue(row.appraisal_at || row.due_at) }))
                           : null,

@@ -31,7 +31,7 @@ Running code + `production/data/*` + crawl artifacts are authoritative; if a doc
 
 ```bash
 npm run check                                # tests + full validate pipeline
-MS_REALTY_ADMIN_TOKEN=replace-me npm start   # interim production Node adapter
+MS_REALTY_ADMIN_TOKEN=replace-me MS_REALTY_ADMIN_ACTOR=operations_lead npm start
 ```
 
 Requires Node ≥ 22 and Python 3.

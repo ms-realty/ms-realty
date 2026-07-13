@@ -9,6 +9,7 @@ x-app-environment: &app-environment
   DATABASE_URL: postgresql://ms_realty_payload:${MS_REALTY_POSTGRES_PASSWORD:?MS_REALTY_POSTGRES_PASSWORD is required}@postgres:5432/ms_realty_payload
   MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: "1"
   MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN:?MS_REALTY_ADMIN_TOKEN is required}
+  MS_REALTY_ADMIN_ACTOR: local_preview
   TYPESENSE_URL: http://typesense:8108
   TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
   TYPESENSE_COLLECTION: ms_realty_listings

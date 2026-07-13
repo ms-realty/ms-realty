@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { isAdminAuthorized } from "./admin-auth.mjs";
+import { bindAuthenticatedOperator, canAdminMutate, resolveAdminPrincipal, withAuthenticatedAuditActor } from "./admin-auth.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -166,6 +166,13 @@ function adminUnauthorized() {
   });
 }
 
+function adminOperatorIdentityRequired() {
+  return new Response(JSON.stringify({ kind: "operator_identity_required" }), {
+    status: 403,
+    headers: PRIVATE_JSON_HEADERS,
+  });
+}
+
 function adminBadRequest(error) {
   return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
     status: 400,
@@ -321,7 +328,9 @@ function auditRecordedAt(config) {
 }
 
 function recordAudit(input, config, recordedAt = auditRecordedAt(config)) {
-  return appendAuditLog(createAuditLogEntry(input, recordedAt), { filePath: config.auditLogPath });
+  return appendAuditLog(createAuditLogEntry(withAuthenticatedAuditActor(input, config.adminPrincipal), recordedAt), {
+    filePath: config.auditLogPath,
+  });
 }
 
 function leadInboxPayload(registry, url, config) {
@@ -336,6 +345,7 @@ function leadInboxPayload(registry, url, config) {
     translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     listingEdits: readListingEdits(config.listingEditLedgerPath),
     leadSlaGeneratedAt: config.reviewedAt,
+    operatorId: config.adminPrincipal?.id || null,
     viewings,
     viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, viewingFollowUps, {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
@@ -671,7 +681,7 @@ function appendViewingBooking(input, config) {
 
 function appendViewingFollowUpEntry(input, config) {
   const recordedAt = config.viewingFollowUpAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
-  const result = appendViewingFollowUp(readViewings(config.viewingLedgerPath), input, {
+  const result = appendViewingFollowUp(readViewings(config.viewingLedgerPath), bindAuthenticatedOperator(input, config.adminPrincipal), {
     filePath: config.viewingFollowUpLedgerPath,
     recordedAt,
   });
@@ -701,7 +711,7 @@ function appendViewingFollowUpEntry(input, config) {
 
 function appendSellerPipelineOutcomeEntry(input, config) {
   const recordedAt = config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
-  const result = appendSellerPipelineOutcome(readSellerPipeline(config.sellerPipelinePath), input, {
+  const result = appendSellerPipelineOutcome(readSellerPipeline(config.sellerPipelinePath), bindAuthenticatedOperator(input, config.adminPrincipal), {
     filePath: config.sellerPipelineOutcomeLedgerPath,
     recordedAt,
   });
@@ -1130,7 +1140,10 @@ function importListingQualityRows(inputCsv, config) {
 }
 
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
-  if (!isAdminAuthorized(request.headers.get("authorization") || "")) return adminUnauthorized();
+  const principal = resolveAdminPrincipal(request.headers.get("authorization") || "");
+  if (!principal) return adminUnauthorized();
+  if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
+  config = { ...config, adminPrincipal: principal };
   try {
     const url = new URL(request.url, "http://localhost");
     const registry = loadLocaleRegistry(config.localeRegistryPath);

@@ -1454,3 +1454,52 @@ test("Next admin adapter drafts Hermes replies without queueing broker send", as
     assert.equal(JSON.stringify(auditRows).includes("Interested in this property"), false);
   });
 });
+
+test("Next admin mutations require an attributable production operator", async () => {
+  const auditLogPath = tempJsonl("app-admin-operator-audit");
+  const launchReadinessOutputPath = tempJson("app-admin-operator-launch", "{}\n");
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    process.env.MS_REALTY_ADMIN_TOKEN = "next-shared-admin-token";
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+    const config = appAdminConfigFromEnv({
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
+    });
+
+    const sharedWrite = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/launch-readiness/export", {
+        method: "POST",
+        headers: { authorization: "Bearer next-shared-admin-token" },
+      }),
+      { config },
+    );
+    assert.equal(sharedWrite.status, 403);
+    assert.equal((await sharedWrite.json()).kind, "operator_identity_required");
+
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "operations_lead", token: "next-operations-token-0123456789" },
+    ]);
+    const credentialWrite = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/launch-readiness/export", {
+        method: "POST",
+        headers: { authorization: "Bearer next-operations-token-0123456789" },
+      }),
+      { config },
+    );
+    assert.equal(credentialWrite.status, 201);
+    assert.equal(readAuditLog(auditLogPath).at(-1).actor, "operations_lead");
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});

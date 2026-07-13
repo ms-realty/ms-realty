@@ -1439,9 +1439,13 @@ test("HTTP app rejects malformed JSON request bodies", async () => {
 test("HTTP admin auth does not accept local smoke token in production without configured secret", async () => {
   const oldNodeEnv = process.env.NODE_ENV;
   const oldAdminToken = process.env.MS_REALTY_ADMIN_TOKEN;
+  const oldAdminActor = process.env.MS_REALTY_ADMIN_ACTOR;
+  const oldAdminCredentials = process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
   try {
     process.env.NODE_ENV = "production";
     delete process.env.MS_REALTY_ADMIN_TOKEN;
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
     const app = createHttpApp();
 
     const defaultToken = await dispatchHttp(app, {
@@ -1467,11 +1471,44 @@ test("HTTP admin auth does not accept local smoke token in production without co
     assert.equal(wrongToken.status, 401);
     assert.equal(nearMatchToken.status, 401);
     assert.equal(configuredToken.status, 200);
+
+    const sharedWrite = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/launch-readiness/export",
+      headers: { authorization: "Bearer real-admin-token" },
+    });
+    assert.equal(sharedWrite.status, 403);
+    assert.equal(sharedWrite.body.kind, "operator_identity_required");
+    assert.equal(sharedWrite.headers["cache-control"], "no-store");
+
+    const auditLogPath = tempAuditLog();
+    const launchReadinessOutputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-auth-`)}/launch-readiness.json`;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "operations_lead", token: "operations-lead-token-0123456789" },
+    ]);
+    const credentialApp = createHttpApp({ auditLogPath, launchReadinessOutputPath });
+    const legacyAfterMigration = await dispatchHttp(credentialApp, {
+      method: "POST",
+      url: "/api/admin/launch-readiness/export",
+      headers: { authorization: "Bearer real-admin-token" },
+    });
+    const credentialWrite = await dispatchHttp(credentialApp, {
+      method: "POST",
+      url: "/api/admin/launch-readiness/export",
+      headers: { authorization: "Bearer operations-lead-token-0123456789" },
+    });
+    assert.equal(legacyAfterMigration.status, 401);
+    assert.equal(credentialWrite.status, 201);
+    assert.equal(readAuditLog(auditLogPath).at(-1).actor, "operations_lead");
   } finally {
     if (oldNodeEnv === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = oldNodeEnv;
     if (oldAdminToken === undefined) delete process.env.MS_REALTY_ADMIN_TOKEN;
     else process.env.MS_REALTY_ADMIN_TOKEN = oldAdminToken;
+    if (oldAdminActor === undefined) delete process.env.MS_REALTY_ADMIN_ACTOR;
+    else process.env.MS_REALTY_ADMIN_ACTOR = oldAdminActor;
+    if (oldAdminCredentials === undefined) delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+    else process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = oldAdminCredentials;
   }
 });
 
@@ -2128,6 +2165,84 @@ test("HTTP admin records private seller valuation outcomes with a derived queue"
   assert.equal(audits.length, 1);
   assert.equal(audits[0].metadata.note, undefined);
   assert.equal(audits[0].metadata.property, undefined);
+});
+
+test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async () => {
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.MS_REALTY_ADMIN_TOKEN;
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "broker_bg", token: "broker-bg-production-token-0123456789" },
+    ]);
+
+    const leadLedgerPath = tempLedger();
+    const sellerPipelinePath = tempSellerPipeline();
+    const sellerPipelineOutcomeLedgerPath = tempSellerPipelineOutcomes();
+    const auditLogPath = tempAuditLog();
+    const app = createHttpApp({
+      registry: loadLocaleRegistry(),
+      leadLedgerPath,
+      sellerPipelinePath,
+      sellerPipelineOutcomeLedgerPath,
+      auditLogPath,
+      sellerPipelineCreatedAt: "2026-07-10T08:00:00Z",
+      sellerPipelineOutcomeAt: "2026-07-10T09:00:00Z",
+    });
+    const sellerLead = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/leads",
+      body: {
+        id: "credentialed-seller-outcome",
+        source: "website_seller_valuation",
+        leadType: "seller",
+        language: "bg",
+        contact: { name: "Mira Petkova" },
+        property: { location: "Sandanski", type: "apartment" },
+      },
+    });
+    const base = {
+      id: "credentialed-seller-callback",
+      sellerPipelineId: sellerLead.body.sellerPipeline.id,
+      action: "callback_completed",
+      note: "Internal callback note.",
+    };
+    const mismatch = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/seller-pipeline/outcome",
+      headers: { authorization: "Bearer broker-bg-production-token-0123456789" },
+      body: { ...base, actor: "broker_ru" },
+    });
+    const created = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/seller-pipeline/outcome",
+      headers: { authorization: "Bearer broker-bg-production-token-0123456789" },
+      body: base,
+    });
+    const inbox = await dispatchHttp(app, {
+      url: "/api/admin/leads",
+      headers: { authorization: "Bearer broker-bg-production-token-0123456789" },
+    });
+
+    assert.equal(mismatch.status, 400);
+    assert.match(mismatch.body.message, /must match the authenticated operator/);
+    assert.equal(created.status, 201);
+    assert.equal(created.body.outcome.actor, "broker_bg");
+    assert.equal(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath)[0].actor, "broker_bg");
+    assert.equal(readAuditLog(auditLogPath).at(-1).actor, "broker_bg");
+    assert.equal(inbox.body.workspace.operator_id, "broker_bg");
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 });
 
 test("HTTP fallback accepts a URL-encoded saved-search form", async () => {
