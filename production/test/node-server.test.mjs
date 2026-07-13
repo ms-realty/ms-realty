@@ -9,6 +9,7 @@ import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lea
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
+import { assertViewingFollowUpLedger, readViewingFollowUps, resetViewingFollowUpLedger } from "../lib/viewing-follow-ups.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
@@ -28,6 +29,7 @@ async function withServer(fn) {
   const translationLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-translations-`)}/translations.jsonl`;
   const listingEditLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-listing-edits-`)}/edits.jsonl`;
   const viewingLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewings-`)}/viewings.jsonl`;
+  const viewingFollowUpLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewing-follow-ups-`)}/viewing-follow-ups.jsonl`;
   const savedSearchLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-saved-searches-`)}/saved-searches.jsonl`;
   const sellerPipelinePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-seller-pipeline-`)}/seller-pipeline.jsonl`;
   const dealLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-deals-`)}/deals.jsonl`;
@@ -43,6 +45,7 @@ async function withServer(fn) {
   resetTranslationLedger(translationLedgerPath);
   resetListingEdits(listingEditLedgerPath);
   resetViewingLedger(viewingLedgerPath);
+  resetViewingFollowUpLedger(viewingFollowUpLedgerPath);
   resetSavedSearches(savedSearchLedgerPath);
   resetSellerPipeline(sellerPipelinePath);
   resetDealLedger(dealLedgerPath);
@@ -60,6 +63,7 @@ async function withServer(fn) {
       translationLedgerPath,
       listingEditLedgerPath,
       viewingLedgerPath,
+      viewingFollowUpLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
       dealLedgerPath,
@@ -74,6 +78,7 @@ async function withServer(fn) {
       editedAt: "2026-07-04T00:03:00Z",
       reviewedAt: "2026-07-04T00:05:00Z",
       bookedAt: "2026-07-04T00:06:00Z",
+      viewingFollowUpAt: "2026-07-06T12:00:00Z",
       savedAt: "2026-07-04T00:07:00Z",
       sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
       dealClosedAt: "2026-07-10T10:00:00Z",
@@ -90,6 +95,7 @@ async function withServer(fn) {
       translationLedgerPath,
       listingEditLedgerPath,
       viewingLedgerPath,
+      viewingFollowUpLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
       dealLedgerPath,
@@ -134,6 +140,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       translationLedgerPath,
       listingEditLedgerPath,
       viewingLedgerPath,
+      viewingFollowUpLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
       dealLedgerPath,
@@ -343,6 +350,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
+            id: "viewing-node-server-lead-test",
             leadId: "node-server-lead-test",
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
@@ -372,6 +380,33 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           body: JSON.stringify({ leadId: "node-server-lead-test", broker: "broker_ru" }),
         }),
       };
+      smoke.viewingFollowUpUnauthorized = await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
+        method: "POST",
+        captureHeaders: true,
+        body: JSON.stringify({ viewingId: "viewing-node-server-lead-test", actor: "broker_ru", action: "complete" }),
+      });
+      smoke.viewingFollowUp = await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
+        method: "POST",
+        headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          id: "viewing-follow-up-node-server-test",
+          viewingId: "viewing-node-server-lead-test",
+          actor: "broker_ru",
+          action: "complete",
+          note: "Completed viewing; feedback remains an internal broker task.",
+        }).toString(),
+      });
+      smoke.viewingFollowUpRetry = await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
+        method: "POST",
+        headers: { authorization: "Bearer local-admin-smoke" },
+        body: JSON.stringify({
+          id: "viewing-follow-up-node-server-test",
+          viewingId: "viewing-node-server-lead-test",
+          actor: "broker_ru",
+          action: "complete",
+          note: "Completed viewing; feedback remains an internal broker task.",
+        }),
+      });
       smoke.translationDraft = await jsonFetch(baseUrl, "/api/admin/translations/draft", {
         method: "POST",
         headers: { authorization: "Bearer local-admin-smoke" },
@@ -484,6 +519,13 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
       assert.equal(smoke.viewing.body.feedback_request.status, "open");
       assert.equal(smoke.viewing.body.feedback_request.channel, "whatsapp");
+      assert.equal(smoke.viewingFollowUp.status, 201);
+      assert.equal(smoke.viewingFollowUp.body.idempotent, false);
+      assert.equal(smoke.viewingFollowUp.body.viewing.status, "completed");
+      assert.equal(smoke.viewingFollowUp.body.viewing.feedback_request.status, "open");
+      assert.equal(smoke.viewingFollowUpRetry.status, 200);
+      assert.equal(smoke.viewingFollowUpRetry.body.idempotent, true);
+      assert.equal(smoke.viewingFollowUpUnauthorized.status, 401);
       assert.equal(smoke.dealClose.body.testimonial_request.status, "open");
       assert.equal(smoke.dealClose.body.referral_request.status, "open");
       assert.equal(smoke.dealClose.body.testimonial_request.channel, "whatsapp");
@@ -502,6 +544,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
       assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
+      assert.equal(assertViewingFollowUpLedger(readViewingFollowUps(viewingFollowUpLedgerPath)), true);
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
       assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
       assert.equal(assertDealLedger(readDeals(dealLedgerPath)), true);
@@ -525,12 +568,14 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         listing_slug_changed: 1,
         reply_approved: 1,
         viewing_booked: 1,
+        viewing_follow_up_recorded: 1,
         deal_closed: 1,
         translation_drafted: 1,
         translation_approved: 1,
         translation_published: 1,
         listing_edited: 1,
       });
+      assert.equal(auditRows.some((row) => Object.hasOwn(row.metadata || {}, "note")), false);
       assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
       assert.deepEqual(
         [
@@ -544,6 +589,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.deepEqual(smoke.adminLocales.ru.body.workspace.interface_locales, ["bg", "ru", "en"]);
       assert.equal(smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "he").direction, "rtl");
       assert.equal(smoke.adminLocales.heFallback.body.locales.find((locale) => locale.code === "el").public_enabled, true);
+      assert.equal(smoke.admin.body.summary.viewingFollowUpsOpen, 1);
+      assert.equal(smoke.admin.body.viewingFollowUpQueue.rows[0].task, "feedback");
     },
   );
 });

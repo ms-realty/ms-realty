@@ -30,6 +30,11 @@ import {
   resetViewingLedger,
 } from "../lib/viewing-ledger.mjs";
 import {
+  assertViewingFollowUpLedger,
+  readViewingFollowUps,
+  resetViewingFollowUpLedger,
+} from "../lib/viewing-follow-ups.mjs";
+import {
   assertSavedSearches,
   readSavedSearches,
   resetSavedSearches,
@@ -105,6 +110,7 @@ const languageRequestPath = path.join(smokeDir, "language-requests.jsonl");
 const translationLedgerPath = path.join(smokeDir, "translation-tasks.jsonl");
 const listingEditLedgerPath = path.join(smokeDir, "listing-edits.jsonl");
 const viewingLedgerPath = path.join(smokeDir, "viewings.jsonl");
+const viewingFollowUpLedgerPath = path.join(smokeDir, "viewing-follow-ups.jsonl");
 const savedSearchLedgerPath = path.join(smokeDir, "saved-searches.jsonl");
 const sellerPipelinePath = path.join(smokeDir, "seller-pipeline.jsonl");
 const dealLedgerPath = path.join(smokeDir, "deals.jsonl");
@@ -122,6 +128,7 @@ resetLanguageRequests(languageRequestPath);
 resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
+resetViewingFollowUpLedger(viewingFollowUpLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
 resetDealLedger(dealLedgerPath);
@@ -139,6 +146,7 @@ const app = createHttpApp({
   translationLedgerPath,
   listingEditLedgerPath,
   viewingLedgerPath,
+  viewingFollowUpLedgerPath,
   savedSearchLedgerPath,
   sellerPipelinePath,
   dealLedgerPath,
@@ -154,6 +162,7 @@ const app = createHttpApp({
   editedAt: "2026-07-04T00:03:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
   bookedAt: "2026-07-04T00:06:00Z",
+  viewingFollowUpAt: "2026-07-06T12:00:00Z",
   savedAt: "2026-07-04T00:07:00Z",
   sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
   dealClosedAt: "2026-07-10T10:00:00Z",
@@ -371,6 +380,35 @@ smoke.viewing = await dispatchHttp(app, {
     broker: "broker_ru",
   },
 });
+smoke.viewingFollowUp = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/viewings/follow-up",
+  headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams({
+    id: "viewing-follow-up-http-0001",
+    viewingId: "viewing-http-lead-he-0001",
+    actor: "broker_ru",
+    action: "complete",
+    note: "Broker recorded the completed viewing privately.",
+  }).toString(),
+});
+smoke.viewingFollowUpRetry = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/viewings/follow-up",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    id: "viewing-follow-up-http-0001",
+    viewingId: "viewing-http-lead-he-0001",
+    actor: "broker_ru",
+    action: "complete",
+    note: "Broker recorded the completed viewing privately.",
+  },
+});
+smoke.viewingFollowUpUnauthorized = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/viewings/follow-up",
+  body: { viewingId: "viewing-http-lead-he-0001", actor: "broker_ru", action: "complete" },
+});
 smoke.viewingUnauthorized = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/viewings",
@@ -535,6 +573,9 @@ smoke.listingEditLedger = { rows: listingEdits.length };
 const viewings = readViewings(viewingLedgerPath);
 assertViewingLedger(viewings);
 smoke.viewingLedger = { rows: viewings.length };
+const viewingFollowUps = readViewingFollowUps(viewingFollowUpLedgerPath);
+assertViewingFollowUpLedger(viewingFollowUps);
+smoke.viewingFollowUpLedger = { rows: viewingFollowUps.length };
 const savedSearches = readSavedSearches(savedSearchLedgerPath);
 assertSavedSearches(savedSearches);
 smoke.savedSearchLedger = { rows: savedSearches.length };

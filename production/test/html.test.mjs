@@ -6,6 +6,7 @@ import { findListingById, loadListings } from "../lib/content.mjs";
 import { assertHtmlPage, renderHtmlPage } from "../lib/html.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { loadCmsSeed, renderRuntimePath } from "../lib/runtime.mjs";
+import { ADMIN_APP_JS } from "../lib/ui/client.mjs";
 import {
   renderLanguageFallback,
   renderContactPage,
@@ -165,6 +166,10 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.match(html, /WhatsApp/);
   assert.match(html, /Нужна эскалация менеджеру/);
   assert.match(html, /data-lead-context="true">Sandanski/);
+  assert.match(html, /data-viewing-follow-up-queue="true"/);
+  assert.match(html, /data-empty-viewing-follow-ups="true"/);
+  assert.match(ADMIN_APP_JS, /data-viewing-follow-up-form/);
+  assert.match(ADMIN_APP_JS, /window\.location\.reload/);
   assert.doesNotMatch(html, />website_listing_detail</);
   assert.doesNotMatch(html, />manager escalation required</);
 });

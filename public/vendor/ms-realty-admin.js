@@ -83,6 +83,56 @@
         });
     });
   }
+  function setViewingFollowUpStatus(form, value, state) {
+    var status = form.querySelector("[data-viewing-follow-up-status]");
+    if (!status) return;
+    status.textContent = value;
+    status.setAttribute("data-state", state);
+  }
+  function initViewingFollowUpForms() {
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-viewing-follow-up-form")) return;
+      event.preventDefault();
+      var submitter = event.submitter;
+      var buttons = form.querySelectorAll('[type="submit"]');
+      var saving = form.getAttribute("data-viewing-follow-up-saving") || "Recording follow-up...";
+      var success = form.getAttribute("data-viewing-follow-up-success") || "Follow-up recorded.";
+      var failed = form.getAttribute("data-viewing-follow-up-failure") || "Could not record follow-up.";
+      var payload = tourPayload(form);
+      if (submitter && submitter.name && submitter.value) payload[submitter.name] = submitter.value;
+      for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setViewingFollowUpStatus(form, saving, "saving");
+      fetch(form.getAttribute("action"), {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(function (response) {
+          return response
+            .json()
+            .catch(function () { return {}; })
+            .then(function (result) {
+              if (!response.ok || !result.viewing) throw new Error(result.message || "viewing follow-up failed");
+              return result;
+            });
+        })
+        .then(function () {
+          setViewingFollowUpStatus(form, success, "success");
+          window.setTimeout(function () { window.location.reload(); }, 150);
+        })
+        .catch(function () {
+          setViewingFollowUpStatus(form, failed, "error");
+        })
+        .then(function () {
+          form.removeAttribute("aria-busy");
+          for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
+        });
+    });
+  }
   initLeadQueueFilters();
   initTourEditor();
+  initViewingFollowUpForms();
 })();

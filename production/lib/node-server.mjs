@@ -328,6 +328,7 @@ export function assertServerSmoke(smoke) {
     smoke.adminUnauthorized,
     smoke.replyUnauthorized,
     smoke.viewingUnauthorized,
+    smoke.viewingFollowUpUnauthorized,
     smoke.viewingCalendarUnauthorized,
     smoke.dealCloseUnauthorized,
   ]) {
@@ -350,6 +351,24 @@ export function assertServerSmoke(smoke) {
     throw new Error("Server must book viewing follow-up and feedback tasks");
   }
   if (smoke.viewingUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated viewings");
+  if (
+    smoke.viewingFollowUp?.status !== 201 ||
+    smoke.viewingFollowUp.body.idempotent !== false ||
+    smoke.viewingFollowUp.body.viewing?.status !== "completed" ||
+    smoke.viewingFollowUp.body.viewing?.follow_up_task?.status !== "completed" ||
+    smoke.viewingFollowUp.body.viewing?.feedback_request?.status !== "open" ||
+    smoke.viewingFollowUpRetry?.status !== 200 ||
+    smoke.viewingFollowUpRetry.body.idempotent !== true ||
+    smoke.viewingFollowUpUnauthorized?.status !== 401
+  ) {
+    throw new Error("Server must keep post-viewing outcomes private, idempotent, and actionable");
+  }
+  if (
+    smoke.admin?.body?.summary?.viewingFollowUpsOpen !== 1 ||
+    smoke.admin.body.viewingFollowUpQueue?.rows?.[0]?.task !== "feedback"
+  ) {
+    throw new Error("Server must return the remaining private follow-up task in the admin queue");
+  }
   if (
     smoke.dealClose?.status !== 201 ||
     smoke.dealClose.body.testimonial_request?.status !== "open" ||

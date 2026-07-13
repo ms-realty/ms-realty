@@ -89,7 +89,7 @@ What it proves now:
 - Next App Router admin lead inbox, listing editor, and migration review can render through the React admin body bridge.
 - Next App Router admin JSON lead inbox endpoint for broker CRM consumers.
 - Next App Router admin write handlers for reviewed replies and listing edits used by those admin pages.
-- Next App Router admin CRM lifecycle handlers for viewing bookings, viewing calendar export, and deal close tasks.
+- Next App Router admin CRM lifecycle handlers for viewing bookings, private append-only follow-up outcomes, viewing calendar export, and deal close tasks.
 - Next App Router admin media/contact handlers for reviewed broker contacts and approved 360 tours.
 - Next App Router admin locale and translation handlers for dynamic language rollout without AI auto-publish.
 - Next App Router admin launch-readiness, launch-input checklist, and SEO evidence read endpoints.
@@ -113,6 +113,7 @@ What it proves now:
 - Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
 - Broker reply approval accepts JSON and form-encoded admin submissions.
 - Broker-booked viewing ledger with open follow-up tasks and admin `.ics` calendar export from existing CRM leads.
+- Private append-only viewing outcomes (complete, reschedule, no-show, note) retain booking history, protect note content from the audit metadata, and leave actionable follow-up/feedback tasks in the broker queue.
 - Booked viewings create post-viewing feedback request tasks using the lead contact preference.
 - Closed-deal ledger with testimonial and referral request tasks from existing CRM leads.
 - Saved-search ledger with open alert tasks from public search criteria.
@@ -284,6 +285,7 @@ Generated production data:
 - `production/data/lead-sla-report.json`
 - `production/data/reply-outbox.jsonl`
 - `production/data/viewings.jsonl`
+- `production/data/viewing-follow-ups.jsonl`
 - `production/data/deals.jsonl`
 - `production/data/saved-searches.jsonl`
 - `production/data/saved-search-alert-report.json`

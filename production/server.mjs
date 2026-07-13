@@ -17,6 +17,7 @@ import { DEFAULT_SLUG_HISTORY_PATH } from "./lib/slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./lib/tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./lib/translation-ledger.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH } from "./lib/viewing-ledger.mjs";
+import { DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH } from "./lib/viewing-follow-ups.mjs";
 
 function portFrom(value) {
   const raw = value === undefined || value === "" ? "3000" : String(value);
@@ -54,6 +55,7 @@ export function productionServerConfig(env = process.env) {
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
@@ -72,6 +74,7 @@ export function productionServerConfig(env = process.env) {
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
+    viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
   };
 }
 
@@ -86,6 +89,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     translationLedgerPath: config.translationLedgerPath,
     listingEditLedgerPath: config.listingEditLedgerPath,
     viewingLedgerPath: config.viewingLedgerPath,
+    viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,
     savedSearchLedgerPath: config.savedSearchLedgerPath,
     sellerPipelinePath: config.sellerPipelinePath,
     dealLedgerPath: config.dealLedgerPath,
@@ -104,6 +108,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     hermesWorkerReportPath: config.hermesWorkerReportPath,
     liveServiceProvisioningReportPath: config.liveServiceProvisioningReportPath,
     payloadRuntimeReportPath: config.payloadRuntimeReportPath,
+    viewingFollowUpAt: config.viewingFollowUpAt,
   });
 }
 

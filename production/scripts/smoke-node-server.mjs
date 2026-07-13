@@ -8,6 +8,7 @@ import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lea
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
+import { assertViewingFollowUpLedger, readViewingFollowUps, resetViewingFollowUpLedger } from "../lib/viewing-follow-ups.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
@@ -45,6 +46,7 @@ const languageRequestPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-
 const translationLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-translations-")), "translations.jsonl");
 const listingEditLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-listing-edits-")), "edits.jsonl");
 const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewings-")), "viewings.jsonl");
+const viewingFollowUpLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewing-follow-ups-")), "viewing-follow-ups.jsonl");
 const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-saved-searches-")), "saved-searches.jsonl");
 const sellerPipelinePath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-seller-pipeline-")), "seller-pipeline.jsonl");
 const dealLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-deals-")), "deals.jsonl");
@@ -60,6 +62,7 @@ resetLanguageRequests(languageRequestPath);
 resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
+resetViewingFollowUpLedger(viewingFollowUpLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
 resetDealLedger(dealLedgerPath);
@@ -77,6 +80,7 @@ const server = createNodeServer(
     translationLedgerPath,
     listingEditLedgerPath,
     viewingLedgerPath,
+    viewingFollowUpLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
     dealLedgerPath,
@@ -91,6 +95,7 @@ const server = createNodeServer(
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
+    viewingFollowUpAt: "2026-07-06T12:00:00Z",
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
     dealClosedAt: "2026-07-10T10:00:00Z",
@@ -313,6 +318,33 @@ try {
         broker: "broker_ru",
       }),
     }),
+    viewingFollowUp: await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        id: "viewing-follow-up-server-0001",
+        viewingId: "viewing-server-lead-he-0001",
+        actor: "broker_ru",
+        action: "complete",
+        note: "Broker recorded the completed viewing privately.",
+      }).toString(),
+    }),
+    viewingFollowUpRetry: await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        id: "viewing-follow-up-server-0001",
+        viewingId: "viewing-server-lead-he-0001",
+        actor: "broker_ru",
+        action: "complete",
+        note: "Broker recorded the completed viewing privately.",
+      }),
+    }),
+    viewingFollowUpUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
+      method: "POST",
+      captureHeaders: true,
+      body: JSON.stringify({ viewingId: "viewing-server-lead-he-0001", actor: "broker_ru", action: "complete" }),
+    }),
     viewingUnauthorized: await jsonFetch(baseUrl, "/api/admin/viewings", {
       method: "POST",
       captureHeaders: true,
@@ -434,7 +466,7 @@ try {
   for (const name of ["languageRequest", "savedSearch", "lead", "viewingLead", "contactLead", "sellerLead", "badLead"]) {
     smoke[name].headers = { "cache-control": smoke[name].headers["cache-control"] };
   }
-  for (const name of ["adminUnauthorized", "replyUnauthorized", "viewingUnauthorized", "viewingCalendarUnauthorized", "dealCloseUnauthorized"]) {
+  for (const name of ["adminUnauthorized", "replyUnauthorized", "viewingUnauthorized", "viewingFollowUpUnauthorized", "viewingCalendarUnauthorized", "dealCloseUnauthorized"]) {
     smoke[name].headers = {
       "cache-control": smoke[name].headers["cache-control"],
       "www-authenticate": smoke[name].headers["www-authenticate"],
@@ -459,6 +491,9 @@ try {
   const viewings = readViewings(viewingLedgerPath);
   assertViewingLedger(viewings);
   smoke.viewingLedger = { rows: viewings.length };
+  const viewingFollowUps = readViewingFollowUps(viewingFollowUpLedgerPath);
+  assertViewingFollowUpLedger(viewingFollowUps);
+  smoke.viewingFollowUpLedger = { rows: viewingFollowUps.length };
   const savedSearches = readSavedSearches(savedSearchLedgerPath);
   assertSavedSearches(savedSearches);
   smoke.savedSearchLedger = { rows: savedSearches.length };

@@ -173,6 +173,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: tempJsonl("app-admin-tour-approvals"),
       MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-translations"),
       MS_REALTY_VIEWING_LEDGER_PATH: tempJsonl("app-admin-viewings"),
+      MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH: tempJsonl("app-admin-viewing-follow-ups"),
+      MS_REALTY_VIEWING_FOLLOW_UP_AT: "2026-07-06T12:00:00Z",
     },
     async () => {
       const publicLeadRoute = await import("../../app/api/leads/route.js");
@@ -215,6 +217,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const translationPublishRoute = await import("../../app/api/admin/translations/publish/route.js");
       const tourApprovalRoute = await import("../../app/api/admin/tours/approve/route.js");
       const viewingRoute = await import("../../app/api/admin/viewings/route.js");
+      const viewingFollowUpRoute = await import("../../app/api/admin/viewings/follow-up/route.js");
       const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
       const leadInboxJsonRoute = await import("../../app/api/admin/leads/route.js");
@@ -1078,6 +1081,53 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(viewingBody.status, "booked");
       assert.equal(viewingBody.feedback_request.status, "open");
 
+      const viewingFollowUpUnauthorized = await viewingFollowUpRoute.POST(
+        new Request("https://example.test/api/admin/viewings/follow-up", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ viewingId: viewingBody.id, actor: "broker_ru", action: "complete" }),
+        }),
+      );
+      assert.equal(viewingFollowUpUnauthorized.status, 401);
+
+      const viewingFollowUp = await viewingFollowUpRoute.POST(
+        new Request("https://example.test/api/admin/viewings/follow-up", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            viewingId: viewingBody.id,
+            actor: "broker_ru",
+            action: "complete",
+            note: "Viewing completed; follow-up feedback remains internal.",
+          }),
+        }),
+      );
+      const viewingFollowUpBody = await viewingFollowUp.json();
+      assert.equal(viewingFollowUp.status, 201);
+      assert.equal(viewingFollowUpBody.idempotent, false);
+      assert.equal(viewingFollowUpBody.viewing.status, "completed");
+      assert.equal(viewingFollowUpBody.viewing.feedback_request.status, "open");
+
+      const viewingFollowUpRetry = await viewingFollowUpRoute.POST(
+        new Request("https://example.test/api/admin/viewings/follow-up", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            viewingId: viewingBody.id,
+            actor: "broker_ru",
+            action: "complete",
+            note: "Viewing completed; follow-up feedback remains internal.",
+          }),
+        }),
+      );
+      assert.equal(viewingFollowUpRetry.status, 200);
+      assert.equal((await viewingFollowUpRetry.json()).idempotent, true);
+
+      const leadInboxAfterViewing = await leadInboxJsonRoute.GET(new Request("https://example.test/api/admin/leads?locale=en", { headers: auth }));
+      const leadInboxAfterViewingBody = await leadInboxAfterViewing.json();
+      assert.equal(leadInboxAfterViewingBody.summary.viewingFollowUpsOpen, 1);
+      assert.equal(leadInboxAfterViewingBody.viewingFollowUpQueue.rows[0].task, "feedback");
+
       const calendar = await viewingCalendarRoute.GET(new Request("https://example.test/api/admin/viewings.ics", { headers: auth }));
       const calendarBody = await calendar.text();
       assert.equal(calendar.status, 200);
@@ -1119,8 +1169,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         listing_slug_changed: 1,
         tour_approved: 1,
         viewing_booked: 1,
+        viewing_follow_up_recorded: 1,
         deal_closed: 1,
       });
+      const viewingFollowUpAudit = readAuditLog(auditLogPath).find((row) => row.action === "viewing_follow_up_recorded");
+      assert.equal(viewingFollowUpAudit.metadata.note, undefined);
     },
   );
 });

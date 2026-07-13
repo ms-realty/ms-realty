@@ -43,6 +43,7 @@ import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } fr
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
 import { appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
+import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
 import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
@@ -305,6 +306,7 @@ export function createHttpApp({
   translationLedgerPath = null,
   listingEditLedgerPath = null,
   viewingLedgerPath = null,
+  viewingFollowUpLedgerPath = null,
   savedSearchLedgerPath = null,
   sellerPipelinePath = null,
   dealLedgerPath = null,
@@ -331,6 +333,7 @@ export function createHttpApp({
   editedAt,
   reviewedAt,
   bookedAt,
+  viewingFollowUpAt,
   savedAt,
   sellerPipelineCreatedAt,
   dealClosedAt,
@@ -348,6 +351,15 @@ export function createHttpApp({
       tourApprovals: readTourApprovals(tourApprovalLedgerPath || undefined),
       ...options,
     });
+  const currentViewingData = () => {
+    const viewings = readViewings(viewingLedgerPath || undefined);
+    return {
+      viewings,
+      viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, readViewingFollowUps(viewingFollowUpLedgerPath || undefined), {
+        now: viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString(),
+      }),
+    };
+  };
   const currentSeoEvidence = () =>
     buildSeoEvidence({
       inputDir: seoEvidenceInputDir || undefined,
@@ -452,9 +464,9 @@ export function createHttpApp({
     consentLedgerPath
       ? appendConsentRecord(createConsentRecord(input, receivedAt || new Date().toISOString()), { filePath: consentLedgerPath })
       : null;
-  const recordAudit = (input) =>
+  const recordAudit = (input, recordedAt = reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()) =>
     auditLogPath
-      ? appendAuditLog(createAuditLogEntry(input, reviewedAt || editedAt || bookedAt || dealClosedAt || receivedAt || new Date().toISOString()), {
+      ? appendAuditLog(createAuditLogEntry(input, recordedAt), {
           filePath: auditLogPath,
         })
       : null;
@@ -613,7 +625,7 @@ export function createHttpApp({
         translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
         listingEdits: readListingEdits(listingEditLedgerPath || undefined),
         leadSlaGeneratedAt,
-        viewings: readViewings(viewingLedgerPath || undefined),
+        ...currentViewingData(),
         savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
         sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
         deals: readDeals(dealLedgerPath || undefined),
@@ -635,7 +647,7 @@ export function createHttpApp({
             translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
             listingEdits: readListingEdits(listingEditLedgerPath || undefined),
             leadSlaGeneratedAt,
-            viewings: readViewings(viewingLedgerPath || undefined),
+            ...currentViewingData(),
             savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
             sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
             deals: readDeals(dealLedgerPath || undefined),
@@ -1363,6 +1375,37 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = viewingFollowUpAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
+        const result = appendViewingFollowUp(readViewings(viewingLedgerPath || undefined), parseBody(request), {
+          filePath: viewingFollowUpLedgerPath || undefined,
+          recordedAt,
+        });
+        if (!result.idempotent) {
+          recordAudit({
+            action: "viewing_follow_up_recorded",
+            actor: result.follow_up.actor,
+            objectType: "viewing_follow_up",
+            objectId: result.follow_up.id,
+            locale: result.viewing.original_language,
+            metadata: {
+              viewing_id: result.viewing.id,
+              lead_id: result.viewing.lead_id,
+              task: result.follow_up.task,
+              action: result.follow_up.action,
+              viewing_status: result.viewing.status,
+              due_at: result.follow_up.due_at || result.follow_up.starts_at || null,
+            },
+          }, recordedAt);
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
@@ -1889,6 +1932,24 @@ export function assertHttpSmoke(smoke) {
     throw new Error("HTTP smoke must book viewing follow-up and feedback tasks");
   }
   if (smoke.viewingUnauthorized.status !== 401) throw new Error("HTTP smoke must reject unauthenticated viewings");
+  if (
+    smoke.viewingFollowUp?.status !== 201 ||
+    smoke.viewingFollowUp.body.idempotent !== false ||
+    smoke.viewingFollowUp.body.viewing?.status !== "completed" ||
+    smoke.viewingFollowUp.body.viewing?.follow_up_task?.status !== "completed" ||
+    smoke.viewingFollowUp.body.viewing?.feedback_request?.status !== "open" ||
+    smoke.viewingFollowUpRetry?.status !== 200 ||
+    smoke.viewingFollowUpRetry.body.idempotent !== true ||
+    smoke.viewingFollowUpUnauthorized?.status !== 401
+  ) {
+    throw new Error("HTTP smoke must keep post-viewing outcomes private, idempotent, and actionable");
+  }
+  if (
+    smoke.admin?.body?.summary?.viewingFollowUpsOpen !== 1 ||
+    smoke.admin.body.viewingFollowUpQueue?.rows?.[0]?.task !== "feedback"
+  ) {
+    throw new Error("HTTP smoke must return the remaining private follow-up task in the admin queue");
+  }
   if (
     smoke.dealClose?.status !== 201 ||
     smoke.dealClose.body.testimonial_request?.status !== "open" ||

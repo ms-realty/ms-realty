@@ -335,7 +335,8 @@ with open broker tasks only when current matches increase; status
 state + related listings); slug change → automatic 301; new listing → sitemap update + internal-link
 suggestions; missing translation → translation coverage report with open reviewer/Hermes tasks; new public locale → locale rollout report + Hermes draft queue → human
 review → indexable only after approval; stale listing → broker verification report with open BG/RU
-broker tasks; new valuation request → seller pipeline + callback task; post-viewing → feedback request; closed deal → testimonial/referral
+broker tasks; new valuation request → seller pipeline + callback task; post-viewing → append-only broker outcome
+(complete/reschedule/no-show/private note) → remaining feedback request; closed deal → testimonial/referral
 request.
 
 **Integrations — required:** Google Search Console · Yandex Webmaster · GA4 or privacy-aware analytics
@@ -470,7 +471,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
 | **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + React App Router body bridge for public routes built**; full React public UI polish pending |
-| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + broker verification report + generated Payload-compatible collection configs + Payload runtime bootstrap built**; real Payload runtime env/database pending |
+| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + private append-only post-viewing follow-up queue + broker verification report + generated Payload-compatible collection configs + Payload runtime bootstrap built**; real Payload runtime env/database pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, Typesense/Meilisearch sync/query worker paths, and redacted live provisioning report built; live engine URLs/API keys pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, OpenAI-compatible draft worker path, and Hermes provisioning contract built; self-hosted Hermes/vLLM endpoint pending |
 | **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; the full 457-row route workbook now supports reviewed `200`/`301`/`410` terminal decisions, with 165 reviewed listing `301`s and 292 page/post/taxonomy rows still unresolved; listing-quality review packet is generated; **blocked on full legacy-route coverage, external SEO exports, reviewed listing-quality CSV, live service provisioning/reports, and Payload runtime env/database configuration** |
@@ -483,7 +484,7 @@ authenticated admin migration/editor/lead workbenches,
 approved-translation-gated localized sitemap (`sitemap.xml` + `robots.txt`), `RealEstateListing`
 JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with OG
 + hreflang + schema, approved CMS guide pages cited by Hermes, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only
-lead/reply/viewing/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
+lead/reply/viewing/viewing-follow-up/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
 missed-SLA report that creates broker reminders and manager escalations from unreplied leads,
 listing-status workflow that keeps sold pages live while removing them from active inventory,
 CMS slug-history workflow that creates path-only automatic 301s to canonical listing routes,

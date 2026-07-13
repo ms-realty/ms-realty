@@ -9,6 +9,11 @@ import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lea
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
+import {
+  assertViewingFollowUpLedger,
+  readViewingFollowUps,
+  resetViewingFollowUpLedger,
+} from "../lib/viewing-follow-ups.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
@@ -82,6 +87,12 @@ function tempDefaultListingEdits() {
 function tempViewings() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewings-`)}/viewings.jsonl`;
   resetViewingLedger(file);
+  return file;
+}
+
+function tempViewingFollowUps() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewing-follow-ups-`)}/viewing-follow-ups.jsonl`;
+  resetViewingFollowUpLedger(file);
   return file;
 }
 
@@ -246,6 +257,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const translationLedgerPath = tempTranslations();
   const listingEditLedgerPath = tempListingEdits();
   const viewingLedgerPath = tempViewings();
+  const viewingFollowUpLedgerPath = tempViewingFollowUps();
   const savedSearchLedgerPath = tempSavedSearches();
   const sellerPipelinePath = tempSellerPipeline();
   const dealLedgerPath = tempDeals();
@@ -263,6 +275,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     translationLedgerPath,
     listingEditLedgerPath,
     viewingLedgerPath,
+    viewingFollowUpLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
     dealLedgerPath,
@@ -277,6 +290,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
+    viewingFollowUpAt: "2026-07-06T12:00:00Z",
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
     dealClosedAt: "2026-07-10T10:00:00Z",
@@ -497,10 +511,38 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       url: "/api/admin/viewings",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
+        id: "viewing-http-lead-test",
         leadId: "http-lead-test",
         startsAt: "2026-07-06T10:00:00Z",
         broker: "broker_ru",
       },
+    }),
+    viewingFollowUp: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/viewings/follow-up",
+      headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        viewingId: "viewing-http-lead-test",
+        actor: "broker_ru",
+        action: "complete",
+        note: "Viewing completed; feedback remains a private broker task.",
+      }).toString(),
+    }),
+    viewingFollowUpRetry: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/viewings/follow-up",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        viewingId: "viewing-http-lead-test",
+        actor: "broker_ru",
+        action: "complete",
+        note: "Viewing completed; feedback remains a private broker task.",
+      },
+    }),
+    viewingFollowUpUnauthorized: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/viewings/follow-up",
+      body: { viewingId: "viewing-http-lead-test", actor: "broker_ru", action: "complete" },
     }),
     viewingUnauthorized: await dispatchHttp(app, {
       method: "POST",
@@ -708,6 +750,13 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.viewing.body.feedback_request.status, "open");
   assert.equal(smoke.viewing.body.feedback_request.channel, "whatsapp");
+  assert.equal(smoke.viewingFollowUp.status, 201);
+  assert.equal(smoke.viewingFollowUp.body.idempotent, false);
+  assert.equal(smoke.viewingFollowUp.body.viewing.status, "completed");
+  assert.equal(smoke.viewingFollowUp.body.viewing.feedback_request.status, "open");
+  assert.equal(smoke.viewingFollowUpRetry.status, 200);
+  assert.equal(smoke.viewingFollowUpRetry.body.idempotent, true);
+  assert.equal(smoke.viewingFollowUpUnauthorized.status, 401);
   assert.equal(smoke.dealClose.body.testimonial_request.status, "open");
   assert.equal(smoke.dealClose.body.referral_request.status, "open");
   assert.equal(smoke.dealClose.body.testimonial_request.channel, "whatsapp");
@@ -735,6 +784,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
   assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
   assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
+  assert.equal(assertViewingFollowUpLedger(readViewingFollowUps(viewingFollowUpLedgerPath)), true);
   assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
   assert.equal(assertDealLedger(readDeals(dealLedgerPath)), true);
@@ -759,6 +809,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     listing_slug_changed: 1,
     reply_approved: 2,
     viewing_booked: 1,
+    viewing_follow_up_recorded: 1,
     deal_closed: 1,
     translation_drafted: 1,
     translation_approved: 1,
@@ -796,6 +847,10 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.admin.body.translationTasks.some((task) => task.status === "stale"), true);
   assert.equal(smoke.admin.body.listingEdits.length, 1);
   assert.equal(smoke.admin.body.viewings.length, 1);
+  assert.equal(smoke.admin.body.summary.viewingFollowUpsOpen, 1);
+  assert.equal(smoke.admin.body.viewingFollowUpQueue.rows[0].task, "feedback");
+  assert.equal(smoke.adminHtml.body.includes('data-viewing-follow-up-queue="true"'), true);
+  assert.equal(smoke.adminHtml.body.includes('action="/api/admin/viewings/follow-up"'), true);
   assert.equal(smoke.adminMigrationReview.body.workspace.locale, "bg");
   assert.equal(smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows, 11859);
   assert.equal(smoke.adminMigrationReview.body.routeMap.total, 457);

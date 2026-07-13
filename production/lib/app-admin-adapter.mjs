@@ -80,6 +80,12 @@ import {
   readTranslationLedger,
 } from "./translation-ledger.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
+import {
+  DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
+  appendViewingFollowUp,
+  buildViewingFollowUpQueue,
+  readViewingFollowUps,
+} from "./viewing-follow-ups.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -133,7 +139,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
+    viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     bookedAt: env.MS_REALTY_BOOKED_AT,
+    viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
     dealClosedAt: env.MS_REALTY_DEAL_CLOSED_AT,
     editedAt: env.MS_REALTY_EDITED_AT,
     reviewedAt: env.MS_REALTY_REVIEWED_AT,
@@ -301,11 +309,13 @@ function auditRecordedAt(config) {
   return config.reviewedAt || config.editedAt || config.bookedAt || config.dealClosedAt || new Date().toISOString();
 }
 
-function recordAudit(input, config) {
-  return appendAuditLog(createAuditLogEntry(input, auditRecordedAt(config)), { filePath: config.auditLogPath });
+function recordAudit(input, config, recordedAt = auditRecordedAt(config)) {
+  return appendAuditLog(createAuditLogEntry(input, recordedAt), { filePath: config.auditLogPath });
 }
 
 function leadInboxPayload(registry, url, config) {
+  const viewings = readViewings(config.viewingLedgerPath);
+  const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
   return renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
     leads: readLeadLedger(config.leadLedgerPath),
     replies: readReplyOutbox(config.replyOutboxPath),
@@ -313,7 +323,10 @@ function leadInboxPayload(registry, url, config) {
     translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     listingEdits: readListingEdits(config.listingEditLedgerPath),
     leadSlaGeneratedAt: config.reviewedAt,
-    viewings: readViewings(config.viewingLedgerPath),
+    viewings,
+    viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, viewingFollowUps, {
+      now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
+    }),
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
     sellerPipeline: readSellerPipeline(config.sellerPipelinePath),
     deals: readDeals(config.dealLedgerPath),
@@ -638,6 +651,36 @@ function appendViewingBooking(input, config) {
     config,
   );
   return viewing;
+}
+
+function appendViewingFollowUpEntry(input, config) {
+  const recordedAt = config.viewingFollowUpAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
+  const result = appendViewingFollowUp(readViewings(config.viewingLedgerPath), input, {
+    filePath: config.viewingFollowUpLedgerPath,
+    recordedAt,
+  });
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: "viewing_follow_up_recorded",
+        actor: result.follow_up.actor,
+        objectType: "viewing_follow_up",
+        objectId: result.follow_up.id,
+        locale: result.viewing.original_language,
+        metadata: {
+          viewing_id: result.viewing.id,
+          lead_id: result.viewing.lead_id,
+          task: result.follow_up.task,
+          action: result.follow_up.action,
+          viewing_status: result.viewing.status,
+          due_at: result.follow_up.due_at || result.follow_up.starts_at || null,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return result;
 }
 
 function appendDealClose(input, config) {
@@ -1199,6 +1242,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
       return jsonResponse(201, appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
+      const result = appendViewingFollowUpEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
       return calendarResponse(renderViewingCalendar(readViewings(config.viewingLedgerPath), { now: config.bookedAt }));

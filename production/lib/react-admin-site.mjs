@@ -88,7 +88,7 @@ const ADMIN_UI_COPY = {
       buyer: "Купувач", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
-      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено",
+      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено",
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", price_eur: "Цена в EUR", bedrooms: "Спални" },
   },
@@ -166,7 +166,7 @@ const ADMIN_UI_COPY = {
       buyer: "Покупатель", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
-      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто",
+      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено",
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", price_eur: "Цена в EUR", bedrooms: "Спальни" },
   },
@@ -244,7 +244,7 @@ const ADMIN_UI_COPY = {
       buyer: "Buyer", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
-      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open",
+      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue",
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", price_eur: "Price in EUR", bedrooms: "Bedrooms" },
   },
@@ -485,6 +485,8 @@ function LeadInboxBody({ page }) {
     [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
     [label(copy, "languageRequests", "Language requests"), page.summary.languageRequests, "languages", "sand"],
     [label(copy, "viewings", "Viewings"), page.summary.viewings, "calendar-check", "success"],
+    [label(copy, "openFollowUps", "Open follow-ups"), page.summary.viewingFollowUpsOpen, "calendar-check", "sea"],
+    [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary.viewingFollowUpsOverdue, "triangle-alert", "brick"],
     [label(copy, "savedSearches", "Saved searches"), page.summary.savedSearches, "star", "ink"],
     [label(copy, "sellerPipeline", "Seller pipeline"), page.summary.sellerPipeline, "landmark", "sand"],
   ];
@@ -522,6 +524,7 @@ function LeadInboxBody({ page }) {
         h("button", { type: "button", "data-lead-filter": "needs_reply", "data-on": "0" }, label(copy, "needsReply", "Needs reply")),
         h("button", { type: "button", "data-lead-filter": "sla", "data-on": "0" }, label(copy, "sla", "SLA")),
       ),
+      h(ViewingFollowUpQueue, { page, copy, ui }),
       h(
         Panel,
         { title: label(copy, "crmLeads", "CRM leads"), "aria-label": label(copy, "crmLeads", "CRM leads") },
@@ -664,6 +667,135 @@ function LeadInboxBody({ page }) {
       ),
     ],
   });
+}
+
+function viewingFollowUpTone(row) {
+  if (row.overdue) return "brick";
+  if (row.viewing_status === "no_show") return "sun";
+  if (row.viewing_status === "rescheduled") return "sea";
+  return "success";
+}
+
+function datetimeLocalValue(value) {
+  if (!value || Number.isNaN(Date.parse(value))) return "";
+  return new Date(value).toISOString().slice(0, 16);
+}
+
+function ViewingFollowUpQueue({ page, copy, ui }) {
+  const queue = page.viewingFollowUpQueue || { rows: [] };
+  const columns = {
+    viewing: label(copy, "viewings", "Viewings"),
+    task: label(copy, "task", "Task"),
+    status: label(copy, "viewingStatus", "Viewing status"),
+    dueAt: label(copy, "dueAt", "Due at"),
+    action: label(copy, "recordOutcome", "Record"),
+  };
+  return h(
+    Panel,
+    { title: label(copy, "viewingFollowUpQueue", "Post-viewing follow-ups"), "data-viewing-follow-up-queue": "true" },
+    queue.rows.length
+      ? h(
+          "div",
+          { className: "adm-scroll-x" },
+          h(
+            "table",
+            { className: "crm-tbl", "data-viewing-follow-up-table": "true" },
+            h(
+              "thead",
+              null,
+              h(
+                "tr",
+                null,
+                h("th", { scope: "col" }, columns.viewing),
+                h("th", { scope: "col" }, columns.task),
+                h("th", { scope: "col" }, columns.status),
+                h("th", { scope: "col" }, columns.dueAt),
+                h("th", { scope: "col" }, columns.action),
+              ),
+            ),
+            h(
+              "tbody",
+              null,
+              ...queue.rows.map((row) =>
+                h(
+                  "tr",
+                  {
+                    key: `${row.viewing_id}-${row.task}`,
+                    "data-viewing-follow-up-row": "true",
+                    "data-viewing-id": row.viewing_id,
+                    "data-viewing-task": row.task,
+                    "data-overdue": row.overdue ? "true" : "false",
+                  },
+                  h(
+                    "td",
+                    { "data-viewing-column": "viewing", "data-label": columns.viewing },
+                    h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.viewing_id), h("small", { className: "adm-lead-context" }, row.listing_reference || row.lead_id)),
+                  ),
+                  h("td", { "data-viewing-column": "task", "data-label": columns.task }, row.task === "feedback" ? label(copy, "feedback", "Feedback") : label(copy, "followUp", "Follow-up")),
+                  h(
+                    "td",
+                    { "data-viewing-column": "status", "data-label": columns.status },
+                    h(StatusPill, { tone: viewingFollowUpTone(row) }, `${statusText(ui, row.viewing_status)} · ${statusText(ui, row.task_status)}`),
+                  ),
+                  h(
+                    "td",
+                    { className: "crm-tbl__muted crm-mono", "data-viewing-column": "due_at", "data-label": columns.dueAt },
+                    row.due_at || "",
+                    row.overdue ? h("small", { className: "adm-lead-context", "data-viewing-overdue": "true" }, statusText(ui, "overdue")) : null,
+                  ),
+                  h(
+                    "td",
+                    { "data-viewing-column": "action", "data-label": columns.action },
+                    h(
+                      "details",
+                      { className: "adm-reply", "data-viewing-follow-up-actions": "true" },
+                      h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "calendar-check", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record"))),
+                      h(
+                        "form",
+                        {
+                          method: "post",
+                          action: "/api/admin/viewings/follow-up",
+                          className: "adm-form",
+                          "data-viewing-follow-up-form": "true",
+                          "data-viewing-id": row.viewing_id,
+                          "data-viewing-task": row.task,
+                          "data-viewing-follow-up-saving": label(copy, "viewingFollowUpSaving", "Recording follow-up…"),
+                          "data-viewing-follow-up-success": label(copy, "viewingFollowUpSaved", "Follow-up recorded."),
+                          "data-viewing-follow-up-failure": label(copy, "viewingFollowUpSaveFailed", "Could not record follow-up."),
+                        },
+                        h("input", { type: "hidden", name: "viewingId", defaultValue: row.viewing_id }),
+                        h("input", { type: "hidden", name: "task", defaultValue: row.task }),
+                        h("label", null, label(copy, "broker", "Broker"), h("input", { name: "actor", required: true, autoComplete: "name", defaultValue: row.broker })),
+                        row.task === "follow_up"
+                          ? h("label", null, label(copy, "nextViewingAt", "New viewing time"), h("input", { name: "startsAt", type: "datetime-local", defaultValue: datetimeLocalValue(row.starts_at) }))
+                          : null,
+                        row.task === "follow_up"
+                          ? h("label", null, label(copy, "dueAt", "Due at"), h("input", { name: "dueAt", type: "datetime-local", defaultValue: datetimeLocalValue(row.due_at) }))
+                          : null,
+                        h("label", null, label(copy, "followUpNote", "Follow-up note"), h("textarea", { name: "note", maxLength: 2000 })),
+                        h(
+                          "div",
+                          { className: "adm-form__actions" },
+                          h("p", { className: "crm-tbl__muted", role: "status", "aria-live": "polite", "data-viewing-follow-up-status": "true" }),
+                          h("button", { type: "submit", name: "action", value: "complete", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "complete", "Complete")),
+                          row.task === "follow_up"
+                            ? h("button", { type: "submit", name: "action", value: "reschedule", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "reschedule", "Reschedule"))
+                            : null,
+                          row.task === "follow_up"
+                            ? h("button", { type: "submit", name: "action", value: "no_show", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "noShow", "No-show"))
+                            : null,
+                          h("button", { type: "submit", name: "action", value: "note", className: "mk-btn mk-btn--ghost mk-btn--sm" }, label(copy, "addNote", "Add note")),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+      : h("p", { className: "crm-tbl__muted", "data-empty-viewing-follow-ups": "true" }, label(copy, "noOpenFollowUps", "No open viewing follow-ups.")),
+  );
 }
 
 /* ============================================================

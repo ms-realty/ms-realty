@@ -41,6 +41,7 @@ const expectedHttpAuditActions = {
   translation_approved: 1,
   translation_published: 1,
   viewing_booked: 1,
+  viewing_follow_up_recorded: 1,
 };
 const expectedNodeServerAuditActions = {
   broker_contact_approved: 1,
@@ -53,6 +54,7 @@ const expectedNodeServerAuditActions = {
   translation_approved: 1,
   translation_published: 1,
   viewing_booked: 1,
+  viewing_follow_up_recorded: 1,
 };
 
 function countBy(rows, field) {
@@ -636,6 +638,18 @@ if (
   throw new Error("HTTP smoke must book one viewing with follow-up and feedback tasks");
 }
 if (
+  httpSmoke.viewingFollowUp.status !== 201 ||
+  httpSmoke.viewingFollowUp.body.idempotent !== false ||
+  httpSmoke.viewingFollowUp.body.viewing.status !== "completed" ||
+  httpSmoke.viewingFollowUpRetry.status !== 200 ||
+  httpSmoke.viewingFollowUpRetry.body.idempotent !== true ||
+  httpSmoke.viewingFollowUpUnauthorized.status !== 401 ||
+  httpSmoke.admin.body.summary.viewingFollowUpsOpen !== 1 ||
+  httpSmoke.admin.body.viewingFollowUpQueue.rows[0]?.task !== "feedback"
+) {
+  throw new Error("HTTP smoke must preserve the private post-viewing follow-up queue");
+}
+if (
   httpSmoke.dealClose.status !== 201 ||
   httpSmoke.dealClose.body.testimonial_request?.status !== "open" ||
   httpSmoke.dealClose.body.referral_request?.status !== "open"
@@ -650,6 +664,7 @@ if (
   throw new Error("HTTP smoke must export booked viewings as an admin calendar feed");
 }
 if (httpSmoke.viewingLedger.rows !== 1) throw new Error("HTTP smoke must persist one viewing row");
+if (httpSmoke.viewingFollowUpLedger.rows !== 1) throw new Error("HTTP smoke must persist one viewing follow-up row");
 if (httpSmoke.savedSearchLedger.rows !== 1) throw new Error("HTTP smoke must persist one saved search row");
 if (httpSmoke.sellerPipelineLedger.rows !== 1) throw new Error("HTTP smoke must persist one seller pipeline row");
 if (httpSmoke.dealLedger.rows !== 1) throw new Error("HTTP smoke must persist one closed deal row");
@@ -823,6 +838,18 @@ if (
   throw new Error("Node server smoke must book one viewing with follow-up and feedback tasks");
 }
 if (
+  nodeServerSmoke.viewingFollowUp.status !== 201 ||
+  nodeServerSmoke.viewingFollowUp.body.idempotent !== false ||
+  nodeServerSmoke.viewingFollowUp.body.viewing.status !== "completed" ||
+  nodeServerSmoke.viewingFollowUpRetry.status !== 200 ||
+  nodeServerSmoke.viewingFollowUpRetry.body.idempotent !== true ||
+  nodeServerSmoke.viewingFollowUpUnauthorized.status !== 401 ||
+  nodeServerSmoke.admin.body.summary.viewingFollowUpsOpen !== 1 ||
+  nodeServerSmoke.admin.body.viewingFollowUpQueue.rows[0]?.task !== "feedback"
+) {
+  throw new Error("Node server smoke must preserve the private post-viewing follow-up queue");
+}
+if (
   nodeServerSmoke.dealClose.status !== 201 ||
   nodeServerSmoke.dealClose.body.testimonial_request?.status !== "open" ||
   nodeServerSmoke.dealClose.body.referral_request?.status !== "open"
@@ -837,6 +864,7 @@ if (
   throw new Error("Node server smoke must export booked viewings as an admin calendar feed");
 }
 if (nodeServerSmoke.viewingLedger.rows !== 1) throw new Error("Node server smoke must persist one viewing row");
+if (nodeServerSmoke.viewingFollowUpLedger.rows !== 1) throw new Error("Node server smoke must persist one viewing follow-up row");
 if (nodeServerSmoke.savedSearchLedger.rows !== 1) throw new Error("Node server smoke must persist one saved search row");
 if (nodeServerSmoke.sellerPipelineLedger.rows !== 1) throw new Error("Node server smoke must persist one seller pipeline row");
 if (nodeServerSmoke.dealLedger.rows !== 1) throw new Error("Node server smoke must persist one closed deal row");
