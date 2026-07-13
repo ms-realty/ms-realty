@@ -167,6 +167,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
       MS_REALTY_SELLER_PIPELINE_PATH: tempJsonl("app-admin-seller-pipeline"),
+      MS_REALTY_SELLER_PIPELINE_OUTCOME_PATH: tempJsonl("app-admin-seller-pipeline-outcomes"),
+      MS_REALTY_SELLER_PIPELINE_CREATED_AT: "2026-07-04T00:08:00Z",
+      MS_REALTY_SELLER_PIPELINE_OUTCOME_AT: "2026-07-06T12:00:00Z",
       MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoEvidenceInputDir,
       MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoEvidenceOutputPath,
       MS_REALTY_SLUG_HISTORY_PATH: tempJsonl("app-admin-slug-history"),
@@ -218,6 +221,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const tourApprovalRoute = await import("../../app/api/admin/tours/approve/route.js");
       const viewingRoute = await import("../../app/api/admin/viewings/route.js");
       const viewingFollowUpRoute = await import("../../app/api/admin/viewings/follow-up/route.js");
+      const sellerPipelineOutcomeRoute = await import("../../app/api/admin/seller-pipeline/outcome/route.js");
       const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
       const leadInboxJsonRoute = await import("../../app/api/admin/leads/route.js");
@@ -1123,10 +1127,82 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(viewingFollowUpRetry.status, 200);
       assert.equal((await viewingFollowUpRetry.json()).idempotent, true);
 
+      const sellerLead = await publicLeadRoute.POST(
+        new Request("https://example.test/api/leads", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            id: "next-admin-seller-pipeline-test",
+            source: "website_seller_valuation",
+            leadType: "seller",
+            language: "bg",
+            contact: { name: "Mira Petkova" },
+            property: { location: "Sandanski", type: "apartment" },
+            message: "Please arrange a broker valuation.",
+          }),
+        }),
+      );
+      const sellerLeadBody = await sellerLead.json();
+      assert.equal(sellerLead.status, 201);
+
+      const sellerPipelineOutcomeUnauthorized = await sellerPipelineOutcomeRoute.POST(
+        new Request("https://example.test/api/admin/seller-pipeline/outcome", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            id: "next-admin-seller-callback",
+            sellerPipelineId: sellerLeadBody.sellerPipeline.id,
+            actor: "broker_bg",
+            action: "callback_completed",
+          }),
+        }),
+      );
+      assert.equal(sellerPipelineOutcomeUnauthorized.status, 401);
+
+      const sellerPipelineOutcome = await sellerPipelineOutcomeRoute.POST(
+        new Request("https://example.test/api/admin/seller-pipeline/outcome", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            id: "next-admin-seller-callback",
+            sellerPipelineId: sellerLeadBody.sellerPipeline.id,
+            actor: "broker_bg",
+            action: "callback_completed",
+            note: "Seller requested a valuation callback; internal broker note.",
+          }),
+        }),
+      );
+      const sellerPipelineOutcomeBody = await sellerPipelineOutcome.json();
+      assert.equal(sellerPipelineOutcome.status, 201);
+      assert.equal(sellerPipelineOutcomeBody.idempotent, false);
+      assert.equal(sellerPipelineOutcomeBody.seller_pipeline.stage, "callback_completed");
+
+      const sellerPipelineOutcomeRetry = await sellerPipelineOutcomeRoute.POST(
+        new Request("https://example.test/api/admin/seller-pipeline/outcome", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            id: "next-admin-seller-callback",
+            sellerPipelineId: sellerLeadBody.sellerPipeline.id,
+            actor: "broker_bg",
+            action: "callback_completed",
+            note: "Seller requested a valuation callback; internal broker note.",
+          }),
+        }),
+      );
+      assert.equal(sellerPipelineOutcomeRetry.status, 200);
+      assert.equal((await sellerPipelineOutcomeRetry.json()).idempotent, true);
+
       const leadInboxAfterViewing = await leadInboxJsonRoute.GET(new Request("https://example.test/api/admin/leads?locale=en", { headers: auth }));
       const leadInboxAfterViewingBody = await leadInboxAfterViewing.json();
       assert.equal(leadInboxAfterViewingBody.summary.viewingFollowUpsOpen, 1);
       assert.equal(leadInboxAfterViewingBody.viewingFollowUpQueue.rows[0].task, "feedback");
+      const sellerPipelineQueueRow = leadInboxAfterViewingBody.sellerPipelineQueue.rows.find(
+        (row) => row.seller_pipeline_id === sellerLeadBody.sellerPipeline.id,
+      );
+      assert.equal(leadInboxAfterViewingBody.sellerPipelineQueue.summary.open, 1);
+      assert.equal(sellerPipelineQueueRow.stage, "callback_completed");
+      assert.equal(sellerPipelineQueueRow.task, "appraisal");
 
       const calendar = await viewingCalendarRoute.GET(new Request("https://example.test/api/admin/viewings.ics", { headers: auth }));
       const calendarBody = await calendar.text();
@@ -1170,10 +1246,15 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         tour_approved: 1,
         viewing_booked: 1,
         viewing_follow_up_recorded: 1,
+        seller_pipeline_outcome_recorded: 1,
         deal_closed: 1,
       });
       const viewingFollowUpAudit = readAuditLog(auditLogPath).find((row) => row.action === "viewing_follow_up_recorded");
       assert.equal(viewingFollowUpAudit.metadata.note, undefined);
+      const sellerPipelineAudits = auditRows.filter((row) => row.action === "seller_pipeline_outcome_recorded");
+      assert.equal(sellerPipelineAudits.length, 1);
+      assert.equal(sellerPipelineAudits[0].metadata.note, undefined);
+      assert.equal(sellerPipelineAudits[0].metadata.property, undefined);
     },
   );
 });

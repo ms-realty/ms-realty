@@ -20,6 +20,7 @@ const ADMIN_ACTIONS = new Set([
   "redirect_approval_created",
   "redirect_approvals_imported",
   "reply_approved",
+  "seller_pipeline_outcome_recorded",
   "seo_evidence_imported",
   "tour_approved",
   "translation_drafted",

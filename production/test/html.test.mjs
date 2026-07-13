@@ -171,8 +171,48 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.match(html, /data-lead-context="true">Sandanski/);
   assert.match(html, /data-viewing-follow-up-queue="true"/);
   assert.match(html, /data-empty-viewing-follow-ups="true"/);
+  assert.match(html, /data-seller-pipeline-queue="true"/);
+  assert.match(html, /data-empty-seller-pipeline="true"/);
   assert.match(ADMIN_APP_JS, /data-viewing-follow-up-form/);
+  assert.match(ADMIN_APP_JS, /data-seller-pipeline-outcome-form/);
   assert.match(ADMIN_APP_JS, /window\.location\.reload/);
   assert.doesNotMatch(html, />website_listing_detail</);
   assert.doesNotMatch(html, />manager escalation required</);
+});
+
+test("admin seller valuation queue renders native broker outcome controls", () => {
+  const page = renderAdminLeadsPayload(registry, "en", {
+    leads: [],
+    replies: [],
+    languageRequests: [],
+    viewings: [],
+    savedSearches: [],
+    sellerPipeline: [{ id: "seller-pipeline-lead-1" }],
+    sellerPipelineQueue: {
+      rows: [
+        {
+          seller_pipeline_id: "seller-pipeline-lead-1",
+          lead_id: "lead-1",
+          property: { location: "Sandanski" },
+          owner: "broker_bg",
+          stage: "callback_completed",
+          task: "appraisal",
+          task_status: "open",
+          due_at: null,
+          appraisal_at: null,
+          overdue: false,
+        },
+      ],
+      summary: { total: 1, open: 1, overdue: 0, completed: 0, closed_lost: 0 },
+    },
+    deals: [],
+    leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
+  });
+  const html = renderHtmlPage(page);
+
+  assert.match(html, /data-seller-pipeline-row="true"/);
+  assert.match(html, /action="\/api\/admin\/seller-pipeline\/outcome"/);
+  assert.match(html, /name="appraisalAt" type="datetime-local" required/);
+  assert.match(html, /name="action" value="appraisal_scheduled"/);
+  assert.match(html, /name="action" value="closed_lost"/);
 });

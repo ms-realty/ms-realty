@@ -37,7 +37,7 @@ export function createSellerPipelineItem(lead, { createdAt = new Date().toISOStr
     owner,
     checklist: {
       callback: "open",
-      appraisal: "open",
+      appraisal: "not_started",
       mandate: "not_started",
       draft_listing: "not_started",
     },

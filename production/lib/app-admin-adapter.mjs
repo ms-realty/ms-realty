@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
-import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
 import {
@@ -66,6 +66,12 @@ import {
 } from "./redirect-approvals.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
+import {
+  DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
+  appendSellerPipelineOutcome,
+  buildSellerPipelineQueue,
+  readSellerPipelineOutcomes,
+} from "./seller-pipeline-outcomes.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH, appendSlugChange } from "./slug-history.mjs";
 import {
   DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
@@ -133,6 +139,10 @@ export function appAdminConfigFromEnv(env = process.env) {
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    sellerPipelineOutcomeLedgerPath:
+      env.MS_REALTY_SELLER_PIPELINE_OUTCOME_PATH ||
+      env.MS_REALTY_SELLER_PIPELINE_OUTCOME_LEDGER_PATH ||
+      DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
     seoEvidenceInputDir: env.MS_REALTY_SEO_EVIDENCE_INPUT_DIR,
     seoEvidenceOutputPath: env.MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH,
     slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
@@ -142,6 +152,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     bookedAt: env.MS_REALTY_BOOKED_AT,
     viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
+    sellerPipelineOutcomeAt: env.MS_REALTY_SELLER_PIPELINE_OUTCOME_AT,
     dealClosedAt: env.MS_REALTY_DEAL_CLOSED_AT,
     editedAt: env.MS_REALTY_EDITED_AT,
     reviewedAt: env.MS_REALTY_REVIEWED_AT,
@@ -316,6 +327,8 @@ function recordAudit(input, config, recordedAt = auditRecordedAt(config)) {
 function leadInboxPayload(registry, url, config) {
   const viewings = readViewings(config.viewingLedgerPath);
   const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
+  const sellerPipeline = readSellerPipeline(config.sellerPipelinePath);
+  const sellerPipelineOutcomes = readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath);
   return renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
     leads: readLeadLedger(config.leadLedgerPath),
     replies: readReplyOutbox(config.replyOutboxPath),
@@ -328,7 +341,10 @@ function leadInboxPayload(registry, url, config) {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
     }),
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
-    sellerPipeline: readSellerPipeline(config.sellerPipelinePath),
+    sellerPipeline,
+    sellerPipelineQueue: buildSellerPipelineQueue(sellerPipeline, sellerPipelineOutcomes, {
+      now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
+    }),
     deals: readDeals(config.dealLedgerPath),
     brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
   });
@@ -674,6 +690,36 @@ function appendViewingFollowUpEntry(input, config) {
           action: result.follow_up.action,
           viewing_status: result.viewing.status,
           due_at: result.follow_up.due_at || result.follow_up.starts_at || null,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return result;
+}
+
+function appendSellerPipelineOutcomeEntry(input, config) {
+  const recordedAt = config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
+  const result = appendSellerPipelineOutcome(readSellerPipeline(config.sellerPipelinePath), input, {
+    filePath: config.sellerPipelineOutcomeLedgerPath,
+    recordedAt,
+  });
+  // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+  if (!readAuditLog(config.auditLogPath).some((row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === result.outcome.id)) {
+    recordAudit(
+      {
+        action: "seller_pipeline_outcome_recorded",
+        actor: result.outcome.actor,
+        objectType: "seller_pipeline_outcome",
+        objectId: result.outcome.id,
+        locale: result.seller_pipeline.original_language,
+        metadata: {
+          seller_pipeline_id: result.seller_pipeline.id,
+          lead_id: result.seller_pipeline.lead_id,
+          action: result.outcome.action,
+          stage: result.seller_pipeline.stage,
+          due_at: result.seller_pipeline.next_task?.due_at || null,
         },
       },
       config,
@@ -1245,6 +1291,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
       const result = appendViewingFollowUpEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/seller-pipeline/outcome") {
+      const result = appendSellerPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {

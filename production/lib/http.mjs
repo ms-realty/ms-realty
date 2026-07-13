@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { isAdminAuthorized } from "./admin-auth.mjs";
-import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
+import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
 import {
   addLocaleToRegistry,
@@ -46,6 +46,7 @@ import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-le
 import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
 import { appendSavedSearch, createSavedSearch, normalizeSavedSearchInput, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
+import { appendSellerPipelineOutcome, buildSellerPipelineQueue, readSellerPipelineOutcomes } from "./seller-pipeline-outcomes.mjs";
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
@@ -309,6 +310,7 @@ export function createHttpApp({
   viewingFollowUpLedgerPath = null,
   savedSearchLedgerPath = null,
   sellerPipelinePath = null,
+  sellerPipelineOutcomeLedgerPath = null,
   dealLedgerPath = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
@@ -336,6 +338,7 @@ export function createHttpApp({
   viewingFollowUpAt,
   savedAt,
   sellerPipelineCreatedAt,
+  sellerPipelineOutcomeAt,
   dealClosedAt,
   slugChangedAt,
   listingQualityGeneratedAt,
@@ -357,6 +360,15 @@ export function createHttpApp({
       viewings,
       viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, readViewingFollowUps(viewingFollowUpLedgerPath || undefined), {
         now: viewingFollowUpAt || bookedAt || reviewedAt || receivedAt || new Date().toISOString(),
+      }),
+    };
+  };
+  const currentSellerPipelineData = () => {
+    const sellerPipeline = readSellerPipeline(sellerPipelinePath || undefined);
+    return {
+      sellerPipeline,
+      sellerPipelineQueue: buildSellerPipelineQueue(sellerPipeline, readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined), {
+        now: sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
       }),
     };
   };
@@ -627,7 +639,7 @@ export function createHttpApp({
         leadSlaGeneratedAt,
         ...currentViewingData(),
         savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
-        sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
+        ...currentSellerPipelineData(),
         deals: readDeals(dealLedgerPath || undefined),
         brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
       });
@@ -649,7 +661,7 @@ export function createHttpApp({
             leadSlaGeneratedAt,
             ...currentViewingData(),
             savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
-            sellerPipeline: readSellerPipeline(sellerPipelinePath || undefined),
+            ...currentSellerPipelineData(),
             deals: readDeals(dealLedgerPath || undefined),
             brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
           }),
@@ -1399,6 +1411,43 @@ export function createHttpApp({
               due_at: result.follow_up.due_at || result.follow_up.starts_at || null,
             },
           }, recordedAt);
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/seller-pipeline/outcome") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
+        const result = appendSellerPipelineOutcome(readSellerPipeline(sellerPipelinePath || undefined), parseBody(request), {
+          filePath: sellerPipelineOutcomeLedgerPath || undefined,
+          recordedAt,
+        });
+        // ponytail: separate JSONL ledgers are not transactional; an idempotent retry repairs a missing summary audit.
+        if (
+          auditLogPath &&
+          !readAuditLog(auditLogPath).some((row) => row.action === "seller_pipeline_outcome_recorded" && row.object_id === result.outcome.id)
+        ) {
+          recordAudit(
+            {
+              action: "seller_pipeline_outcome_recorded",
+              actor: result.outcome.actor,
+              objectType: "seller_pipeline_outcome",
+              objectId: result.outcome.id,
+              locale: result.seller_pipeline.original_language,
+              metadata: {
+                seller_pipeline_id: result.seller_pipeline.id,
+                lead_id: result.seller_pipeline.lead_id,
+                action: result.outcome.action,
+                stage: result.seller_pipeline.stage,
+                due_at: result.seller_pipeline.next_task?.due_at || null,
+              },
+            },
+            recordedAt,
+          );
         }
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {

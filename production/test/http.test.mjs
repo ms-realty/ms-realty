@@ -16,6 +16,7 @@ import {
 } from "../lib/viewing-follow-ups.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
+import { assertSellerPipelineOutcomes, readSellerPipelineOutcomes, resetSellerPipelineOutcomes } from "../lib/seller-pipeline-outcomes.mjs";
 import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
@@ -105,6 +106,12 @@ function tempSavedSearches() {
 function tempSellerPipeline() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seller-pipeline-`)}/seller-pipeline.jsonl`;
   resetSellerPipeline(file);
+  return file;
+}
+
+function tempSellerPipelineOutcomes() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-seller-pipeline-outcomes-`)}/seller-pipeline-outcomes.jsonl`;
+  resetSellerPipelineOutcomes(file);
   return file;
 }
 
@@ -2060,6 +2067,67 @@ test("HTTP fallback accepts a URL-encoded seller valuation form", async () => {
   assert.deepEqual(response.body.lead.property, { location: "Sandanski", type: "apartment" });
   assert.deepEqual(response.body.sellerPipeline.property, { location: "Sandanski", type: "apartment" });
   assert.deepEqual(readLeadLedger(leadLedgerPath)[0].property, { location: "Sandanski", type: "apartment" });
+});
+
+test("HTTP admin records private seller valuation outcomes with a derived queue", async () => {
+  const leadLedgerPath = tempLedger();
+  const sellerPipelinePath = tempSellerPipeline();
+  const sellerPipelineOutcomeLedgerPath = tempSellerPipelineOutcomes();
+  const auditLogPath = tempAuditLog();
+  const app = createHttpApp({
+    registry: loadLocaleRegistry(),
+    leadLedgerPath,
+    sellerPipelinePath,
+    sellerPipelineOutcomeLedgerPath,
+    auditLogPath,
+    sellerPipelineCreatedAt: "2026-07-10T08:00:00Z",
+    sellerPipelineOutcomeAt: "2026-07-10T09:00:00Z",
+  });
+  const sellerLead = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/leads",
+    body: {
+      id: "http-seller-outcome",
+      source: "website_seller_valuation",
+      leadType: "seller",
+      language: "bg",
+      contact: { name: "Mira Petkova" },
+      property: { location: "Sandanski", type: "apartment" },
+    },
+  });
+  const input = {
+    id: "http-seller-callback",
+    sellerPipelineId: sellerLead.body.sellerPipeline.id,
+    actor: "broker_bg",
+    action: "callback_completed",
+    note: "Internal callback note.",
+  };
+
+  const unauthorized = await dispatchHttp(app, { method: "POST", url: "/api/admin/seller-pipeline/outcome", body: input });
+  const created = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/seller-pipeline/outcome",
+    headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams(input).toString(),
+  });
+  const retry = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/seller-pipeline/outcome",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: input,
+  });
+  const inbox = await dispatchHttp(app, { url: "/api/admin/leads", headers: { authorization: "Bearer local-admin-smoke" } });
+
+  assert.equal(unauthorized.status, 401);
+  assert.equal(created.status, 201);
+  assert.equal(retry.status, 200);
+  assert.equal(retry.body.idempotent, true);
+  assert.equal(inbox.body.sellerPipelineQueue.rows[0].task, "appraisal");
+  assert.equal(assertSellerPipelineOutcomes(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath)), true);
+  const audits = readAuditLog(auditLogPath).filter((row) => row.action === "seller_pipeline_outcome_recorded");
+  assert.equal(audits.length, 1);
+  assert.equal(audits[0].metadata.note, undefined);
+  assert.equal(audits[0].metadata.property, undefined);
 });
 
 test("HTTP fallback accepts a URL-encoded saved-search form", async () => {

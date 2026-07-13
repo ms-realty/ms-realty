@@ -49,7 +49,13 @@ export function renderAdminListingEditorPayload(registry, requestedLocale, seed,
 
 export function renderAdminLeadsPayload(registry, requestedLocale, data) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
-  const { leadSla: providedLeadSla, leadSlaGeneratedAt, viewingFollowUpQueue: providedViewingFollowUpQueue, ...payloadData } = data;
+  const {
+    leadSla: providedLeadSla,
+    leadSlaGeneratedAt,
+    viewingFollowUpQueue: providedViewingFollowUpQueue,
+    sellerPipelineQueue: providedSellerPipelineQueue,
+    ...payloadData
+  } = data;
   const leadSla =
     providedLeadSla ||
     buildLeadSlaReport({
@@ -62,6 +68,13 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     {
       rows: [],
       summary: { total_viewings: data.viewings.length, open: 0, overdue: 0, booked: 0, completed: 0, rescheduled: 0, no_show: 0 },
+    };
+  const sellerPipelineQueue =
+    providedSellerPipelineQueue ||
+    {
+      rows: [],
+      states: [],
+      summary: { total: data.sellerPipeline.length, open: 0, overdue: 0, completed: 0, closed_lost: 0 },
     };
   return {
     kind: "admin_lead_inbox",
@@ -81,6 +94,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     ...payloadData,
     leadSla,
     viewingFollowUpQueue,
+    sellerPipelineQueue,
     summary: {
       leads: data.leads.length,
       replies: data.replies.length,
@@ -92,6 +106,8 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       viewingFollowUpsOverdue: viewingFollowUpQueue.summary.overdue,
       savedSearches: data.savedSearches.length,
       sellerPipeline: data.sellerPipeline.length,
+      sellerPipelineOpen: sellerPipelineQueue.summary.open,
+      sellerPipelineOverdue: sellerPipelineQueue.summary.overdue,
       deals: data.deals.length,
     },
   };

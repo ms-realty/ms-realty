@@ -88,7 +88,7 @@ const ADMIN_UI_COPY = {
       buyer: "Купувач", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
-      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено",
+      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", price_eur: "Цена в EUR", bedrooms: "Спални" },
   },
@@ -166,7 +166,7 @@ const ADMIN_UI_COPY = {
       buyer: "Покупатель", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
-      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено",
+      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", price_eur: "Цена в EUR", bedrooms: "Спальни" },
   },
@@ -244,7 +244,7 @@ const ADMIN_UI_COPY = {
       buyer: "Buyer", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
-      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue",
+      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", price_eur: "Price in EUR", bedrooms: "Bedrooms" },
   },
@@ -525,6 +525,7 @@ function LeadInboxBody({ page }) {
         h("button", { type: "button", "data-lead-filter": "sla", "data-on": "0" }, label(copy, "sla", "SLA")),
       ),
       h(ViewingFollowUpQueue, { page, copy, ui }),
+      h(SellerPipelineQueue, { page, copy, ui }),
       h(
         Panel,
         { title: label(copy, "crmLeads", "CRM leads"), "aria-label": label(copy, "crmLeads", "CRM leads") },
@@ -795,6 +796,145 @@ function ViewingFollowUpQueue({ page, copy, ui }) {
           ),
         )
       : h("p", { className: "crm-tbl__muted", "data-empty-viewing-follow-ups": "true" }, label(copy, "noOpenFollowUps", "No open viewing follow-ups.")),
+  );
+}
+
+function sellerPipelineTone(row) {
+  if (row.overdue) return "brick";
+  if (row.task === "seller_callback" || row.task === "callback") return "sun";
+  if (row.stage === "appraisal_scheduled") return "sea";
+  return "success";
+}
+
+function sellerPipelinePrimaryAction(row, copy) {
+  const isAppraisal = row.task === "appraisal" || row.task === "seller_appraisal";
+  if (row.task === "seller_callback" || row.task === "callback") {
+    return ["callback_completed", label(copy, "callbackCompleted", "Complete callback")];
+  }
+  if (isAppraisal) {
+    return row.stage === "appraisal_scheduled"
+      ? ["appraisal_completed", label(copy, "appraisalCompleted", "Complete appraisal")]
+      : ["appraisal_scheduled", label(copy, "scheduleAppraisal", "Schedule appraisal")];
+  }
+  if (row.task === "mandate" || row.task === "seller_mandate") {
+    return ["mandate_signed", label(copy, "mandateSigned", "Record mandate")];
+  }
+  if (row.task === "listing_draft" || row.task === "seller_listing_draft") {
+    return ["listing_draft_started", label(copy, "startListingDraft", "Start listing draft")];
+  }
+  return null;
+}
+
+function SellerPipelineQueue({ page, copy, ui }) {
+  const queue = page.sellerPipelineQueue || { rows: [] };
+  const columns = {
+    seller: label(copy, "sellerRequest", "Seller request"),
+    task: label(copy, "task", "Task"),
+    stage: label(copy, "sellerStage", "Stage"),
+    dueAt: label(copy, "dueAt", "Due at"),
+    action: label(copy, "recordOutcome", "Record"),
+  };
+  return h(
+    Panel,
+    { title: label(copy, "sellerPipelineQueue", "Seller valuation queue"), "data-seller-pipeline-queue": "true" },
+    queue.rows.length
+      ? h(
+          "div",
+          { className: "adm-scroll-x" },
+          h(
+            "table",
+            { className: "crm-tbl", "data-seller-pipeline-table": "true" },
+            h(
+              "thead",
+              null,
+              h(
+                "tr",
+                null,
+                h("th", { scope: "col" }, columns.seller),
+                h("th", { scope: "col" }, columns.task),
+                h("th", { scope: "col" }, columns.stage),
+                h("th", { scope: "col" }, columns.dueAt),
+                h("th", { scope: "col" }, columns.action),
+              ),
+            ),
+            h(
+              "tbody",
+              null,
+              ...queue.rows.map((row) => {
+                const isAppraisal = row.task === "appraisal" || row.task === "seller_appraisal";
+                const needsAppraisalSchedule = isAppraisal && row.stage !== "appraisal_scheduled";
+                const primary = sellerPipelinePrimaryAction(row, copy);
+                return h(
+                  "tr",
+                  {
+                    key: `${row.seller_pipeline_id}-${row.task}`,
+                    "data-seller-pipeline-row": "true",
+                    "data-seller-pipeline-id": row.seller_pipeline_id,
+                    "data-seller-pipeline-task": row.task,
+                    "data-overdue": row.overdue ? "true" : "false",
+                  },
+                  h(
+                    "td",
+                    { "data-seller-pipeline-column": "seller", "data-label": columns.seller },
+                    h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.seller_pipeline_id), h("small", { className: "adm-lead-context" }, row.property?.location || row.lead_id)),
+                  ),
+                  h("td", { "data-seller-pipeline-column": "task", "data-label": columns.task }, statusText(ui, row.task)),
+                  h(
+                    "td",
+                    { "data-seller-pipeline-column": "stage", "data-label": columns.stage },
+                    h(StatusPill, { tone: sellerPipelineTone(row) }, `${statusText(ui, row.stage)} · ${statusText(ui, row.task_status)}`),
+                  ),
+                  h(
+                    "td",
+                    { className: "crm-tbl__muted crm-mono", "data-seller-pipeline-column": "due_at", "data-label": columns.dueAt },
+                    row.due_at || "",
+                    row.overdue ? h("small", { className: "adm-lead-context", "data-seller-pipeline-overdue": "true" }, statusText(ui, "overdue")) : null,
+                  ),
+                  h(
+                    "td",
+                    { "data-seller-pipeline-column": "action", "data-label": columns.action },
+                    h(
+                      "details",
+                      { className: "adm-reply", "data-seller-pipeline-actions": "true" },
+                      h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "landmark", size: 16 }), h("span", null, label(copy, "recordOutcome", "Record"))),
+                      h(
+                        "form",
+                        {
+                          method: "post",
+                          action: "/api/admin/seller-pipeline/outcome",
+                          className: "adm-form",
+                          "data-seller-pipeline-outcome-form": "true",
+                          "data-seller-pipeline-id": row.seller_pipeline_id,
+                          "data-seller-pipeline-saving": label(copy, "sellerPipelineSaving", "Recording seller outcome…"),
+                          "data-seller-pipeline-success": label(copy, "sellerPipelineSaved", "Seller outcome recorded."),
+                          "data-seller-pipeline-failure": label(copy, "sellerPipelineSaveFailed", "Could not record seller outcome."),
+                        },
+                        h("input", { type: "hidden", name: "sellerPipelineId", defaultValue: row.seller_pipeline_id }),
+                        h("label", null, label(copy, "broker", "Broker"), h("input", { name: "actor", required: true, autoComplete: "name", defaultValue: row.owner })),
+                        isAppraisal
+                          ? h("label", null, label(copy, "appraisalAt", "Appraisal time"), h("input", { name: "appraisalAt", type: "datetime-local", required: true, defaultValue: datetimeLocalValue(row.appraisal_at || row.due_at) }))
+                          : null,
+                        h("label", null, label(copy, "sellerPipelineNote", "Seller pipeline note"), h("textarea", { name: "note", maxLength: 2000 })),
+                        h(
+                          "div",
+                          { className: "adm-form__actions" },
+                          h("p", { className: "crm-tbl__muted", role: "status", "aria-live": "polite", "data-seller-pipeline-status": "true" }),
+                          primary ? h("button", { type: "submit", name: "action", value: primary[0], formNoValidate: isAppraisal && !needsAppraisalSchedule ? true : undefined, className: "mk-btn mk-btn--primary mk-btn--sm" }, primary[1]) : null,
+                          isAppraisal && !needsAppraisalSchedule
+                            ? h("button", { type: "submit", name: "action", value: "appraisal_scheduled", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "reschedule", "Reschedule"))
+                            : null,
+                          h("button", { type: "submit", name: "action", value: "closed_lost", formNoValidate: isAppraisal || undefined, className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "closeLost", "Close lost")),
+                          h("button", { type: "submit", name: "action", value: "note", formNoValidate: isAppraisal || undefined, className: "mk-btn mk-btn--ghost mk-btn--sm" }, label(copy, "addNote", "Add note")),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        )
+      : h("p", { className: "crm-tbl__muted", "data-empty-seller-pipeline": "true" }, label(copy, "noOpenSellerTasks", "No open seller valuation tasks.")),
   );
 }
 
