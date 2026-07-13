@@ -2,9 +2,9 @@ import fs from "node:fs";
 import {
   appendRedirectApproval,
   buildDeployableRedirects,
+  buildLegacyRouteDecisions,
   importRedirectApprovalsCsv,
   readRedirectApprovals,
-  resetRedirectApprovals,
   writeRedirectApprovalWorkbook,
   writeDeployableRedirects,
 } from "../lib/redirect-approvals.mjs";
@@ -22,13 +22,14 @@ if (!bgListing || !ruListing) {
 }
 
 const workbook = writeRedirectApprovalWorkbook(routeMap);
-resetRedirectApprovals(approvalLedgerPath);
-if (fs.existsSync(importPath)) {
+let approvals = readRedirectApprovals(approvalLedgerPath);
+if (!approvals.length && fs.existsSync(importPath)) {
   importRedirectApprovalsCsv(routeMap, fs.readFileSync(importPath, "utf8"), {
     filePath: approvalLedgerPath,
     approvedAt: "2026-07-04T00:00:00Z",
   });
-} else {
+  approvals = readRedirectApprovals(approvalLedgerPath);
+} else if (!approvals.length) {
   for (const route of [bgListing, ruListing]) {
     appendRedirectApproval(routeMap, {
       oldUrl: route.old_url,
@@ -40,12 +41,14 @@ if (fs.existsSync(importPath)) {
       approvedAt: "2026-07-04T00:00:00Z",
     });
   }
+  approvals = readRedirectApprovals(approvalLedgerPath);
 }
 
-const approvals = readRedirectApprovals(approvalLedgerPath);
+const decisions = buildLegacyRouteDecisions(routeMap, approvals);
 const redirects = buildDeployableRedirects(routeMap, approvals);
-const { outPath, summary } = writeDeployableRedirects(redirects, deployableRedirectOutputPath);
+const { outPath, summary, decisionSummary } = writeDeployableRedirects(redirects, deployableRedirectOutputPath, { decisions });
 
 console.log(`Wrote ${workbook.rows.length} redirect approval workbook rows to ${workbook.outPath}`);
 console.log(`Wrote ${summary.total} deployable redirects to ${outPath}`);
+console.log(`Wrote ${decisionSummary.total} reviewed legacy route decisions`);
 console.log(`Target locales: ${JSON.stringify(summary.byTargetLocale)}`);

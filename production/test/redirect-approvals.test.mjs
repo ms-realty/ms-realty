@@ -7,9 +7,13 @@ import { spawnSync } from "node:child_process";
 import {
   appendRedirectApproval,
   assertDeployableRedirects,
+  assertLegacyRouteDecisions,
   buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
+  buildLegacyRouteDecisions,
+  buildPendingRedirectApprovalWorkbook,
   importRedirectApprovalsCsv,
+  loadLegacyRouteDecisions,
   readRedirectApprovals,
   renderRedirectApprovalWorkbook,
   resetRedirectApprovals,
@@ -27,7 +31,7 @@ function tempApprovalFile() {
   return path.join(os.tmpdir(), `ms-realty-redirect-approvals-${process.pid}-${Date.now()}.jsonl`);
 }
 
-test("redirect approvals reject unmapped rows and missing same-content confirmation", () => {
+test("route decisions require an explicit terminal choice and same-content confirmation where applicable", () => {
   const routeMap = loadRouteMap();
   const filePath = tempApprovalFile();
   const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
@@ -40,15 +44,59 @@ test("redirect approvals reject unmapped rows and missing same-content confirmat
       equivalentContent: true,
       reviewer: "editor_bg",
     }, { filePath }),
-    /Only mapped 301 routes/,
+    /Route decision must be redirect_301, retain_200, or approved_410/,
   );
   assert.throws(
     () => appendRedirectApproval(routeMap, {
-      oldUrl: listing.old_url,
+    oldUrl: listing.old_url,
+    decision: "redirect_301",
       equivalentContent: false,
       reviewer: "editor_bg",
     }, { filePath }),
     /equivalentContent true/,
+  );
+});
+
+test("human-reviewed 410 and retained decisions are terminal without inventing a redirect", () => {
+  const routeMap = loadRouteMap();
+  const filePath = tempApprovalFile();
+  const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
+  const page = routeMap.find((route) => route.url_type === "page" && route.old_url !== "https://makler-realty.com");
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg");
+
+  resetRedirectApprovals(filePath);
+  appendRedirectApproval(routeMap, {
+    oldUrl: taxonomy.old_url,
+    decision: "approved_410",
+    reviewer: "seo_editor",
+    reason: "No truthful replacement remains after editorial review.",
+  }, { filePath, approvedAt: "2026-07-13T00:00:00Z" });
+  appendRedirectApproval(routeMap, {
+    oldUrl: page.old_url,
+    decision: "retain_200",
+    targetPath: listing.target_path,
+    equivalentContent: true,
+    reviewer: "seo_editor",
+    reason: "The verified replacement content remains available under the legacy URL.",
+  }, { filePath, approvedAt: "2026-07-13T00:00:00Z" });
+
+  const approvals = readRedirectApprovals(filePath);
+  const decisions = buildLegacyRouteDecisions(routeMap, approvals);
+
+  assert.equal(assertLegacyRouteDecisions(decisions).total, 2);
+  assert.equal(decisions.find((row) => row.old_url === taxonomy.old_url).status, 410);
+  assert.equal(decisions.find((row) => row.old_url === page.old_url).status, 200);
+  assert.equal(buildDeployableRedirects(routeMap, approvals).length, 0);
+  assert.equal(buildPendingRedirectApprovalWorkbook(routeMap, approvals).length, 455);
+  assert.throws(
+    () => appendRedirectApproval(routeMap, {
+      oldUrl: taxonomy.old_url,
+      decision: "approved_410",
+      targetPath: listing.target_path,
+      reviewer: "seo_editor",
+      reason: "A removed route cannot retain a target.",
+    }, { filePath }),
+    /cannot include a targetPath/,
   );
 });
 
@@ -94,7 +142,7 @@ test("CSV redirect approval import validates rows before appending", () => {
         `old_url,equivalent_content,reviewer,approved_at,reason\n${listing.old_url},true,editor_bg,2026-07-04T00:00:00Z,Reviewed\n${taxonomy.old_url},true,editor_bg,2026-07-04T00:00:00Z,Bad\n`,
         { filePath },
       ),
-    /Only mapped 301 routes/,
+    /Route decision must be redirect_301, retain_200, or approved_410/,
   );
   assert.deepEqual(readRedirectApprovals(filePath), []);
 
@@ -163,7 +211,34 @@ test("deployable redirect build CLI honors configured ledger and output paths", 
   assert.equal(readRedirectApprovals(ledgerPath).length, 165);
   const deployable = JSON.parse(fs.readFileSync(outputPath, "utf8"));
   assert.equal(deployable.summary.total, 165);
+  assert.equal(deployable.decision_summary.total, 165);
   assert.equal(deployable.redirects.length, 165);
+  assert.equal(loadLegacyRouteDecisions(outputPath).length, 165);
+
+  const routeMap = loadRouteMap();
+  const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
+  appendRedirectApproval(routeMap, {
+    oldUrl: taxonomy.old_url,
+    decision: "approved_410",
+    reviewer: "seo_editor",
+    reason: "The reviewed legacy taxonomy has no truthful public replacement.",
+  }, { filePath: ledgerPath, approvedAt: "2026-07-13T00:00:00Z" });
+  const rerun = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-deployable-redirects.mjs")], {
+    cwd: fromRoot(),
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      MS_REALTY_REDIRECT_APPROVALS_PATH: ledgerPath,
+      MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: outputPath,
+    },
+  });
+
+  assert.equal(rerun.status, 0, rerun.stderr);
+  assert.equal(readRedirectApprovals(ledgerPath).length, 166);
+  const rebuilt = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(rebuilt.redirects.length, 165);
+  assert.equal(rebuilt.decisions.length, 166);
+  assert.equal(rebuilt.decisions.find((row) => row.old_url === taxonomy.old_url).status, 410);
 });
 
 test("duplicate approval imports keep one deployable redirect per old URL", () => {
@@ -184,17 +259,19 @@ test("duplicate approval imports keep one deployable redirect per old URL", () =
   assert.equal(summary.duplicateOldUrls, 0);
 });
 
-test("redirect approval workbook includes all mapped listings without approving them", () => {
+test("redirect approval workbook includes every legacy URL without approving it", () => {
   const rows = buildRedirectApprovalWorkbook(loadRouteMap());
   const parsed = parseCsv(renderRedirectApprovalWorkbook(rows));
 
-  assert.equal(rows.length, 165);
-  assert.equal(parsed.length, 165);
+  assert.equal(rows.length, 457);
+  assert.equal(parsed.length, 457);
   assert.equal(parsed.every((row) => row.equivalent_content === "false"), true);
-  assert.equal(parsed.every((row) => /^MS-/.test(row.target_listing_id)), true);
-  assert.equal(parsed.every((row) => row.review_status === "pending_same_content_review"), true);
-  assert.match(parsed[0].same_content_checklist, /same property/);
-  assert.equal(parsed.every((row) => row.old_url && row.target_path && row.reviewer === ""), true);
+  assert.equal(parsed.filter((row) => row.url_type === "listing").every((row) => /^MS-/.test(row.target_listing_id)), true);
+  assert.equal(parsed.filter((row) => row.url_type === "listing").every((row) => row.review_status === "pending_same_content_review"), true);
+  assert.equal(parsed.filter((row) => row.url_type !== "listing").every((row) => row.review_status === "pending_terminal_route_review"), true);
+  assert.match(parsed.find((row) => row.url_type === "listing").same_content_checklist, /same property/);
+  assert.equal(parsed.every((row) => row.old_url && row.reviewer === ""), true);
+  assert.equal(parsed.filter((row) => row.url_type !== "listing").every((row) => row.decision === "" && row.target_path === ""), true);
 });
 
 test("generated deployable redirect file is valid when present", () => {

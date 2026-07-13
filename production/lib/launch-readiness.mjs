@@ -29,6 +29,11 @@ import {
   missingRequiredExport,
   missingRequiredSources,
 } from "./seo-evidence-contract.mjs";
+import {
+  summarizeDeployableRedirects,
+  summarizeLegacyRouteDecisions,
+  validateLegacyRouteDecisionArtifact,
+} from "./redirect-approvals.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
@@ -94,7 +99,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   redirect_reviews: [
     "Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.",
-    "Use /api/admin/redirect-approval-workbook?pending=1 only for mapped same-content redirects, then import reviewed approvals through /api/admin/redirect-approvals/import.",
+    "Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import.",
   ],
   localized_sitemap: [
     "Run npm run sitemap:build after approved locale routes are generated.",
@@ -298,6 +303,94 @@ function assertPassCrawlInventoryEvidence(report) {
   }
 }
 
+function sameJson(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function redirectRowsFromDecisions(decisions) {
+  return decisions
+    .filter((decision) => decision.status === 301)
+    .map((decision) => ({
+      old_url: decision.old_url,
+      target_path: decision.target_path,
+      status: 301,
+      source_domain: decision.source_domain,
+      target_locale: decision.target_locale,
+      url_type: decision.url_type,
+      reviewer: decision.reviewer,
+      approved_at: decision.approved_at,
+    }));
+}
+
+function redirectRowsMatchDecisions(rows, decisions) {
+  if (!Array.isArray(rows) || rows.length !== decisions.length) return false;
+  const expected = new Map(decisions.map((decision) => [decision.old_url, decision]));
+  const seen = new Set();
+  return rows.every((row) => {
+    const decision = expected.get(row.old_url);
+    if (!decision || seen.has(row.old_url)) return false;
+    seen.add(row.old_url);
+    return (
+      row.status === decision.status &&
+      row.target_path === decision.target_path &&
+      row.source_domain === decision.source_domain &&
+      row.target_locale === decision.target_locale &&
+      row.url_type === decision.url_type &&
+      row.reviewer === decision.reviewer &&
+      row.approved_at === decision.approved_at
+    );
+  });
+}
+
+function legacyRouteReviewState(routeMap, deployableRedirects) {
+  const routes = Array.isArray(routeMap.routes) ? routeMap.routes : [];
+  const routeMapSummary = routeMap.summary || {};
+  const total = routes.length || (Number.isInteger(routeMapSummary.total) ? routeMapSummary.total : 0);
+  const hasDecisionArtifact = Array.isArray(deployableRedirects.decisions);
+  const artifactDecisions = hasDecisionArtifact
+    ? deployableRedirects.decisions
+    : Array.isArray(deployableRedirects.redirects)
+      ? deployableRedirects.redirects
+      : [];
+  const validation = validateLegacyRouteDecisionArtifact(routes, artifactDecisions, {
+    requireExplicitDecision: hasDecisionArtifact,
+  });
+  const decisions = validation.decisions;
+  const decisionSummary = summarizeLegacyRouteDecisions(decisions);
+  const redirects = redirectRowsFromDecisions(decisions);
+  const redirectSummary = summarizeDeployableRedirects(redirects);
+  const terminal = new Set(decisions.map((decision) => decision.old_url));
+  const unresolvedByType = {};
+  if (routes.length) {
+    for (const route of routes) {
+      if (terminal.has(route.old_url)) continue;
+      unresolvedByType[route.url_type] = (unresolvedByType[route.url_type] || 0) + 1;
+    }
+  } else {
+    Object.assign(
+      unresolvedByType,
+      Object.fromEntries(
+        Object.entries(routeMapSummary.unmappedByType || {}).filter(([, count]) => Number.isInteger(count) && count > 0),
+      ),
+    );
+  }
+  const unresolved = Object.values(unresolvedByType).reduce((count, value) => count + value, 0);
+  return {
+    total,
+    hasFullRouteMap: routes.length === total && total > 0,
+    hasDecisionArtifact,
+    terminalDecisions: terminal.size,
+    unresolved,
+    unresolvedByType,
+    decisionSummary,
+    redirectSummary,
+    invalidDecisionCount: validation.errors.length,
+    decisionSummaryMatches: sameJson(deployableRedirects.decision_summary, decisionSummary),
+    redirectSummaryMatches: sameJson(deployableRedirects.summary, redirectSummary),
+    redirectRowsMatch: redirectRowsMatchDecisions(deployableRedirects.redirects, redirects),
+  };
+}
+
 function assertPassRedirectReviewEvidence(report) {
   const redirects = gateById(report, "redirect_reviews");
   if (redirects?.status !== "pass") return;
@@ -307,12 +400,17 @@ function assertPassRedirectReviewEvidence(report) {
     evidence.total_legacy_urls !== 457 ||
     evidence.resolved_legacy_urls !== evidence.total_legacy_urls ||
     evidence.unresolved_legacy_urls !== 0 ||
+    evidence.terminal_decisions !== evidence.total_legacy_urls ||
+    evidence.invalid_terminal_decisions !== 0 ||
+    evidence.decision_artifact_valid !== true ||
+    evidence.deployed_redirect_export_matches !== true ||
     !unresolvedByType ||
     Object.values(unresolvedByType).some((count) => !Number.isInteger(count) || count !== 0) ||
     !Number.isInteger(evidence.mapped_listings) ||
     !Number.isInteger(evidence.deployable_redirects) ||
-    evidence.mapped_listings < 1 ||
-    evidence.deployable_redirects < evidence.mapped_listings ||
+    !evidence.decision_statuses ||
+    ![200, 301, 410].every((status) => Number.isInteger(evidence.decision_statuses[status]) && evidence.decision_statuses[status] >= 0) ||
+    evidence.decision_statuses[200] + evidence.decision_statuses[301] + evidence.decision_statuses[410] !== evidence.total_legacy_urls ||
     evidence.homepage_targets !== 0 ||
     evidence.duplicate_old_urls !== 0
   ) {
@@ -1021,19 +1119,26 @@ export function buildLaunchReadinessReport({
     migration.summary.byDomain?.["makler-realty.ru"] === 179 &&
     migration.summary.byStatus?.["200"] === 457;
   const routeMapSummary = routeMap.summary || {};
-  const routeMapTotal = Number.isInteger(routeMapSummary.total) ? routeMapSummary.total : 0;
-  const unresolvedByType = Object.fromEntries(
-    Object.entries(routeMapSummary.unmappedByType || {}).filter(([, count]) => Number.isInteger(count) && count > 0),
-  );
-  const unresolvedLegacyUrls = Object.values(unresolvedByType).reduce((total, count) => total + count, 0);
+  const routeReview = legacyRouteReviewState(routeMap, deployableRedirects);
+  const routeMapTotal = routeReview.total;
+  const unresolvedByType = routeReview.unresolvedByType;
+  const unresolvedLegacyUrls = routeReview.unresolved;
   const resolvedLegacyUrls = routeMapTotal - unresolvedLegacyUrls;
   const redirectsReviewed =
     routeMapTotal === migration.summary.total &&
+    routeReview.hasFullRouteMap &&
+    routeReview.hasDecisionArtifact &&
     resolvedLegacyUrls === routeMapTotal &&
     unresolvedLegacyUrls === 0 &&
-    deployableRedirects.summary.total >= routeMapSummary.mappedListings &&
-    deployableRedirects.summary.homepageTargets === 0 &&
-    deployableRedirects.summary.duplicateOldUrls === 0;
+    routeReview.terminalDecisions === routeMapTotal &&
+    routeReview.invalidDecisionCount === 0 &&
+    routeReview.decisionSummaryMatches &&
+    routeReview.redirectSummaryMatches &&
+    routeReview.redirectRowsMatch &&
+    routeReview.redirectSummary.homepageTargets === 0 &&
+    routeReview.redirectSummary.duplicateOldUrls === 0 &&
+    routeReview.decisionSummary.homepageTargets === 0 &&
+    routeReview.decisionSummary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
   const listingQualityReady = hasCompleteListingQualityEvidence(listingQualityReview);
   const liveServicesReady = liveServices.every((item) => item.status === "pass") && liveServiceProvisioning.status === "pass";
@@ -1079,10 +1184,19 @@ export function buildLaunchReadinessReport({
         resolved_legacy_urls: resolvedLegacyUrls,
         unresolved_legacy_urls: unresolvedLegacyUrls,
         unresolved_by_type: unresolvedByType,
+        terminal_decisions: routeReview.terminalDecisions,
+        invalid_terminal_decisions: routeReview.invalidDecisionCount,
+        decision_artifact_valid:
+          routeReview.hasDecisionArtifact &&
+          routeReview.invalidDecisionCount === 0 &&
+          routeReview.decisionSummaryMatches &&
+          routeReview.redirectSummaryMatches,
+        deployed_redirect_export_matches: routeReview.redirectRowsMatch,
+        decision_statuses: routeReview.decisionSummary.byStatus,
         mapped_listings: routeMapSummary.mappedListings,
-        deployable_redirects: deployableRedirects.summary.total,
-        homepage_targets: deployableRedirects.summary.homepageTargets,
-        duplicate_old_urls: deployableRedirects.summary.duplicateOldUrls,
+        deployable_redirects: routeReview.redirectSummary.total,
+        homepage_targets: routeReview.redirectSummary.homepageTargets,
+        duplicate_old_urls: routeReview.redirectSummary.duplicateOldUrls,
       },
       redirectsReviewed
         ? ""

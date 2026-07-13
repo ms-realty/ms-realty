@@ -30,11 +30,13 @@ import {
   buildPendingRedirectApprovalWorkbook,
   buildRedirectApprovalWorkbook,
   buildDeployableRedirects,
+  buildLegacyRouteDecisions,
   importRedirectApprovalsCsv,
-  loadDeployableRedirects,
+  loadLegacyRouteDecisions,
   readRedirectApprovals,
   renderRedirectApprovalWorkbook,
   summarizeDeployableRedirects,
+  summarizeLegacyRouteDecisions,
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
 import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
@@ -254,6 +256,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
       total: routes.length,
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
+      terminalDecisionsReviewed: buildLegacyRouteDecisions(routes, approvals).length,
       pendingSample: reviewRequired.slice(0, 20),
       approvableSample: mappedListings.filter((route) => route.review_required && route.planned_status === 301).slice(0, 20),
     },
@@ -287,6 +290,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     listingQualityEndpoint: "/api/admin/listing-quality",
     deployablePreview: buildDeployableRedirects(routes, approvals),
+    terminalDecisionPreview: buildLegacyRouteDecisions(routes, approvals),
   };
 }
 
@@ -337,7 +341,7 @@ export function createHttpApp({
   hermesReplyProvider = null,
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
-  const activeRedirects = redirects ?? loadDeployableRedirects(deployableRedirectOutputPath || undefined);
+  const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
   const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
   const currentListingQualityReport = (options = {}) =>
     buildListingQualityReport({
@@ -351,16 +355,36 @@ export function createHttpApp({
       events: readEventLedger(eventLedgerPath || undefined),
       generatedAt: reviewedAt || new Date().toISOString(),
     });
-  const currentDeployableRedirects = () =>
-    buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
+  const currentLegacyRouteDecisions = () =>
+    buildLegacyRouteDecisions(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
+  const currentDeployedRedirectArtifact = () => {
+    const decisions = activeLegacyDecisions;
+    const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
+      old_url: decision.old_url,
+      target_path: decision.target_path,
+      status: 301,
+      source_domain: decision.source_domain,
+      target_locale: decision.target_locale,
+      url_type: decision.url_type,
+      reviewer: decision.reviewer,
+      approved_at: decision.approved_at,
+    }));
+    return {
+      summary: summarizeDeployableRedirects(redirects),
+      decision_summary: summarizeLegacyRouteDecisions(decisions),
+      redirects,
+      decisions,
+    };
+  };
   const currentLaunchReadiness = () => {
-    const redirectRows = currentDeployableRedirects();
+    const redirectArtifact = currentDeployedRedirectArtifact();
     return buildLaunchReadinessReport({
       generatedAt: reviewedAt || new Date().toISOString(),
       routeMap: {
         summary: summarizeLegacyRouteMap(routeMap),
+        routes: routeMap,
       },
-      deployableRedirects: { summary: summarizeDeployableRedirects(redirectRows), redirects: redirectRows },
+      deployableRedirects: redirectArtifact,
       listingQuality: currentListingQualityReport({ generatedAt: reviewedAt || new Date().toISOString() }),
       listingQualityReviewPath: listingQualityReviewPath || undefined,
       seoEvidence: currentSeoEvidence(),
@@ -379,9 +403,10 @@ export function createHttpApp({
       launchReadiness: currentLaunchReadiness(),
       seoEvidence: currentSeoEvidence(),
       redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap)),
-      deployableRedirects: { summary: summarizeDeployableRedirects(currentDeployableRedirects()) },
+      deployableRedirects: currentDeployedRedirectArtifact(),
       routeMap: {
         summary: summarizeLegacyRouteMap(routeMap),
+        routes: routeMap,
       },
       liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
     });
@@ -443,15 +468,34 @@ export function createHttpApp({
       request.headers?.host ||
       request.headers?.Host;
     const legacyUrl = request.url.startsWith("http") ? url.href : host ? `https://${host}${url.pathname}${url.search}` : "";
-    const legacyRedirect = request.method === "GET" ? activeRedirects.find((row) => row.old_url === legacyUrl) : null;
+    const legacyDecision = request.method === "GET" ? activeLegacyDecisions.find((row) => row.old_url === legacyUrl) : null;
 
-    if (legacyRedirect) {
+    if (legacyDecision?.status === 301) {
       return response(
         301,
-        { kind: "legacy_redirect", location: legacyRedirect.target_path },
+        { kind: "legacy_redirect", location: legacyDecision.target_path },
         "application/json; charset=utf-8",
-        { location: legacyRedirect.target_path },
+        { location: legacyDecision.target_path },
       );
+    }
+    if (legacyDecision?.status === 410) {
+      return response(410, { kind: "legacy_gone", old_url: legacyDecision.old_url }, "application/json; charset=utf-8");
+    }
+    if (legacyDecision?.status === 200) {
+      const retained = renderRuntimePath(
+        activeRegistry,
+        currentSeed(),
+        legacyDecision.target_path,
+        readTranslationLedger(translationLedgerPath || undefined),
+        readBrokerContacts(brokerContactLedgerPath || undefined),
+        readTourApprovals(tourApprovalLedgerPath || undefined),
+      );
+      if ((retained.status || 200) >= 400) {
+        return response(503, { kind: "legacy_retain_unavailable", old_url: legacyDecision.old_url }, "application/json; charset=utf-8", {
+          "cache-control": "no-store",
+        });
+      }
+      return publicResponse(request, url, retained);
     }
 
     const slugRedirect =
@@ -481,6 +525,22 @@ export function createHttpApp({
       return response(200, renderFaviconSvg(), "image/svg+xml; charset=utf-8", {
         "cache-control": "public, max-age=86400",
       });
+    }
+
+    if (request.method === "GET" && url.pathname.startsWith("/vendor/")) {
+      // Versioned browser bundles generated into public/vendor by
+      // scripts/build-design-assets.mjs (?v= content hash → immutable cache).
+      const vendorMatch = url.pathname.match(/^\/vendor\/([a-z0-9][a-z0-9._-]*\.(js|css|txt))$/i);
+      if (vendorMatch) {
+        const vendorPath = fromRoot("public", "vendor", vendorMatch[1]);
+        if (fs.existsSync(vendorPath)) {
+          const vendorTypes = { js: "text/javascript; charset=utf-8", css: "text/css; charset=utf-8", txt: "text/plain; charset=utf-8" };
+          return response(200, fs.readFileSync(vendorPath, "utf8"), vendorTypes[vendorMatch[2].toLowerCase()], {
+            "cache-control": "public, max-age=31536000, immutable",
+          });
+        }
+      }
+      return json(404, { kind: "not_found", message: "Unknown vendor asset" });
     }
 
     if (request.method === "GET" && url.pathname === "/api/health") {
@@ -919,6 +979,7 @@ export function createHttpApp({
         return adminJson(201, {
           approval,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
+          terminalDecisionPreview: buildLegacyRouteDecisions(routeMap, approvals),
           report: currentLaunchReadiness(),
         });
       } catch (error) {
@@ -945,6 +1006,7 @@ export function createHttpApp({
           imported: imported.length,
           approvals: imported,
           deployablePreview: buildDeployableRedirects(routeMap, approvals),
+          terminalDecisionPreview: buildLegacyRouteDecisions(routeMap, approvals),
           report: currentLaunchReadiness(),
         });
       } catch (error) {
@@ -955,14 +1017,16 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const rows = buildDeployableRedirects(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
-        const written = writeDeployableRedirects(rows, deployableRedirectOutputPath || undefined);
+        const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
+        const rows = buildDeployableRedirects(routeMap, approvals);
+        const decisions = buildLegacyRouteDecisions(routeMap, approvals);
+        const written = writeDeployableRedirects(rows, deployableRedirectOutputPath || undefined, { decisions });
         recordAudit({
           action: "deployable_redirects_exported",
           actor: "seo_editor",
           objectType: "redirect_export",
           objectId: "deployable-redirects",
-          metadata: { exported: rows.length, total: written.summary?.total },
+          metadata: { exported: rows.length, terminal_decisions: decisions.length, total: written.summary?.total },
         });
         return adminJson(201, { exported: rows.length, ...written, report: currentLaunchReadiness() });
       } catch (error) {

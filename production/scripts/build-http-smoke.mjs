@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
-import { DEFAULT_LEAD_LEDGER_PATH, assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import {
   assertLanguageRequests,
   readLanguageRequests,
@@ -526,7 +526,6 @@ smoke.adminHtml = await dispatchHttp(app, {
 assertHttpSmoke(smoke);
 const ledger = readLeadLedger(leadLedgerPath);
 assertLeadLedger(ledger);
-fs.copyFileSync(leadLedgerPath, DEFAULT_LEAD_LEDGER_PATH);
 smoke.leadLedger = { rows: ledger.length };
 const outbox = readReplyOutbox(replyOutboxPath);
 assertReplyOutbox(outbox);

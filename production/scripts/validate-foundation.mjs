@@ -10,7 +10,7 @@ import { assertLeadLedger } from "../lib/lead-ledger.mjs";
 import { assertLeadMatchingReport } from "../lib/lead-matching.mjs";
 import { assertLeadSlaReport } from "../lib/lead-sla.mjs";
 import { assertMigrationLaunchGate } from "../lib/migration.mjs";
-import { assertDeployableRedirects } from "../lib/redirect-approvals.mjs";
+import { assertDeployableRedirects, assertLegacyRouteDecisions } from "../lib/redirect-approvals.mjs";
 import { assertSlugHistory } from "../lib/slug-history.mjs";
 import { assertListingPublicationReport } from "../lib/listing-publication.mjs";
 import { assertListingVerificationReport } from "../lib/listing-verification.mjs";
@@ -163,6 +163,7 @@ if (reviewQueue.summary.byOwner.ru_preservation_editor !== 179) {
 
 const deployableRedirects = JSON.parse(fs.readFileSync(fromRoot("production", "data", "deployable-redirects.json"), "utf8"));
 const redirectSummary = assertDeployableRedirects(deployableRedirects.redirects);
+const decisionSummary = assertLegacyRouteDecisions(deployableRedirects.decisions || deployableRedirects.redirects);
 if (redirectSummary.total !== routeMap.summary.mappedListings) {
   throw new Error("Deployable redirect export must include every reviewed mapped listing");
 }
@@ -172,9 +173,12 @@ if (redirectSummary.byTargetLocale.bg !== 113 || redirectSummary.byTargetLocale.
 if (redirectSummary.homepageTargets !== 0 || redirectSummary.duplicateOldUrls !== 0) {
   throw new Error("Deployable redirect export must not include homepage targets or duplicate old URLs");
 }
+if (decisionSummary.total !== redirectSummary.total || decisionSummary.byStatus[301] !== redirectSummary.total) {
+  throw new Error("Current redirect export must preserve its reviewed terminal decisions alongside 301 rows");
+}
 const redirectWorkbook = fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8").trim().split("\n");
-if (redirectWorkbook.length !== 166 || !redirectWorkbook[0].includes("equivalent_content")) {
-  throw new Error("Redirect approval workbook must include header plus 165 mapped listing rows");
+if (redirectWorkbook.length !== 458 || !redirectWorkbook[0].includes("equivalent_content") || !redirectWorkbook[0].includes("decision")) {
+  throw new Error("Redirect approval workbook must include header plus every legacy URL row");
 }
 if (redirectWorkbook.slice(1).some((row) => !row.includes(",false,"))) {
   throw new Error("Redirect approval workbook rows must default to not approved");

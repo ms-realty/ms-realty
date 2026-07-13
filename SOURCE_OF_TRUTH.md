@@ -1,7 +1,7 @@
 # MS Realty — Source of Truth
 
 **Single canonical document for the MS Realty rebuild** (`makler-realty.com` + `makler-realty.ru`).
-Last updated: 2026-07-05.
+Last updated: 2026-07-13.
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
 > subsystem READMEs (`production/`, `migration/`, `search/`, `locales/`,
@@ -352,9 +352,10 @@ legacy CMS; letting n8n own workflow truth; adding AI before deterministic CRM/C
 
 ## 13. Zero-loss SEO migration (the critical constraint)
 
-**Prime directive:** no existing indexable URL may disappear without an explicit destination. Every old
-URL resolves as either **`200` on the same URL with equivalent content**, or a **single-hop `301` to
-the closest equivalent**. **Never bulk-redirect old listing URLs to the homepage or search page.**
+**Prime directive:** every legacy URL needs a reviewer-approved terminal decision: **`200` on the
+same URL with equivalent content**, a **single-hop `301` to the closest equivalent**, or an
+**approved `410` with an explicit removal reason**. **Never bulk-redirect old listing URLs to the
+homepage or search page.**
 
 ### Non-negotiable rules
 1. Preserve property IDs, titles, prices, areas, locations, categories, descriptions, galleries, and
@@ -386,11 +387,17 @@ intentionally removed and worthless** → **noindex only if already non-indexabl
 - Dead/obsolete pages → closest useful parent, **never** the homepage by default.
 
 ### Redirect implementation
-`old_url,new_url,status,reason` map for both domains, reviewer-approved. Only **mapped, reviewed,
-same-content** rows become deployable 301s (`production/data/deployable-redirects.json`); everything
-else stays non-deployable until reviewed. Prefer literal exact-match rules; keep chains to a single
-hop. Keep sitemap URLs stable where possible (`.com` `/sitemap.html`, `.ru` `/sitemap_index.xml` +
-`/sitemap.xml` behavior); preserve robots allowances for `/wp-content/uploads/`.
+The reviewer workbook covers the full route map and records `old_url`, `url_type`, `decision`,
+`target_path`, reviewer, reason, and review time. `redirect_301` and `retain_200` decisions must
+point to a real, non-home, non-search public route; `approved_410` must carry an explicit removal
+reason. Only reviewed `redirect_301` rows become deployable redirects
+(`production/data/deployable-redirects.json`), while reviewed `200` and `410` rows remain as terminal
+decisions in the same artifact. Everything else stays unresolved until reviewed. Prefer literal
+exact-match rules and keep chains to a single hop. Keep sitemap URLs stable where possible (`.com`
+`/sitemap.html`, `.ru` `/sitemap_index.xml` + `/sitemap.xml` behavior); preserve robots allowances
+for `/wp-content/uploads/`. Export preserves the append-only approval ledger; it must never erase
+earlier terminal decisions. Launch readiness is evaluated against the deployed decision artifact, so
+ledger changes do not clear the gate until export and the serving deployment have been updated.
 
 ### Launch validation (before cutover)
 Crawl old `.com` + `.ru`; crawl new staging; diff URL counts by type; verify every old URL returns
@@ -466,12 +473,13 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + broker verification report + generated Payload-compatible collection configs + Payload runtime bootstrap built**; real Payload runtime env/database pending |
 | **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, Typesense/Meilisearch sync/query worker paths, and redacted live provisioning report built; live engine URLs/API keys pending |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, OpenAI-compatible draft worker path, and Hermes provisioning contract built; self-hosted Hermes/vLLM endpoint pending |
-| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; the 165 mapped listing redirects are locally reviewed, while 292 page/post/taxonomy URLs still require an explicit route decision; listing-quality review packet is generated; **blocked on full legacy-route coverage, external SEO exports, reviewed listing-quality CSV, live service provisioning/reports, and Payload runtime env/database configuration** |
+| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; the full 457-row route workbook now supports reviewed `200`/`301`/`410` terminal decisions, with 165 reviewed listing `301`s and 292 page/post/taxonomy rows still unresolved; listing-quality review packet is generated; **blocked on full legacy-route coverage, external SEO exports, reviewed listing-quality CSV, live service provisioning/reports, and Payload runtime env/database configuration** |
 
 **What is proven in code right now** (see `production/README.md` and git history):
 crawl pack for both domains (457 URLs), SQLite migration DB + review dashboards, Typesense/Meilisearch
-import fixtures (165 source listings → 167 locale-scoped docs), 165-row redirect-approval workbook,
-reviewer-gated deployable 301 export, authenticated admin migration/editor/lead workbenches,
+import fixtures (165 source listings → 167 locale-scoped docs), 457-row legacy-route decision workbook,
+reviewer-gated deployable 301 export plus retained-200/approved-410 terminal-decision artifact,
+authenticated admin migration/editor/lead workbenches,
 approved-translation-gated localized sitemap (`sitemap.xml` + `robots.txt`), `RealEstateListing`
 JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with OG
 + hreflang + schema, approved CMS guide pages cited by Hermes, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only

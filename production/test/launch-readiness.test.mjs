@@ -31,6 +31,7 @@ import {
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { summarizeLegacyRouteMap } from "../lib/migration.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { summarizeDeployableRedirects, summarizeLegacyRouteDecisions } from "../lib/redirect-approvals.mjs";
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -67,6 +68,30 @@ function completeRouteMap() {
   );
   routeMap.summary = summarizeLegacyRouteMap(routeMap.routes);
   return routeMap;
+}
+
+function completeTerminalDecisions(routeMap, deployableRedirects) {
+  const existing = new Map((deployableRedirects.decisions || deployableRedirects.redirects || []).map((row) => [row.old_url, row]));
+  const decisions = routeMap.routes.map((route) =>
+    existing.get(route.old_url) || {
+      old_url: route.old_url,
+      source_domain: route.source_domain,
+      url_type: route.url_type,
+      target_locale: null,
+      target_path: null,
+      decision: "approved_410",
+      planned_status: 410,
+      status: 410,
+      reviewer: "fixture_seo_editor",
+      approved_at: "2026-07-05T00:00:00Z",
+      equivalent_content: false,
+      deployable: true,
+      reason: "Test-only terminal review fixture.",
+    },
+  );
+  const decisionSummary = summarizeLegacyRouteDecisions(decisions);
+  Object.assign(deployableRedirects, { decisions, decision_summary: decisionSummary });
+  return deployableRedirects;
 }
 
 function writeJson(path, value) {
@@ -592,6 +617,11 @@ test("launch readiness stays blocked until production launch blockers are cleare
     resolved_legacy_urls: 165,
     unresolved_legacy_urls: 292,
     unresolved_by_type: { page: 104, post: 42, taxonomy: 146 },
+    terminal_decisions: 165,
+    invalid_terminal_decisions: 0,
+    decision_artifact_valid: true,
+    deployed_redirect_export_matches: true,
+    decision_statuses: { 200: 0, 301: 165, 410: 0 },
     mapped_listings: 165,
     deployable_redirects: 165,
     homepage_targets: 0,
@@ -660,6 +690,7 @@ test("launch readiness validator accepts ready state after required gates are cl
   const seoEvidence = readySeoEvidenceFixture();
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -679,6 +710,42 @@ test("launch readiness validator accepts ready state after required gates are cl
   assert.deepEqual(report.blockers, []);
   assert.deepEqual(publicLaunchReadinessPayload(report).blocked_gates, []);
   assert.deepEqual(publicLaunchReadinessHeaders(report), { "cache-control": "no-store" });
+});
+
+test("launch readiness blocks forged terminal-decision summaries when rows lack human review", () => {
+  const routeMap = completeRouteMap();
+  const decisions = routeMap.routes.map((route) => ({
+    old_url: route.old_url,
+    source_domain: route.source_domain,
+    url_type: route.url_type,
+    target_locale: null,
+    target_path: null,
+    decision: "approved_410",
+    planned_status: 410,
+    status: 410,
+    reviewer: "",
+    approved_at: "2026-07-05T00:00:00Z",
+    equivalent_content: false,
+    deployable: false,
+    reason: "",
+  }));
+  const deployableRedirects = {
+    summary: summarizeDeployableRedirects([]),
+    decision_summary: summarizeLegacyRouteDecisions(decisions),
+    redirects: [],
+    decisions,
+  };
+
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    routeMap,
+    deployableRedirects,
+  });
+  const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
+
+  assert.equal(redirectGate.status, "blocked");
+  assert.equal(redirectGate.evidence.invalid_terminal_decisions, 457);
+  assert.equal(redirectGate.evidence.decision_artifact_valid, false);
 });
 
 test("launch readiness validator requires blocked gate next actions", () => {
@@ -704,6 +771,7 @@ test("launch readiness rejects hand-cleared external SEO blockers", () => {
   const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
   seoEvidence.summary.missing_required_sources = [];
 
   assert.throws(
@@ -726,6 +794,7 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -760,7 +829,13 @@ test("launch readiness validator rejects weak redirect review pass evidence", ()
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
-  for (const patch of [{ deployable_redirects: 0 }, { homepage_targets: 1 }, { duplicate_old_urls: 1 }]) {
+  completeTerminalDecisions(routeMap, deployableRedirects);
+  for (const patch of [
+    { terminal_decisions: 0 },
+    { decision_statuses: { 200: 0, 301: 164, 410: 292 } },
+    { homepage_targets: 1 },
+    { duplicate_old_urls: 1 },
+  ]) {
     const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", routeMap, deployableRedirects });
     const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
     Object.assign(redirectGate.evidence, patch);
@@ -802,6 +877,7 @@ test("launch readiness validator rejects weak runtime smoke pass evidence", () =
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -825,6 +901,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const weakPayload = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -915,6 +992,7 @@ test("launch readiness validator rejects weak payload runtime pass evidence", ()
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -939,6 +1017,7 @@ test("launch readiness validator rejects weak live service pass summaries", () =
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -962,6 +1041,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const withoutQueryOperation = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1069,6 +1149,7 @@ test("launch readiness validator rejects weak live provisioning pass evidence", 
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1093,6 +1174,7 @@ test("launch readiness blocks live services until provisioning passes", () => {
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1138,6 +1220,7 @@ test("launch readiness validator rejects weak listing quality pass evidence", ()
   const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
 
   const report = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1183,6 +1266,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
   const seoEvidence = readySeoEvidenceFixture();
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
   seoEvidence.summary.sources.analytics_export.status = "imported";
   seoEvidence.summary.sources.privacy_events.status = "";
 
@@ -1210,6 +1294,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
   const seoEvidence = readySeoEvidenceFixture();
 
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
+  completeTerminalDecisions(routeMap, deployableRedirects);
   deployableRedirects.summary.homepageTargets = 1;
   deployableRedirects.summary.duplicateOldUrls = 0;
 
@@ -1910,16 +1995,18 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /live_services: Run npm run live:provisioning:preflight/);
   assert.match(markdown, /payload_runtime: Run npm run payload:runtime/);
   assert.match(markdown, /redirect_reviews: Review every unresolved legacy URL/);
-  assert.match(markdown, /Remaining mapped-listing approvals: 0/);
+  assert.match(markdown, /Terminal route decisions: 165\/457 \(200: 0, 301: 165, 410: 0\)/);
+  assert.match(markdown, /Remaining terminal route decisions: 292/);
   assert.match(markdown, /Legacy route coverage: 165\/457/);
   assert.match(markdown, /Unresolved legacy URLs: 292 \(page 104, post 42, taxonomy 146\)/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
   assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(markdown, /MS_REALTY_REDIRECT_APPROVALS_PATH/);
   assert.match(markdown, /MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH/);
+  assert.match(markdown, /decision/);
   assert.match(markdown, /target_listing_id/);
   assert.match(markdown, /same_content_checklist/);
-  assert.match(markdown, /Approval import columns: `old_url`, `equivalent_content`, `reviewer`/);
+  assert.match(markdown, /Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`/);
   assert.match(markdown, /Missing required sources: search_console, yandex_webmaster, backlinks/);
   assert.match(markdown, /Crawl coverage: 457 URLs \(page 104, post 42, taxonomy 146, listing 165\); URLs with any evidence: 2/);
   assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);

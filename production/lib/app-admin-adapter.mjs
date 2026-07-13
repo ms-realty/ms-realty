@@ -54,12 +54,14 @@ import {
   DEFAULT_REDIRECT_APPROVALS_PATH,
   appendRedirectApproval,
   buildDeployableRedirects,
+  buildLegacyRouteDecisions,
   buildPendingRedirectApprovalWorkbook,
   buildRedirectApprovalWorkbook,
   importRedirectApprovalsCsv,
   readRedirectApprovals,
   renderRedirectApprovalWorkbook,
   summarizeDeployableRedirects,
+  summarizeLegacyRouteDecisions,
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
@@ -340,21 +342,54 @@ function routeMapRows() {
   return readJsonData("legacy-route-map.json").routes;
 }
 
-function deployableRedirects(config = {}) {
+function deployableRedirectArtifact(config = {}) {
   const filePath = config.deployableRedirectOutputPath || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT;
   const sourcePath = fs.existsSync(/*turbopackIgnore: true*/ filePath) ? filePath : DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT;
-  return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ sourcePath, "utf8")).redirects;
+  return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ sourcePath, "utf8"));
+}
+
+function deployableRedirects(config = {}) {
+  return deployableRedirectArtifact(config).redirects || [];
 }
 
 function routeMapSummary(routes) {
-  return { summary: summarizeLegacyRouteMap(routes) };
+  return { summary: summarizeLegacyRouteMap(routes), routes };
+}
+
+function currentLegacyRouteDecisions(config) {
+  return buildLegacyRouteDecisions(routeMapRows(), readRedirectApprovals(config.redirectApprovalPath));
+}
+
+function currentDeployableArtifact(config) {
+  const decisions = currentLegacyRouteDecisions(config);
+  const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
+    old_url: decision.old_url,
+    target_path: decision.target_path,
+    status: 301,
+    source_domain: decision.source_domain,
+    target_locale: decision.target_locale,
+    url_type: decision.url_type,
+    reviewer: decision.reviewer,
+    approved_at: decision.approved_at,
+  }));
+  return {
+    summary: summarizeDeployableRedirects(redirects),
+    decision_summary: summarizeLegacyRouteDecisions(decisions),
+    redirects,
+    decisions,
+  };
 }
 
 function deployableRedirectsForLaunch(config) {
-  const approvals = readRedirectApprovals(config.redirectApprovalPath);
-  const customApprovals = config.redirectApprovalPath !== DEFAULT_REDIRECT_APPROVALS_PATH;
-  const redirects = approvals.length || customApprovals ? buildDeployableRedirects(routeMapRows(), approvals) : deployableRedirects(config);
-  return { summary: summarizeDeployableRedirects(redirects), redirects };
+  const artifact = deployableRedirectArtifact(config);
+  const redirects = artifact.redirects || [];
+  const decisions = artifact.decisions || [];
+  return {
+    summary: artifact.summary || summarizeDeployableRedirects(redirects),
+    decision_summary: artifact.decision_summary || summarizeLegacyRouteDecisions(decisions),
+    redirects,
+    decisions,
+  };
 }
 
 function currentDeployableRedirects(config) {
@@ -385,18 +420,14 @@ function launchReadiness(config) {
 
 function launchInputChecklist(config) {
   const routes = routeMapRows();
-  const approvals = readRedirectApprovals(config.redirectApprovalPath);
-  const redirects =
-    approvals.length || config.redirectApprovalPath !== DEFAULT_REDIRECT_APPROVALS_PATH
-      ? buildDeployableRedirects(routes, approvals)
-      : deployableRedirects(config);
+  const artifact = deployableRedirectsForLaunch(config);
   const generatedAt = config.reviewedAt || new Date().toISOString();
   return renderLaunchInputChecklist({
     generatedAt,
     launchReadiness: launchReadiness(config),
     seoEvidence: currentSeoEvidence(config),
     redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routes)),
-    deployableRedirects: { summary: summarizeDeployableRedirects(redirects) },
+    deployableRedirects: artifact,
     routeMap: routeMapSummary(routes),
     liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
   });
@@ -464,6 +495,7 @@ function migrationReviewPayload(registry, url, config) {
       total: routes.length,
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
+      terminalDecisionsReviewed: currentLegacyRouteDecisions(config).length,
       pendingSample: reviewRequired.slice(0, 20),
       approvableSample: mappedListings.filter((route) => route.review_required && route.planned_status === 301).slice(0, 20),
     },
@@ -497,6 +529,7 @@ function migrationReviewPayload(registry, url, config) {
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     listingQualityEndpoint: "/api/admin/listing-quality",
     deployablePreview: currentDeployableRedirects(config),
+    terminalDecisionPreview: currentLegacyRouteDecisions(config),
   };
 }
 
@@ -752,6 +785,7 @@ function appendRedirectApprovalRow(input, config) {
   return {
     approval,
     deployablePreview: currentDeployableRedirects(config),
+    terminalDecisionPreview: currentLegacyRouteDecisions(config),
     report: launchReadiness(config),
   };
 }
@@ -775,20 +809,22 @@ function importRedirectApprovalRows(csvText, config) {
     imported: imported.length,
     approvals: imported,
     deployablePreview: currentDeployableRedirects(config),
+    terminalDecisionPreview: currentLegacyRouteDecisions(config),
     report: launchReadiness(config),
   };
 }
 
 function exportDeployableRedirectRows(config) {
   const rows = currentDeployableRedirects(config);
-  const exported = { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath) };
+  const decisions = currentLegacyRouteDecisions(config);
+  const exported = { exported: rows.length, ...writeDeployableRedirects(rows, config.deployableRedirectOutputPath, { decisions }) };
   recordAudit(
     {
       action: "deployable_redirects_exported",
       actor: "seo_editor",
       objectType: "redirect_export",
       objectId: "deployable-redirects",
-      metadata: { exported: rows.length, total: exported.summary?.total },
+      metadata: { exported: rows.length, terminal_decisions: decisions.length, total: exported.summary?.total },
     },
     config,
   );

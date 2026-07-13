@@ -60,6 +60,15 @@
           "post": 42,
           "taxonomy": 146
         },
+        "terminal_decisions": 165,
+        "invalid_terminal_decisions": 0,
+        "decision_artifact_valid": true,
+        "deployed_redirect_export_matches": true,
+        "decision_statuses": {
+          "200": 0,
+          "301": 165,
+          "410": 0
+        },
         "mapped_listings": 165,
         "deployable_redirects": 165,
         "homepage_targets": 0,
@@ -67,7 +76,7 @@
       },
       "next_actions": [
         "Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.",
-        "Use /api/admin/redirect-approval-workbook?pending=1 only for mapped same-content redirects, then import reviewed approvals through /api/admin/redirect-approvals/import."
+        "Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import."
       ]
     },
     {

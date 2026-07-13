@@ -25,6 +25,7 @@ import {
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -1092,14 +1093,14 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(formApproved.status, 201);
   assert.equal(formApproved.body.deployablePreview.length, 2);
   assert.equal(rejected.status, 400);
-  assert.match(rejected.body.message, /Only mapped 301 routes/);
+  assert.match(rejected.body.message, /Route decision must be redirect_301, retain_200, or approved_410/);
   assert.equal(unauthorized.status, 401);
   assert.equal(importUnauthorized.status, 401);
   assert.equal(workbookUnauthorized.status, 401);
   assert.equal(workbook.status, 200);
   assert.equal(workbook.headers["cache-control"], "no-store");
   assert.equal(workbook.headers["content-type"], "text/csv; charset=utf-8");
-  assert.equal(parseCsv(workbook.body).length, 165);
+  assert.equal(parseCsv(workbook.body).length, 457);
   assert.equal(qualityWorkbookUnauthorized.status, 401);
   assert.equal(qualityWorkbook.status, 200);
   assert.equal(qualityWorkbook.headers["content-type"], "text/csv; charset=utf-8");
@@ -1224,7 +1225,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(formImported.body.deployablePreview.length, 4);
   assert.equal(formImported.body.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   const pendingRows = parseCsv(pendingWorkbook.body);
-  assert.equal(pendingRows.length, 161);
+  assert.equal(pendingRows.length, 453);
   assert.equal(pendingRows.some((row) => row.old_url === listing.old_url), false);
   assert.equal(pendingRows.some((row) => row.old_url === importRuListing.old_url), false);
   assert.equal(exportUnauthorized.status, 401);
@@ -1771,6 +1772,62 @@ test("HTTP app only redirects rows in the reviewed deployable export", async () 
 
   assert.equal((await dispatchHttp(app, { url: approved.old_url })).status, 301);
   assert.notEqual((await dispatchHttp(app, { url: notDeployable.old_url })).status, 301);
+});
+
+test("HTTP app executes reviewed retained and 410 legacy route decisions", async () => {
+  const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
+  const taxonomy = routeMap.find((route) => route.url_type === "taxonomy");
+  const page = routeMap.find((route) => route.url_type === "page" && route.old_url !== "https://makler-realty.com");
+  const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg");
+  const app = createHttpApp({
+    redirects: [
+      { old_url: taxonomy.old_url, status: 410, source_domain: taxonomy.source_domain, reviewer: "seo_editor", reason: "Reviewed obsolete." },
+      {
+        old_url: page.old_url,
+        status: 200,
+        target_path: listing.target_path,
+        source_domain: page.source_domain,
+        reviewer: "seo_editor",
+        reason: "Reviewed equivalent public content.",
+      },
+    ],
+  });
+
+  const gone = await dispatchHttp(app, { url: taxonomy.old_url });
+  const retained = await dispatchHttp(app, { url: page.old_url });
+
+  assert.equal(gone.status, 410);
+  assert.equal(gone.body.kind, "legacy_gone");
+  assert.equal(retained.status, 200);
+  assert.equal(retained.body.kind, "listing");
+  assert.equal(retained.body.body.facts.id, listing.target_path.split("/").at(-1));
+});
+
+test("HTTP launch readiness stays tied to the deployed redirect artifact until export and restart", async () => {
+  const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-stale-redirect-artifact-`);
+  const redirectApprovalPath = `${directory}/redirect-approvals.jsonl`;
+  fs.copyFileSync(fromRoot("production", "data", "redirect-approvals.jsonl"), redirectApprovalPath);
+  for (const route of routeMap.filter((row) => !row.target_path)) {
+    appendRedirectApproval(routeMap, {
+      oldUrl: route.old_url,
+      decision: "approved_410",
+      reviewer: "fixture_seo_editor",
+      reason: "Test-only reviewed terminal decision.",
+    }, { filePath: redirectApprovalPath, approvedAt: "2026-07-13T00:00:00Z" });
+  }
+
+  const app = createHttpApp({ redirectApprovalPath });
+  const readiness = await dispatchHttp(app, {
+    url: "/api/admin/launch-readiness",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  const redirectGate = readiness.body.gates.find((gate) => gate.id === "redirect_reviews");
+
+  assert.equal(readiness.status, 200);
+  assert.equal(redirectGate.status, "blocked");
+  assert.equal(redirectGate.evidence.terminal_decisions, 165);
+  assert.equal(redirectGate.evidence.unresolved_legacy_urls, 292);
 });
 
 test("HTTP sitemap honors mounted listing edit ledger", async () => {
