@@ -383,4 +383,8 @@ dialog.mk-enquiry::backdrop { background: var(--overlay); }
 dialog.mk-enquiry .ct-form { padding: 20px 22px 24px; }
 dialog.mk-enquiry .ct-modal__hd { padding: 0 0 var(--space-2); }
 dialog.mk-enquiry .ct-done { display: grid; justify-items: center; gap: var(--space-3); padding: 44px 30px; text-align: center; }
+/* display:grid above would defeat the hidden attribute (author styles beat UA
+   styles), so restate it: the success block only shows after submission. */
+dialog.mk-enquiry .ct-done[hidden],
+dialog.mk-enquiry form[hidden] { display: none; }
 dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
