@@ -3,10 +3,12 @@
 Generated: 2026-07-05T00:00:00Z
 
 Status: blocked
-Blockers: external_seo_exports, listing_quality_review, live_services, payload_runtime
+Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, payload_runtime
 
 ## Blocked Gate Actions
 
+- redirect_reviews: Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.
+- redirect_reviews: Use /api/admin/redirect-approval-workbook?pending=1 only for mapped same-content redirects, then import reviewed approvals through /api/admin/redirect-approvals/import.
 - external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
 - external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
 - listing_quality_review: Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.
@@ -19,16 +21,18 @@ Blockers: external_seo_exports, listing_quality_review, live_services, payload_r
 ## Redirect Reviews
 
 - Workbook: `production/data/redirect-approval-workbook.csv`
-- Review rows: 165
-- Deployable approvals: 165/165
-- Remaining approvals required: 0
+- Same-content redirect workbook rows: 165
+- Reviewed deployable listing redirects: 165/165
+- Remaining mapped-listing approvals: 0
+- Legacy route coverage: 165/457
+- Unresolved legacy URLs: 292 (page 104, post 42, taxonomy 146)
 - Import path: `migration/reviews/redirect-approvals.csv`
 - Admin import endpoint: `POST /api/admin/redirect-approvals/import`
 - Admin workbook endpoint: `GET /api/admin/redirect-approval-workbook?pending=1`
 - Production adapter path overrides: `MS_REALTY_REDIRECT_APPROVALS_PATH`, `MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH`
 - Review helper columns: `target_listing_id`, `review_status`, `same_content_checklist`
 - Approval import columns: `old_url`, `equivalent_content`, `reviewer`, optional `approved_at`, optional `reason`
-- Launch rule: set `equivalent_content=true` only after same-content human review. Homepage targets stay blocked.
+- Launch rule: each of all 457 legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set `equivalent_content=true` only after same-content human review; homepage and search targets stay blocked.
 
 ## External SEO Exports
 

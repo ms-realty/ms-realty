@@ -144,7 +144,14 @@ export function renderLaunchInputChecklist({
   listingVerification = defaultListingVerification(),
   liveServiceProvisioning = liveServiceProvisioningState(),
 }) {
+  const redirectEvidence = launchReadiness.gates.find((gate) => gate.id === "redirect_reviews")?.evidence || {};
   const mapped = routeMap.summary.mappedListings;
+  const totalLegacyUrls = redirectEvidence.total_legacy_urls ?? routeMap.summary.total ?? mapped;
+  const resolvedLegacyUrls = redirectEvidence.resolved_legacy_urls ?? mapped;
+  const unresolvedLegacyUrls = redirectEvidence.unresolved_legacy_urls ?? Math.max(totalLegacyUrls - resolvedLegacyUrls, 0);
+  const unresolvedByType = Object.entries(redirectEvidence.unresolved_by_type || {})
+    .map(([type, count]) => `${type} ${count}`)
+    .join(", ") || "none";
   const approved = deployableRedirects.summary.total;
   const remaining = Math.max(mapped - approved, 0);
   const workbookRows = rowCount(redirectWorkbookCsv);
@@ -182,16 +189,18 @@ ${blockedGateActionLines(launchReadiness)}
 ## Redirect Reviews
 
 - Workbook: \`production/data/redirect-approval-workbook.csv\`
-- Review rows: ${workbookRows}
-- Deployable approvals: ${approved}/${mapped}
-- Remaining approvals required: ${remaining}
+- Same-content redirect workbook rows: ${workbookRows}
+- Reviewed deployable listing redirects: ${approved}/${mapped}
+- Remaining mapped-listing approvals: ${remaining}
+- Legacy route coverage: ${resolvedLegacyUrls}/${totalLegacyUrls}
+- Unresolved legacy URLs: ${unresolvedLegacyUrls} (${unresolvedByType})
 - Import path: \`migration/reviews/redirect-approvals.csv\`
 - Admin import endpoint: \`POST /api/admin/redirect-approvals/import\`
 - Admin workbook endpoint: \`GET /api/admin/redirect-approval-workbook?pending=1\`
 - Production adapter path overrides: \`MS_REALTY_REDIRECT_APPROVALS_PATH\`, \`MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH\`
 - Review helper columns: \`target_listing_id\`, \`review_status\`, \`same_content_checklist\`
 - Approval import columns: \`old_url\`, \`equivalent_content\`, \`reviewer\`, optional \`approved_at\`, optional \`reason\`
-- Launch rule: set \`equivalent_content=true\` only after same-content human review. Homepage targets stay blocked.
+- Launch rule: each of all ${totalLegacyUrls} legacy URLs needs a deliberate equivalent 200 route, reviewed one-hop 301, or approved 410 before cutover. Set \`equivalent_content=true\` only after same-content human review; homepage and search targets stay blocked.
 
 ## External SEO Exports
 

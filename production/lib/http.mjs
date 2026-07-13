@@ -17,6 +17,7 @@ import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
   approveTranslationTask,
@@ -357,9 +358,7 @@ export function createHttpApp({
     return buildLaunchReadinessReport({
       generatedAt: reviewedAt || new Date().toISOString(),
       routeMap: {
-        summary: {
-          mappedListings: routeMap.filter((route) => route.url_type === "listing" && route.target_path).length,
-        },
+        summary: summarizeLegacyRouteMap(routeMap),
       },
       deployableRedirects: { summary: summarizeDeployableRedirects(redirectRows), redirects: redirectRows },
       listingQuality: currentListingQualityReport({ generatedAt: reviewedAt || new Date().toISOString() }),
@@ -382,9 +381,7 @@ export function createHttpApp({
       redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap)),
       deployableRedirects: { summary: summarizeDeployableRedirects(currentDeployableRedirects()) },
       routeMap: {
-        summary: {
-          mappedListings: routeMap.filter((route) => route.url_type === "listing" && route.target_path).length,
-        },
+        summary: summarizeLegacyRouteMap(routeMap),
       },
       liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
     });
@@ -1499,7 +1496,7 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
-  const expectedBlockers = ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"];
+  const expectedBlockers = ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"];
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||

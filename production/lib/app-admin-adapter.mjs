@@ -47,6 +47,7 @@ import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
+import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -346,11 +347,7 @@ function deployableRedirects(config = {}) {
 }
 
 function routeMapSummary(routes) {
-  return {
-    summary: {
-      mappedListings: routes.filter((route) => route.url_type === "listing" && route.target_path).length,
-    },
-  };
+  return { summary: summarizeLegacyRouteMap(routes) };
 }
 
 function deployableRedirectsForLaunch(config) {

@@ -661,6 +661,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
   assert.deepEqual(smoke.health.body.blockers, [
+    "redirect_reviews",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -670,7 +671,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.ready.body.status, "blocked");
   assert.deepEqual(
     smoke.ready.body.blocked_gates.map((gate) => gate.id),
-    ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
+    ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
   );
   assert.equal(smoke.ready.headers["cache-control"], "no-store");
   assert.equal(smoke.ready.headers["retry-after"], "60");
@@ -1693,15 +1694,16 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);
   assert.equal(launchUnauthorized.status, 401);
   assert.equal(launch.status, 200);
-  assert.deepEqual(launch.body.blockers, ["listing_quality_review", "live_services", "payload_runtime"]);
+  assert.deepEqual(launch.body.blockers, ["redirect_reviews", "listing_quality_review", "live_services", "payload_runtime"]);
   assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
   assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
-  assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
+  assert.equal(launch.body.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.equal(launchExportUnauthorized.status, 401);
   assert.equal(launchExport.status, 201);
   assert.equal(fs.existsSync(launchReadinessOutputPath), true);
   assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, [
+    "redirect_reviews",
     "listing_quality_review",
     "live_services",
     "payload_runtime",
@@ -1757,7 +1759,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(hermesWorkerReportPath), true);
   assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
-  assert.deepEqual(launchAfterLive.body.blockers, ["listing_quality_review"]);
+  assert.deepEqual(launchAfterLive.body.blockers, ["redirect_reviews", "listing_quality_review"]);
   assert.equal(launchAfterLive.body.status, "blocked");
 });
 

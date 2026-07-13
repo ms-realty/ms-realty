@@ -93,8 +93,8 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Regenerate production/data/migration-records.json before rebuilding launch readiness.",
   ],
   redirect_reviews: [
-    "Download /api/admin/redirect-approval-workbook?pending=1 for unresolved legacy listing redirects.",
-    "Import reviewed same-content approvals through /api/admin/redirect-approvals/import.",
+    "Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.",
+    "Use /api/admin/redirect-approval-workbook?pending=1 only for mapped same-content redirects, then import reviewed approvals through /api/admin/redirect-approvals/import.",
   ],
   localized_sitemap: [
     "Run npm run sitemap:build after approved locale routes are generated.",
@@ -302,7 +302,13 @@ function assertPassRedirectReviewEvidence(report) {
   const redirects = gateById(report, "redirect_reviews");
   if (redirects?.status !== "pass") return;
   const evidence = redirects.evidence || {};
+  const unresolvedByType = evidence.unresolved_by_type;
   if (
+    evidence.total_legacy_urls !== 457 ||
+    evidence.resolved_legacy_urls !== evidence.total_legacy_urls ||
+    evidence.unresolved_legacy_urls !== 0 ||
+    !unresolvedByType ||
+    Object.values(unresolvedByType).some((count) => !Number.isInteger(count) || count !== 0) ||
     !Number.isInteger(evidence.mapped_listings) ||
     !Number.isInteger(evidence.deployable_redirects) ||
     evidence.mapped_listings < 1 ||
@@ -310,7 +316,7 @@ function assertPassRedirectReviewEvidence(report) {
     evidence.homepage_targets !== 0 ||
     evidence.duplicate_old_urls !== 0
   ) {
-    throw new Error("Launch readiness redirect reviews require complete same-content redirect evidence");
+    throw new Error("Launch readiness redirect reviews require a terminal route decision for every legacy URL");
   }
 }
 
@@ -1014,8 +1020,18 @@ export function buildLaunchReadinessReport({
     migration.summary.byDomain?.["makler-realty.com"] === 278 &&
     migration.summary.byDomain?.["makler-realty.ru"] === 179 &&
     migration.summary.byStatus?.["200"] === 457;
+  const routeMapSummary = routeMap.summary || {};
+  const routeMapTotal = Number.isInteger(routeMapSummary.total) ? routeMapSummary.total : 0;
+  const unresolvedByType = Object.fromEntries(
+    Object.entries(routeMapSummary.unmappedByType || {}).filter(([, count]) => Number.isInteger(count) && count > 0),
+  );
+  const unresolvedLegacyUrls = Object.values(unresolvedByType).reduce((total, count) => total + count, 0);
+  const resolvedLegacyUrls = routeMapTotal - unresolvedLegacyUrls;
   const redirectsReviewed =
-    deployableRedirects.summary.total >= routeMap.summary.mappedListings &&
+    routeMapTotal === migration.summary.total &&
+    resolvedLegacyUrls === routeMapTotal &&
+    unresolvedLegacyUrls === 0 &&
+    deployableRedirects.summary.total >= routeMapSummary.mappedListings &&
     deployableRedirects.summary.homepageTargets === 0 &&
     deployableRedirects.summary.duplicateOldUrls === 0;
   const seoExportsReady = (seoEvidence.summary.missing_required_sources || []).length === 0;
@@ -1059,12 +1075,18 @@ export function buildLaunchReadinessReport({
       "redirect_reviews",
       redirectsReviewed ? "pass" : "blocked",
       {
-        mapped_listings: routeMap.summary.mappedListings,
+        total_legacy_urls: routeMapTotal,
+        resolved_legacy_urls: resolvedLegacyUrls,
+        unresolved_legacy_urls: unresolvedLegacyUrls,
+        unresolved_by_type: unresolvedByType,
+        mapped_listings: routeMapSummary.mappedListings,
         deployable_redirects: deployableRedirects.summary.total,
         homepage_targets: deployableRedirects.summary.homepageTargets,
         duplicate_old_urls: deployableRedirects.summary.duplicateOldUrls,
       },
-      redirectsReviewed ? "" : "Only reviewed same-content redirects with no homepage targets or duplicate old URLs may launch.",
+      redirectsReviewed
+        ? ""
+        : "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; homepage and search fallbacks are prohibited.",
     ),
     gate("localized_sitemap", localizedSitemapReady ? "pass" : "blocked", sitemap.summary),
     gate(

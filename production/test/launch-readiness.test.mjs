@@ -29,6 +29,7 @@ import {
   writeLiveServiceProvisioningReport,
 } from "../lib/live-service-provisioning.mjs";
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
+import { summarizeLegacyRouteMap } from "../lib/migration.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function healthyHermesAgentFetch(url) {
@@ -49,6 +50,23 @@ function healthyHermesAgentFetch(url) {
 
 function readJson(path) {
   return JSON.parse(fs.readFileSync(fromRoot(...path), "utf8"));
+}
+
+function completeRouteMap() {
+  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  routeMap.routes = routeMap.routes.map((route) =>
+    route.target_path
+      ? route
+      : {
+          ...route,
+          target_locale: "bg",
+          target_path: "/bg/guides/foreign-buyers",
+          planned_status: 301,
+          reason: "Reviewed fixture route for launch-readiness coverage validation.",
+        },
+  );
+  routeMap.summary = summarizeLegacyRouteMap(routeMap.routes);
+  return routeMap;
 }
 
 function writeJson(path, value) {
@@ -566,8 +584,19 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
-  assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
-  assert.equal(report.gates.find((gate) => gate.id === "redirect_reviews").status, "pass");
+  assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
+  const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
+  assert.equal(redirectGate.status, "blocked");
+  assert.deepEqual(redirectGate.evidence, {
+    total_legacy_urls: 457,
+    resolved_legacy_urls: 165,
+    unresolved_legacy_urls: 292,
+    unresolved_by_type: { page: 104, post: 42, taxonomy: 146 },
+    mapped_listings: 165,
+    deployable_redirects: 165,
+    homepage_targets: 0,
+    duplicate_old_urls: 0,
+  });
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
   const liveGate = report.gates.find((gate) => gate.id === "live_services");
@@ -603,11 +632,11 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.match(liveGate.next_actions.join(" "), /npm run live:preflight/);
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
-  for (const id of ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]) {
+  for (const id of ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]) {
     const blockedGate = report.gates.find((gate) => gate.id === id);
     assert.ok(blockedGate.next_actions.length > 0);
   }
-  assert.equal("next_actions" in report.gates.find((gate) => gate.id === "redirect_reviews"), false);
+  assert.ok(report.gates.find((gate) => gate.id === "redirect_reviews").next_actions.length > 0);
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {
     id: "listing_quality.thin_public_gallery",
@@ -618,7 +647,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const publicPayload = publicLaunchReadinessPayload(report);
   assert.deepEqual(
     publicPayload.blocked_gates.map((gate) => gate.id),
-    ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
+    ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
   );
   assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Typesense\/Meilisearch/);
   assert.equal("next_actions" in publicPayload.blocked_gates.find((gate) => gate.id === "live_services"), false);
@@ -626,7 +655,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
 });
 
 test("launch readiness validator accepts ready state after required gates are cleared", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
 
@@ -670,7 +699,7 @@ test("launch readiness validator requires blocked gate next actions", () => {
 });
 
 test("launch readiness rejects hand-cleared external SEO blockers", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
 
@@ -694,7 +723,7 @@ test("launch readiness rejects hand-cleared external SEO blockers", () => {
 });
 
 test("launch readiness validator rejects weak external SEO pass evidence", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
 
@@ -728,12 +757,15 @@ test("launch readiness validator rejects weak crawl inventory pass evidence", ()
 });
 
 test("launch readiness validator rejects weak redirect review pass evidence", () => {
+  const routeMap = completeRouteMap();
+  const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
+  deployableRedirects.summary.total = routeMap.summary.mappedListings;
   for (const patch of [{ deployable_redirects: 0 }, { homepage_targets: 1 }, { duplicate_old_urls: 1 }]) {
-    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", routeMap, deployableRedirects });
     const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
     Object.assign(redirectGate.evidence, patch);
 
-    assert.throws(() => assertLaunchReadinessReport(report), /complete same-content redirect evidence/);
+    assert.throws(() => assertLaunchReadinessReport(report), /terminal route decision/);
   }
 });
 
@@ -767,7 +799,7 @@ test("launch readiness validator requires every production gate", () => {
 });
 
 test("launch readiness validator rejects weak runtime smoke pass evidence", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
 
@@ -789,7 +821,7 @@ test("launch readiness validator rejects weak runtime smoke pass evidence", () =
 });
 
 test("launch readiness validator rejects weak runtime pass evidence", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
@@ -879,7 +911,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
 });
 
 test("launch readiness validator rejects weak payload runtime pass evidence", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
@@ -904,7 +936,7 @@ test("launch readiness validator rejects weak payload runtime pass evidence", ()
 });
 
 test("launch readiness validator rejects weak live service pass summaries", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
 
@@ -926,7 +958,7 @@ test("launch readiness validator rejects weak live service pass summaries", () =
 });
 
 test("launch readiness validator rejects weak live service operation evidence", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
@@ -1034,7 +1066,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
 });
 
 test("launch readiness validator rejects weak live provisioning pass evidence", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
 
@@ -1058,7 +1090,7 @@ test("launch readiness validator rejects weak live provisioning pass evidence", 
 });
 
 test("launch readiness blocks live services until provisioning passes", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
 
@@ -1103,7 +1135,7 @@ test("launch readiness validator rejects weak monitoring rollback pass evidence"
 });
 
 test("launch readiness validator rejects weak listing quality pass evidence", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   deployableRedirects.summary.total = routeMap.summary.mappedListings;
 
@@ -1146,7 +1178,7 @@ test("launch readiness accepts reviewed location page growth", () => {
 });
 
 test("launch readiness blocks incomplete monitoring configuration", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
 
@@ -1173,7 +1205,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
 });
 
 test("launch readiness blocks broad or duplicate deployable redirect exports", () => {
-  const routeMap = readJson(["production", "data", "legacy-route-map.json"]);
+  const routeMap = completeRouteMap();
   const deployableRedirects = readJson(["production", "data", "deployable-redirects.json"]);
   const seoEvidence = readySeoEvidenceFixture();
 
@@ -1231,7 +1263,7 @@ test("launch readiness build honors output path override", () => {
   assert.ok(result.stdout.includes(`Wrote launch readiness report to ${outputPath}`));
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
   assert.equal(assertLaunchReadinessReport(report), true);
-  assert.deepEqual(report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
+  assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
 });
 
 test("local readiness materializer promotes only fresh local Payload proof and preserves external blockers", async () => {
@@ -1268,7 +1300,7 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   assert.equal(result.outPath, outputPath);
   assert.equal(assertLaunchReadinessReport(result.report), true);
   assert.equal(result.report.launch_ready, false);
-  assert.deepEqual(result.report.blockers, ["external_seo_exports", "listing_quality_review", "live_services", "local_preview_only"]);
+  assert.deepEqual(result.report.blockers, ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "local_preview_only"]);
   assert.equal(result.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
   assert.equal(result.report.gates.find((gate) => gate.id === "local_preview_only").status, "blocked");
   assert.deepEqual(
@@ -1310,7 +1342,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /LAUNCH BLOCKED: external_seo_exports, listing_quality_review, live_services, payload_runtime/);
+  assert.match(result.stderr, /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, listing_quality_review, live_services, payload_runtime/);
   assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
@@ -1345,7 +1377,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(withReviewPath.status, 0);
-  assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: external_seo_exports, live_services, payload_runtime/);
+  assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, live_services, payload_runtime/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
 
@@ -1369,7 +1401,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(ready.status, 0);
-  assert.match(ready.stderr, /LAUNCH BLOCKED: payload_runtime/);
+  assert.match(ready.stderr, /LAUNCH BLOCKED: redirect_reviews, payload_runtime/);
 
   const seoOutputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-output-`)}/seo-evidence.json`;
   const seoBuild = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence.mjs")], {
@@ -1397,7 +1429,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
     },
   });
   assert.notEqual(readyFromSeoOutput.status, 0);
-  assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: payload_runtime/);
+  assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: redirect_reviews, payload_runtime/);
 });
 
 test("launch preflight and input checklist honor env-mounted redirect and evidence paths", async () => {
@@ -1414,7 +1446,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
 
   assert.notEqual(blocked.status, 0);
   assert.match(blocked.stderr, /LAUNCH BLOCKED: redirect_reviews/);
-  assert.match(blocked.stderr, /redirect_reviews next: Download \/api\/admin\/redirect-approval-workbook\?pending=1/);
+  assert.match(blocked.stderr, /redirect_reviews next: Review every unresolved legacy URL in \/admin\/migration\/review/);
 
   const reviewPath = writeListingQualityReviewFixture(fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-review-`));
   const seoDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-seo-`);
@@ -1441,7 +1473,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
 
   assert.equal(ready.status, 0, ready.stderr);
   assert.match(markdown, /Status: blocked/);
-  assert.match(markdown, /Blockers: payload_runtime/);
+  assert.match(markdown, /Blockers: redirect_reviews, payload_runtime/);
   assert.match(markdown, /MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH/);
 });
 
@@ -1877,7 +1909,10 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /listing_quality_review: Download \/api\/admin\/listing-quality-review-packet/);
   assert.match(markdown, /live_services: Run npm run live:provisioning:preflight/);
   assert.match(markdown, /payload_runtime: Run npm run payload:runtime/);
-  assert.match(markdown, /Remaining approvals required: 0/);
+  assert.match(markdown, /redirect_reviews: Review every unresolved legacy URL/);
+  assert.match(markdown, /Remaining mapped-listing approvals: 0/);
+  assert.match(markdown, /Legacy route coverage: 165\/457/);
+  assert.match(markdown, /Unresolved legacy URLs: 292 \(page 104, post 42, taxonomy 146\)/);
   assert.match(markdown, /migration\/reviews\/redirect-approvals\.csv/);
   assert.match(markdown, /POST \/api\/admin\/redirect-approvals\/import/);
   assert.match(markdown, /MS_REALTY_REDIRECT_APPROVALS_PATH/);

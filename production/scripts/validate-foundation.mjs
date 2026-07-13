@@ -1108,8 +1108,8 @@ if (launchReadiness.launch_ready !== false || launchReadiness.status !== "blocke
 for (const blocker of ["external_seo_exports", "live_services"]) {
   if (!launchReadiness.blockers.includes(blocker)) throw new Error(`Launch readiness report must include ${blocker}`);
 }
-if (launchReadiness.blockers.includes("redirect_reviews")) {
-  throw new Error("Launch readiness report should not include redirect_reviews after all listing redirects are approved");
+if (!launchReadiness.blockers.includes("redirect_reviews")) {
+  throw new Error("Launch readiness report must include redirect_reviews until every legacy URL has a terminal route decision");
 }
 if (launchReadiness.blockers.includes("production_app_layer")) {
   throw new Error("Launch readiness report should not include production_app_layer after the Node adapter is present");
