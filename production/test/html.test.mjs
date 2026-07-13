@@ -93,10 +93,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /id="sr-location-options"/);
   assert.match(searchHtml, /id="sr-mobile-location-options"/);
   assert.match(searchHtml, /data-mobile-search-filters="true"/);
-  assert.match(searchHtml, /data-hermes-assistant="true"/);
-  assert.match(searchHtml, /data-hermes-mode="retrieval_only"/);
-  assert.match(searchHtml, /data-hermes-chat-form="true"/);
-  assert.match(searchHtml, /action="\/api\/hermes\/chat"/);
+  assert.doesNotMatch(searchHtml, /data-hermes-(assistant|mode|chat-form|chat-output)|\/api\/hermes\/chat/);
   assert.match(searchHtml, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
   assert.match(searchHtml, /data-ms-realty-public-client/);
   assert.match(searchHtml, /data-request-failed="לא ניתן היה לשלוח את הפנייה\. נסו שוב\."/);

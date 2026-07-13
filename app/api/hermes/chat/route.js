@@ -1,8 +1,8 @@
-import { renderAppApiResponse } from "../../../_ms-realty/api.js";
-
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function POST(request) {
-  return renderAppApiResponse(request);
+function notFound() {
+  return new Response(null, { status: 404, headers: { "cache-control": "no-store" } });
 }
+
+export { notFound as DELETE, notFound as GET, notFound as OPTIONS, notFound as PATCH, notFound as POST, notFound as PUT };

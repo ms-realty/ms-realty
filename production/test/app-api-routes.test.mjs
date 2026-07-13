@@ -82,7 +82,6 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
     },
     async () => {
       const eventRoute = await import("../../app/api/events/route.js");
-      const hermesChatRoute = await import("../../app/api/hermes/chat/route.js");
       const healthRoute = await import("../../app/api/health/route.js");
       const languageRequestRoute = await import("../../app/api/language-requests/route.js");
       const readyRoute = await import("../../app/api/ready/route.js");
@@ -220,19 +219,18 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(savedSearchBody.status, "active");
       assert.ok(savedSearchBody.match_count > 0);
 
-      const hermesChat = await hermesChatRoute.POST(
+      const retiredHermesChatRoute = await import("../../app/api/hermes/chat/route.js");
+      const disabledHermesChat = await retiredHermesChatRoute.POST(
         new Request("https://example.test/api/hermes/chat", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ locale: "he", query: "Sandanski" }),
         }),
       );
-      const hermesChatBody = await hermesChat.json();
-      assert.equal(hermesChat.status, 200);
-      assert.equal(hermesChat.headers.get("cache-control"), "no-store");
-      assert.equal(hermesChatBody.kind, "hermes_public_chat");
-      assert.equal(hermesChatBody.can_publish, false);
-      assert.ok(hermesChatBody.citations.length > 0);
+      assert.equal(disabledHermesChat.status, 404);
+      assert.equal(disabledHermesChat.headers.get("cache-control"), "no-store");
+      assert.equal((await retiredHermesChatRoute.GET(new Request("https://example.test/api/hermes/chat"))).status, 404);
+      assert.equal(fs.existsSync("app/api/hermes/chat/route.js"), true);
     },
   );
 
@@ -251,5 +249,5 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "search").length, 1);
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "lead_submitted").length, 2);
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "cta_click").length, 1);
-  assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "hermes_chat").length, 1);
+  assert.equal(readEventLedger(eventLedgerPath).some((event) => event.type === "hermes_chat"), false);
 });

@@ -51,7 +51,7 @@ What it proves now:
 - Runtime smoke fixture for listing route, search route, contact route, fallback route, and lead intake.
 - HTTP JSON adapter smoke fixture for listing, search, contact, fallback, and lead endpoints.
 - Server-rendered HTML adapter for listing, search, contact, guide, and fallback pages with SEO metadata.
-- Approved CMS guide pages for foreign-buyer and buying-process facts cited by public Hermes chat.
+- Approved CMS guide pages for human-reviewed foreign-buyer and buying-process guidance.
 - Open Graph metadata in server-rendered public HTML, including listing `og:image` from reviewed gallery media.
 - Structured-data launch report for every indexable listing sitemap entry.
 - Listing quality report that turns missing price, bedroom, location, alt text, thin gallery, media review, and tour review warnings into admin editor links.
@@ -75,7 +75,7 @@ What it proves now:
 - Search engine query smoke path that verifies both engines can return the reviewed BG listing document without draft locales.
 - Language request intake for unavailable public locales.
 - Authenticated admin locale creation for non-indexable website locales.
-- Locale rollout report that turns requested disabled locales into approval tasks and public Hermes locales into draft queue summaries.
+- Locale rollout report that turns requested disabled locales into approval tasks and Hermes draft queue summaries.
 - Hermes draft dispatch batch that prepares real crawl-backed listing prompts with citations while keeping drafts non-publishing and reviewer-gated.
 - Hermes draft worker path that calls an OpenAI-compatible vLLM/Hermes endpoint, validates JSON output, and persists only non-indexable review drafts.
 - Authenticated launch input checklist endpoint for redirect, SEO, listing-quality, and live-service launch handoff gates.

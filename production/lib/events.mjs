@@ -4,7 +4,7 @@ import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_EVENT_LEDGER_PATH = fromRoot("production", "data", "events.jsonl");
 
-const EVENT_TYPES = new Set(["page_view", "search", "lead_submitted", "cta_click", "hermes_chat"]);
+const EVENT_TYPES = new Set(["page_view", "search", "lead_submitted", "cta_click"]);
 const FORBIDDEN_KEYS = new Set(["contact", "message", "email", "phone", "name"]);
 
 function scrubText(value) {

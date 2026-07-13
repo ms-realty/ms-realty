@@ -171,25 +171,8 @@ export function assertServerSmoke(smoke) {
   if (smoke.savedSearch.status !== 201 || smoke.savedSearch.body.alert_task?.status !== "open") {
     throw new Error("Server must store saved search alert tasks");
   }
-  if (
-    smoke.hermesChat?.status !== 200 ||
-    smoke.hermesChat.body.kind !== "hermes_public_chat" ||
-    smoke.hermesChat.body.mode !== "retrieval_only" ||
-    smoke.hermesChat.body.can_publish !== false ||
-    smoke.hermesChat.body.can_send_customer_message !== false ||
-    smoke.hermesChat.body.source_policy !== "approved_ms_realty_only" ||
-    !smoke.hermesChat.body.disclosure ||
-    !smoke.hermesChat.body.citations?.some((citation) => citation.path?.startsWith("/he/"))
-  ) {
-    throw new Error("Server must answer public Hermes chat from approved listing sources only");
-  }
-  if (
-    smoke.hermesProcessChat?.status !== 200 ||
-    smoke.hermesProcessChat.body.citations?.[0]?.type !== "cms_page" ||
-    !smoke.hermesProcessChat.body.answer.includes("Non-EU buyers cannot own Bulgarian land directly") ||
-    smoke.hermesProcessChat.body.can_publish !== false
-  ) {
-    throw new Error("Server must answer foreign-buyer process chat from approved CMS content only");
+  if (smoke.hermesChatDisabled?.status !== 405 || smoke.hermesChatDisabled.body.kind !== "method_not_allowed") {
+    throw new Error("Server must not expose public Hermes chat");
   }
   for (const response of [
     smoke.languageRequest,

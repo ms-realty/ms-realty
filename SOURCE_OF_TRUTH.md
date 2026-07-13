@@ -119,7 +119,7 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 | Video | **Video.js + HLS.js** | Where adaptive playback is needed |
 | Workers/queues | App-owned queues | Imports, sitemap gen, media processing, saved-search alerts, stale checks, CRM reminders, AI jobs |
 | Automation (non-critical) | **n8n**, self-hosted, locked down | Internal experiments only — never the source of truth |
-| AI | **Hermes Agent** — self-hosted Nous Research **open-weight Hermes models** + Hermes function-calling format (model-agnostic seam) | Draft-only assistant; read-only retrieval over approved CMS content; schema-validated JSON outputs; human approval; full audit logs. Full spec in §11 |
+| AI | **Hermes Agent** — self-hosted Nous Research **open-weight Hermes models** + Hermes function-calling format (model-agnostic seam) | Authenticated internal draft assistant only; schema-validated JSON outputs; human approval; full audit logs. No public chat capability. Full spec in §11 |
 | Locales | Admin-managed dynamic registry | Hermes drafts; humans approve; RTL support before Hebrew launch |
 
 The current app is a **hybrid production foundation**: `production/` keeps the dependency-light
@@ -291,9 +291,9 @@ not displayed. A future read-only retrieval integration must be reviewed as a se
 cannot grant the Agent write access to public, CRM, or messaging state.
 
 ### 11.3 Capability map
-- **Public:** conversational property search; guided buyer questionnaire with explainable matches;
-  similar-by-lifestyle; foreign-buyer assistant grounded in approved legal/process CMS content;
-  multilingual listing Q&A; smart saved-search alerts.
+- **Public:** no Hermes chat. The retired chat path returns 404; buyers use deterministic property search,
+  approved guide pages, broker contact, language requests, and saved-search alerts; a human owns any
+  customer-facing answer.
 - **Seller:** intake assistant; AI-assisted valuation *range* with broker review; listing-readiness
   score; photo-quality/missing-room detection; description draft from facts; pre-publish improvements.
 - **Broker:** lead summary + next-best-action; lead scoring (budget/urgency/language/fit/repeat);
@@ -316,13 +316,13 @@ Agent cannot reach CMS, CRM, a customer, or public publishing directly. The appl
 draft and its audit entry; a human broker/editor must approve every visible, indexable, or sent action.
 
 ### 11.5 Guardrails (hard)
-AI never publishes listings, translations, valuations, legal/tax answers, or listing changes without
-human approval. Hermes translation drafts cannot publish or mark pages indexable. Legal/tax/process
-answers must cite approved CMS content. Users must know when they are chatting with AI. **Sensitive
-owner/buyer inference goes only through the self-hosted Hermes Agent to a private EU model endpoint;**
-hosted OpenRouter is forbidden for that data and is allowed only for explicitly non-sensitive tasks.
-Every Hermes call is logged in the AuditLog (model, prompt version, tool calls, tokens,
-sensitive-vs-not).
+Hermes has no public capability and never sends customer messages. AI never publishes listings,
+translations, valuations, legal/tax answers, or listing changes without human approval. Hermes
+translation drafts cannot publish or mark pages indexable. Legal/tax/process drafts must cite approved
+CMS content. Internal users must see that a draft came from Hermes. **Sensitive owner/buyer inference
+goes only through the self-hosted Hermes Agent to a private EU model endpoint;** hosted OpenRouter is
+forbidden for that data and is allowed only for explicitly non-sensitive tasks. Every Hermes call is
+logged in the AuditLog (model, prompt version, tool calls, tokens, sensitive-vs-not).
 
 ---
 

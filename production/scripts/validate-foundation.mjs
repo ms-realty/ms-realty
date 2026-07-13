@@ -293,7 +293,7 @@ if (
     section.facts.join(" ").includes("Non-EU buyers cannot own Bulgarian land directly"),
   )
 ) {
-  throw new Error("Public fixtures must include approved CMS guide pages cited by Hermes");
+  throw new Error("Public fixtures must include approved CMS guide pages for buyer guidance");
 }
 if (JSON.stringify(publicFixtures).match(/Sandanski sea|sea destination|Сандански море/i)) {
   throw new Error("Public fixtures must not introduce Sandanski sea framing");

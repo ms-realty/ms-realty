@@ -382,20 +382,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         contact: { name: "Noa Levi" },
       },
     }),
-    hermesChat: await dispatchHttp(app, {
+    hermesChatDisabled: await dispatchHttp(app, {
       method: "POST",
       url: "/api/hermes/chat",
       body: {
         locale: "he",
         query: "Sandanski",
-      },
-    }),
-    hermesProcessChat: await dispatchHttp(app, {
-      method: "POST",
-      url: "/api/hermes/chat",
-      body: {
-        locale: "he",
-        query: "Can a non-EU buyer own land in Bulgaria through an OOD?",
       },
     }),
     sitemap: await dispatchHttp(app, { url: "/sitemap.xml" }),
@@ -700,13 +692,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
   assert.equal(smoke.savedSearch.headers["cache-control"], "no-store");
-  assert.equal(smoke.hermesChat.body.kind, "hermes_public_chat");
-  assert.equal(smoke.hermesChat.body.mode, "retrieval_only");
-  assert.equal(smoke.hermesChat.body.can_publish, false);
-  assert.equal(smoke.hermesChat.body.citations.length > 0, true);
-  assert.equal(smoke.hermesChat.headers["cache-control"], "no-store");
-  assert.equal(smoke.hermesProcessChat.body.citations[0].type, "cms_page");
-  assert.match(smoke.hermesProcessChat.body.answer, /Non-EU buyers cannot own Bulgarian land directly/);
+  assert.equal(smoke.hermesChatDisabled.status, 405);
+  assert.equal(smoke.hermesChatDisabled.body.kind, "method_not_allowed");
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
   assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
@@ -780,7 +767,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     locale_created: 1,
   });
   assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "cta_click" && row.action === "sticky_inquiry"), true);
-  assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "hermes_chat" && row.path === "/api/hermes/chat"), true);
+  assert.equal(readEventLedger(eventLedgerPath).some((row) => row.type === "hermes_chat"), false);
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
   assert.equal(smoke.admin.body.leads.length, 4);

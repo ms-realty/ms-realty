@@ -26,7 +26,6 @@ export function createLanguageRequest(registry, input, requestedAt = new Date().
     fallback_locale: fallbackLocale,
     admin_locale: adminLocales(registry).includes(input.requestedLocale) ? input.requestedLocale : "en",
     public_indexable: false,
-    hermes_chat_available: true,
     contact: input.contact || {},
     message: input.message || "",
   };

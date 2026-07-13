@@ -82,6 +82,7 @@
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -234,7 +235,7 @@
         "id": "MS-CRAWL-0001",
         "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
         "path": "/he/properties/MS-CRAWL-0001",
-        "review_badge": "verified_inventory",
+        "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
         "translation_locale": "he",
         "translation_status": "approved",
@@ -283,9 +284,9 @@
       },
       {
         "id": "MS-CRAWL-0002",
-        "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+        "title": "Апартаменти в парка на Сандански. Затворен комплекс",
         "path": "/he/properties/MS-CRAWL-0002",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -334,9 +335,9 @@
       },
       {
         "id": "MS-CRAWL-0003",
-        "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+        "title": "Тристаен апартамент под наем в Сандански + паркомясто",
         "path": "/he/properties/MS-CRAWL-0003",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -385,9 +386,9 @@
       },
       {
         "id": "MS-CRAWL-0004",
-        "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+        "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
         "path": "/he/properties/MS-CRAWL-0004",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -436,9 +437,9 @@
       },
       {
         "id": "MS-CRAWL-0005",
-        "title": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански",
+        "title": "Апартамент под наем в гр.Сандански",
         "path": "/he/properties/MS-CRAWL-0005",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -487,9 +488,9 @@
       },
       {
         "id": "MS-CRAWL-0006",
-        "title": "Industrieel gebouw te huur in Sandanski",
+        "title": "Дава под наем промишлена сграда в Сандански",
         "path": "/he/properties/MS-CRAWL-0006",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -554,7 +555,7 @@
       "resolved_locale": "bg"
     },
     "metadata": {
-      "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански",
+      "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
       "description": "Updated approved source description.",
       "robots": "index,follow"
     },
@@ -587,6 +588,7 @@
         "tagline": "Имоти за продажба и под наем в Сандански и Пирин, по Черноморието и в съседна Гърция — с местни офиси и брокери, които говорят вашия език.",
         "copyright": "Всички права запазени.",
         "requestSent": "Запитването е изпратено. Брокер ще се свърже с вас.",
+        "requestFailed": "Изпращането не бе успешно. Опитайте отново.",
         "close": "Затвори",
         "callBroker": "Обади се на брокер",
         "languageLabel": "Език",
@@ -694,7 +696,7 @@
       "@id": "/bg/imoti/MS-CRAWL-0001#listing",
       "url": "/bg/imoti/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански",
+      "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
       "description": "Updated approved source description.",
       "category": "commercial",
       "image": [
@@ -705,11 +707,6 @@
           "@type": "PropertyValue",
           "name": "offer_type",
           "value": "rent"
-        },
-        {
-          "@type": "PropertyValue",
-          "name": "source_locale",
-          "value": "bg"
         }
       ],
       "areaServed": {
@@ -932,6 +929,7 @@
         "tagline": "Ακίνητα προς πώληση και ενοικίαση στο Σαντάνσκι και τον Πιρίν, στις ακτές της Μαύρης Θάλασσας και στη γειτονική Ελλάδα — με τοπικά γραφεία και μεσίτες που μιλούν τη γλώσσα σας.",
         "copyright": "Με την επιφύλαξη παντός δικαιώματος.",
         "requestSent": "Το αίτημά σας εστάλη. Ένας μεσίτης θα επικοινωνήσει μαζί σας.",
+        "requestFailed": "Δεν ήταν δυνατή η αποστολή του αιτήματος. Προσπαθήστε ξανά.",
         "close": "Κλείσιμο",
         "callBroker": "Καλέστε μεσίτη",
         "languageLabel": "Γλώσσα",
@@ -1050,11 +1048,6 @@
           "@type": "PropertyValue",
           "name": "offer_type",
           "value": "rent"
-        },
-        {
-          "@type": "PropertyValue",
-          "name": "source_locale",
-          "value": "bg"
         }
       ],
       "areaServed": {
@@ -1070,7 +1063,7 @@
     },
     "body": {
       "h1": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
-      "description": "Updated approved source description.",
+      "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
@@ -1277,6 +1270,7 @@
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -1395,11 +1389,6 @@
           "@type": "PropertyValue",
           "name": "offer_type",
           "value": "rent"
-        },
-        {
-          "@type": "PropertyValue",
-          "name": "source_locale",
-          "value": "bg"
         }
       ],
       "areaServed": {
@@ -1415,7 +1404,7 @@
     },
     "body": {
       "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "Updated approved source description.",
+      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
       "facts": {
         "id": "MS-CRAWL-0001",
         "location": "Sandanski",
@@ -1589,8 +1578,8 @@
       "resolved_locale": "en"
     },
     "metadata": {
-      "title": "MS Realty property MS-CRAWL-0001 in Sandanski",
-      "description": "Reviewed MS Realty property facts for Sandanski.",
+      "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+      "description": "Updated approved source description.",
       "robots": "noindex,follow"
     },
     "hreflang": [],
@@ -1605,6 +1594,7 @@
         "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
+        "requestFailed": "The request could not be sent. Please try again.",
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
@@ -1712,8 +1702,8 @@
       "@id": "/en/properties/MS-CRAWL-0001#listing",
       "url": "/en/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "MS Realty property MS-CRAWL-0001 in Sandanski",
-      "description": "Reviewed MS Realty property facts for Sandanski.",
+      "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+      "description": "Updated approved source description.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg"
@@ -1723,11 +1713,6 @@
           "@type": "PropertyValue",
           "name": "offer_type",
           "value": "rent"
-        },
-        {
-          "@type": "PropertyValue",
-          "name": "source_locale",
-          "value": "bg"
         }
       ],
       "areaServed": {
@@ -1742,7 +1727,7 @@
       "reviewer": null
     },
     "body": {
-      "h1": "MS Realty property MS-CRAWL-0001 in Sandanski",
+      "h1": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
       "description": "Updated approved source description.",
       "facts": {
         "id": "MS-CRAWL-0001",
@@ -1915,6 +1900,7 @@
         "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
+        "requestFailed": "The request could not be sent. Please try again.",
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
@@ -2029,7 +2015,6 @@
       "robots": "noindex,follow"
     },
     "request_language_available": true,
-    "hermes_chat_available": true,
     "public_translation_available": false
   },
   "search_he": {
@@ -2064,6 +2049,7 @@
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -2212,7 +2198,36 @@
             "source": "website_search"
           }
         },
-        "active_filter_chips": []
+        "active_filter_chips": [],
+        "filter_options": {
+          "locations": [
+            "Hotovo",
+            "Petrich",
+            "Sandanski"
+          ],
+          "property_types": [
+            "apartment",
+            "commercial",
+            "hotel",
+            "house",
+            "land",
+            "multi_unit",
+            "property"
+          ],
+          "offer_types": [
+            "rent",
+            "sale"
+          ],
+          "bedrooms": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            6,
+            7
+          ]
+        }
       },
       "fallback": {
         "enabled": true,
@@ -2225,7 +2240,7 @@
         "id": "MS-CRAWL-0001",
         "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
         "path": "/he/properties/MS-CRAWL-0001",
-        "review_badge": "verified_inventory",
+        "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
         "translation_locale": "he",
         "translation_status": "approved",
@@ -2274,9 +2289,9 @@
       },
       {
         "id": "MS-CRAWL-0002",
-        "title": "Апартаменти в парка на Сандански. Затворен комплекс - Недвижими имоти в Сандански",
+        "title": "Апартаменти в парка на Сандански. Затворен комплекс",
         "path": "/he/properties/MS-CRAWL-0002",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2325,9 +2340,9 @@
       },
       {
         "id": "MS-CRAWL-0003",
-        "title": "Тристаен апартамент под наем в Сандански + паркомясто - Недвижими имоти в Сандански",
+        "title": "Тристаен апартамент под наем в Сандански + паркомясто",
         "path": "/he/properties/MS-CRAWL-0003",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2376,9 +2391,9 @@
       },
       {
         "id": "MS-CRAWL-0004",
-        "title": "Апартамент под наем, ул.Банска 2, гр.Сандански - Недвижими имоти в Сандански",
+        "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
         "path": "/he/properties/MS-CRAWL-0004",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2427,9 +2442,9 @@
       },
       {
         "id": "MS-CRAWL-0005",
-        "title": "Апартамент под наем в гр.Сандански - Недвижими имоти в Сандански",
+        "title": "Апартамент под наем в гр.Сандански",
         "path": "/he/properties/MS-CRAWL-0005",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2478,9 +2493,9 @@
       },
       {
         "id": "MS-CRAWL-0006",
-        "title": "Industrieel gebouw te huur in Sandanski",
+        "title": "Дава под наем промишлена сграда в Сандански",
         "path": "/he/properties/MS-CRAWL-0006",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2529,9 +2544,9 @@
       },
       {
         "id": "MS-CRAWL-0007",
-        "title": "Продава двустаен апартамент в гр.Сандански - Недвижими имоти в Сандански",
+        "title": "Продава двустаен апартамент в гр.Сандански",
         "path": "/he/properties/MS-CRAWL-0007",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2580,9 +2595,9 @@
       },
       {
         "id": "MS-CRAWL-0008",
-        "title": "Двустаен апартамент в центъра на Сандански - наем - Недвижими имоти в Сандански",
+        "title": "Двустаен апартамент в центъра на Сандански – наем",
         "path": "/he/properties/MS-CRAWL-0008",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2631,9 +2646,9 @@
       },
       {
         "id": "MS-CRAWL-0009",
-        "title": "Двустаен апартамент под наем в парка на Сандански - Недвижими имоти в Сандански",
+        "title": "Двустаен апартамент под наем в парка на Сандански",
         "path": "/he/properties/MS-CRAWL-0009",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2682,9 +2697,9 @@
       },
       {
         "id": "MS-CRAWL-0010",
-        "title": "Двустаен апартамент в идеалния център на гр. Сандански - Недвижими имоти в Сандански",
+        "title": "Двустаен апартамент в идеалния център на гр. Сандански",
         "path": "/he/properties/MS-CRAWL-0010",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2733,9 +2748,9 @@
       },
       {
         "id": "MS-CRAWL-0011",
-        "title": "Дългосрочен наем в Парк Хотел Пирин - гр.Сандански - Недвижими имоти в Сандански",
+        "title": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
         "path": "/he/properties/MS-CRAWL-0011",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2784,9 +2799,9 @@
       },
       {
         "id": "MS-CRAWL-0012",
-        "title": "Инвестиционен проект в Сандански - хотел ресторант - Недвижими имоти в Сандански",
+        "title": "Инвестиционен проект в Сандански – хотел ресторант",
         "path": "/he/properties/MS-CRAWL-0012",
-        "review_badge": "source_locale_fallback",
+        "review_badge": null,
         "translation_display": "fallback_source_locale",
         "translation_locale": "he",
         "translation_status": "missing",
@@ -2883,6 +2898,7 @@
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -2994,7 +3010,7 @@
         "id": "MS-CRAWL-0001",
         "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
         "path": "/he/properties/MS-CRAWL-0001",
-        "review_badge": "verified_inventory",
+        "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
         "translation_locale": "he",
         "translation_status": "approved",
@@ -3103,6 +3119,7 @@
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -3213,6 +3230,8 @@
         "minimum_tap_target_px": 44,
         "required_fields": [
           "contact.name",
+          "property.location",
+          "property.type",
           "message"
         ],
         "payload": {
@@ -3296,6 +3315,7 @@
         "tagline": "נכסים למכירה ולהשכרה בסנדנסקי ובהרי פירין, לאורך חוף הים השחור וביוון השכנה — עם משרדים מקומיים ומתווכים שמדברים בשפה שלכם.",
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
+        "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -3460,6 +3480,7 @@
         "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
+        "requestFailed": "The request could not be sent. Please try again.",
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
@@ -3633,6 +3654,7 @@
         "cms": "CMS",
         "translationQueue": "Переводы на проверку",
         "leadInbox": "Входящие заявки",
+        "leadInboxDescription": "Входящие заявки CRM с ответами, проверенными брокером.",
         "leadDetail": "Детали заявки",
         "sellerPipeline": "Воронка продавцов",
         "brokerAssignment": "Назначение брокера",
@@ -3681,6 +3703,10 @@
         "media": "Медиа",
         "quality": "Качество",
         "editor": "Редактор",
+        "editorNamePlaceholder": "Имя редактора",
+        "sourceContent": "Содержание из источника",
+        "propertyDetails": "Данные объекта",
+        "commercialTerms": "Коммерческие условия",
         "saveSourceEdit": "Сохранить правку источника",
         "translationState": "Состояние переводов",
         "qualityStatus": "Качество",
@@ -3872,6 +3898,7 @@
         "cms": "CMS",
         "translationQueue": "Translation review",
         "leadInbox": "Lead inbox",
+        "leadInboxDescription": "CRM lead inbox with broker-reviewed replies.",
         "leadDetail": "Lead detail",
         "sellerPipeline": "Seller pipeline",
         "brokerAssignment": "Broker assignment",
@@ -3920,6 +3947,10 @@
         "media": "Media",
         "quality": "Quality",
         "editor": "Editor",
+        "editorNamePlaceholder": "Editor name",
+        "sourceContent": "Source content",
+        "propertyDetails": "Property details",
+        "commercialTerms": "Commercial terms",
         "saveSourceEdit": "Save source edit",
         "translationState": "Translation state",
         "qualityStatus": "Quality",
