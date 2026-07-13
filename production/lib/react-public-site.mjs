@@ -527,6 +527,8 @@ function SearchBody({ page }) {
   const viewModes = controls.view_modes || [];
   const filterOptions = controls.filter_options || {};
   const activeFilterCount = (controls.active_filter_chips || []).length;
+  const savedSearchFilters = controls.save_search?.payload?.filters || {};
+  const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
   const filterSelect = (idPrefix, name, label, values, optionLabel = (value) => value) =>
     h(
       "div",
@@ -661,9 +663,16 @@ function SearchBody({ page }) {
         "data-save-search-endpoint": controls.save_search?.endpoint || "/api/saved-searches",
         "data-save-search-form": idPrefix,
       },
-      h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
+      h("input", { type: "hidden", name: "locale", defaultValue: page.locale }),
       h("input", { type: "hidden", name: "query", defaultValue: page.search.query || "" }),
-      h(Btn, { type: "submit", variant: "secondary", full: true, iconStart: "bell" }, labels.saveSearch),
+      h("input", { type: "hidden", name: "filters", defaultValue: JSON.stringify(savedSearchFilters) }),
+      h(
+        "div",
+        { className: "sr-fg" },
+        h("label", { className: "hdr", htmlFor: `${idPrefix}-save-search-name` }, labels.name),
+        h("input", { id: `${idPrefix}-save-search-name`, name: "contact.name", required: true, autoComplete: "name" }),
+      ),
+      h(Btn, { type: "submit", variant: "secondary", full: true, iconStart: "bell", disabled: !hasSavedSearchCriteria }, labels.saveSearch),
     );
   const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchForm(idPrefix)];
   const main = h(

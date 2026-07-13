@@ -254,6 +254,8 @@ function renderSearch(page) {
     return `<label>${escapeHtml(label)} <input name="${escapeHtml(name)}" value="${escapeHtml(value)}"></label>`;
   };
   const controls = page.search.controls || {};
+  const savedSearchFilters = controls.save_search?.payload?.filters || {};
+  const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
   const viewModes = (controls.view_modes || [])
     .map(
       (mode) =>
@@ -295,9 +297,11 @@ function renderSearch(page) {
   <form method="${escapeHtml(controls.save_search?.method || "POST")}" action="${escapeHtml(
     controls.save_search?.endpoint || "/api/saved-searches",
   )}" data-save-search-endpoint="${escapeHtml(controls.save_search?.endpoint || "/api/saved-searches")}">
-    <input type="hidden" name="language" value="${escapeHtml(page.locale)}">
+    <input type="hidden" name="locale" value="${escapeHtml(page.locale)}">
     <input type="hidden" name="query" value="${escapeHtml(page.search.query || "")}">
-    <button type="submit">Save search</button>
+    <input type="hidden" name="filters" value="${escapeHtml(JSON.stringify(savedSearchFilters))}">
+    <label>Name <input name="contact.name" required autocomplete="name"></label>
+    <button type="submit"${hasSavedSearchCriteria ? "" : " disabled"}>Save search</button>
   </form>
   <section aria-label="Active filters" data-active-filters="true" data-active-filter-count="${escapeHtml((controls.active_filter_chips || []).length)}">${chips}</section>
   <p>${escapeHtml(page.search.total_matches)} matches</p>

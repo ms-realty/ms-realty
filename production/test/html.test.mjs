@@ -88,6 +88,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /שמירת חיפוש/);
   assert.match(contactHtml, /פעולות קשר/);
   assert.match(searchHtml, /data-save-search-endpoint="\/api\/saved-searches"/);
+  assert.match(searchHtml, /name="locale" value="he"/);
+  assert.match(searchHtml, /name="filters" value="{}"/);
+  assert.match(searchHtml, /name="contact\.name" required/);
   assert.match(searchHtml, /name="offer_type"/);
   assert.match(searchHtml, /name="price_min"/);
   assert.match(searchHtml, /name="bedrooms_min"/);

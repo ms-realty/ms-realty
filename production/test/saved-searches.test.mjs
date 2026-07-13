@@ -24,6 +24,20 @@ test("saved search stores criteria and creates alert task", () => {
     /BCP 47/,
   );
 
+  const nativeFormSearch = createSavedSearch(
+    registry,
+    {
+      language: "he",
+      query: "Sandanski",
+      filters: JSON.stringify({ property_type: "apartment" }),
+      "contact.name": "Noa Levi",
+    },
+    { savedAt: "2026-07-04T00:06:00Z" },
+  );
+  assert.equal(nativeFormSearch.locale, "he");
+  assert.deepEqual(nativeFormSearch.filters, { property_type: "apartment" });
+  assert.equal(nativeFormSearch.contact.name, "Noa Levi");
+
   appendSavedSearch(
     createSavedSearch(
       registry,

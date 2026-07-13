@@ -8,7 +8,7 @@ import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits }
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead } from "./runtime.mjs";
-import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, appendSavedSearch, createSavedSearch } from "./saved-searches.mjs";
+import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, appendSavedSearch, createSavedSearch, normalizeSavedSearchInput } from "./saved-searches.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
@@ -296,9 +296,9 @@ function routeLanguageRequest(body, registry, config) {
   }
 }
 
-function routeSavedSearch(body, registry, seed, config) {
+function routeSavedSearch(request, body, registry, seed, config) {
   try {
-    const input = parseJsonBody(body);
+    const input = normalizeSavedSearchInput(parseBody(request, body));
     const filters = searchFiltersFromObject(input.filters);
     const search = searchRuntimeListings(registry, seed, {
       localeCode: input.locale || registry.source_locale,
@@ -382,7 +382,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
       const registry = loadLocaleRegistry(config.localeRegistryPath);
       const seed = currentSeed(config);
-      return webResponse(routeSavedSearch(body, registry, seed, config));
+      return webResponse(routeSavedSearch(request, body, registry, seed, config));
     }
 
     return webResponse(json(405, { kind: "method_not_allowed" }));

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { normalizeLeadInput } from "./leads.mjs";
 import { resolvePublicLocale } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 
@@ -15,6 +16,25 @@ function normalizePriceSnapshot(snapshot = {}) {
       .map(([id, price]) => [id, Number(price)])
       .filter(([id, price]) => id && Number.isFinite(price)),
   );
+}
+
+function normalizeFilters(filters) {
+  if (filters === undefined || filters === null || filters === "") return {};
+  if (typeof filters !== "string") return filters;
+  try {
+    return JSON.parse(filters);
+  } catch {
+    throw new Error("filters must be valid JSON");
+  }
+}
+
+export function normalizeSavedSearchInput(input = {}) {
+  const normalized = normalizeLeadInput(input);
+  return {
+    ...normalized,
+    locale: normalized.locale || normalized.language,
+    filters: normalizeFilters(normalized.filters),
+  };
 }
 
 export function resetSavedSearches(filePath = DEFAULT_SAVED_SEARCH_LEDGER_PATH) {
@@ -33,34 +53,35 @@ export function readSavedSearches(filePath = DEFAULT_SAVED_SEARCH_LEDGER_PATH) {
 }
 
 export function createSavedSearch(registry, input, { matchCount = 0, savedAt = new Date().toISOString() } = {}) {
-  const query = String(input.query || "").trim();
-  const filters = input.filters || {};
+  const savedSearchInput = normalizeSavedSearchInput(input);
+  const query = String(savedSearchInput.query || "").trim();
+  const filters = savedSearchInput.filters || {};
   if (typeof filters !== "object" || Array.isArray(filters)) throw new Error("filters must be an object");
   if (!query && !Object.keys(filters).length) throw new Error("query or filters are required");
-  if (!input.contact?.name) throw new Error("contact.name is required");
-  const requestedLocale = input.locale || registry.source_locale;
+  if (!savedSearchInput.contact?.name) throw new Error("contact.name is required");
+  const requestedLocale = savedSearchInput.locale || registry.source_locale;
   if (!BCP47.test(requestedLocale)) throw new Error("locale must be a BCP 47 language code");
   const resolved = resolvePublicLocale(registry, requestedLocale);
-  const frequency = input.alertFrequency || "weekly";
+  const frequency = savedSearchInput.alertFrequency || "weekly";
   if (!FREQUENCIES.has(frequency)) throw new Error("alertFrequency must be instant, daily, or weekly");
 
   return {
     saved_at: savedAt,
-    id: input.id || `saved-search-${requestedLocale}-${Date.parse(savedAt)}`,
+    id: savedSearchInput.id || `saved-search-${requestedLocale}-${Date.parse(savedAt)}`,
     requested_locale: requestedLocale,
     locale: resolved.locale.code,
     fallback_used: !resolved.available,
     query,
     filters,
-    contact: input.contact,
+    contact: savedSearchInput.contact,
     match_count: matchCount,
-    price_snapshot: normalizePriceSnapshot(input.priceSnapshot || input.price_snapshot),
+    price_snapshot: normalizePriceSnapshot(savedSearchInput.priceSnapshot || savedSearchInput.price_snapshot),
     alert_frequency: frequency,
     status: "active",
     alert_task: {
-      id: input.taskId || `alert-${requestedLocale}-${Date.parse(savedAt)}`,
+      id: savedSearchInput.taskId || `alert-${requestedLocale}-${Date.parse(savedAt)}`,
       status: "open",
-      owner: input.owner || "broker_en",
+      owner: savedSearchInput.owner || "broker_en",
     },
   };
 }

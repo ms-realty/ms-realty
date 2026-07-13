@@ -219,6 +219,24 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(savedSearchBody.status, "active");
       assert.ok(savedSearchBody.match_count > 0);
 
+      const savedSearchForm = await savedSearchRoute.POST(
+        new Request("https://example.test/api/saved-searches", {
+          method: "POST",
+          headers: { "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            id: "next-api-saved-search-form-test",
+            locale: "he",
+            query: "Sandanski",
+            filters: JSON.stringify({ location: "Sandanski" }),
+            "contact.name": "Noa Levi",
+          }),
+        }),
+      );
+      const savedSearchFormBody = await savedSearchForm.json();
+      assert.equal(savedSearchForm.status, 201);
+      assert.deepEqual(savedSearchFormBody.filters, { location: "Sandanski" });
+      assert.equal(savedSearchFormBody.contact.name, "Noa Levi");
+
       const retiredHermesChatRoute = await import("../../app/api/hermes/chat/route.js");
       const disabledHermesChat = await retiredHermesChatRoute.POST(
         new Request("https://example.test/api/hermes/chat", {
@@ -241,10 +259,10 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   });
   assert.deepEqual(readSellerPipeline(sellerPipelinePath)[0].property, { location: "Sandanski", type: "apartment" });
   assert.equal(readLanguageRequests(languageRequestPath).length, 1);
-  assert.equal(readSavedSearches(savedSearchLedgerPath).length, 1);
+  assert.equal(readSavedSearches(savedSearchLedgerPath).length, 2);
   assert.deepEqual(
     readConsentLedger(consentLedgerPath).map((row) => row.consent_type),
-    ["inquiry_follow_up", "inquiry_follow_up", "language_request", "saved_search_alerts"],
+    ["inquiry_follow_up", "inquiry_follow_up", "language_request", "saved_search_alerts", "saved_search_alerts"],
   );
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "search").length, 1);
   assert.equal(readEventLedger(eventLedgerPath).filter((event) => event.type === "lead_submitted").length, 2);

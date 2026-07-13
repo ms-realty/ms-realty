@@ -2062,6 +2062,33 @@ test("HTTP fallback accepts a URL-encoded seller valuation form", async () => {
   assert.deepEqual(readLeadLedger(leadLedgerPath)[0].property, { location: "Sandanski", type: "apartment" });
 });
 
+test("HTTP fallback accepts a URL-encoded saved-search form", async () => {
+  const savedSearchLedgerPath = tempSavedSearches();
+  const app = createHttpApp({
+    registry: loadLocaleRegistry(),
+    savedSearchLedgerPath,
+    consentLedgerPath: tempConsents(),
+    translationLedgerPath: tempTranslations(),
+    savedAt: "2026-07-13T00:00:00Z",
+  });
+  const response = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/saved-searches",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      locale: "he",
+      query: "",
+      filters: JSON.stringify({ property_type: "apartment" }),
+      "contact.name": "Noa Levi",
+    }).toString(),
+  });
+
+  assert.equal(response.status, 201);
+  assert.deepEqual(response.body.filters, { property_type: "apartment" });
+  assert.equal(response.body.contact.name, "Noa Levi");
+  assert.deepEqual(readSavedSearches(savedSearchLedgerPath)[0].contact, { name: "Noa Levi" });
+});
+
 test("generated HTTP smoke file is valid when present", () => {
   const file = fromRoot("production", "data", "http-smoke.json");
   if (!fs.existsSync(file)) return;

@@ -44,7 +44,7 @@ import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } 
 import { appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
-import { appendSavedSearch, createSavedSearch, readSavedSearches } from "./saved-searches.mjs";
+import { appendSavedSearch, createSavedSearch, normalizeSavedSearchInput, readSavedSearches } from "./saved-searches.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
@@ -1527,7 +1527,7 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
       try {
-        const input = parseJsonBody(request);
+        const input = normalizeSavedSearchInput(parseBody(request));
         const filters = searchFiltersFromObject(input.filters);
         const search = searchRuntimeListings(activeRegistry, currentSeed(), {
           localeCode: input.locale || activeRegistry.source_locale,
