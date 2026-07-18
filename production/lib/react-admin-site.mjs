@@ -79,9 +79,15 @@ const ADMIN_UI_COPY = {
     tourSaving: "Запазване...",
     tourSaved: "360 обиколката е одобрена.",
     tourSaveFailed: "360 обиколката не беше запазена.",
+    replyDraftPending: "Подготвя се чернова само за брокера…",
+    replyDraftReady: "Черновата е готова за преглед от брокер.",
+    replyDraftFailed: "Черновата за брокера не беше подготвена.",
+    replyQueuePending: "Отговорът с одобрение от брокер се поставя на опашка…",
+    replyQueueReady: "Отговорът е поставен на опашка за ръчно изпращане.",
+    replyQueueFailed: "Провереният отговор не можа да бъде поставен на опашка.",
     skipToContent: "Към съдържанието",
     values: {
-      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
+      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
       email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
     },
     statuses: {
@@ -157,9 +163,15 @@ const ADMIN_UI_COPY = {
     tourSaving: "Сохранение...",
     tourSaved: "360 тур одобрен.",
     tourSaveFailed: "Не удалось сохранить 360 тур.",
+    replyDraftPending: "Готовим черновик только для брокера…",
+    replyDraftReady: "Черновик готов к проверке брокером.",
+    replyDraftFailed: "Не удалось подготовить черновик для брокера.",
+    replyQueuePending: "Ответ, одобренный брокером, ставится в очередь…",
+    replyQueueReady: "Ответ поставлен в очередь для ручной отправки.",
+    replyQueueFailed: "Не удалось поставить проверенный ответ в очередь.",
     skipToContent: "К содержанию",
     values: {
-      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
+      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
       email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
     },
     statuses: {
@@ -235,9 +247,15 @@ const ADMIN_UI_COPY = {
     tourSaving: "Saving...",
     tourSaved: "360 tour approved.",
     tourSaveFailed: "Could not save 360 tour.",
+    replyDraftPending: "Preparing broker-only draft…",
+    replyDraftReady: "Draft ready for broker review.",
+    replyDraftFailed: "Could not prepare a broker draft.",
+    replyQueuePending: "Queueing broker-approved reply…",
+    replyQueueReady: "Reply queued for manual sending.",
+    replyQueueFailed: "Could not queue the reviewed reply.",
     skipToContent: "Skip to content",
     values: {
-      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
+      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
       email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber",
     },
     statuses: {
@@ -273,6 +291,16 @@ function adminHref(path, page) {
 
 function currentOperatorId(page, fallback) {
   return page.workspace?.operator_id || fallback;
+}
+
+function formatAdminDateTime(value, locale) {
+  if (!value || Number.isNaN(new Date(value).getTime())) return "";
+  const language = locale === "bg" ? "bg-BG" : locale === "ru" ? "ru-RU" : "en-GB";
+  return new Intl.DateTimeFormat(language, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Sofia",
+  }).format(new Date(value));
 }
 
 /* ============================================================
@@ -482,25 +510,24 @@ function LeadInboxBody({ page }) {
   const ui = workbenchCopy(page);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const repliedLeadIds = new Set((page.replies || []).map((reply) => reply.lead_id || reply.leadId).filter(Boolean));
+  const leadPriority = (lead) => {
+    if (repliedLeadIds.has(lead.lead_id)) return 3;
+    const status = leadSlaById.get(lead.lead_id)?.status || "pending";
+    if (status === "manager_escalation_required") return 0;
+    if (status === "reminder_required") return 1;
+    return 2;
+  };
+  const leads = [...page.leads].sort((left, right) => leadPriority(left) - leadPriority(right));
+  const needsReply = leads.filter((lead) => !repliedLeadIds.has(lead.lead_id));
   const metrics = [
-    [label(copy, "leads", "Leads"), page.summary.leads, "users", "sea"],
-    [label(copy, "repliesQueued", "Replies queued"), page.summary.replies, "send", "ink"],
-    [label(copy, "slaReminders", "SLA reminders"), page.summary.leadSlaReminders, "bell", "sun"],
+    [label(copy, "needsReply", "Needs reply"), needsReply.length, "messages-square", "sea"],
     [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
-    [label(copy, "languageRequests", "Language requests"), page.summary.languageRequests, "languages", "sand"],
     [label(copy, "viewings", "Viewings"), page.summary.viewings, "calendar-check", "success"],
-    [label(copy, "openFollowUps", "Open follow-ups"), page.summary.viewingFollowUpsOpen, "calendar-check", "sea"],
-    [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary.viewingFollowUpsOverdue, "triangle-alert", "brick"],
-    [label(copy, "savedSearches", "Saved searches"), page.summary.savedSearches, "star", "ink"],
     [label(copy, "sellerPipeline", "Seller pipeline"), page.summary.sellerPipeline, "landmark", "sand"],
   ];
   const title = page.workspace.modules.find((module) => module.id === "crm")?.primary_view || "Lead inbox";
   const leadColumns = {
     lead: label(copy, "lead", "Lead"),
-    type: label(copy, "type", "Type"),
-    source: label(copy, "source", "Source"),
-    language: label(copy, "language", "Language"),
-    contact: label(copy, "contact", "Contact"),
     sla: label(copy, "sla", "SLA"),
     escalationDue: label(copy, "escalationDue", "Escalation due"),
     reply: label(copy, "reply", "Reply"),
@@ -512,11 +539,12 @@ function LeadInboxBody({ page }) {
       "data-kind": "admin-lead-inbox",
       "data-react-admin-ui": "lead-inbox",
       "data-admin-workbench": "crm",
-      "data-inbox-layout": "list-detail-action",
+      "data-inbox-layout": "action-queue",
       "data-lead-count": page.summary.leads,
       "data-sla-reminders": page.summary.leadSlaReminders,
       "data-admin-locale": page.workspace.locale,
       "data-interface-locales": page.workspace.interface_locales.join(","),
+      "data-task-led": "true",
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
@@ -524,12 +552,10 @@ function LeadInboxBody({ page }) {
       h(
         "nav",
         { className: "crm-seg adm-lead-tabs", "aria-label": label(copy, "leadQueues", "Lead queues"), "data-lead-queue-tabs": "true" },
-        h("button", { type: "button", "data-lead-filter": "all", "data-on": "1" }, label(copy, "all", "All")),
-        h("button", { type: "button", "data-lead-filter": "needs_reply", "data-on": "0" }, label(copy, "needsReply", "Needs reply")),
+        h("button", { type: "button", "data-lead-filter": "all", "data-on": "0" }, label(copy, "all", "All")),
+        h("button", { type: "button", "data-lead-filter": "needs_reply", "data-on": "1" }, label(copy, "needsReply", "Needs reply")),
         h("button", { type: "button", "data-lead-filter": "sla", "data-on": "0" }, label(copy, "sla", "SLA")),
       ),
-      h(ViewingFollowUpQueue, { page, copy, ui }),
-      h(SellerPipelineQueue, { page, copy, ui }),
       h(
         Panel,
         { title: label(copy, "crmLeads", "CRM leads"), "aria-label": label(copy, "crmLeads", "CRM leads") },
@@ -546,10 +572,6 @@ function LeadInboxBody({ page }) {
                 "tr",
                 null,
                 h("th", { scope: "col" }, leadColumns.lead),
-                h("th", { scope: "col" }, leadColumns.type),
-                h("th", { scope: "col" }, leadColumns.source),
-                h("th", { scope: "col" }, leadColumns.language),
-                h("th", { scope: "col" }, leadColumns.contact),
                 h("th", { scope: "col" }, leadColumns.sla),
                 h("th", { scope: "col" }, leadColumns.escalationDue),
                 h("th", { scope: "col" }, leadColumns.reply),
@@ -558,7 +580,7 @@ function LeadInboxBody({ page }) {
             h(
               "tbody",
               null,
-              ...page.leads.map((lead) => {
+              ...leads.map((lead) => {
                 const leadSla = leadSlaById.get(lead.lead_id);
                 const slaStatus = leadSla?.status || "pending";
                 const brokerId = lead.broker_assignment?.broker_id || "";
@@ -575,6 +597,7 @@ function LeadInboxBody({ page }) {
                     "data-contact-preference": lead.contact_preference,
                     "data-broker-assignment": brokerId,
                     "data-lead-replied": repliedLeadIds.has(lead.lead_id) ? "true" : "false",
+                    hidden: repliedLeadIds.has(lead.lead_id),
                   },
                   h(
                     "td",
@@ -584,14 +607,28 @@ function LeadInboxBody({ page }) {
                       { className: "adm-lead-identity" },
                       h("code", { className: "crm-mono" }, lead.lead_id),
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
+                      h(
+                        "div",
+                        { className: "adm-lead-meta" },
+                        h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type)),
+                        h("span", { className: "adm-lead-meta__source" }, valueText(ui, lead.source)),
+                        h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`),
+                        h("span", { className: "adm-lead-meta__contact" }, valueText(ui, lead.contact_preference)),
+                      ),
                     ),
                   ),
-                  h("td", { "data-lead-column": "type", "data-label": leadColumns.type }, h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type))),
-                  h("td", { className: "crm-tbl__muted", "data-lead-column": "source", "data-label": leadColumns.source }, valueText(ui, lead.source)),
-                  h("td", { "data-lead-column": "language", "data-label": leadColumns.language }, h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`)),
-                  h("td", { className: "crm-tbl__muted", "data-lead-column": "contact", "data-label": leadColumns.contact }, valueText(ui, lead.contact_preference)),
                   h("td", { "data-sla-status": slaStatus, "data-lead-column": "sla", "data-label": leadColumns.sla }, h(StatusPill, { tone: slaTone(slaStatus) }, statusText(ui, slaStatus))),
-                  h("td", { className: "crm-tbl__muted crm-mono", "data-lead-column": "escalation_due", "data-label": leadColumns.escalationDue }, leadSla?.manager_escalation_due_at || ""),
+                  h(
+                    "td",
+                    { className: "crm-tbl__muted", "data-lead-column": "escalation_due", "data-label": leadColumns.escalationDue },
+                    leadSla?.manager_escalation_due_at
+                      ? h(
+                          "time",
+                          { dateTime: leadSla.manager_escalation_due_at, title: leadSla.manager_escalation_due_at },
+                          formatAdminDateTime(leadSla.manager_escalation_due_at, page.workspace?.locale),
+                        )
+                      : "",
+                  ),
                   h(
                     "td",
                     { className: "adm-reply-cell", "data-lead-column": "reply", "data-label": leadColumns.reply },
@@ -604,6 +641,9 @@ function LeadInboxBody({ page }) {
                         "data-hermes-draft-request": "true",
                         "data-hermes-draft-endpoint": "/api/admin/replies/draft",
                         "data-original-language": lead.original_language,
+                        "data-reply-draft-pending": label(copy, "replyDraftPending", "Preparing broker-only draft…"),
+                        "data-reply-draft-success": label(copy, "replyDraftReady", "Draft ready for broker review."),
+                        "data-reply-draft-failure": label(copy, "replyDraftFailed", "Could not prepare a broker draft."),
                       },
                       h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
                       h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
@@ -627,6 +667,9 @@ function LeadInboxBody({ page }) {
                           "data-reply-approval-required": "true",
                           "data-hermes-reply-draft": "broker_review_required",
                           "data-original-language": lead.original_language,
+                          "data-reply-queue-pending": label(copy, "replyQueuePending", "Queueing broker-approved reply…"),
+                          "data-reply-queue-success": label(copy, "replyQueueReady", "Reply queued for manual sending."),
+                          "data-reply-queue-failure": label(copy, "replyQueueFailed", "Could not queue the reviewed reply."),
                         },
                         h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
                         h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
@@ -638,7 +681,18 @@ function LeadInboxBody({ page }) {
                           ` ${label(copy, "showOriginal", "Show original")}`,
                         ),
                         h("label", null, label(copy, "hermesDraftText", "Hermes draft text"), h("textarea", { name: "hermesDraftText" })),
-                        h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, autoComplete: "name" })),
+                        h(
+                          "label",
+                          null,
+                          label(copy, "reviewer", "Reviewer"),
+                          h("input", {
+                            name: "reviewer",
+                            required: true,
+                            autoComplete: "name",
+                            defaultValue: currentOperatorId(page, brokerId),
+                            readOnly: Boolean(page.workspace?.operator_id),
+                          }),
+                        ),
                         h("label", null, label(copy, "reviewedReply", "Reviewed reply"), h("textarea", { name: "reviewedReply", required: true })),
                         h(
                           "button",
@@ -647,6 +701,7 @@ function LeadInboxBody({ page }) {
                         ),
                       ),
                     ),
+                    h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-status": "true" }),
                   ),
                 );
               }),
@@ -654,6 +709,8 @@ function LeadInboxBody({ page }) {
           ),
         ),
       ),
+      h(ViewingFollowUpQueue, { page, copy, ui }),
+      h(SellerPipelineQueue, { page, copy, ui }),
       h(
         Panel,
         { title: label(copy, "languageRequests", "Language requests"), "aria-label": label(copy, "languageRequests", "Language requests") },

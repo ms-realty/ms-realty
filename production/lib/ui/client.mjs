@@ -187,6 +187,50 @@ export const PUBLIC_APP_JS = `(function () {
         for (var j = 0; j < tours.length; j += 1) showTourFallback(tours[j].section);
       });
   }
+  function updateEnquiryContact(form) {
+    var intent = form.elements.intent ? form.elements.intent.value : "inquiry";
+    var channel = form.elements.contact_preference;
+    var contact = form.querySelector("[data-enquiry-contact]");
+    var label = form.querySelector("[data-enquiry-phone-label]");
+    if (!contact) return;
+    var value = intent === "inquiry" && channel ? channel.value : "phone";
+    if (value !== "phone" && value !== "whatsapp" && value !== "viber") value = "phone";
+    var option = channel && channel.options[channel.selectedIndex];
+    var text = intent === "inquiry" && option ? option.textContent : label && label.getAttribute("data-enquiry-default-label");
+    contact.name = "contact." + value;
+    contact.required = true;
+    contact.setAttribute("data-enquiry-validation", intent === "inquiry" ? "reachable_channel" : "phone");
+    if (label && label.firstChild) label.firstChild.nodeValue = text || "";
+  }
+  function configureEnquiryDialog(dialog, lead) {
+    var form = dialog.querySelector("form");
+    if (!form) return;
+    var intent = lead.getAttribute("data-lead-intent") || "inquiry";
+    if (intent === "request_viewing") intent = "viewing";
+    var title = lead.getAttribute("data-lead-title") || lead.textContent.trim();
+    var submitText = lead.getAttribute("data-lead-submit") || title;
+    var titleNode = dialog.querySelector("[data-enquiry-title]");
+    var submit = form.querySelector("[data-enquiry-submit]");
+    var channel = form.elements.contact_preference;
+    var channelGroup = form.querySelector("[data-enquiry-channel-group]");
+    var error = form.querySelector("[data-enquiry-error]");
+    form.hidden = false;
+    dialog.querySelector(".ct-done").hidden = true;
+    if (error) error.remove();
+    if (form.elements.source) form.elements.source.value = lead.getAttribute("data-lead-source") || form.elements.source.value;
+    if (form.elements.intent) form.elements.intent.value = intent;
+    if (form.elements.listingReference) form.elements.listingReference.value = lead.getAttribute("data-listing-reference") || "";
+    if (channel) channel.value = intent === "inquiry" ? lead.getAttribute("data-contact-preference") || "phone" : "phone";
+    if (channelGroup) channelGroup.hidden = intent !== "inquiry";
+    if (titleNode) titleNode.textContent = title;
+    if (submit) {
+      var submitLabel = submit.querySelector("span") || submit;
+      submitLabel.textContent = submitText;
+    }
+    dialog.setAttribute("aria-label", title);
+    form.setAttribute("data-lead-intent", intent);
+    updateEnquiryContact(form);
+  }
   document.addEventListener("click", function (event) {
     var save = event.target.closest("[data-client-save-listing]");
     if (save) {
@@ -210,12 +254,7 @@ export const PUBLIC_APP_JS = `(function () {
     if (lead) {
       var dialog = document.getElementById("mk-enquiry");
       if (!dialog || typeof dialog.showModal !== "function") return;
-      var form = dialog.querySelector("form");
-      form.hidden = false;
-      dialog.querySelector(".ct-done").hidden = true;
-      if (form.elements.source) form.elements.source.value = lead.getAttribute("data-lead-source") || form.elements.source.value;
-      if (form.elements.listingReference) form.elements.listingReference.value = lead.getAttribute("data-listing-reference") || "";
-      if (form.elements.contact_preference) form.elements.contact_preference.value = lead.getAttribute("data-contact-preference") || "";
+      configureEnquiryDialog(dialog, lead);
       dialog.showModal();
       return;
     }
@@ -224,6 +263,10 @@ export const PUBLIC_APP_JS = `(function () {
       var open = document.getElementById("mk-enquiry");
       if (open && open.close) open.close();
     }
+  });
+  document.addEventListener("change", function (event) {
+    var channel = event.target.closest("[data-enquiry-channel]");
+    if (channel && channel.form) updateEnquiryContact(channel.form);
   });
   document.addEventListener("submit", function (event) {
     var form = event.target;
@@ -250,28 +293,32 @@ export const PUBLIC_APP_JS = `(function () {
 
 export const ADMIN_APP_JS = `(function () {
   "use strict";
+  function applyLeadQueueFilter(tabs, filter) {
+    var buttons = tabs.querySelectorAll("button[data-lead-filter]");
+    for (var i = 0; i < buttons.length; i += 1) {
+      buttons[i].setAttribute("data-on", buttons[i].getAttribute("data-lead-filter") === filter ? "1" : "0");
+    }
+    var rows = document.querySelectorAll("[data-lead-row]");
+    for (var j = 0; j < rows.length; j += 1) {
+      var row = rows[j];
+      var slaCell = row.querySelector("[data-sla-status]");
+      var sla = slaCell ? slaCell.getAttribute("data-sla-status") : "";
+      var replied = row.getAttribute("data-lead-replied") === "true";
+      var show = true;
+      if (filter === "needs_reply") show = !replied;
+      if (filter === "sla") show = sla === "reminder_required" || sla === "manager_escalation_required";
+      row.hidden = !show;
+    }
+  }
   function initLeadQueueFilters() {
     var tabs = document.querySelector("[data-lead-queue-tabs]");
     if (!tabs) return;
+    var selected = tabs.querySelector('button[data-lead-filter][data-on="1"]');
+    applyLeadQueueFilter(tabs, selected ? selected.getAttribute("data-lead-filter") : "needs_reply");
     tabs.addEventListener("click", function (event) {
       var button = event.target.closest("button[data-lead-filter]");
       if (!button) return;
-      var buttons = tabs.querySelectorAll("button[data-lead-filter]");
-      for (var i = 0; i < buttons.length; i += 1) {
-        buttons[i].setAttribute("data-on", buttons[i] === button ? "1" : "0");
-      }
-      var filter = button.getAttribute("data-lead-filter");
-      var rows = document.querySelectorAll("[data-lead-row]");
-      for (var j = 0; j < rows.length; j += 1) {
-        var row = rows[j];
-        var slaCell = row.querySelector("[data-sla-status]");
-        var sla = slaCell ? slaCell.getAttribute("data-sla-status") : "";
-        var replied = row.getAttribute("data-lead-replied") === "true";
-        var show = true;
-        if (filter === "needs_reply") show = !replied;
-        if (filter === "sla") show = sla === "reminder_required" || sla === "manager_escalation_required";
-        row.hidden = !show;
-      }
+      applyLeadQueueFilter(tabs, button.getAttribute("data-lead-filter"));
     });
   }
   function tourPayload(form) {
@@ -428,8 +475,89 @@ export const ADMIN_APP_JS = `(function () {
         });
     });
   }
+  function setReplyStatus(form, value, state) {
+    var row = form.closest("[data-lead-row]");
+    var status = row ? row.querySelector("[data-reply-status]") : null;
+    if (!status) return;
+    status.textContent = value;
+    status.setAttribute("data-state", state);
+  }
+  function submitReplyJson(form, payload) {
+    return fetch(form.getAttribute("action"), {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify(payload),
+    }).then(function (response) {
+      return response
+        .json()
+        .catch(function () { return {}; })
+        .then(function (result) {
+          if (!response.ok) throw new Error(result.message || "reply request failed");
+          return result;
+        });
+    });
+  }
+  function initReplyForms() {
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      var isDraft = form.hasAttribute("data-hermes-draft-request");
+      var isApproval = form.hasAttribute("data-reply-approval-required");
+      if (!isDraft && !isApproval) return;
+      event.preventDefault();
+      var submit = form.querySelector('[type="submit"]');
+      var saving = isDraft
+        ? form.getAttribute("data-reply-draft-pending") || "Preparing broker-only draft…"
+        : form.getAttribute("data-reply-queue-pending") || "Queueing broker-approved reply…";
+      var success = isDraft
+        ? form.getAttribute("data-reply-draft-success") || "Draft ready for broker review."
+        : form.getAttribute("data-reply-queue-success") || "Reply queued for manual sending.";
+      var failure = isDraft
+        ? form.getAttribute("data-reply-draft-failure") || "Could not prepare a broker draft."
+        : form.getAttribute("data-reply-queue-failure") || "Could not queue the reviewed reply.";
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setReplyStatus(form, saving, "saving");
+      submitReplyJson(form, tourPayload(form))
+        .then(function (result) {
+          if (isDraft) {
+            if (!result.text || result.broker_approval_required !== true || result.can_send_without_approval === true) {
+              throw new Error("invalid Hermes draft response");
+            }
+            var row = form.closest("[data-lead-row]");
+            var reviewForm = row ? row.querySelector("form[data-reply-approval-required]") : null;
+            if (!reviewForm || !reviewForm.elements.hermesDraftText) throw new Error("review form unavailable");
+            reviewForm.elements.hermesDraftText.value = result.text;
+            var reviewPanel = reviewForm.closest("details");
+            if (reviewPanel) reviewPanel.open = true;
+            setReplyStatus(form, success, "success");
+            return;
+          }
+          if (result.status !== "queued_for_manual_send" || result.broker_approved !== true) {
+            throw new Error("reply was not queued for broker-reviewed manual sending");
+          }
+          var leadRow = form.closest("[data-lead-row]");
+          if (leadRow) {
+            leadRow.setAttribute("data-lead-replied", "true");
+            leadRow.setAttribute("data-reply-queue-status", result.status);
+          }
+          var details = form.closest("details");
+          if (details) details.open = false;
+          setReplyStatus(form, success, "success");
+        })
+        .catch(function () {
+          setReplyStatus(form, failure, "error");
+        })
+        .then(function () {
+          form.removeAttribute("aria-busy");
+          if (submit) submit.disabled = false;
+        });
+    });
+  }
   initLeadQueueFilters();
   initTourEditor();
   initViewingFollowUpForms();
   initSellerPipelineOutcomeForms();
+  initReplyForms();
 })();`;

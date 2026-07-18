@@ -18,6 +18,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
       lead: {
         id: "lead-test",
         source: "website_listing_detail",
+        intent: "inquiry",
         leadType: "buyer",
         listingReference: "MS-CRAWL-0001",
         contact: { email: "Noa@example.com" },
@@ -37,6 +38,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
       lead: {
         id: "lead-duplicate-test",
         source: "website_viewing_request",
+        intent: "viewing",
         leadType: "buyer",
         listingReference: "MS-CRAWL-0001",
         contact: { email: "noa@example.com" },
@@ -51,6 +53,8 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
   assert.equal(rows[0].original_language, "he");
   assert.equal(rows[0].admin_locale, "en");
   assert.equal(rows[0].source, "website_listing_detail");
+  assert.equal(rows[0].intent, "inquiry");
+  assert.equal(rows[1].intent, "viewing");
   assert.equal(rows[0].message_original, "Interested in this property.");
   assert.equal(rows[0].show_original_available, true);
   assert.equal(rows[0].contact_preference, "whatsapp");

@@ -228,8 +228,8 @@ function SiteFooter({ chrome, labels }) {
   );
 }
 
-// Enquiry dialog opened by any [data-endpoint="/api/leads"] button; the client
-// script prefills source/listingReference and submits JSON (see ui/client.mjs).
+// One listing CTA dialog with explicit intent; the client selects the matching
+// title, submit label, source, and validation (see ui/client.mjs).
 function EnquiryDialog({ page, labels, copy }) {
   return h(
     "dialog",
@@ -240,7 +240,7 @@ function EnquiryDialog({ page, labels, copy }) {
       h(
         "div",
         { className: "ct-modal__hd" },
-        h("div", null, h("h2", null, labels.inquiry)),
+        h("div", null, h("h2", { "data-enquiry-title": "true" }, labels.inquiry)),
         h(
           "button",
           { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-enquiry-close": "true", "aria-label": copy.close },
@@ -248,14 +248,31 @@ function EnquiryDialog({ page, labels, copy }) {
         ),
       ),
       h("input", { type: "hidden", name: "source", defaultValue: "website_listing_detail" }),
+      h("input", { type: "hidden", name: "intent", defaultValue: "inquiry" }),
       h("input", { type: "hidden", name: "leadType", defaultValue: "buyer" }),
       h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
       h("input", { type: "hidden", name: "listingReference", defaultValue: "" }),
-      h("input", { type: "hidden", name: "contact_preference", defaultValue: "" }),
       h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
-      h("label", null, labels.phone, h("input", { name: "contact.phone", autoComplete: "tel", inputMode: "tel" })),
+      h(
+        "label",
+        { "data-enquiry-channel-group": "true" },
+        labels.preferredContact,
+        h(
+          "select",
+          { name: "contact_preference", "data-enquiry-channel": "true", defaultValue: "phone" },
+          h("option", { value: "phone" }, labels.phone),
+          h("option", { value: "whatsapp" }, "WhatsApp"),
+          h("option", { value: "viber" }, "Viber"),
+        ),
+      ),
+      h(
+        "label",
+        { "data-enquiry-phone-label": "true", "data-enquiry-default-label": labels.phone },
+        labels.phone,
+        h("input", { name: "contact.phone", required: true, autoComplete: "tel", inputMode: "tel", "data-enquiry-contact": "true" }),
+      ),
       h("label", null, labels.message, h("textarea", { name: "message" })),
-      h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send" }, labels.inquiry),
+      h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send", "data-enquiry-submit": "true" }, labels.inquiry),
     ),
     h(
       "div",
@@ -356,6 +373,9 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
             "data-endpoint": card.actions.inquiry.endpoint,
             "data-listing-reference": card.actions.inquiry.payload.listingReference,
             "data-lead-source": card.actions.inquiry.payload.source,
+            "data-lead-intent": "inquiry",
+            "data-lead-title": card.actions.inquiry.label,
+            "data-lead-submit": card.actions.inquiry.label,
           },
           h("span", null, card.actions.inquiry.label),
         ),
@@ -879,6 +899,9 @@ function ListingBody({ page }) {
           iconStart: primaryIcons[index % primaryIcons.length],
           "data-endpoint": action.endpoint,
           "data-lead-source": action.payload?.source,
+          "data-lead-intent": action.id === "request_viewing" ? "viewing" : action.id,
+          "data-lead-title": action.label,
+          "data-lead-submit": action.label,
           "data-listing-reference": action.payload?.listingReference,
           "data-contact-preference": action.payload?.contact_preference,
         },

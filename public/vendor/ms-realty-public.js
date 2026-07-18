@@ -186,6 +186,50 @@
         for (var j = 0; j < tours.length; j += 1) showTourFallback(tours[j].section);
       });
   }
+  function updateEnquiryContact(form) {
+    var intent = form.elements.intent ? form.elements.intent.value : "inquiry";
+    var channel = form.elements.contact_preference;
+    var contact = form.querySelector("[data-enquiry-contact]");
+    var label = form.querySelector("[data-enquiry-phone-label]");
+    if (!contact) return;
+    var value = intent === "inquiry" && channel ? channel.value : "phone";
+    if (value !== "phone" && value !== "whatsapp" && value !== "viber") value = "phone";
+    var option = channel && channel.options[channel.selectedIndex];
+    var text = intent === "inquiry" && option ? option.textContent : label && label.getAttribute("data-enquiry-default-label");
+    contact.name = "contact." + value;
+    contact.required = true;
+    contact.setAttribute("data-enquiry-validation", intent === "inquiry" ? "reachable_channel" : "phone");
+    if (label && label.firstChild) label.firstChild.nodeValue = text || "";
+  }
+  function configureEnquiryDialog(dialog, lead) {
+    var form = dialog.querySelector("form");
+    if (!form) return;
+    var intent = lead.getAttribute("data-lead-intent") || "inquiry";
+    if (intent === "request_viewing") intent = "viewing";
+    var title = lead.getAttribute("data-lead-title") || lead.textContent.trim();
+    var submitText = lead.getAttribute("data-lead-submit") || title;
+    var titleNode = dialog.querySelector("[data-enquiry-title]");
+    var submit = form.querySelector("[data-enquiry-submit]");
+    var channel = form.elements.contact_preference;
+    var channelGroup = form.querySelector("[data-enquiry-channel-group]");
+    var error = form.querySelector("[data-enquiry-error]");
+    form.hidden = false;
+    dialog.querySelector(".ct-done").hidden = true;
+    if (error) error.remove();
+    if (form.elements.source) form.elements.source.value = lead.getAttribute("data-lead-source") || form.elements.source.value;
+    if (form.elements.intent) form.elements.intent.value = intent;
+    if (form.elements.listingReference) form.elements.listingReference.value = lead.getAttribute("data-listing-reference") || "";
+    if (channel) channel.value = intent === "inquiry" ? lead.getAttribute("data-contact-preference") || "phone" : "phone";
+    if (channelGroup) channelGroup.hidden = intent !== "inquiry";
+    if (titleNode) titleNode.textContent = title;
+    if (submit) {
+      var submitLabel = submit.querySelector("span") || submit;
+      submitLabel.textContent = submitText;
+    }
+    dialog.setAttribute("aria-label", title);
+    form.setAttribute("data-lead-intent", intent);
+    updateEnquiryContact(form);
+  }
   document.addEventListener("click", function (event) {
     var save = event.target.closest("[data-client-save-listing]");
     if (save) {
@@ -209,12 +253,7 @@
     if (lead) {
       var dialog = document.getElementById("mk-enquiry");
       if (!dialog || typeof dialog.showModal !== "function") return;
-      var form = dialog.querySelector("form");
-      form.hidden = false;
-      dialog.querySelector(".ct-done").hidden = true;
-      if (form.elements.source) form.elements.source.value = lead.getAttribute("data-lead-source") || form.elements.source.value;
-      if (form.elements.listingReference) form.elements.listingReference.value = lead.getAttribute("data-listing-reference") || "";
-      if (form.elements.contact_preference) form.elements.contact_preference.value = lead.getAttribute("data-contact-preference") || "";
+      configureEnquiryDialog(dialog, lead);
       dialog.showModal();
       return;
     }
@@ -223,6 +262,10 @@
       var open = document.getElementById("mk-enquiry");
       if (open && open.close) open.close();
     }
+  });
+  document.addEventListener("change", function (event) {
+    var channel = event.target.closest("[data-enquiry-channel]");
+    if (channel && channel.form) updateEnquiryContact(channel.form);
   });
   document.addEventListener("submit", function (event) {
     var form = event.target;

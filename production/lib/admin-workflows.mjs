@@ -512,6 +512,7 @@ export function createCrmInboxItem(registry, input) {
   const lead = createLeadDraft(registry, {
     id: leadInput.id,
     source: leadInput.source,
+    intent: leadInput.intent,
     leadType: leadInput.leadType,
     language: leadInput.language,
     listingReference: leadInput.listingReference,

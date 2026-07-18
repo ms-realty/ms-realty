@@ -3,6 +3,7 @@ import { approvedContentDocumentsForPath, readApprovedCmsContent } from "./appro
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
+import { normalizeBuyerListingLeadInput } from "./leads.mjs";
 import { applyListingEdits } from "./listing-edits.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
@@ -214,14 +215,20 @@ export function searchRuntimeListings(registry, seed, { localeCode, query = "", 
 }
 
 export function submitRuntimeLead(registry, seed, input) {
-  const record = listingRecords(seed).find((candidate) => candidate.id === input.listingReference);
-  if (!record && input.leadType === "buyer") throw new Error("Buyer lead requires a known listingReference");
+  const source = input.source || "website_listing_detail";
+  const hasIntent = String(input.intent || "").trim().length > 0;
+  // ponytail: keep pre-CTA payloads compatible; remove this branch once all callers send intent.
+  const leadInput =
+    input.leadType === "buyer"
+      ? normalizeBuyerListingLeadInput({ ...input, source }, { validateContact: hasIntent })
+      : { ...input, source };
+  const record = listingRecords(seed).find((candidate) => candidate.id === leadInput.listingReference);
+  if (!record && leadInput.leadType === "buyer") throw new Error("Buyer lead requires a known listingReference");
   return createCrmInboxItem(registry, {
-    ...input,
-    source: input.source || "website_listing_detail",
+    ...leadInput,
     listingContext: record
       ? { location: record.facts.location, property_type: record.facts.property_type, offer_type: record.facts.offer_type }
-      : input.listingContext,
+      : leadInput.listingContext,
   });
 }
 

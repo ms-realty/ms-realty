@@ -5,6 +5,7 @@ import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { publicMediaLibrary } from "../lib/media.mjs";
+import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 import {
   renderAdminShell,
@@ -55,6 +56,24 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
       pdf_status: "browser_print_ready",
     },
   );
+});
+
+test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct", () => {
+  const html = renderReactPublicBody(renderListingPage({ registry, listing, localeCode: "ru" }));
+
+  assert.match(html, /id="mk-enquiry"/);
+  assert.match(html, /name="intent" value="inquiry"/);
+  assert.match(html, /data-enquiry-title="true"/);
+  assert.match(html, /data-enquiry-submit="true"/);
+  assert.match(html, /data-enquiry-channel="true"/);
+  assert.match(html, /data-enquiry-contact="true"/);
+  assert.match(html, /data-lead-intent="inquiry"/);
+  assert.match(html, /data-lead-intent="callback"/);
+  assert.match(html, /data-lead-intent="viewing"/);
+  assert.match(html, /data-lead-source="website_listing_detail"/);
+  assert.match(html, /data-lead-source="website_callback_request"/);
+  assert.match(html, /data-lead-source="website_viewing_request"/);
+  assert.doesNotMatch(html, /\/api\/admin\/(viewings|replies)/);
 });
 
 test("approved broker contact data enables direct listing contact links", () => {

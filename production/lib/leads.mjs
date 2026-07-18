@@ -1,6 +1,12 @@
 import { getLocale, adminLocales } from "./locales.mjs";
 
 const CONTACT_PREFERENCES = new Set(["phone", "viber", "whatsapp", "email"]);
+export const BUYER_LISTING_SOURCE_INTENTS = Object.freeze({
+  website_listing_detail: "inquiry",
+  website_search_result: "inquiry",
+  website_callback_request: "callback",
+  website_viewing_request: "viewing",
+});
 const LOCAL_LOCATIONS = ["Sandanski", "Petrich", "Bansko", "Blagoevgrad", "Sveti Vlas", "Sunny Beach", "Melnik"];
 const PROPERTY_TYPES = ["apartment", "house", "villa", "land", "commercial", "hotel", "office", "industrial"];
 const DEFAULT_BROKER_PROFILES = [
@@ -54,6 +60,31 @@ export function normalizeLeadInput(input = {}) {
   return { ...input, contact, property };
 }
 
+function hasReachableContact(contact = {}) {
+  return ["email", "phone", "whatsapp", "viber"].some((field) => Boolean(String(contact[field] || "").trim()));
+}
+
+export function normalizeBuyerListingLeadInput(input = {}, { validateContact = true } = {}) {
+  const leadInput = normalizeLeadInput(input);
+  const source = String(leadInput.source || "").trim();
+  const intent = BUYER_LISTING_SOURCE_INTENTS[source];
+  if (!intent) throw new Error("Buyer listing source must be a known canonical source");
+
+  const submittedIntent = String(leadInput.intent || "").trim().toLowerCase();
+  if (submittedIntent && submittedIntent !== intent) throw new Error("Buyer listing intent must match source");
+
+  if (validateContact) {
+    if (intent === "inquiry" && !hasReachableContact(leadInput.contact)) {
+      throw new Error("Buyer inquiry requires a reachable contact channel");
+    }
+    if ((intent === "callback" || intent === "viewing") && !String(leadInput.contact.phone || "").trim()) {
+      throw new Error(`Buyer ${intent} requires a phone`);
+    }
+  }
+
+  return { ...leadInput, source, intent };
+}
+
 export function createLeadDraft(registry, input) {
   const leadInput = normalizeLeadInput(input);
   if (!leadInput.source || !leadInput.leadType || !leadInput.contact?.name) {
@@ -63,6 +94,7 @@ export function createLeadDraft(registry, input) {
   return {
     id: leadInput.id || `lead-draft-${Date.now()}`,
     source: leadInput.source,
+    intent: leadInput.intent || null,
     leadType: leadInput.leadType,
     listingReference: leadInput.listingReference || null,
     contact: leadInput.contact,

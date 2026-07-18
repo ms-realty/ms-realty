@@ -610,10 +610,14 @@ function addLocale(registry, input, config) {
 }
 
 function appendReply(input, config) {
-  const reply = appendReviewedReply(readLeadLedger(config.leadLedgerPath), reviewedReplyInput(input), {
-    filePath: config.replyOutboxPath,
-    reviewedAt: config.reviewedAt,
-  });
+  const reply = appendReviewedReply(
+    readLeadLedger(config.leadLedgerPath),
+    bindAuthenticatedOperator(reviewedReplyInput(input), config.adminPrincipal, ["reviewer"]),
+    {
+      filePath: config.replyOutboxPath,
+      reviewedAt: config.reviewedAt,
+    },
+  );
   recordAudit(
     {
       action: "reply_approved",

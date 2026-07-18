@@ -50,6 +50,7 @@ export function appendLead(
     id: lead.id,
     lead_id: lead.lead?.id,
     source: lead.lead?.source,
+    intent: lead.lead?.intent || null,
     lead_type: lead.lead?.leadType,
     listing_reference: lead.lead?.listingReference || null,
     property: lead.lead?.property || {},

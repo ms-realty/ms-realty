@@ -271,7 +271,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-kind="admin-lead-inbox"/);
       assert.match(inboxHtml, /data-react-admin-ui="lead-inbox"/);
       assert.match(inboxHtml, /data-admin-workbench="crm"/);
-      assert.match(inboxHtml, /data-inbox-layout="list-detail-action"/);
+      assert.match(inboxHtml, /data-inbox-layout="action-queue"/);
+      assert.match(inboxHtml, /data-task-led="true"/);
       assert.match(inboxHtml, /data-lead-queue-tabs="true"/);
       assert.match(inboxHtml, /data-lead-row="true"/);
       assert.match(inboxHtml, /data-original-language="he"/);
@@ -280,6 +281,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-reply-approval-required="true"/);
       assert.match(inboxHtml, /data-hermes-reply-draft="broker_review_required"/);
       assert.match(inboxHtml, /name="hermesDraftText"/);
+      assert.match(inboxHtml, /data-reply-status="true"/);
       assert.equal(inboxHtml.includes('name="hermesDraft" value="true"'), false);
       assert.match(inboxHtml, /data-show-original-toggle="true"/);
       assert.match(inboxHtml, /he -&gt; en/);
@@ -289,6 +291,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /scope="col"/);
       assert.match(inboxHtml, /data-lead-column="reply"/);
       assert.match(inboxHtml, /data-label="Ответ"/);
+      assert.match(inboxHtml, /data-lead-column="escalation_due"[^>]*><time dateTime="[^"]+" title="[^"]+">/);
 
       const russianEditor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
@@ -1495,6 +1498,87 @@ test("Next admin mutations require an attributable production operator", async (
       { config },
     );
     assert.equal(credentialWrite.status, 201);
+    assert.equal(readAuditLog(auditLogPath).at(-1).actor, "operations_lead");
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
+test("Next admin replies bind the named production operator before queueing", async () => {
+  const leadLedgerPath = tempJsonl("app-admin-operator-reply-leads");
+  const replyOutboxPath = tempJsonl("app-admin-operator-reply-outbox");
+  const auditLogPath = tempJsonl("app-admin-operator-reply-audit");
+  fs.appendFileSync(
+    leadLedgerPath,
+    `${JSON.stringify({
+      lead_id: "next-operator-reply-lead",
+      listing_reference: "MS-CRAWL-0001",
+      original_language: "ru",
+      message_original: "Please contact me about this listing.",
+    })}\n`,
+  );
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    process.env.MS_REALTY_ADMIN_TOKEN = "next-shared-admin-token";
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "operations_lead", token: "next-operations-token-0123456789" },
+    ]);
+    const config = appAdminConfigFromEnv({
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
+      MS_REALTY_REPLY_OUTBOX_PATH: replyOutboxPath,
+      MS_REALTY_REVIEWED_AT: "2026-07-18T18:00:00Z",
+    });
+    const headers = {
+      authorization: "Bearer next-operations-token-0123456789",
+      "content-type": "application/json",
+    };
+
+    const mismatched = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/replies", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          leadId: "next-operator-reply-lead",
+          language: "ru",
+          approved: true,
+          reviewer: "someone_else",
+          reviewedReply: "Broker-reviewed reply.",
+        }),
+      }),
+      { config },
+    );
+    assert.equal(mismatched.status, 400);
+    assert.match((await mismatched.json()).message, /Submitted reviewer must match the authenticated operator/);
+
+    const queued = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/replies", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          leadId: "next-operator-reply-lead",
+          language: "ru",
+          approved: true,
+          reviewedReply: "Broker-reviewed reply.",
+        }),
+      }),
+      { config },
+    );
+    const queuedBody = await queued.json();
+    assert.equal(queued.status, 201);
+    assert.equal(queuedBody.status, "queued_for_manual_send");
+    assert.equal(queuedBody.broker_approved, true);
+    assert.equal(queuedBody.reviewer, "operations_lead");
     assert.equal(readAuditLog(auditLogPath).at(-1).actor, "operations_lead");
   } finally {
     for (const [key, value] of Object.entries(previous)) {

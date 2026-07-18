@@ -133,10 +133,12 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             id: "next-api-lead-test",
+            source: "website_listing_detail",
+            intent: "inquiry",
             leadType: "buyer",
             language: "he",
             listingReference: "MS-CRAWL-0001",
-            contact: { name: "Noa Levi" },
+            contact: { name: "Noa Levi", whatsapp: "+359880000000" },
             contact_preference: "whatsapp",
             message: "Interested in this property.",
           }),
@@ -146,6 +148,8 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(lead.status, 201);
       assert.equal(lead.headers.get("cache-control"), "no-store");
       assert.equal(leadBody.lead.listingReference, "MS-CRAWL-0001");
+      assert.equal(leadBody.lead.intent, "inquiry");
+      assert.equal(leadBody.ledger.intent, "inquiry");
 
       const sellerFormLead = await leadRoute.POST(
         new Request("https://example.test/api/leads", {
@@ -253,6 +257,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   );
 
   assert.equal(readLeadLedger(leadLedgerPath).length, 2);
+  assert.equal(readLeadLedger(leadLedgerPath).find((row) => row.lead_id === "next-api-lead-test").intent, "inquiry");
   assert.deepEqual(readLeadLedger(leadLedgerPath).find((row) => row.lead_id === "next-api-seller-form-test").property, {
     location: "Sandanski",
     type: "apartment",

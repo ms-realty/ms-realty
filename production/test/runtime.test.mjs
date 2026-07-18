@@ -304,6 +304,7 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
   });
 
   assert.equal(lead.lead.source, "website_viewing_request");
+  assert.equal(lead.lead.intent, "viewing");
   assert.equal(lead.lead.leadType, "buyer");
   assert.equal(lead.lead.listingReference, "MS-CRAWL-0001");
   assert.equal(lead.original_language, "he");
@@ -311,6 +312,91 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
   assert.equal(lead.contact_preference, "phone");
   assert.equal(lead.broker_assignment.broker_id, "broker_international");
   assert.equal(lead.hermes_reply_draft.broker_approval_required, true);
+});
+
+test("runtime canonicalizes explicit listing CTA intents and validates their contact channels", () => {
+  const inquiry = submitRuntimeLead(registry, seed, {
+    id: "runtime-inquiry-intent-test",
+    source: "website_listing_detail",
+    intent: "inquiry",
+    leadType: "buyer",
+    language: "ru",
+    listingReference: "MS-CRAWL-0001",
+    contact: { name: "Nina", whatsapp: "+359880000000" },
+    contact_preference: "whatsapp",
+  });
+  const callback = submitRuntimeLead(registry, seed, {
+    id: "runtime-callback-intent-test",
+    source: "website_callback_request",
+    intent: "callback",
+    leadType: "buyer",
+    language: "ru",
+    listingReference: "MS-CRAWL-0001",
+    contact: { name: "Nina", phone: "+359880000000" },
+    contact_preference: "phone",
+  });
+  const viewing = submitRuntimeLead(registry, seed, {
+    id: "runtime-viewing-intent-test",
+    source: "website_viewing_request",
+    intent: "viewing",
+    leadType: "buyer",
+    language: "ru",
+    listingReference: "MS-CRAWL-0001",
+    contact: { name: "Nina", phone: "+359880000000" },
+    contact_preference: "phone",
+  });
+
+  assert.deepEqual([inquiry.lead.intent, callback.lead.intent, viewing.lead.intent], ["inquiry", "callback", "viewing"]);
+  assert.deepEqual(
+    [inquiry.lead.source, callback.lead.source, viewing.lead.source],
+    ["website_listing_detail", "website_callback_request", "website_viewing_request"],
+  );
+  assert.equal(viewing.hermes_reply_draft.can_send_without_approval, false);
+  assert.equal("viewing" in viewing, false);
+  assert.throws(
+    () =>
+      submitRuntimeLead(registry, seed, {
+        source: "website_viewing_request",
+        intent: "callback",
+        leadType: "buyer",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Nina", phone: "+359880000000" },
+      }),
+    /intent must match source/,
+  );
+  assert.throws(
+    () =>
+      submitRuntimeLead(registry, seed, {
+        source: "website_callback_request",
+        intent: "callback",
+        leadType: "buyer",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Nina" },
+      }),
+    /requires a phone/,
+  );
+  assert.throws(
+    () =>
+      submitRuntimeLead(registry, seed, {
+        source: "website_listing_detail",
+        intent: "inquiry",
+        leadType: "buyer",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Nina" },
+      }),
+    /reachable contact channel/,
+  );
+  assert.throws(
+    () =>
+      submitRuntimeLead(registry, seed, {
+        source: "website_untrusted",
+        intent: "inquiry",
+        leadType: "buyer",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Nina", phone: "+359880000000" },
+      }),
+    /known canonical source/,
+  );
 });
 
 test("runtime contact callback lead stays routed through broker-approved CRM flow", () => {
