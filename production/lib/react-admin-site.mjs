@@ -86,6 +86,9 @@ const ADMIN_UI_COPY = {
     replyQueueReady: "Отговорът е поставен на опашка за ръчно изпращане.",
     replyQueueFailed: "Провереният отговор не можа да бъде поставен на опашка.",
     skipToContent: "Към съдържанието",
+    auditActions: {
+      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
+    },
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
       email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
@@ -170,6 +173,9 @@ const ADMIN_UI_COPY = {
     replyQueueReady: "Ответ поставлен в очередь для ручной отправки.",
     replyQueueFailed: "Не удалось поставить проверенный ответ в очередь.",
     skipToContent: "К содержанию",
+    auditActions: {
+      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
+    },
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
       email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
@@ -254,6 +260,9 @@ const ADMIN_UI_COPY = {
     replyQueueReady: "Reply queued for manual sending.",
     replyQueueFailed: "Could not queue the reviewed reply.",
     skipToContent: "Skip to content",
+    auditActions: {
+      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
+    },
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
       email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber",
@@ -409,7 +418,10 @@ function PageHeader({ title, subtitle, children }) {
 }
 
 const NAV_ROUTES = [
+  { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today" },
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox" },
+  { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings" },
+  { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity" },
   { id: "listing_editor", module: "cms", path: "/admin/listings/edit", icon: "building-2", kind: "admin_listing_editor" },
   { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review" },
 ];
@@ -421,24 +433,31 @@ function Sidebar({ page }) {
     const module = modules.find((entry) => entry.id === moduleId);
     return module?.screens?.find((screen) => screen.id === screenId)?.label || fallback;
   };
+  const route = (id) => NAV_ROUTES.find((entry) => entry.id === id);
   const groups = [
     {
       label: modules.find((module) => module.id === "crm")?.label || "CRM",
       items: [
         {
-          ...NAV_ROUTES[0],
+          ...route("today"),
+          label: screenLabel("crm", "today", "Today"),
+        },
+        {
+          ...route("lead_inbox"),
           label: screenLabel("crm", "lead_inbox", "Lead inbox"),
           badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
         },
+        { ...route("viewings"), label: screenLabel("crm", "viewings", "Viewings") },
+        { ...route("activity"), label: screenLabel("crm", "activity", "Activity") },
       ],
     },
     {
       label: modules.find((module) => module.id === "cms")?.label || "CMS",
-      items: [{ ...NAV_ROUTES[1], label: screenLabel("cms", "listing_editor", "Listing editor") }],
+      items: [{ ...route("listing_editor"), label: screenLabel("cms", "listing_editor", "Listing editor") }],
     },
     {
       label: label(copy, "launchEvidence", "Launch"),
-      items: [{ ...NAV_ROUTES[2], label: label(copy, "migrationReview", "Migration review") }],
+      items: [{ ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") }],
     },
   ];
   return h(
@@ -449,7 +468,7 @@ function Sidebar({ page }) {
       { className: "crm-sb__brand" },
       h(
         "a",
-        { href: adminHref("/admin/leads", page), "aria-label": "MS Realty" },
+        { href: adminHref("/admin/today", page), "aria-label": "MS Realty" },
         h("img", { src: LOGO_SRC_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
       ),
     ),
@@ -531,6 +550,235 @@ function adminShell(page, { title, mainAttrs, children }) {
   ];
 }
 
+function leadQueueState(page) {
+  const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
+  const repliedLeadIds = new Set((page.replies || []).map((reply) => reply.lead_id || reply.leadId).filter(Boolean));
+  const priority = (lead) => {
+    if (repliedLeadIds.has(lead.lead_id)) return 4;
+    const status = leadSlaById.get(lead.lead_id)?.status || "pending";
+    if (status === "manager_escalation_required") return 0;
+    if (status === "reminder_required") return 1;
+    return 2;
+  };
+  return {
+    leadSlaById,
+    repliedLeadIds,
+    pending: [...(page.leads || [])]
+      .filter((lead) => !repliedLeadIds.has(lead.lead_id))
+      .sort((left, right) => priority(left) - priority(right)),
+  };
+}
+
+function queueTone(status) {
+  if (status === "ok") return "success";
+  if (status?.includes("escalation")) return "brick";
+  return "sun";
+}
+
+function TodayBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const queue = leadQueueState(page);
+  const openTasks = (page.summary?.viewingFollowUpsOpen || 0) + (page.summary?.sellerPipelineOpen || 0);
+  const metrics = [
+    [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
+    [label(copy, "managerEscalations", "Manager escalations"), page.summary?.leadSlaManagerEscalations || 0, "triangle-alert", "brick"],
+    [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary?.viewingFollowUpsOverdue || 0, "bell", "sun"],
+    [label(copy, "openTasks", "Open tasks"), openTasks, "check-circle-2", "success"],
+  ];
+  const title = label(copy, "today", "Today");
+  const inboxHref = adminHref("/admin/leads", page);
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-today",
+      "data-react-admin-ui": "today",
+      "data-admin-workbench": "crm",
+      "data-task-led": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: inboxHref }, h(Icon, { name: "inbox", size: 16 }), h("span", null, label(copy, "viewLeadInbox", "Open lead inbox"))),
+      ),
+      h(StatGrid, { metrics }),
+      h(
+        Panel,
+        { title: label(copy, "priorityLeads", "Priority leads"), "data-priority-leads": "true" },
+        queue.pending.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...queue.pending.map((lead) => {
+                const sla = queue.leadSlaById.get(lead.lead_id);
+                const status = sla?.status || "pending";
+                return h(
+                  "li",
+                  { key: lead.lead_id, "data-priority-lead": lead.lead_id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("code", { className: "crm-mono" }, lead.lead_id),
+                    h("strong", null, [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source)),
+                    leadContactActions(lead, ui),
+                    requestDetailsText(lead) ? h("small", { className: "adm-lead-context" }, requestDetailsText(lead)) : null,
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h(StatusPill, { tone: queueTone(status) }, statusText(ui, status)),
+                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}` }, label(copy, "reply", "Reply")),
+                  ),
+                );
+              }),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noPriorityLeads", "No leads are waiting for a reply.")),
+      ),
+      h(ViewingFollowUpQueue, { page, copy, ui }),
+      h(SellerPipelineQueue, { page, copy, ui }),
+    ],
+  });
+}
+
+function ViewingsBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "viewingsWorkspace", "Viewings and follow-ups");
+  const viewings = [...(page.viewings || [])].sort((left, right) => Date.parse(left.starts_at) - Date.parse(right.starts_at));
+  const metrics = [
+    [label(copy, "viewings", "Viewings"), page.summary?.viewings || 0, "calendar-days", "sea"],
+    [label(copy, "openFollowUps", "Open follow-ups"), page.summary?.viewingFollowUpsOpen || 0, "calendar-check", "sun"],
+    [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary?.viewingFollowUpsOverdue || 0, "triangle-alert", "brick"],
+    [statusText(ui, "completed"), page.viewingFollowUpQueue?.summary?.completed || 0, "check-circle-2", "success"],
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-viewings",
+      "data-react-admin-ui": "viewings",
+      "data-admin-workbench": "crm",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/viewings.ics", download: true }, h(Icon, { name: "download", size: 16 }), h("span", null, label(copy, "downloadCalendar", "Download calendar"))),
+      ),
+      h(StatGrid, { metrics }),
+      h(
+        Panel,
+        { title: label(copy, "viewings", "Viewings"), "data-viewing-schedule": "true" },
+        viewings.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...viewings.map((viewing) =>
+                h(
+                  "li",
+                  { key: viewing.id, "data-viewing-schedule-row": viewing.id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("code", { className: "crm-mono" }, viewing.id),
+                    h("strong", null, viewing.listing_reference || viewing.lead_id),
+                    h("small", { className: "adm-lead-context" }, `${label(copy, "broker", "Broker")}: ${viewing.broker}`),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h(StatusPill, { tone: viewing.status === "booked" ? "sea" : "success" }, statusText(ui, viewing.status)),
+                    h("time", { dateTime: viewing.starts_at, title: viewing.starts_at }, formatAdminDateTime(viewing.starts_at, page.workspace.locale)),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noUpcomingViewings", "No upcoming viewings.")),
+      ),
+      h(ViewingFollowUpQueue, { page, copy, ui }),
+    ],
+  });
+}
+
+function auditMetadataValue(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+function ActivityBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "activity", "Activity history");
+  const metrics = [
+    [label(copy, "totalActions", "Recorded actions"), page.summary?.totalActions || 0, "list", "ink"],
+    [label(copy, "activeOperators", "Active operators"), page.summary?.activeOperators || 0, "users", "sea"],
+    [label(copy, "object", "Object"), page.summary?.objectTypes || 0, "table-properties", "sand"],
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-activity",
+      "data-react-admin-ui": "activity",
+      "data-admin-workbench": "crm",
+      "data-privacy-safe": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(StatGrid, { metrics }),
+      h(
+        Panel,
+        { title: label(copy, "activityLog", "Action log"), "data-audit-log": "true" },
+        page.auditLog.length
+          ? h(
+              "ol",
+              { className: "adm-activity" },
+              ...page.auditLog.map((row, index) =>
+                h(
+                  "li",
+                  { key: `${row.recorded_at}-${row.action}-${row.object_id}-${index}`, "data-audit-action": row.action },
+                  h("span", { className: "adm-activity__icon", "aria-hidden": "true" }, h(Icon, { name: "check", size: 16 })),
+                  h(
+                    "div",
+                    { className: "adm-activity__body" },
+                    h("strong", null, ui.auditActions?.[row.action] || valueText(ui, row.action)),
+                    h(
+                      "div",
+                      { className: "adm-activity__meta" },
+                      h("span", null, `${label(copy, "actor", "Operator")}: ${row.actor}`),
+                      h("span", null, `${label(copy, "object", "Object")}: ${valueText(ui, row.object_type)} · ${row.object_id}`),
+                      row.locale ? h("span", { className: "crm-lang" }, row.locale.toUpperCase()) : null,
+                      h("time", { dateTime: row.recorded_at, title: row.recorded_at }, formatAdminDateTime(row.recorded_at, page.workspace.locale)),
+                    ),
+                    Object.keys(row.metadata || {}).length
+                      ? h(
+                          "details",
+                          { className: "adm-activity__details" },
+                          h("summary", null, label(copy, "details", "Details")),
+                          h(
+                            "dl",
+                            null,
+                            ...Object.entries(row.metadata).flatMap(([key, value]) => [
+                              h("dt", { key: `${key}-term` }, valueText(ui, key)),
+                              h("dd", { key: `${key}-value` }, auditMetadataValue(value)),
+                            ]),
+                          ),
+                        )
+                      : null,
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noActivity", "No actions have been recorded yet.")),
+      ),
+    ],
+  });
+}
+
 /* ============================================================
    Lead inbox (ui_kits/crm Dashboard + Messages patterns)
    ============================================================ */
@@ -555,7 +803,7 @@ function LeadInboxBody({ page }) {
     [label(copy, "viewings", "Viewings"), page.summary.viewings, "calendar-check", "success"],
     [label(copy, "sellerPipeline", "Seller pipeline"), page.summary.sellerPipeline, "landmark", "sand"],
   ];
-  const title = page.workspace.modules.find((module) => module.id === "crm")?.primary_view || "Lead inbox";
+  const title = label(copy, "leadInbox", "Lead inbox");
   const leadColumns = {
     lead: label(copy, "lead", "Lead"),
     sla: label(copy, "sla", "SLA"),
@@ -620,6 +868,7 @@ function LeadInboxBody({ page }) {
                   "tr",
                   {
                     key: lead.lead_id,
+                    id: `lead-${lead.lead_id}`,
                     "data-lead-row": "true",
                     "data-lead-id": lead.lead_id,
                     "data-lead-type": lead.lead_type,
@@ -1569,7 +1818,10 @@ function MigrationReviewBody({ page }) {
 }
 
 export function renderReactAdminBody(page) {
+  if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
+  if (page.kind === "admin_viewings") return renderStaticElement(h(ViewingsBody, { page }));
+  if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
   if (page.kind === "admin_migration_review") return renderStaticElement(h(MigrationReviewBody, { page }));
   return "";

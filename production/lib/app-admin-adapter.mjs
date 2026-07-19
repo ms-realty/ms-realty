@@ -367,6 +367,67 @@ function leadInboxPayload(registry, url, config) {
   });
 }
 
+function operationalQueuePayload(registry, url, config, { kind, path, titleKey, descriptionKey }) {
+  const payload = leadInboxPayload(registry, url, config);
+  const copy = payload.workspace.copy;
+  return {
+    ...payload,
+    kind,
+    path,
+    canonical: path,
+    metadata: {
+      title: `${copy[titleKey]} | MS Realty`,
+      description: copy[descriptionKey],
+      robots: "noindex,nofollow",
+    },
+  };
+}
+
+function todayPayload(registry, url, config) {
+  return operationalQueuePayload(registry, url, config, {
+    kind: "admin_today",
+    path: "/admin/today",
+    titleKey: "today",
+    descriptionKey: "todayDescription",
+  });
+}
+
+function viewingsPayload(registry, url, config) {
+  return operationalQueuePayload(registry, url, config, {
+    kind: "admin_viewings",
+    path: "/admin/viewings",
+    titleKey: "viewingsWorkspace",
+    descriptionKey: "viewingsDescription",
+  });
+}
+
+function activityPayload(registry, url, config) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
+  const auditLog = readAuditLog(config.auditLogPath).toReversed();
+  return {
+    kind: "admin_activity",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/activity",
+    canonical: "/admin/activity",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.activity} | MS Realty`,
+      description: workspace.copy.activityDescription,
+      robots: "noindex,nofollow",
+    },
+    workspace: config.adminPrincipal?.id ? { ...workspace, operator_id: config.adminPrincipal.id } : workspace,
+    auditLog,
+    summary: {
+      totalActions: auditLog.length,
+      activeOperators: new Set(auditLog.map((row) => row.actor)).size,
+      objectTypes: new Set(auditLog.map((row) => row.object_type)).size,
+    },
+  };
+}
+
 function listingEditorPayload(registry, url, config) {
   const edits = readListingEdits(config.listingEditLedgerPath);
   return renderAdminListingEditorPayload(
@@ -1158,8 +1219,14 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   try {
     const url = new URL(request.url, "http://localhost");
     const registry = loadLocaleRegistry(config.localeRegistryPath);
+    if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(todayPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(viewingsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/viewings") return jsonResponse(200, viewingsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/activity") return htmlResponse(activityPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/activity") return jsonResponse(200, activityPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       return htmlResponse(listingEditorPayload(registry, url, config));
     }

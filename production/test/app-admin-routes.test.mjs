@@ -226,8 +226,15 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const viewingFollowUpRoute = await import("../../app/api/admin/viewings/follow-up/route.js");
       const sellerPipelineOutcomeRoute = await import("../../app/api/admin/seller-pipeline/outcome/route.js");
       const viewingCalendarRoute = await import("../../app/api/admin/viewings.ics/route.js");
+      const adminRootRoute = await import("../../app/admin/route.js");
+      const todayRoute = await import("../../app/admin/today/route.js");
+      const todayJsonRoute = await import("../../app/api/admin/today/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
       const leadInboxJsonRoute = await import("../../app/api/admin/leads/route.js");
+      const viewingsPageRoute = await import("../../app/admin/viewings/route.js");
+      const viewingsJsonRoute = await import("../../app/api/admin/viewings/route.js");
+      const activityRoute = await import("../../app/admin/activity/route.js");
+      const activityJsonRoute = await import("../../app/api/admin/activity/route.js");
       const listingEditorRoute = await import("../../app/admin/listings/edit/route.js");
       const migrationReviewHtmlRoute = await import("../../app/admin/migration/review/route.js");
       const migrationReviewRoute = await import("../../app/api/admin/migration/review/route.js");
@@ -254,6 +261,37 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(unauthorized.headers.get("www-authenticate"), 'Bearer realm="ms-realty-admin"');
 
       const auth = { authorization: "Bearer next-admin-test" };
+      const adminRoot = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru"));
+      assert.equal(adminRoot.status, 307);
+      assert.equal(adminRoot.headers.get("location"), "https://example.test/admin/today?locale=ru");
+
+      const todayUnauthorized = await todayRoute.GET(new Request("https://example.test/admin/today?locale=ru"));
+      assert.equal(todayUnauthorized.status, 401);
+      const today = await todayRoute.GET(new Request("https://example.test/admin/today?locale=ru", { headers: auth }));
+      const todayHtml = await today.text();
+      assert.equal(today.status, 200);
+      assert.equal(today.headers.get("cache-control"), "no-store");
+      assert.match(todayHtml, /data-kind="admin-today"/);
+      assert.match(todayHtml, /data-react-admin-ui="today"/);
+      assert.match(todayHtml, /data-priority-leads="true"/);
+      assert.match(todayHtml, /data-priority-lead="next-admin-lead-test"/);
+      assert.match(todayHtml, /href="\/admin\/leads\?locale=ru#lead-next-admin-lead-test"/);
+      assert.match(todayHtml, /href="\/admin\/viewings\?locale=ru"/);
+      assert.match(todayHtml, /href="\/admin\/activity\?locale=ru"/);
+      const todayJson = await todayJsonRoute.GET(new Request("https://example.test/api/admin/today?locale=ru", { headers: auth }));
+      const todayJsonBody = await todayJson.json();
+      assert.equal(todayJsonBody.kind, "admin_today");
+      assert.equal(todayJsonBody.summary.leads, 1);
+
+      const viewingsPage = await viewingsPageRoute.GET(new Request("https://example.test/admin/viewings?locale=ru", { headers: auth }));
+      const viewingsHtml = await viewingsPage.text();
+      assert.equal(viewingsPage.status, 200);
+      assert.match(viewingsHtml, /data-kind="admin-viewings"/);
+      assert.match(viewingsHtml, /href="\/api\/admin\/viewings\.ics" download/);
+      assert.match(viewingsHtml, /Нет предстоящих просмотров/);
+      const viewingsJson = await viewingsJsonRoute.GET(new Request("https://example.test/api/admin/viewings?locale=ru", { headers: auth }));
+      assert.equal((await viewingsJson.json()).kind, "admin_viewings");
+
       const inboxJsonUnauthorized = await leadInboxJsonRoute.GET(new Request("https://example.test/api/admin/leads?locale=ru"));
       assert.equal(inboxJsonUnauthorized.status, 401);
       assert.equal(inboxJsonUnauthorized.headers.get("cache-control"), "no-store");
@@ -338,6 +376,22 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(addedLocale.status, 201);
       assert.equal(addedLocaleBody.locale.code, "es");
       assert.ok(addedLocaleBody.public_indexable_locales.includes("es"));
+
+      const activity = await activityRoute.GET(new Request("https://example.test/admin/activity?locale=ru", { headers: auth }));
+      const activityHtml = await activity.text();
+      assert.equal(activity.status, 200);
+      assert.equal(activity.headers.get("cache-control"), "no-store");
+      assert.match(activityHtml, /data-kind="admin-activity"/);
+      assert.match(activityHtml, /data-privacy-safe="true"/);
+      assert.match(activityHtml, /data-audit-action="locale_created"/);
+      assert.match(activityHtml, /Язык добавлен/);
+      assert.equal(activityHtml.includes("Noa Levi"), false);
+      assert.equal(activityHtml.includes("+359880000001"), false);
+      const activityJson = await activityJsonRoute.GET(new Request("https://example.test/api/admin/activity?locale=ru", { headers: auth }));
+      const activityJsonBody = await activityJson.json();
+      assert.equal(activityJsonBody.kind, "admin_activity");
+      assert.ok(activityJsonBody.auditLog.some((row) => row.action === "locale_created"));
+      assert.equal("leads" in activityJsonBody, false);
 
       const launchReadiness = await launchReadinessRoute.GET(
         new Request("https://example.test/api/admin/launch-readiness", { headers: auth }),
@@ -1212,6 +1266,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(leadInboxAfterViewingBody.sellerPipelineQueue.summary.open, 1);
       assert.equal(sellerPipelineQueueRow.stage, "callback_completed");
       assert.equal(sellerPipelineQueueRow.task, "appraisal");
+
+      const viewingsAfterBooking = await viewingsPageRoute.GET(
+        new Request("https://example.test/admin/viewings?locale=en", { headers: auth }),
+      );
+      const viewingsAfterBookingHtml = await viewingsAfterBooking.text();
+      assert.match(viewingsAfterBookingHtml, new RegExp(`data-viewing-schedule-row="${viewingBody.id}"`));
+      assert.match(viewingsAfterBookingHtml, /data-viewing-follow-up-row="true"/);
+      assert.match(viewingsAfterBookingHtml, /data-viewing-task="feedback"/);
 
       const calendar = await viewingCalendarRoute.GET(new Request("https://example.test/api/admin/viewings.ics", { headers: auth }));
       const calendarBody = await calendar.text();
