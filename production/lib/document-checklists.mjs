@@ -98,7 +98,10 @@ function normalizedLocale(locale) {
 }
 
 function checklistKind(lead) {
-  return TEMPLATES[lead.lead_type] ? lead.lead_type : "general";
+  if (["buyer", "foreign_buyer", "investor"].includes(lead.lead_type)) return "buyer";
+  if (lead.lead_type === "renter") return "renter";
+  if (lead.lead_type === "seller") return "seller";
+  return "general";
 }
 
 function itemKeys(lead) {

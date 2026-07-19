@@ -55,6 +55,8 @@ export function appendLead(
     listing_reference: lead.lead?.listingReference || null,
     property: lead.lead?.property || {},
     request_details: lead.lead?.request_details || {},
+    requirements: lead.lead?.requirements || {},
+    intake_completion: lead.lead?.intake || lead.intake || { complete: false, missing_fields: [], captured_fields: [] },
     original_language: lead.original_language,
     admin_locale: lead.admin_locale,
     message_original: messageOriginal,
@@ -76,6 +78,13 @@ export function appendLead(
       owner: "broker_assignment",
       due_at: slaDueAt,
       action: "broker_response_required",
+    },
+    qualification_task: {
+      id: `intake-${lead.lead?.id || lead.id}`,
+      status: (lead.lead?.intake || lead.intake)?.complete === true ? "complete" : "open",
+      owner: lead.broker_assignment?.broker_id || "broker_assignment",
+      action: "complete_intake_requirements",
+      missing_fields: (lead.lead?.intake || lead.intake)?.missing_fields || [],
     },
   };
   fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
@@ -109,6 +118,12 @@ export function assertLeadLedger(rows) {
     }
     if (!row.sla_due_at || row.follow_up_task?.status !== "open") {
       throw new Error("Lead ledger must create an immediate broker follow-up SLA task");
+    }
+    if (!row.requirements || !row.intake_completion || !row.qualification_task) {
+      throw new Error("Lead ledger must preserve intake requirements and qualification work");
+    }
+    if (row.intake_completion.complete !== true && row.qualification_task.status !== "open") {
+      throw new Error("Incomplete intake must create an open qualification task");
     }
   }
   return true;

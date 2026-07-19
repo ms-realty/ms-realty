@@ -128,6 +128,8 @@ function initialState(lead) {
     admin_locale: lead.admin_locale,
     assigned_broker: lead.assigned_broker,
     received_at: lead.received_at,
+    intake_requirements: lead.requirements || null,
+    intake_completion: lead.intake_completion || null,
     requirements: null,
     offer_amount_eur: null,
     status: "open",

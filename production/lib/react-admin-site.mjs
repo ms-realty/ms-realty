@@ -1701,6 +1701,7 @@ function PipelinePrimaryAction({ page, state }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const next = state.next_action;
+  const intake = state.intake_requirements || {};
   if (!next) return null;
   if (next === "qualify") {
     return h(
@@ -1713,22 +1714,22 @@ function PipelinePrimaryAction({ page, state }) {
         h(
           "div",
           { className: "adm-pipeline-fields adm-pipeline-fields--two" },
-          h("label", null, label(copy, "budgetMin", "Minimum budget (€)"), h("input", { name: "budgetMinEur", type: "number", min: "0", step: "1" })),
-          h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "budgetMaxEur", type: "number", min: "1", step: "1", required: true })),
-          h("label", null, label(copy, "locations", "Locations"), h("input", { name: "locations", required: true, placeholder: "Sandanski" })),
-          h("label", null, label(copy, "propertyTypes", "Property types"), h("input", { name: "propertyTypes", placeholder: "apartment, house" })),
-          h("label", null, label(copy, "bedroomsMin", "Minimum bedrooms"), h("input", { name: "bedroomsMin", type: "number", min: "0", max: "20", step: "1" })),
+          h("label", null, label(copy, "budgetMin", "Minimum budget (€)"), h("input", { name: "budgetMinEur", type: "number", min: "0", step: "1", defaultValue: intake.budget_min_eur ?? "" })),
+          h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "budgetMaxEur", type: "number", min: "1", step: "1", required: true, defaultValue: intake.budget_max_eur ?? "" })),
+          h("label", null, label(copy, "locations", "Locations"), h("input", { name: "locations", required: true, placeholder: "Sandanski", defaultValue: (intake.locations || []).join(", ") })),
+          h("label", null, label(copy, "propertyTypes", "Property types"), h("input", { name: "propertyTypes", placeholder: "apartment, house", defaultValue: (intake.property_types || []).join(", ") })),
+          h("label", null, label(copy, "bedroomsMin", "Minimum bedrooms"), h("input", { name: "bedroomsMin", type: "number", min: "0", max: "20", step: "1", defaultValue: intake.bedrooms_min ?? "" })),
           h(
             "label",
             null,
             label(copy, "financeStatus", "Finance status"),
             h(
               "select",
-              { name: "financeStatus", defaultValue: state.pipeline === "renter" ? "not_applicable" : "unknown" },
+              { name: "financeStatus", defaultValue: intake.finance_status || (state.pipeline === "renter" ? "not_applicable" : "unknown") },
               ...["unknown", "cash", "mortgage", "preapproved", "not_applicable"].map((value) => h("option", { key: value, value }, statusText(ui, value))),
             ),
           ),
-          h("label", null, label(copy, "timeline", "Decision timeline"), h("input", { name: "timeline", required: true })),
+          h("label", null, label(copy, "timeline", "Decision timeline"), h("input", { name: "timeline", required: true, defaultValue: intake.timeline || "" })),
           h("label", null, label(copy, "nextFollowUp", "Next follow-up"), h("input", { name: "nextFollowUpAt", type: "datetime-local", required: true })),
         ),
       ),
@@ -1831,6 +1832,7 @@ function PipelineCard({ page, state, lead }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const requirements = state.requirements;
+  const intake = state.intake_requirements;
   const inventoryMatch = (page.leadMatching?.rows || []).find((row) => row.lead_id === state.lead_id);
   const stageTone = state.status === "lost" ? "brick" : state.status === "closed" ? "success" : state.overdue ? "brick" : "sea";
   return h(
@@ -1879,6 +1881,17 @@ function PipelineCard({ page, state, lead }) {
           requirements.bedrooms_min !== null ? h("span", null, `${label(copy, "bedroomsMin", "Minimum bedrooms")}: ${requirements.bedrooms_min}`) : null,
           h("span", null, requirements.timeline),
           h("span", null, statusText(ui, requirements.finance_status)),
+        )
+      : null,
+    !requirements && intake && (intake.captured_fields?.length || Object.values(intake).some((value) => (Array.isArray(value) ? value.length : value !== null && value !== undefined && value !== "")))
+      ? h(
+          "div",
+          { className: "adm-pipeline-requirements", "data-intake-requirements": "true" },
+          h("strong", null, label(copy, "intakeIncomplete", "Qualification details missing")),
+          intake.budget_max_eur !== null && intake.budget_max_eur !== undefined ? h("span", null, `≤ €${intake.budget_max_eur}`) : null,
+          intake.locations?.length ? h("span", null, intake.locations.join(", ")) : null,
+          intake.property_types?.length ? h("span", null, intake.property_types.join(", ")) : null,
+          intake.timeline ? h("span", null, intake.timeline) : null,
         )
       : null,
     inventoryMatch
@@ -2501,6 +2514,7 @@ function LeadInboxBody({ page }) {
                 const brokerId = lead.broker_assignment?.broker_id || lead.assigned_broker || "";
                 const leadContext = [lead.listing_reference, lead.property?.location].filter(Boolean).join(" / ");
                 const requestDetails = requestDetailsText(lead);
+                const intake = lead.intake_completion || { complete: false, missing_fields: [] };
                 return h(
                   "tr",
                   {
@@ -2526,6 +2540,14 @@ function LeadInboxBody({ page }) {
                       h("code", { className: "crm-mono" }, lead.lead_id),
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
                       requestDetails ? h("small", { className: "adm-lead-context", "data-lead-request-details": "true" }, requestDetails) : null,
+                      h(
+                        "div",
+                        { className: "adm-lead-meta", "data-intake-complete": intake.complete ? "true" : "false" },
+                        h(StatusPill, { tone: intake.complete ? "success" : "sun" }, intake.complete ? label(copy, "intakeComplete", "Initial requirements captured") : label(copy, "intakeIncomplete", "Qualification details missing")),
+                        !intake.complete && intake.missing_fields?.length
+                          ? h("small", { className: "adm-lead-context" }, `${label(copy, "missingFields", "Missing fields")}: ${intake.missing_fields.map((field) => statusText(ui, field)).join(", ")}`)
+                          : null,
+                      ),
                       leadContactActions(lead, ui),
                       lead.duplicate_status === "possible_duplicate"
                         ? h(

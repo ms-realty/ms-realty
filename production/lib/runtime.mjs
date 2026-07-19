@@ -249,9 +249,17 @@ export function submitRuntimeLead(registry, seed, input) {
   const source = input.source || "website_listing_detail";
   const record = listingRecords(seed).find((candidate) => candidate.id === input.listingReference);
   const listingLeadType = record?.facts?.offer_type === "rent" ? "renter" : record ? "buyer" : input.leadType;
-  const leadInput = normalizePublicLeadInput({ ...input, source, leadType: listingLeadType });
-  if (!record && ["buyer", "renter"].includes(leadInput.leadType)) {
-    throw new Error("Buyer or renter lead requires a known listingReference");
+  const property = record
+    ? {
+        ...(input.property || {}),
+        location: record.facts.location,
+        type: record.facts.property_type,
+        bedrooms: record.facts.bedrooms ?? input.property?.bedrooms,
+      }
+    : input.property;
+  const leadInput = normalizePublicLeadInput({ ...input, property, source, leadType: listingLeadType });
+  if (!record && ["website_listing_detail", "website_search_result", "website_callback_request", "website_viewing_request"].includes(source)) {
+    throw new Error("Listing lead requires a known listingReference");
   }
   return createCrmInboxItem(registry, {
     ...leadInput,

@@ -23,6 +23,16 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
         listingReference: "MS-CRAWL-0001",
         contact: { email: "Noa@example.com" },
         request_details: { callback_time: "After 14:00" },
+        requirements: {
+          budget_min_eur: null,
+          budget_max_eur: null,
+          locations: ["Sandanski"],
+          property_types: ["apartment"],
+          bedrooms_min: null,
+          timeline: null,
+          finance_status: null,
+        },
+        intake: { complete: false, missing_fields: ["budget_max_eur", "timeline"], captured_fields: ["locations", "property_types"] },
         message: "Interested in this property.",
       },
       hermes_reply_draft: { broker_approval_required: true },
@@ -60,6 +70,10 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
   assert.equal(rows[0].show_original_available, true);
   assert.equal(rows[0].contact_preference, "whatsapp");
   assert.deepEqual(rows[0].request_details, { callback_time: "After 14:00" });
+  assert.deepEqual(rows[0].requirements.locations, ["Sandanski"]);
+  assert.equal(rows[0].intake_completion.complete, false);
+  assert.equal(rows[0].qualification_task.status, "open");
+  assert.deepEqual(rows[0].qualification_task.missing_fields, ["budget_max_eur", "timeline"]);
   assert.equal(rows[0].confirmation_status, "ready");
   assert.equal(rows[0].confirmation_message_key, "lead_received");
   assert.equal(rows[0].assigned_broker, "broker_international");

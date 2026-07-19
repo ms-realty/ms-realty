@@ -1,28 +1,46 @@
 import { getLocale, adminLocales } from "./locales.mjs";
 
 const CONTACT_PREFERENCES = new Set(["phone", "viber", "whatsapp", "email"]);
+export const LEAD_TYPES = Object.freeze([
+  "buyer",
+  "foreign_buyer",
+  "investor",
+  "renter",
+  "seller",
+  "landlord",
+  "partner_referral",
+  "general",
+]);
+const LEAD_TYPE_SET = new Set(LEAD_TYPES);
+const BUYER_REQUIREMENT_TYPES = new Set(["buyer", "foreign_buyer", "investor", "renter"]);
+const OWNER_REQUIREMENT_TYPES = new Set(["seller", "landlord"]);
 export const BUYER_LISTING_SOURCE_INTENTS = Object.freeze({
   website_listing_detail: "inquiry",
   website_search_result: "inquiry",
   website_callback_request: "callback",
   website_viewing_request: "viewing",
 });
-const NON_BUYER_SOURCE_CONTRACTS = Object.freeze({
-  website_contact_callback: { leadType: "general", intent: "callback", phone: true },
-  website_seller_callback: { leadType: "seller", intent: "callback", phone: true },
-  website_seller_valuation: { leadType: "seller", intent: "valuation", phone: true, property: true },
+const PUBLIC_LEAD_SOURCE_CONTRACTS = Object.freeze({
+  website_contact_callback: { leadTypes: ["general"], intent: "callback", phone: true },
+  website_seller_callback: { leadTypes: ["seller"], intent: "callback", phone: true },
+  website_seller_valuation: { leadTypes: ["seller"], intent: "valuation", phone: true, property: true },
+  website_consultation_request: {
+    leadTypes: ["buyer", "foreign_buyer", "investor", "renter", "landlord", "partner_referral", "general"],
+    intent: "consultation",
+    reachableContact: true,
+  },
 });
 const LOCAL_LOCATIONS = ["Sandanski", "Petrich", "Bansko", "Blagoevgrad", "Sveti Vlas", "Sunny Beach", "Melnik"];
 const PROPERTY_TYPES = ["apartment", "house", "villa", "land", "commercial", "hotel", "office", "industrial"];
 export const DEFAULT_BROKER_PROFILES = [
-  { id: "broker_bg", languages: ["bg"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "renter", "seller", "general"] },
-  { id: "broker_ru", languages: ["ru"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "renter", "seller", "general"] },
+  { id: "broker_bg", languages: ["bg"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: LEAD_TYPES },
+  { id: "broker_ru", languages: ["ru"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: LEAD_TYPES },
   {
     id: "broker_international",
     languages: ["en", "de", "nl", "el", "he"],
     locations: LOCAL_LOCATIONS,
     property_types: PROPERTY_TYPES,
-    lead_types: ["buyer", "renter", "seller", "general"],
+    lead_types: LEAD_TYPES,
   },
 ];
 
@@ -41,12 +59,124 @@ export function normalizeLeadLanguage(registry, languageCode) {
 function normalizeContactPreference(input) {
   const value =
     input.contact_preference || input.contactPreference || input.preferred_channel || input.contact?.preferred_channel || null;
-  if (!value) return null;
+  if (!value) {
+    if (String(input.contact?.whatsapp || "").trim()) return "whatsapp";
+    if (String(input.contact?.viber || "").trim()) return "viber";
+    if (String(input.contact?.phone || "").trim()) return "phone";
+    if (String(input.contact?.email || "").trim()) return "email";
+    return null;
+  }
   const normalized = String(value).toLowerCase();
   if (!CONTACT_PREFERENCES.has(normalized)) {
     throw new Error("contact_preference must be phone, viber, whatsapp, or email");
   }
   return normalized;
+}
+
+function optionalMoney(value, label) {
+  if (value === null || value === undefined || value === "") return null;
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount < 0) throw new Error(`${label} must be a non-negative amount`);
+  return Math.round(amount);
+}
+
+function optionalInteger(value, label, { min = 0, max = 20 } = {}) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < min || number > max) {
+    throw new Error(`${label} must be an integer from ${min} to ${max}`);
+  }
+  return number;
+}
+
+function boundedString(value, label, max = 200) {
+  const text = String(value || "").trim();
+  if (text.length > max) throw new Error(`${label} must be ${max} characters or fewer`);
+  return text || null;
+}
+
+function stringList(value, label, max = 10) {
+  const rows = (Array.isArray(value) ? value : String(value || "").split(","))
+    .map((item) => String(item).trim())
+    .filter(Boolean);
+  const unique = [...new Set(rows)];
+  if (unique.length > max) throw new Error(`${label} must contain ${max} values or fewer`);
+  if (unique.some((item) => item.length > 120)) throw new Error(`${label} values must be 120 characters or fewer`);
+  return unique;
+}
+
+function firstDefined(...values) {
+  return values.find((value) => value !== undefined && value !== null && value !== "");
+}
+
+export function normalizeLeadRequirements(input = {}, property = {}) {
+  const raw = input.requirements && typeof input.requirements === "object" && !Array.isArray(input.requirements) ? input.requirements : {};
+  const budgetMin = optionalMoney(
+    firstDefined(input["requirements.budget_min_eur"], input.budgetMinEur, input.budget_min_eur, raw.budget_min_eur),
+    "requirements.budget_min_eur",
+  );
+  const budgetMax = optionalMoney(
+    firstDefined(input["requirements.budget_max_eur"], input.budgetMaxEur, input.budget_max_eur, raw.budget_max_eur),
+    "requirements.budget_max_eur",
+  );
+  if (budgetMin !== null && budgetMax !== null && budgetMin > budgetMax) {
+    throw new Error("requirements.budget_min_eur cannot exceed requirements.budget_max_eur");
+  }
+  const locations = stringList(
+    firstDefined(input["requirements.locations"], input.locations, raw.locations, property.location),
+    "requirements.locations",
+  );
+  const propertyTypes = stringList(
+    firstDefined(input["requirements.property_types"], input.propertyTypes, input.property_types, raw.property_types, property.type),
+    "requirements.property_types",
+  );
+  const timeline = boundedString(
+    firstDefined(input["requirements.timeline"], input.timeline, raw.timeline),
+    "requirements.timeline",
+  );
+  const bedroomsMin = optionalInteger(
+    firstDefined(input["requirements.bedrooms_min"], input.bedroomsMin, input.bedrooms_min, raw.bedrooms_min),
+    "requirements.bedrooms_min",
+  );
+  const financeStatus = boundedString(
+    firstDefined(input["requirements.finance_status"], input.financeStatus, input.finance_status, raw.finance_status),
+    "requirements.finance_status",
+    40,
+  );
+  if (financeStatus && !["cash", "mortgage", "preapproved", "unknown", "not_applicable"].includes(financeStatus.toLowerCase())) {
+    throw new Error("requirements.finance_status must be cash, mortgage, preapproved, unknown, or not_applicable");
+  }
+  return {
+    budget_min_eur: budgetMin,
+    budget_max_eur: budgetMax,
+    locations,
+    property_types: propertyTypes,
+    bedrooms_min: bedroomsMin,
+    timeline,
+    finance_status: financeStatus?.toLowerCase() || null,
+  };
+}
+
+export function leadIntakeCompleteness(lead) {
+  const requirements = lead.requirements || {};
+  const missing = [];
+  if (!lead.contact_preference) missing.push("preferred_channel");
+  if (BUYER_REQUIREMENT_TYPES.has(lead.leadType)) {
+    if (requirements.budget_max_eur === null || requirements.budget_max_eur === undefined) missing.push("budget_max_eur");
+    if (!requirements.locations?.length) missing.push("locations");
+    if (!requirements.timeline) missing.push("timeline");
+  } else if (OWNER_REQUIREMENT_TYPES.has(lead.leadType)) {
+    if (!requirements.locations?.length) missing.push("locations");
+    if (!requirements.property_types?.length) missing.push("property_types");
+    if (!requirements.timeline) missing.push("timeline");
+  }
+  return {
+    complete: missing.length === 0,
+    missing_fields: missing,
+    captured_fields: Object.entries(requirements)
+      .filter(([, value]) => (Array.isArray(value) ? value.length > 0 : value !== null && value !== undefined && value !== ""))
+      .map(([key]) => key),
+  };
 }
 
 export function normalizeLeadInput(input = {}) {
@@ -73,7 +203,8 @@ export function normalizeLeadInput(input = {}) {
     if (value !== undefined && String(value).trim()) requestDetails[field] = String(value).trim();
     else if (typeof requestDetails[field] === "string") requestDetails[field] = requestDetails[field].trim();
   }
-  return { ...input, contact, property, request_details: requestDetails };
+  const requirements = normalizeLeadRequirements(input, property);
+  return { ...input, contact, property, request_details: requestDetails, requirements };
 }
 
 function hasReachableContact(contact = {}) {
@@ -109,14 +240,15 @@ export function normalizeBuyerListingLeadInput(input = {}) {
 
 export function normalizePublicLeadInput(input = {}) {
   const source = String(input.source || "website_listing_detail").trim();
-  if (["buyer", "renter"].includes(input.leadType)) return normalizeBuyerListingLeadInput({ ...input, source });
+  if (BUYER_LISTING_SOURCE_INTENTS[source]) return normalizeBuyerListingLeadInput({ ...input, source });
   const leadInput = normalizeLeadInput({ ...input, source });
-  const contract = NON_BUYER_SOURCE_CONTRACTS[source];
+  const contract = PUBLIC_LEAD_SOURCE_CONTRACTS[source];
   if (!contract) throw new Error("Lead source must be a known canonical source");
-  if (leadInput.leadType !== contract.leadType) throw new Error("Lead type must match source");
+  if (!contract.leadTypes.includes(leadInput.leadType)) throw new Error("Lead type must match source");
   const submittedIntent = String(leadInput.intent || "").trim().toLowerCase();
   if (submittedIntent && submittedIntent !== contract.intent) throw new Error("Lead intent must match source");
   if (contract.phone && !String(leadInput.contact.phone || "").trim()) throw new Error("Lead source requires a phone");
+  if (contract.reachableContact && !hasReachableContact(leadInput.contact)) throw new Error("Lead source requires a reachable contact channel");
   if (contract.property && (!String(leadInput.property.location || "").trim() || !String(leadInput.property.type || "").trim())) {
     throw new Error("Seller valuation requires property location and type");
   }
@@ -128,8 +260,9 @@ export function createLeadDraft(registry, input) {
   if (!leadInput.source || !leadInput.leadType || !leadInput.contact?.name) {
     throw new Error("source, leadType, and contact.name are required");
   }
+  if (!LEAD_TYPE_SET.has(leadInput.leadType)) throw new Error("leadType must be a supported lead segment");
   const language = normalizeLeadLanguage(registry, leadInput.language || registry.source_locale);
-  return {
+  const draft = {
     id: leadInput.id || `lead-draft-${Date.now()}`,
     source: leadInput.source,
     intent: leadInput.intent || null,
@@ -138,6 +271,7 @@ export function createLeadDraft(registry, input) {
     contact: leadInput.contact,
     property: leadInput.property,
     request_details: leadInput.request_details,
+    requirements: leadInput.requirements,
     contact_preference: normalizeContactPreference(leadInput),
     message: leadInput.message || "",
     language,
@@ -145,6 +279,8 @@ export function createLeadDraft(registry, input) {
     requiresBrokerApproval: true,
     hermesDraftAllowed: true,
   };
+  draft.intake = leadIntakeCompleteness(draft);
+  return draft;
 }
 
 function scoreBroker(profile, lead, listingContext) {

@@ -7,6 +7,7 @@ import { fromRoot } from "./paths.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "./runtime.mjs";
 
 export const DEFAULT_LEAD_MATCHING_REPORT = fromRoot("production", "data", "lead-matching-report.json");
+const MATCHABLE_LEAD_TYPES = new Set(["buyer", "foreign_buyer", "investor", "renter"]);
 
 function sourceFilters(view) {
   return Object.fromEntries(
@@ -114,7 +115,7 @@ export function buildLeadMatchingReport({
   const listingById = new Map(seed.records.map((record) => [record.id, record]));
   const stateByLeadId = new Map(leadPipelineStates.map((state) => [state.lead_id, state]));
   const rows = leads
-    .filter((lead) => ["buyer", "renter"].includes(lead.lead_type) && (lead.listing_reference || stateByLeadId.get(lead.lead_id)?.requirements))
+    .filter((lead) => MATCHABLE_LEAD_TYPES.has(lead.lead_type) && (lead.listing_reference || stateByLeadId.get(lead.lead_id)?.requirements))
     .filter((lead) => !["lost", "closed"].includes(stateByLeadId.get(lead.lead_id)?.status))
     .map((lead) => matchLead(registry, seed, listingById, lead, stateByLeadId.get(lead.lead_id)))
     .filter(Boolean);
