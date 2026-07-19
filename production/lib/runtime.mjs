@@ -120,10 +120,18 @@ export function resolveRuntimePath(registry, seed, pathname, translationTasks = 
   const normalized = pathname.replace(/\/$/, "");
   for (const record of listingRecords(seed)) {
     const translations = mergeRuntimeTranslations(record, translationTasks);
+    const fallbackLocale = registry.locales.find((locale) => {
+      if (!locale.public_enabled || !locale.indexable) return false;
+      try {
+        return listingPath(registry, locale.code, record.id) === normalized;
+      } catch {
+        return false;
+      }
+    })?.code;
     const matchedLocale =
       record.routing?.target_path === normalized
         ? record.routing.target_locale
-        : translations.find((translation) => translationPathMatches(registry, record, translation, normalized))?.locale;
+        : translations.find((translation) => translationPathMatches(registry, record, translation, normalized))?.locale || fallbackLocale;
     if (!matchedLocale) continue;
     return {
       type: "listing",
@@ -278,6 +286,7 @@ export function buildRuntimeSmoke(registry, seed) {
   return {
     fixture_id: "runtime-smoke-20260704",
     listing_he: renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"),
+    listing_en_fallback: renderRuntimePath(registry, seed, "/en/properties/MS-CRAWL-0001"),
     listing_ru: renderRuntimePath(registry, seed, ruListing.routing.target_path),
     home_he: renderRuntimePath(registry, seed, "/he/"),
     seller_he: renderRuntimePath(registry, seed, "/he/sell"),
@@ -338,6 +347,16 @@ export function assertRuntimeSmoke(smoke) {
     "website_viewing_request"
   ) {
     throw new Error("Runtime smoke must expose listing viewing request action");
+  }
+  if (
+    smoke.listing_en_fallback.status !== 200 ||
+    smoke.listing_en_fallback.kind !== "listing" ||
+    smoke.listing_en_fallback.fallback.active !== true ||
+    smoke.listing_en_fallback.indexable !== false ||
+    smoke.listing_en_fallback.metadata.robots !== "noindex,follow" ||
+    smoke.listing_en_fallback.body.content_locale !== "bg"
+  ) {
+    throw new Error("Runtime search fallback must open a source-language noindex listing page");
   }
   if (smoke.listing_ru.status !== 200 || !smoke.listing_ru.path.startsWith("/ru/")) {
     throw new Error("Runtime Russian listing route missing");

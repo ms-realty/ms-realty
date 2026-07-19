@@ -102,6 +102,16 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(listing.html, /href="\/he\/search"/);
   assert.match(listing.html, /data-related-listings="true"/);
 
+  const listingFallback = renderAppRoute({
+    pathname: "/en/properties/MS-CRAWL-0001",
+    url: "https://example.test/en/properties/MS-CRAWL-0001",
+  });
+  assert.equal(listingFallback.status, 200);
+  assert.equal(listingFallback.rendered.kind, "listing");
+  assert.equal(listingFallback.rendered.fallback.active, true);
+  assert.equal(listingFallback.rendered.body.content_locale, "bg");
+  assert.match(listingFallback.html, /<meta name="robots" content="noindex,follow">/);
+
   const listingPrint = renderAppRoute({
     pathname: "/he/properties/MS-CRAWL-0001",
     url: "https://example.test/he/properties/MS-CRAWL-0001?print=1",

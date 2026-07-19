@@ -555,6 +555,544 @@
       }
     }
   },
+  "listing_en_fallback": {
+    "kind": "listing",
+    "status": 200,
+    "requested_locale": "en",
+    "locale": "en",
+    "lang": "en",
+    "dir": "ltr",
+    "path": "/en/properties/MS-CRAWL-0001",
+    "canonical": "/en/properties/MS-CRAWL-0001",
+    "indexable": false,
+    "fallback": {
+      "active": true,
+      "requested_locale": "en",
+      "resolved_locale": "en"
+    },
+    "metadata": {
+      "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+      "description": "Updated approved source description.",
+      "og_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+      "og_description": "Updated approved source description.",
+      "robots": "noindex,follow"
+    },
+    "hreflang": [],
+    "chrome": {
+      "copy": {
+        "navBuy": "Buy",
+        "navRent": "Rent",
+        "navSell": "Sell",
+        "navContact": "Contact",
+        "explore": "Explore",
+        "getInTouch": "Get in touch",
+        "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
+        "copyright": "All rights reserved.",
+        "requestSent": "Your inquiry was sent. A broker will contact you.",
+        "requestFailed": "The request could not be sent. Please try again.",
+        "close": "Close",
+        "callBroker": "Call a broker",
+        "languageLabel": "Language",
+        "menuLabel": "Primary navigation",
+        "skipToContent": "Skip to content",
+        "filters": "Filters",
+        "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "home": {
+        "href": "/en/",
+        "label": "MS Realty"
+      },
+      "nav": [
+        {
+          "id": "buy",
+          "href": "/en/search",
+          "label": "Buy",
+          "active": true
+        },
+        {
+          "id": "rent",
+          "href": "/en/search?offer_type=rent",
+          "label": "Rent",
+          "active": false
+        },
+        {
+          "id": "sell",
+          "href": "/en/sell",
+          "label": "Sell",
+          "active": false
+        },
+        {
+          "id": "contact",
+          "href": "/en/contact",
+          "label": "Contact",
+          "active": false
+        }
+      ],
+      "languages": [
+        {
+          "code": "bg",
+          "label": "Български",
+          "href": "/bg/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "en",
+          "label": "English",
+          "href": "/en/",
+          "active": true,
+          "dir": "ltr"
+        },
+        {
+          "code": "de",
+          "label": "Deutsch",
+          "href": "/de/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "nl",
+          "label": "Nederlands",
+          "href": "/nl/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "ru",
+          "label": "Русский",
+          "href": "/ru/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "el",
+          "label": "Ελληνικά",
+          "href": "/el/",
+          "active": false,
+          "dir": "ltr"
+        },
+        {
+          "code": "he",
+          "label": "עברית",
+          "href": "/he/",
+          "active": false,
+          "dir": "rtl"
+        }
+      ],
+      "contact": {
+        "phone_label": "+359 879 69 68 70",
+        "phone_href": "tel:+359879696870",
+        "email": "office@makler-realty.com",
+        "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "footer": {
+        "locations": [],
+        "locationsLabel": "Locations",
+        "searchLabel": "Search"
+      }
+    },
+    "schema": {
+      "@context": "https://schema.org",
+      "@type": "RealEstateListing",
+      "@id": "/en/properties/MS-CRAWL-0001#listing",
+      "url": "/en/properties/MS-CRAWL-0001",
+      "identifier": "MS-CRAWL-0001",
+      "name": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+      "description": "Updated approved source description.",
+      "category": "commercial",
+      "image": [
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg"
+      ],
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "offer_type",
+          "value": "rent"
+        }
+      ],
+      "areaServed": {
+        "@type": "Place",
+        "name": "Sandanski"
+      }
+    },
+    "translation": {
+      "locale": "en",
+      "status": "missing",
+      "human_approved": false,
+      "reviewer": null
+    },
+    "body": {
+      "content_locale": "bg",
+      "h1": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+      "description": "Updated approved source description.",
+      "facts": {
+        "id": "MS-CRAWL-0001",
+        "location": "Sandanski",
+        "property_type": "commercial",
+        "offer_type": "rent",
+        "bedrooms": null,
+        "area_sqm": null,
+        "floor": null,
+        "total_floors": null,
+        "land_area_sqm": null,
+        "condition": "",
+        "location_precision": "approximate",
+        "price_eur": null,
+        "price_on_request": true,
+        "listing_status": "available",
+        "image_count": 35
+      },
+      "lifecycle": {
+        "status": "available",
+        "active_in_search": true,
+        "seo_kept_live": true,
+        "publish_approved": false,
+        "publish_approved_at": null,
+        "last_edited_at": null
+      },
+      "verification": {
+        "availability_verified_at": null,
+        "availability_verified_by": null,
+        "verified": false
+      },
+      "quality_flags": {
+        "bedrooms_not_applicable": false,
+        "location_precision": "approximate"
+      },
+      "media": {
+        "gallery": [
+          {
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
+            "width": null,
+            "height": null
+          }
+        ],
+        "gallery_count": 1,
+        "floor_plans": [],
+        "videos": [],
+        "review": {
+          "total_assets": 35,
+          "public_gallery_assets": 18,
+          "suppressed_public_assets": 16,
+          "floor_plan_candidates": 0,
+          "video_candidates": 0,
+          "review_gated_assets": 0
+        },
+        "tour": {
+          "available": false,
+          "provider": "photo-sphere-viewer",
+          "review_status": "needs_panorama_upload",
+          "fallback_gallery": [
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            },
+            {
+              "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
+              "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!"
+            }
+          ]
+        }
+      },
+      "ctas": {
+        "inquiry": "Inquiry",
+        "seller_valuation": "Seller valuation"
+      },
+      "actions": {
+        "sticky_mobile": true,
+        "minimum_tap_target_px": 44,
+        "primary": [
+          {
+            "id": "inquiry",
+            "label": "Inquiry",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "en",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_listing_detail"
+            }
+          },
+          {
+            "id": "callback",
+            "label": "Callback",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "en",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_callback_request",
+              "contact_preference": "phone"
+            }
+          },
+          {
+            "id": "request_viewing",
+            "label": "Viewing",
+            "kind": "lead",
+            "method": "POST",
+            "endpoint": "/api/leads",
+            "payload": {
+              "leadType": "buyer",
+              "language": "en",
+              "listingReference": "MS-CRAWL-0001",
+              "source": "website_viewing_request",
+              "contact_preference": "phone"
+            }
+          }
+        ],
+        "direct_contact": {
+          "review_status": "needs_broker_contact_review",
+          "broker": null,
+          "reviewer": null,
+          "channels": [
+            {
+              "id": "phone",
+              "label": "Phone",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "whatsapp",
+              "label": "WhatsApp",
+              "enabled": false,
+              "href": null
+            },
+            {
+              "id": "viber",
+              "label": "Viber",
+              "enabled": false,
+              "href": null
+            }
+          ]
+        },
+        "secondary": [
+          {
+            "id": "back_to_results",
+            "label": "Back to results",
+            "kind": "link",
+            "url": "/en/search"
+          },
+          {
+            "id": "save",
+            "label": "Save",
+            "kind": "client_saved_listing",
+            "storage_key": "ms-realty:saved-listings",
+            "listing_id": "MS-CRAWL-0001"
+          },
+          {
+            "id": "share_family",
+            "label": "Share",
+            "kind": "share",
+            "url": "/en/properties/MS-CRAWL-0001"
+          },
+          {
+            "id": "print",
+            "label": "Print/PDF",
+            "kind": "print",
+            "url": "/en/properties/MS-CRAWL-0001?print=1",
+            "pdf_status": "browser_print_ready"
+          }
+        ]
+      },
+      "related_listings": [
+        {
+          "id": "MS-CRAWL-0002",
+          "title": "Апартаменти в парка на Сандански. Затворен комплекс",
+          "path": "/en/properties/MS-CRAWL-0002",
+          "review_badge": null,
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "en",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "content_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "multi_unit",
+          "property_type_label": "Apartments",
+          "offer_type": "sale",
+          "offer_type_label": "For sale",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": null,
+          "price_on_request": true,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 1,
+          "legacy_image_count": 20,
+          "thumbnail": {
+            "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
+            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/en/properties/MS-CRAWL-0002"
+            },
+            "inquiry": {
+              "label": "Inquiry",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "en",
+                "listingReference": "MS-CRAWL-0002",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Save",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0002"
+            }
+          }
+        },
+        {
+          "id": "MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
+          "path": "/en/properties/MS-CRAWL-0003",
+          "review_badge": null,
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "en",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "content_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "property_type_label": "Apartment",
+          "offer_type": "rent",
+          "offer_type_label": "For rent",
+          "bedrooms": 2,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": 600,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 1,
+          "legacy_image_count": 32,
+          "thumbnail": {
+            "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
+            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/en/properties/MS-CRAWL-0003"
+            },
+            "inquiry": {
+              "label": "Inquiry",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "en",
+                "listingReference": "MS-CRAWL-0003",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Save",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0003"
+            }
+          }
+        },
+        {
+          "id": "MS-CRAWL-0004",
+          "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+          "path": "/en/properties/MS-CRAWL-0004",
+          "review_badge": null,
+          "translation_display": "fallback_source_locale",
+          "translation_locale": "en",
+          "translation_status": "missing",
+          "translation_indexable": false,
+          "translation_human_approved": false,
+          "source_locale": "bg",
+          "content_locale": "bg",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "property_type_label": "Apartment",
+          "offer_type": "rent",
+          "offer_type_label": "For rent",
+          "bedrooms": 1,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": 355,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 1,
+          "legacy_image_count": 26,
+          "thumbnail": {
+            "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
+            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Details",
+              "href": "/en/properties/MS-CRAWL-0004"
+            },
+            "inquiry": {
+              "label": "Inquiry",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "en",
+                "listingReference": "MS-CRAWL-0004",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Save",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0004"
+            }
+          }
+        }
+      ],
+      "source": {
+        "old_url": "https://makler-realty.com/listing/%d0%b0%d0%b2%d1%82%d0%be%d1%80%d0%b5%d0%bc%d0%be%d0%bd%d1%82%d0%bd%d0%b0-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b8%d0%bb%d0%bd%d0%b8%d1%86%d0%b0-%d0%bc%d0%be%d1%82%d0%b5%d0%bb-%d0%b8-%d0%b2%d0%b5%d0%b4/",
+        "source_domain": "makler-realty.com",
+        "source_locale": "bg",
+        "source_title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански"
+      }
+    }
+  },
   "listing_ru": {
     "kind": "listing",
     "status": 200,

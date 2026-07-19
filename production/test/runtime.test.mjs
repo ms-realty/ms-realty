@@ -20,6 +20,7 @@ const seed = loadCmsSeed();
 
 test("runtime resolves locale-prefixed listing and fallback routes from CMS seed", () => {
   const he = renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001");
+  const enSourceFallback = renderRuntimePath(registry, seed, "/en/properties/MS-CRAWL-0001");
   const home = renderRuntimePath(registry, seed, "/he/");
   const seller = renderRuntimePath(registry, seed, "/he/sell");
   const contact = renderRuntimePath(registry, seed, "/he/contact");
@@ -43,6 +44,12 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(he.body.actions.secondary.find((action) => action.id === "back_to_results").url, "/he/search");
   assert.equal(he.body.actions.secondary.find((action) => action.id === "share_family").url, he.path);
   assert.equal(he.body.actions.direct_contact.review_status, "needs_broker_contact_review");
+  assert.equal(enSourceFallback.status, 200);
+  assert.equal(enSourceFallback.locale, "en");
+  assert.equal(enSourceFallback.fallback.active, true);
+  assert.equal(enSourceFallback.indexable, false);
+  assert.equal(enSourceFallback.metadata.robots, "noindex,follow");
+  assert.equal(enSourceFallback.body.content_locale, "bg");
   assert.equal(home.kind, "home");
   assert.equal(home.body.search.path, "/he/search");
   assert.equal(home.body.seller.path, "/he/sell");
@@ -190,6 +197,20 @@ test("runtime search uses CMS seed listings and keeps mobile-first contract", ()
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.ok(apartmentSearch.cards.every((card) => card.property_type === "apartment"));
   assert.ok(apartmentSearch.search.total_matches > apartmentSearch.cards.length);
+});
+
+test("every source-fallback search card resolves to a noindex listing page", () => {
+  const search = searchRuntimeListings(registry, seed, { localeCode: "en", query: "Sandanski" });
+  const fallbackCard = search.cards.find((card) => card.translation_display === "fallback_source_locale");
+  assert.ok(fallbackCard);
+  const listing = renderRuntimePath(registry, seed, fallbackCard.path);
+
+  assert.equal(listing.status, 200);
+  assert.equal(listing.kind, "listing");
+  assert.equal(listing.path, fallbackCard.path);
+  assert.equal(listing.indexable, false);
+  assert.equal(listing.metadata.robots, "noindex,follow");
+  assert.equal(listing.body.content_locale, fallbackCard.content_locale);
 });
 
 test("runtime keeps sold listing pages live while removing them from active inventory", () => {
