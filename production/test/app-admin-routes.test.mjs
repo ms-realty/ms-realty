@@ -326,6 +326,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(inboxJsonBody.leads.length, 1);
       assert.equal(inboxJsonBody.leads[0].original_language, "he");
       assert.equal(inboxJsonBody.leads[0].contact.whatsapp, "+359880000001");
+      assert.equal(inboxJsonBody.communicationThreads[0].events[0].type, "inbound_request");
+      assert.equal(inboxJsonBody.communicationTemplates["next-admin-lead-test"][0].locale, "he");
+      assert.equal(inboxJsonBody.communicationTemplates["next-admin-lead-test"][0].human_review_required, true);
 
       const inbox = await leadInboxRoute.GET(new Request("https://example.test/admin/leads?locale=ru", { headers: auth }));
       const inboxHtml = await inbox.text();
@@ -351,6 +354,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(inboxHtml.includes('name="hermesDraft" value="true"'), false);
       assert.match(inboxHtml, /data-show-original-toggle="true"/);
       assert.match(inboxHtml, /data-lead-assignment-control="next-admin-lead-test"/);
+      assert.match(inboxHtml, /data-communication-thread="next-admin-lead-test"/);
+      assert.match(inboxHtml, /data-communication-event="inbound_request"/);
+      assert.match(inboxHtml, /data-communication-template-select="true"/);
+      assert.match(inboxHtml, /data-template-locale="he"/);
       assert.match(inboxHtml, /action="\/api\/admin\/leads\/assign"/);
       assert.match(inboxHtml, /name="assignmentConfirmed"/);
       assert.match(inboxHtml, /he -&gt; en/);

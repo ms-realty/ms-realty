@@ -403,6 +403,22 @@
         });
     });
   }
+  function initCommunicationTemplates() {
+    document.addEventListener("change", function (event) {
+      var select = event.target;
+      if (!(select instanceof HTMLSelectElement) || !select.hasAttribute("data-communication-template-select")) return;
+      var option = select.options[select.selectedIndex];
+      if (!option || !option.value) return;
+      var form = select.closest("form[data-reply-approval-required]");
+      if (!form || !form.elements.reviewedReply) return;
+      var body = option.getAttribute("data-template-body") || "";
+      var locale = option.getAttribute("data-template-locale") || "";
+      form.elements.reviewedReply.value = body;
+      form.elements.reviewedReply.setAttribute("data-template-id", option.value);
+      if (locale && form.elements.language) form.elements.language.value = locale;
+      form.elements.reviewedReply.focus();
+    });
+  }
   function initLeadPipelineFilters() {
     var tabs = document.querySelector("[data-pipeline-tabs]");
     var grid = document.querySelector("[data-pipeline-grid]");
@@ -515,4 +531,5 @@
   initTranslationWorkflowForms();
   initReplyDeliveryForms();
   initReplyForms();
+  initCommunicationTemplates();
 })();

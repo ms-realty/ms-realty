@@ -130,6 +130,21 @@ main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { min-width: 0; }
 .adm-lead-assignment__form .adm-check input { width: 20px; min-height: 20px; margin-top: 1px; }
 .adm-lead-assignment__form [data-admin-mutation-status] { min-height: 1.25em; margin: 0; font-size: var(--text-xs); }
 .adm-lead-assignment__form button { width: 100%; justify-content: center; }
+.adm-communication { min-width: 0; border-top: 1px solid var(--border); padding-top: var(--space-2); }
+.adm-communication > summary { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-link); font-size: var(--text-xs); font-weight: var(--fw-semibold); list-style: none; }
+.adm-communication > summary::-webkit-details-marker { display: none; }
+.adm-communication > summary small { margin-inline-start: auto; color: var(--text-muted); font-weight: var(--fw-regular); }
+.adm-communication__timeline { display: grid; gap: var(--space-2); margin: var(--space-2) 0 0; padding: 0; list-style: none; }
+.adm-communication__timeline > li { min-width: 0; padding: var(--space-2) var(--space-3); border-inline-start: 3px solid var(--border-strong); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--surface-sunken); }
+.adm-communication__timeline > li[data-communication-event="delivery_failed"] { border-inline-start-color: var(--brick-500); }
+.adm-communication__event-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px var(--space-2); font-size: var(--text-xs); }
+.adm-communication__event-head time { margin-inline-start: auto; color: var(--text-muted); }
+.adm-communication__timeline small { color: var(--text-muted); font-size: var(--text-xs); }
+.adm-communication__timeline p { margin: 4px 0 0; color: var(--text-strong); font-size: var(--text-xs); white-space: pre-wrap; overflow-wrap: anywhere; }
+.adm-template-picker { display: grid; gap: 5px; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }
+.adm-template-picker label { display: grid; gap: 5px; color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+.adm-template-picker select { width: 100%; min-width: 0; }
+.adm-template-picker small { color: var(--text-muted); font-size: var(--text-xs); line-height: var(--lh-snug); }
 .adm-public-request-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 .adm-public-request {
   display: grid;

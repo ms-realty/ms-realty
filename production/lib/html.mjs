@@ -621,6 +621,7 @@ function renderAdminMigrationReview(page) {
 
 function renderAdminLeadInbox(page) {
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
+  const communicationByLeadId = new Map((page.communicationThreads || []).map((thread) => [thread.lead_id, thread]));
   const metrics = [
     ["Leads", page.summary.leads],
     ["Replies queued", page.summary.replies],
@@ -639,14 +640,28 @@ function renderAdminLeadInbox(page) {
       const slaStatus = leadSla?.status || "pending";
       const slaLabel = slaStatus.replaceAll("_", " ");
       const escalationDue = leadSla?.manager_escalation_due_at || "";
-      const brokerId = lead.broker_assignment?.broker_id || "";
+      const brokerId = lead.broker_assignment?.broker_id || lead.assigned_broker || "";
+      const templates = page.communicationTemplates?.[lead.lead_id] || [];
+      const templateOptions = templates
+        .map(
+          (template) =>
+            `<option value="${escapeHtml(template.id)}" data-template-body="${escapeHtml(template.body)}" data-template-locale="${escapeHtml(template.locale)}" data-template-channel="${escapeHtml(template.preferred_channel)}">${escapeHtml(`${template.kind} · ${template.locale.toUpperCase()} · ${template.preferred_channel}`)}</option>`,
+        )
+        .join("");
+      const thread = communicationByLeadId.get(lead.lead_id);
+      const threadEvents = (thread?.events || [])
+        .map(
+          (event) =>
+            `<li data-communication-event="${escapeHtml(event.type)}"><strong>${escapeHtml(event.type.replaceAll("_", " "))}</strong> <time datetime="${escapeHtml(event.occurred_at || "")}">${escapeHtml(event.occurred_at || "")}</time><p>${escapeHtml(event.body || "No message body was provided.")}</p></li>`,
+        )
+        .join("");
       return `
       <tr data-lead-row="true" data-lead-id="${escapeHtml(lead.lead_id)}" data-lead-type="${escapeHtml(
         lead.lead_type,
       )}" data-original-language="${escapeHtml(lead.original_language)}" data-admin-locale="${escapeHtml(
         lead.admin_locale,
       )}" data-contact-preference="${escapeHtml(lead.contact_preference)}" data-broker-assignment="${escapeHtml(brokerId)}">
-        <td><code>${escapeHtml(lead.lead_id)}</code></td>
+        <td><code>${escapeHtml(lead.lead_id)}</code>${thread ? `<details data-communication-thread="${escapeHtml(lead.lead_id)}"><summary>Communication history (${escapeHtml(thread.event_count)})</summary><ol>${threadEvents}</ol></details>` : ""}</td>
         <td>${escapeHtml(lead.lead_type)}</td>
         <td>${escapeHtml(lead.source)}</td>
         <td>${escapeHtml(lead.original_language)} -> ${escapeHtml(lead.admin_locale)}</td>
@@ -667,6 +682,7 @@ function renderAdminLeadInbox(page) {
             <input type="hidden" name="leadId" value="${escapeHtml(lead.lead_id)}">
             <input type="hidden" name="language" value="${escapeHtml(lead.original_language)}">
             <input type="hidden" name="approved" value="true">
+            ${templates.length ? `<label>Reply template <select name="replyTemplate" data-communication-template-select="true"><option value="">Choose a reviewable starting template</option>${templateOptions}</select></label><small>Check the facts and edit the text before approval.</small>` : ""}
             <label data-show-original-toggle="true"><input type="checkbox" name="showOriginal"> Show original</label>
             <label>Hermes draft text <textarea name="hermesDraftText"></textarea></label>
             <label>Reviewer <input name="reviewer" required autocomplete="name"></label>

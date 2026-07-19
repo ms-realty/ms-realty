@@ -147,6 +147,17 @@ const ADMIN_UI_COPY = {
     replyQueuePending: "Отговорът с одобрение от брокер се поставя на опашка…",
     replyQueueReady: "Отговорът е поставен на опашка за ръчно изпращане.",
     replyQueueFailed: "Провереният отговор не можа да бъде поставен на опашка.",
+    communicationHistory: "История на комуникацията",
+    communicationEvents: "събития",
+    inboundRequest: "Получена заявка",
+    approvedReply: "Одобрен отговор",
+    deliverySent: "Изпратено",
+    deliveryFailed: "Неуспешно изпращане",
+    deliveryRequeue: "Върнато в опашката",
+    noMessageBody: "Няма въведен текст.",
+    replyTemplate: "Шаблон за отговор",
+    chooseReplyTemplate: "Изберете проверим начален шаблон",
+    templateReviewNotice: "Шаблонът е само начална точка. Проверете фактите и редактирайте текста преди одобрение.",
     skipToContent: "Към съдържанието",
     operationsReports: "Оперативни отчети",
     actualResponses: "Действително изпратени отговори",
@@ -324,6 +335,17 @@ const ADMIN_UI_COPY = {
     replyQueuePending: "Ответ, одобренный брокером, ставится в очередь…",
     replyQueueReady: "Ответ поставлен в очередь для ручной отправки.",
     replyQueueFailed: "Не удалось поставить проверенный ответ в очередь.",
+    communicationHistory: "История коммуникации",
+    communicationEvents: "событий",
+    inboundRequest: "Полученная заявка",
+    approvedReply: "Одобренный ответ",
+    deliverySent: "Отправлено",
+    deliveryFailed: "Ошибка отправки",
+    deliveryRequeue: "Возвращено в очередь",
+    noMessageBody: "Текст не указан.",
+    replyTemplate: "Шаблон ответа",
+    chooseReplyTemplate: "Выберите проверяемый начальный шаблон",
+    templateReviewNotice: "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
     skipToContent: "К содержанию",
     operationsReports: "Операционные отчеты",
     actualResponses: "Фактически отправленные ответы",
@@ -501,6 +523,17 @@ const ADMIN_UI_COPY = {
     replyQueuePending: "Queueing broker-approved reply…",
     replyQueueReady: "Reply queued for manual sending.",
     replyQueueFailed: "Could not queue the reviewed reply.",
+    communicationHistory: "Communication history",
+    communicationEvents: "events",
+    inboundRequest: "Inbound request",
+    approvedReply: "Approved reply",
+    deliverySent: "Sent",
+    deliveryFailed: "Delivery failed",
+    deliveryRequeue: "Returned to queue",
+    noMessageBody: "No message body was provided.",
+    replyTemplate: "Reply template",
+    chooseReplyTemplate: "Choose a reviewable starting template",
+    templateReviewNotice: "Templates are a starting point only. Check the facts and edit the text before approval.",
     skipToContent: "Skip to content",
     operationsReports: "Operations reports",
     actualResponses: "Actual responses sent",
@@ -1985,12 +2018,92 @@ function LeadAssignmentControl({ page, lead, copy }) {
   );
 }
 
+function communicationEventLabel(copy, type) {
+  const labels = {
+    inbound_request: label(copy, "inboundRequest", "Inbound request"),
+    reply_approved: label(copy, "approvedReply", "Approved reply"),
+    delivery_sent: label(copy, "deliverySent", "Sent"),
+    delivery_failed: label(copy, "deliveryFailed", "Delivery failed"),
+    delivery_requeue: label(copy, "deliveryRequeue", "Returned to queue"),
+  };
+  return labels[type] || type.replaceAll("_", " ");
+}
+
+function CommunicationThread({ page, thread, copy, ui }) {
+  if (!thread) return null;
+  return h(
+    "details",
+    { className: "adm-communication", "data-communication-thread": thread.lead_id },
+    h(
+      "summary",
+      null,
+      h(Icon, { name: "messages-square", size: 16 }),
+      h("span", null, label(copy, "communicationHistory", "Communication history")),
+      h("small", null, `${thread.event_count} ${label(copy, "communicationEvents", "events")}`),
+    ),
+    h(
+      "ol",
+      { className: "adm-communication__timeline" },
+      ...thread.events.map((event) =>
+        h(
+          "li",
+          { key: event.id, "data-communication-event": event.type },
+          h(
+            "div",
+            { className: "adm-communication__event-head" },
+            h("strong", null, communicationEventLabel(copy, event.type)),
+            event.channel ? h(StatusPill, { tone: event.type === "delivery_failed" ? "brick" : "sea" }, valueText(ui, event.channel)) : null,
+            event.occurred_at
+              ? h("time", { dateTime: event.occurred_at, title: event.occurred_at }, formatAdminDateTime(event.occurred_at, page.workspace?.locale))
+              : null,
+          ),
+          event.actor ? h("small", null, event.actor) : null,
+          h("p", null, event.body || label(copy, "noMessageBody", "No message body was provided.")),
+        ),
+      ),
+    ),
+  );
+}
+
+function CommunicationTemplateSelect({ templates = [], copy }) {
+  if (!templates.length) return null;
+  return h(
+    "div",
+    { className: "adm-template-picker", "data-communication-template-picker": "true" },
+    h(
+      "label",
+      null,
+      label(copy, "replyTemplate", "Reply template"),
+      h(
+        "select",
+        { name: "replyTemplate", "data-communication-template-select": "true" },
+        h("option", { value: "" }, label(copy, "chooseReplyTemplate", "Choose a reviewable starting template")),
+        ...templates.map((template) =>
+          h(
+            "option",
+            {
+              key: template.id,
+              value: template.id,
+              "data-template-body": template.body,
+              "data-template-locale": template.locale,
+              "data-template-channel": template.preferred_channel,
+            },
+            `${template.kind.replaceAll("_", " ")} · ${template.locale.toUpperCase()} · ${template.preferred_channel}`,
+          ),
+        ),
+      ),
+    ),
+    h("small", null, label(copy, "templateReviewNotice", "Templates are a starting point only. Check the facts and edit the text before approval.")),
+  );
+}
+
 function LeadInboxBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
+  const communicationByLeadId = new Map((page.communicationThreads || []).map((thread) => [thread.lead_id, thread]));
   const repliedLeadIds = new Set(
     (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
   );
@@ -2112,6 +2225,7 @@ function LeadInboxBody({ page }) {
                           )
                         : null,
                       h(LeadAssignmentControl, { page, lead, copy }),
+                      h(CommunicationThread, { page, thread: communicationByLeadId.get(lead.lead_id), copy, ui }),
                       h("a", { className: "adm-lead-context", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id }, label(copy, "viewHistory", "History")),
                       h(
                         "div",
@@ -2181,6 +2295,7 @@ function LeadInboxBody({ page }) {
                         h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
                         h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
                         h("input", { type: "hidden", name: "approved", defaultValue: "true" }),
+                        h(CommunicationTemplateSelect, { templates: page.communicationTemplates?.[lead.lead_id] || [], copy }),
                         h(
                           "label",
                           { className: "adm-check", "data-show-original-toggle": "true" },

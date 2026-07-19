@@ -62,6 +62,7 @@ import {
   readLeadPipelineOutcomes,
 } from "./lead-pipeline-outcomes.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
+import { buildCommunicationThreads, communicationTemplatesForLead } from "./communication-threads.mjs";
 import {
   DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH,
   appendReplyDeliveryOutcome,
@@ -507,6 +508,7 @@ function leadInboxPayload(registry, url, config) {
     readLeadAssignments(config.leadAssignmentLedgerPath),
   );
   const replies = readReplyOutbox(config.replyOutboxPath);
+  const replyDeliveryOutcomes = readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath);
   const viewings = readViewings(config.viewingLedgerPath);
   const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
   const deals = readDeals(config.dealLedgerPath);
@@ -533,9 +535,10 @@ function leadInboxPayload(registry, url, config) {
       generatedAt: config.reviewedAt || config.leadPipelineOutcomeAt || new Date().toISOString(),
     }),
     replies,
-    replyDeliveryQueue: buildReplyDeliveryQueue(
-      replies,
-      readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath),
+    replyDeliveryQueue: buildReplyDeliveryQueue(replies, replyDeliveryOutcomes),
+    communicationThreads: buildCommunicationThreads({ leads, replies, outcomes: replyDeliveryOutcomes }),
+    communicationTemplates: Object.fromEntries(
+      leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
     ),
     languageRequests: readLanguageRequests(config.languageRequestPath),
     translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),

@@ -493,6 +493,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       repliesQueued: replyDeliveryQueue.summary.queued,
       repliesFailed: replyDeliveryQueue.summary.failed,
       repliesSent: replyDeliveryQueue.summary.sent,
+      communicationThreads: data.communicationThreads?.length || 0,
       buyerPipelineOpen: leadPipelineQueue.summary.buyers_open,
       renterPipelineOpen: leadPipelineQueue.summary.renters_open,
       leadPipelineOverdue: leadPipelineQueue.summary.overdue,

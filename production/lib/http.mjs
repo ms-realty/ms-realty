@@ -46,6 +46,7 @@ import {
   readLeadPipelineOutcomes,
 } from "./lead-pipeline-outcomes.mjs";
 import { appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
+import { buildCommunicationThreads, communicationTemplatesForLead } from "./communication-threads.mjs";
 import {
   appendReplyDeliveryOutcome,
   buildReplyDeliveryQueue,
@@ -508,12 +509,11 @@ export function createHttpApp({
   };
   const currentReplyData = () => {
     const replies = readReplyOutbox(replyOutboxPath || undefined);
+    const outcomes = readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined);
     return {
       replies,
-      replyDeliveryQueue: buildReplyDeliveryQueue(
-        replies,
-        readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined),
-      ),
+      outcomes,
+      replyDeliveryQueue: buildReplyDeliveryQueue(replies, outcomes),
     };
   };
   const currentLeadJourneyContext = () => ({
@@ -532,6 +532,7 @@ export function createHttpApp({
   const currentAdminLeadPayload = (requestedLocale, operatorId = null) => {
     const leads = currentLeads();
     const leadPipelineQueue = currentLeadPipelineQueue();
+    const replyData = currentReplyData();
     return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads,
       leadPipelineQueue,
@@ -542,7 +543,12 @@ export function createHttpApp({
         leadPipelineStates: leadPipelineQueue.states,
         generatedAt: reviewedAt || leadPipelineOutcomeAt || receivedAt || new Date().toISOString(),
       }),
-      ...currentReplyData(),
+      replies: replyData.replies,
+      replyDeliveryQueue: replyData.replyDeliveryQueue,
+      communicationThreads: buildCommunicationThreads({ leads, replies: replyData.replies, outcomes: replyData.outcomes }),
+      communicationTemplates: Object.fromEntries(
+        leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
+      ),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
       translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
       listingEdits: readListingEdits(listingEditLedgerPath || undefined),
