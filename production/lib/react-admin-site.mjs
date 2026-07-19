@@ -1701,6 +1701,7 @@ function PipelineCard({ page, state, lead }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const requirements = state.requirements;
+  const inventoryMatch = (page.leadMatching?.rows || []).find((row) => row.lead_id === state.lead_id);
   const stageTone = state.status === "lost" ? "brick" : state.status === "closed" ? "success" : state.overdue ? "brick" : "sea";
   return h(
     "article",
@@ -1743,6 +1744,41 @@ function PipelineCard({ page, state, lead }) {
           requirements.bedrooms_min !== null ? h("span", null, `${label(copy, "bedroomsMin", "Minimum bedrooms")}: ${requirements.bedrooms_min}`) : null,
           h("span", null, requirements.timeline),
           h("span", null, statusText(ui, requirements.finance_status)),
+        )
+      : null,
+    inventoryMatch
+      ? h(
+          "section",
+          { className: "adm-report-card", "data-inventory-matching": "true", "data-match-count": inventoryMatch.match_count },
+          h(
+            "header",
+            null,
+            h("div", null, h("h3", null, label(copy, "matchingInventory", "Matching inventory")), h("small", null, `${label(copy, "matches", "Matches")}: ${inventoryMatch.match_count}`)),
+          ),
+          inventoryMatch.matches.length
+            ? h(
+                "ul",
+                { className: "adm-task-list" },
+                ...inventoryMatch.matches.map((match) =>
+                  h(
+                    "li",
+                    { key: match.listing_id, "data-inventory-match": match.listing_id },
+                    h(
+                      "div",
+                      null,
+                      h("strong", null, match.title),
+                      h("small", null, [match.location, statusText(ui, match.property_type), match.price_on_request ? label(copy, "priceOnRequest", "Price on request") : match.price_eur ? `€${Number(match.price_eur).toLocaleString("en")}` : null].filter(Boolean).join(" · ")),
+                    ),
+                    h(
+                      "div",
+                      { className: "adm-task-list__actions" },
+                      h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: match.path, target: "_blank", rel: "noopener" }, h(Icon, { name: "external-link", size: 15 }), label(copy, "openListing", "Open listing")),
+                      h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/listings/edit?listingId=${encodeURIComponent(match.listing_id)}`, page) }, label(copy, "propertyEditor", "Edit")),
+                    ),
+                  ),
+                ),
+              )
+            : h("p", { className: "adm-empty" }, label(copy, "noInventoryMatches", "No reviewed listings match these requirements yet.")),
         )
       : null,
     state.status === "open" ? h("div", { className: "adm-pipeline-card__primary" }, h(PipelinePrimaryAction, { page, state })) : null,

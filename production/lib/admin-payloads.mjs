@@ -468,6 +468,8 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       renterPipelineOpen: leadPipelineQueue.summary.renters_open,
       leadPipelineOverdue: leadPipelineQueue.summary.overdue,
       leadPipelineQualified: leadPipelineQueue.summary.qualified,
+      leadsWithInventoryMatches: data.leadMatching?.summary?.leads_with_matches || 0,
+      inventoryMatchTasks: data.leadMatching?.summary?.open_broker_tasks || 0,
       leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
       leadSlaReminders: leadSla.summary.reminder_required,
       languageRequests: data.languageRequests.length,

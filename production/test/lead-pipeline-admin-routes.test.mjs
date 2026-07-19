@@ -81,6 +81,10 @@ test("buyer pipeline route binds the operator, renders its workbench, and keeps 
     assert.match(page.body, /data-react-admin-ui="lead-pipeline"/);
     assert.match(page.body, /data-admin-mutation-form="lead-pipeline"/);
     assert.match(page.body, /pipeline-buyer-1/);
+    assert.match(page.body, /data-inventory-matching="true"/);
+    const pipelineJson = await dispatchHttp(app, { url: "/api/admin/pipeline", headers: auth });
+    assert.equal(pipelineJson.body.leadMatching.rows[0].lead_id, "pipeline-buyer-1");
+    assert.equal(pipelineJson.body.leadMatching.rows[0].matches.length, pipelineJson.body.leadMatching.rows[0].match_count);
 
     const prematureViewing = await dispatchHttp(app, {
       method: "POST",
@@ -130,6 +134,7 @@ test("buyer pipeline route binds the operator, renders its workbench, and keeps 
       body: qualification,
     });
     assert.equal(qualified.status, 201);
+
     assert.equal(qualified.body.outcome.actor, "broker_en");
     assert.equal(qualified.body.lead_pipeline.stage, "qualified");
 
@@ -254,6 +259,13 @@ test("Next adapter enforces the same qualification and contract gates", async ()
       { config },
     );
     assert.equal(qualified.status, 201);
+
+    const pipelinePage = await renderAppAdminResponse(
+      new Request("https://example.test/admin/pipeline", { headers: auth }),
+      { config },
+    );
+    assert.equal(pipelinePage.status, 200);
+    assert.match(await pipelinePage.text(), /data-inventory-matching="true"/);
 
     const viewing = await renderAppAdminResponse(
       new Request("https://example.test/api/admin/viewings", {

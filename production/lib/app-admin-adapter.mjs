@@ -47,6 +47,7 @@ import {
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, withLeadContacts } from "./lead-contact-vault.mjs";
+import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
   appendLeadPipelineOutcome,
@@ -489,18 +490,26 @@ function leadInboxPayload(registry, url, config) {
   const deals = readDeals(config.dealLedgerPath);
   const sellerPipeline = readSellerPipeline(config.sellerPipelinePath);
   const sellerPipelineOutcomes = readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath);
+  const leadPipelineQueue = buildLeadPipelineQueue(
+    {
+      leads,
+      outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
+      viewings,
+      viewingFollowUps,
+      deals,
+    },
+    { now: config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString() },
+  );
   return renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
     leads,
-    leadPipelineQueue: buildLeadPipelineQueue(
-      {
-        leads,
-        outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
-        viewings,
-        viewingFollowUps,
-        deals,
-      },
-      { now: config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString() },
-    ),
+    leadPipelineQueue,
+    leadMatching: buildLeadMatchingReport({
+      registry,
+      seed: currentSeed(config),
+      leads,
+      leadPipelineStates: leadPipelineQueue.states,
+      generatedAt: config.reviewedAt || config.leadPipelineOutcomeAt || new Date().toISOString(),
+    }),
     replies,
     replyDeliveryQueue: buildReplyDeliveryQueue(
       replies,

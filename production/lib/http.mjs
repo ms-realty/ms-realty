@@ -33,6 +33,7 @@ import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   appendLeadPipelineOutcome,
   buildLeadPipelineQueue,
@@ -512,10 +513,19 @@ export function createHttpApp({
     buildLeadPipelineQueue(currentLeadJourneyContext(), {
       now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
     });
-  const currentAdminLeadPayload = (requestedLocale, operatorId = null) =>
-    renderAdminLeadsPayload(activeRegistry, requestedLocale, {
-      leads: currentLeads(),
-      leadPipelineQueue: currentLeadPipelineQueue(),
+  const currentAdminLeadPayload = (requestedLocale, operatorId = null) => {
+    const leads = currentLeads();
+    const leadPipelineQueue = currentLeadPipelineQueue();
+    return renderAdminLeadsPayload(activeRegistry, requestedLocale, {
+      leads,
+      leadPipelineQueue,
+      leadMatching: buildLeadMatchingReport({
+        registry: activeRegistry,
+        seed: currentSeed(),
+        leads,
+        leadPipelineStates: leadPipelineQueue.states,
+        generatedAt: reviewedAt || leadPipelineOutcomeAt || receivedAt || new Date().toISOString(),
+      }),
       ...currentReplyData(),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
       translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
@@ -529,6 +539,7 @@ export function createHttpApp({
       deals: readDeals(dealLedgerPath || undefined),
       brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
     });
+  };
   const currentOperationsReport = () => {
     const generatedAt = reviewedAt || editedAt || receivedAt || new Date().toISOString();
     const reportSeed = currentSeed();
