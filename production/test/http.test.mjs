@@ -297,6 +297,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const eventLedgerPath = tempEvents();
   const consentLedgerPath = tempConsents();
   const auditLogPath = tempAuditLog();
+  const accountLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-accounts-`)}/accounts.jsonl`;
   const slugHistoryPath = tempSlugHistory();
   const hermesReplyPrompts = [];
   const app = createHttpApp({
@@ -321,6 +322,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     eventLedgerPath,
     consentLedgerPath,
     auditLogPath,
+    accountLedgerPath,
     slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
@@ -768,6 +770,36 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/leads?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  smoke.contacts = await dispatchHttp(app, {
+    url: "/api/admin/contacts?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  smoke.contactsHtml = await dispatchHttp(app, {
+    url: "/admin/contacts?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  smoke.accountCreated = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/accounts",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: { accountType: "family", label: "HTTP review household", actor: "sales_manager", humanConfirmed: true },
+  });
+  smoke.accountLinked = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/accounts/link",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      accountId: smoke.accountCreated.body.account_id,
+      contactId: smoke.contacts.body.contacts[0].id,
+      actor: "sales_manager",
+      reason: "Broker confirmed the same household.",
+      linkConfirmed: true,
+    },
+  });
+  smoke.contactsAfterLink = await dispatchHttp(app, {
+    url: "/api/admin/contacts?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
@@ -901,7 +933,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const auditRows = readAuditLog(auditLogPath);
   assert.equal(assertAuditLog(auditRows), true);
   assert.deepEqual(actionCounts(auditRows), {
+    account_created: 1,
     broker_contact_approved: 1,
+    contact_linked: 1,
     hermes_model_call: 1,
     tour_approved: 1,
     media_reviewed: 1,
@@ -922,6 +956,15 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.staleListing.body.metadata.robots, "noindex,follow");
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
   assert.equal(smoke.admin.body.leads.length, 4);
+  assert.equal(smoke.contacts.status, 200);
+  assert.equal(smoke.contacts.body.kind, "admin_contacts");
+  assert.equal(smoke.contacts.body.contacts.length, 2);
+  assert.equal(smoke.contacts.body.summary.duplicate_leads, 2);
+  assert.equal(smoke.contactsHtml.body.includes('data-kind="admin-contacts"'), true);
+  assert.equal(smoke.contactsHtml.body.includes('data-account-create-form="true"'), true);
+  assert.equal(smoke.accountCreated.status, 201);
+  assert.equal(smoke.accountLinked.status, 201);
+  assert.equal(smoke.contactsAfterLink.body.contacts[0].account_id, smoke.accountCreated.body.account_id);
   assert.equal(smoke.admin.body.leadSla.summary.total_leads, 4);
   assert.equal(smoke.admin.body.leadSla.summary.manager_escalation_required, 4);
   assert.equal(smoke.admin.body.leadSla.summary.customer_reply_sent, 0);

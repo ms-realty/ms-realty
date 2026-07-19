@@ -19,6 +19,7 @@ import {
 import {
   LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
+  renderAdminContactsPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
   renderAdminListingManagerPayload,
@@ -26,6 +27,14 @@ import {
   renderAdminOperationalQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
+import {
+  DEFAULT_ACCOUNT_LEDGER_PATH,
+  appendAccountContactLink,
+  appendAccountCreation,
+  deriveAccounts,
+  readAccountLedger,
+} from "./account-ledger.mjs";
+import { buildContactRecords } from "./contact-records.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
@@ -192,6 +201,7 @@ export function appAdminConfigFromEnv(env = process.env) {
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
@@ -557,6 +567,35 @@ function leadInboxPayload(registry, url, config) {
     }),
     deals,
     brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+  });
+}
+
+function contactWorkspaceData(config) {
+  const leads = applyLeadAssignments(
+    withLeadContacts(readLeadLedger(config.leadLedgerPath), {
+      filePath: config.leadContactVaultPath,
+      secret: config.leadContactKey,
+    }),
+    readLeadAssignments(config.leadAssignmentLedgerPath),
+  );
+  const replies = readReplyOutbox(config.replyOutboxPath);
+  const outcomes = readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath);
+  const communicationThreads = buildCommunicationThreads({ leads, replies, outcomes });
+  const accounts = deriveAccounts(readAccountLedger(config.accountLedgerPath));
+  return {
+    leads,
+    communicationThreads,
+    accounts,
+    contacts: buildContactRecords({ leads, communicationThreads, accounts }),
+  };
+}
+
+function contactsPayload(registry, url, config) {
+  const data = contactWorkspaceData(config);
+  return renderAdminContactsPayload(registry, url.searchParams.get("locale") || "en", {
+    contacts: data.contacts,
+    accounts: data.accounts,
+    operatorId: config.adminPrincipal || null,
   });
 }
 
@@ -1366,6 +1405,51 @@ function appendLeadAssignmentEntry(input, config) {
   return persisted;
 }
 
+function appendAccountCreationEntry(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const result = appendAccountCreation(attributed, {
+    filePath: config.accountLedgerPath,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+  });
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: "account_created",
+        actor: result.actor,
+        objectType: "account",
+        objectId: result.account_id,
+        metadata: { account_type: result.account_type },
+      },
+      config,
+      result.recorded_at,
+    );
+  }
+  return result;
+}
+
+function appendAccountContactLinkEntry(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const contacts = contactWorkspaceData(config).contacts;
+  const result = appendAccountContactLink(contacts, attributed, {
+    filePath: config.accountLedgerPath,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+  });
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: "contact_linked",
+        actor: result.actor,
+        objectType: "account_contact",
+        objectId: result.id,
+        metadata: { account_id: result.account_id, contact_id: result.contact_id },
+      },
+      config,
+      result.recorded_at,
+    );
+  }
+  return result;
+}
+
 function appendDealClose(input, config) {
   const deal = appendClosedDeal(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.dealLedgerPath,
@@ -1785,6 +1869,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(contactsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, contactsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
@@ -1954,6 +2040,14 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
       const result = appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/accounts") {
+      const result = appendAccountCreationEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/accounts/link") {
+      const result = appendAccountContactLinkEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {

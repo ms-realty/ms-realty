@@ -13,6 +13,7 @@ import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.m
 import {
   LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
+  renderAdminContactsPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
   renderAdminListingManagerPayload,
@@ -20,6 +21,8 @@ import {
   renderAdminOperationalQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
+import { appendAccountContactLink, appendAccountCreation, deriveAccounts, readAccountLedger } from "./account-ledger.mjs";
+import { buildContactRecords } from "./contact-records.mjs";
 import {
   addLocaleToRegistry,
   loadLocaleRegistry,
@@ -385,6 +388,7 @@ export function createHttpApp({
   routeMap = loadLegacyRouteMap(),
   migrationReviewDashboard = loadMigrationReviewDashboard(),
   leadLedgerPath = null,
+  accountLedgerPath = null,
   leadAssignmentLedgerPath = null,
   leadPipelineOutcomeLedgerPath = null,
   leadContactVaultPath = null,
@@ -560,6 +564,18 @@ export function createHttpApp({
       ...currentSellerPipelineData(),
       deals: readDeals(dealLedgerPath || undefined),
       brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
+    });
+  };
+  const currentContactPayload = (requestedLocale, operatorId = null) => {
+    const leads = currentLeads();
+    const replies = readReplyOutbox(replyOutboxPath || undefined);
+    const outcomes = readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined);
+    const communicationThreads = buildCommunicationThreads({ leads, replies, outcomes });
+    const accounts = deriveAccounts(readAccountLedger(accountLedgerPath || undefined));
+    return renderAdminContactsPayload(activeRegistry, requestedLocale, {
+      contacts: buildContactRecords({ leads, communicationThreads, accounts }),
+      accounts,
+      operatorId,
     });
   };
   const currentOperationsReport = () => {
@@ -942,6 +958,15 @@ export function createHttpApp({
         adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal)),
         "text/html; charset=utf-8",
       );
+    }
+
+    if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal);
+      if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && url.pathname === "/admin") {
@@ -1995,6 +2020,53 @@ export function createHttpApp({
           });
         }
         return adminJson(persisted.idempotent ? 200 : 201, persisted);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/accounts") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const result = appendAccountCreation(input, {
+          filePath: accountLedgerPath || undefined,
+          recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
+        });
+        if (!result.idempotent) {
+          recordAudit({
+            action: "account_created",
+            actor: result.actor,
+            objectType: "account",
+            objectId: result.account_id,
+            metadata: { account_type: result.account_type },
+          });
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/accounts/link") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const contacts = currentContactPayload("en", principal).contacts;
+        const result = appendAccountContactLink(contacts, input, {
+          filePath: accountLedgerPath || undefined,
+          recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
+        });
+        if (!result.idempotent) {
+          recordAudit({
+            action: "contact_linked",
+            actor: result.actor,
+            objectType: "account_contact",
+            objectId: result.id,
+            metadata: { account_id: result.account_id, contact_id: result.contact_id },
+          });
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

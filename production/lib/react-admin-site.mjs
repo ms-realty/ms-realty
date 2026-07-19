@@ -198,6 +198,8 @@ const ADMIN_UI_COPY = {
     auditActions: {
       media_reviewed: "Прегледан медиен файл",
       lead_assigned: "Запитването е пренасочено към брокер",
+      account_created: "Създаден клиентски акаунт",
+      contact_linked: "Контакт, свързан с акаунт",
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
@@ -386,6 +388,8 @@ const ADMIN_UI_COPY = {
     auditActions: {
       media_reviewed: "Медиафайл проверен",
       lead_assigned: "Заявка переназначена брокеру",
+      account_created: "Создан клиентский аккаунт",
+      contact_linked: "Контакт связан с аккаунтом",
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
@@ -574,6 +578,8 @@ const ADMIN_UI_COPY = {
     auditActions: {
       media_reviewed: "Media asset reviewed",
       lead_assigned: "Lead assigned to broker",
+      account_created: "Customer account created",
+      contact_linked: "Contact linked to account",
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
@@ -740,6 +746,7 @@ function PageHeader({ title, subtitle, children }) {
 const NAV_ROUTES = [
   { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
+  { id: "contacts", module: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
   { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
   { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
@@ -772,6 +779,7 @@ function Sidebar({ page }) {
           label: screenLabel("crm", "lead_inbox", "Lead inbox"),
           badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
         },
+        { ...route("contacts"), label: screenLabel("crm", "contacts", "Contacts and accounts") },
         {
           ...route("lead_pipeline"),
           label: screenLabel("crm", "lead_pipeline", "Buyers and renters"),
@@ -2095,6 +2103,179 @@ function CommunicationTemplateSelect({ templates = [], copy }) {
     ),
     h("small", null, label(copy, "templateReviewNotice", "Templates are a starting point only. Check the facts and edit the text before approval.")),
   );
+}
+
+function AccountCreateForm({ page, copy }) {
+  if (!pageCan(page, "operations:write")) return null;
+  return h(
+    "form",
+    {
+      method: "post",
+      action: "/api/admin/accounts",
+      className: "adm-account-form",
+      "data-admin-mutation-form": "true",
+      "data-admin-mutation-saving": label(copy, "accountSaving", "Saving…"),
+      "data-admin-mutation-success": label(copy, "accountSaved", "Account saved."),
+      "data-admin-mutation-failure": label(copy, "accountFailed", "Could not save the account."),
+      "data-account-create-form": "true",
+    },
+    page.workspace?.operator_id
+      ? h("input", { type: "hidden", name: "actor", value: currentOperatorId(page) })
+      : h("label", null, label(copy, "reviewer", "Operator"), h("input", { name: "actor", required: true, autoComplete: "name" })),
+    h(
+      "label",
+      null,
+      label(copy, "accountType", "Account type"),
+      h(
+        "select",
+        { name: "accountType", required: true },
+        h("option", { value: "family" }, label(copy, "family", "Family")),
+        h("option", { value: "company" }, label(copy, "company", "Company")),
+      ),
+    ),
+    h("label", null, label(copy, "accountLabel", "Internal account label"), h("input", { name: "label", required: true, maxLength: 120 })),
+    h("label", null, label(copy, "accountNote", "Internal note (optional)"), h("textarea", { name: "note", rows: 2, maxLength: 1000 })),
+    h(
+      "label",
+      { className: "adm-check" },
+      h("input", { type: "checkbox", name: "humanConfirmed", required: true }),
+      h("span", null, label(copy, "humanConfirmAccount", "I confirm this account has been reviewed and should be created.")),
+    ),
+    h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+    h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "plus", size: 15 }), h("span", null, label(copy, "createAccount", "Create account"))),
+  );
+}
+
+function AccountLinkForm({ page, contact, copy }) {
+  if (!pageCan(page, "operations:write") || contact.account_id || !page.accounts?.length) return null;
+  return h(
+    "details",
+    { className: "adm-account-link", "data-account-link-control": contact.id },
+    h("summary", null, h(Icon, { name: "link", size: 15 }), h("span", null, label(copy, "linkToAccount", "Link to account"))),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/accounts/link",
+        "data-admin-mutation-form": "true",
+        "data-admin-mutation-saving": label(copy, "accountSaving", "Saving…"),
+        "data-admin-mutation-success": label(copy, "accountLinkSaved", "Contact linked to the account."),
+        "data-admin-mutation-failure": label(copy, "accountLinkFailed", "Could not link the contact."),
+      },
+      h("input", { type: "hidden", name: "contactId", value: contact.id }),
+      page.workspace?.operator_id
+        ? h("input", { type: "hidden", name: "actor", value: currentOperatorId(page) })
+        : h("label", null, label(copy, "reviewer", "Operator"), h("input", { name: "actor", required: true, autoComplete: "name" })),
+      h(
+        "label",
+        null,
+        label(copy, "accounts", "Accounts"),
+        h(
+          "select",
+          { name: "accountId", required: true },
+          h("option", { value: "" }, "—"),
+          ...page.accounts.map((account) => h("option", { key: account.id, value: account.id }, `${account.label} · ${label(copy, account.type, account.type)}`)),
+        ),
+      ),
+      h("label", null, label(copy, "linkReason", "Reason for linking"), h("textarea", { name: "reason", rows: 2, maxLength: 1000, required: true })),
+      h(
+        "label",
+        { className: "adm-check" },
+        h("input", { type: "checkbox", name: "linkConfirmed", required: true }),
+        h("span", null, label(copy, "humanConfirmLink", "I confirm this contact belongs to the selected account.")),
+      ),
+      h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+      h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "saveAccountLink", "Save account link")),
+    ),
+  );
+}
+
+function ContactsBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const metrics = [
+    [label(copy, "contactRecords", "Customer contacts"), page.summary.contacts, "users", "sea"],
+    [label(copy, "accounts", "Accounts"), page.summary.accounts, "building-2", "sand"],
+    [label(copy, "duplicateEnquiries", "Linked repeat enquiries"), page.summary.duplicate_leads, "link", "sun"],
+    [label(copy, "communicationEvents", "Communication events"), page.summary.communication_events, "messages-square", "sea"],
+  ];
+  return adminShell(page, {
+    title: label(copy, "contactsWorkspace", "Contacts and accounts"),
+    mainAttrs: {
+      "data-kind": "admin-contacts",
+      "data-react-admin-ui": "contacts",
+      "data-contact-count": page.summary.contacts,
+      "data-account-count": page.summary.accounts,
+      "data-task-led": "true",
+    },
+    children: [
+      h(PageHeader, { title: label(copy, "contactsWorkspace", "Contacts and accounts"), subtitle: page.metadata.description }),
+      h(StatGrid, { metrics }),
+      h(
+        "div",
+        { className: "adm-contact-layout" },
+        h(
+          Panel,
+          { title: label(copy, "accounts", "Accounts") },
+          h(AccountCreateForm, { page, copy }),
+          page.accounts.length
+            ? h(
+                "ul",
+                { className: "adm-account-list" },
+                ...page.accounts.map((account) =>
+                  h(
+                    "li",
+                    { key: account.id, "data-account-record": account.id },
+                    h("div", null, h("strong", null, account.label), h("code", { className: "crm-mono" }, account.id)),
+                    h(StatusPill, { tone: account.type === "company" ? "sea" : "sand" }, label(copy, account.type, account.type)),
+                    h("span", null, `${account.contact_count} ${label(copy, "contactRecords", "contacts")}`),
+                  ),
+                ),
+              )
+            : h("p", { className: "adm-empty" }, label(copy, "noAccounts", "No family or company accounts yet.")),
+        ),
+        h(
+          Panel,
+          { title: label(copy, "contactRecords", "Customer contacts") },
+          h(
+            "div",
+            { className: "adm-contact-grid" },
+            ...page.contacts.map((contact) =>
+              h(
+                "article",
+                { key: contact.id, className: "adm-contact-card", "data-contact-record": contact.id },
+                h(
+                  "header",
+                  null,
+                  h("div", null, h("h3", null, contact.display_name), h("code", { className: "crm-mono" }, contact.id)),
+                  contact.account_id
+                    ? h(StatusPill, { tone: "sand" }, `${contact.account_label} · ${label(copy, contact.account_type, contact.account_type)}`)
+                    : h(StatusPill, { tone: "sun" }, label(copy, "ungroupedContacts", "No account")),
+                ),
+                leadContactActions({ contact: contact.contact, contact_preference: contact.preferred_channel }, ui),
+                h(
+                  "dl",
+                  { className: "adm-contact-facts" },
+                  h("div", null, h("dt", null, label(copy, "leads", "Enquiries")), h("dd", null, contact.lead_count)),
+                  h("div", null, h("dt", null, label(copy, "duplicateEnquiries", "Linked repeats")), h("dd", null, contact.duplicate_leads)),
+                  h("div", null, h("dt", null, label(copy, "owners", "Owners")), h("dd", null, contact.assigned_brokers.join(", ") || "—")),
+                  h("div", null, h("dt", null, label(copy, "language", "Language")), h("dd", null, contact.languages.join(", ").toUpperCase() || "—")),
+                  h("div", null, h("dt", null, label(copy, "communicationEvents", "Communication events")), h("dd", null, contact.communication_event_count)),
+                  h("div", null, h("dt", null, label(copy, "latestEnquiry", "Latest enquiry")), h("dd", null, contact.latest_received_at ? formatAdminDateTime(contact.latest_received_at, page.workspace?.locale) : "—")),
+                ),
+                h(
+                  "div",
+                  { className: "adm-contact-card__leads" },
+                  ...contact.lead_ids.map((leadId) => h("a", { key: leadId, href: adminHref(`/admin/leads?locale=${page.workspace.locale}#lead-${encodeURIComponent(leadId)}`, page) }, leadId)),
+                ),
+                h(AccountLinkForm, { page, contact, copy }),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  });
 }
 
 function LeadInboxBody({ page }) {
@@ -3764,6 +3945,7 @@ function MigrationReviewBody({ page }) {
 
 export function renderReactAdminBody(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
+  if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
   if (page.kind === "admin_lead_pipeline") return renderStaticElement(h(LeadPipelineBody, { page }));
   if (page.kind === "admin_requests") return renderStaticElement(h(PublicRequestsBody, { page }));

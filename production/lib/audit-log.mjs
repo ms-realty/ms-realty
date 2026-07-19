@@ -5,7 +5,9 @@ import { fromRoot } from "./paths.mjs";
 export const DEFAULT_AUDIT_LOG_PATH = fromRoot("production", "data", "audit-log.jsonl");
 
 const ADMIN_ACTIONS = new Set([
+  "account_created",
   "broker_contact_approved",
+  "contact_linked",
   "deal_closed",
   "deployable_redirects_exported",
   "hermes_model_call",

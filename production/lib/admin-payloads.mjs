@@ -516,3 +516,34 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     },
   };
 }
+
+export function renderAdminContactsPayload(registry, requestedLocale, data) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const contacts = data.contacts || [];
+  const accounts = data.accounts || [];
+  return {
+    kind: "admin_contacts",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/contacts",
+    canonical: "/admin/contacts",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.contactsWorkspace || "Contacts and accounts"} | MS Realty`,
+      description: workspace.copy.contactsDescription || "One customer record for related enquiries and accounts.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, data.operatorId || null),
+    contacts,
+    accounts,
+    summary: {
+      contacts: contacts.length,
+      accounts: accounts.length,
+      duplicate_leads: contacts.reduce((total, contact) => total + (contact.duplicate_leads || 0), 0),
+      unassigned_accounts: contacts.filter((contact) => !contact.account_id).length,
+      communication_events: contacts.reduce((total, contact) => total + (contact.communication_event_count || 0), 0),
+    },
+  };
+}

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEFAULT_AUDIT_LOG_PATH } from "./lib/audit-log.mjs";
+import { DEFAULT_ACCOUNT_LEDGER_PATH } from "./lib/account-ledger.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
@@ -58,6 +59,7 @@ export function productionServerConfig(env = process.env) {
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
+    accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
     leadAssignmentLedgerPath: env.MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH || DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
     leadPipelineOutcomeLedgerPath:
@@ -117,6 +119,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     eventLedgerPath: config.eventLedgerPath,
     consentLedgerPath: config.consentLedgerPath,
     auditLogPath: config.auditLogPath,
+    accountLedgerPath: config.accountLedgerPath,
     leadLedgerPath: config.leadLedgerPath,
     leadAssignmentLedgerPath: config.leadAssignmentLedgerPath,
     leadPipelineOutcomeLedgerPath: config.leadPipelineOutcomeLedgerPath,

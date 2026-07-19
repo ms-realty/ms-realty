@@ -151,6 +151,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_ACCOUNT_LEDGER_PATH: tempJsonl("app-admin-accounts"),
       MS_REALTY_BROKER_CONTACT_LEDGER_PATH: tempJsonl("app-admin-broker-contacts"),
       MS_REALTY_CONSENT_LEDGER_PATH: tempJsonl("app-admin-consents"),
       MS_REALTY_DEAL_LEDGER_PATH: tempJsonl("app-admin-deals"),
@@ -247,6 +248,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const leadPipelineJsonRoute = await import("../../app/api/admin/pipeline/route.js");
       const leadPipelineOutcomeRoute = await import("../../app/api/admin/lead-pipeline/outcome/route.js");
       const leadAssignmentRoute = await import("../../app/api/admin/leads/assign/route.js");
+      const contactsRoute = await import("../../app/admin/contacts/route.js");
+      const contactsJsonRoute = await import("../../app/api/admin/contacts/route.js");
+      const accountRoute = await import("../../app/api/admin/accounts/route.js");
+      const accountLinkRoute = await import("../../app/api/admin/accounts/link/route.js");
       const viewingsPageRoute = await import("../../app/admin/viewings/route.js");
       const viewingsJsonRoute = await import("../../app/api/admin/viewings/route.js");
       const activityRoute = await import("../../app/admin/activity/route.js");
@@ -368,6 +373,49 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-lead-column="reply"/);
       assert.match(inboxHtml, /data-label="Ответ"/);
       assert.match(inboxHtml, /data-lead-column="escalation_due"[^>]*><time dateTime="[^"]+" title="[^"]+">/);
+
+      const contactsBefore = await contactsJsonRoute.GET(new Request("https://example.test/api/admin/contacts?locale=ru", { headers: auth }));
+      const contactsBeforeBody = await contactsBefore.json();
+      assert.equal(contactsBefore.status, 200);
+      assert.equal(contactsBeforeBody.kind, "admin_contacts");
+      assert.equal(contactsBeforeBody.contacts.length, 1);
+      assert.equal(contactsBeforeBody.contacts[0].contact.whatsapp, "+359880000001");
+      assert.equal(contactsBeforeBody.contacts[0].account_id, null);
+      const contactsPage = await contactsRoute.GET(new Request("https://example.test/admin/contacts?locale=ru", { headers: auth }));
+      const contactsHtml = await contactsPage.text();
+      assert.match(contactsHtml, /data-kind="admin-contacts"/);
+      assert.match(contactsHtml, /data-react-admin-ui="contacts"/);
+      assert.match(contactsHtml, /data-account-create-form="true"/);
+      assert.match(contactsHtml, /data-contact-record="contact-/);
+
+      const accountCreated = await accountRoute.POST(
+        new Request("https://example.test/api/admin/accounts", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({ accountType: "family", label: "Test household", actor: "account_manager", humanConfirmed: true }),
+        }),
+      );
+      const accountCreatedBody = await accountCreated.json();
+      assert.equal(accountCreated.status, 201);
+      assert.match(accountCreatedBody.account_id, /^account-family-/);
+      const accountLinked = await accountLinkRoute.POST(
+        new Request("https://example.test/api/admin/accounts/link", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            accountId: accountCreatedBody.account_id,
+            contactId: contactsBeforeBody.contacts[0].id,
+            actor: "account_manager",
+            reason: "Broker confirmed the same household.",
+            linkConfirmed: true,
+          }),
+        }),
+      );
+      assert.equal(accountLinked.status, 201);
+      const contactsAfter = await contactsJsonRoute.GET(new Request("https://example.test/api/admin/contacts?locale=ru", { headers: auth }));
+      const contactsAfterBody = await contactsAfter.json();
+      assert.equal(contactsAfterBody.contacts[0].account_id, accountCreatedBody.account_id);
+      assert.equal(contactsAfterBody.accounts[0].contact_count, 1);
 
       const leadAssignment = await leadAssignmentRoute.POST(
         new Request("https://example.test/api/admin/leads/assign", {
@@ -1555,6 +1603,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const auditRows = readAuditLog(auditLogPath);
       assert.equal(assertAuditLog(auditRows), true);
       assert.deepEqual(actionCounts(auditRows), {
+        account_created: 1,
         locale_created: 1,
         live_service_provisioning_report_imported: 1,
         live_service_report_imported: 1,
@@ -1570,6 +1619,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         translation_published: 2,
         reply_approved: 1,
         broker_contact_approved: 1,
+        contact_linked: 1,
         listing_edited: 1,
         listing_slug_changed: 1,
         tour_approved: 1,

@@ -24,6 +24,7 @@ x-app-environment: &app-environment
   MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE: ${MS_REALTY_HERMES_AGENT_EVIDENCE_SCOPE:-live}
   # Local Docker preview state only. This named volume is not production persistence.
   MS_REALTY_AUDIT_LOG_PATH: /runtime-data/audit-log.jsonl
+  MS_REALTY_ACCOUNT_LEDGER_PATH: /runtime-data/accounts.jsonl
   MS_REALTY_BROKER_CONTACT_LEDGER_PATH: /runtime-data/broker-contacts.jsonl
   MS_REALTY_CONSENT_LEDGER_PATH: /runtime-data/consent-ledger.jsonl
   MS_REALTY_DEAL_LEDGER_PATH: /runtime-data/deals.jsonl
