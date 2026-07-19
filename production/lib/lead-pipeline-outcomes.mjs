@@ -220,6 +220,48 @@ export function deriveLeadPipelineStates({ leads = [], outcomes = [], viewings =
   return [...states.values()];
 }
 
+function operationalLeadState(context, leadId) {
+  if (!context || typeof context !== "object" || !Array.isArray(context.leads)) {
+    throw new Error("Lead journey context with leads is required");
+  }
+  const lead = context.leads.find((row) => row.lead_id === leadId);
+  if (!lead) throw new Error("Lead journey requires a known leadId");
+  const pipeline = pipelineKind(lead);
+  if (!pipeline) return { lead, pipeline: null, state: null };
+  const state = deriveLeadPipelineStates(context).find((row) => row.lead_id === leadId);
+  if (!state) throw new Error("Lead journey state is unavailable");
+  return { lead, pipeline, state };
+}
+
+function assertChronologicalAction(state, value, label) {
+  const actionAt = isoTimestamp(value, label);
+  if (state?.last_recorded_at && Date.parse(actionAt) < Date.parse(state.last_recorded_at)) {
+    throw new Error(`${label} cannot precede the latest lead journey action`);
+  }
+  return actionAt;
+}
+
+export function assertLeadCanBookViewing(context, leadId, bookedAt = new Date().toISOString()) {
+  const journey = operationalLeadState(context, leadId);
+  if (!journey.pipeline) return journey;
+  if (journey.state.status !== "open") throw new Error("Only an open lead can book a viewing");
+  if (!journey.state.requirements) throw new Error("Buyer or renter must be qualified before booking a viewing");
+  assertChronologicalAction(journey.state, bookedAt, "bookedAt");
+  return journey;
+}
+
+export function assertLeadCanCloseDeal(context, leadId, closedAt = new Date().toISOString()) {
+  const journey = operationalLeadState(context, leadId);
+  if (!journey.pipeline) return journey;
+  if (journey.state.status !== "open") throw new Error("Only an open lead can close a deal");
+  const requiredStage = journey.pipeline === "buyer" ? "contract" : "lease";
+  if (journey.state.stage !== requiredStage) {
+    throw new Error(`${journey.pipeline === "buyer" ? "Buyer contract" : "Renter lease"} must be recorded before closing the deal`);
+  }
+  assertChronologicalAction(journey.state, closedAt, "closedAt");
+  return journey;
+}
+
 export function buildLeadPipelineQueue(input = {}, { now = new Date().toISOString() } = {}) {
   const nowTime = Date.parse(now);
   if (!Number.isFinite(nowTime)) throw new Error("now must be an ISO timestamp");

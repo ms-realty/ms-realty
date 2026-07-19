@@ -27,7 +27,7 @@ function fixture() {
     },
   ];
   const viewing = appendViewing(
-    leads,
+    { leads },
     { id: "viewing-test", leadId: "lead-viewing-test", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
     { filePath: viewingPath, bookedAt: "2026-07-04T00:06:00Z" },
   );

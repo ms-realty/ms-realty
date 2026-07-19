@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { assertLeadCanCloseDeal } from "./lead-pipeline-outcomes.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_DEAL_LEDGER_PATH = fromRoot("production", "data", "deals.jsonl");
@@ -25,7 +26,11 @@ function daysAfter(isoString, days) {
   return new Date(time + days * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export function appendClosedDeal(leads, input, { filePath = DEFAULT_DEAL_LEDGER_PATH, closedAt = new Date().toISOString() } = {}) {
+export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGER_PATH, closedAt = new Date().toISOString() } = {}) {
+  if (!context || typeof context !== "object" || !Array.isArray(context.leads)) {
+    throw new Error("Closed deal requires lead journey context");
+  }
+  const leads = context.leads;
   const lead = leads.find((row) => row.lead_id === input.leadId);
   if (!lead) throw new Error("Closed deal requires a known leadId");
   if (!input.broker) throw new Error("broker is required");
@@ -45,6 +50,10 @@ export function appendClosedDeal(leads, input, { filePath = DEFAULT_DEAL_LEDGER_
       throw new Error("Lead already belongs to another closed deal record");
     }
     return { ...existingForLead, idempotent: true };
+  }
+  assertLeadCanCloseDeal({ ...context, deals: rows }, input.leadId, normalizedClosedAt);
+  if (lead.received_at && Date.parse(normalizedClosedAt) < Date.parse(lead.received_at)) {
+    throw new Error("closedAt cannot precede the lead received time");
   }
   const requestedId = String(input.id || `deal-${input.leadId}`).trim();
   if (rows.some((row) => row.id === requestedId)) throw new Error("Deal id already belongs to another lead");

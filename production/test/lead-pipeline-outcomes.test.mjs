@@ -5,6 +5,8 @@ import os from "node:os";
 import path from "node:path";
 import {
   appendLeadPipelineOutcome,
+  assertLeadCanBookViewing,
+  assertLeadCanCloseDeal,
   assertLeadPipelineOutcomes,
   buildLeadPipelineQueue,
   deriveLeadPipelineStates,
@@ -117,6 +119,50 @@ test("renter pipeline supports qualification, viewing, application, lease, and c
     { filePath, recordedAt: "2026-07-18T10:20:00.000Z" },
   );
   assert.equal(leased.lead_pipeline.stage, "lease");
+});
+
+test("domain journey guards reject unqualified viewings and premature closes", () => {
+  const { filePath, context } = fixture();
+  assert.throws(
+    () => assertLeadCanBookViewing(context, "buyer-1", "2026-07-18T10:05:00.000Z"),
+    /qualified before booking/,
+  );
+  assert.throws(
+    () => assertLeadCanBookViewing(context, "renter-1", "2026-07-18T10:05:00.000Z"),
+    /qualified before booking/,
+  );
+
+  appendLeadPipelineOutcome(
+    context,
+    qualifyInput("renter-1", { budgetMinEur: 500, budgetMaxEur: 900, financeStatus: "not_applicable" }),
+    { filePath, recordedAt: "2026-07-18T10:05:00.000Z" },
+  );
+  context.outcomes = readLeadPipelineOutcomes(filePath);
+  assert.equal(assertLeadCanBookViewing(context, "renter-1", "2026-07-18T10:10:00.000Z").state.stage, "qualified");
+  assert.throws(
+    () => assertLeadCanCloseDeal(context, "renter-1", "2026-07-18T10:10:00.000Z"),
+    /lease must be recorded/,
+  );
+
+  context.viewings.push({
+    id: "viewing-renter-guard",
+    lead_id: "renter-1",
+    broker: "broker_en",
+    booked_at: "2026-07-18T10:10:00.000Z",
+    starts_at: "2026-07-20T10:00:00.000Z",
+  });
+  appendLeadPipelineOutcome(
+    context,
+    { leadId: "renter-1", actor: "broker_en", action: "application_submitted" },
+    { filePath, recordedAt: "2026-07-18T10:15:00.000Z" },
+  );
+  appendLeadPipelineOutcome(
+    context,
+    { leadId: "renter-1", actor: "broker_en", action: "lease_signed" },
+    { filePath, recordedAt: "2026-07-18T10:20:00.000Z" },
+  );
+  context.outcomes = readLeadPipelineOutcomes(filePath);
+  assert.equal(assertLeadCanCloseDeal(context, "renter-1", "2026-07-18T10:25:00.000Z").state.stage, "lease");
 });
 
 test("lost leads can be reopened while invalid jumps, stale timing, and private fields are rejected", () => {

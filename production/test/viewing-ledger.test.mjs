@@ -24,12 +24,12 @@ test("viewing ledger requires a known lead and creates follow-up task", () => {
   ];
 
   assert.throws(
-    () => appendViewing(leads, { leadId: "missing", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" }, { filePath: file }),
+    () => appendViewing({ leads }, { leadId: "missing", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" }, { filePath: file }),
     /known leadId/,
   );
 
   appendViewing(
-    leads,
+    { leads },
     {
       leadId: "lead-test",
       startsAt: "2026-07-06T10:00:00Z",

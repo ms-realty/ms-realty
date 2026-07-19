@@ -18,12 +18,12 @@ test("closed deal ledger requires a known lead and creates testimonial and refer
   ];
 
   assert.throws(
-    () => appendClosedDeal(leads, { leadId: "missing", broker: "broker_ru" }, { filePath: file }),
+    () => appendClosedDeal({ leads }, { leadId: "missing", broker: "broker_ru" }, { filePath: file }),
     /known leadId/,
   );
 
   const row = appendClosedDeal(
-    leads,
+    { leads },
     {
       id: "deal-lead-test",
       leadId: "lead-test",

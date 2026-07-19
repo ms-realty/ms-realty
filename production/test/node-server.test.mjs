@@ -364,8 +364,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
           body: JSON.stringify({
-            id: "viewing-node-server-lead-test",
-            leadId: "node-server-lead-test",
+            id: "viewing-node-server-contact-lead-test",
+            leadId: "node-server-contact-lead-test",
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
           }),
@@ -374,7 +374,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
           method: "POST",
           captureHeaders: true,
           body: JSON.stringify({
-            leadId: "node-server-lead-test",
+            leadId: "node-server-contact-lead-test",
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
           }),
@@ -386,25 +386,25 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         dealClose: await jsonFetch(baseUrl, "/api/admin/deals/close", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
-          body: JSON.stringify({ leadId: "node-server-lead-test", broker: "broker_ru" }),
+          body: JSON.stringify({ leadId: "node-server-contact-lead-test", broker: "broker_ru" }),
         }),
         dealCloseUnauthorized: await jsonFetch(baseUrl, "/api/admin/deals/close", {
           method: "POST",
           captureHeaders: true,
-          body: JSON.stringify({ leadId: "node-server-lead-test", broker: "broker_ru" }),
+          body: JSON.stringify({ leadId: "node-server-contact-lead-test", broker: "broker_ru" }),
         }),
       };
       smoke.viewingFollowUpUnauthorized = await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
         method: "POST",
         captureHeaders: true,
-        body: JSON.stringify({ viewingId: "viewing-node-server-lead-test", actor: "broker_ru", action: "complete" }),
+        body: JSON.stringify({ viewingId: "viewing-node-server-contact-lead-test", actor: "broker_ru", action: "complete" }),
       });
       smoke.viewingFollowUp = await jsonFetch(baseUrl, "/api/admin/viewings/follow-up", {
         method: "POST",
         headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
           id: "viewing-follow-up-node-server-test",
-          viewingId: "viewing-node-server-lead-test",
+          viewingId: "viewing-node-server-contact-lead-test",
           actor: "broker_ru",
           action: "complete",
           note: "Completed viewing; feedback remains an internal broker task.",
@@ -415,7 +415,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         headers: { authorization: "Bearer local-admin-smoke" },
         body: JSON.stringify({
           id: "viewing-follow-up-node-server-test",
-          viewingId: "viewing-node-server-lead-test",
+          viewingId: "viewing-node-server-contact-lead-test",
           actor: "broker_ru",
           action: "complete",
           note: "Completed viewing; feedback remains an internal broker task.",
@@ -532,7 +532,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
       assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
       assert.equal(smoke.viewing.body.feedback_request.status, "open");
-      assert.equal(smoke.viewing.body.feedback_request.channel, "whatsapp");
+      assert.equal(smoke.viewing.body.feedback_request.channel, "phone");
       assert.equal(smoke.viewingFollowUp.status, 201);
       assert.equal(smoke.viewingFollowUp.body.idempotent, false);
       assert.equal(smoke.viewingFollowUp.body.viewing.status, "completed");
@@ -542,7 +542,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.viewingFollowUpUnauthorized.status, 401);
       assert.equal(smoke.dealClose.body.testimonial_request.status, "open");
       assert.equal(smoke.dealClose.body.referral_request.status, "open");
-      assert.equal(smoke.dealClose.body.testimonial_request.channel, "whatsapp");
+      assert.equal(smoke.dealClose.body.testimonial_request.channel, "phone");
       assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
       assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
       assert.equal(smoke.contactLead.body.lead.leadType, "general");

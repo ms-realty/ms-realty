@@ -476,17 +476,17 @@ export function createHttpApp({
       ),
     };
   };
+  const currentLeadJourneyContext = () => ({
+    leads: currentLeads(),
+    outcomes: readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined),
+    viewings: readViewings(viewingLedgerPath || undefined),
+    viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
+    deals: readDeals(dealLedgerPath || undefined),
+  });
   const currentLeadPipelineQueue = () =>
-    buildLeadPipelineQueue(
-      {
-        leads: currentLeads(),
-        outcomes: readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined),
-        viewings: readViewings(viewingLedgerPath || undefined),
-        viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
-        deals: readDeals(dealLedgerPath || undefined),
-      },
-      { now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString() },
-    );
+    buildLeadPipelineQueue(currentLeadJourneyContext(), {
+      now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
+    });
   const currentAdminLeadPayload = (requestedLocale, operatorId = null) =>
     renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads: currentLeads(),
@@ -1741,12 +1741,7 @@ export function createHttpApp({
       try {
         const recordedAt = leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
         const result = appendLeadPipelineOutcome(
-          {
-            leads: readLeadLedger(leadLedgerPath || undefined),
-            viewings: readViewings(viewingLedgerPath || undefined),
-            viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
-            deals: readDeals(dealLedgerPath || undefined),
-          },
+          currentLeadJourneyContext(),
           bindAuthenticatedOperator(parseBody(request), principal),
           { filePath: leadPipelineOutcomeLedgerPath || undefined, recordedAt },
         );
@@ -1799,7 +1794,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
-        const viewing = appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
+        const viewing = appendViewing(currentLeadJourneyContext(), input, {
           filePath: viewingLedgerPath || undefined,
           bookedAt,
         });
@@ -1933,7 +1928,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
-        const deal = appendClosedDeal(readLeadLedger(leadLedgerPath || undefined), input, {
+        const deal = appendClosedDeal(currentLeadJourneyContext(), input, {
           filePath: dealLedgerPath || undefined,
           closedAt: dealClosedAt,
         });

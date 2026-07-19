@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { assertLeadCanBookViewing } from "./lead-pipeline-outcomes.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_VIEWING_LEDGER_PATH = fromRoot("production", "data", "viewings.jsonl");
@@ -19,12 +20,18 @@ export function readViewings(filePath = DEFAULT_VIEWING_LEDGER_PATH) {
     .map((line) => JSON.parse(line));
 }
 
-export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_PATH, bookedAt = new Date().toISOString() } = {}) {
+export function appendViewing(context, input, { filePath = DEFAULT_VIEWING_LEDGER_PATH, bookedAt = new Date().toISOString() } = {}) {
+  if (!context || typeof context !== "object" || !Array.isArray(context.leads)) {
+    throw new Error("Viewing requires lead journey context");
+  }
+  const leads = context.leads;
   const lead = leads.find((row) => row.lead_id === input.leadId);
   if (!lead) throw new Error("Viewing requires a known leadId");
   if (!input.startsAt || !input.broker) throw new Error("startsAt and broker are required");
   if (Number.isNaN(Date.parse(input.startsAt))) throw new Error("startsAt must be an ISO date");
   const startsAt = new Date(input.startsAt).toISOString();
+  if (Number.isNaN(Date.parse(bookedAt))) throw new Error("bookedAt must be an ISO date");
+  const normalizedBookedAt = new Date(bookedAt).toISOString();
   const rows = readViewings(filePath);
   const listingReference = input.listingReference || lead.listing_reference || null;
   const semanticMatch = rows.find(
@@ -35,6 +42,8 @@ export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_
       (row.listing_reference || null) === listingReference,
   );
   if (semanticMatch) return { ...semanticMatch, idempotent: true };
+  assertLeadCanBookViewing({ ...context, viewings: rows }, input.leadId, normalizedBookedAt);
+  if (Date.parse(startsAt) < Date.parse(normalizedBookedAt)) throw new Error("startsAt cannot precede bookedAt");
   const requestedId = String(input.id || "").trim();
   const conflictingId = requestedId ? rows.find((row) => row.id === requestedId) : null;
   if (conflictingId) throw new Error("Viewing id already belongs to another booking");
@@ -45,8 +54,14 @@ export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_
     ordinal += 1;
     id = `viewing-${input.leadId}-${ordinal}`;
   }
-  const feedbackDueAt =
-    input.feedbackDueAt || new Date(Date.parse(startsAt) + 2 * 60 * 60 * 1000).toISOString();
+  const followUpDueValue = input.followUpDueAt || startsAt;
+  if (Number.isNaN(Date.parse(followUpDueValue))) throw new Error("followUpDueAt must be an ISO date");
+  const followUpDueAt = new Date(followUpDueValue).toISOString();
+  if (Date.parse(followUpDueAt) < Date.parse(normalizedBookedAt)) throw new Error("followUpDueAt cannot precede bookedAt");
+  const feedbackDueValue = input.feedbackDueAt || new Date(Date.parse(startsAt) + 2 * 60 * 60 * 1000).toISOString();
+  if (Number.isNaN(Date.parse(feedbackDueValue))) throw new Error("feedbackDueAt must be an ISO date");
+  const feedbackDueAt = new Date(feedbackDueValue).toISOString();
+  if (Date.parse(feedbackDueAt) < Date.parse(startsAt)) throw new Error("feedbackDueAt cannot precede startsAt");
   const taskSuffix = ordinal === 1 && id === `viewing-${input.leadId}` ? input.leadId : id;
 
   const row = {
@@ -57,14 +72,14 @@ export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_
     admin_locale: lead.admin_locale,
     broker: input.broker,
     starts_at: startsAt,
-    booked_at: bookedAt,
+    booked_at: normalizedBookedAt,
     channel: input.channel || "property_viewing",
     status: "booked",
     follow_up_task: {
       id: input.taskId || `task-${taskSuffix}`,
       owner: input.broker,
       status: "open",
-      due_at: input.followUpDueAt || startsAt,
+      due_at: followUpDueAt,
     },
     feedback_request: {
       id: input.feedbackTaskId || `feedback-${taskSuffix}`,

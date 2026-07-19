@@ -396,6 +396,16 @@ function currentSeed(config) {
   return applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath));
 }
 
+function leadJourneyContext(config) {
+  return {
+    leads: readLeadLedger(config.leadLedgerPath),
+    outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
+    viewings: readViewings(config.viewingLedgerPath),
+    viewingFollowUps: readViewingFollowUps(config.viewingFollowUpLedgerPath),
+    deals: readDeals(config.dealLedgerPath),
+  };
+}
+
 function currentListingQualityReport(config, options = {}) {
   return buildListingQualityReport({
     seed: currentSeed(config),
@@ -956,7 +966,7 @@ function appendBulkListingStatusChanges(input, config) {
 }
 
 function appendViewingBooking(input, config) {
-  const viewing = appendViewing(readLeadLedger(config.leadLedgerPath), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
+  const viewing = appendViewing(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.viewingLedgerPath,
     bookedAt: config.bookedAt,
   });
@@ -1111,12 +1121,7 @@ function appendReplyDeliveryOutcomeEntry(input, config) {
 function appendLeadPipelineOutcomeEntry(input, config) {
   const recordedAt = config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
   const result = appendLeadPipelineOutcome(
-    {
-      leads: readLeadLedger(config.leadLedgerPath),
-      viewings: readViewings(config.viewingLedgerPath),
-      viewingFollowUps: readViewingFollowUps(config.viewingFollowUpLedgerPath),
-      deals: readDeals(config.dealLedgerPath),
-    },
+    leadJourneyContext(config),
     bindAuthenticatedOperator(input, config.adminPrincipal),
     { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
   );
@@ -1149,7 +1154,7 @@ function appendLeadPipelineOutcomeEntry(input, config) {
 }
 
 function appendDealClose(input, config) {
-  const deal = appendClosedDeal(readLeadLedger(config.leadLedgerPath), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
+  const deal = appendClosedDeal(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.dealLedgerPath,
     closedAt: config.dealClosedAt,
   });

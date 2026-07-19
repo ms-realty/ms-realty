@@ -535,8 +535,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       url: "/api/admin/viewings",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
-        id: "viewing-http-lead-test",
-        leadId: "http-lead-test",
+        id: "viewing-http-contact-lead-test",
+        leadId: "http-contact-lead-test",
         startsAt: "2026-07-06T10:00:00Z",
         broker: "broker_ru",
       },
@@ -546,7 +546,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       url: "/api/admin/viewings/follow-up",
       headers: { authorization: "Bearer local-admin-smoke", "content-type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        viewingId: "viewing-http-lead-test",
+        viewingId: "viewing-http-contact-lead-test",
         actor: "broker_ru",
         action: "complete",
         note: "Viewing completed; feedback remains a private broker task.",
@@ -557,7 +557,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       url: "/api/admin/viewings/follow-up",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: {
-        viewingId: "viewing-http-lead-test",
+        viewingId: "viewing-http-contact-lead-test",
         actor: "broker_ru",
         action: "complete",
         note: "Viewing completed; feedback remains a private broker task.",
@@ -566,12 +566,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     viewingFollowUpUnauthorized: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/viewings/follow-up",
-      body: { viewingId: "viewing-http-lead-test", actor: "broker_ru", action: "complete" },
+      body: { viewingId: "viewing-http-contact-lead-test", actor: "broker_ru", action: "complete" },
     }),
     viewingUnauthorized: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/viewings",
-      body: { leadId: "http-lead-test", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
+      body: { leadId: "http-contact-lead-test", startsAt: "2026-07-06T10:00:00Z", broker: "broker_ru" },
     }),
     viewingCalendar: await dispatchHttp(app, {
       url: "/api/admin/viewings.ics",
@@ -582,12 +582,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       method: "POST",
       url: "/api/admin/deals/close",
       headers: { authorization: "Bearer local-admin-smoke" },
-      body: { leadId: "http-lead-test", broker: "broker_ru" },
+      body: { leadId: "http-contact-lead-test", broker: "broker_ru" },
     }),
     dealCloseUnauthorized: await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/deals/close",
-      body: { leadId: "http-lead-test", broker: "broker_ru" },
+      body: { leadId: "http-contact-lead-test", broker: "broker_ru" },
     }),
   };
   smoke.formReply = await dispatchHttp(app, {
@@ -776,7 +776,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.viewingLead.body.lead.source, "website_viewing_request");
   assert.equal(smoke.viewingLead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.viewing.body.feedback_request.status, "open");
-  assert.equal(smoke.viewing.body.feedback_request.channel, "whatsapp");
+  assert.equal(smoke.viewing.body.feedback_request.channel, "phone");
   assert.equal(smoke.viewingFollowUp.status, 201);
   assert.equal(smoke.viewingFollowUp.body.idempotent, false);
   assert.equal(smoke.viewingFollowUp.body.viewing.status, "completed");
@@ -786,7 +786,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.viewingFollowUpUnauthorized.status, 401);
   assert.equal(smoke.dealClose.body.testimonial_request.status, "open");
   assert.equal(smoke.dealClose.body.referral_request.status, "open");
-  assert.equal(smoke.dealClose.body.testimonial_request.channel, "whatsapp");
+  assert.equal(smoke.dealClose.body.testimonial_request.channel, "phone");
   assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");

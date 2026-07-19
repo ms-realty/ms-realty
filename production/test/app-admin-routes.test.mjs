@@ -169,6 +169,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveServiceProvisioningReportPath,
       MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimeReportPath,
+      MS_REALTY_RECEIVED_AT: "2026-07-04T00:00:00Z",
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
       MS_REALTY_REDIRECT_APPROVALS_PATH: tempJsonl("app-admin-redirect-approvals"),
@@ -185,6 +186,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-translations"),
       MS_REALTY_VIEWING_LEDGER_PATH: tempJsonl("app-admin-viewings"),
       MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH: tempJsonl("app-admin-viewing-follow-ups"),
+      MS_REALTY_BOOKED_AT: "2026-07-04T00:06:00Z",
+      MS_REALTY_DEAL_CLOSED_AT: "2026-07-10T10:00:00Z",
       MS_REALTY_VIEWING_FOLLOW_UP_AT: "2026-07-06T12:00:00Z",
     },
     async () => {
@@ -1264,12 +1267,30 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorAfterTourApprovalHtml, /value="https:\/\/cdn\.example\.test\/tours\/MS-CRAWL-0001\.jpg"/);
       assert.match(editorAfterTourApprovalHtml, /Reviewed 360 tour of the property\./);
 
+      const operationsLead = await publicLeadRoute.POST(
+        new Request("https://example.test/api/leads", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            id: "next-admin-operations-lead-test",
+            source: "website_contact_callback",
+            leadType: "general",
+            language: "he",
+            contact: { name: "Noa Levi", phone: "+359880000001" },
+            contact_preference: "phone",
+            message: "Please arrange an appointment for this property.",
+          }),
+        }),
+      );
+      assert.equal(operationsLead.status, 201);
+
       const viewing = await viewingRoute.POST(
         new Request("https://example.test/api/admin/viewings", {
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
           body: JSON.stringify({
-            leadId: "next-admin-lead-test",
+            leadId: "next-admin-operations-lead-test",
+            listingReference: "MS-CRAWL-0001",
             startsAt: "2026-07-06T10:00:00Z",
             broker: "broker_ru",
           }),
@@ -1418,7 +1439,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         new Request("https://example.test/api/admin/deals/close", {
           method: "POST",
           headers: { ...auth, "content-type": "application/json" },
-          body: JSON.stringify({ leadId: "next-admin-lead-test", broker: "broker_ru" }),
+          body: JSON.stringify({
+            leadId: "next-admin-operations-lead-test",
+            listingReference: "MS-CRAWL-0001",
+            broker: "broker_ru",
+          }),
         }),
       );
       const dealBody = await deal.json();
