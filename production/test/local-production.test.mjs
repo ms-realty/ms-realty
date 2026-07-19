@@ -38,3 +38,18 @@ test("local Docker startup recreates the edge after an app update", () => {
   assert.match(script, /Caddy resolves the app service address when it starts/);
   assert.match(script, /\["up", "--detach", "--wait", "--no-deps", "--force-recreate", "edge"\]/);
 });
+
+test("local recovery is explicit, checksummed, and takes a rollback snapshot", () => {
+  const script = fs.readFileSync(fromRoot("production", "scripts", "local-production.mjs"), "utf8");
+  const packageJson = JSON.parse(fs.readFileSync(fromRoot("package.json"), "utf8"));
+  const gitignore = fs.readFileSync(fromRoot(".gitignore"), "utf8");
+
+  assert.equal(packageJson.scripts["docker:backup"], "node production/scripts/local-production.mjs backup");
+  assert.equal(packageJson.scripts["docker:restore"], "node production/scripts/local-production.mjs restore");
+  assert.match(gitignore, /^\.local-backups\/$/m);
+  assert.match(script, /--confirm-replace-local-data/);
+  assert.match(script, /prefix: "pre-restore"/);
+  assert.match(script, /keepQuiesced: true/);
+  assert.match(script, /validateArchiveInApp/);
+  assert.match(script, /materializeLocalReadinessInApp\(\)/);
+});

@@ -7,6 +7,7 @@ node_modules/
 .next/
 dist/
 coverage/
+.local-backups/
 migration/external/seo/*.csv
 !migration/external/seo/*.csv.example
 production/data/search-engine-sync-report.json

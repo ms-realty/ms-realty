@@ -10,6 +10,8 @@
     "docker:up": "node production/scripts/local-production.mjs up",
     "docker:hermes:up": "node production/scripts/local-production.mjs hermes:up",
     "docker:seed": "node production/scripts/local-production.mjs seed",
+    "docker:backup": "node production/scripts/local-production.mjs backup",
+    "docker:restore": "node production/scripts/local-production.mjs restore",
     "docker:status": "node production/scripts/local-production.mjs status",
     "docker:logs": "node production/scripts/local-production.mjs logs",
     "docker:down": "node production/scripts/local-production.mjs down",

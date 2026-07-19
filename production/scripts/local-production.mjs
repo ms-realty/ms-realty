@@ -4,13 +4,22 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { materializeLocalLaunchReadiness } from "../lib/launch-readiness.mjs";
+import {
+  LOCAL_BACKUP_COMPONENTS,
+  assertSafeArchiveEntries,
+  createLocalBackupManifest,
+  validateLocalBackup,
+  writeLocalBackupManifest,
+} from "../lib/local-backup.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const composeFile = path.join(root, "production", "docker-compose.local-production.yml");
 const envFile = path.join(root, ".env.local-production");
 const command = process.argv[2] || "status";
+const commandArgs = process.argv.slice(3);
 const HERMES_AGENT_ENV_KEYS = ["HERMES_AGENT_API_SERVER_KEY", "HERMES_AGENT_MODEL", "HERMES_AGENT_LLM_BASE_URL", "HERMES_AGENT_LLM_API_KEY"];
 const LOCAL_READINESS_MATERIALIZE_FLAG = "MS_REALTY_LOCAL_READINESS_MATERIALIZE";
+const LOCAL_BACKUP_ROOT = path.resolve(root, process.env.MS_REALTY_LOCAL_BACKUP_ROOT || ".local-backups");
 
 function secret(bytes = 32) {
   return crypto.randomBytes(bytes).toString("hex");
@@ -76,6 +85,26 @@ function compose(args, { allowFailure = false, envOverrides = {} } = {}) {
   if (result.error) throw result.error;
   if (!allowFailure && result.status !== 0) process.exit(result.status ?? 1);
   return result.status ?? 1;
+}
+
+function composeCapture(args, { input, encoding = "utf8", envOverrides = {} } = {}) {
+  const result = spawnSync(
+    "docker",
+    ["compose", "--env-file", envFile, "-f", composeFile, ...args],
+    {
+      cwd: root,
+      env: { ...process.env, ...envOverrides },
+      input,
+      encoding,
+      maxBuffer: 512 * 1024 * 1024,
+    },
+  );
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    const stderr = Buffer.isBuffer(result.stderr) ? result.stderr.toString("utf8") : String(result.stderr || "");
+    throw new Error(`docker compose ${args[0] || "command"} failed: ${stderr.trim() || `exit ${result.status}`}`);
+  }
+  return result.stdout;
 }
 
 function configured(value) {
@@ -165,6 +194,186 @@ async function waitFor(url, { headers = {}, timeoutMs = 90_000 } = {}) {
   throw new Error(`Timed out waiting for ${url}: ${lastError}`);
 }
 
+function localBackupId(prefix = "backup", now = new Date()) {
+  const timestamp = now.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z").toLowerCase();
+  return `${prefix}-${timestamp}-${crypto.randomBytes(3).toString("hex")}`;
+}
+
+function runningComposeServices() {
+  return new Set(
+    String(composeCapture(["ps", "--status", "running", "--services"]))
+      .split(/\r?\n/)
+      .map((value) => value.trim())
+      .filter(Boolean),
+  );
+}
+
+function quiescePublicWrites() {
+  const running = runningComposeServices();
+  const stopped = ["edge", "app"].filter((service) => running.has(service));
+  if (stopped.length) compose(["stop", ...stopped]);
+  return stopped;
+}
+
+async function resumePublicWrites(stopped, env) {
+  if (!stopped.length) return;
+  if (stopped.includes("app")) compose(["up", "--detach", "--wait", "--no-deps", "app"]);
+  if (stopped.includes("edge")) compose(["up", "--detach", "--wait", "--no-deps", "edge"]);
+  if (stopped.includes("edge")) await waitFor(`http://127.0.0.1:${env.MS_REALTY_APP_PORT}/api/health`);
+}
+
+function createPrivateDirectory(directory) {
+  fs.mkdirSync(directory, { recursive: false, mode: 0o700 });
+  fs.chmodSync(directory, 0o700);
+}
+
+function writePrivateFile(filePath, contents) {
+  fs.writeFileSync(filePath, contents, { mode: 0o600, flag: "wx" });
+  fs.chmodSync(filePath, 0o600);
+}
+
+function archiveRuntimeVolume(backupDir, sourceDirectory, component) {
+  compose([
+    "run",
+    "--rm",
+    "--no-deps",
+    "--volume",
+    `${backupDir}:/backup`,
+    "--entrypoint",
+    "sh",
+    "runtime-init",
+    "-ec",
+    `umask 077; tar -czf /backup/${component.file} -C ${sourceDirectory} .`,
+  ]);
+  fs.chmodSync(path.join(backupDir, component.file), 0o600);
+}
+
+async function captureLocalBackup(env, { prefix = "backup", keepQuiesced = false } = {}) {
+  fs.mkdirSync(LOCAL_BACKUP_ROOT, { recursive: true, mode: 0o700 });
+  fs.chmodSync(LOCAL_BACKUP_ROOT, 0o700);
+  const backupId = localBackupId(prefix);
+  const backupDir = path.join(LOCAL_BACKUP_ROOT, backupId);
+  createPrivateDirectory(backupDir);
+
+  compose(["up", "--detach", "--wait", "postgres"]);
+  const stopped = quiescePublicWrites();
+  let completed = false;
+  try {
+    const postgresDump = composeCapture(
+      ["exec", "-T", "postgres", "pg_dump", "-U", "ms_realty_payload", "-d", "ms_realty_payload", "-Fc"],
+      { encoding: null },
+    );
+    writePrivateFile(path.join(backupDir, LOCAL_BACKUP_COMPONENTS.payload_postgres.file), postgresDump);
+    archiveRuntimeVolume(backupDir, "/runtime-data", LOCAL_BACKUP_COMPONENTS.runtime_data);
+    archiveRuntimeVolume(backupDir, "/runtime-evidence", LOCAL_BACKUP_COMPONENTS.runtime_evidence);
+
+    const manifest = createLocalBackupManifest({ backupDir, backupId, env });
+    writeLocalBackupManifest({ backupDir, manifest });
+    validateLocalBackup({ backupDir, env });
+    completed = true;
+    process.stdout.write(`Local recovery backup created: ${backupDir}\n`);
+    return { backupDir, manifest, stoppedServices: stopped };
+  } finally {
+    if (!completed || !keepQuiesced) await resumePublicWrites(stopped, env);
+    if (!completed) fs.rmSync(backupDir, { recursive: true, force: true });
+  }
+}
+
+function validateArchiveInApp(backupDir, component, label) {
+  const listing = composeCapture([
+    "run",
+    "--rm",
+    "--no-deps",
+    "--volume",
+    `${backupDir}:/backup:ro`,
+    "--entrypoint",
+    "tar",
+    "runtime-init",
+    "-tzf",
+    `/backup/${component.file}`,
+  ]);
+  assertSafeArchiveEntries(String(listing).split(/\r?\n/), label);
+}
+
+function restoreRuntimeVolume(backupDir, targetDirectory, component) {
+  compose([
+    "run",
+    "--rm",
+    "--no-deps",
+    "--volume",
+    `${backupDir}:/backup:ro`,
+    "--entrypoint",
+    "sh",
+    "runtime-init",
+    "-ec",
+    `find ${targetDirectory} -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +; tar -xzf /backup/${component.file} -C ${targetDirectory}`,
+  ]);
+}
+
+async function restoreLocalBackup(env, backupPath, { confirmed = false } = {}) {
+  if (!confirmed) {
+    throw new Error("restore requires --confirm-replace-local-data because it replaces the local database and CRM/CMS ledgers");
+  }
+  if (!backupPath) throw new Error("restore requires a backup directory path");
+
+  const target = validateLocalBackup({ backupDir: path.resolve(root, backupPath), env });
+  compose(["up", "--detach", "--wait", "postgres"]);
+  validateArchiveInApp(target.backupDir, LOCAL_BACKUP_COMPONENTS.runtime_data, "runtime data");
+  validateArchiveInApp(target.backupDir, LOCAL_BACKUP_COMPONENTS.runtime_evidence, "runtime evidence");
+
+  const safety = await captureLocalBackup(env, { prefix: "pre-restore", keepQuiesced: true });
+  try {
+    compose([
+      "exec",
+      "-T",
+      "postgres",
+      "psql",
+      "-U",
+      "ms_realty_payload",
+      "-d",
+      "postgres",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
+      "DROP DATABASE IF EXISTS ms_realty_payload WITH (FORCE);",
+      "-c",
+      "CREATE DATABASE ms_realty_payload OWNER ms_realty_payload;",
+    ]);
+    composeCapture(
+      [
+        "exec",
+        "-T",
+        "postgres",
+        "pg_restore",
+        "-U",
+        "ms_realty_payload",
+        "-d",
+        "ms_realty_payload",
+        "--no-owner",
+        "--no-privileges",
+      ],
+      {
+        input: fs.readFileSync(path.join(target.backupDir, LOCAL_BACKUP_COMPONENTS.payload_postgres.file)),
+        encoding: null,
+      },
+    );
+    restoreRuntimeVolume(target.backupDir, "/runtime-data", LOCAL_BACKUP_COMPONENTS.runtime_data);
+    restoreRuntimeVolume(target.backupDir, "/runtime-evidence", LOCAL_BACKUP_COMPONENTS.runtime_evidence);
+    compose(["run", "--rm", "payload-migrate"]);
+    compose(["up", "--detach", "--wait", "--no-deps", "app"]);
+    compose(["up", "--detach", "--wait", "--no-deps", "edge"]);
+    await waitFor(`http://127.0.0.1:${env.MS_REALTY_APP_PORT}/api/health`);
+    compose(["--profile", "tools", "run", "--rm", "search-seed"]);
+    compose(["exec", "-T", "app", "npm", "run", "payload:runtime"]);
+    materializeLocalReadinessInApp();
+    process.stdout.write(
+      `Local recovery restore completed from ${target.backupDir}\nRollback backup retained at ${safety.backupDir}\n`,
+    );
+  } catch (error) {
+    throw new Error(`${error.message}; services were left quiesced and rollback backup is ${safety.backupDir}`);
+  }
+}
+
 async function start(env, { withHermes = false } = {}) {
   const hermesEnv = withHermes ? hermesAgentEnvironment(env) : env;
   const envOverrides = withHermes ? hermesAgentAppEnv(hermesEnv) : {};
@@ -242,6 +451,14 @@ try {
         compose(["--profile", "tools", "run", "--rm", "search-seed"]);
         compose(["exec", "-T", "app", "npm", "run", "payload:runtime"]);
         materializeLocalReadinessInApp();
+        break;
+      case "backup":
+        await captureLocalBackup(env);
+        break;
+      case "restore":
+        await restoreLocalBackup(env, commandArgs.find((argument) => !argument.startsWith("--")), {
+          confirmed: commandArgs.includes("--confirm-replace-local-data"),
+        });
         break;
       case "status":
         compose(["ps"], { allowFailure: true });

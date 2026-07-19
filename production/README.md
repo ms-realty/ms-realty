@@ -198,7 +198,27 @@ preview does not depend on an external viewer CDN.
 The compose stack keeps CRM/CMS JSONL preview state and the admin locale registry in the
 named `local-dev-app-data` Docker volume. App rebuilds, recreates, and `npm run docker:down`
 preserve that local state; `npm run docker:reset` intentionally removes it. This is a local
-development convenience, not production persistence, backup, or a substitute for Payload/Postgres.
+development convenience, not production persistence or a substitute for Payload/Postgres.
+
+Create a private, checksummed recovery snapshot of the local Payload/Postgres database,
+CRM/CMS ledger volume, and runtime-evidence volume with:
+
+```bash
+npm run docker:backup
+```
+
+Backups are written mode-private under ignored `.local-backups/` directories. Their
+manifest contains no secrets, but binds restore to fingerprints of the current Payload
+and contact-vault secrets. Restore validates every checksum and archive path, takes an
+automatic rollback snapshot, replaces the local state only after explicit confirmation,
+then migrates Payload and rebuilds the search indexes and runtime reports:
+
+```bash
+npm run docker:restore -- .local-backups/backup-<timestamp>-<id> --confirm-replace-local-data
+```
+
+This is tested local recovery machinery, not proof of an encrypted off-site production
+backup policy, retention schedule, or successful production disaster-recovery drill.
 
 After `docker:up` or `docker:seed`, the app atomically materializes schema-valid runtime reports
 that are no older than 15 minutes into `/runtime-evidence/local-launch-readiness.json`. It preserves
@@ -216,6 +236,7 @@ Useful lifecycle commands:
 npm run docker:status
 npm run docker:logs
 npm run docker:seed
+npm run docker:backup
 npm run docker:down
 npm run docker:reset
 ```
