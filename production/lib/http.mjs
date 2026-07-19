@@ -3,9 +3,13 @@ import { bindAuthenticatedOperator, canAdminMutate, isAdminAuthorized, resolveAd
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
   LISTING_EDIT_FIELDS,
+  renderAdminActivityPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
+  renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
+  renderAdminOperationalQueuePayload,
+  renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import {
   addLocaleToRegistry,
@@ -530,33 +534,59 @@ export function createHttpApp({
   const currentReportsPayload = (requestedLocale, operatorId = null) =>
     renderAdminOperationsReportPayload(activeRegistry, requestedLocale, currentOperationsReport(), operatorId);
   const currentRequestsPayload = (requestedLocale, operatorId = null) => {
-    const payload = currentAdminLeadPayload(requestedLocale, operatorId);
-    return {
-      ...payload,
+    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
       kind: "admin_requests",
       path: "/admin/requests",
-      canonical: "/admin/requests",
-      metadata: {
-        title: `${payload.workspace.copy.requestsWorkspace} | MS Realty`,
-        description: payload.workspace.copy.requestsDescription,
-        robots: "noindex,nofollow",
-      },
-    };
+      titleKey: "requestsWorkspace",
+      descriptionKey: "requestsDescription",
+    });
   };
   const currentPipelinePayload = (requestedLocale, operatorId = null) => {
-    const payload = currentAdminLeadPayload(requestedLocale, operatorId);
-    return {
-      ...payload,
+    return renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
       kind: "admin_lead_pipeline",
       path: "/admin/pipeline",
-      canonical: "/admin/pipeline",
-      metadata: {
-        title: `${payload.workspace.copy.pipelineWorkspace} | MS Realty`,
-        description: payload.workspace.copy.pipelineDescription,
-        robots: "noindex,nofollow",
-      },
-    };
+      titleKey: "pipelineWorkspace",
+      descriptionKey: "pipelineDescription",
+    });
   };
+  const currentTodayPayload = (requestedLocale, operatorId = null) =>
+    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+      kind: "admin_today",
+      path: "/admin/today",
+      titleKey: "today",
+      descriptionKey: "todayDescription",
+    });
+  const currentViewingsPayload = (requestedLocale, operatorId = null) =>
+    renderAdminOperationalQueuePayload(currentAdminLeadPayload(requestedLocale, operatorId), {
+      kind: "admin_viewings",
+      path: "/admin/viewings",
+      titleKey: "viewingsWorkspace",
+      descriptionKey: "viewingsDescription",
+    });
+  const currentActivityPayload = (requestedLocale, operatorId = null) =>
+    renderAdminActivityPayload(activeRegistry, requestedLocale, readAuditLog(auditLogPath || undefined), operatorId);
+  const currentListingManagerPayload = (url, operatorId = null) =>
+    renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
+      seed: currentSeed(),
+      translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+      query: url.searchParams.get("q") || "",
+      status: url.searchParams.get("status") || "",
+      sourceLocale: url.searchParams.get("sourceLocale") || "",
+      page: url.searchParams.get("page") || 1,
+      generatedAt: reviewedAt || new Date().toISOString(),
+      operatorId,
+    });
+  const currentTranslationQueuePayload = (url, operatorId = null) =>
+    renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
+      seed: currentSeed(),
+      translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+      query: url.searchParams.get("q") || "",
+      targetLocale: url.searchParams.get("targetLocale") || "",
+      taskType: url.searchParams.get("taskType") || "",
+      page: url.searchParams.get("page") || 1,
+      generatedAt: reviewedAt || new Date().toISOString(),
+      operatorId,
+    });
   const currentSeoEvidence = () =>
     buildSeoEvidence({
       inputDir: seoEvidenceInputDir || undefined,
@@ -670,7 +700,7 @@ export function createHttpApp({
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
-    const adminRequest = url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
+    const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
     if (adminRequest && !principal) return adminUnauthorized();
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
@@ -838,6 +868,23 @@ export function createHttpApp({
       );
     }
 
+    if (request.method === "GET" && url.pathname === "/admin") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const locale = url.searchParams.get("locale") || "en";
+      return adminResponse(302, "", "text/plain; charset=utf-8", {
+        location: `/admin/today?locale=${encodeURIComponent(locale)}`,
+      });
+    }
+
+    if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      if (url.pathname === "/admin/today" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal?.id || null);
@@ -851,6 +898,42 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal?.id || null);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/viewings", "/admin/viewings"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentViewingsPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      if (url.pathname === "/admin/viewings" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/activity", "/admin/activity"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentActivityPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      if (url.pathname === "/admin/activity" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/listings", "/admin/listings"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentListingManagerPayload(url, principal?.id || null);
+      if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/translations", "/admin/translations"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentTranslationQueuePayload(url, principal?.id || null);
+      if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
