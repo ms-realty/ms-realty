@@ -239,6 +239,22 @@ export const PUBLIC_APP_JS = `(function () {
     form.setAttribute("data-lead-intent", intent);
     updateEnquiryContact(form);
   }
+  function updateSavedSearchContact(form) {
+    var channel = form.querySelector("[data-save-search-channel]");
+    var contact = form.querySelector("[data-save-search-contact]");
+    var label = form.querySelector("[data-save-search-contact-label]");
+    if (!channel || !contact) return;
+    var value = channel.value === "whatsapp" ? "whatsapp" : "email";
+    contact.name = "contact." + value;
+    contact.type = value === "email" ? "email" : "tel";
+    contact.inputMode = value === "email" ? "email" : "tel";
+    contact.autocomplete = value === "email" ? "email" : "tel";
+    if (label) label.textContent = label.getAttribute(value === "email" ? "data-email-label" : "data-whatsapp-label") || value;
+  }
+  function initSavedSearchContacts() {
+    var forms = document.querySelectorAll("[data-save-search-form]");
+    for (var i = 0; i < forms.length; i += 1) updateSavedSearchContact(forms[i]);
+  }
   document.addEventListener("click", function (event) {
     var save = event.target.closest("[data-client-save-listing]");
     if (save) {
@@ -275,6 +291,8 @@ export const PUBLIC_APP_JS = `(function () {
   document.addEventListener("change", function (event) {
     var channel = event.target.closest("[data-enquiry-channel]");
     if (channel && channel.form) updateEnquiryContact(channel.form);
+    var savedSearchChannel = event.target.closest("[data-save-search-channel]");
+    if (savedSearchChannel && savedSearchChannel.form) updateSavedSearchContact(savedSearchChannel.form);
   });
   document.addEventListener("submit", function (event) {
     var form = event.target;
@@ -296,6 +314,7 @@ export const PUBLIC_APP_JS = `(function () {
     });
   });
   markSaved();
+  initSavedSearchContacts();
   initPhotoSphereViewers();
 })();`;
 

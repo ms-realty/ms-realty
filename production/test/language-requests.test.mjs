@@ -6,6 +6,7 @@ import {
   appendLanguageRequest,
   assertLanguageRequests,
   createLanguageRequest,
+  privacySafeLanguageRequest,
   readLanguageRequests,
   resetLanguageRequests,
 } from "../lib/language-requests.mjs";
@@ -16,16 +17,18 @@ test("language requests persist unsupported locales without indexability", () =>
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-language-`)}/requests.jsonl`;
   resetLanguageRequests(file);
   appendLanguageRequest(
-    createLanguageRequest(
-      registry,
-      {
-        id: "language-request-fr-test",
-        requestedLocale: "fr",
-        requestedPath: "/fr/",
-        contact: { name: "Claire" },
-        message: "Please notify me when French is reviewed.",
-      },
-      "2026-07-04T00:00:00Z",
+    privacySafeLanguageRequest(
+      createLanguageRequest(
+        registry,
+        {
+          id: "language-request-fr-test",
+          requested_locale: "fr",
+          requested_path: "/fr/",
+          contact: { name: "Claire", email: "claire@example.test" },
+          message: "Please notify me when French is reviewed.",
+        },
+        "2026-07-04T00:00:00Z",
+      ),
     ),
     { filePath: file },
   );
@@ -36,6 +39,9 @@ test("language requests persist unsupported locales without indexability", () =>
   assert.equal(rows[0].fallback_locale, "en");
   assert.equal(rows[0].admin_locale, "en");
   assert.equal(rows[0].public_indexable, false);
+  assert.equal(rows[0].contact, undefined);
+  assert.equal(rows[0].message, undefined);
+  assert.equal(rows[0].contact_ref, "language-request-fr-test");
   assert.equal(assertLanguageRequests(rows), true);
 });
 

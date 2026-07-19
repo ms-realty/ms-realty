@@ -1,15 +1,27 @@
 import fs from "node:fs";
 import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
-import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, appendLanguageRequest, createLanguageRequest } from "./language-requests.mjs";
+import {
+  DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
+  appendLanguageRequest,
+  createLanguageRequest,
+  privacySafeLanguageRequest,
+} from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact } from "./lead-contact-vault.mjs";
 import { publicLaunchReadinessHeaders, publicLaunchReadinessPayload } from "./launch-readiness.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
+import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, appendPublicContact } from "./public-contact-vault.mjs";
 import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead } from "./runtime.mjs";
-import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, appendSavedSearch, createSavedSearch, normalizeSavedSearchInput } from "./saved-searches.mjs";
+import {
+  DEFAULT_SAVED_SEARCH_LEDGER_PATH,
+  appendSavedSearch,
+  createSavedSearch,
+  normalizeSavedSearchInput,
+  privacySafeSavedSearch,
+} from "./saved-searches.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
@@ -47,6 +59,9 @@ export function appApiConfigFromEnv(env = process.env) {
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
+    publicContactVaultPath:
+      env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
+    publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
@@ -285,23 +300,48 @@ function routeEvent(request, body, config) {
   }
 }
 
-function routeLanguageRequest(body, registry, config) {
+function routeLanguageRequest(request, body, registry, config) {
   try {
-    const input = parseJsonBody(body);
+    const input = parseBody(request, body);
     const requestRow = createLanguageRequest(registry, input, config.requestedAt);
-    const ledger = appendLanguageRequest(requestRow, { filePath: config.languageRequestPath });
-    const consent = recordConsent(
-      {
-        consentType: "language_request",
-        source: "website_language_request",
-        subjectId: requestRow.id,
-        locale: requestRow.requested_locale,
-        contact: requestRow.contact,
-        marketingOptIn: input.marketingOptIn === true,
-      },
-      config,
-    );
-    return privateJson(201, { ...requestRow, ledger, consent });
+    if (requestRow.notification_requested && !config.publicContactVaultPath) {
+      throw new Error("Public contact delivery storage is not configured");
+    }
+    const contactVault =
+      requestRow.notification_requested && config.publicContactVaultPath
+        ? appendPublicContact(
+            {
+              subjectType: "language_request",
+              subjectId: requestRow.id,
+              contact: requestRow.contact,
+              message: requestRow.message,
+            },
+            {
+              filePath: config.publicContactVaultPath,
+              secret: config.publicContactKey,
+              storedAt: config.requestedAt,
+              includeMessage: true,
+            },
+          )
+        : null;
+    const safeRequest = privacySafeLanguageRequest(requestRow);
+    const ledger = appendLanguageRequest(safeRequest, { filePath: config.languageRequestPath });
+    const consent = requestRow.notification_requested
+      ? recordConsent(
+          {
+            consentType: "language_request",
+            source: "website_language_request",
+            subjectId: requestRow.id,
+            locale: requestRow.requested_locale,
+            contact: requestRow.contact,
+            granted: true,
+            legalBasis: "consent",
+            marketingOptIn: input.marketingOptIn === true,
+          },
+          config,
+        )
+      : null;
+    return privateJson(201, { ...safeRequest, ledger, contactVault, consent });
   } catch (error) {
     return privateJson(400, { kind: "bad_request", message: error.message });
   }
@@ -321,7 +361,20 @@ function routeSavedSearch(request, body, registry, seed, config) {
       search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
     );
     const savedSearch = createSavedSearch(registry, { ...input, filters, priceSnapshot }, { matchCount: search.search.total_matches, savedAt: config.savedAt });
-    const ledger = appendSavedSearch(savedSearch, { filePath: config.savedSearchLedgerPath });
+    if (!config.publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
+    const contactVault = config.publicContactVaultPath
+      ? appendPublicContact(
+          {
+            subjectType: "saved_search",
+            subjectId: savedSearch.id,
+            contact: savedSearch.contact,
+            contactPreference: savedSearch.contact_preference,
+          },
+          { filePath: config.publicContactVaultPath, secret: config.publicContactKey, storedAt: config.savedAt },
+        )
+      : null;
+    const safeSearch = privacySafeSavedSearch(savedSearch);
+    const ledger = appendSavedSearch(safeSearch, { filePath: config.savedSearchLedgerPath });
     const consent = recordConsent(
       {
         consentType: "saved_search_alerts",
@@ -329,12 +382,13 @@ function routeSavedSearch(request, body, registry, seed, config) {
         subjectId: savedSearch.id,
         locale: savedSearch.requested_locale,
         contact: savedSearch.contact,
+        granted: savedSearch.alert_consent === true,
         legalBasis: "consent",
         marketingOptIn: input.marketingOptIn === true,
       },
       config,
     );
-    return privateJson(201, { ...savedSearch, ledger, consent });
+    return privateJson(201, { ...safeSearch, ledger, contactVault, consent });
   } catch (error) {
     return privateJson(400, { kind: "bad_request", message: error.message });
   }
@@ -387,7 +441,7 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
 
     if (request.method === "POST" && url.pathname === "/api/language-requests") {
       const registry = loadLocaleRegistry(config.localeRegistryPath);
-      return webResponse(routeLanguageRequest(body, registry, config));
+      return webResponse(routeLanguageRequest(request, body, registry, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {

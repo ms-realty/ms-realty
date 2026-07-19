@@ -23,7 +23,15 @@ test("lead contact vault encrypts private contact data and restores it only with
   });
   const stored = fs.readFileSync(filePath, "utf8");
   const storedRow = JSON.parse(stored);
-  assert.deepEqual(Object.keys(storedRow).sort(), ["algorithm", "auth_tag", "ciphertext", "iv", "lead_id", "stored_at"]);
+  assert.deepEqual(Object.keys(storedRow).sort(), [
+    "algorithm",
+    "auth_tag",
+    "ciphertext",
+    "iv",
+    "stored_at",
+    "subject_id",
+    "subject_type",
+  ]);
   assert.doesNotMatch(stored, /Noa Levi|\+359880000001|"whatsapp"/);
   assert.equal(fs.statSync(filePath).mode & 0o777, 0o600);
   assert.deepEqual(readLeadContacts(filePath, SECRET).get("vault-lead-1"), {

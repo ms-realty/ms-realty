@@ -40,12 +40,24 @@ import {
   summarizeLegacyRouteDecisions,
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
-import { appendLanguageRequest, createLanguageRequest, readLanguageRequests } from "./language-requests.mjs";
+import {
+  appendLanguageRequest,
+  createLanguageRequest,
+  privacySafeLanguageRequest,
+  readLanguageRequests,
+} from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
 import { appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
-import { appendSavedSearch, createSavedSearch, normalizeSavedSearchInput, readSavedSearches } from "./saved-searches.mjs";
+import {
+  appendSavedSearch,
+  createSavedSearch,
+  normalizeSavedSearchInput,
+  privacySafeSavedSearch,
+  readSavedSearches,
+} from "./saved-searches.mjs";
+import { appendPublicContact } from "./public-contact-vault.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendSellerPipelineOutcome, buildSellerPipelineQueue, readSellerPipelineOutcomes } from "./seller-pipeline-outcomes.mjs";
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
@@ -309,6 +321,8 @@ export function createHttpApp({
   leadLedgerPath = null,
   leadContactVaultPath = null,
   leadContactKey = null,
+  publicContactVaultPath = null,
+  publicContactKey = null,
   replyOutboxPath = null,
   languageRequestPath = null,
   translationLedgerPath = null,
@@ -1579,18 +1593,43 @@ export function createHttpApp({
 
     if (request.method === "POST" && url.pathname === "/api/language-requests") {
       try {
-        const input = parseJsonBody(request);
+        const input = parseBody(request);
         const requestRow = createLanguageRequest(activeRegistry, input, requestedAt);
-        const ledger = languageRequestPath ? appendLanguageRequest(requestRow, { filePath: languageRequestPath }) : null;
-        const consent = recordConsent({
-          consentType: "language_request",
-          source: "website_language_request",
-          subjectId: requestRow.id,
-          locale: requestRow.requested_locale,
-          contact: requestRow.contact,
-          marketingOptIn: input.marketingOptIn === true,
-        });
-        return privateJson(201, { ...requestRow, ledger, consent });
+        if (requestRow.notification_requested && !publicContactVaultPath) {
+          throw new Error("Public contact delivery storage is not configured");
+        }
+        const contactVault =
+          requestRow.notification_requested && publicContactVaultPath
+            ? appendPublicContact(
+                {
+                  subjectType: "language_request",
+                  subjectId: requestRow.id,
+                  contact: requestRow.contact,
+                  message: requestRow.message,
+                },
+                {
+                  filePath: publicContactVaultPath,
+                  secret: publicContactKey,
+                  storedAt: requestedAt,
+                  includeMessage: true,
+                },
+              )
+            : null;
+        const safeRequest = privacySafeLanguageRequest(requestRow);
+        const ledger = languageRequestPath ? appendLanguageRequest(safeRequest, { filePath: languageRequestPath }) : null;
+        const consent = requestRow.notification_requested
+          ? recordConsent({
+              consentType: "language_request",
+              source: "website_language_request",
+              subjectId: requestRow.id,
+              locale: requestRow.requested_locale,
+              contact: requestRow.contact,
+              granted: true,
+              legalBasis: "consent",
+              marketingOptIn: input.marketingOptIn === true,
+            })
+          : null;
+        return privateJson(201, { ...safeRequest, ledger, contactVault, consent });
       } catch (error) {
         return privateJson(400, { kind: "bad_request", message: error.message });
       }
@@ -1610,17 +1649,31 @@ export function createHttpApp({
           search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
         );
         const savedSearch = createSavedSearch(activeRegistry, { ...input, filters, priceSnapshot }, { matchCount: search.search.total_matches, savedAt });
-        const ledger = savedSearchLedgerPath ? appendSavedSearch(savedSearch, { filePath: savedSearchLedgerPath }) : null;
+        if (!publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
+        const contactVault = publicContactVaultPath
+          ? appendPublicContact(
+              {
+                subjectType: "saved_search",
+                subjectId: savedSearch.id,
+                contact: savedSearch.contact,
+                contactPreference: savedSearch.contact_preference,
+              },
+              { filePath: publicContactVaultPath, secret: publicContactKey, storedAt: savedAt },
+            )
+          : null;
+        const safeSearch = privacySafeSavedSearch(savedSearch);
+        const ledger = savedSearchLedgerPath ? appendSavedSearch(safeSearch, { filePath: savedSearchLedgerPath }) : null;
         const consent = recordConsent({
           consentType: "saved_search_alerts",
           source: "website_saved_search",
           subjectId: savedSearch.id,
           locale: savedSearch.requested_locale,
           contact: savedSearch.contact,
+          granted: savedSearch.alert_consent === true,
           legalBasis: "consent",
           marketingOptIn: input.marketingOptIn === true,
         });
-        return privateJson(201, { ...savedSearch, ledger, consent });
+        return privateJson(201, { ...safeSearch, ledger, contactVault, consent });
       } catch (error) {
         return privateJson(400, { kind: "bad_request", message: error.message });
       }

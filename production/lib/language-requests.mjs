@@ -13,21 +13,36 @@ export function resetLanguageRequests(filePath = DEFAULT_LANGUAGE_REQUEST_LEDGER
 }
 
 export function createLanguageRequest(registry, input, requestedAt = new Date().toISOString()) {
-  if (!BCP47.test(input.requestedLocale || "")) throw new Error("requestedLocale must be a BCP 47 language code");
-  if (!input.requestedPath) throw new Error("requestedPath is required");
-  const requested = localesByCode(registry).get(input.requestedLocale);
+  const requestedLocale = input.requestedLocale || input.requested_locale;
+  const requestedPath = input.requestedPath || input.requested_path;
+  if (!BCP47.test(requestedLocale || "")) throw new Error("requestedLocale must be a BCP 47 language code");
+  if (!requestedPath) throw new Error("requestedPath is required");
+  const requested = localesByCode(registry).get(requestedLocale);
   const fallbackLocale = requested?.fallback_locale || registry.source_locale;
+  const contact = input.contact && typeof input.contact === "object" ? input.contact : {};
+  const notificationRequested = ["email", "phone", "whatsapp", "viber"].some((field) => Boolean(String(contact[field] || "").trim()));
 
   return {
     requested_at: requestedAt,
-    id: input.id || `language-request-${input.requestedLocale}`,
-    requested_locale: input.requestedLocale,
-    requested_path: input.requestedPath,
+    id: input.id || `language-request-${requestedLocale}`,
+    requested_locale: requestedLocale,
+    requested_path: requestedPath,
     fallback_locale: fallbackLocale,
-    admin_locale: adminLocales(registry).includes(input.requestedLocale) ? input.requestedLocale : "en",
+    admin_locale: adminLocales(registry).includes(requestedLocale) ? requestedLocale : "en",
     public_indexable: false,
-    contact: input.contact || {},
+    contact,
+    notification_requested: notificationRequested,
     message: input.message || "",
+  };
+}
+
+export function privacySafeLanguageRequest(request) {
+  const { contact, message, ...safe } = request;
+  return {
+    ...safe,
+    contact_ref: request.notification_requested ? request.id : null,
+    contact_available: request.notification_requested === true,
+    message_available: Boolean(String(message || "").trim()),
   };
 }
 
@@ -58,6 +73,10 @@ export function assertLanguageRequests(rows) {
       throw new Error("Language request row is missing routing data");
     }
     if (row.public_indexable !== false) throw new Error("Language requests must never be indexable");
+    if (row.contact || row.message) throw new Error("Language request ledger must not store raw contact or message data");
+    if (row.notification_requested && (!row.contact_available || row.contact_ref !== row.id)) {
+      throw new Error("Language request notification must preserve private contact routing");
+    }
   }
   return true;
 }

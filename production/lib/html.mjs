@@ -301,6 +301,10 @@ function renderSearch(page) {
     <input type="hidden" name="query" value="${escapeHtml(page.search.query || "")}">
     <input type="hidden" name="filters" value="${escapeHtml(JSON.stringify(savedSearchFilters))}">
     <label>Name <input name="contact.name" required autocomplete="name"></label>
+    <label>Alert channel <select name="contact_preference"><option value="email">Email</option><option value="whatsapp">WhatsApp</option></select></label>
+    <label>Email <input name="contact.email" type="email" required autocomplete="email"></label>
+    <label>Frequency <select name="alertFrequency"><option value="weekly">Weekly</option><option value="daily">Daily</option><option value="instant">As soon as possible</option></select></label>
+    <label><input type="checkbox" name="alertConsent" value="true" required> I agree that a broker may contact me about new matches.</label>
     <button type="submit"${hasSavedSearchCriteria ? "" : " disabled"}>Save search</button>
   </form>
   <section aria-label="Active filters" data-active-filters="true" data-active-filter-count="${escapeHtml((controls.active_filter_chips || []).length)}">${chips}</section>
@@ -402,7 +406,11 @@ function renderFallback(page) {
 <main data-kind="language-fallback">
   <h1>${escapeHtml(page.metadata.title)}</h1>
   <p>${escapeHtml(page.metadata.description)}</p>
-  <a href="/api/language-requests" data-method="POST">Request this language</a>
+  <form method="post" action="/api/language-requests" data-request-language="true">
+    <input type="hidden" name="requestedLocale" value="${escapeHtml(page.requested_locale)}">
+    <input type="hidden" name="requestedPath" value="${escapeHtml(page.requested_path)}">
+    <button type="submit">Request this language</button>
+  </form>
 </main>`;
 }
 

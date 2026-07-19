@@ -91,6 +91,10 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /name="locale" value="he"/);
   assert.match(searchHtml, /name="filters" value="{}"/);
   assert.match(searchHtml, /name="contact\.name" required/);
+  assert.match(searchHtml, /name="contact_preference"/);
+  assert.match(searchHtml, /name="contact\.email" type="email" required/);
+  assert.match(searchHtml, /name="alertFrequency"/);
+  assert.match(searchHtml, /name="alertConsent" value="true" required/);
   assert.match(searchHtml, /name="offer_type"/);
   assert.match(searchHtml, /name="price_min"/);
   assert.match(searchHtml, /name="bedrooms_min"/);
@@ -141,6 +145,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(guideHtml, /Non-EU buyers cannot own Bulgarian land directly/);
   assert.equal(assertHtmlPage(fallbackHtml, { lang: "en", dir: "ltr", kind: "language-fallback" }), true);
   assert.match(fallbackHtml, /noindex,follow/);
+  assert.match(fallbackHtml, /action="\/api\/language-requests"/);
+  assert.match(fallbackHtml, /name="requestedLocale" value="fr"/);
+  assert.match(fallbackHtml, /name="requestedPath" value="\/fr\/"/);
 });
 
 test("admin lead values are localized without exposing raw workflow codes", () => {

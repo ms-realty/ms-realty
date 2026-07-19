@@ -714,6 +714,59 @@ function SearchBody({ page }) {
         h("label", { className: "hdr", htmlFor: `${idPrefix}-save-search-name` }, labels.name),
         h("input", { id: `${idPrefix}-save-search-name`, name: "contact.name", required: true, autoComplete: "name" }),
       ),
+      h(
+        "div",
+        { className: "sr-fg" },
+        h("label", { className: "hdr", htmlFor: `${idPrefix}-save-search-channel` }, labels.alertDelivery),
+        h(
+          "select",
+          { id: `${idPrefix}-save-search-channel`, name: "contact_preference", "data-save-search-channel": "true" },
+          h("option", { value: "email" }, labels.email),
+          h("option", { value: "whatsapp" }, "WhatsApp"),
+        ),
+      ),
+      h(
+        "div",
+        { className: "sr-fg" },
+        h(
+          "label",
+          {
+            className: "hdr",
+            htmlFor: `${idPrefix}-save-search-contact`,
+            "data-save-search-contact-label": "true",
+            "data-email-label": labels.email,
+            "data-whatsapp-label": "WhatsApp",
+          },
+          labels.email,
+        ),
+        h("input", {
+          id: `${idPrefix}-save-search-contact`,
+          name: "contact.email",
+          type: "email",
+          required: true,
+          autoComplete: "email",
+          inputMode: "email",
+          "data-save-search-contact": "true",
+        }),
+      ),
+      h(
+        "div",
+        { className: "sr-fg" },
+        h("label", { className: "hdr", htmlFor: `${idPrefix}-save-search-frequency` }, labels.alertFrequency),
+        h(
+          "select",
+          { id: `${idPrefix}-save-search-frequency`, name: "alertFrequency" },
+          h("option", { value: "weekly" }, labels.alertWeekly),
+          h("option", { value: "daily" }, labels.alertDaily),
+          h("option", { value: "instant" }, labels.alertInstant),
+        ),
+      ),
+      h(
+        "label",
+        { className: "sr-save__consent" },
+        h("input", { type: "checkbox", name: "alertConsent", value: "true", required: true }),
+        h("span", null, labels.alertConsent),
+      ),
       h(Btn, { type: "submit", variant: "secondary", full: true, iconStart: "bell", disabled: !hasSavedSearchCriteria }, labels.saveSearch),
     );
   const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchForm(idPrefix)];
@@ -1276,8 +1329,8 @@ function LanguageFallbackBody({ page }) {
         h(
           "form",
           { method: "POST", action: "/api/language-requests", "data-request-language": "true" },
-          h("input", { type: "hidden", name: "requested_locale", defaultValue: page.requested_locale }),
-          h("input", { type: "hidden", name: "fallback_locale", defaultValue: page.locale }),
+          h("input", { type: "hidden", name: "requestedLocale", defaultValue: page.requested_locale }),
+          h("input", { type: "hidden", name: "requestedPath", defaultValue: page.requested_path }),
           h(Btn, { type: "submit", variant: "primary", iconStart: "languages" }, labels.requestLanguage),
         ),
       ),

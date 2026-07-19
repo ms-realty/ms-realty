@@ -3,7 +3,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
-import { appendSavedSearch, assertSavedSearches, createSavedSearch, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
+import {
+  appendSavedSearch,
+  assertSavedSearches,
+  createSavedSearch,
+  privacySafeSavedSearch,
+  readSavedSearches,
+  resetSavedSearches,
+} from "../lib/saved-searches.mjs";
 
 test("saved search stores criteria and creates alert task", () => {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-saved-searches-`)}/saved-searches.jsonl`;
@@ -18,7 +25,12 @@ test("saved search stores criteria and creates alert task", () => {
     () =>
       createSavedSearch(
         registry,
-        { locale: "not a locale", query: "Sandanski", contact: { name: "Noa Levi" } },
+        {
+          locale: "not a locale",
+          query: "Sandanski",
+          contact: { name: "Noa Levi", email: "noa@example.test" },
+          alertConsent: true,
+        },
         { savedAt: "2026-07-04T00:07:00Z" },
       ),
     /BCP 47/,
@@ -31,25 +43,33 @@ test("saved search stores criteria and creates alert task", () => {
       query: "Sandanski",
       filters: JSON.stringify({ property_type: "apartment" }),
       "contact.name": "Noa Levi",
+      "contact.email": "noa@example.test",
+      contact_preference: "email",
+      alertConsent: "true",
     },
     { savedAt: "2026-07-04T00:06:00Z" },
   );
   assert.equal(nativeFormSearch.locale, "he");
   assert.deepEqual(nativeFormSearch.filters, { property_type: "apartment" });
   assert.equal(nativeFormSearch.contact.name, "Noa Levi");
+  assert.equal(nativeFormSearch.contact_preference, "email");
 
   appendSavedSearch(
-    createSavedSearch(
-      registry,
-      {
-        id: "saved-search-test",
-        locale: "fr",
-        query: "Sandanski",
-        filters: { property_type: "apartment" },
-        contact: { name: "Claire Martin" },
-        priceSnapshot: { "MS-CRAWL-0001": 120000, ignored: "not-a-number" },
-      },
-      { matchCount: 12, savedAt: "2026-07-04T00:07:00Z" },
+    privacySafeSavedSearch(
+      createSavedSearch(
+        registry,
+        {
+          id: "saved-search-test",
+          locale: "fr",
+          query: "Sandanski",
+          filters: { property_type: "apartment" },
+          contact: { name: "Claire Martin", whatsapp: "+33600000000" },
+          contact_preference: "whatsapp",
+          alertConsent: true,
+          priceSnapshot: { "MS-CRAWL-0001": 120000, ignored: "not-a-number" },
+        },
+        { matchCount: 12, savedAt: "2026-07-04T00:07:00Z" },
+      ),
     ),
     { filePath: file },
   );
@@ -59,6 +79,9 @@ test("saved search stores criteria and creates alert task", () => {
   assert.equal(rows[0].requested_locale, "fr");
   assert.equal(rows[0].locale, "en");
   assert.equal(rows[0].fallback_used, true);
+  assert.equal(rows[0].contact, undefined);
+  assert.equal(rows[0].contact_ref, "saved-search-test");
+  assert.equal(rows[0].contact_preference, "whatsapp");
   assert.deepEqual(rows[0].price_snapshot, { "MS-CRAWL-0001": 120000 });
   assert.equal(rows[0].alert_task.status, "open");
   assert.equal(assertSavedSearches(rows), true);

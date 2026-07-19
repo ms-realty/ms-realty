@@ -39,6 +39,7 @@ import {
   readSavedSearches,
   resetSavedSearches,
 } from "../lib/saved-searches.mjs";
+import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import {
   assertSellerPipeline,
   readSellerPipeline,
@@ -120,6 +121,8 @@ const eventLedgerPath = path.join(smokeDir, "events.jsonl");
 const consentLedgerPath = path.join(smokeDir, "consent.jsonl");
 const auditLogPath = path.join(smokeDir, "audit-log.jsonl");
 const slugHistoryPath = path.join(smokeDir, "slug-history.jsonl");
+const publicContactVaultPath = path.join(smokeDir, "public-contacts.jsonl");
+const publicContactKey = "http-smoke-public-contact-key-2026";
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
 
 resetLeadLedger(leadLedgerPath);
@@ -156,6 +159,8 @@ const app = createHttpApp({
   consentLedgerPath,
   auditLogPath,
   slugHistoryPath,
+  publicContactVaultPath,
+  publicContactKey,
   localeRegistryPath,
   receivedAt: "2026-07-04T00:00:00Z",
   requestedAt: "2026-07-04T00:01:00Z",
@@ -234,7 +239,7 @@ const smoke = {
       id: "language-request-fr-0001",
       requestedLocale: "fr",
       requestedPath: "/fr/",
-      contact: { name: "Claire Martin" },
+      contact: { name: "Claire Martin", email: "claire@example.test" },
       message: "Please notify me when French property pages are reviewed.",
     },
   }),
@@ -256,6 +261,8 @@ const smoke = {
       query: "Sandanski",
       filters: { property_type: "apartment", unsupported_filter: "ignored" },
       contact: { name: "Noa Levi", whatsapp: "+359880000001" },
+      contact_preference: "whatsapp",
+      alertConsent: true,
     },
   }),
   hermesChatDisabled: await dispatchHttp(app, {
@@ -567,6 +574,9 @@ fs.copyFileSync(replyOutboxPath, DEFAULT_REPLY_OUTBOX_PATH);
 smoke.replyOutbox = { rows: outbox.length };
 const languageRequests = readLanguageRequests(languageRequestPath);
 assertLanguageRequests(languageRequests);
+if (languageRequests.some((row) => Object.hasOwn(row, "contact") || Object.hasOwn(row, "message"))) {
+  throw new Error("Language request workflow ledger must not contain private contact or message data");
+}
 smoke.languageRequestLedger = { rows: languageRequests.length };
 const translations = readTranslationLedger(translationLedgerPath);
 assertTranslationLedger(translations);
@@ -582,6 +592,12 @@ assertViewingFollowUpLedger(viewingFollowUps);
 smoke.viewingFollowUpLedger = { rows: viewingFollowUps.length };
 const savedSearches = readSavedSearches(savedSearchLedgerPath);
 assertSavedSearches(savedSearches);
+if (savedSearches.some((row) => Object.hasOwn(row, "contact"))) {
+  throw new Error("Saved search workflow ledger must not contain private contact data");
+}
+if (readPublicContacts(publicContactVaultPath, publicContactKey).size !== 2) {
+  throw new Error("Public contact vault must contain the language request and saved search contacts");
+}
 smoke.savedSearchLedger = { rows: savedSearches.length };
 const sellerPipeline = readSellerPipeline(sellerPipelinePath);
 assertSellerPipeline(sellerPipeline);

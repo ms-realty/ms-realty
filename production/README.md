@@ -252,6 +252,10 @@ for large admin CSV imports. The default is 10 MiB.
 Set `MS_REALTY_LEAD_CONTACT_KEY` to a secret of at least 32 characters and
 `MS_REALTY_LEAD_CONTACT_VAULT_PATH` to durable private storage. Public contact
 details are AES-256-GCM encrypted there and never written to the lead ledger.
+Saved-search and language-notification contacts use the same key by default and
+`MS_REALTY_PUBLIC_CONTACT_VAULT_PATH`; set `MS_REALTY_PUBLIC_CONTACT_KEY` when
+those records must use a separately rotated secret. Their workflow ledgers keep
+only contact references and delivery routing, never raw contact values.
 Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers
 need to live outside `production/data/`.
 Set `MS_REALTY_LOCALE_REGISTRY_PATH` when admin-added locales must persist

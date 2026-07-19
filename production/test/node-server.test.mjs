@@ -11,6 +11,7 @@ import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertViewingFollowUpLedger, readViewingFollowUps, resetViewingFollowUpLedger } from "../lib/viewing-follow-ups.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
+import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
@@ -39,6 +40,8 @@ async function withServer(fn) {
   const consentLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-consents-`)}/consents.jsonl`;
   const auditLogPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-audit-`)}/audit-log.jsonl`;
   const slugHistoryPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-slug-history-`)}/slug-history.jsonl`;
+  const publicContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-public-contacts-`)}/contacts.jsonl`;
+  const publicContactKey = "node-server-public-contact-key-2026";
   resetLeadLedger(leadLedgerPath);
   resetReplyOutbox(replyOutboxPath);
   resetLanguageRequests(languageRequestPath);
@@ -73,6 +76,8 @@ async function withServer(fn) {
       consentLedgerPath,
       auditLogPath,
       slugHistoryPath,
+      publicContactVaultPath,
+      publicContactKey,
       receivedAt: "2026-07-04T00:00:00Z",
       requestedAt: "2026-07-04T00:01:00Z",
       editedAt: "2026-07-04T00:03:00Z",
@@ -105,6 +110,8 @@ async function withServer(fn) {
       consentLedgerPath,
       auditLogPath,
       slugHistoryPath,
+      publicContactVaultPath,
+      publicContactKey,
     );
   } finally {
     await close(server);
@@ -150,6 +157,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       consentLedgerPath,
       auditLogPath,
       slugHistoryPath,
+      publicContactVaultPath,
+      publicContactKey,
     ) => {
       const redirect = deployableRedirect();
       const oldUrl = new URL(redirect.old_url);
@@ -225,7 +234,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             id: "node-server-language-request-test",
             requestedLocale: "fr",
             requestedPath: "/fr/",
-            contact: { name: "Claire Martin" },
+            contact: { name: "Claire Martin", email: "claire@example.test" },
             message: "Please notify me when French property pages are reviewed.",
           }),
         }),
@@ -237,7 +246,9 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             locale: "he",
             query: "Sandanski",
             filters: { property_type: "apartment" },
-            contact: { name: "Noa Levi" },
+            contact: { name: "Noa Levi", email: "noa@example.test" },
+            contact_preference: "email",
+            alertConsent: true,
           }),
         }),
         hermesChatDisabled: await jsonFetch(baseUrl, "/api/hermes/chat", {
@@ -549,6 +560,9 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
       assert.equal(assertViewingFollowUpLedger(readViewingFollowUps(viewingFollowUpLedgerPath)), true);
       assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
+      assert.equal(readSavedSearches(savedSearchLedgerPath).some((row) => Object.hasOwn(row, "contact")), false);
+      assert.equal(readLanguageRequests(languageRequestPath).some((row) => Object.hasOwn(row, "contact")), false);
+      assert.equal(readPublicContacts(publicContactVaultPath, publicContactKey).size, 2);
       assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
       assert.equal(assertDealLedger(readDeals(dealLedgerPath)), true);
       assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);

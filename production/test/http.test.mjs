@@ -5,6 +5,7 @@ import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
 import { readLeadContacts } from "../lib/lead-contact-vault.mjs";
+import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
@@ -262,6 +263,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const leadLedgerPath = tempLedger();
   const leadContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-contacts-`)}/contacts.jsonl`;
   const leadContactKey = "test-only-http-contact-key-32-characters-minimum";
+  const publicContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-public-contacts-`)}/contacts.jsonl`;
+  const publicContactKey = "test-only-http-public-contact-key-32-characters";
   const replyOutboxPath = tempOutbox();
   const languageRequestPath = tempLanguageRequests();
   const translationLedgerPath = tempTranslations();
@@ -282,6 +285,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     leadLedgerPath,
     leadContactVaultPath,
     leadContactKey,
+    publicContactVaultPath,
+    publicContactKey,
     replyOutboxPath,
     languageRequestPath,
     translationLedgerPath,
@@ -393,7 +398,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         id: "http-language-request-test",
         requestedLocale: "fr",
         requestedPath: "/fr/",
-        contact: { name: "Claire Martin" },
+        contact: { name: "Claire Martin", email: "claire@example.test" },
         message: "Please notify me when French property pages are reviewed.",
       },
     }),
@@ -405,7 +410,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         locale: "he",
         query: "Sandanski",
         filters: { property_type: "apartment", unsupported_filter: "ignored" },
-        contact: { name: "Noa Levi" },
+        contact: { name: "Noa Levi", whatsapp: "+359880000001" },
+        contact_preference: "whatsapp",
+        alertConsent: true,
       },
     }),
     hermesChatDisabled: await dispatchHttp(app, {
@@ -748,6 +755,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.location.body.cards.length, 1);
   assert.equal(smoke.locationHtml.body.includes("data-location=\"Sandanski\""), true);
   assert.deepEqual(smoke.savedSearch.body.filters, { property_type: "apartment" });
+  assert.equal(smoke.savedSearch.body.contact, undefined);
+  assert.equal(smoke.savedSearch.body.contactVault.encrypted, true);
   assert.equal(smoke.savedSearch.headers["cache-control"], "no-store");
   assert.equal(smoke.hermesChatDisabled.status, 405);
   assert.equal(smoke.hermesChatDisabled.body.kind, "method_not_allowed");
@@ -788,6 +797,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.match(smoke.guideHtml.body, /data-kind="guide"/);
   assert.match(smoke.guideHtml.body, /data-react-public-ui="guide"/);
   assert.equal(smoke.languageRequest.headers["cache-control"], "no-store");
+  assert.equal(smoke.languageRequest.body.contact, undefined);
+  assert.equal(smoke.languageRequest.body.contactVault.encrypted, true);
   assert.equal(smoke.listingAfterBrokerContact.body.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(smoke.tourApproval.body.is_public, true);
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.available, true);
@@ -799,6 +810,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.slugChangeUnauthorized.status, 401);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
   assert.equal(readLeadContacts(leadContactVaultPath, leadContactKey).size, 4);
+  assert.equal(readPublicContacts(publicContactVaultPath, publicContactKey).size, 2);
   assert.doesNotMatch(fs.readFileSync(leadContactVaultPath, "utf8"), /Noa Levi|Nikos Papadopoulos|359880000001/);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
@@ -2261,9 +2273,13 @@ test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async 
 
 test("HTTP fallback accepts a URL-encoded saved-search form", async () => {
   const savedSearchLedgerPath = tempSavedSearches();
+  const publicContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-saved-contact-`)}/contacts.jsonl`;
+  const publicContactKey = "test-only-http-saved-contact-key-32-characters";
   const app = createHttpApp({
     registry: loadLocaleRegistry(),
     savedSearchLedgerPath,
+    publicContactVaultPath,
+    publicContactKey,
     consentLedgerPath: tempConsents(),
     translationLedgerPath: tempTranslations(),
     savedAt: "2026-07-13T00:00:00Z",
@@ -2277,13 +2293,50 @@ test("HTTP fallback accepts a URL-encoded saved-search form", async () => {
       query: "",
       filters: JSON.stringify({ property_type: "apartment" }),
       "contact.name": "Noa Levi",
+      "contact.whatsapp": "+359880000001",
+      contact_preference: "whatsapp",
+      alertConsent: "true",
     }).toString(),
   });
 
   assert.equal(response.status, 201);
   assert.deepEqual(response.body.filters, { property_type: "apartment" });
-  assert.equal(response.body.contact.name, "Noa Levi");
-  assert.deepEqual(readSavedSearches(savedSearchLedgerPath)[0].contact, { name: "Noa Levi" });
+  assert.equal(response.body.contact, undefined);
+  assert.equal(response.body.contact_preference, "whatsapp");
+  assert.equal(readSavedSearches(savedSearchLedgerPath)[0].contact, undefined);
+  assert.equal(readPublicContacts(publicContactVaultPath, publicContactKey, "saved_search").size, 1);
+});
+
+test("HTTP public delivery requests fail closed when private contact storage is unavailable", async () => {
+  const app = createHttpApp({
+    savedSearchLedgerPath: `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-no-contact-vault-`)}/saved-searches.jsonl`,
+    languageRequestPath: `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-no-language-vault-`)}/language-requests.jsonl`,
+  });
+  const savedSearch = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/saved-searches",
+    body: {
+      locale: "en",
+      query: "Sandanski",
+      contact: { name: "Buyer", email: "buyer@example.test" },
+      contact_preference: "email",
+      alertConsent: true,
+    },
+  });
+  const languageRequest = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/language-requests",
+    body: {
+      requestedLocale: "fr",
+      requestedPath: "/fr/",
+      contact: { name: "Buyer", email: "buyer@example.test" },
+    },
+  });
+
+  assert.equal(savedSearch.status, 400);
+  assert.equal(languageRequest.status, 400);
+  assert.match(savedSearch.body.message, /delivery storage is not configured/);
+  assert.match(languageRequest.body.message, /delivery storage is not configured/);
 });
 
 test("generated HTTP smoke file is valid when present", () => {

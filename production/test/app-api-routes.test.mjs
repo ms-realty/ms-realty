@@ -6,6 +6,7 @@ import { readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs
 import { readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 
@@ -39,6 +40,8 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
   const launchReadinessPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-readiness-`)}/launch-readiness.json`;
   const localeRegistryPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-locales-`)}/registry.json`;
   const savedSearchLedgerPath = tempLedger("app-api-saved-searches", resetSavedSearches);
+  const publicContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-app-api-public-contacts-`)}/contacts.jsonl`;
+  const publicContactKey = "test-only-app-api-public-contact-key-32-characters";
   const sellerPipelinePath = tempLedger("app-api-seller-pipeline", resetSellerPipeline);
   const registry = JSON.parse(fs.readFileSync("locales/registry.json", "utf8"));
   registry.locales.push({
@@ -77,6 +80,8 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessPath,
       MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
       MS_REALTY_LOCALE_REGISTRY_PATH: localeRegistryPath,
+      MS_REALTY_PUBLIC_CONTACT_KEY: publicContactKey,
+      MS_REALTY_PUBLIC_CONTACT_VAULT_PATH: publicContactVaultPath,
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: savedSearchLedgerPath,
       MS_REALTY_SELLER_PIPELINE_PATH: sellerPipelinePath,
     },
@@ -192,7 +197,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
             id: "next-api-language-request-test",
             requestedLocale: "fr",
             requestedPath: "/fr/",
-            contact: { name: "Claire" },
+            contact: { name: "Claire", email: "claire@example.test" },
             message: "Please notify me when French is available.",
           }),
         }),
@@ -202,6 +207,25 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(languageRequest.headers.get("cache-control"), "no-store");
       assert.equal(languageRequestBody.public_indexable, false);
       assert.equal(languageRequestBody.fallback_locale, "ru");
+      assert.equal(languageRequestBody.contact, undefined);
+      assert.equal(languageRequestBody.contactVault.encrypted, true);
+
+      const languageRequestForm = await languageRequestRoute.POST(
+        new Request("https://example.test/api/language-requests", {
+          method: "POST",
+          headers: { "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            id: "next-api-language-request-form-test",
+            requestedLocale: "fr",
+            requestedPath: "/fr/",
+          }),
+        }),
+      );
+      const languageRequestFormBody = await languageRequestForm.json();
+      assert.equal(languageRequestForm.status, 201);
+      assert.equal(languageRequestFormBody.requested_path, "/fr/");
+      assert.equal(languageRequestFormBody.notification_requested, false);
+      assert.equal(languageRequestFormBody.consent, null);
 
       const savedSearch = await savedSearchRoute.POST(
         new Request("https://example.test/api/saved-searches", {
@@ -212,7 +236,9 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
             locale: "he",
             query: "Sandanski",
             filters: { location: "Sandanski" },
-            contact: { name: "Noa Levi" },
+            contact: { name: "Noa Levi", email: "noa@example.test" },
+            contact_preference: "email",
+            alertConsent: true,
             alertFrequency: "weekly",
           }),
         }),
@@ -222,6 +248,8 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(savedSearch.headers.get("cache-control"), "no-store");
       assert.equal(savedSearchBody.status, "active");
       assert.ok(savedSearchBody.match_count > 0);
+      assert.equal(savedSearchBody.contact, undefined);
+      assert.equal(savedSearchBody.contactVault.encrypted, true);
 
       const savedSearchForm = await savedSearchRoute.POST(
         new Request("https://example.test/api/saved-searches", {
@@ -233,13 +261,17 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
             query: "Sandanski",
             filters: JSON.stringify({ location: "Sandanski" }),
             "contact.name": "Noa Levi",
+            "contact.whatsapp": "+359880000001",
+            contact_preference: "whatsapp",
+            alertConsent: "true",
           }),
         }),
       );
       const savedSearchFormBody = await savedSearchForm.json();
       assert.equal(savedSearchForm.status, 201);
       assert.deepEqual(savedSearchFormBody.filters, { location: "Sandanski" });
-      assert.equal(savedSearchFormBody.contact.name, "Noa Levi");
+      assert.equal(savedSearchFormBody.contact, undefined);
+      assert.equal(savedSearchFormBody.contact_preference, "whatsapp");
 
       const retiredHermesChatRoute = await import("../../app/api/hermes/chat/route.js");
       const disabledHermesChat = await retiredHermesChatRoute.POST(
@@ -263,8 +295,10 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
     type: "apartment",
   });
   assert.deepEqual(readSellerPipeline(sellerPipelinePath)[0].property, { location: "Sandanski", type: "apartment" });
-  assert.equal(readLanguageRequests(languageRequestPath).length, 1);
+  assert.equal(readLanguageRequests(languageRequestPath).length, 2);
   assert.equal(readSavedSearches(savedSearchLedgerPath).length, 2);
+  assert.equal(readSavedSearches(savedSearchLedgerPath).some((row) => row.contact), false);
+  assert.equal(readPublicContacts(publicContactVaultPath, publicContactKey).size, 3);
   assert.deepEqual(
     readConsentLedger(consentLedgerPath).map((row) => row.consent_type),
     ["inquiry_follow_up", "inquiry_follow_up", "language_request", "saved_search_alerts", "saved_search_alerts"],
