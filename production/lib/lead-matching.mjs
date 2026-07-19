@@ -80,7 +80,8 @@ function matchLead(registry, seed, listingById, lead, pipelineState) {
     admin_locale: lead.admin_locale,
     assigned_broker: lead.assigned_broker,
     source_listing_id: lead.listing_reference || null,
-    qualification_stage: pipelineState?.stage || null,
+    pipeline_stage: pipelineState?.stage || null,
+    qualification_complete: Boolean(pipelineState?.requirements),
     criteria,
     match_count: matches.length,
     matches: matches.map((card) => ({
@@ -123,9 +124,9 @@ export function buildLeadMatchingReport({
   return {
     generated_at: generatedAt,
     summary: {
-      buyer_leads_with_listing_reference: rows.filter((row) => row.lead_type === "buyer" && row.source_listing_id).length,
-      active_buyer_renter_leads: rows.length,
-      qualified_leads: rows.filter((row) => row.qualification_stage).length,
+      matchable_leads_with_listing_reference: rows.filter((row) => row.source_listing_id).length,
+      active_matchable_leads: rows.length,
+      qualified_leads: rows.filter((row) => row.qualification_complete).length,
       leads_with_matches: rows.filter((row) => row.match_count > 0).length,
       open_broker_tasks: rows.filter((row) => row.broker_task?.status === "open").length,
     },
@@ -134,18 +135,21 @@ export function buildLeadMatchingReport({
 }
 
 export function assertLeadMatchingReport(report) {
-  const buyerRowsWithSource = report.rows.filter((row) => row.lead_type === "buyer" && row.source_listing_id).length;
-  if (report.summary.buyer_leads_with_listing_reference !== buyerRowsWithSource) {
-    throw new Error("Lead matching summary must match rows");
+  const rowsWithSource = report.rows.filter((row) => row.source_listing_id).length;
+  if (report.summary.matchable_leads_with_listing_reference !== rowsWithSource) {
+    throw new Error("Lead matching source-listing summary must match rows");
   }
-  if (report.summary.active_buyer_renter_leads !== undefined && report.summary.active_buyer_renter_leads !== report.rows.length) {
+  if (report.summary.active_matchable_leads !== report.rows.length) {
     throw new Error("Lead matching active summary must match rows");
+  }
+  if (report.summary.qualified_leads !== report.rows.filter((row) => row.qualification_complete).length) {
+    throw new Error("Lead matching qualification summary must match rows");
   }
   if (report.summary.leads_with_matches !== report.rows.filter((row) => row.match_count > 0).length) {
     throw new Error("Lead matching matched summary must match rows");
   }
   for (const row of report.rows) {
-    if (!row.lead_id || (!row.source_listing_id && !row.qualification_stage) || !row.assigned_broker) {
+    if (!row.lead_id || (!row.source_listing_id && !row.pipeline_stage) || !row.assigned_broker) {
       throw new Error("Lead matching rows must preserve lead criteria and broker assignment");
     }
     if ("contact" in row || "email" in row || "phone" in row) throw new Error("Lead matching rows must not store raw contact data");

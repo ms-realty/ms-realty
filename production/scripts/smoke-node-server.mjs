@@ -9,6 +9,11 @@ import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger 
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertViewingFollowUpLedger, readViewingFollowUps, resetViewingFollowUpLedger } from "../lib/viewing-follow-ups.mjs";
+import {
+  assertLeadPipelineOutcomes,
+  readLeadPipelineOutcomes,
+  resetLeadPipelineOutcomes,
+} from "../lib/lead-pipeline-outcomes.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
@@ -48,6 +53,7 @@ const translationLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "m
 const listingEditLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-listing-edits-")), "edits.jsonl");
 const viewingLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewings-")), "viewings.jsonl");
 const viewingFollowUpLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-viewing-follow-ups-")), "viewing-follow-ups.jsonl");
+const leadPipelineOutcomeLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-lead-pipeline-")), "outcomes.jsonl");
 const savedSearchLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-saved-searches-")), "saved-searches.jsonl");
 const sellerPipelinePath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-seller-pipeline-")), "seller-pipeline.jsonl");
 const dealLedgerPath = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-deals-")), "deals.jsonl");
@@ -66,6 +72,7 @@ resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
 resetViewingFollowUpLedger(viewingFollowUpLedgerPath);
+resetLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
 resetDealLedger(dealLedgerPath);
@@ -84,6 +91,7 @@ const server = createNodeServer(
     listingEditLedgerPath,
     viewingLedgerPath,
     viewingFollowUpLedgerPath,
+    leadPipelineOutcomeLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
     dealLedgerPath,
@@ -100,6 +108,7 @@ const server = createNodeServer(
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
+    leadPipelineOutcomeAt: "2026-07-04T00:05:30Z",
     viewingFollowUpAt: "2026-07-06T12:00:00Z",
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
@@ -320,6 +329,23 @@ try {
         approved: true,
       }),
     }),
+    leadQualification: await jsonFetch(baseUrl, "/api/admin/lead-pipeline/outcome", {
+      method: "POST",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: JSON.stringify({
+        id: "qualification-server-lead-he-0001",
+        leadId: "server-lead-he-0001",
+        actor: "broker_ru",
+        action: "qualify",
+        budgetMinEur: 90000,
+        budgetMaxEur: 160000,
+        locations: ["Sandanski"],
+        propertyTypes: ["apartment"],
+        bedroomsMin: 2,
+        timeline: "Within six months",
+        financeStatus: "cash",
+      }),
+    }),
     viewing: await jsonFetch(baseUrl, "/api/admin/viewings", {
       method: "POST",
       headers: { authorization: "Bearer local-admin-smoke" },
@@ -374,8 +400,8 @@ try {
       method: "POST",
       headers: { authorization: "Bearer local-admin-smoke" },
       body: JSON.stringify({
-        id: "deal-server-lead-he-0001",
-        leadId: "server-lead-he-0001",
+        id: "deal-server-lead-contact-he-0001",
+        leadId: "server-lead-contact-he-0001",
         broker: "broker_ru",
       }),
     }),
@@ -509,6 +535,9 @@ try {
   const viewingFollowUps = readViewingFollowUps(viewingFollowUpLedgerPath);
   assertViewingFollowUpLedger(viewingFollowUps);
   smoke.viewingFollowUpLedger = { rows: viewingFollowUps.length };
+  const leadPipelineOutcomes = readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath);
+  assertLeadPipelineOutcomes(leadPipelineOutcomes);
+  smoke.leadPipelineOutcomeLedger = { rows: leadPipelineOutcomes.length };
   const savedSearches = readSavedSearches(savedSearchLedgerPath);
   assertSavedSearches(savedSearches);
   if (savedSearches.some((row) => Object.hasOwn(row, "contact"))) {

@@ -10,6 +10,7 @@ import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger 
 import { assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
 import { assertViewingLedger, readViewings, resetViewingLedger } from "../lib/viewing-ledger.mjs";
 import { assertViewingFollowUpLedger, readViewingFollowUps, resetViewingFollowUpLedger } from "../lib/viewing-follow-ups.mjs";
+import { resetLeadPipelineOutcomes } from "../lib/lead-pipeline-outcomes.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { readPublicContacts } from "../lib/public-contact-vault.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
@@ -31,6 +32,7 @@ async function withServer(fn) {
   const listingEditLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-listing-edits-`)}/edits.jsonl`;
   const viewingLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewings-`)}/viewings.jsonl`;
   const viewingFollowUpLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-viewing-follow-ups-`)}/viewing-follow-ups.jsonl`;
+  const leadPipelineOutcomeLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-lead-pipeline-`)}/outcomes.jsonl`;
   const savedSearchLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-saved-searches-`)}/saved-searches.jsonl`;
   const sellerPipelinePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-seller-pipeline-`)}/seller-pipeline.jsonl`;
   const dealLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-server-deals-`)}/deals.jsonl`;
@@ -49,6 +51,7 @@ async function withServer(fn) {
   resetListingEdits(listingEditLedgerPath);
   resetViewingLedger(viewingLedgerPath);
   resetViewingFollowUpLedger(viewingFollowUpLedgerPath);
+  resetLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath);
   resetSavedSearches(savedSearchLedgerPath);
   resetSellerPipeline(sellerPipelinePath);
   resetDealLedger(dealLedgerPath);
@@ -67,6 +70,7 @@ async function withServer(fn) {
       listingEditLedgerPath,
       viewingLedgerPath,
       viewingFollowUpLedgerPath,
+      leadPipelineOutcomeLedgerPath,
       savedSearchLedgerPath,
       sellerPipelinePath,
       dealLedgerPath,
@@ -83,6 +87,7 @@ async function withServer(fn) {
       editedAt: "2026-07-04T00:03:00Z",
       reviewedAt: "2026-07-04T00:05:00Z",
       bookedAt: "2026-07-04T00:06:00Z",
+      leadPipelineOutcomeAt: "2026-07-04T00:05:30Z",
       viewingFollowUpAt: "2026-07-06T12:00:00Z",
       savedAt: "2026-07-04T00:07:00Z",
       sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
@@ -360,6 +365,22 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
             approved: true,
           }),
         }),
+        leadQualification: await jsonFetch(baseUrl, "/api/admin/lead-pipeline/outcome", {
+          method: "POST",
+          headers: { authorization: "Bearer local-admin-smoke" },
+          body: JSON.stringify({
+            leadId: "node-server-lead-test",
+            actor: "broker_ru",
+            action: "qualify",
+            budgetMinEur: 90000,
+            budgetMaxEur: 160000,
+            locations: ["Sandanski"],
+            propertyTypes: ["apartment"],
+            bedroomsMin: 2,
+            timeline: "Within six months",
+            financeStatus: "cash",
+          }),
+        }),
         viewing: await jsonFetch(baseUrl, "/api/admin/viewings", {
           method: "POST",
           headers: { authorization: "Bearer local-admin-smoke" },
@@ -583,6 +604,7 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         broker_contact_approved: 1,
         tour_approved: 1,
         listing_slug_changed: 1,
+        lead_pipeline_outcome_recorded: 1,
         reply_approved: 1,
         viewing_booked: 1,
         viewing_follow_up_recorded: 1,

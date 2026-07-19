@@ -2,7 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
-import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import {
+  DEFAULT_LEAD_LEDGER_PATH,
+  assertLeadLedger,
+  readLeadLedger,
+  resetLeadLedger,
+} from "../lib/lead-ledger.mjs";
 import {
   assertLanguageRequests,
   readLanguageRequests,
@@ -25,15 +30,23 @@ import {
   resetReplyOutbox,
 } from "../lib/lead-replies.mjs";
 import {
+  DEFAULT_VIEWING_LEDGER_PATH,
   assertViewingLedger,
   readViewings,
   resetViewingLedger,
 } from "../lib/viewing-ledger.mjs";
 import {
+  DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
   assertViewingFollowUpLedger,
   readViewingFollowUps,
   resetViewingFollowUpLedger,
 } from "../lib/viewing-follow-ups.mjs";
+import {
+  DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
+  assertLeadPipelineOutcomes,
+  readLeadPipelineOutcomes,
+  resetLeadPipelineOutcomes,
+} from "../lib/lead-pipeline-outcomes.mjs";
 import {
   assertSavedSearches,
   readSavedSearches,
@@ -46,6 +59,7 @@ import {
   resetSellerPipeline,
 } from "../lib/seller-pipeline.mjs";
 import {
+  DEFAULT_DEAL_LEDGER_PATH,
   assertDealLedger,
   readDeals,
   resetDealLedger,
@@ -112,6 +126,7 @@ const translationLedgerPath = path.join(smokeDir, "translation-tasks.jsonl");
 const listingEditLedgerPath = path.join(smokeDir, "listing-edits.jsonl");
 const viewingLedgerPath = path.join(smokeDir, "viewings.jsonl");
 const viewingFollowUpLedgerPath = path.join(smokeDir, "viewing-follow-ups.jsonl");
+const leadPipelineOutcomeLedgerPath = path.join(smokeDir, "lead-pipeline-outcomes.jsonl");
 const savedSearchLedgerPath = path.join(smokeDir, "saved-searches.jsonl");
 const sellerPipelinePath = path.join(smokeDir, "seller-pipeline.jsonl");
 const dealLedgerPath = path.join(smokeDir, "deals.jsonl");
@@ -124,6 +139,7 @@ const slugHistoryPath = path.join(smokeDir, "slug-history.jsonl");
 const publicContactVaultPath = path.join(smokeDir, "public-contacts.jsonl");
 const publicContactKey = "http-smoke-public-contact-key-2026";
 const localeRegistryPath = fromRoot("production", "data", "admin-locale-registry-smoke.json");
+const auditLogExamplePath = fromRoot("production", "data", "audit-log.jsonl.example");
 
 resetLeadLedger(leadLedgerPath);
 resetReplyOutbox(replyOutboxPath);
@@ -132,6 +148,7 @@ resetTranslationLedger(translationLedgerPath);
 resetListingEdits(listingEditLedgerPath);
 resetViewingLedger(viewingLedgerPath);
 resetViewingFollowUpLedger(viewingFollowUpLedgerPath);
+resetLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath);
 resetSavedSearches(savedSearchLedgerPath);
 resetSellerPipeline(sellerPipelinePath);
 resetDealLedger(dealLedgerPath);
@@ -150,6 +167,7 @@ const app = createHttpApp({
   listingEditLedgerPath,
   viewingLedgerPath,
   viewingFollowUpLedgerPath,
+  leadPipelineOutcomeLedgerPath,
   savedSearchLedgerPath,
   sellerPipelinePath,
   dealLedgerPath,
@@ -167,6 +185,7 @@ const app = createHttpApp({
   editedAt: "2026-07-04T00:03:00Z",
   reviewedAt: "2026-07-04T00:05:00Z",
   bookedAt: "2026-07-04T00:06:00Z",
+  leadPipelineOutcomeAt: "2026-07-04T00:05:30Z",
   viewingFollowUpAt: "2026-07-06T12:00:00Z",
   savedAt: "2026-07-04T00:07:00Z",
   sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
@@ -380,6 +399,24 @@ smoke.replyUnauthorized = await dispatchHttp(app, {
   url: "/api/admin/replies",
   body: { leadId: "http-lead-he-0001", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
 });
+smoke.leadQualification = await dispatchHttp(app, {
+  method: "POST",
+  url: "/api/admin/lead-pipeline/outcome",
+  headers: { authorization: "Bearer local-admin-smoke" },
+  body: {
+    id: "qualification-http-lead-he-0001",
+    leadId: "http-lead-he-0001",
+    actor: "broker_ru",
+    action: "qualify",
+    budgetMinEur: 90000,
+    budgetMaxEur: 160000,
+    locations: ["Sandanski"],
+    propertyTypes: ["apartment"],
+    bedroomsMin: 2,
+    timeline: "Within six months",
+    financeStatus: "cash",
+  },
+});
 smoke.viewing = await dispatchHttp(app, {
   method: "POST",
   url: "/api/admin/viewings",
@@ -435,8 +472,8 @@ smoke.dealClose = await dispatchHttp(app, {
   url: "/api/admin/deals/close",
   headers: { authorization: "Bearer local-admin-smoke" },
   body: {
-    id: "deal-http-lead-he-0001",
-    leadId: "http-lead-he-0001",
+    id: "deal-http-lead-contact-he-0001",
+    leadId: "http-lead-contact-he-0001",
     broker: "broker_ru",
   },
 });
@@ -567,6 +604,7 @@ smoke.adminHtml = await dispatchHttp(app, {
 assertHttpSmoke(smoke);
 const ledger = readLeadLedger(leadLedgerPath);
 assertLeadLedger(ledger);
+fs.copyFileSync(leadLedgerPath, DEFAULT_LEAD_LEDGER_PATH);
 smoke.leadLedger = { rows: ledger.length };
 const outbox = readReplyOutbox(replyOutboxPath);
 assertReplyOutbox(outbox);
@@ -586,10 +624,16 @@ assertListingEdits(listingEdits);
 smoke.listingEditLedger = { rows: listingEdits.length };
 const viewings = readViewings(viewingLedgerPath);
 assertViewingLedger(viewings);
+fs.copyFileSync(viewingLedgerPath, DEFAULT_VIEWING_LEDGER_PATH);
 smoke.viewingLedger = { rows: viewings.length };
 const viewingFollowUps = readViewingFollowUps(viewingFollowUpLedgerPath);
 assertViewingFollowUpLedger(viewingFollowUps);
+fs.copyFileSync(viewingFollowUpLedgerPath, DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH);
 smoke.viewingFollowUpLedger = { rows: viewingFollowUps.length };
+const leadPipelineOutcomes = readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath);
+assertLeadPipelineOutcomes(leadPipelineOutcomes);
+fs.copyFileSync(leadPipelineOutcomeLedgerPath, DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH);
+smoke.leadPipelineOutcomeLedger = { rows: leadPipelineOutcomes.length };
 const savedSearches = readSavedSearches(savedSearchLedgerPath);
 assertSavedSearches(savedSearches);
 if (savedSearches.some((row) => Object.hasOwn(row, "contact"))) {
@@ -604,6 +648,7 @@ assertSellerPipeline(sellerPipeline);
 smoke.sellerPipelineLedger = { rows: sellerPipeline.length };
 const deals = readDeals(dealLedgerPath);
 assertDealLedger(deals);
+fs.copyFileSync(dealLedgerPath, DEFAULT_DEAL_LEDGER_PATH);
 smoke.dealLedger = { rows: deals.length };
 const brokerContacts = readBrokerContacts(brokerContactLedgerPath);
 assertBrokerContacts(brokerContacts);
@@ -627,6 +672,7 @@ smoke.consentLedger = {
 const auditRows = readAuditLog(auditLogPath);
 assertAuditLog(auditRows);
 fs.copyFileSync(auditLogPath, DEFAULT_AUDIT_LOG_PATH);
+fs.copyFileSync(auditLogPath, auditLogExamplePath);
 smoke.auditLog = {
   rows: auditRows.length,
   byAction: auditRows.reduce((counts, row) => ({ ...counts, [row.action]: (counts[row.action] || 0) + 1 }), {}),

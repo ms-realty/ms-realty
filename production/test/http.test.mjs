@@ -16,6 +16,11 @@ import {
   readViewingFollowUps,
   resetViewingFollowUpLedger,
 } from "../lib/viewing-follow-ups.mjs";
+import {
+  assertLeadPipelineOutcomes,
+  readLeadPipelineOutcomes,
+  resetLeadPipelineOutcomes,
+} from "../lib/lead-pipeline-outcomes.mjs";
 import { assertSavedSearches, readSavedSearches, resetSavedSearches } from "../lib/saved-searches.mjs";
 import { assertSellerPipeline, readSellerPipeline, resetSellerPipeline } from "../lib/seller-pipeline.mjs";
 import { assertSellerPipelineOutcomes, readSellerPipelineOutcomes, resetSellerPipelineOutcomes } from "../lib/seller-pipeline-outcomes.mjs";
@@ -98,6 +103,12 @@ function tempViewings() {
 function tempViewingFollowUps() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-viewing-follow-ups-`)}/viewing-follow-ups.jsonl`;
   resetViewingFollowUpLedger(file);
+  return file;
+}
+
+function tempLeadPipelineOutcomes() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-lead-pipeline-`)}/outcomes.jsonl`;
+  resetLeadPipelineOutcomes(file);
   return file;
 }
 
@@ -288,6 +299,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const listingEditLedgerPath = tempListingEdits();
   const viewingLedgerPath = tempViewings();
   const viewingFollowUpLedgerPath = tempViewingFollowUps();
+  const leadPipelineOutcomeLedgerPath = tempLeadPipelineOutcomes();
   const savedSearchLedgerPath = tempSavedSearches();
   const sellerPipelinePath = tempSellerPipeline();
   const dealLedgerPath = tempDeals();
@@ -314,6 +326,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     listingEditLedgerPath,
     viewingLedgerPath,
     viewingFollowUpLedgerPath,
+    leadPipelineOutcomeLedgerPath,
     savedSearchLedgerPath,
     sellerPipelinePath,
     dealLedgerPath,
@@ -331,6 +344,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     editedAt: "2026-07-04T00:03:00Z",
     reviewedAt: "2026-07-04T00:05:00Z",
     bookedAt: "2026-07-04T00:06:00Z",
+    leadPipelineOutcomeAt: "2026-07-04T00:05:30Z",
     viewingFollowUpAt: "2026-07-06T12:00:00Z",
     savedAt: "2026-07-04T00:07:00Z",
     sellerPipelineCreatedAt: "2026-07-04T00:08:00Z",
@@ -551,6 +565,23 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       method: "POST",
       url: "/api/admin/replies",
       body: { leadId: "http-lead-test", reviewedReply: "No auth", reviewer: "broker_ru", approved: true },
+    }),
+    leadQualification: await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/lead-pipeline/outcome",
+      headers: { authorization: "Bearer local-admin-smoke" },
+      body: {
+        leadId: "http-lead-test",
+        actor: "broker_ru",
+        action: "qualify",
+        budgetMinEur: 90000,
+        budgetMaxEur: 160000,
+        locations: ["Sandanski"],
+        propertyTypes: ["apartment"],
+        bedroomsMin: 2,
+        timeline: "Within six months",
+        financeStatus: "cash",
+      },
     }),
     viewing: await dispatchHttp(app, {
       method: "POST",
@@ -940,6 +971,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertListingEdits(readListingEdits(listingEditLedgerPath)), true);
   assert.equal(assertViewingLedger(readViewings(viewingLedgerPath)), true);
   assert.equal(assertViewingFollowUpLedger(readViewingFollowUps(viewingFollowUpLedgerPath)), true);
+  assert.equal(assertLeadPipelineOutcomes(readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath)), true);
   assert.equal(assertSavedSearches(readSavedSearches(savedSearchLedgerPath)), true);
   assert.equal(assertSellerPipeline(readSellerPipeline(sellerPipelinePath)), true);
   assert.equal(assertDealLedger(readDeals(dealLedgerPath)), true);
@@ -967,6 +999,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     tour_approved: 1,
     media_reviewed: 1,
     lead_assigned: 1,
+    lead_pipeline_outcome_recorded: 1,
     listing_slug_changed: 1,
     reply_approved: 2,
     viewing_booked: 1,

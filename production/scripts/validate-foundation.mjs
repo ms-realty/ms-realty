@@ -32,6 +32,7 @@ assertLocaleRegistry(registry);
 const expectedHttpAuditActions = {
   broker_contact_approved: 1,
   deal_closed: 1,
+  lead_pipeline_outcome_recorded: 1,
   listing_edited: 1,
   listing_slug_changed: 1,
   locale_created: 1,
@@ -46,6 +47,7 @@ const expectedHttpAuditActions = {
 const expectedNodeServerAuditActions = {
   broker_contact_approved: 1,
   deal_closed: 1,
+  lead_pipeline_outcome_recorded: 1,
   listing_edited: 1,
   listing_slug_changed: 1,
   reply_approved: 1,
@@ -887,8 +889,13 @@ if (leadSla.summary.manager_escalation_required !== 4 || leadSla.summary.custome
 }
 const leadMatching = JSON.parse(fs.readFileSync(fromRoot("production", "data", "lead-matching-report.json"), "utf8"));
 assertLeadMatchingReport(leadMatching);
-if (leadMatching.summary.buyer_leads_with_listing_reference !== 2 || leadMatching.summary.open_broker_tasks !== 2) {
-  throw new Error("Lead matching report must create broker inventory tasks for referenced buyer leads");
+if (
+  leadMatching.summary.matchable_leads_with_listing_reference !== 2 ||
+  leadMatching.summary.active_matchable_leads !== 2 ||
+  leadMatching.summary.qualified_leads !== 1 ||
+  leadMatching.summary.open_broker_tasks !== 2
+) {
+  throw new Error("Lead matching report must distinguish active, qualified, and referenced buyer or renter leads");
 }
 const replyOutbox = fs.readFileSync(fromRoot("production", "data", "reply-outbox.jsonl"), "utf8").trim().split("\n").filter(Boolean);
 if (replyOutbox.length !== 2) throw new Error("Reply outbox artifact must contain two deterministic smoke rows");

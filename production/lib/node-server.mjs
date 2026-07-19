@@ -344,6 +344,13 @@ export function assertServerSmoke(smoke) {
   }
   if (smoke.replyUnauthorized.status !== 401) throw new Error("Server must reject unauthenticated replies");
   if (
+    smoke.leadQualification?.status !== 201 ||
+    smoke.leadQualification.body.lead_pipeline?.stage !== "qualified" ||
+    smoke.leadQualification.body.lead_pipeline?.requirements?.budget_max_eur !== 160000
+  ) {
+    throw new Error("Server must qualify a buyer before booking a viewing");
+  }
+  if (
     smoke.viewing.status !== 201 ||
     smoke.viewing.body.follow_up_task?.status !== "open" ||
     smoke.viewing.body.feedback_request?.status !== "open"

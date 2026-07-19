@@ -363,6 +363,7 @@ Generated production data:
 - `production/data/reply-outbox.jsonl`
 - `production/data/viewings.jsonl`
 - `production/data/viewing-follow-ups.jsonl`
+- `production/data/lead-pipeline-outcomes.jsonl`
 - `production/data/deals.jsonl`
 - `production/data/saved-searches.jsonl`
 - `production/data/saved-search-alert-report.json`

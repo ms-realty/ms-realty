@@ -18,6 +18,8 @@
     "metadata": {
       "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
       "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+      "og_description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -182,6 +184,7 @@
       "reviewer": "translator_he"
     },
     "body": {
+      "content_locale": "he",
       "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
       "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
       "facts": {
@@ -190,6 +193,12 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "area_sqm": null,
+        "floor": null,
+        "total_floors": null,
+        "land_area_sqm": null,
+        "condition": "",
+        "location_precision": "approximate",
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -198,10 +207,19 @@
       "lifecycle": {
         "status": "available",
         "active_in_search": true,
-        "seo_kept_live": true
+        "seo_kept_live": true,
+        "publish_approved": false,
+        "publish_approved_at": null,
+        "last_edited_at": null
+      },
+      "verification": {
+        "availability_verified_at": null,
+        "availability_verified_by": null,
+        "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false
+        "bedrooms_not_applicable": false,
+        "location_precision": "approximate"
       },
       "media": {
         "gallery": [
@@ -371,6 +389,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "multi_unit",
           "property_type_label": "דירות",
@@ -378,11 +397,13 @@
           "offer_type_label": "למכירה",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": null,
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 20,
+          "image_count": 1,
+          "legacy_image_count": 20,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
             "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
@@ -424,6 +445,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
           "property_type_label": "דירה",
@@ -431,11 +453,13 @@
           "offer_type_label": "להשכרה",
           "bedrooms": 2,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": 600,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 32,
+          "image_count": 1,
+          "legacy_image_count": 32,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
             "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
@@ -477,6 +501,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
           "property_type_label": "דירה",
@@ -484,11 +509,13 @@
           "offer_type_label": "להשכרה",
           "bedrooms": 1,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": 355,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 26,
+          "image_count": 1,
+          "legacy_image_count": 26,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
             "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
@@ -546,6 +573,8 @@
     "metadata": {
       "title": "Апартаменты в Парк отеле Пирин — г.Сандански",
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
+      "og_title": "Апартаменты в Парк отеле Пирин — г.Сандански",
+      "og_description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -698,6 +727,7 @@
       "reviewer": "editor_ru"
     },
     "body": {
+      "content_locale": "ru",
       "h1": "Апартаменты в Парк отеле Пирин — г.Сандански",
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
       "facts": {
@@ -706,6 +736,12 @@
         "property_type": "multi_unit",
         "offer_type": "sale",
         "bedrooms": null,
+        "area_sqm": null,
+        "floor": null,
+        "total_floors": null,
+        "land_area_sqm": null,
+        "condition": "",
+        "location_precision": "approximate",
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
@@ -714,10 +750,19 @@
       "lifecycle": {
         "status": "available",
         "active_in_search": true,
-        "seo_kept_live": true
+        "seo_kept_live": true,
+        "publish_approved": false,
+        "publish_approved_at": null,
+        "last_edited_at": null
+      },
+      "verification": {
+        "availability_verified_at": null,
+        "availability_verified_by": null,
+        "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false
+        "bedrooms_not_applicable": false,
+        "location_precision": "approximate"
       },
       "media": {
         "gallery": [
@@ -887,6 +932,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "commercial",
           "property_type_label": "Коммерческая недвижимость",
@@ -894,11 +940,13 @@
           "offer_type_label": "Аренда",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": null,
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 35,
+          "image_count": 1,
+          "legacy_image_count": 35,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
@@ -940,6 +988,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "multi_unit",
           "property_type_label": "Апартаменты",
@@ -947,11 +996,13 @@
           "offer_type_label": "Продажа",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": null,
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 20,
+          "image_count": 1,
+          "legacy_image_count": 20,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
             "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
@@ -993,6 +1044,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
           "property_type_label": "Квартира",
@@ -1000,11 +1052,13 @@
           "offer_type_label": "Аренда",
           "bedrooms": 2,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": 600,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 32,
+          "image_count": 1,
+          "legacy_image_count": 32,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
             "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
@@ -1264,6 +1318,7 @@
         "translation_indexable": true,
         "translation_human_approved": true,
         "source_locale": "bg",
+        "content_locale": "he",
         "location": "Sandanski",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -1271,11 +1326,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35,
+        "image_count": 1,
+        "legacy_image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
           "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
@@ -1317,6 +1374,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
@@ -1324,11 +1382,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 20,
+        "image_count": 1,
+        "legacy_image_count": 20,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
           "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
@@ -1370,6 +1430,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -1377,11 +1438,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 32,
+        "image_count": 1,
+        "legacy_image_count": 32,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
           "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
@@ -1423,6 +1486,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -1430,11 +1494,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
           "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
@@ -1476,6 +1542,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -1483,11 +1550,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg",
           "alt": "Апартамент под наем в гр.Сандански",
@@ -1529,6 +1598,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -1536,11 +1606,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 18,
+        "image_count": 1,
+        "legacy_image_count": 18,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
           "alt": "Дава под наем промишлена сграда в Сандански",
@@ -2314,6 +2386,7 @@
         "translation_indexable": true,
         "translation_human_approved": true,
         "source_locale": "bg",
+        "content_locale": "he",
         "location": "Sandanski",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -2321,11 +2394,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35,
+        "image_count": 1,
+        "legacy_image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
           "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
@@ -2376,6 +2451,8 @@
     "metadata": {
       "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
       "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+      "og_description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -2540,6 +2617,7 @@
       "reviewer": "translator_he"
     },
     "body": {
+      "content_locale": "he",
       "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
       "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
       "facts": {
@@ -2548,6 +2626,12 @@
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
+        "area_sqm": null,
+        "floor": null,
+        "total_floors": null,
+        "land_area_sqm": null,
+        "condition": "",
+        "location_precision": "approximate",
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "sold",
@@ -2556,10 +2640,19 @@
       "lifecycle": {
         "status": "sold",
         "active_in_search": false,
-        "seo_kept_live": true
+        "seo_kept_live": true,
+        "publish_approved": false,
+        "publish_approved_at": null,
+        "last_edited_at": null
+      },
+      "verification": {
+        "availability_verified_at": null,
+        "availability_verified_by": null,
+        "verified": false
       },
       "quality_flags": {
-        "bedrooms_not_applicable": false
+        "bedrooms_not_applicable": false,
+        "location_precision": "approximate"
       },
       "media": {
         "gallery": [
@@ -2729,6 +2822,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "multi_unit",
           "property_type_label": "דירות",
@@ -2736,11 +2830,13 @@
           "offer_type_label": "למכירה",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": null,
           "price_on_request": true,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 20,
+          "image_count": 1,
+          "legacy_image_count": 20,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
             "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
@@ -2782,6 +2878,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
           "property_type_label": "דירה",
@@ -2789,11 +2886,13 @@
           "offer_type_label": "להשכרה",
           "bedrooms": 2,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": 600,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 32,
+          "image_count": 1,
+          "legacy_image_count": 32,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
             "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
@@ -2835,6 +2934,7 @@
           "translation_indexable": false,
           "translation_human_approved": false,
           "source_locale": "bg",
+          "content_locale": "bg",
           "location": "Sandanski",
           "property_type": "apartment",
           "property_type_label": "דירה",
@@ -2842,11 +2942,13 @@
           "offer_type_label": "להשכרה",
           "bedrooms": 1,
           "bedrooms_not_applicable": false,
+          "area_sqm": null,
           "price_eur": 355,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 26,
+          "image_count": 1,
+          "legacy_image_count": 26,
           "thumbnail": {
             "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
             "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
@@ -3034,6 +3136,13 @@
       },
       "total_matches": 108,
       "returned": 12,
+      "pagination": {
+        "page": 1,
+        "per_page": 12,
+        "total_pages": 9,
+        "has_previous": false,
+        "has_next": true
+      },
       "controls": {
         "view_modes": [
           {
@@ -3116,6 +3225,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
@@ -3123,11 +3233,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 20,
+        "image_count": 1,
+        "legacy_image_count": 20,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
           "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
@@ -3169,6 +3281,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3176,11 +3289,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 32,
+        "image_count": 1,
+        "legacy_image_count": 32,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
           "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
@@ -3222,6 +3337,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3229,11 +3345,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
           "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
@@ -3275,6 +3393,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3282,11 +3401,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg",
           "alt": "Апартамент под наем в гр.Сандански",
@@ -3328,6 +3449,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -3335,11 +3457,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 18,
+        "image_count": 1,
+        "legacy_image_count": 18,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
           "alt": "Дава под наем промишлена сграда в Сандански",
@@ -3381,6 +3505,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3388,11 +3513,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 53289,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 24,
+        "image_count": 1,
+        "legacy_image_count": 24,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg",
           "alt": "Продава двустаен апартамент в гр.Сандански",
@@ -3434,6 +3561,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3441,11 +3569,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 350,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35,
+        "image_count": 1,
+        "legacy_image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg",
           "alt": "Двустаен апартамент в центъра на Сандански – наем",
@@ -3487,6 +3617,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3494,11 +3625,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 400,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg",
           "alt": "Двустаен апартамент под наем в парка на Сандански",
@@ -3540,6 +3673,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3547,11 +3681,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 130000,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 34,
+        "image_count": 1,
+        "legacy_image_count": 34,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg",
           "alt": "Двустаен апартамент в идеалния център на гр. Сандански",
@@ -3593,6 +3729,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
         "property_type_label": "מלון",
@@ -3600,11 +3737,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 38,
+        "image_count": 1,
+        "legacy_image_count": 38,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2018/03/778-dron-680x383.jpg",
           "alt": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
@@ -3646,6 +3785,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
         "property_type_label": "מלון",
@@ -3653,11 +3793,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 19,
+        "image_count": 1,
+        "legacy_image_count": 19,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg",
           "alt": "Инвестиционен проект в Сандански – хотел ресторант",
@@ -3699,6 +3841,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -3706,11 +3849,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 230,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 23,
+        "image_count": 1,
+        "legacy_image_count": 23,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2024/10/876-1-680x510.jpg",
           "alt": "Наем – Двустаен апартамент в гр.Сандански",
@@ -3996,6 +4141,7 @@
       }
     },
     "requested_locale": "fr",
+    "requested_path": "/fr/",
     "locale": "en",
     "lang": "en",
     "dir": "ltr",
@@ -4158,6 +4304,13 @@
       },
       "total_matches": 109,
       "returned": 12,
+      "pagination": {
+        "page": 1,
+        "per_page": 12,
+        "total_pages": 10,
+        "has_previous": false,
+        "has_next": true
+      },
       "controls": {
         "view_modes": [
           {
@@ -4240,6 +4393,7 @@
         "translation_indexable": true,
         "translation_human_approved": true,
         "source_locale": "bg",
+        "content_locale": "he",
         "location": "Sandanski",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -4247,11 +4401,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35,
+        "image_count": 1,
+        "legacy_image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
           "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
@@ -4293,6 +4449,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
@@ -4300,11 +4457,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 20,
+        "image_count": 1,
+        "legacy_image_count": 20,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
           "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
@@ -4346,6 +4505,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -4353,11 +4513,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 600,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 32,
+        "image_count": 1,
+        "legacy_image_count": 32,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
           "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
@@ -4399,6 +4561,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -4406,11 +4569,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 355,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
           "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
@@ -4452,6 +4617,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -4459,11 +4625,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 2,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg",
           "alt": "Апартамент под наем в гр.Сандански",
@@ -4505,6 +4673,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
@@ -4512,11 +4681,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 1,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 18,
+        "image_count": 1,
+        "legacy_image_count": 18,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
           "alt": "Дава под наем промишлена сграда в Сандански",
@@ -4558,6 +4729,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -4565,11 +4737,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 53289,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 24,
+        "image_count": 1,
+        "legacy_image_count": 24,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg",
           "alt": "Продава двустаен апартамент в гр.Сандански",
@@ -4611,6 +4785,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -4618,11 +4793,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 350,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 35,
+        "image_count": 1,
+        "legacy_image_count": 35,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg",
           "alt": "Двустаен апартамент в центъра на Сандански – наем",
@@ -4664,6 +4841,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -4671,11 +4849,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 400,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 26,
+        "image_count": 1,
+        "legacy_image_count": 26,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg",
           "alt": "Двустаен апартамент под наем в парка на Сандански",
@@ -4717,6 +4897,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "apartment",
         "property_type_label": "דירה",
@@ -4724,11 +4905,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": 1,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 130000,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 34,
+        "image_count": 1,
+        "legacy_image_count": 34,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg",
           "alt": "Двустаен апартамент в идеалния център на гр. Сандански",
@@ -4770,6 +4953,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
         "property_type_label": "מלון",
@@ -4777,11 +4961,13 @@
         "offer_type_label": "להשכרה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": null,
         "price_on_request": true,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 38,
+        "image_count": 1,
+        "legacy_image_count": 38,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2018/03/778-dron-680x383.jpg",
           "alt": "Дългосрочен наем в Парк Хотел Пирин – гр.Сандански",
@@ -4823,6 +5009,7 @@
         "translation_indexable": false,
         "translation_human_approved": false,
         "source_locale": "bg",
+        "content_locale": "bg",
         "location": "Sandanski",
         "property_type": "hotel",
         "property_type_label": "מלון",
@@ -4830,11 +5017,13 @@
         "offer_type_label": "למכירה",
         "bedrooms": null,
         "bedrooms_not_applicable": false,
+        "area_sqm": null,
         "price_eur": 950000,
         "price_on_request": false,
         "listing_status": "available",
         "listing_active": true,
-        "image_count": 19,
+        "image_count": 1,
+        "legacy_image_count": 19,
         "thumbnail": {
           "url": "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg",
           "alt": "Инвестиционен проект в Сандански – хотел ресторант",
@@ -4873,14 +5062,30 @@
       "id": "runtime-lead-he-0001",
       "source": "website_listing_detail",
       "intent": "inquiry",
-      "leadType": "buyer",
+      "leadType": "renter",
       "listingReference": "MS-CRAWL-0001",
       "contact": {
         "name": "Noa Levi",
         "whatsapp": "+359880000001"
       },
-      "property": {},
+      "property": {
+        "location": "Sandanski",
+        "type": "commercial"
+      },
       "request_details": {},
+      "requirements": {
+        "budget_min_eur": null,
+        "budget_max_eur": null,
+        "locations": [
+          "Sandanski"
+        ],
+        "property_types": [
+          "commercial"
+        ],
+        "bedrooms_min": null,
+        "timeline": null,
+        "finance_status": null
+      },
       "contact_preference": "whatsapp",
       "message": "Interested in this property.",
       "language": {
@@ -4891,13 +5096,35 @@
       },
       "status": "draft",
       "requiresBrokerApproval": true,
-      "hermesDraftAllowed": true
+      "hermesDraftAllowed": true,
+      "intake": {
+        "complete": false,
+        "missing_fields": [
+          "budget_max_eur",
+          "timeline"
+        ],
+        "captured_fields": [
+          "locations",
+          "property_types"
+        ]
+      }
     },
     "original_language": "he",
     "original_direction": "rtl",
     "admin_locale": "en",
     "requires_translation": true,
     "contact_preference": "whatsapp",
+    "intake": {
+      "complete": false,
+      "missing_fields": [
+        "budget_max_eur",
+        "timeline"
+      ],
+      "captured_fields": [
+        "locations",
+        "property_types"
+      ]
+    },
     "message_original": "Interested in this property.",
     "broker_assignment": {
       "status": "assigned",
@@ -4908,7 +5135,7 @@
         "admin_locale": "en",
         "location": "Sandanski",
         "property_type": "commercial",
-        "lead_type": "buyer"
+        "lead_type": "renter"
       }
     },
     "confirmation": {
@@ -4935,16 +5162,32 @@
       "id": "runtime-viewing-lead-he-0001",
       "source": "website_viewing_request",
       "intent": "viewing",
-      "leadType": "buyer",
+      "leadType": "renter",
       "listingReference": "MS-CRAWL-0001",
       "contact": {
         "name": "Noa Levi",
         "phone": "+359880000001"
       },
-      "property": {},
+      "property": {
+        "location": "Sandanski",
+        "type": "commercial"
+      },
       "request_details": {
         "viewing_date": "2026-07-20",
         "viewing_time": "14:00"
+      },
+      "requirements": {
+        "budget_min_eur": null,
+        "budget_max_eur": null,
+        "locations": [
+          "Sandanski"
+        ],
+        "property_types": [
+          "commercial"
+        ],
+        "bedrooms_min": null,
+        "timeline": null,
+        "finance_status": null
       },
       "contact_preference": "phone",
       "message": "I would like to view this property.",
@@ -4956,13 +5199,35 @@
       },
       "status": "draft",
       "requiresBrokerApproval": true,
-      "hermesDraftAllowed": true
+      "hermesDraftAllowed": true,
+      "intake": {
+        "complete": false,
+        "missing_fields": [
+          "budget_max_eur",
+          "timeline"
+        ],
+        "captured_fields": [
+          "locations",
+          "property_types"
+        ]
+      }
     },
     "original_language": "he",
     "original_direction": "rtl",
     "admin_locale": "en",
     "requires_translation": true,
     "contact_preference": "phone",
+    "intake": {
+      "complete": false,
+      "missing_fields": [
+        "budget_max_eur",
+        "timeline"
+      ],
+      "captured_fields": [
+        "locations",
+        "property_types"
+      ]
+    },
     "message_original": "I would like to view this property.",
     "broker_assignment": {
       "status": "assigned",
@@ -4973,7 +5238,7 @@
         "admin_locale": "en",
         "location": "Sandanski",
         "property_type": "commercial",
-        "lead_type": "buyer"
+        "lead_type": "renter"
       }
     },
     "confirmation": {
@@ -5010,6 +5275,15 @@
       "request_details": {
         "callback_time": "Weekdays after 14:00"
       },
+      "requirements": {
+        "budget_min_eur": null,
+        "budget_max_eur": null,
+        "locations": [],
+        "property_types": [],
+        "bedrooms_min": null,
+        "timeline": null,
+        "finance_status": null
+      },
       "contact_preference": "phone",
       "message": "Please call me about buying in Sandanski.",
       "language": {
@@ -5020,13 +5294,23 @@
       },
       "status": "draft",
       "requiresBrokerApproval": true,
-      "hermesDraftAllowed": true
+      "hermesDraftAllowed": true,
+      "intake": {
+        "complete": true,
+        "missing_fields": [],
+        "captured_fields": []
+      }
     },
     "original_language": "he",
     "original_direction": "rtl",
     "admin_locale": "en",
     "requires_translation": true,
     "contact_preference": "phone",
+    "intake": {
+      "complete": true,
+      "missing_fields": [],
+      "captured_fields": []
+    },
     "message_original": "Please call me about buying in Sandanski.",
     "broker_assignment": {
       "status": "assigned",

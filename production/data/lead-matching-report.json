@@ -1,73 +1,53 @@
 {
-  "generated_at": "2026-07-05T00:00:00Z",
+  "generated_at": "2026-07-19T21:03:15.894Z",
   "summary": {
-    "buyer_leads_with_listing_reference": 2,
+    "matchable_leads_with_listing_reference": 2,
+    "active_matchable_leads": 2,
+    "qualified_leads": 1,
     "leads_with_matches": 2,
     "open_broker_tasks": 2
   },
   "rows": [
     {
       "lead_id": "http-lead-he-0001",
-      "lead_type": "buyer",
+      "lead_type": "renter",
       "original_language": "he",
       "admin_locale": "en",
       "assigned_broker": "broker_international",
       "source_listing_id": "MS-CRAWL-0001",
+      "pipeline_stage": "viewing",
+      "qualification_complete": true,
       "criteria": {
-        "location": "Sandanski",
-        "property_type": "commercial",
-        "offer_type": "rent"
+        "locations": [
+          "Sandanski"
+        ],
+        "property_types": [
+          "apartment"
+        ],
+        "offer_type": "rent",
+        "price_max": 160000,
+        "bedrooms_min": 2
       },
-      "match_count": 5,
+      "match_count": 2,
       "matches": [
         {
-          "listing_id": "MS-CRAWL-0006",
-          "path": "/he/properties/MS-CRAWL-0006",
-          "title": "Дава под наем промишлена сграда в Сандански",
+          "listing_id": "MS-CRAWL-0003",
+          "path": "/he/properties/MS-CRAWL-0003",
+          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
           "location": "Sandanski",
-          "property_type": "commercial",
-          "offer_type": "rent",
-          "price_eur": 1,
-          "price_on_request": false
-        },
-        {
-          "listing_id": "MS-CRAWL-0019",
-          "path": "/he/properties/MS-CRAWL-0019",
-          "title": "Офиси/магазини под наем в гр.Сандански",
-          "location": "Sandanski",
-          "property_type": "commercial",
-          "offer_type": "rent",
-          "price_eur": 6,
-          "price_on_request": false
-        },
-        {
-          "listing_id": "MS-CRAWL-0020",
-          "path": "/he/properties/MS-CRAWL-0020",
-          "title": "Офис под наем в центъра на гр.Сандански",
-          "location": "Sandanski",
-          "property_type": "commercial",
-          "offer_type": "rent",
-          "price_eur": 83,
-          "price_on_request": false
-        },
-        {
-          "listing_id": "MS-CRAWL-0022",
-          "path": "/he/properties/MS-CRAWL-0022",
-          "title": "Дава под наем производствено помещение в Сандански",
-          "location": "Sandanski",
-          "property_type": "commercial",
+          "property_type": "apartment",
           "offer_type": "rent",
           "price_eur": 600,
           "price_on_request": false
         },
         {
-          "listing_id": "MS-CRAWL-0094",
-          "path": "/he/properties/MS-CRAWL-0094",
-          "title": "Индустриална сграда под наем в Петрич",
+          "listing_id": "MS-CRAWL-0080",
+          "path": "/he/properties/MS-CRAWL-0080",
+          "title": "Тристаен апартамент под наем в с.Поленица",
           "location": "Sandanski",
-          "property_type": "commercial",
+          "property_type": "apartment",
           "offer_type": "rent",
-          "price_eur": 1,
+          "price_eur": 450,
           "price_on_request": false
         }
       ],
@@ -80,11 +60,13 @@
     },
     {
       "lead_id": "http-viewing-lead-he-0001",
-      "lead_type": "buyer",
+      "lead_type": "renter",
       "original_language": "he",
       "admin_locale": "en",
       "assigned_broker": "broker_international",
       "source_listing_id": "MS-CRAWL-0001",
+      "pipeline_stage": "inquiry",
+      "qualification_complete": false,
       "criteria": {
         "location": "Sandanski",
         "property_type": "commercial",

@@ -35,7 +35,8 @@ test("lead matching report creates broker inventory tasks from buyer listing ref
   });
 
   assert.equal(assertLeadMatchingReport(report), true);
-  assert.equal(report.summary.buyer_leads_with_listing_reference, 1);
+  assert.equal(report.summary.matchable_leads_with_listing_reference, 1);
+  assert.equal(report.summary.qualified_leads, 0);
   assert.equal(report.summary.open_broker_tasks, 1);
   assert.equal(report.rows[0].criteria.location, "Sandanski");
   assert.equal(report.rows[0].criteria.property_type, "commercial");
@@ -83,9 +84,10 @@ test("qualified renter requirements drive inventory matching without a source li
   });
 
   assert.equal(assertLeadMatchingReport(report), true);
-  assert.equal(report.summary.active_buyer_renter_leads, 1);
+  assert.equal(report.summary.active_matchable_leads, 1);
   assert.equal(report.summary.qualified_leads, 1);
   assert.equal(report.rows[0].source_listing_id, null);
+  assert.equal(report.rows[0].qualification_complete, true);
   assert.equal(report.rows[0].criteria.offer_type, "rent");
   assert.ok(report.rows[0].matches.every((match) => match.offer_type === "rent"));
 });
