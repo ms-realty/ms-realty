@@ -121,6 +121,10 @@ def main() -> int:
         if bedrooms.get(listing_id) != bedroom_count:
             raise SystemExit(f"Search imports must infer {bedroom_count} bedrooms for {listing_id}")
 
+    russian_listing = next(doc for doc in source_docs if doc["id"] == "MS-CRAWL-0114")
+    if "apartamenty" not in str(russian_listing["search_text"]).lower():
+        raise SystemExit("Search imports must include deterministic Cyrillic transliteration variants")
+
     print("PASS: search import fixtures validate for Typesense and Meilisearch")
     return 0
 

@@ -1194,16 +1194,44 @@ function locationNamesFromListings(listings) {
   return [...new Set(listings.map((listing) => listingToPublicViewModel(listing).location).filter(Boolean))].sort();
 }
 
+const CYRILLIC_TO_LATIN = Object.freeze({
+  а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m",
+  н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sht",
+  ъ: "a", ы: "y", ь: "y", э: "e", ю: "yu", я: "ya", ѝ: "i",
+});
+
 function norm(value) {
-  return String(value ?? "").toLocaleLowerCase();
+  return String(value ?? "")
+    .toLocaleLowerCase()
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "");
+}
+
+function transliterateCyrillic(value) {
+  return [...norm(value)].map((character) => CYRILLIC_TO_LATIN[character] || character).join("");
+}
+
+function searchVariants(value) {
+  const source = norm(value);
+  const transliterated = transliterateCyrillic(source);
+  return [...new Set([source, transliterated].filter(Boolean))];
 }
 
 function queryTokens(query) {
-  return norm(query).split(/\s+/).filter(Boolean);
+  return norm(query)
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(searchVariants);
 }
 
 function searchableText(view) {
-  return norm([view.id, view.title, view.h1, view.description, view.location, view.property_type, view.offer_type].join(" "));
+  const source = [view.id, view.title, view.h1, view.description, view.location, view.property_type, view.offer_type].join(" ");
+  return searchVariants(source).join(" ");
+}
+
+function includesSearchValue(haystack, needle) {
+  const indexed = searchVariants(haystack).join(" ");
+  return searchVariants(needle).some((candidate) => indexed.includes(candidate));
 }
 
 function numberFilter(value, min, max) {
@@ -1218,8 +1246,8 @@ function numberFilter(value, min, max) {
 
 function matchesSearch(view, query, filters = {}) {
   const text = searchableText(view);
-  if (!queryTokens(query).every((token) => text.includes(token))) return false;
-  if (filters.location && !norm(view.location).includes(norm(filters.location))) return false;
+  if (!queryTokens(query).every((variants) => variants.some((token) => text.includes(token)))) return false;
+  if (filters.location && !includesSearchValue(view.location, filters.location)) return false;
   if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
   if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
   if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;

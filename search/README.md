@@ -9,6 +9,12 @@ locale prefix, indexability, and translation-status fields. The current public
 website seed locales are BG, EN, DE, NL, RU, EL, and HE; admin CMS/CRM locales
 are BG, RU, and EN.
 
+Search text also carries a deterministic Latin variant of Cyrillic content.
+The public runtime applies the same normalization to both listings and queries,
+so buyers can find Cyrillic listings when their keyboard is set to Latin (and
+Latin location names when their keyboard is set to Cyrillic). This is search
+normalization only; it does not create or approve public translations.
+
 ## Build Fixtures
 
 ```bash

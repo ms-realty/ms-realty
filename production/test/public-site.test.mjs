@@ -262,6 +262,7 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
 
 test("search applies text and facet filters before paginating cards", () => {
   const petrich = renderSearchPage({ registry, listings, localeCode: "he", query: "Petrich" });
+  const petrichLocation = renderSearchPage({ registry, listings, localeCode: "he", filters: { location: "Petrich" } });
   const apartments = renderSearchPage({
     registry,
     listings,
@@ -271,11 +272,20 @@ test("search applies text and facet filters before paginating cards", () => {
   });
 
   assert.ok(petrich.search.total_matches > 0);
-  assert.ok(petrich.cards.every((card) => card.location === "Petrich"));
+  assert.ok(petrich.cards.some((card) => card.location === "Petrich"));
+  assert.ok(petrichLocation.cards.every((card) => card.location === "Petrich"));
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_type, "apartment");
   assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_type", value: "apartment", active: true }]);
+});
+
+test("search matches Cyrillic listings across Latin and Cyrillic keyboard input", () => {
+  const latinRussianTitle = renderSearchPage({ registry, listings, localeCode: "ru", query: "apartamenty" });
+  const cyrillicLatinLocation = renderSearchPage({ registry, listings, localeCode: "ru", query: "Сандански" });
+
+  assert.ok(latinRussianTitle.cards.some((card) => card.id === "MS-CRAWL-0114"));
+  assert.ok(cyrillicLatinLocation.search.total_matches > 0);
 });
 
 test("search paginates without duplicating cards and applies reviewed area facets", () => {

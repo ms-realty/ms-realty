@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
 
@@ -48,9 +49,29 @@ TYPE_PATTERNS = [
 APPROVED_TRANSLATION_SEEDS = {"MS-CRAWL-0001": ["el", "he"]}
 PUBLIC_TRANSLATION_STATES = {"approved", "published"}
 
+CYRILLIC_TO_LATIN = {
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "yo",
+    "ж": "zh", "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "h", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "sht", "ъ": "a",
+    "ы": "y", "ь": "y", "э": "e", "ю": "yu", "я": "ya", "ѝ": "i",
+}
+
 
 def textish(value: str | None) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
+
+
+def search_text(*values: object) -> str:
+    """Keep source text and deterministic Latin variants for cross-keyboard search."""
+    source = textish(" ".join(str(value or "") for value in values))
+    folded = "".join(
+        character
+        for character in unicodedata.normalize("NFKD", source.lower())
+        if not unicodedata.combining(character)
+    )
+    transliterated = "".join(CYRILLIC_TO_LATIN.get(character, character) for character in folded)
+    return textish(f"{source} {transliterated}" if transliterated != source.lower() else source)
 
 
 def meilisearch_document(document: dict[str, object]) -> dict[str, object]:
@@ -275,9 +296,7 @@ def apply_listing_edits(docs: list[dict[str, object]], edits: list[dict[str, obj
         ):
             if field in patch:
                 doc[field] = patch[field]
-        doc["search_text"] = textish(
-            " ".join([str(doc.get("title") or ""), str(doc.get("description") or ""), str(doc.get("h1") or "")])
-        )
+        doc["search_text"] = search_text(doc.get("title"), doc.get("description"), doc.get("h1"))
     return docs
 
 
@@ -341,7 +360,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
                     "word_count": int(row.get("word_count") or 0),
                     "schema_present": row.get("schema_present") == "true",
                     "source_sitemap": textish(row.get("sitemap_source")),
-                    "search_text": textish(" ".join([title, description, h1])),
+                    "search_text": search_text(title, description, h1),
                 }
             )
 
