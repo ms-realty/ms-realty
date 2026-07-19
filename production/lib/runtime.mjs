@@ -50,6 +50,11 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     bedrooms: record.facts.bedrooms,
     bedrooms_not_applicable: record.facts.bedrooms_not_applicable === true,
     area_sqm: record.facts.area_sqm ?? record.facts.area ?? null,
+    floor: record.facts.floor ?? null,
+    total_floors: record.facts.total_floors ?? null,
+    land_area_sqm: record.facts.land_area_sqm ?? null,
+    condition: record.facts.condition || "",
+    location_precision: record.facts.location_precision || "approximate",
     price_eur: record.facts.price_eur,
     price_on_request: record.facts.price_on_request === true,
     image_count: record.facts.image_count,
@@ -60,6 +65,18 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     tour: approvedTour || record.tour || null,
     word_count: record.facts.word_count,
     schema_present: record.seo.schema_present,
+    workflow: record.workflow || {},
+    seo: {
+      title: record.seo.title || "",
+      description: record.seo.description || "",
+      canonical_override: record.seo.canonical_override || "",
+      og_title: record.seo.og_title || "",
+      og_description: record.seo.og_description || "",
+      robots: record.seo.robots || "",
+      human_approved: record.seo.human_approved === true,
+      reviewer: record.seo.reviewer || null,
+      reviewed_at: record.seo.reviewed_at || null,
+    },
   };
 }
 

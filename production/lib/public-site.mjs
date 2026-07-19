@@ -96,7 +96,7 @@ const ACTION_LABELS = {
     sellerValuation: "Оценка за продавач",
     requestLanguage: "Заяви този език",
     guideActions: "Действия за ръководството",
-    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Оферта", bedrooms: "Спални" },
+    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Оферта", bedrooms: "Спални", floor: "Етаж", land_area_sqm: "Площ на парцела", condition: "Състояние", location_precision: "Локация" },
   },
   en: {
     inquiry: "Inquiry",
@@ -169,7 +169,7 @@ const ACTION_LABELS = {
     sellerValuation: "Seller valuation",
     requestLanguage: "Request this language",
     guideActions: "Guide actions",
-    factLabels: { location: "Location", property_type: "Type", offer_type: "Offer", bedrooms: "Bedrooms" },
+    factLabels: { location: "Location", property_type: "Type", offer_type: "Offer", bedrooms: "Bedrooms", floor: "Floor", land_area_sqm: "Land area", condition: "Condition", location_precision: "Location" },
   },
   de: {
     inquiry: "Anfrage",
@@ -242,7 +242,7 @@ const ACTION_LABELS = {
     sellerValuation: "Verkaufsbewertung",
     requestLanguage: "Diese Sprache anfragen",
     guideActions: "Ratgeberaktionen",
-    factLabels: { location: "Ort", property_type: "Typ", offer_type: "Angebot", bedrooms: "Schlafzimmer" },
+    factLabels: { location: "Ort", property_type: "Typ", offer_type: "Angebot", bedrooms: "Schlafzimmer", floor: "Etage", land_area_sqm: "Grundstücksfläche", condition: "Zustand", location_precision: "Standort" },
   },
   nl: {
     inquiry: "Aanvraag",
@@ -315,7 +315,7 @@ const ACTION_LABELS = {
     sellerValuation: "Verkoopwaardering",
     requestLanguage: "Vraag deze taal aan",
     guideActions: "Gidsacties",
-    factLabels: { location: "Locatie", property_type: "Type", offer_type: "Aanbod", bedrooms: "Slaapkamers" },
+    factLabels: { location: "Locatie", property_type: "Type", offer_type: "Aanbod", bedrooms: "Slaapkamers", floor: "Verdieping", land_area_sqm: "Perceeloppervlakte", condition: "Staat", location_precision: "Locatie" },
   },
   ru: {
     inquiry: "Запрос",
@@ -388,7 +388,7 @@ const ACTION_LABELS = {
     sellerValuation: "Оценка для продавца",
     requestLanguage: "Запросить этот язык",
     guideActions: "Действия руководства",
-    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Предложение", bedrooms: "Спальни" },
+    factLabels: { location: "Локация", property_type: "Тип", offer_type: "Предложение", bedrooms: "Спальни", floor: "Этаж", land_area_sqm: "Площадь участка", condition: "Состояние", location_precision: "Локация" },
   },
   el: {
     inquiry: "Ερώτηση",
@@ -461,7 +461,7 @@ const ACTION_LABELS = {
     sellerValuation: "Εκτίμηση πωλητή",
     requestLanguage: "Ζητήστε αυτή τη γλώσσα",
     guideActions: "Ενέργειες οδηγού",
-    factLabels: { location: "Τοποθεσία", property_type: "Τύπος", offer_type: "Προσφορά", bedrooms: "Υπνοδωμάτια" },
+    factLabels: { location: "Τοποθεσία", property_type: "Τύπος", offer_type: "Προσφορά", bedrooms: "Υπνοδωμάτια", floor: "Όροφος", land_area_sqm: "Εμβαδόν οικοπέδου", condition: "Κατάσταση", location_precision: "Τοποθεσία" },
   },
   he: {
     inquiry: "פנייה",
@@ -534,7 +534,7 @@ const ACTION_LABELS = {
     sellerValuation: "הערכת מוכר",
     requestLanguage: "בקשת שפה זו",
     guideActions: "פעולות מדריך",
-    factLabels: { location: "מיקום", property_type: "סוג", offer_type: "הצעה", bedrooms: "חדרי שינה" },
+    factLabels: { location: "מיקום", property_type: "סוג", offer_type: "הצעה", bedrooms: "חדרי שינה", floor: "קומה", land_area_sqm: "שטח מגרש", condition: "מצב", location_precision: "מיקום" },
   },
 };
 
@@ -553,6 +553,7 @@ const UI_COPY = {
     priceLowToHigh: "Цена: ниска към висока",
     priceHighToLow: "Цена: висока към ниска",
     verifiedInventory: "Проверена обява",
+    locationPrecisions: { area_only: "само район", approximate: "приблизителна локация", exact: "точна локация" },
     sourceFallback: "Версия на изходния език",
     breadcrumb: "Навигационна пътека",
     propertyTypes: { commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", land: "Парцел", property: "Имот" },
@@ -569,6 +570,7 @@ const UI_COPY = {
     priceLowToHigh: "Price: low to high",
     priceHighToLow: "Price: high to low",
     verifiedInventory: "Verified listing",
+    locationPrecisions: { area_only: "area only", approximate: "approximate location", exact: "exact location" },
     sourceFallback: "Source-language version",
     breadcrumb: "Breadcrumb",
     propertyTypes: { commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", land: "Land", property: "Property" },
@@ -585,6 +587,7 @@ const UI_COPY = {
     priceLowToHigh: "Preis: niedrig zu hoch",
     priceHighToLow: "Preis: hoch zu niedrig",
     verifiedInventory: "Geprüfte Immobilie",
+    locationPrecisions: { area_only: "nur Gebiet", approximate: "ungefährer Standort", exact: "genauer Standort" },
     sourceFallback: "Version in Ausgangssprache",
     breadcrumb: "Brotkrümelnavigation",
     propertyTypes: { commercial: "Gewerbeimmobilie", multi_unit: "Apartments", apartment: "Wohnung", hotel: "Hotel", house: "Haus", land: "Grundstück", property: "Immobilie" },
@@ -601,6 +604,7 @@ const UI_COPY = {
     priceLowToHigh: "Prijs: laag naar hoog",
     priceHighToLow: "Prijs: hoog naar laag",
     verifiedInventory: "Beoordeeld object",
+    locationPrecisions: { area_only: "alleen gebied", approximate: "benaderde locatie", exact: "exacte locatie" },
     sourceFallback: "Versie in brontaal",
     breadcrumb: "Kruimelpad",
     propertyTypes: { commercial: "Commercieel vastgoed", multi_unit: "Appartementen", apartment: "Appartement", hotel: "Hotel", house: "Huis", land: "Grond", property: "Object" },
@@ -617,6 +621,7 @@ const UI_COPY = {
     priceLowToHigh: "Цена: по возрастанию",
     priceHighToLow: "Цена: по убыванию",
     verifiedInventory: "Проверенный объект",
+    locationPrecisions: { area_only: "только район", approximate: "приблизительная локация", exact: "точная локация" },
     sourceFallback: "Версия на исходном языке",
     breadcrumb: "Навигационная цепочка",
     propertyTypes: { commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", land: "Участок", property: "Объект" },
@@ -633,6 +638,7 @@ const UI_COPY = {
     priceLowToHigh: "Τιμή: χαμηλή προς υψηλή",
     priceHighToLow: "Τιμή: υψηλή προς χαμηλή",
     verifiedInventory: "Ελεγμένο ακίνητο",
+    locationPrecisions: { area_only: "μόνο περιοχή", approximate: "κατά προσέγγιση τοποθεσία", exact: "ακριβής τοποθεσία" },
     sourceFallback: "Έκδοση στη γλώσσα προέλευσης",
     breadcrumb: "Διαδρομή πλοήγησης",
     propertyTypes: { commercial: "Επαγγελματικό ακίνητο", multi_unit: "Διαμερίσματα", apartment: "Διαμέρισμα", hotel: "Ξενοδοχείο", house: "Κατοικία", land: "Οικόπεδο", property: "Ακίνητο" },
@@ -649,6 +655,7 @@ const UI_COPY = {
     priceLowToHigh: "מחיר: מהנמוך לגבוה",
     priceHighToLow: "מחיר: מהגבוה לנמוך",
     verifiedInventory: "נכס מאושר",
+    locationPrecisions: { area_only: "אזור בלבד", approximate: "מיקום משוער", exact: "מיקום מדויק" },
     sourceFallback: "גרסה בשפת המקור",
     breadcrumb: "נתיב ניווט",
     propertyTypes: { commercial: "נכס מסחרי", multi_unit: "דירות", apartment: "דירה", hotel: "מלון", house: "בית", land: "מגרש", property: "נכס" },
@@ -1355,6 +1362,10 @@ export function renderListingPage({ registry, listing, localeCode, translations,
   const hreflang = indexable ? hreflangForListing(registry, listing.id, allTranslations) : [];
   const labels = labelsFor(locale.code);
   const copy = localizedCopy(translationIndexable ? locale.code : view.source_locale, view);
+  const sourceSeo = locale.code === view.source_locale && view.seo?.human_approved === true ? view.seo : {};
+  const canonical = sourceSeo.canonical_override === path ? sourceSeo.canonical_override : path;
+  const metadataTitle = sourceSeo.title || copy.title;
+  const metadataDescription = sourceSeo.description || copy.description;
   const publicMedia = publicMediaLibrary(view.media, {
     fallback: view.thumbnail_url
       ? {
@@ -1372,7 +1383,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
     lang: locale.code,
     dir: locale.direction,
     path,
-    canonical: path,
+    canonical,
     indexable,
     fallback: {
       active: !resolved.available || !translationIndexable,
@@ -1380,13 +1391,15 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       resolved_locale: locale.code,
     },
     metadata: {
-      title: copy.title,
-      description: copy.description,
-      robots: indexable ? "index,follow" : "noindex,follow",
+      title: metadataTitle,
+      description: metadataDescription,
+      og_title: sourceSeo.og_title || metadataTitle,
+      og_description: sourceSeo.og_description || metadataDescription,
+      robots: indexable ? sourceSeo.robots || "index,follow" : "noindex,follow",
     },
     hreflang,
     chrome: publicChrome(registry, locale, { hreflang, active: "listing" }),
-    schema: buildListingSchema({ path, view, copy, publicMedia }),
+    schema: buildListingSchema({ path: canonical, view, copy: { ...copy, title: metadataTitle, description: metadataDescription }, publicMedia }),
     translation: {
       locale: translation?.locale || locale.code,
       status: translation?.status || "missing",
@@ -1403,6 +1416,11 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         offer_type: view.offer_type,
         bedrooms: view.bedrooms,
         area_sqm: view.area_sqm,
+        floor: view.floor,
+        total_floors: view.total_floors,
+        land_area_sqm: view.land_area_sqm,
+        condition: view.condition,
+        location_precision: view.location_precision,
         price_eur: view.price_eur,
         price_on_request: view.price_on_request,
         listing_status: view.listing_status,
@@ -1412,9 +1430,18 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         status: view.listing_status,
         active_in_search: isActiveListing(listing),
         seo_kept_live: true,
+        publish_approved: view.workflow?.publish_approved === true,
+        publish_approved_at: view.workflow?.publish_approved_at || null,
+        last_edited_at: view.workflow?.last_edited_at || null,
+      },
+      verification: {
+        availability_verified_at: view.workflow?.availability_verified_at || null,
+        availability_verified_by: view.workflow?.availability_verified_by || null,
+        verified: Boolean(view.workflow?.availability_verified_at),
       },
       quality_flags: {
         bedrooms_not_applicable: view.bedrooms_not_applicable === true,
+        location_precision: view.location_precision,
       },
       media: {
         ...publicMedia,

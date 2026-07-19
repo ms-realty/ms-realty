@@ -23,8 +23,8 @@ function designSystemStyle() {
 }
 
 function openGraph(page) {
-  const title = page.metadata?.title || "MS Realty";
-  const description = page.metadata?.description || "";
+  const title = page.metadata?.og_title || page.metadata?.title || "MS Realty";
+  const description = page.metadata?.og_description || page.metadata?.description || "";
   const url = page.canonical || page.path || "/";
   const image = page.body?.media?.gallery?.find((item) => item.url)?.url || null;
   return [
@@ -155,6 +155,11 @@ function renderListing(page) {
     .map((card) => `<article data-related-listing="true"><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2></article>`)
     .join("");
   const tour = page.body.media.tour || {};
+  const verification = page.body.verification?.verified
+    ? `<p data-availability-verification="true">availability verified <time datetime="${escapeHtml(
+        page.body.verification.availability_verified_at,
+      )}">${escapeHtml(page.body.verification.availability_verified_at)}</time></p>`
+    : "";
   return `
 <main data-kind="listing" data-review-status="${escapeHtml(page.body.actions.direct_contact.review_status)}" data-listing-status="${escapeHtml(
     page.body.lifecycle?.status || "available",
@@ -164,6 +169,7 @@ function renderListing(page) {
     page.body.source.source_domain,
   )}" data-schema-ready="${escapeHtml(page.schema ? "true" : "false")}">
     <p data-listing-verification="true">${escapeHtml(page.translation.human_approved ? "reviewed translation" : "approved source")}</p>
+    ${verification}
     <h1>${escapeHtml(page.body.h1)}</h1>
     <p data-listing-price="true">${escapeHtml(listingPriceLabel(page.body.facts))}</p>
     <ul data-listing-highlights="true">${listingHighlights(page.body.facts)}</ul>

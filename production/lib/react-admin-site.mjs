@@ -106,6 +106,13 @@ const ADMIN_UI_COPY = {
     approvedRedirects: "Одобрени пренасочвания",
     source: "Източник",
     schema: "Схема",
+    seoSettings: "SEO настройки за изходния език",
+    listingWorkflow: "Проверка и публикуване",
+    availabilityVerification: "Проверка на наличността",
+    notVerified: "Не е проверена",
+    publishApproval: "Одобрение за публикуване",
+    approvedForPublishing: "Одобрена за публикуване",
+    notApprovedForPublishing: "Не е одобрена",
     tour360: "360 обиколка",
     tourStatus: "Статус на обиколката",
     tourPanoramaUrl: "URL на панорамата",
@@ -179,7 +186,7 @@ const ADMIN_UI_COPY = {
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
-    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", price_eur: "Цена в EUR", area_sqm: "Площ в m²", bedrooms: "Спални" },
+    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация" },
   },
   ru: {
     urls: "URL-адреса",
@@ -259,6 +266,13 @@ const ADMIN_UI_COPY = {
     approvedRedirects: "Одобренные редиректы",
     source: "Источник",
     schema: "Схема",
+    seoSettings: "SEO для исходного языка",
+    listingWorkflow: "Проверка и публикация",
+    availabilityVerification: "Проверка доступности",
+    notVerified: "Не проверена",
+    publishApproval: "Одобрение публикации",
+    approvedForPublishing: "Одобрено к публикации",
+    notApprovedForPublishing: "Не одобрено",
     tour360: "360 тур",
     tourStatus: "Статус тура",
     tourPanoramaUrl: "URL панорамы",
@@ -332,7 +346,7 @@ const ADMIN_UI_COPY = {
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
-    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", price_eur: "Цена в EUR", area_sqm: "Площадь в m²", bedrooms: "Спальни" },
+    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация" },
   },
   en: {
     urls: "URLs",
@@ -412,6 +426,13 @@ const ADMIN_UI_COPY = {
     approvedRedirects: "Approved redirects",
     source: "Source",
     schema: "Schema",
+    seoSettings: "Source-language SEO",
+    listingWorkflow: "Verification and publishing",
+    availabilityVerification: "Availability verification",
+    notVerified: "Not verified",
+    publishApproval: "Publication approval",
+    approvedForPublishing: "Approved for publishing",
+    notApprovedForPublishing: "Not approved",
     tour360: "360 tour",
     tourStatus: "Tour status",
     tourPanoramaUrl: "Panorama URL",
@@ -485,7 +506,7 @@ const ADMIN_UI_COPY = {
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
-    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", price_eur: "Price in EUR", area_sqm: "Area in m²", bedrooms: "Bedrooms" },
+    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location" },
   },
 };
 
@@ -2822,16 +2843,53 @@ function TranslationQueueBody({ page }) {
   });
 }
 
-function editorInputFor(field, value, disabled = false) {
+function editorDateTimeValue(value) {
+  if (!value || Number.isNaN(new Date(value).getTime())) return "";
+  const date = new Date(value);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
+}
+
+function editorSelect(field, value, disabled, options) {
+  return h(
+    "select",
+    { name: field, disabled, "data-editor-field": field },
+    ...options.map(([optionValue, optionLabel]) =>
+      h("option", { key: optionValue, value: optionValue, selected: String(value ?? "") === optionValue ? true : undefined }, optionLabel),
+    ),
+  );
+}
+
+function editorInputFor(ui, field, value, disabled = false) {
   const shared = { name: field, defaultValue: value, disabled, "data-editor-field": field };
-  if (field === "description") return h("textarea", { ...shared, rows: 6 });
-  if (field === "price_eur" || field === "area_sqm") return h("input", { ...shared, type: "number", min: "0", step: "any", inputMode: "decimal" });
-  if (field === "bedrooms") return h("input", { ...shared, inputMode: "numeric" });
+  if (["description", "seo_description", "seo_og_description"].includes(field)) return h("textarea", { ...shared, rows: field === "description" ? 6 : 3 });
+  if (["price_eur", "area_sqm", "land_area_sqm"].includes(field)) return h("input", { ...shared, type: "number", min: "0", step: "any", inputMode: "decimal" });
+  if (["bedrooms", "floor", "total_floors"].includes(field)) return h("input", { ...shared, type: "number", min: "0", step: "1", inputMode: "numeric" });
+  if (["bedrooms_not_applicable", "price_on_request", "publish_approved", "seo_review_confirmed"].includes(field)) {
+    return editorSelect(field, value === true ? "true" : "false", disabled, [
+      ["false", fieldText(ui, "option_no")],
+      ["true", fieldText(ui, "option_yes")],
+    ]);
+  }
+  if (field === "listing_status") {
+    return editorSelect(field, value || "available", disabled, ["available", "reserved", "sold", "rented", "archived"].map((status) => [status, statusText(ui, status)]));
+  }
+  if (field === "location_precision") {
+    return editorSelect(field, value || "approximate", disabled, ["area_only", "approximate", "exact"].map((precision) => [precision, fieldText(ui, `option_${precision}`)]));
+  }
+  if (field === "seo_robots") {
+    return editorSelect(field, value || "index,follow", disabled, [
+      ["index,follow", "index,follow"],
+      ["noindex,follow", "noindex,follow"],
+    ]);
+  }
+  if (field === "availability_verified_at") return h("input", { ...shared, defaultValue: editorDateTimeValue(value), type: "datetime-local" });
+  if (field === "seo_canonical") return h("input", { ...shared, inputMode: "url", placeholder: "/bg/imoti/MS-CRAWL-0001" });
   return h("input", shared);
 }
 
 function editorField(copy, ui, field, value, disabled = false) {
-  return h("label", { key: field }, fieldText(ui, field), editorInputFor(field, value, disabled));
+  return h("label", { key: field }, fieldText(ui, field), editorInputFor(ui, field, value, disabled));
 }
 
 function editorFieldGroup(copy, ui, title, fields, facts, disabled = false) {
@@ -2847,6 +2905,20 @@ function ListingEditorBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const facts = page.listing.facts || {};
+  const workflow = page.listing.workflow || {};
+  const seo = page.listing.seo || {};
+  const editorValues = {
+    ...facts,
+    availability_verified_at: workflow.availability_verified_at || "",
+    publish_approved: workflow.publish_approved === true,
+    seo_title: seo.title || "",
+    seo_description: seo.description || "",
+    seo_canonical: seo.canonical_override || "",
+    seo_og_title: seo.og_title || "",
+    seo_og_description: seo.og_description || "",
+    seo_robots: seo.robots || "index,follow",
+    seo_review_confirmed: seo.human_approved === true,
+  };
   const tour = page.listing.tour || {};
   const tourPublished = tour.is_public === true;
   const tourStatus = tourPublished ? "approved" : tour.review_status || "review_required";
@@ -2855,7 +2927,11 @@ function ListingEditorBody({ page }) {
   const title = label(copy, "propertyEditor", "Property editor");
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
-  const detailFields = page.editableFields.filter((field) => !contentFields.includes(field) && !termsFields.includes(field));
+  const workflowFields = page.editableFields.filter((field) => ["availability_verified_at", "publish_approved"].includes(field));
+  const seoFields = page.editableFields.filter((field) => field.startsWith("seo_"));
+  const detailFields = page.editableFields.filter(
+    (field) => !contentFields.includes(field) && !termsFields.includes(field) && !workflowFields.includes(field) && !seoFields.includes(field),
+  );
   const canEditContent = pageCan(page, "content:write");
   return adminShell(page, {
     title,
@@ -2866,6 +2942,8 @@ function ListingEditorBody({ page }) {
       "data-editor-layout": "facts-translations-quality",
       "data-cms-status": page.listing.cms_status,
       "data-schema-ready": page.listing.seo?.schema_present ? "true" : "false",
+      "data-publish-approved": workflow.publish_approved ? "true" : "false",
+      "data-availability-verified": workflow.availability_verified_at ? "true" : "false",
       "data-stale-translation-count": staleTranslations.length,
       "data-listing-id": page.listing.id,
       "data-admin-locale": page.workspace.locale,
@@ -2886,6 +2964,7 @@ function ListingEditorBody({ page }) {
         h("a", { className: "mk-tab", href: "#listing-facts", "data-editor-tab": "facts", "aria-label": label(copy, "facts", "Facts"), title: label(copy, "facts", "Facts") }, h(Icon, { name: "pencil", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "facts", "Facts"))),
         h("a", { className: "mk-tab", href: "#listing-translations", "data-editor-tab": "translations", "aria-label": label(copy, "translations", "Translations"), title: label(copy, "translations", "Translations") }, h(Icon, { name: "languages", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "translations", "Translations"))),
         h("a", { className: "mk-tab", href: "#listing-media", "data-editor-tab": "media", "aria-label": label(copy, "media", "Media"), title: label(copy, "media", "Media") }, h(Icon, { name: "camera", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "media", "Media"))),
+        h("a", { className: "mk-tab", href: "#listing-seo", "data-editor-tab": "seo", "aria-label": ui.seoSettings, title: ui.seoSettings }, h(Icon, { name: "search", size: 16 }), h("span", { className: "adm-editor-tab__label" }, ui.seoSettings)),
         h("a", { className: "mk-tab", href: "#listing-quality", "data-editor-tab": "quality", "aria-label": label(copy, "quality", "Quality"), title: label(copy, "quality", "Quality") }, h(Icon, { name: "shield-check", size: 16 }), h("span", { className: "adm-editor-tab__label" }, label(copy, "quality", "Quality"))),
       ),
       h(
@@ -2913,9 +2992,15 @@ function ListingEditorBody({ page }) {
               }),
             ),
           ),
-          editorFieldGroup(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, facts, !canEditContent),
-          editorFieldGroup(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, facts, !canEditContent),
-          editorFieldGroup(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, facts, !canEditContent),
+          editorFieldGroup(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, editorValues, !canEditContent),
+          editorFieldGroup(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, editorValues, !canEditContent),
+          editorFieldGroup(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, editorValues, !canEditContent),
+          editorFieldGroup(copy, ui, ui.listingWorkflow, workflowFields, editorValues, !canEditContent),
+          h(
+            "section",
+            { id: "listing-seo", className: "adm-form__section", "data-seo-panel": "true", "aria-label": ui.seoSettings },
+            editorFieldGroup(copy, ui, ui.seoSettings, seoFields, editorValues, !canEditContent),
+          ),
           canEditContent
             ? h(
                 "div",
@@ -3068,6 +3153,8 @@ function ListingEditorBody({ page }) {
           metrics: [
             [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), "file-check", PILL_TONES[page.listing.cms_status] || "ink"],
             [ui.schema, statusText(ui, page.listing.seo?.schema_present ? "present" : "missing"), "check-circle-2", page.listing.seo?.schema_present ? "success" : "brick"],
+            [ui.availabilityVerification, workflow.availability_verified_at ? formatAdminDateTime(workflow.availability_verified_at, page.workspace.locale) : ui.notVerified, "calendar-check", workflow.availability_verified_at ? "success" : "sun"],
+            [ui.publishApproval, workflow.publish_approved ? ui.approvedForPublishing : ui.notApprovedForPublishing, "shield-check", workflow.publish_approved ? "success" : "sun"],
           ],
         }),
       ),

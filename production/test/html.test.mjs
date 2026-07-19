@@ -22,6 +22,21 @@ const listings = loadListings();
 const listing = findListingById(listings, "MS-CRAWL-0001");
 const seed = loadCmsSeed();
 
+test("HTML renderer honors reviewed Open Graph listing fields", () => {
+  const page = renderListingPage({ registry, listing, localeCode: "bg" });
+  const html = renderHtmlPage({
+    ...page,
+    metadata: {
+      ...page.metadata,
+      og_title: "Reviewed social title",
+      og_description: "Reviewed social description.",
+    },
+  });
+
+  assert.match(html, /property="og:title" content="Reviewed social title"/);
+  assert.match(html, /property="og:description" content="Reviewed social description\."/);
+});
+
 test("HTML renderer emits SEO-safe listing, search, and fallback documents", () => {
   const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));

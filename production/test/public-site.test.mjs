@@ -6,7 +6,8 @@ import { findListingById, loadListings } from "../lib/content.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { publicMediaLibrary } from "../lib/media.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
-import { loadCmsSeed } from "../lib/runtime.mjs";
+import { applyListingEdits } from "../lib/listing-edits.mjs";
+import { listingFromCmsRecord, loadCmsSeed } from "../lib/runtime.mjs";
 import {
   renderAdminShell,
   renderContactPage,
@@ -111,6 +112,69 @@ test("listing SEO includes approved hreflang and excludes unavailable draft loca
   assert.equal(hreflangCodes.includes("de"), false);
   assert.equal(page.schema["@type"], "RealEstateListing");
   assert.equal(page.schema.url, page.canonical);
+});
+
+test("reviewed listing facts, privacy, verification, and SEO reach the public listing", () => {
+  const seed = applyListingEdits(loadCmsSeed(), [
+    {
+      listing_id: "MS-CRAWL-0001",
+      editor: "listing_editor",
+      edited_at: "2026-07-19T11:31:00Z",
+      patch: {
+        floor: 2,
+        total_floors: 5,
+        land_area_sqm: 640,
+        condition: "Renovated",
+        location_precision: "approximate",
+        availability_verified_at: "2026-07-19T11:30:00Z",
+        publish_approved: true,
+        seo_title: "Reviewed commercial property in Sandanski",
+        seo_description: "Reviewed source-language description for search engines.",
+        seo_canonical: "/bg/imoti/MS-CRAWL-0001",
+        seo_og_title: "Commercial property in Sandanski",
+        seo_og_description: "Reviewed commercial property listing.",
+        seo_robots: "index,follow",
+        seo_review_confirmed: true,
+      },
+    },
+  ]);
+  const record = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const page = renderListingPage({ registry, listing: listingFromCmsRecord(record), localeCode: "bg" });
+  const html = renderReactPublicBody(page);
+
+  assert.equal(page.canonical, "/bg/imoti/MS-CRAWL-0001");
+  assert.equal(page.metadata.title, "Reviewed commercial property in Sandanski");
+  assert.equal(page.metadata.og_title, "Commercial property in Sandanski");
+  assert.equal(page.body.facts.floor, 2);
+  assert.equal(page.body.facts.total_floors, 5);
+  assert.equal(page.body.facts.land_area_sqm, 640);
+  assert.equal(page.body.facts.location_precision, "approximate");
+  assert.equal(page.body.verification.verified, true);
+  assert.equal(page.body.lifecycle.publish_approved, true);
+  assert.equal(page.schema.dateModified, "2026-07-19T11:30:00Z");
+  assert.ok(page.schema.additionalProperty.some((property) => property.name === "condition" && property.value === "Renovated"));
+  assert.match(html, /data-availability-verified="true"/);
+  assert.match(html, /data-location-precision="approximate"/);
+  assert.match(html, /data-listing-verification="availability"/);
+  assert.match(html, /приблизителна локация/);
+});
+
+test("unreviewed source-language SEO never replaces public metadata", () => {
+  const seed = applyListingEdits(loadCmsSeed(), [
+    {
+      listing_id: "MS-CRAWL-0001",
+      editor: "seo_editor",
+      edited_at: "2026-07-19T11:31:00Z",
+      patch: { seo_title: "Unreviewed SEO draft", seo_review_confirmed: false },
+    },
+  ]);
+  const record = seed.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
+  const runtimeListing = listingFromCmsRecord(record);
+  const page = renderListingPage({ registry, listing: runtimeListing, localeCode: "bg" });
+
+  assert.equal(runtimeListing.seo.human_approved, false);
+  assert.notEqual(page.metadata.title, "Unreviewed SEO draft");
+  assert.equal(page.metadata.title, page.body.h1);
 });
 
 test("unapproved French route falls back without becoming indexable", () => {

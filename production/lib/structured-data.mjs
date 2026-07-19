@@ -25,8 +25,14 @@ export function buildListingSchema({ path: listingPath, view, copy, publicMedia 
       { "@type": "PropertyValue", name: "offer_type", value: view.offer_type },
       { "@type": "PropertyValue", name: "bedrooms", value: view.bedrooms },
       { "@type": "PropertyValue", name: "floor_area_sqm", value: asNumber(view.area_sqm) },
+      { "@type": "PropertyValue", name: "floor", value: asNumber(view.floor) },
+      { "@type": "PropertyValue", name: "total_floors", value: asNumber(view.total_floors) },
+      { "@type": "PropertyValue", name: "land_area_sqm", value: asNumber(view.land_area_sqm) },
+      { "@type": "PropertyValue", name: "condition", value: view.condition },
     ].filter((item) => filled(item.value)),
   };
+
+  if (filled(view.workflow?.availability_verified_at)) schema.dateModified = view.workflow.availability_verified_at;
 
   if (filled(view.location)) {
     schema.areaServed = {

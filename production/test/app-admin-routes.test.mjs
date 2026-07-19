@@ -418,6 +418,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const russianEditorHtml = await russianEditor.text();
       assert.equal(russianEditor.status, 200);
       assert.match(russianEditorHtml, /data-editor-field="price_eur"/);
+      assert.match(russianEditorHtml, /data-editor-field="condition"/);
+      assert.match(russianEditorHtml, /data-editor-field="location_precision"/);
+      assert.match(russianEditorHtml, /data-editor-field="availability_verified_at"/);
+      assert.match(russianEditorHtml, /data-editor-field="seo_title"/);
+      assert.match(russianEditorHtml, /data-seo-panel="true"/);
       assert.match(russianEditorHtml, /inputmode="decimal"/);
       assert.match(russianEditorHtml, /data-editor-name="true"/);
       assert.match(russianEditorHtml, /data-editor-tab="translations" aria-label="Переводы" title="Переводы"/);
@@ -1189,6 +1194,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /data-editor-layout="facts-translations-quality"/);
       assert.match(editorHtml, /data-editor-tabs="true"/);
       assert.match(editorHtml, /data-editor-panel="facts"/);
+      assert.match(editorHtml, /data-editor-tab="seo"/);
+      assert.match(editorHtml, /data-seo-panel="true"/);
       assert.match(editorHtml, /data-translation-panel="true"/);
       assert.match(editorHtml, /data-media-review-panel="true"/);
       assert.match(editorHtml, /data-tour-review-status=/);
@@ -1211,17 +1218,38 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             listingId: "MS-CRAWL-0001",
             editor: "content_editor",
             title: "Updated title for Next admin",
+            floor: "2",
+            total_floors: "5",
+            land_area_sqm: "640",
+            condition: "Renovated",
+            location_precision: "approximate",
+            availability_verified_at: "2026-07-19T11:30",
+            publish_approved: "true",
+            seo_title: "Reviewed SEO title",
+            seo_description: "Reviewed SEO description for the source-language listing.",
+            seo_canonical: "/bg/imoti/MS-CRAWL-0001",
+            seo_og_title: "Reviewed Open Graph title",
+            seo_og_description: "Reviewed Open Graph description.",
+            seo_robots: "index,follow",
+            seo_review_confirmed: "true",
           }),
         }),
       );
       const editBody = await edit.json();
       assert.equal(edit.status, 201);
       assert.equal(editBody.edit.patch.title, "Updated title for Next admin");
+      assert.equal(editBody.edit.patch.floor, 2);
+      assert.equal(editBody.edit.patch.publish_approved, true);
+      assert.equal(editBody.edit.patch.seo_title, "Reviewed SEO title");
 
       const updatedEditor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
       );
-      assert.match(await updatedEditor.text(), /value="Updated title for Next admin"/);
+      const updatedEditorHtml = await updatedEditor.text();
+      assert.match(updatedEditorHtml, /value="Updated title for Next admin"/);
+      assert.match(updatedEditorHtml, /value="Reviewed SEO title"/);
+      assert.match(updatedEditorHtml, /data-publish-approved="true"/);
+      assert.match(updatedEditorHtml, /data-availability-verified="true"/);
 
       const slugChange = await listingSlugRoute.POST(
         new Request("https://example.test/api/admin/listings/slug", {

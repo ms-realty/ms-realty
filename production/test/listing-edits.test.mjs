@@ -29,6 +29,20 @@ test("listing edits persist and stale dependent translations", () => {
         bedrooms_not_applicable: "1",
         price_on_request: "on",
         listing_status: "sold",
+        floor: "2",
+        total_floors: "5",
+        land_area_sqm: "640",
+        condition: "  Renovated  ",
+        location_precision: "approximate",
+        availability_verified_at: "2026-07-04T10:30:00Z",
+        publish_approved: "true",
+        seo_title: "Reviewed workshop to rent",
+        seo_description: "Reviewed source-language search description.",
+        seo_canonical: "/bg/imoti/MS-CRAWL-0001",
+        seo_og_title: "Workshop to rent in Sandanski",
+        seo_og_description: "A reviewed commercial property listing.",
+        seo_robots: "index,follow",
+        seo_review_confirmed: "true",
       },
     },
     [],
@@ -46,6 +60,15 @@ test("listing edits persist and stale dependent translations", () => {
   assert.equal(rows[0].patch.bedrooms_not_applicable, true);
   assert.equal(rows[0].patch.price_on_request, true);
   assert.equal(rows[0].patch.listing_status, "sold");
+  assert.equal(rows[0].patch.floor, 2);
+  assert.equal(rows[0].patch.total_floors, 5);
+  assert.equal(rows[0].patch.land_area_sqm, 640);
+  assert.equal(rows[0].patch.condition, "Renovated");
+  assert.equal(rows[0].patch.location_precision, "approximate");
+  assert.equal(rows[0].patch.availability_verified_at, "2026-07-04T10:30:00.000Z");
+  assert.equal(rows[0].patch.publish_approved, true);
+  assert.equal(rows[0].patch.seo_canonical, "/bg/imoti/MS-CRAWL-0001");
+  assert.equal(rows[0].patch.seo_review_confirmed, true);
   assert.equal(result.staleTranslations.some((translation) => translation.locale === "el" && translation.status === "stale"), true);
   assert.equal(result.staleTranslations.every((translation) => translation.public_indexable === false), true);
   assert.equal(assertListingEdits(rows), true);
@@ -56,12 +79,28 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
   const updated = applyListingEdits(seed, [
     {
       listing_id: "MS-CRAWL-0001",
+      edited_at: "2026-07-04T11:00:00Z",
+      editor: "listing_editor",
       patch: {
         description: "Reviewed source description.",
         price_eur: 123000,
         bedrooms: 2,
         bedrooms_not_applicable: true,
         price_on_request: true,
+        floor: 2,
+        total_floors: 5,
+        land_area_sqm: 640,
+        condition: "Renovated",
+        location_precision: "approximate",
+        availability_verified_at: "2026-07-04T10:30:00.000Z",
+        publish_approved: true,
+        seo_title: "Reviewed SEO title",
+        seo_description: "Reviewed SEO description.",
+        seo_canonical: "/bg/imoti/MS-CRAWL-0001",
+        seo_og_title: "Reviewed Open Graph title",
+        seo_og_description: "Reviewed Open Graph description.",
+        seo_robots: "noindex,follow",
+        seo_review_confirmed: true,
       },
       media_reviewer: "media_editor",
     },
@@ -75,6 +114,26 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
   assert.equal(record.facts.bedrooms, 2);
   assert.equal(record.facts.bedrooms_not_applicable, true);
   assert.equal(record.facts.price_on_request, true);
+  assert.equal(record.facts.floor, 2);
+  assert.equal(record.facts.total_floors, 5);
+  assert.equal(record.facts.land_area_sqm, 640);
+  assert.equal(record.facts.condition, "Renovated");
+  assert.equal(record.facts.location_precision, "approximate");
+  assert.equal(record.facts.seo_title, undefined);
+  assert.equal(record.seo.title, "Reviewed SEO title");
+  assert.equal(record.seo.description, "Reviewed SEO description.");
+  assert.equal(record.seo.canonical_override, "/bg/imoti/MS-CRAWL-0001");
+  assert.equal(record.seo.og_title, "Reviewed Open Graph title");
+  assert.equal(record.seo.robots, "noindex,follow");
+  assert.equal(record.seo.human_approved, true);
+  assert.equal(record.seo.reviewer, "listing_editor");
+  assert.equal(record.seo.reviewed_at, "2026-07-04T11:00:00Z");
+  assert.equal(record.workflow.availability_verified_at, "2026-07-04T10:30:00.000Z");
+  assert.equal(record.workflow.availability_verified_by, "listing_editor");
+  assert.equal(record.workflow.publish_approved, true);
+  assert.equal(record.workflow.publish_approved_by, "listing_editor");
+  assert.equal(record.workflow.publish_approved_at, "2026-07-04T11:00:00Z");
+  assert.equal(record.workflow.last_editor, "listing_editor");
   assert.equal(record.media_workflow.review_gated_assets, 0);
   assert.equal(record.media_workflow.media_reviewer, "media_editor");
 });
@@ -117,6 +176,60 @@ test("listing edits reject invalid numeric facts before persistence", () => {
       }),
     /listing_status must be/,
   );
+  assert.throws(
+    () =>
+      createListingEdit(seed, {
+        listingId: "MS-CRAWL-0001",
+        editor: "editor_bg",
+        patch: { seo_canonical: "https://other.example/listing" },
+      }),
+    /root-relative path/,
+  );
+  assert.throws(
+    () =>
+      createListingEdit(seed, {
+        listingId: "MS-CRAWL-0001",
+        editor: "editor_bg",
+        patch: { location_precision: "coordinates" },
+      }),
+    /location_precision must be/,
+  );
+});
+
+test("verification and publication workflow edits do not stale translated copy", () => {
+  const result = createListingEdit(
+    loadCmsSeed(),
+    {
+      listingId: "MS-CRAWL-0001",
+      editor: "availability_reviewer",
+      patch: { availability_verified_at: "2026-07-04T10:30:00Z", publish_approved: true },
+    },
+    [],
+    "2026-07-04T10:31:00Z",
+  );
+
+  assert.equal(result.edit.source_hash_before, result.edit.source_hash_after);
+  assert.equal(result.staleTranslations.length, 0);
+});
+
+test("source-language SEO remains review-gated until a human confirms it", () => {
+  const seed = loadCmsSeed();
+  const draft = createListingEdit(
+    seed,
+    {
+      listingId: "MS-CRAWL-0001",
+      editor: "seo_editor",
+      patch: { seo_title: "Unreviewed SEO draft", seo_review_confirmed: false },
+    },
+    [],
+    "2026-07-04T10:31:00Z",
+  );
+  const record = applyListingEdits(seed, [draft.edit]).records.find((candidate) => candidate.id === "MS-CRAWL-0001");
+
+  assert.equal(record.seo.title, "Unreviewed SEO draft");
+  assert.equal(record.seo.human_approved, false);
+  assert.equal(record.seo.review_status, "review_required");
+  assert.equal(record.seo.reviewer, null);
 });
 
 test("listing edits can persist media-only review rows", () => {

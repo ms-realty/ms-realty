@@ -420,7 +420,7 @@ function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
   return h(
     "dl",
     { "data-listing-facts": "true" },
-    ...["property_type", "offer_type", "bedrooms", "area_sqm"]
+    ...["property_type", "offer_type", "bedrooms", "area_sqm", "floor", "land_area_sqm", "condition", "location_precision"]
       .map((key) => [key, facts[key]])
       .filter(([, value]) => value !== null && value !== undefined && value !== "")
       .flatMap(([key, value]) => [
@@ -430,8 +430,12 @@ function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
           { key: `${key}-value` },
           key === "property_type" || key === "offer_type"
             ? localizedListingValue(localeCode, key, value)
-            : key === "area_sqm"
+            : key === "area_sqm" || key === "land_area_sqm"
               ? `${value} m²`
+              : key === "floor" && facts.total_floors !== null && facts.total_floors !== undefined && facts.total_floors !== ""
+                ? `${value}/${facts.total_floors}`
+                : key === "location_precision"
+                  ? uiCopyFor(localeCode).locationPrecisions?.[value] || humanizeIdentifier(value)
               : value,
         ),
       ]),
@@ -948,6 +952,12 @@ function channelIcon(href = "") {
   return "message-circle";
 }
 
+function listingVerificationDate(value, localeCode) {
+  if (!value || Number.isNaN(new Date(value).getTime())) return "";
+  const language = { bg: "bg-BG", ru: "ru-RU", de: "de-DE", nl: "nl-NL", el: "el-GR", he: "he-IL" }[localeCode] || "en-GB";
+  return new Intl.DateTimeFormat(language, { dateStyle: "medium", timeZone: "Europe/Sofia" }).format(new Date(value));
+}
+
 function ListingBody({ page }) {
   const labels = uiLabels(page);
   const ui = uiCopyFor(page.locale);
@@ -962,7 +972,11 @@ function ListingBody({ page }) {
   const sourceLocale = page.body.source.source_locale;
   const reviewedTranslation = page.locale !== sourceLocale && page.translation.human_approved === true;
   const translationLabel = reviewedTranslation ? labels.reviewedTranslation : null;
-  const hasDetailFacts = ["property_type", "offer_type", "bedrooms"].some((key) => facts[key] !== null && facts[key] !== undefined && facts[key] !== "");
+  const verificationDate = listingVerificationDate(page.body.verification?.availability_verified_at, page.locale);
+  const locationPrecision = ui.locationPrecisions?.[facts.location_precision] || humanizeIdentifier(facts.location_precision);
+  const hasDetailFacts = ["property_type", "offer_type", "bedrooms", "area_sqm", "floor", "land_area_sqm", "condition", "location_precision"].some(
+    (key) => facts[key] !== null && facts[key] !== undefined && facts[key] !== "",
+  );
 
   const crumbs = chrome
     ? h(
@@ -1052,6 +1066,8 @@ function ListingBody({ page }) {
       "data-review-status": page.body.actions.direct_contact.review_status,
       "data-listing-status": page.body.lifecycle?.status || "available",
       "data-active-in-search": page.body.lifecycle?.active_in_search ? "true" : "false",
+      "data-availability-verified": page.body.verification?.verified ? "true" : "false",
+      "data-location-precision": facts.location_precision || "approximate",
       "data-min-touch-target": "44",
     },
     h(
@@ -1073,12 +1089,21 @@ function ListingBody({ page }) {
           translationLabel
             ? h("p", { className: "mk-badge mk-badge--new mk-badge--sm ld-top__badge", "data-listing-verification": "translation" }, translationLabel)
             : null,
+          verificationDate
+            ? h(
+                "p",
+                { className: "mk-badge mk-badge--success mk-badge--sm ld-top__badge", "data-listing-verification": "availability" },
+                h(Icon, { name: "shield-check", size: 14 }),
+                ` ${ui.verifiedInventory} · `,
+                h("time", { dateTime: page.body.verification.availability_verified_at }, verificationDate),
+              )
+            : null,
           h("h1", null, page.body.h1),
           h(
             "div",
             { className: "ld-top__loc" },
             h(Icon, { name: "map-pin", size: 17 }),
-            ` ${[facts.location, localizedListingValue(page.locale, "property_type", facts.property_type)].filter(Boolean).join(" · ")}`,
+            ` ${[facts.location, locationPrecision, localizedListingValue(page.locale, "property_type", facts.property_type)].filter(Boolean).join(" · ")}`,
           ),
           h("div", { className: "ld-top__price", "data-listing-price-summary": "true" }, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
           h(
@@ -1167,6 +1192,7 @@ function ListingBody({ page }) {
             primaryActions,
             brokerChannels.length ? brokerContact : null,
             translationLabel ? h("div", { className: "ld-trust" }, h(Icon, { name: "shield-check", size: 16 }), ` ${translationLabel}`) : null,
+            verificationDate ? h("div", { className: "ld-trust", "data-availability-verification": "true" }, h(Icon, { name: "calendar-check", size: 16 }), ` ${ui.verifiedInventory}: ${verificationDate}`) : null,
             h("div", { className: "ld-aside__ref" }, h("span", null, facts.id), h("span", null, page.body.source.source_domain)),
           ),
         ),

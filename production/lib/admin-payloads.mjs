@@ -3,21 +3,8 @@ import { publicAdminPrincipal } from "./admin-auth.mjs";
 import { buildLeadSlaReport } from "./lead-sla.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { latestTourForListing } from "./tours.mjs";
-
-export const LISTING_EDIT_FIELDS = [
-  "title",
-  "h1",
-  "description",
-  "location",
-  "property_type",
-  "offer_type",
-  "listing_status",
-  "bedrooms",
-  "bedrooms_not_applicable",
-  "area_sqm",
-  "price_eur",
-  "price_on_request",
-];
+export { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
+import { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 
 function listingRecord(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);

@@ -5,7 +5,7 @@ import { contentHash, markStaleWhenSourceChanges } from "./translations.mjs";
 
 export const DEFAULT_LISTING_EDIT_LEDGER_PATH = fromRoot("production", "data", "listing-edits.jsonl");
 
-const EDITABLE_FACT_FIELDS = new Set([
+export const LISTING_FACT_EDIT_FIELDS = Object.freeze([
   "title",
   "h1",
   "description",
@@ -18,9 +18,57 @@ const EDITABLE_FACT_FIELDS = new Set([
   "area_sqm",
   "price_eur",
   "price_on_request",
+  "floor",
+  "total_floors",
+  "land_area_sqm",
+  "condition",
+  "location_precision",
 ]);
-const TEXT_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type"]);
-const BOOLEAN_FACT_FIELDS = new Set(["bedrooms_not_applicable", "price_on_request"]);
+export const LISTING_WORKFLOW_EDIT_FIELDS = Object.freeze([
+  "availability_verified_at",
+  "publish_approved",
+]);
+export const LISTING_SEO_EDIT_FIELDS = Object.freeze([
+  "seo_title",
+  "seo_description",
+  "seo_canonical",
+  "seo_og_title",
+  "seo_og_description",
+  "seo_robots",
+  "seo_review_confirmed",
+]);
+export const LISTING_EDIT_FIELDS = Object.freeze([
+  ...LISTING_FACT_EDIT_FIELDS,
+  ...LISTING_WORKFLOW_EDIT_FIELDS,
+  ...LISTING_SEO_EDIT_FIELDS,
+]);
+const EDITABLE_FIELDS = new Set(LISTING_EDIT_FIELDS);
+const TEXT_FIELDS = new Set([
+  "title",
+  "h1",
+  "description",
+  "location",
+  "property_type",
+  "offer_type",
+  "condition",
+  "seo_title",
+  "seo_description",
+  "seo_og_title",
+  "seo_og_description",
+]);
+const BOOLEAN_FIELDS = new Set(["bedrooms_not_applicable", "price_on_request", "publish_approved", "seo_review_confirmed"]);
+const SEO_FIELD_MAP = Object.freeze({
+  seo_title: "title",
+  seo_description: "description",
+  seo_canonical: "canonical_override",
+  seo_og_title: "og_title",
+  seo_og_description: "og_description",
+  seo_robots: "robots",
+});
+const FACT_FIELDS = new Set(LISTING_FACT_EDIT_FIELDS);
+const WORKFLOW_FIELDS = new Set(LISTING_WORKFLOW_EDIT_FIELDS);
+const LOCATION_PRECISIONS = new Set(["area_only", "approximate", "exact"]);
+const ROBOTS_VALUES = new Set(["index,follow", "noindex,follow"]);
 export const LISTING_STATUSES = Object.freeze(["available", "reserved", "sold", "rented", "archived"]);
 const LISTING_STATUS_SET = new Set(LISTING_STATUSES);
 const MAX_BULK_LISTING_EDITS = 100;
@@ -78,19 +126,49 @@ export function appendListingEdit(edit, { filePath = DEFAULT_LISTING_EDIT_LEDGER
 }
 
 export function applyListingEdits(seed, edits = []) {
-  const patches = new Map();
-  const mediaReviewers = new Map();
+  const editsByListing = new Map();
   for (const edit of edits) {
     if (!edit.listing_id) continue;
-    if (edit.patch) patches.set(edit.listing_id, { ...(patches.get(edit.listing_id) || {}), ...edit.patch });
-    if (edit.media_reviewer) mediaReviewers.set(edit.listing_id, edit.media_reviewer);
+    editsByListing.set(edit.listing_id, [...(editsByListing.get(edit.listing_id) || []), edit]);
   }
-  if (!patches.size && !mediaReviewers.size) return seed;
+  if (!editsByListing.size) return seed;
   return {
     ...seed,
     records: seed.records.map((record) => {
-      if (record.collection !== "listings" || (!patches.has(record.id) && !mediaReviewers.has(record.id))) return record;
-      const mediaReviewer = mediaReviewers.get(record.id);
+      const listingEdits = editsByListing.get(record.id);
+      if (record.collection !== "listings" || !listingEdits?.length) return record;
+      const facts = { ...record.facts };
+      const seo = { ...record.seo };
+      const workflow = { ...(record.workflow || {}) };
+      let mediaReviewer = null;
+      for (const edit of listingEdits) {
+        let seoChanged = false;
+        for (const [field, value] of Object.entries(edit.patch || {})) {
+          if (SEO_FIELD_MAP[field]) {
+            seo[SEO_FIELD_MAP[field]] = value;
+            seoChanged = true;
+          } else if (WORKFLOW_FIELDS.has(field)) workflow[field] = value;
+          else if (FACT_FIELDS.has(field)) facts[field] = value;
+        }
+        if (seoChanged || Object.hasOwn(edit.patch || {}, "seo_review_confirmed")) {
+          seo.human_approved = edit.patch.seo_review_confirmed === true;
+          seo.reviewer = seo.human_approved ? edit.editor || null : null;
+          seo.reviewed_at = seo.human_approved ? edit.edited_at || null : null;
+          seo.review_status = seo.human_approved ? "approved" : "review_required";
+        }
+        if (Object.keys(edit.patch || {}).length || edit.media_reviewer) {
+          if (edit.edited_at) workflow.last_edited_at = edit.edited_at;
+          if (edit.editor) workflow.last_editor = edit.editor;
+        }
+        if (Object.hasOwn(edit.patch || {}, "availability_verified_at")) {
+          workflow.availability_verified_by = edit.patch.availability_verified_at ? edit.editor || null : null;
+        }
+        if (Object.hasOwn(edit.patch || {}, "publish_approved")) {
+          workflow.publish_approved_by = edit.patch.publish_approved ? edit.editor || null : null;
+          workflow.publish_approved_at = edit.patch.publish_approved ? edit.edited_at || null : null;
+        }
+        if (edit.media_reviewer) mediaReviewer = edit.media_reviewer;
+      }
       const media = mediaReviewer
         ? (record.media || []).map((item) =>
             item.is_public ? item : { ...item, review_status: "reviewed_private", media_reviewer: mediaReviewer },
@@ -98,7 +176,9 @@ export function applyListingEdits(seed, edits = []) {
         : record.media;
       return {
         ...record,
-        facts: { ...record.facts, ...(patches.get(record.id) || {}) },
+        facts,
+        seo,
+        workflow,
         media,
         media_workflow: mediaReviewer
           ? { ...record.media_workflow, review_gated_assets: 0, media_reviewer: mediaReviewer }
@@ -113,20 +193,50 @@ function findListing(seed, listingId) {
 }
 
 function normalizePatch(patch = {}, { allowEmpty = false } = {}) {
-  const entries = Object.entries(patch).filter(([field]) => EDITABLE_FACT_FIELDS.has(field));
+  const entries = Object.entries(patch).filter(([field]) => EDITABLE_FIELDS.has(field));
   if (!entries.length && allowEmpty) return {};
-  if (!entries.length) throw new Error("Listing edit patch must include editable listing facts");
+  if (!entries.length) throw new Error("Listing edit patch must include editable listing fields");
   return Object.fromEntries(entries.map(([field, value]) => [field, normalizePatchValue(field, value)]));
 }
 
 function normalizePatchValue(field, value) {
-  if (TEXT_FACT_FIELDS.has(field)) return typeof value === "string" ? value.trim() : value;
+  if (TEXT_FIELDS.has(field)) {
+    if (typeof value !== "string") throw new Error(`${field} must be text`);
+    const normalized = value.trim();
+    const max = field === "description" ? 20000 : field.includes("description") ? 320 : 240;
+    if (normalized.length > max) throw new Error(`${field} must be ${max} characters or fewer`);
+    return normalized;
+  }
   if (field === "listing_status") {
     const status = String(value || "").trim().toLowerCase();
     if (!LISTING_STATUS_SET.has(status)) throw new Error("listing_status must be available, reserved, sold, rented, or archived");
     return status;
   }
-  if (BOOLEAN_FACT_FIELDS.has(field)) return value === true || value === "true" || value === "on" || value === "1";
+  if (BOOLEAN_FIELDS.has(field)) return value === true || value === "true" || value === "on" || value === "1";
+  if (field === "location_precision") {
+    const precision = String(value || "").trim().toLowerCase();
+    if (!LOCATION_PRECISIONS.has(precision)) throw new Error("location_precision must be area_only, approximate, or exact");
+    return precision;
+  }
+  if (field === "availability_verified_at") {
+    if (value === "" || value === null) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) throw new Error("availability_verified_at must be a valid date and time");
+    return date.toISOString();
+  }
+  if (field === "seo_canonical") {
+    const canonical = String(value || "").trim();
+    if (!canonical) return "";
+    if (!canonical.startsWith("/") || canonical.startsWith("//") || canonical.includes("?") || canonical.includes("#")) {
+      throw new Error("seo_canonical must be a root-relative path without query parameters or fragments");
+    }
+    return canonical;
+  }
+  if (field === "seo_robots") {
+    const robots = String(value || "").trim().toLowerCase();
+    if (!ROBOTS_VALUES.has(robots)) throw new Error("seo_robots must be index,follow or noindex,follow");
+    return robots;
+  }
   if (value === "" || value === null) return "";
   const number = Number(value);
   if (!Number.isFinite(number)) throw new Error(`${field} must be numeric`);
@@ -138,8 +248,12 @@ function normalizePatchValue(field, value) {
     if (number <= 0) throw new Error("area_sqm must be positive");
     return number;
   }
-  if (field === "bedrooms") {
-    if (!Number.isInteger(number) || number < 0) throw new Error("bedrooms must be a non-negative integer");
+  if (field === "land_area_sqm") {
+    if (number <= 0) throw new Error("land_area_sqm must be positive");
+    return number;
+  }
+  if (["bedrooms", "floor", "total_floors"].includes(field)) {
+    if (!Number.isInteger(number) || number < 0) throw new Error(`${field} must be a non-negative integer`);
     return number;
   }
   return value;
@@ -173,7 +287,10 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
   if (!record) throw new Error("Known listingId is required");
   if (!input.editor) throw new Error("Listing edit requires an editor");
   const patch = normalizePatch(input.patch, { allowEmpty: Boolean(input.mediaReviewer) });
-  const factsAfter = { ...record.facts, ...patch };
+  const translationSourcePatch = Object.fromEntries(
+    Object.entries(patch).filter(([field]) => LISTING_FACT_EDIT_FIELDS.includes(field) || Object.hasOwn(SEO_FIELD_MAP, field)),
+  );
+  const factsAfter = { ...record.facts, ...translationSourcePatch };
   const sourceHashBefore = contentHash(record.facts);
   const sourceHashAfter = contentHash(factsAfter);
   const staleTranslations = staleTranslationsForListing(record, sourceHashAfter, translationTasks);
