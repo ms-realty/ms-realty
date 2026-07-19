@@ -3,13 +3,22 @@ import path from "node:path";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed, searchRuntimeListings } from "./runtime.mjs";
 import { fromRoot } from "./paths.mjs";
+import {
+  derivePublicRequestStates,
+  readPublicRequestOutcomes,
+} from "./public-request-outcomes.mjs";
 import { readSavedSearches } from "./saved-searches.mjs";
 import { readTranslationLedger } from "./translation-ledger.mjs";
 
 export const DEFAULT_SAVED_SEARCH_ALERT_REPORT = fromRoot("production", "data", "saved-search-alert-report.json");
 
-function activeSavedSearches(rows) {
-  return rows.filter((row) => row.status === "active");
+function activeSavedSearches(rows, outcomes) {
+  const stateById = new Map(
+    derivePublicRequestStates(rows, [], outcomes)
+      .filter((state) => state.request_type === "saved_search")
+      .map((state) => [state.request_id, state]),
+  );
+  return rows.filter((row) => row.status === "active" && !["completed", "closed"].includes(stateById.get(row.id)?.status));
 }
 
 function ownerForSearch(row) {
@@ -81,16 +90,19 @@ export function buildSavedSearchAlertReport({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
   savedSearches = readSavedSearches(),
+  requestOutcomes = readPublicRequestOutcomes(),
   translationTasks = readTranslationLedger(),
   generatedAt = new Date().toISOString(),
 } = {}) {
-  const rows = activeSavedSearches(savedSearches).map((row) => evaluateSavedSearch(registry, seed, translationTasks, row));
+  const active = activeSavedSearches(savedSearches, requestOutcomes);
+  const rows = active.map((row) => evaluateSavedSearch(registry, seed, translationTasks, row));
 
   return {
     generated_at: generatedAt,
     summary: {
       saved_searches: savedSearches.length,
       active_saved_searches: rows.length,
+      suppressed_saved_searches: savedSearches.filter((row) => row.status === "active").length - active.length,
       new_match_alerts: rows.filter((row) => row.new_match_count > 0).length,
       price_change_alerts: rows.filter((row) => row.price_change_count > 0).length,
       no_new_matches: rows.filter((row) => row.status === "no_new_matches").length,
@@ -100,7 +112,7 @@ export function buildSavedSearchAlertReport({
 }
 
 export function assertSavedSearchAlertReport(report) {
-  if (!report.rows.length) throw new Error("Saved-search alert report must contain active saved searches");
+  if (!Array.isArray(report.rows)) throw new Error("Saved-search alert report must contain a rows array");
   if (report.summary.active_saved_searches !== report.rows.length) {
     throw new Error("Saved-search alert summary must match rows");
   }

@@ -56,6 +56,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     operatorId,
     viewingFollowUpQueue: providedViewingFollowUpQueue,
     sellerPipelineQueue: providedSellerPipelineQueue,
+    publicRequestQueue: providedPublicRequestQueue,
     ...payloadData
   } = data;
   const leadSla =
@@ -78,6 +79,24 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       states: [],
       summary: { total: data.sellerPipeline.length, open: 0, overdue: 0, completed: 0, closed_lost: 0 },
     };
+  const publicRequestQueue =
+    providedPublicRequestQueue ||
+    {
+      rows: [],
+      states: [],
+      contact_vault_status: "not_configured",
+      summary: {
+        total: (data.savedSearches?.length || 0) + (data.languageRequests?.length || 0),
+        open: 0,
+        overdue: 0,
+        contacted: 0,
+        completed: 0,
+        closed: 0,
+        saved_search_open: 0,
+        language_request_open: 0,
+        contacts_available: 0,
+      },
+    };
   return {
     kind: "admin_lead_inbox",
     status: 200,
@@ -97,6 +116,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     leadSla,
     viewingFollowUpQueue,
     sellerPipelineQueue,
+    publicRequestQueue,
     summary: {
       leads: data.leads.length,
       replies: data.replies.length,
@@ -107,6 +127,8 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       viewingFollowUpsOpen: viewingFollowUpQueue.summary.open,
       viewingFollowUpsOverdue: viewingFollowUpQueue.summary.overdue,
       savedSearches: data.savedSearches.length,
+      publicRequestsOpen: publicRequestQueue.summary.open,
+      publicRequestsOverdue: publicRequestQueue.summary.overdue,
       sellerPipeline: data.sellerPipeline.length,
       sellerPipelineOpen: sellerPipelineQueue.summary.open,
       sellerPipelineOverdue: sellerPipelineQueue.summary.overdue,

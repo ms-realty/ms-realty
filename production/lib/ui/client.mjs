@@ -502,6 +502,55 @@ export const ADMIN_APP_JS = `(function () {
         });
     });
   }
+  function setPublicRequestStatus(form, value, state) {
+    var status = form.querySelector("[data-public-request-status]");
+    if (!status) return;
+    status.textContent = value;
+    status.setAttribute("data-state", state);
+  }
+  function initPublicRequestOutcomeForms() {
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-public-request-outcome-form")) return;
+      event.preventDefault();
+      var submitter = event.submitter;
+      var buttons = form.querySelectorAll('[type="submit"]');
+      var saving = form.getAttribute("data-public-request-saving") || "Recording request outcome...";
+      var success = form.getAttribute("data-public-request-success") || "Request outcome recorded.";
+      var failed = form.getAttribute("data-public-request-failure") || "Could not record request outcome.";
+      var payload = tourPayload(form);
+      if (submitter && submitter.name && submitter.value) payload[submitter.name] = submitter.value;
+      for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setPublicRequestStatus(form, saving, "saving");
+      fetch(form.getAttribute("action"), {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(function (response) {
+          return response
+            .json()
+            .catch(function () { return {}; })
+            .then(function (result) {
+              if (!response.ok || !result.request) throw new Error(result.message || failed);
+              return result;
+            });
+        })
+        .then(function () {
+          setPublicRequestStatus(form, success, "success");
+          window.setTimeout(function () { window.location.reload(); }, 150);
+        })
+        .catch(function (error) {
+          setPublicRequestStatus(form, error.message || failed, "error");
+        })
+        .then(function () {
+          form.removeAttribute("aria-busy");
+          for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
+        });
+    });
+  }
   function setTranslationWorkflowStatus(form, value, state) {
     var status = form.querySelector("[data-translation-workflow-status]");
     if (!status) return;
@@ -633,6 +682,7 @@ export const ADMIN_APP_JS = `(function () {
   initTourEditor();
   initViewingFollowUpForms();
   initSellerPipelineOutcomeForms();
+  initPublicRequestOutcomeForms();
   initTranslationWorkflowForms();
   initReplyForms();
 })();`;

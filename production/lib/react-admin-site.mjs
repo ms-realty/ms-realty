@@ -87,7 +87,7 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Провереният отговор не можа да бъде поставен на опашка.",
     skipToContent: "Към съдържанието",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
+      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
@@ -97,7 +97,7 @@ const ADMIN_UI_COPY = {
       buyer: "Купувач", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
-      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
+      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", price_eur: "Цена в EUR", area_sqm: "Площ в m²", bedrooms: "Спални" },
@@ -175,7 +175,7 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Не удалось поставить проверенный ответ в очередь.",
     skipToContent: "К содержанию",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
+      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
@@ -185,7 +185,7 @@ const ADMIN_UI_COPY = {
       buyer: "Покупатель", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
-      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
+      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", price_eur: "Цена в EUR", area_sqm: "Площадь в m²", bedrooms: "Спальни" },
@@ -263,7 +263,7 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Could not queue the reviewed reply.",
     skipToContent: "Skip to content",
     auditActions: {
-      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
+      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
@@ -273,7 +273,7 @@ const ADMIN_UI_COPY = {
       buyer: "Buyer", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
-      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
+      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", price_eur: "Price in EUR", area_sqm: "Area in m²", bedrooms: "Bedrooms" },
@@ -426,6 +426,7 @@ function PageHeader({ title, subtitle, children }) {
 const NAV_ROUTES = [
   { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today" },
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox" },
+  { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings" },
   { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity" },
   { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager" },
@@ -454,6 +455,11 @@ function Sidebar({ page }) {
           ...route("lead_inbox"),
           label: screenLabel("crm", "lead_inbox", "Lead inbox"),
           badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
+        },
+        {
+          ...route("requests"),
+          label: screenLabel("crm", "requests", "Requests and alerts"),
+          badge: page.publicRequestQueue?.summary?.open,
         },
         { ...route("viewings"), label: screenLabel("crm", "viewings", "Viewings") },
         { ...route("activity"), label: screenLabel("crm", "activity", "Activity") },
@@ -590,11 +596,18 @@ function TodayBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const queue = leadQueueState(page);
-  const openTasks = (page.summary?.viewingFollowUpsOpen || 0) + (page.summary?.sellerPipelineOpen || 0);
+  const openTasks =
+    (page.summary?.viewingFollowUpsOpen || 0) +
+    (page.summary?.sellerPipelineOpen || 0) +
+    (page.summary?.publicRequestsOpen || 0);
+  const overdueTasks =
+    (page.summary?.viewingFollowUpsOverdue || 0) +
+    (page.summary?.sellerPipelineOverdue || 0) +
+    (page.summary?.publicRequestsOverdue || 0);
   const metrics = [
     [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
     [label(copy, "managerEscalations", "Manager escalations"), page.summary?.leadSlaManagerEscalations || 0, "triangle-alert", "brick"],
-    [label(copy, "overdueFollowUps", "Overdue follow-ups"), page.summary?.viewingFollowUpsOverdue || 0, "bell", "sun"],
+    [label(copy, "overdueFollowUps", "Overdue follow-ups"), overdueTasks, "bell", "sun"],
     [label(copy, "openTasks", "Open tasks"), openTasks, "check-circle-2", "success"],
   ];
   const title = label(copy, "today", "Today");
@@ -649,6 +662,37 @@ function TodayBody({ page }) {
       ),
       h(ViewingFollowUpQueue, { page, copy, ui }),
       h(SellerPipelineQueue, { page, copy, ui }),
+      h(
+        Panel,
+        {
+          title: label(copy, "publicRequests", "Website requests"),
+          action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/requests", page) }, label(copy, "requestsWorkspace", "Requests and alerts")),
+          "data-public-request-preview": "true",
+        },
+        page.publicRequestQueue?.rows?.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...page.publicRequestQueue.rows.slice(0, 3).map((row) =>
+                h(
+                  "li",
+                  { key: `${row.request_type}:${row.request_id}` },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("code", { className: "crm-mono" }, row.request_id),
+                    h("strong", null, row.request_type === "saved_search" ? label(copy, "savedSearchRequest", "Saved search") : label(copy, "languageRequest", "Language request")),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h(StatusPill, { tone: row.overdue ? "brick" : "sea" }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
+      ),
     ],
   });
 }
@@ -709,6 +753,180 @@ function ViewingsBody({ page }) {
           : h("p", { className: "adm-empty" }, label(copy, "noUpcomingViewings", "No upcoming viewings.")),
       ),
       h(ViewingFollowUpQueue, { page, copy, ui }),
+    ],
+  });
+}
+
+function publicRequestCriteria(row) {
+  const filters = Object.entries(row.filters || {})
+    .filter(([, value]) => value !== null && value !== undefined && value !== "" && value !== false)
+    .map(([key, value]) => `${key.replaceAll("_", " ")}: ${Array.isArray(value) ? value.join(", ") : value}`);
+  return [row.query ? `“${row.query}”` : null, ...filters].filter(Boolean).join(" · ") || "—";
+}
+
+function publicRequestTone(row) {
+  if (row.overdue) return "brick";
+  if (row.status === "contacted") return "sea";
+  if (row.status === "completed") return "success";
+  if (row.status === "closed") return "sand";
+  return "sun";
+}
+
+function PublicRequestOutcomeForm({ page, row, copy, terminal = false }) {
+  const formAttrs = {
+    method: "post",
+    action: "/api/admin/public-requests/outcome",
+    className: "adm-form adm-public-request-form",
+    "data-public-request-outcome-form": "true",
+    "data-public-request-saving": label(copy, "publicRequestSaving", "Recording request outcome…"),
+    "data-public-request-success": label(copy, "publicRequestSaved", "Request outcome recorded."),
+    "data-public-request-failure": label(copy, "publicRequestSaveFailed", "Could not record request outcome."),
+  };
+  return h(
+    "form",
+    formAttrs,
+    h("input", { type: "hidden", name: "requestType", value: row.request_type }),
+    h("input", { type: "hidden", name: "requestId", value: row.request_id }),
+    h("input", { type: "hidden", name: "actor", value: currentOperatorId(page, row.owner) }),
+    h(
+      "label",
+      null,
+      label(copy, "nextFollowUp", "Next follow-up"),
+      h("input", { type: "datetime-local", name: "nextFollowUpAt", min: datetimeLocalValue(new Date().toISOString()) }),
+    ),
+    terminal
+      ? null
+      : h(
+          "label",
+          null,
+          label(copy, "publicRequestNote", "Outcome note"),
+          h("textarea", { name: "note", rows: 3, maxLength: 2000, required: true }),
+        ),
+    h(
+      "div",
+      { className: "adm-form__actions" },
+      terminal
+        ? h("button", { type: "submit", name: "action", value: "reopen", formNoValidate: true, className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "reopenRequest", "Reopen request"))
+        : [
+            h("button", { key: "contacted", type: "submit", name: "action", value: "contacted", formNoValidate: true, className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "markContacted", "Mark contacted")),
+            h("button", { key: "complete", type: "submit", name: "action", value: "complete", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "complete", "Complete")),
+            h("button", { key: "close", type: "submit", name: "action", value: "close", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "closeRequest", "Close request")),
+            h("button", { key: "note", type: "submit", name: "action", value: "note", className: "mk-btn mk-btn--ghost mk-btn--sm" }, label(copy, "noteOnly", "Note only")),
+          ],
+    ),
+    h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-public-request-status": "true" }),
+  );
+}
+
+function PublicRequestCard({ page, row, copy, ui, terminal = false }) {
+  const requestType =
+    row.request_type === "saved_search"
+      ? label(copy, "savedSearchRequest", "Saved search")
+      : label(copy, "languageRequest", "Language request");
+  const contact = leadContactActions(row, ui);
+  const unavailable =
+    row.contact_state === "locked"
+      ? label(copy, "contactVaultLocked", "The contact vault could not be unlocked. Check the environment key.")
+      : label(copy, "noPrivateContact", "No private contact is available for this request.");
+  return h(
+    "li",
+    {
+      className: "adm-public-request",
+      "data-public-request": row.request_id,
+      "data-public-request-type": row.request_type,
+      "data-public-request-status": row.status,
+      "data-overdue": row.overdue ? "true" : "false",
+    },
+    h(
+      "div",
+      { className: "adm-public-request__summary" },
+      h(
+        "div",
+        { className: "adm-public-request__heading" },
+        h("div", null, h("code", { className: "crm-mono" }, row.request_id), h("h3", null, requestType)),
+        h(StatusPill, { tone: publicRequestTone(row) }, row.overdue ? statusText(ui, "overdue") : statusText(ui, row.status)),
+      ),
+      h(
+        "dl",
+        { className: "adm-public-request__facts" },
+        h("div", null, h("dt", null, label(copy, "requestedLocale", "Requested locale")), h("dd", null, String(row.requested_locale || row.locale || "—").toUpperCase())),
+        row.request_type === "saved_search"
+          ? h("div", null, h("dt", null, label(copy, "searchCriteria", "Search criteria")), h("dd", null, publicRequestCriteria(row)))
+          : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || "—")),
+        row.request_type === "saved_search"
+          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency || "—"))
+          : null,
+        row.request_type === "saved_search"
+          ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
+          : null,
+        h(
+          "div",
+          null,
+          h("dt", null, label(copy, "nextFollowUp", "Next follow-up")),
+          h("dd", null, row.next_follow_up_at ? h("time", { dateTime: row.next_follow_up_at }, formatAdminDateTime(row.next_follow_up_at, page.workspace.locale)) : "—"),
+        ),
+      ),
+      h(
+        "div",
+        { className: "adm-public-request__contact", "data-private-request-contact": "true" },
+        h("strong", null, label(copy, "customerContact", "Customer contact")),
+        contact || h("p", { className: "adm-empty" }, unavailable),
+        row.message
+          ? h("div", { className: "adm-public-request__message", "data-private-request-message": "true" }, h("small", null, label(copy, "privateMessage", "Private message")), h("p", null, row.message))
+          : null,
+      ),
+    ),
+    h(
+      "details",
+      { className: "adm-public-request__outcome" },
+      h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: terminal ? "arrow-left" : "check-circle-2", size: 16 }), label(copy, terminal ? "reopenRequest" : "recordRequestOutcome", terminal ? "Reopen request" : "Record outcome")),
+      h(PublicRequestOutcomeForm, { page, row, copy, terminal }),
+    ),
+  );
+}
+
+function PublicRequestsBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const queue = page.publicRequestQueue || { rows: [], states: [], summary: {} };
+  const terminal = (queue.states || []).filter((row) => row.status === "completed" || row.status === "closed").toReversed();
+  const title = label(copy, "requestsWorkspace", "Requests and alerts");
+  const metrics = [
+    [label(copy, "openTasks", "Open tasks"), queue.summary?.open || 0, "bell", "sun"],
+    [statusText(ui, "overdue"), queue.summary?.overdue || 0, "triangle-alert", "brick"],
+    [label(copy, "savedSearches", "Saved searches"), queue.summary?.saved_search_open || 0, "star", "sea"],
+    [label(copy, "languageRequests", "Language requests"), queue.summary?.language_request_open || 0, "languages", "sand"],
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-requests",
+      "data-react-admin-ui": "requests",
+      "data-admin-workbench": "crm",
+      "data-private-contact-vault": queue.contact_vault_status || "not_configured",
+      "data-admin-locale": page.workspace.locale,
+      "data-task-led": "true",
+    },
+    children: [
+      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(StatGrid, { metrics }),
+      queue.contact_vault_status === "locked"
+        ? h("p", { className: "adm-inline-alert", role: "alert" }, label(copy, "contactVaultLocked", "The contact vault could not be unlocked. Check the environment key."))
+        : null,
+      h(
+        Panel,
+        { title: label(copy, "publicRequests", "Website requests"), "data-public-request-queue": "true" },
+        queue.rows.length
+          ? h("ul", { className: "adm-public-request-list" }, ...queue.rows.map((row) => h(PublicRequestCard, { key: `${row.request_type}:${row.request_id}`, page, row, copy, ui })))
+          : h("p", { className: "adm-empty" }, label(copy, "noOpenRequests", "No open website requests.")),
+      ),
+      terminal.length
+        ? h(
+            Panel,
+            { title: statusText(ui, "completed"), "data-public-request-history": "true" },
+            h("ul", { className: "adm-public-request-list" }, ...terminal.slice(0, 20).map((row) => h(PublicRequestCard, { key: `${row.request_type}:${row.request_id}`, page, row, copy, ui, terminal: true }))),
+          )
+        : null,
     ],
   });
 }
@@ -1004,22 +1222,6 @@ function LeadInboxBody({ page }) {
       ),
       h(ViewingFollowUpQueue, { page, copy, ui }),
       h(SellerPipelineQueue, { page, copy, ui }),
-      h(
-        Panel,
-        { title: label(copy, "languageRequests", "Language requests"), "aria-label": label(copy, "languageRequests", "Language requests") },
-        h(
-          "ul",
-          { className: "adm-lang-requests" },
-          ...page.languageRequests.map((request) =>
-            h(
-              "li",
-              { key: `${request.requested_locale}-${request.fallback_locale}` },
-              h(Icon, { name: "languages", size: 16 }),
-              h("span", { className: "crm-lang" }, `${request.requested_locale} -> ${request.fallback_locale}`),
-            ),
-          ),
-        ),
-      ),
     ],
   });
 }
@@ -2082,6 +2284,7 @@ function MigrationReviewBody({ page }) {
 export function renderReactAdminBody(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
+  if (page.kind === "admin_requests") return renderStaticElement(h(PublicRequestsBody, { page }));
   if (page.kind === "admin_viewings") return renderStaticElement(h(ViewingsBody, { page }));
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
   if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));

@@ -17,6 +17,7 @@ function savedSearch(matchCount) {
     query: "Sandanski",
     filters: { property_type: "apartment" },
     contact: { name: "Noa Levi" },
+    saved_at: "2026-07-04T12:00:00.000Z",
     match_count: matchCount,
     alert_frequency: "weekly",
     status: "active",
@@ -44,6 +45,7 @@ test("saved-search alert report creates open tasks when current matches increase
     registry,
     seed,
     savedSearches: [savedSearch(0)],
+    requestOutcomes: [],
     translationTasks: [],
     generatedAt: "2026-07-05T00:00:00Z",
   });
@@ -61,6 +63,7 @@ test("saved-search alert report does not duplicate alerts when there are no new 
     registry,
     seed,
     savedSearches: [savedSearch(999)],
+    requestOutcomes: [],
     translationTasks: [],
     generatedAt: "2026-07-05T00:00:00Z",
   });
@@ -75,6 +78,7 @@ test("saved-search alert report creates open tasks when tracked prices change", 
     registry,
     seed,
     savedSearches: [savedSearchWithOldPrice()],
+    requestOutcomes: [],
     translationTasks: [],
     generatedAt: "2026-07-05T00:00:00Z",
   });
@@ -108,6 +112,7 @@ test("saved-search price monitoring covers matches beyond the first result page"
         price_snapshot: { [card.id]: Number(card.price_eur) + 5000 },
       },
     ],
+    requestOutcomes: [],
     translationTasks: [],
     generatedAt: "2026-07-05T00:00:00Z",
   });
@@ -115,6 +120,33 @@ test("saved-search price monitoring covers matches beyond the first result page"
   assert.equal(report.rows[0].new_match_count, 0);
   assert.equal(report.rows[0].price_change_count, 1);
   assert.equal(report.rows[0].price_changes[0].listing_id, card.id);
+});
+
+test("completed saved searches stop producing customer alert work", () => {
+  const report = buildSavedSearchAlertReport({
+    registry,
+    seed,
+    savedSearches: [savedSearch(0)],
+    requestOutcomes: [
+      {
+        id: "outcome-complete-search",
+        request_type: "saved_search",
+        request_id: "saved-search-low-watermark",
+        actor: "broker_en",
+        action: "complete",
+        note: "Customer no longer wants alerts.",
+        next_follow_up_at: null,
+        recorded_at: "2026-07-05T00:00:00.000Z",
+      },
+    ],
+    translationTasks: [],
+    generatedAt: "2026-07-06T00:00:00Z",
+  });
+
+  assert.equal(assertSavedSearchAlertReport(report), true);
+  assert.equal(report.summary.active_saved_searches, 0);
+  assert.equal(report.summary.suppressed_saved_searches, 1);
+  assert.deepEqual(report.rows, []);
 });
 
 test("generated saved-search alert report is valid when present", () => {

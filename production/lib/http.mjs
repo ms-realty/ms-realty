@@ -57,7 +57,12 @@ import {
   privacySafeSavedSearch,
   readSavedSearches,
 } from "./saved-searches.mjs";
-import { appendPublicContact } from "./public-contact-vault.mjs";
+import { appendPublicContact, readPublicContacts } from "./public-contact-vault.mjs";
+import {
+  appendPublicRequestOutcome,
+  buildPublicRequestQueue,
+  readPublicRequestOutcomes,
+} from "./public-request-outcomes.mjs";
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendSellerPipelineOutcome, buildSellerPipelineQueue, readSellerPipelineOutcomes } from "./seller-pipeline-outcomes.mjs";
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
@@ -330,6 +335,7 @@ export function createHttpApp({
   viewingLedgerPath = null,
   viewingFollowUpLedgerPath = null,
   savedSearchLedgerPath = null,
+  publicRequestOutcomeLedgerPath = null,
   sellerPipelinePath = null,
   sellerPipelineOutcomeLedgerPath = null,
   dealLedgerPath = null,
@@ -358,6 +364,7 @@ export function createHttpApp({
   bookedAt,
   viewingFollowUpAt,
   savedAt,
+  publicRequestOutcomeAt,
   sellerPipelineCreatedAt,
   sellerPipelineOutcomeAt,
   dealClosedAt,
@@ -396,6 +403,62 @@ export function createHttpApp({
       sellerPipelineQueue: buildSellerPipelineQueue(sellerPipeline, readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined), {
         now: sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString(),
       }),
+    };
+  };
+  const currentPublicRequestQueue = () => {
+    let contactMaps = {};
+    let contactVaultStatus = "not_configured";
+    if (publicContactVaultPath) {
+      try {
+        contactMaps = {
+          saved_search: readPublicContacts(publicContactVaultPath, publicContactKey, "saved_search"),
+          language_request: readPublicContacts(publicContactVaultPath, publicContactKey, "language_request"),
+        };
+        contactVaultStatus = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length
+          ? "available"
+          : "empty";
+      } catch {
+        contactMaps = {};
+        contactVaultStatus = "locked";
+      }
+    }
+    return buildPublicRequestQueue({
+      savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
+      languageRequests: readLanguageRequests(languageRequestPath || undefined),
+      outcomes: readPublicRequestOutcomes(publicRequestOutcomeLedgerPath || undefined),
+      contactMaps,
+      contactVaultStatus,
+      now: publicRequestOutcomeAt || reviewedAt || receivedAt || new Date().toISOString(),
+    });
+  };
+  const currentAdminLeadPayload = (requestedLocale, operatorId = null) =>
+    renderAdminLeadsPayload(activeRegistry, requestedLocale, {
+      leads: currentLeads(),
+      replies: readReplyOutbox(replyOutboxPath || undefined),
+      languageRequests: readLanguageRequests(languageRequestPath || undefined),
+      translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+      listingEdits: readListingEdits(listingEditLedgerPath || undefined),
+      leadSlaGeneratedAt,
+      operatorId,
+      ...currentViewingData(),
+      savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
+      publicRequestQueue: currentPublicRequestQueue(),
+      ...currentSellerPipelineData(),
+      deals: readDeals(dealLedgerPath || undefined),
+      brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
+    });
+  const currentRequestsPayload = (requestedLocale, operatorId = null) => {
+    const payload = currentAdminLeadPayload(requestedLocale, operatorId);
+    return {
+      ...payload,
+      kind: "admin_requests",
+      path: "/admin/requests",
+      canonical: "/admin/requests",
+      metadata: {
+        title: `${payload.workspace.copy.requestsWorkspace} | MS Realty`,
+        description: payload.workspace.copy.requestsDescription,
+        robots: "noindex,nofollow",
+      },
     };
   };
   const currentSeoEvidence = () =>
@@ -665,20 +728,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
-      const payload = renderAdminLeadsPayload(activeRegistry, requestedLocale, {
-        leads: currentLeads(),
-        replies: readReplyOutbox(replyOutboxPath || undefined),
-        languageRequests: readLanguageRequests(languageRequestPath || undefined),
-        translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
-        listingEdits: readListingEdits(listingEditLedgerPath || undefined),
-        leadSlaGeneratedAt,
-        operatorId: principal?.id || null,
-        ...currentViewingData(),
-        savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
-        ...currentSellerPipelineData(),
-        deals: readDeals(dealLedgerPath || undefined),
-        brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
-      });
+      const payload = currentAdminLeadPayload(requestedLocale, principal?.id || null);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
@@ -687,24 +737,18 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        adminHtml(
-          renderAdminLeadsPayload(activeRegistry, url.searchParams.get("locale") || "en", {
-            leads: currentLeads(),
-            replies: readReplyOutbox(replyOutboxPath || undefined),
-            languageRequests: readLanguageRequests(languageRequestPath || undefined),
-            translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
-            listingEdits: readListingEdits(listingEditLedgerPath || undefined),
-            leadSlaGeneratedAt,
-            operatorId: principal?.id || null,
-            ...currentViewingData(),
-            savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
-            ...currentSellerPipelineData(),
-            deals: readDeals(dealLedgerPath || undefined),
-            brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
-          }),
-        ),
+        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal?.id || null)),
         "text/html; charset=utf-8",
       );
+    }
+
+    if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
@@ -1482,6 +1526,48 @@ export function createHttpApp({
                 action: result.outcome.action,
                 stage: result.seller_pipeline.stage,
                 due_at: result.seller_pipeline.next_task?.due_at || null,
+              },
+            },
+            recordedAt,
+          );
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/public-requests/outcome") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = publicRequestOutcomeAt || reviewedAt || receivedAt || new Date().toISOString();
+        const result = appendPublicRequestOutcome(
+          {
+            savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
+            languageRequests: readLanguageRequests(languageRequestPath || undefined),
+          },
+          bindAuthenticatedOperator(parseBody(request), principal),
+          { filePath: publicRequestOutcomeLedgerPath || undefined, recordedAt },
+        );
+        const existingAudit = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "public_request_outcome_recorded" && row.object_id === result.outcome.id,
+            )
+          : false;
+        if (!existingAudit) {
+          recordAudit(
+            {
+              action: "public_request_outcome_recorded",
+              actor: result.outcome.actor,
+              objectType: "public_request_outcome",
+              objectId: result.outcome.id,
+              locale: result.request.requested_locale,
+              metadata: {
+                request_type: result.request.request_type,
+                request_id: result.request.request_id,
+                action: result.outcome.action,
+                status: result.request.status,
+                next_follow_up_at: result.request.next_follow_up_at,
               },
             },
             recordedAt,

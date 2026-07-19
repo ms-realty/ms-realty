@@ -229,6 +229,8 @@ Useful operator endpoints:
 - `GET /api/admin/live-service-report-template` and `POST /api/admin/live-service-reports/import` handle validated live report files.
 - `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
 - `GET /api/admin/payload-collections` returns Payload-compatible collection configs generated from that manifest.
+- `GET /admin/requests?locale=bg|ru|en` and `GET /api/admin/requests` return the broker queue for saved-search alerts and language requests. Private contact values are decrypted only for this authenticated, `no-store` response.
+- `POST /api/admin/public-requests/outcome` records an attributed contacted, complete, close, reopen, or note transition and appends a privacy-safe audit row. Completed and closed saved searches are suppressed from future alert reports.
 - `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
 - `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest; launch readiness still blocks until the Payload runtime dependency and config exist.
 
@@ -256,6 +258,9 @@ Saved-search and language-notification contacts use the same key by default and
 `MS_REALTY_PUBLIC_CONTACT_VAULT_PATH`; set `MS_REALTY_PUBLIC_CONTACT_KEY` when
 those records must use a separately rotated secret. Their workflow ledgers keep
 only contact references and delivery routing, never raw contact values.
+Set `MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH` when the append-only request
+outcome ledger is mounted outside the repo. `MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT`
+is a deterministic test/smoke timestamp only; production should use wall-clock time.
 Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers
 need to live outside `production/data/`.
 Set `MS_REALTY_LOCALE_REGISTRY_PATH` when admin-added locales must persist
@@ -309,6 +314,7 @@ Generated production data:
 - `production/data/deals.jsonl`
 - `production/data/saved-searches.jsonl`
 - `production/data/saved-search-alert-report.json`
+- `production/data/public-request-outcomes.jsonl`
 - `production/data/seller-pipeline.jsonl`
 - `production/data/broker-contacts.jsonl`
 - `production/data/tour-approvals.jsonl`
@@ -334,5 +340,7 @@ Generated production data:
 - `production/data/translation-coverage-report.json`
 - `production/data/listing-edits.jsonl`
 
-The next production slice can continue React visual polish or add the Payload runtime app
-without re-deciding URL, locale, AI, or lead-language policy.
+The local runtime remains a launch-review environment until the external evidence gates
+and operator approvals in `production/data/launch-readiness.json` are complete. Local
+workflow coverage must not be presented as live Payload, search-engine, Hermes-worker,
+Search Console, Yandex Webmaster, backlink, or human listing-review proof.

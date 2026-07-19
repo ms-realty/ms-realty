@@ -47,6 +47,13 @@ import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
+import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, readPublicContacts } from "./public-contact-vault.mjs";
+import {
+  DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
+  appendPublicRequestOutcome,
+  buildPublicRequestQueue,
+  readPublicRequestOutcomes,
+} from "./public-request-outcomes.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -132,6 +139,11 @@ export function appAdminConfigFromEnv(env = process.env) {
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
+    publicContactVaultPath:
+      env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
+    publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
+    publicRequestOutcomeLedgerPath:
+      env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
     searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
     searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
@@ -161,6 +173,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     dealClosedAt: env.MS_REALTY_DEAL_CLOSED_AT,
     editedAt: env.MS_REALTY_EDITED_AT,
     reviewedAt: env.MS_REALTY_REVIEWED_AT,
+    publicRequestOutcomeAt: env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT,
   };
 }
 
@@ -358,6 +371,32 @@ function recordAudit(input, config, recordedAt = auditRecordedAt(config)) {
   });
 }
 
+function publicRequestContactData(config) {
+  if (!config.publicContactVaultPath) {
+    return { contactMaps: {}, contactVaultStatus: "not_configured" };
+  }
+  try {
+    const contactMaps = {
+      saved_search: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "saved_search"),
+      language_request: readPublicContacts(config.publicContactVaultPath, config.publicContactKey, "language_request"),
+    };
+    const count = [...contactMaps.saved_search.values(), ...contactMaps.language_request.values()].length;
+    return { contactMaps, contactVaultStatus: count ? "available" : "empty" };
+  } catch {
+    return { contactMaps: {}, contactVaultStatus: "locked" };
+  }
+}
+
+function currentPublicRequestQueue(config) {
+  return buildPublicRequestQueue({
+    savedSearches: readSavedSearches(config.savedSearchLedgerPath),
+    languageRequests: readLanguageRequests(config.languageRequestPath),
+    outcomes: readPublicRequestOutcomes(config.publicRequestOutcomeLedgerPath),
+    ...publicRequestContactData(config),
+    now: config.publicRequestOutcomeAt || config.reviewedAt || new Date().toISOString(),
+  });
+}
+
 function leadInboxPayload(registry, url, config) {
   const viewings = readViewings(config.viewingLedgerPath);
   const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
@@ -379,12 +418,22 @@ function leadInboxPayload(registry, url, config) {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
     }),
     savedSearches: readSavedSearches(config.savedSearchLedgerPath),
+    publicRequestQueue: currentPublicRequestQueue(config),
     sellerPipeline,
     sellerPipelineQueue: buildSellerPipelineQueue(sellerPipeline, sellerPipelineOutcomes, {
       now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
     }),
     deals: readDeals(config.dealLedgerPath),
     brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
+  });
+}
+
+function requestsPayload(registry, url, config) {
+  return operationalQueuePayload(registry, url, config, {
+    kind: "admin_requests",
+    path: "/admin/requests",
+    titleKey: "requestsWorkspace",
+    descriptionKey: "requestsDescription",
   });
 }
 
@@ -1038,6 +1087,43 @@ function appendSellerPipelineOutcomeEntry(input, config) {
   return result;
 }
 
+function appendPublicRequestOutcomeEntry(input, config) {
+  const recordedAt = config.publicRequestOutcomeAt || config.reviewedAt || new Date().toISOString();
+  const result = appendPublicRequestOutcome(
+    {
+      savedSearches: readSavedSearches(config.savedSearchLedgerPath),
+      languageRequests: readLanguageRequests(config.languageRequestPath),
+    },
+    bindAuthenticatedOperator(input, config.adminPrincipal),
+    { filePath: config.publicRequestOutcomeLedgerPath, recordedAt },
+  );
+  if (
+    !readAuditLog(config.auditLogPath).some(
+      (row) => row.action === "public_request_outcome_recorded" && row.object_id === result.outcome.id,
+    )
+  ) {
+    recordAudit(
+      {
+        action: "public_request_outcome_recorded",
+        actor: result.outcome.actor,
+        objectType: "public_request_outcome",
+        objectId: result.outcome.id,
+        locale: result.request.requested_locale,
+        metadata: {
+          request_type: result.request.request_type,
+          request_id: result.request.request_id,
+          action: result.outcome.action,
+          status: result.request.status,
+          next_follow_up_at: result.request.next_follow_up_at,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return result;
+}
+
 function appendDealClose(input, config) {
   const deal = appendClosedDeal(readLeadLedger(config.leadLedgerPath), input, {
     filePath: config.dealLedgerPath,
@@ -1453,6 +1539,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(viewingsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/viewings") return jsonResponse(200, viewingsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/activity") return htmlResponse(activityPayload(registry, url, config));
@@ -1620,6 +1708,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seller-pipeline/outcome") {
       const result = appendSellerPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/public-requests/outcome") {
+      const result = appendPublicRequestOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
