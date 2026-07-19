@@ -1021,6 +1021,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraftText"'), true);
   assert.equal(smoke.adminHtml.body.includes('data-communication-thread='), true);
   assert.equal(smoke.adminHtml.body.includes('data-communication-template-select="true"'), true);
+  assert.equal(smoke.adminHtml.body.includes('data-lead-brief='), true);
+  assert.equal(smoke.adminHtml.body.includes('data-decision-source="deterministic_workflow"'), true);
+  assert.equal(smoke.adminHtml.body.includes('data-next-best-action="manager_review_and_reply"'), true);
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraft" value="true"'), false);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");
   assert.equal(smoke.adminHtml.body.includes("data-interface-locales=\"bg,ru,en\""), true);

@@ -2614,6 +2614,40 @@ function ManualLeadForm({ page }) {
   );
 }
 
+function LeadBrief({ brief, copy, ui }) {
+  if (!brief) return null;
+  const tone = brief.priority === "critical" ? "brick" : brief.priority === "urgent" ? "sun" : brief.readiness_band === "ready" ? "success" : "sea";
+  const readinessLabel = label(copy, `readiness_${brief.readiness_band}`, brief.readiness_band);
+  const actionLabel = label(copy, brief.next_action.code, statusText(ui, brief.next_action.code));
+  return h(
+    "section",
+    {
+      className: "adm-lead-brief",
+      "data-lead-brief": brief.lead_id,
+      "data-readiness-band": brief.readiness_band,
+      "data-next-best-action": brief.next_action.code,
+      "data-decision-source": brief.decision_source,
+    },
+    h(
+      "div",
+      { className: "adm-lead-brief__score" },
+      h("span", null, label(copy, "leadReadiness", "Readiness")),
+      h("strong", null, `${brief.readiness_score}%`),
+      h("progress", { value: brief.readiness_score, max: 100, "aria-label": `${label(copy, "leadReadiness", "Readiness")}: ${brief.readiness_score}%` }),
+      h(StatusPill, { tone }, readinessLabel),
+    ),
+    h(
+      "div",
+      { className: "adm-lead-brief__action" },
+      h("span", null, label(copy, "nextBestAction", "Next best action")),
+      h("strong", null, actionLabel),
+      brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at)) : null,
+      brief.match_count ? h("small", null, `${brief.match_count} ${label(copy, "inventoryMatches", "inventory matches")}`) : null,
+    ),
+    h("small", { className: "adm-lead-brief__guardrail" }, label(copy, "deterministicDecision", "Calculated from workflow evidence; Hermes may only suggest a draft.")),
+  );
+}
+
 function LeadInboxBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -2621,6 +2655,8 @@ function LeadInboxBody({ page }) {
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
   const communicationByLeadId = new Map((page.communicationThreads || []).map((thread) => [thread.lead_id, thread]));
+  const briefByLeadId = new Map((page.leadBriefs?.rows || []).map((brief) => [brief.lead_id, brief]));
+  const briefOrder = new Map((page.leadBriefs?.rows || []).map((brief, index) => [brief.lead_id, index]));
   const repliedLeadIds = new Set(
     (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
   );
@@ -2635,7 +2671,10 @@ function LeadInboxBody({ page }) {
     if (status === "reminder_required") return 3;
     return 4;
   };
-  const leads = [...page.leads].sort((left, right) => leadPriority(left) - leadPriority(right));
+  const leads = [...page.leads].sort((left, right) => {
+    const briefDifference = (briefOrder.get(left.lead_id) ?? Number.MAX_SAFE_INTEGER) - (briefOrder.get(right.lead_id) ?? Number.MAX_SAFE_INTEGER);
+    return briefDifference || leadPriority(left) - leadPriority(right);
+  });
   const needsReply = leads.filter((lead) => !repliedLeadIds.has(lead.lead_id));
   const metrics = [
     [label(copy, "needsReply", "Needs reply"), needsReply.length, "messages-square", "sea"],
@@ -2742,6 +2781,7 @@ function LeadInboxBody({ page }) {
                           ? h("small", { className: "adm-lead-context" }, `${label(copy, "missingFields", "Missing fields")}: ${intake.missing_fields.map((field) => statusText(ui, field)).join(", ")}`)
                           : null,
                       ),
+                      h(LeadBrief, { brief: briefByLeadId.get(lead.lead_id), copy, ui }),
                       leadContactActions(lead, ui),
                       lead.duplicate_status === "possible_duplicate"
                         ? h(

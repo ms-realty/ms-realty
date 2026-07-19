@@ -5,6 +5,7 @@ import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { latestTourForListing } from "./tours.mjs";
 import { mediaAssetId } from "./media-reviews.mjs";
 import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
+import { buildLeadBriefs } from "./lead-briefs.mjs";
 export { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 import { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 
@@ -461,6 +462,16 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
         contacts_available: 0,
       },
     };
+  const leadBriefs =
+    data.leadBriefs ||
+    buildLeadBriefs({
+      leads: data.leads,
+      leadSla,
+      leadMatching: data.leadMatching,
+      leadPipelineQueue,
+      replyDeliveryQueue,
+      communicationThreads: data.communicationThreads,
+    });
   return {
     kind: "admin_lead_inbox",
     status: 200,
@@ -487,6 +498,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     viewingFollowUpQueue,
     sellerPipelineQueue,
     publicRequestQueue,
+    leadBriefs,
     summary: {
       leads: data.leads.length,
       replies: data.replies.length,
@@ -500,6 +512,8 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       leadPipelineQualified: leadPipelineQueue.summary.qualified,
       leadsWithInventoryMatches: data.leadMatching?.summary?.leads_with_matches || 0,
       inventoryMatchTasks: data.leadMatching?.summary?.open_broker_tasks || 0,
+      criticalLeadActions: leadBriefs.summary.critical,
+      readyLeadBriefs: leadBriefs.summary.ready,
       leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
       leadSlaReminders: leadSla.summary.reminder_required,
       languageRequests: data.languageRequests.length,
