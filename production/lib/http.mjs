@@ -14,6 +14,7 @@ import {
   LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
   renderAdminContactsPayload,
+  renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
   renderAdminListingManagerPayload,
@@ -21,6 +22,7 @@ import {
   renderAdminOperationalQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
+import { appendDocumentChecklistOutcome, buildDocumentChecklistQueue, readDocumentChecklistOutcomes } from "./document-checklists.mjs";
 import { appendAccountContactLink, appendAccountCreation, deriveAccounts, readAccountLedger } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
 import {
@@ -409,6 +411,7 @@ export function createHttpApp({
   sellerPipelinePath = null,
   sellerPipelineOutcomeLedgerPath = null,
   dealLedgerPath = null,
+  documentChecklistLedgerPath = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
@@ -578,6 +581,15 @@ export function createHttpApp({
       operatorId,
     });
   };
+  const currentDocumentChecklistPayload = (requestedLocale, operatorId = null) =>
+    renderAdminDocumentChecklistPayload(
+      activeRegistry,
+      requestedLocale,
+      buildDocumentChecklistQueue(currentLeads(), readDocumentChecklistOutcomes(documentChecklistLedgerPath || undefined), {
+        locale: requestedLocale,
+      }),
+      operatorId,
+    );
   const currentOperationsReport = () => {
     const generatedAt = reviewedAt || editedAt || receivedAt || new Date().toISOString();
     const reportSeed = currentSeed();
@@ -964,6 +976,15 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/documents", "/admin/documents"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal);
+      if (url.pathname === "/admin/documents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
@@ -2064,6 +2085,35 @@ export function createHttpApp({
             objectType: "account_contact",
             objectId: result.id,
             metadata: { account_id: result.account_id, contact_id: result.contact_id },
+          });
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/documents/outcome") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const result = appendDocumentChecklistOutcome(currentLeads(), input, {
+          filePath: documentChecklistLedgerPath || undefined,
+          recordedAt: reviewedAt || receivedAt || new Date().toISOString(),
+        });
+        if (!result.idempotent) {
+          recordAudit({
+            action: "document_checklist_updated",
+            actor: result.outcome.actor,
+            objectType: "document_checklist_item",
+            objectId: result.outcome.id,
+            locale: result.checklist.original_language,
+            metadata: {
+              lead_id: result.outcome.lead_id,
+              item_key: result.outcome.item_key,
+              status: result.outcome.status,
+              has_reference: Boolean(result.outcome.reference),
+            },
           });
         }
         return adminJson(result.idempotent ? 200 : 201, result);

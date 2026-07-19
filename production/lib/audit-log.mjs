@@ -10,6 +10,7 @@ const ADMIN_ACTIONS = new Set([
   "contact_linked",
   "deal_closed",
   "deployable_redirects_exported",
+  "document_checklist_updated",
   "hermes_model_call",
   "launch_readiness_exported",
   "listing_edited",

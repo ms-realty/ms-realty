@@ -200,6 +200,7 @@ const ADMIN_UI_COPY = {
       lead_assigned: "Запитването е пренасочено към брокер",
       account_created: "Създаден клиентски акаунт",
       contact_linked: "Контакт, свързан с акаунт",
+      document_checklist_updated: "Обновен контролен списък за документи",
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
@@ -390,6 +391,7 @@ const ADMIN_UI_COPY = {
       lead_assigned: "Заявка переназначена брокеру",
       account_created: "Создан клиентский аккаунт",
       contact_linked: "Контакт связан с аккаунтом",
+      document_checklist_updated: "Обновлен чек-лист документов",
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
@@ -580,6 +582,7 @@ const ADMIN_UI_COPY = {
       lead_assigned: "Lead assigned to broker",
       account_created: "Customer account created",
       contact_linked: "Contact linked to account",
+      document_checklist_updated: "Document checklist updated",
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
@@ -747,6 +750,7 @@ const NAV_ROUTES = [
   { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
   { id: "contacts", module: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
+  { id: "documents", module: "crm", path: "/admin/documents", icon: "file-check", kind: "admin_document_checklists", capability: "operations:read" },
   { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
   { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
@@ -780,6 +784,7 @@ function Sidebar({ page }) {
           badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
         },
         { ...route("contacts"), label: screenLabel("crm", "contacts", "Contacts and accounts") },
+        { ...route("documents"), label: screenLabel("crm", "documents", "Documents and process") },
         {
           ...route("lead_pipeline"),
           label: screenLabel("crm", "lead_pipeline", "Buyers and renters"),
@@ -2188,6 +2193,131 @@ function AccountLinkForm({ page, contact, copy }) {
       h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "saveAccountLink", "Save account link")),
     ),
   );
+}
+
+function documentStatusLabel(copy, status) {
+  if (status === "complete") return label(copy, "complete", "Complete");
+  if (status === "not_applicable") return label(copy, "notApplicable", "Not applicable");
+  if (status === "blocked") return label(copy, "blocked", "Blocked");
+  return label(copy, "open", "Open");
+}
+
+function DocumentOutcomeForm({ page, checklist, item, copy }) {
+  if (!pageCan(page, "operations:write") || item.complete) return null;
+  return h(
+    "details",
+    { className: "adm-document-outcome", open: item.blocked, "data-document-outcome-control": item.id },
+    h("summary", null, h(Icon, { name: item.blocked ? "triangle-alert" : "check-circle-2", size: 15 }), h("span", null, label(copy, "saveDocumentOutcome", "Record outcome"))),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/documents/outcome",
+        "data-admin-mutation-form": "true",
+        "data-admin-mutation-saving": label(copy, "documentSaving", "Saving…"),
+        "data-admin-mutation-success": label(copy, "documentSaved", "Outcome saved."),
+        "data-admin-mutation-failure": label(copy, "documentFailed", "Could not save the outcome."),
+      },
+      h("input", { type: "hidden", name: "leadId", value: checklist.lead_id }),
+      h("input", { type: "hidden", name: "itemKey", value: item.key }),
+      page.workspace?.operator_id
+        ? h("input", { type: "hidden", name: "actor", value: currentOperatorId(page) })
+        : h("label", null, label(copy, "reviewer", "Operator"), h("input", { name: "actor", required: true, autoComplete: "name" })),
+      h(
+        "label",
+        null,
+        label(copy, "documentStatus", "Outcome"),
+        h(
+          "select",
+          { name: "status", required: true },
+          h("option", { value: "complete" }, label(copy, "complete", "Complete")),
+          h("option", { value: "blocked" }, label(copy, "blocked", "Blocked")),
+          h("option", { value: "not_applicable" }, label(copy, "notApplicable", "Not applicable")),
+        ),
+      ),
+      h("label", null, label(copy, "documentReference", "Internal reference (optional)"), h("input", { name: "reference", maxLength: 160 })),
+      h("label", null, label(copy, "documentNote", "Review note"), h("textarea", { name: "note", rows: 2, maxLength: 1000, required: true })),
+      h(
+        "label",
+        { className: "adm-check" },
+        h("input", { type: "checkbox", name: "humanConfirmed", required: true }),
+        h("span", null, label(copy, "confirmDocumentOutcome", "I confirm this outcome was reviewed and is not an automatic legal approval.")),
+      ),
+      h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+      h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "saveDocumentOutcome", "Save outcome")),
+    ),
+  );
+}
+
+function DocumentChecklistsBody({ page }) {
+  const copy = adminCopy(page);
+  const queue = page.documentChecklistQueue;
+  const metrics = [
+    [label(copy, "openChecklists", "Open checklists"), queue.summary.open, "file-check", "sea"],
+    [label(copy, "blockedChecklists", "Blocked checklists"), queue.summary.blocked, "triangle-alert", "brick"],
+    [label(copy, "completedChecklists", "Completed checklists"), queue.summary.complete, "check-circle-2", "success"],
+    [label(copy, "completedItems", "Completed steps"), `${queue.summary.items_complete}/${queue.summary.items}`, "list", "sand"],
+  ];
+  return adminShell(page, {
+    title: label(copy, "documentsWorkspace", "Documents and process"),
+    mainAttrs: {
+      "data-kind": "admin-document-checklists",
+      "data-react-admin-ui": "document-checklists",
+      "data-checklist-count": queue.summary.checklists,
+      "data-task-led": "true",
+    },
+    children: [
+      h(PageHeader, { title: label(copy, "documentsWorkspace", "Documents and process"), subtitle: page.metadata.description }),
+      h("p", { className: "adm-inline-alert", "data-process-guardrail": "true" }, label(copy, "processGuardrail", "The checklist tracks responsibility and evidence. It does not replace professional review.")),
+      h(StatGrid, { metrics }),
+      h(
+        "div",
+        { className: "adm-checklist-grid" },
+        ...queue.rows.map((checklist) =>
+          h(
+            "article",
+            { key: checklist.id, className: "adm-checklist-card", "data-document-checklist": checklist.lead_id, "data-checklist-blocked": checklist.blocked_count ? "true" : "false" },
+            h(
+              "header",
+              null,
+              h("div", null, h("h2", null, checklist.title), h("a", { href: adminHref(`/admin/leads#lead-${encodeURIComponent(checklist.lead_id)}`, page), className: "crm-mono" }, checklist.lead_id)),
+              h(StatusPill, { tone: checklist.blocked_count ? "brick" : checklist.open_count ? "sun" : "success" }, `${checklist.progress_percent}%`),
+            ),
+            h(
+              "div",
+              { className: "adm-checklist-progress" },
+              h("progress", { value: checklist.completed_count, max: checklist.item_count, "aria-label": checklist.title }),
+              h("span", null, `${checklist.completed_count}/${checklist.item_count}`),
+            ),
+            checklist.next_item
+              ? h("p", { className: "adm-checklist-next" }, h("strong", null, `${label(copy, "nextDocumentStep", "Next step")}: `), checklist.next_item.label)
+              : null,
+            h(
+              "ol",
+              { className: "adm-checklist-items" },
+              ...checklist.items.map((item) =>
+                h(
+                  "li",
+                  { key: item.id, "data-document-item": item.key, "data-document-status": item.status },
+                  h(
+                    "div",
+                    { className: "adm-checklist-item__head" },
+                    h("span", { className: "adm-checklist-item__ordinal" }, item.ordinal),
+                    h("strong", null, item.label),
+                    h(StatusPill, { tone: item.blocked ? "brick" : item.complete ? "success" : "sun" }, documentStatusLabel(copy, item.status)),
+                  ),
+                  item.outcome
+                    ? h("small", null, `${item.outcome.actor} · ${formatAdminDateTime(item.outcome.recorded_at, page.workspace?.locale)}${item.outcome.reference ? ` · ${item.outcome.reference}` : ""}`)
+                    : null,
+                  h(DocumentOutcomeForm, { page, checklist, item, copy }),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ],
+  });
 }
 
 function ContactsBody({ page }) {
@@ -3946,6 +4076,7 @@ function MigrationReviewBody({ page }) {
 export function renderReactAdminBody(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
+  if (page.kind === "admin_document_checklists") return renderStaticElement(h(DocumentChecklistsBody, { page }));
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
   if (page.kind === "admin_lead_pipeline") return renderStaticElement(h(LeadPipelineBody, { page }));
   if (page.kind === "admin_requests") return renderStaticElement(h(PublicRequestsBody, { page }));

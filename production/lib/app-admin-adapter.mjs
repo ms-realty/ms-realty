@@ -20,6 +20,7 @@ import {
   LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
   renderAdminContactsPayload,
+  renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
   renderAdminListingManagerPayload,
@@ -27,6 +28,12 @@ import {
   renderAdminOperationalQueuePayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
+import {
+  DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
+  appendDocumentChecklistOutcome,
+  buildDocumentChecklistQueue,
+  readDocumentChecklistOutcomes,
+} from "./document-checklists.mjs";
 import {
   DEFAULT_ACCOUNT_LEDGER_PATH,
   appendAccountContactLink,
@@ -204,6 +211,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
+    documentChecklistLedgerPath:
+      env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
@@ -597,6 +606,17 @@ function contactsPayload(registry, url, config) {
     accounts: data.accounts,
     operatorId: config.adminPrincipal || null,
   });
+}
+
+function documentChecklistPayload(registry, url, config) {
+  const locale = url.searchParams.get("locale") || "en";
+  const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
+  return renderAdminDocumentChecklistPayload(
+    registry,
+    locale,
+    buildDocumentChecklistQueue(leads, readDocumentChecklistOutcomes(config.documentChecklistLedgerPath), { locale }),
+    config.adminPrincipal || null,
+  );
 }
 
 function requestsPayload(registry, url, config) {
@@ -1450,6 +1470,35 @@ function appendAccountContactLinkEntry(input, config) {
   return result;
 }
 
+function appendDocumentChecklistOutcomeEntry(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
+  const result = appendDocumentChecklistOutcome(leads, attributed, {
+    filePath: config.documentChecklistLedgerPath,
+    recordedAt: config.reviewedAt || new Date().toISOString(),
+  });
+  if (!result.idempotent) {
+    recordAudit(
+      {
+        action: "document_checklist_updated",
+        actor: result.outcome.actor,
+        objectType: "document_checklist_item",
+        objectId: result.outcome.id,
+        locale: result.checklist.original_language,
+        metadata: {
+          lead_id: result.outcome.lead_id,
+          item_key: result.outcome.item_key,
+          status: result.outcome.status,
+          has_reference: Boolean(result.outcome.reference),
+        },
+      },
+      config,
+      result.outcome.recorded_at,
+    );
+  }
+  return result;
+}
+
 function appendDealClose(input, config) {
   const deal = appendClosedDeal(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.dealLedgerPath,
@@ -1871,6 +1920,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(contactsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, contactsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/documents") return htmlResponse(documentChecklistPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/documents") return jsonResponse(200, documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
@@ -2048,6 +2099,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/accounts/link") {
       const result = appendAccountContactLinkEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/documents/outcome") {
+      const result = appendDocumentChecklistOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {

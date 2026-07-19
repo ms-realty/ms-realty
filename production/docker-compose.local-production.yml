@@ -28,6 +28,7 @@ x-app-environment: &app-environment
   MS_REALTY_BROKER_CONTACT_LEDGER_PATH: /runtime-data/broker-contacts.jsonl
   MS_REALTY_CONSENT_LEDGER_PATH: /runtime-data/consent-ledger.jsonl
   MS_REALTY_DEAL_LEDGER_PATH: /runtime-data/deals.jsonl
+  MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH: /runtime-data/document-checklist-outcomes.jsonl
   MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: /runtime-data/deployable-redirects.json
   MS_REALTY_EVENT_LEDGER_PATH: /runtime-data/events.jsonl
   MS_REALTY_HERMES_AUDIT_PATH: /runtime-data/hermes-audit.jsonl

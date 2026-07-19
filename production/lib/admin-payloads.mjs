@@ -547,3 +547,25 @@ export function renderAdminContactsPayload(registry, requestedLocale, data) {
     },
   };
 }
+
+export function renderAdminDocumentChecklistPayload(registry, requestedLocale, checklistQueue, operator = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_document_checklists",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/documents",
+    canonical: "/admin/documents",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.documentsWorkspace || "Documents and process"} | MS Realty`,
+      description: workspace.copy.documentsDescription || "Reviewable process checklists without storing files.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    documentChecklistQueue: checklistQueue,
+    summary: checklistQueue.summary,
+  };
+}

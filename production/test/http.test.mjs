@@ -298,6 +298,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const consentLedgerPath = tempConsents();
   const auditLogPath = tempAuditLog();
   const accountLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-accounts-`)}/accounts.jsonl`;
+  const documentChecklistLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-documents-`)}/outcomes.jsonl`;
   const slugHistoryPath = tempSlugHistory();
   const hermesReplyPrompts = [];
   const app = createHttpApp({
@@ -323,6 +324,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     consentLedgerPath,
     auditLogPath,
     accountLedgerPath,
+    documentChecklistLedgerPath,
     slugHistoryPath,
     receivedAt: "2026-07-04T00:00:00Z",
     requestedAt: "2026-07-04T00:01:00Z",
@@ -800,6 +802,31 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/api/admin/contacts?locale=ru",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  smoke.documents = await dispatchHttp(app, {
+    url: "/api/admin/documents?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  smoke.documentsHtml = await dispatchHttp(app, {
+    url: "/admin/documents?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
+  smoke.documentOutcome = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/documents/outcome",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      leadId: "http-lead-test",
+      itemKey: "foreign_process_scope",
+      status: "complete",
+      actor: "sales_manager",
+      note: "Broker confirmed that foreign-buyer guidance applies.",
+      humanConfirmed: true,
+    },
+  });
+  smoke.documentsAfter = await dispatchHttp(app, {
+    url: "/api/admin/documents?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
@@ -945,6 +972,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     viewing_booked: 1,
     viewing_follow_up_recorded: 1,
     deal_closed: 1,
+    document_checklist_updated: 1,
     translation_drafted: 1,
     translation_approved: 1,
     translation_published: 1,
@@ -965,6 +993,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.accountCreated.status, 201);
   assert.equal(smoke.accountLinked.status, 201);
   assert.equal(smoke.contactsAfterLink.body.contacts[0].account_id, smoke.accountCreated.body.account_id);
+  assert.equal(smoke.documents.status, 200);
+  assert.equal(smoke.documents.body.documentChecklistQueue.rows.length, 4);
+  assert.equal(smoke.documentsHtml.body.includes('data-kind="admin-document-checklists"'), true);
+  assert.equal(smoke.documentsHtml.body.includes('data-process-guardrail="true"'), true);
+  assert.equal(smoke.documentOutcome.status, 201);
+  assert.equal(smoke.documentsAfter.body.documentChecklistQueue.rows.find((row) => row.lead_id === "http-lead-test").completed_count, 1);
   assert.equal(smoke.admin.body.leadSla.summary.total_leads, 4);
   assert.equal(smoke.admin.body.leadSla.summary.manager_escalation_required, 4);
   assert.equal(smoke.admin.body.leadSla.summary.customer_reply_sent, 0);

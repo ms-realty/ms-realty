@@ -155,6 +155,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_BROKER_CONTACT_LEDGER_PATH: tempJsonl("app-admin-broker-contacts"),
       MS_REALTY_CONSENT_LEDGER_PATH: tempJsonl("app-admin-consents"),
       MS_REALTY_DEAL_LEDGER_PATH: tempJsonl("app-admin-deals"),
+      MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH: tempJsonl("app-admin-document-checklists"),
       MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: deployableRedirectOutputPath,
       MS_REALTY_EVENT_LEDGER_PATH: tempJsonl("app-admin-events"),
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
@@ -252,6 +253,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const contactsJsonRoute = await import("../../app/api/admin/contacts/route.js");
       const accountRoute = await import("../../app/api/admin/accounts/route.js");
       const accountLinkRoute = await import("../../app/api/admin/accounts/link/route.js");
+      const documentsRoute = await import("../../app/admin/documents/route.js");
+      const documentsJsonRoute = await import("../../app/api/admin/documents/route.js");
+      const documentOutcomeRoute = await import("../../app/api/admin/documents/outcome/route.js");
       const viewingsPageRoute = await import("../../app/admin/viewings/route.js");
       const viewingsJsonRoute = await import("../../app/api/admin/viewings/route.js");
       const activityRoute = await import("../../app/admin/activity/route.js");
@@ -416,6 +420,34 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const contactsAfterBody = await contactsAfter.json();
       assert.equal(contactsAfterBody.contacts[0].account_id, accountCreatedBody.account_id);
       assert.equal(contactsAfterBody.accounts[0].contact_count, 1);
+
+      const documentsBefore = await documentsJsonRoute.GET(new Request("https://example.test/api/admin/documents?locale=ru", { headers: auth }));
+      const documentsBeforeBody = await documentsBefore.json();
+      assert.equal(documentsBefore.status, 200);
+      assert.equal(documentsBeforeBody.kind, "admin_document_checklists");
+      assert.equal(documentsBeforeBody.documentChecklistQueue.rows[0].items[0].key, "foreign_process_scope");
+      const documentsPage = await documentsRoute.GET(new Request("https://example.test/admin/documents?locale=ru", { headers: auth }));
+      const documentsHtml = await documentsPage.text();
+      assert.match(documentsHtml, /data-kind="admin-document-checklists"/);
+      assert.match(documentsHtml, /data-process-guardrail="true"/);
+      assert.match(documentsHtml, /action="\/api\/admin\/documents\/outcome"/);
+      const documentOutcome = await documentOutcomeRoute.POST(
+        new Request("https://example.test/api/admin/documents/outcome", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({
+            leadId: "next-admin-lead-test",
+            itemKey: "foreign_process_scope",
+            status: "complete",
+            actor: "account_manager",
+            note: "Broker confirmed that foreign-buyer guidance applies.",
+            humanConfirmed: true,
+          }),
+        }),
+      );
+      assert.equal(documentOutcome.status, 201);
+      const documentsAfter = await documentsJsonRoute.GET(new Request("https://example.test/api/admin/documents?locale=ru", { headers: auth }));
+      assert.equal((await documentsAfter.json()).documentChecklistQueue.rows[0].completed_count, 1);
 
       const leadAssignment = await leadAssignmentRoute.POST(
         new Request("https://example.test/api/admin/leads/assign", {
@@ -1613,6 +1645,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         redirect_approval_created: 1,
         redirect_approvals_imported: 1,
         deployable_redirects_exported: 1,
+        document_checklist_updated: 1,
         listing_quality_imported: 1,
         translation_drafted: 2,
         translation_approved: 2,
