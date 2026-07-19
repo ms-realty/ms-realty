@@ -23,6 +23,7 @@ import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
 import { assertMediaReviews, mediaAssetId, readMediaReviews, resetMediaReviews } from "../lib/media-reviews.mjs";
+import { assertLeadAssignments, readLeadAssignments, resetLeadAssignments } from "../lib/lead-assignments.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
@@ -139,6 +140,12 @@ function tempTourApprovals() {
 function tempMediaReviews() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-media-reviews-`)}/media-reviews.jsonl`;
   resetMediaReviews(file);
+  return file;
+}
+
+function tempLeadAssignments() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-lead-assignments-`)}/lead-assignments.jsonl`;
+  resetLeadAssignments(file);
   return file;
 }
 
@@ -270,6 +277,7 @@ function actionCounts(rows) {
 
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();
+  const leadAssignmentLedgerPath = tempLeadAssignments();
   const leadContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-contacts-`)}/contacts.jsonl`;
   const leadContactKey = "test-only-http-contact-key-32-characters-minimum";
   const publicContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-public-contacts-`)}/contacts.jsonl`;
@@ -293,6 +301,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const hermesReplyPrompts = [];
   const app = createHttpApp({
     leadLedgerPath,
+    leadAssignmentLedgerPath,
     leadContactVaultPath,
     leadContactKey,
     publicContactVaultPath,
@@ -743,6 +752,22 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   });
   smoke.listingAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" });
   smoke.listingHtmlAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" });
+  smoke.leadAssignment = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/leads/assign",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      leadId: "http-lead-test",
+      brokerId: "broker_ru",
+      actor: "sales_manager",
+      reason: "Owner approved reassignment for Russian follow-up.",
+      assignmentConfirmed: true,
+    },
+  });
+  smoke.adminAfterLeadAssignment = await dispatchHttp(app, {
+    url: "/api/admin/leads?locale=ru",
+    headers: { authorization: "Bearer local-admin-smoke" },
+  });
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
@@ -840,6 +865,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listingAfterMediaReview.body.body.media.floor_plans[0].reviewer, undefined);
   assert.match(smoke.listingHtmlAfterMediaReview.body, /data-floor-plan-gallery="true"/);
   assert.match(smoke.listingHtmlAfterMediaReview.body, /MS-CRAWL-0001-floor-plan\.webp/);
+  assert.equal(smoke.leadAssignment.status, 201);
+  assert.equal(smoke.leadAssignment.body.previous_broker_id, "broker_international");
+  assert.equal(smoke.adminAfterLeadAssignment.body.leads.find((lead) => lead.lead_id === "http-lead-test").assigned_broker, "broker_ru");
   assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugChangeUnauthorized.status, 401);
@@ -859,6 +887,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
   assert.equal(assertMediaReviews(readMediaReviews(mediaReviewLedgerPath)), true);
+  assert.equal(assertLeadAssignments(readLeadAssignments(leadAssignmentLedgerPath)), true);
   assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
   assert.equal(assertConsentLedger(readConsentLedger(consentLedgerPath)), true);
   assert.equal(assertSlugHistory(readSlugHistory(slugHistoryPath)), true);
@@ -876,6 +905,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     hermes_model_call: 1,
     tour_approved: 1,
     media_reviewed: 1,
+    lead_assigned: 1,
     listing_slug_changed: 1,
     reply_approved: 2,
     viewing_booked: 1,

@@ -117,6 +117,19 @@ main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { min-width: 0; }
   color: var(--brick-700);
   font-size: var(--text-sm);
 }
+.adm-lead-duplicate { display: inline-flex; width: max-content; max-width: 100%; align-items: center; gap: 6px; color: var(--brick-700); font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+.adm-lead-assignment { min-width: 0; border-top: 1px solid var(--border); padding-top: var(--space-2); }
+.adm-lead-assignment > summary { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); cursor: pointer; font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+.adm-lead-assignment__form { grid-template-columns: 1fr; gap: var(--space-2); margin-top: var(--space-2); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-sunken); }
+.adm-lead-assignment__form label { display: grid; gap: 5px; min-width: 0; color: var(--text-muted); font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+.adm-lead-assignment__form input,
+.adm-lead-assignment__form select,
+.adm-lead-assignment__form textarea { width: 100%; min-width: 0; }
+.adm-lead-assignment__form textarea { resize: vertical; }
+.adm-lead-assignment__form .adm-check { display: flex; align-items: flex-start; font-weight: var(--fw-regular); }
+.adm-lead-assignment__form .adm-check input { width: 20px; min-height: 20px; margin-top: 1px; }
+.adm-lead-assignment__form [data-admin-mutation-status] { min-height: 1.25em; margin: 0; font-size: var(--text-xs); }
+.adm-lead-assignment__form button { width: 100%; justify-content: center; }
 .adm-public-request-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 .adm-public-request {
   display: grid;

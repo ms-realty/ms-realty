@@ -7,6 +7,7 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
   const compose = fs.readFileSync(fromRoot("production", "docker-compose.local-production.yml"), "utf8");
   const requiredPaths = [
     "MS_REALTY_LEAD_LEDGER_PATH: /runtime-data/lead-ledger.jsonl",
+    "MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH: /runtime-data/lead-assignments.jsonl",
     "MS_REALTY_LISTING_EDIT_LEDGER_PATH: /runtime-data/listing-edits.jsonl",
     "MS_REALTY_MEDIA_REVIEW_LEDGER_PATH: /runtime-data/media-reviews.jsonl",
     "MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH: /runtime-data/listing-publication-schedules.jsonl",

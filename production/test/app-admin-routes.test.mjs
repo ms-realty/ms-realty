@@ -159,6 +159,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
+      MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH: tempJsonl("app-admin-lead-assignments"),
       MS_REALTY_LEAD_CONTACT_VAULT_PATH: leadContactVaultPath,
       MS_REALTY_LEAD_CONTACT_KEY: "test-only-next-contact-key-32-characters-minimum",
       MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: tempJsonl("app-admin-lead-pipeline-outcomes"),
@@ -245,6 +246,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const leadPipelineRoute = await import("../../app/admin/pipeline/route.js");
       const leadPipelineJsonRoute = await import("../../app/api/admin/pipeline/route.js");
       const leadPipelineOutcomeRoute = await import("../../app/api/admin/lead-pipeline/outcome/route.js");
+      const leadAssignmentRoute = await import("../../app/api/admin/leads/assign/route.js");
       const viewingsPageRoute = await import("../../app/admin/viewings/route.js");
       const viewingsJsonRoute = await import("../../app/api/admin/viewings/route.js");
       const activityRoute = await import("../../app/admin/activity/route.js");
@@ -348,6 +350,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-reply-status="true"/);
       assert.equal(inboxHtml.includes('name="hermesDraft" value="true"'), false);
       assert.match(inboxHtml, /data-show-original-toggle="true"/);
+      assert.match(inboxHtml, /data-lead-assignment-control="next-admin-lead-test"/);
+      assert.match(inboxHtml, /action="\/api\/admin\/leads\/assign"/);
+      assert.match(inboxHtml, /name="assignmentConfirmed"/);
       assert.match(inboxHtml, /he -&gt; en/);
       assert.match(inboxHtml, /Входящие заявки/);
       assert.match(inboxHtml, /Входящие заявки CRM с ответами, проверенными брокером\./);
@@ -356,6 +361,31 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-lead-column="reply"/);
       assert.match(inboxHtml, /data-label="Ответ"/);
       assert.match(inboxHtml, /data-lead-column="escalation_due"[^>]*><time dateTime="[^"]+" title="[^"]+">/);
+
+      const leadAssignment = await leadAssignmentRoute.POST(
+        new Request("https://example.test/api/admin/leads/assign", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            leadId: "next-admin-lead-test",
+            brokerId: "broker_ru",
+            actor: "sales_manager",
+            reason: "Owner approved Russian broker follow-up.",
+            assignmentConfirmed: "on",
+          }),
+        }),
+      );
+      const leadAssignmentBody = await leadAssignment.json();
+      assert.equal(leadAssignment.status, 201);
+      assert.equal(leadAssignmentBody.previous_broker_id, "broker_international");
+      assert.equal(leadAssignmentBody.broker_id, "broker_ru");
+
+      const inboxAfterAssignment = await leadInboxJsonRoute.GET(
+        new Request("https://example.test/api/admin/leads?locale=ru", { headers: auth }),
+      );
+      const inboxAfterAssignmentBody = await inboxAfterAssignment.json();
+      assert.equal(inboxAfterAssignmentBody.leads[0].assigned_broker, "broker_ru");
+      assert.equal(inboxAfterAssignmentBody.leads[0].broker_assignment.method, "manual_override");
 
       const pipeline = await leadPipelineRoute.GET(new Request("https://example.test/admin/pipeline?locale=ru", { headers: auth }));
       const pipelineHtml = await pipeline.text();
@@ -1537,6 +1567,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         listing_slug_changed: 1,
         tour_approved: 1,
         media_reviewed: 1,
+        lead_assigned: 1,
         viewing_booked: 1,
         viewing_follow_up_recorded: 1,
         seller_pipeline_outcome_recorded: 1,

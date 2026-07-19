@@ -4,6 +4,7 @@ import { buildLeadSlaReport } from "./lead-sla.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { latestTourForListing } from "./tours.mjs";
 import { mediaAssetId } from "./media-reviews.mjs";
+import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
 export { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 import { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 
@@ -475,6 +476,10 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       robots: "noindex,nofollow",
     },
     workspace: workspaceWithOperator(workspace, operatorId),
+    brokerProfiles: (data.brokerProfiles || DEFAULT_BROKER_PROFILES).map((profile) => ({
+      id: profile.id,
+      languages: profile.languages || [],
+    })),
     ...payloadData,
     leadSla,
     leadPipelineQueue,

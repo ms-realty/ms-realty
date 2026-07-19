@@ -32,6 +32,7 @@ x-app-environment: &app-environment
   MS_REALTY_HERMES_AUDIT_PATH: /runtime-data/hermes-audit.jsonl
   MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: /runtime-data/language-requests.jsonl
   MS_REALTY_LEAD_LEDGER_PATH: /runtime-data/lead-ledger.jsonl
+  MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH: /runtime-data/lead-assignments.jsonl
   MS_REALTY_LEAD_CONTACT_VAULT_PATH: /runtime-data/lead-contact-vault.jsonl
   MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: /runtime-data/lead-pipeline-outcomes.jsonl
   MS_REALTY_PUBLIC_CONTACT_VAULT_PATH: /runtime-data/public-contact-vault.jsonl

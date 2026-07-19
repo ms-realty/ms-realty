@@ -14,7 +14,7 @@ const NON_BUYER_SOURCE_CONTRACTS = Object.freeze({
 });
 const LOCAL_LOCATIONS = ["Sandanski", "Petrich", "Bansko", "Blagoevgrad", "Sveti Vlas", "Sunny Beach", "Melnik"];
 const PROPERTY_TYPES = ["apartment", "house", "villa", "land", "commercial", "hotel", "office", "industrial"];
-const DEFAULT_BROKER_PROFILES = [
+export const DEFAULT_BROKER_PROFILES = [
   { id: "broker_bg", languages: ["bg"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "renter", "seller", "general"] },
   { id: "broker_ru", languages: ["ru"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "renter", "seller", "general"] },
   {

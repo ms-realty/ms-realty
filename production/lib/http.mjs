@@ -33,6 +33,12 @@ import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import {
+  appendLeadAssignment,
+  applyLeadAssignments,
+  createLeadAssignment,
+  readLeadAssignments,
+} from "./lead-assignments.mjs";
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   appendLeadPipelineOutcome,
@@ -378,6 +384,7 @@ export function createHttpApp({
   routeMap = loadLegacyRouteMap(),
   migrationReviewDashboard = loadMigrationReviewDashboard(),
   leadLedgerPath = null,
+  leadAssignmentLedgerPath = null,
   leadPipelineOutcomeLedgerPath = null,
   leadContactVaultPath = null,
   leadContactKey = null,
@@ -442,10 +449,13 @@ export function createHttpApp({
       readMediaReviews(mediaReviewLedgerPath || undefined),
     );
   const currentLeads = () =>
-    withLeadContacts(readLeadLedger(leadLedgerPath || undefined), {
-      filePath: leadContactVaultPath,
-      secret: leadContactKey,
-    });
+    applyLeadAssignments(
+      withLeadContacts(readLeadLedger(leadLedgerPath || undefined), {
+        filePath: leadContactVaultPath,
+        secret: leadContactKey,
+      }),
+      readLeadAssignments(leadAssignmentLedgerPath || undefined),
+    );
   const currentListingQualityReport = (options = {}) =>
     buildListingQualityReport({
       seed: currentSeed(),
@@ -1953,6 +1963,32 @@ export function createHttpApp({
           );
         }
         return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const assignment = createLeadAssignment(currentLeads(), input, reviewedAt || receivedAt || new Date().toISOString());
+        const persisted = appendLeadAssignment(assignment, { filePath: leadAssignmentLedgerPath || undefined });
+        if (!persisted.idempotent) {
+          recordAudit({
+            action: "lead_assigned",
+            actor: persisted.assigned_by,
+            objectType: "lead_assignment",
+            objectId: persisted.id,
+            metadata: {
+              lead_id: persisted.lead_id,
+              previous_broker_id: persisted.previous_broker_id,
+              broker_id: persisted.broker_id,
+              assignment_method: persisted.assignment_method,
+            },
+          });
+        }
+        return adminJson(persisted.idempotent ? 200 : 201, persisted);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

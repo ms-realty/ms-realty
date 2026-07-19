@@ -185,6 +185,8 @@ test("admin lead values are localized without exposing raw workflow codes", () =
         contact_preference: "whatsapp",
         property: { location: "Sandanski", type: "apartment" },
         broker_assignment: { broker_id: "broker_international" },
+        duplicate_status: "possible_duplicate",
+        possible_duplicate_of: "lead-earlier",
       },
     ],
     replies: [],
@@ -204,6 +206,10 @@ test("admin lead values are localized without exposing raw workflow codes", () =
   assert.match(html, /WhatsApp/);
   assert.match(html, /Нужна эскалация менеджеру/);
   assert.match(html, /data-lead-context="true">Sandanski/);
+  assert.match(html, /data-possible-duplicate-of="lead-earlier"/);
+  assert.match(html, /Возможный дубликат контакта/);
+  assert.match(html, /data-lead-assignment-control="lead-ru-1"/);
+  assert.match(html, /action="\/api\/admin\/leads\/assign"/);
   assert.match(html, /data-viewing-follow-up-queue="true"/);
   assert.match(html, /data-empty-viewing-follow-ups="true"/);
   assert.match(html, /data-seller-pipeline-queue="true"/);

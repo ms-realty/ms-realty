@@ -186,6 +186,7 @@ const ADMIN_UI_COPY = {
     noReportData: "Все още няма данни за този отчет.",
     auditActions: {
       media_reviewed: "Прегледан медиен файл",
+      lead_assigned: "Запитването е пренасочено към брокер",
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
@@ -362,6 +363,7 @@ const ADMIN_UI_COPY = {
     noReportData: "Для этого отчета пока нет данных.",
     auditActions: {
       media_reviewed: "Медиафайл проверен",
+      lead_assigned: "Заявка переназначена брокеру",
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
@@ -538,6 +540,7 @@ const ADMIN_UI_COPY = {
     noReportData: "There is no data for this report yet.",
     auditActions: {
       media_reviewed: "Media asset reviewed",
+      lead_assigned: "Lead assigned to broker",
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
@@ -1930,6 +1933,58 @@ function LeadPipelineBody({ page }) {
   });
 }
 
+function LeadAssignmentControl({ page, lead, copy }) {
+  const brokerId = lead.broker_assignment?.broker_id || lead.assigned_broker || "";
+  const canAssign = pageCan(page, "operations:write");
+  return h(
+    "details",
+    { className: "adm-lead-assignment", "data-lead-assignment-control": lead.lead_id },
+    h(
+      "summary",
+      null,
+      h(Icon, { name: "users", size: 15 }),
+      h("span", null, `${label(copy, "assignedBroker", "Assigned broker")}: ${brokerId || "—"}`),
+    ),
+    canAssign
+      ? h(
+          "form",
+          {
+            method: "post",
+            action: "/api/admin/leads/assign",
+            className: "adm-form adm-lead-assignment__form",
+            "data-admin-mutation-form": "lead-assignment",
+            "data-admin-mutation-saving": label(copy, "assignmentSaving", "Saving assignment…"),
+            "data-admin-mutation-success": label(copy, "assignmentSaved", "Assignment saved. Refresh to see the new owner."),
+            "data-admin-mutation-failure": label(copy, "assignmentSaveFailed", "Could not save assignment."),
+          },
+          h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
+          h(
+            "label",
+            null,
+            label(copy, "assignedBroker", "Assigned broker"),
+            h(
+              "select",
+              { name: "brokerId", defaultValue: brokerId, required: true },
+              ...(page.brokerProfiles || []).map((profile) =>
+                h("option", { key: profile.id, value: profile.id, selected: profile.id === brokerId ? true : undefined }, profile.id.replaceAll("_", " ")),
+              ),
+            ),
+          ),
+          h("label", null, label(copy, "assignmentReason", "Reassignment reason"), h("textarea", { name: "reason", rows: 2, required: true })),
+          h("label", null, label(copy, "reviewer", "Actor"), h("input", { name: "actor", required: true, defaultValue: currentOperatorId(page, brokerId), readOnly: Boolean(page.workspace?.operator_id) })),
+          h(
+            "label",
+            { className: "adm-check" },
+            h("input", { type: "checkbox", name: "assignmentConfirmed", required: true }),
+            ` ${label(copy, "confirmAssignment", "I confirm this manual lead reassignment.")}`,
+          ),
+          h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "users", size: 15 }), h("span", null, label(copy, "saveAssignment", "Save assignment"))),
+        )
+      : h("p", { className: "adm-note", "data-read-only-role": "true" }, label(copy, "readOnlyAccess", "Read-only access.")),
+  );
+}
+
 function LeadInboxBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -2019,7 +2074,7 @@ function LeadInboxBody({ page }) {
                 const queuedReply = replyByLeadId.get(lead.lead_id);
                 const delivery = queuedReply ? deliveryByReplyId.get(queuedReply.id) : null;
                 const delivered = delivery?.status === "sent";
-                const brokerId = lead.broker_assignment?.broker_id || "";
+                const brokerId = lead.broker_assignment?.broker_id || lead.assigned_broker || "";
                 const leadContext = [lead.listing_reference, lead.property?.location].filter(Boolean).join(" / ");
                 const requestDetails = requestDetailsText(lead);
                 return h(
@@ -2048,6 +2103,15 @@ function LeadInboxBody({ page }) {
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
                       requestDetails ? h("small", { className: "adm-lead-context", "data-lead-request-details": "true" }, requestDetails) : null,
                       leadContactActions(lead, ui),
+                      lead.duplicate_status === "possible_duplicate"
+                        ? h(
+                            "a",
+                            { className: "adm-lead-duplicate", href: `#lead-${encodeURIComponent(lead.possible_duplicate_of)}`, "data-possible-duplicate-of": lead.possible_duplicate_of },
+                            h(Icon, { name: "triangle-alert", size: 15 }),
+                            h("span", null, `${label(copy, "possibleDuplicate", "Possible duplicate contact")}: ${lead.possible_duplicate_of}`),
+                          )
+                        : null,
+                      h(LeadAssignmentControl, { page, lead, copy }),
                       h("a", { className: "adm-lead-context", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id }, label(copy, "viewHistory", "History")),
                       h(
                         "div",

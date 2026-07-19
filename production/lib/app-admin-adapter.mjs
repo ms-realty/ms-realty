@@ -47,6 +47,13 @@ import {
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, withLeadContacts } from "./lead-contact-vault.mjs";
+import {
+  DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
+  appendLeadAssignment,
+  applyLeadAssignments,
+  createLeadAssignment,
+  readLeadAssignments,
+} from "./lead-assignments.mjs";
 import { buildLeadMatchingReport } from "./lead-matching.mjs";
 import {
   DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
@@ -191,6 +198,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    leadAssignmentLedgerPath: env.MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH || DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
     leadPipelineOutcomeLedgerPath:
       env.MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH || DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
     leadContactVaultPath:
@@ -436,7 +444,7 @@ function currentSeed(config) {
 
 function leadJourneyContext(config) {
   return {
-    leads: readLeadLedger(config.leadLedgerPath),
+    leads: applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath)),
     outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
     viewings: readViewings(config.viewingLedgerPath),
     viewingFollowUps: readViewingFollowUps(config.viewingFollowUpLedgerPath),
@@ -491,10 +499,13 @@ function currentPublicRequestQueue(config) {
 }
 
 function leadInboxPayload(registry, url, config) {
-  const leads = withLeadContacts(readLeadLedger(config.leadLedgerPath), {
-    filePath: config.leadContactVaultPath,
-    secret: config.leadContactKey,
-  });
+  const leads = applyLeadAssignments(
+    withLeadContacts(readLeadLedger(config.leadLedgerPath), {
+      filePath: config.leadContactVaultPath,
+      secret: config.leadContactKey,
+    }),
+    readLeadAssignments(config.leadAssignmentLedgerPath),
+  );
   const replies = readReplyOutbox(config.replyOutboxPath);
   const viewings = readViewings(config.viewingLedgerPath);
   const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
@@ -1326,6 +1337,32 @@ function appendLeadPipelineOutcomeEntry(input, config) {
   return result;
 }
 
+function appendLeadAssignmentEntry(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
+  const assignment = createLeadAssignment(leads, attributed, config.reviewedAt || new Date().toISOString());
+  const persisted = appendLeadAssignment(assignment, { filePath: config.leadAssignmentLedgerPath });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "lead_assigned",
+        actor: persisted.assigned_by,
+        objectType: "lead_assignment",
+        objectId: persisted.id,
+        metadata: {
+          lead_id: persisted.lead_id,
+          previous_broker_id: persisted.previous_broker_id,
+          broker_id: persisted.broker_id,
+          assignment_method: persisted.assignment_method,
+        },
+      },
+      config,
+      persisted.assigned_at,
+    );
+  }
+  return persisted;
+}
+
 function appendDealClose(input, config) {
   const deal = appendClosedDeal(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.dealLedgerPath,
@@ -1910,6 +1947,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
       const result = appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
+      const result = appendLeadAssignmentEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
