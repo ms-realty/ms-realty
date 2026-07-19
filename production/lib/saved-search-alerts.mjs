@@ -17,7 +17,6 @@ function ownerForSearch(row) {
 }
 
 function changedPrices(cards, snapshot = {}) {
-  // ponytail: checks returned result cards; expand to full-match snapshots if alerts need every paginated result.
   return cards
     .map((card) => {
       const previous = Number(snapshot[card.id]);
@@ -34,6 +33,7 @@ function evaluateSavedSearch(registry, seed, translationTasks, row) {
     localeCode: row.locale,
     query: row.query,
     filters: row.filters || {},
+    pageSize: null,
     translationTasks,
   });
   const previousMatchCount = Number(row.match_count || 0);

@@ -58,6 +58,8 @@ export function createEvent(input, recordedAt = new Date().toISOString()) {
     action: input.action || null,
     query: input.query === undefined ? null : scrubText(input.query),
     filters: safeFilters(input.filters),
+    sort: input.sort === undefined ? null : scrubText(input.sort),
+    page: Number.isInteger(Number(input.page)) && Number(input.page) > 0 ? Number(input.page) : null,
   };
 }
 

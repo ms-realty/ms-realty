@@ -102,7 +102,7 @@ import {
   writeCompleteListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
-import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
+import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -623,14 +623,16 @@ export function createHttpApp({
       const query = url.searchParams.get("q") || "";
       const filters = searchFiltersFromParams(url.searchParams);
       const sort = url.searchParams.get("sort") || "recommended";
+      const page = searchPageFromParams(url.searchParams);
       const result = searchRuntimeListings(activeRegistry, currentSeed(), {
         localeCode,
         query,
         filters,
         sort,
+        page,
         translationTasks: readTranslationLedger(translationLedgerPath || undefined),
       });
-      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort });
+      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort, page });
       return json(200, result);
     }
 
@@ -643,7 +645,8 @@ export function createHttpApp({
         const query = url.searchParams.get("q") || "";
         const filters = searchFiltersFromParams(url.searchParams);
         const sort = url.searchParams.get("sort") || "recommended";
-        recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters, sort });
+        const page = searchPageFromParams(url.searchParams);
+        recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters, sort, page });
         return publicResponse(
           request,
           url,
@@ -652,6 +655,7 @@ export function createHttpApp({
             query,
             filters,
             sort,
+            page,
             translationTasks: readTranslationLedger(translationLedgerPath || undefined),
           }),
         );
@@ -1202,6 +1206,7 @@ export function createHttpApp({
         return adminJson(reviewPath ? 201 : 202, {
           imported: review.summary.review_rows,
           edited: edits.length,
+          factsReviewRows: review.summary.facts_review_rows,
           mediaReviewRows: review.summary.media_review_rows,
           missingReviewRows: review.summary.missing_review_rows,
           report: currentLaunchReadiness(),
@@ -1643,6 +1648,7 @@ export function createHttpApp({
           localeCode: input.locale || activeRegistry.source_locale,
           query: input.query || "",
           filters,
+          pageSize: null,
           translationTasks: readTranslationLedger(translationLedgerPath || undefined),
         });
         const priceSnapshot = Object.fromEntries(

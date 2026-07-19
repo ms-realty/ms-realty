@@ -98,6 +98,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /name="offer_type"/);
   assert.match(searchHtml, /name="price_min"/);
   assert.match(searchHtml, /name="bedrooms_min"/);
+  assert.match(searchHtml, /name="area_min"/);
+  assert.match(searchHtml, /name="area_max"/);
   assert.match(searchHtml, /id="sr-location-options"/);
   assert.match(searchHtml, /id="sr-mobile-location-options"/);
   assert.match(searchHtml, /data-mobile-search-filters="true"/);
@@ -108,6 +110,12 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.doesNotMatch(searchHtml, /window\.MS_REALTY_I18N/);
   assert.match(filteredSearchHtml, /data-filter-chip="offer_type"/);
   assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski&amp;price_min=50000"/);
+
+  const pagedSearchHtml = renderHtmlPage(
+    renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski", page: 2 }),
+  );
+  assert.match(pagedSearchHtml, /data-search-pagination="true"/);
+  assert.match(pagedSearchHtml, /page=3/);
   assert.match(filteredSearchHtml, /href="\/he\/search\?q=Sandanski"/);
   assert.match(searchHtml, /data-search-card="true"/);
   assert.match(searchHtml, /data-card-thumbnail="true"/);

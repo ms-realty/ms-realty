@@ -244,7 +244,7 @@ export function buildCmsCollections(seed) {
           collectionField("source_url", "url", { required: true, unique: true }),
           collectionField("facts", "group", {
             required: true,
-            fields: ["title", "h1", "description", "property_type", "location", "price", "area"],
+            fields: ["title", "h1", "description", "property_type", "location", "price_eur", "area_sqm"],
           }),
           collectionField("seo", "group", {
             required: true,

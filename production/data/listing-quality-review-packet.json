@@ -16,12 +16,13 @@
     "review_packet_endpoint": "GET /api/admin/listing-quality-review-packet"
   },
   "summary": {
-    "expected_review_rows": 7,
-    "facts_review_rows_required": 0,
+    "expected_review_rows": 165,
+    "facts_review_rows_required": 165,
     "media_review_rows_required": 7,
-    "reviewer_fields_blank": 7,
+    "reviewer_fields_blank": 165,
     "issue_counts": {
       "missing_price": 0,
+      "missing_area": 165,
       "missing_bedrooms": 0,
       "missing_location": 0,
       "missing_description": 0,
@@ -31,7 +32,8 @@
       "tour_review_pending": 0
     },
     "by_review_status": {
-      "needs_media_review": 7
+      "needs_facts_review": 158,
+      "needs_facts_and_media_review": 7
     }
   },
   "instructions": [

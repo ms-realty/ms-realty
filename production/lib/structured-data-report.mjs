@@ -8,7 +8,7 @@ import { applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { bedroomsRequired } from "./listing-facts.mjs";
 
 export const DEFAULT_STRUCTURED_DATA_REPORT = fromRoot("production", "data", "structured-data-report.json");
-const KNOWN_WARNINGS = ["missing_location", "missing_price", "missing_bedrooms", "missing_public_images", "media_review_pending"];
+const KNOWN_WARNINGS = ["missing_location", "missing_price", "missing_area", "missing_bedrooms", "missing_public_images", "media_review_pending"];
 
 function filled(value) {
   return value !== null && value !== undefined && value !== "";
@@ -25,6 +25,7 @@ function reportRow(registry, seed, entry) {
   if (entry.type === "listing") {
     if (!filled(page.body?.facts?.location)) warnings.push("missing_location");
     if (!filled(page.body?.facts?.price_eur) && page.body?.facts?.price_on_request !== true) warnings.push("missing_price");
+    if (!filled(page.body?.facts?.area_sqm)) warnings.push("missing_area");
     if (
       bedroomsRequired(page.body?.facts) &&
       !filled(page.body?.facts?.bedrooms) &&

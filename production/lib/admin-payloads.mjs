@@ -12,6 +12,7 @@ export const LISTING_EDIT_FIELDS = [
   "listing_status",
   "bedrooms",
   "bedrooms_not_applicable",
+  "area_sqm",
   "price_eur",
   "price_on_request",
 ];

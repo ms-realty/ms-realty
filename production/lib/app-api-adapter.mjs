@@ -23,7 +23,7 @@ import {
   privacySafeSavedSearch,
 } from "./saved-searches.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
-import { searchFiltersFromObject, searchFiltersFromParams } from "./search-filters.mjs";
+import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 
@@ -220,11 +220,15 @@ async function routeSearch(requestUrl, registry, seed, config) {
   const localeCode = requestUrl.searchParams.get("locale") || "bg";
   const query = requestUrl.searchParams.get("q") || "";
   const filters = searchFiltersFromParams(requestUrl.searchParams);
+  const sort = requestUrl.searchParams.get("sort") || "recommended";
+  const page = searchPageFromParams(requestUrl.searchParams);
   const translationTasks = readTranslationLedger(config.translationLedgerPath);
   const localResult = searchRuntimeListings(registry, seed, {
     localeCode,
     query,
     filters,
+    sort,
+    page,
     translationTasks,
   });
   const engineResult = await queryPublicSearch({
@@ -239,9 +243,11 @@ async function routeSearch(requestUrl, registry, seed, config) {
           localeCode,
           query,
           filters,
+          sort,
+          page,
           translationTasks,
         });
-  recordEvent({ type: "search", path: requestUrl.pathname, locale: localeCode, query, filters }, config);
+  recordEvent({ type: "search", path: requestUrl.pathname, locale: localeCode, query, filters, sort, page }, config);
   return json(200, withSearchBackend(result, engineResult));
 }
 
@@ -355,6 +361,7 @@ function routeSavedSearch(request, body, registry, seed, config) {
       localeCode: input.locale || registry.source_locale,
       query: input.query || "",
       filters,
+      pageSize: null,
       translationTasks: readTranslationLedger(config.translationLedgerPath),
     });
     const priceSnapshot = Object.fromEntries(

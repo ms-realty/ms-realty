@@ -89,6 +89,34 @@ test("saved-search alert report creates open tasks when tracked prices change", 
   assert.equal(report.rows[0].price_changes[0].previous_price_eur, report.rows[0].price_changes[0].current_price_eur + 1000);
 });
 
+test("saved-search price monitoring covers matches beyond the first result page", () => {
+  const completeSearch = searchRuntimeListings(registry, seed, {
+    localeCode: "he",
+    query: "Sandanski",
+    filters: { property_type: "apartment" },
+    pageSize: null,
+    translationTasks: [],
+  });
+  const card = completeSearch.cards.slice(12).find((candidate) => Number.isFinite(Number(candidate.price_eur)));
+  assert.ok(card, "expected a priced match beyond page one");
+  const report = buildSavedSearchAlertReport({
+    registry,
+    seed,
+    savedSearches: [
+      {
+        ...savedSearch(completeSearch.search.total_matches),
+        price_snapshot: { [card.id]: Number(card.price_eur) + 5000 },
+      },
+    ],
+    translationTasks: [],
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+
+  assert.equal(report.rows[0].new_match_count, 0);
+  assert.equal(report.rows[0].price_change_count, 1);
+  assert.equal(report.rows[0].price_changes[0].listing_id, card.id);
+});
+
 test("generated saved-search alert report is valid when present", () => {
   const file = fromRoot("production", "data", "saved-search-alert-report.json");
   if (!fs.existsSync(file)) return;

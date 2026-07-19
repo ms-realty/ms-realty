@@ -24,6 +24,7 @@ export function buildListingSchema({ path: listingPath, view, copy, publicMedia 
     additionalProperty: [
       { "@type": "PropertyValue", name: "offer_type", value: view.offer_type },
       { "@type": "PropertyValue", name: "bedrooms", value: view.bedrooms },
+      { "@type": "PropertyValue", name: "floor_area_sqm", value: asNumber(view.area_sqm) },
     ].filter((item) => filled(item.value)),
   };
 

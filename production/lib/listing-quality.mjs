@@ -15,6 +15,7 @@ export const DEFAULT_LISTING_QUALITY_REVIEW_PACKET = fromRoot("production", "dat
 
 const FACT_FIELDS_BY_ISSUE = {
   missing_price: "price_eur",
+  missing_area: "area_sqm",
   missing_bedrooms: "bedrooms",
   missing_location: "location",
   missing_description: "description",
@@ -148,6 +149,7 @@ function qualityRow(record, approvedTour = null) {
   const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
   if (!filled(facts.price_eur) && facts.price_on_request !== true) issues.push("missing_price");
+  if (!filled(facts.area_sqm)) issues.push("missing_area");
   if (bedroomsRequired(facts) && !filled(facts.bedrooms) && facts.bedrooms_not_applicable !== true) {
     issues.push("missing_bedrooms");
   }
@@ -173,6 +175,7 @@ function qualityRow(record, approvedTour = null) {
     issues,
     price_eur: facts.price_eur,
     price_on_request: facts.price_on_request === true,
+    area_sqm: facts.area_sqm,
     bedrooms: facts.bedrooms,
     bedrooms_not_applicable: facts.bedrooms_not_applicable === true,
     public_gallery_assets: publicGalleryAssets,
@@ -220,6 +223,9 @@ export function assertListingQualityReport(report) {
   if (!Object.hasOwn(report.summary.issue_counts, "missing_price")) {
     throw new Error("Listing quality report must expose missing price counts");
   }
+  if (!Object.hasOwn(report.summary.issue_counts, "missing_area")) {
+    throw new Error("Listing quality report must expose missing area counts");
+  }
   if (!Object.hasOwn(report.summary.issue_counts, "media_review_pending")) {
     throw new Error("Listing quality report must expose pending media review");
   }
@@ -247,6 +253,7 @@ export function renderListingQualityWorkbook(report) {
     "location",
     "description",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "public_gallery_assets",
     "public_gallery_sample",
@@ -279,6 +286,7 @@ export function renderListingQualityReviewDraft(report) {
   const headers = [
     "listing_id",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "location",
     "description",
@@ -296,6 +304,7 @@ export function renderListingQualityReviewDraft(report) {
   const rows = report.rows.map((row) => ({
     listing_id: row.listing_id,
     price_eur: row.required_editor_fields.includes("price_eur") ? row.price_eur || "" : "",
+    area_sqm: row.required_editor_fields.includes("area_sqm") ? row.area_sqm || "" : "",
     bedrooms: row.required_editor_fields.includes("bedrooms") ? row.bedrooms ?? "" : "",
     location: row.required_editor_fields.includes("location") ? row.location || "" : "",
     description: row.required_editor_fields.includes("description") ? row.description || "" : "",
@@ -320,7 +329,7 @@ export function buildListingQualityReviewPacket({
   reviewPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
 } = {}) {
   const factsReviewRows = report.rows.filter((row) =>
-    row.required_editor_fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field)),
+    row.required_editor_fields.some((field) => ["price_eur", "area_sqm", "bedrooms", "location", "description"].includes(field)),
   ).length;
   const mediaReviewRows = report.rows.filter((row) =>
     row.required_editor_fields.some((field) =>
@@ -381,9 +390,9 @@ export function assertListingQualityReviewPacket(packet) {
 
 function assertReviewFactValue(listingId, field, value) {
   if (!filled(value)) throw new Error(`Listing ${listingId} requires ${field}`);
-  if (field === "price_eur") {
-    const price = Number(value);
-    if (!Number.isFinite(price) || price <= 0) throw new Error(`Listing ${listingId} requires a positive price_eur`);
+  if (field === "price_eur" || field === "area_sqm") {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number <= 0) throw new Error(`Listing ${listingId} requires a positive ${field}`);
   }
   if (field === "bedrooms") {
     const bedrooms = Number(value);
@@ -446,10 +455,44 @@ function assertOptionalSnapshotList(listingId, label, actual, expected) {
   }
 }
 
+function sameReviewedFact(field, actual, expected) {
+  if (["price_eur", "area_sqm", "bedrooms"].includes(field)) return Number(actual) === Number(expected);
+  return String(actual ?? "").trim() === String(expected ?? "").trim();
+}
+
+function assertResolvedFactSnapshots(listingId, row, quality) {
+  const snapshotIssues = listValue(row.issues);
+  const currentIssues = quality.issues;
+  if (!currentIssues.every((issue) => snapshotIssues.includes(issue))) {
+    throw new Error(`Listing ${listingId} review issues is stale`);
+  }
+  const resolvedIssues = snapshotIssues.filter((issue) => !currentIssues.includes(issue));
+  if (!resolvedIssues.length || resolvedIssues.some((issue) => !FACT_FIELDS_BY_ISSUE[issue])) {
+    throw new Error(`Listing ${listingId} review issues is stale`);
+  }
+  if (row.review_status !== reviewStatus(snapshotIssues)) {
+    throw new Error(`Listing ${listingId} review review_status is stale`);
+  }
+
+  const snapshotFields = listValue(row.required_editor_fields);
+  const expectedSnapshotFields = requiredEditorFields(snapshotIssues);
+  if (JSON.stringify(snapshotFields) !== JSON.stringify(expectedSnapshotFields)) {
+    throw new Error(`Listing ${listingId} review required_editor_fields is stale`);
+  }
+  assertReviewerValue(listingId, "facts_reviewer", row.facts_reviewer);
+  for (const issue of resolvedIssues) {
+    const field = FACT_FIELDS_BY_ISSUE[issue];
+    assertReviewFactValue(listingId, field, row[field]);
+    if (!sameReviewedFact(field, row[field], quality[field])) {
+      throw new Error(`Listing ${listingId} resolved review ${field} is stale`);
+    }
+  }
+}
+
 export function validateListingQualityReviewCsv(
   report,
   csvText,
-  { allowExtraRows = false, requireComplete = false, requireSnapshots = false } = {},
+  { allowExtraRows = false, allowResolvedSnapshots = false, requireComplete = false, requireSnapshots = false } = {},
 ) {
   const rows = parseCsv(csvText);
   if (!rows.length) throw new Error("Listing quality review CSV has no rows");
@@ -480,12 +523,20 @@ export function validateListingQualityReviewCsv(
         if (expectedValue && !filled(row[field])) throw new Error(`Listing ${listingId} complete review requires ${field}`);
       }
     }
-    assertOptionalSnapshotValue(listingId, "review_status", row.review_status, quality.review_status);
     assertOptionalSnapshotValue(listingId, "editor_path", row.editor_path, quality.editor_path);
     assertOptionalSnapshotValue(listingId, "public_gallery_assets", row.public_gallery_assets, quality.public_gallery_assets);
     assertOptionalSnapshotValue(listingId, "missing_alt_text_assets", row.missing_alt_text_assets, quality.missing_alt_text_assets);
-    assertOptionalSnapshotList(listingId, "issues", row.issues, quality.issues);
-    assertOptionalSnapshotList(listingId, "required_editor_fields", row.required_editor_fields, quality.required_editor_fields);
+    const resolvedFactSnapshot =
+      allowResolvedSnapshots &&
+      filled(row.issues) &&
+      JSON.stringify(listValue(row.issues)) !== JSON.stringify(quality.issues);
+    if (resolvedFactSnapshot) {
+      assertResolvedFactSnapshots(listingId, row, quality);
+    } else {
+      assertOptionalSnapshotValue(listingId, "review_status", row.review_status, quality.review_status);
+      assertOptionalSnapshotList(listingId, "issues", row.issues, quality.issues);
+      assertOptionalSnapshotList(listingId, "required_editor_fields", row.required_editor_fields, quality.required_editor_fields);
+    }
     assertOptionalSnapshotList(listingId, "public_gallery_sample", row.public_gallery_sample, quality.public_gallery_sample);
 
     const factIssues = quality.issues.filter((issue) => FACT_FIELDS_BY_ISSUE[issue]);
@@ -561,7 +612,11 @@ function reviewState(report, reviewPath, csvText = null) {
 
   try {
     const text = csvText ?? fs.readFileSync(reviewPath, "utf8");
-    const validation = validateListingQualityReviewCsv(report, text, { allowExtraRows: true, requireSnapshots: true });
+    const validation = validateListingQualityReviewCsv(report, text, {
+      allowExtraRows: true,
+      allowResolvedSnapshots: true,
+      requireSnapshots: true,
+    });
     if (validation.summary.missing_review_rows > 0) {
       const reviewed = new Set(validation.reviews.map((review) => review.listing_id));
       const missingRows = report.rows.filter((row) => !reviewed.has(row.listing_id));

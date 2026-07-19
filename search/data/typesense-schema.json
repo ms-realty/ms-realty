@@ -105,6 +105,18 @@
       "facet": true
     },
     {
+      "name": "area_sqm",
+      "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "price_eur",
+      "type": "float",
+      "facet": true,
+      "optional": true
+    },
+    {
       "name": "price_on_request",
       "type": "bool",
       "facet": true

@@ -148,6 +148,13 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.ok(search.search.controls.filter_options.bedrooms.includes(2));
   assert.ok(search.search.total_matches > search.cards.length);
   assert.equal(search.search.returned, search.cards.length);
+  assert.deepEqual(search.search.pagination, {
+    page: 1,
+    per_page: 12,
+    total_pages: Math.ceil(search.search.total_matches / 12),
+    has_previous: false,
+    has_next: true,
+  });
   assert.ok(search.cards.length > 0);
   assert.ok(search.cards.every((card) => card.path.startsWith("/he/properties/")));
   assert.equal(search.cards.every((card) => card.actions.inquiry.endpoint === "/api/leads"), true);
@@ -194,6 +201,28 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_type, "apartment");
   assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_type", value: "apartment", active: true }]);
+});
+
+test("search paginates without duplicating cards and applies reviewed area facets", () => {
+  const withAreas = listings.map((listing, index) => ({ ...listing, area_sqm: 40 + index }));
+  const first = renderSearchPage({ registry, listings: withAreas, localeCode: "he", query: "Sandanski", page: 1 });
+  const second = renderSearchPage({ registry, listings: withAreas, localeCode: "he", query: "Sandanski", page: 2 });
+  const area = renderSearchPage({
+    registry,
+    listings: withAreas,
+    localeCode: "he",
+    filters: { area_min: "100", area_max: "120" },
+  });
+
+  assert.equal(second.search.pagination.page, 2);
+  assert.equal(second.search.pagination.has_previous, true);
+  assert.equal(first.cards.some((card) => second.cards.some((candidate) => candidate.id === card.id)), false);
+  assert.ok(area.cards.length > 0);
+  assert.ok(area.cards.every((card) => card.area_sqm >= 100 && card.area_sqm <= 120));
+  assert.deepEqual(
+    area.search.controls.active_filter_chips.map((chip) => chip.key),
+    ["area_min", "area_max"],
+  );
 });
 
 test("search price sorting is real and unavailable prices stay after priced listings", () => {

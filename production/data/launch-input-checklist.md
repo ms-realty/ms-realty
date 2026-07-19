@@ -117,15 +117,18 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 ## Content Quality Warnings
 
 - Current review evidence:
-- missing_review (path /Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv; expected 7; reviewed 0; missing 7)
+- missing_review (path /Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv; expected 165; reviewed 0; missing 165)
 - Pending review sample:
-- MS-CRAWL-0006: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0006
-- MS-CRAWL-0012: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0012
-- MS-CRAWL-0049: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0049
-- MS-CRAWL-0068: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0068
-- MS-CRAWL-0070: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0070
-- MS-CRAWL-0082: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0082
-- MS-CRAWL-0112: public_gallery (thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0112
+- MS-CRAWL-0001: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0001
+- MS-CRAWL-0002: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0002
+- MS-CRAWL-0003: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0003
+- MS-CRAWL-0004: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0004
+- MS-CRAWL-0005: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0005
+- MS-CRAWL-0006: area_sqm|public_gallery (missing_area|thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0006
+- MS-CRAWL-0007: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0007
+- MS-CRAWL-0008: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0008
+- MS-CRAWL-0009: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0009
+- MS-CRAWL-0010: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0010
 - Workbook: `production/data/listing-quality-workbook.csv`
 - Review packet: `production/data/listing-quality-review-packet.json`
 - Draft review CSV: `production/data/listing-quality-review-draft.csv`
@@ -137,7 +140,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Status report: `npm run listing:preflight:report` writes current missing/invalid listing-review state without clearing the launch gate.
 - Build path overrides: `MS_REALTY_LISTING_EDIT_LEDGER_PATH`, `MS_REALTY_TOUR_APPROVAL_LEDGER_PATH`, `MS_REALTY_LISTING_QUALITY_REPORT_PATH`, `MS_REALTY_LISTING_QUALITY_WORKBOOK_PATH`
 - Preflight report override: `MS_REALTY_LISTING_QUALITY_PREFLIGHT_REPORT_PATH`
-- Review columns: `review_status`, `required_editor_fields`, `price_eur`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
+- Review columns: `review_status`, `required_editor_fields`, `price_eur`, `area_sqm`, `bedrooms`, `location`, `description`, `facts_reviewer`, `media_reviewer`, `review_notes`
 - Launch review CSVs must retain draft snapshot columns: `editor_path`, `review_status`, `issues`, `required_editor_fields`, `public_gallery_assets`, `public_gallery_sample`, `missing_alt_text_assets`.
 - Admin review packet endpoint: `GET /api/admin/listing-quality-review-packet`
 - Admin draft endpoint: `GET /api/admin/listing-quality-review-draft`
@@ -146,7 +149,9 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - Review pack command: `npm run listing:review-pack`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
+- structured_data.missing_area: 167
 - structured_data.missing_public_images: 4
+- listing_quality.missing_area: 165
 - listing_quality.thin_public_gallery: 7
 
 ## Broker Verification

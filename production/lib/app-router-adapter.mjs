@@ -4,7 +4,7 @@ import { loadLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
-import { searchFiltersFromParams } from "./search-filters.mjs";
+import { searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
@@ -54,6 +54,7 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
         query: requestUrl.searchParams.get("q") || "",
         filters: searchFiltersFromParams(requestUrl.searchParams),
         sort: requestUrl.searchParams.get("sort") || "recommended",
+        page: searchPageFromParams(requestUrl.searchParams),
         translationTasks,
       })
     : renderRuntimePath(

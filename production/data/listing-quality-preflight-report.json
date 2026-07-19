@@ -6,21 +6,108 @@
     "status": "missing_review",
     "path": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv",
     "summary": {
-      "expected_review_rows": 7,
+      "expected_review_rows": 165,
       "review_rows": 0,
-      "missing_review_rows": 7,
+      "missing_review_rows": 165,
       "facts_review_rows": 0,
       "media_review_rows": 0
     },
     "pending_review_sample": [
       {
+        "listing_id": "MS-CRAWL-0001",
+        "target_path": "/bg/imoti/MS-CRAWL-0001",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0001",
+        "issues": [
+          "missing_area"
+        ],
+        "required_editor_fields": [
+          "area_sqm"
+        ],
+        "public_gallery_assets": 18,
+        "public_gallery_sample": [
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+          "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+          "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]"
+        ]
+      },
+      {
+        "listing_id": "MS-CRAWL-0002",
+        "target_path": "/bg/imoti/MS-CRAWL-0002",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
+        "issues": [
+          "missing_area"
+        ],
+        "required_editor_fields": [
+          "area_sqm"
+        ],
+        "public_gallery_assets": 3,
+        "public_gallery_sample": [
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]",
+          "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]",
+          "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-72x72.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]"
+        ]
+      },
+      {
+        "listing_id": "MS-CRAWL-0003",
+        "target_path": "/bg/imoti/MS-CRAWL-0003",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0003",
+        "issues": [
+          "missing_area"
+        ],
+        "required_editor_fields": [
+          "area_sqm"
+        ],
+        "public_gallery_assets": 15,
+        "public_gallery_sample": [
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
+          "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
+          "https://makler-realty.com/wp-content/uploads/2025/10/922-1-72x72.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]"
+        ]
+      },
+      {
+        "listing_id": "MS-CRAWL-0004",
+        "target_path": "/bg/imoti/MS-CRAWL-0004",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0004",
+        "issues": [
+          "missing_area"
+        ],
+        "required_editor_fields": [
+          "area_sqm"
+        ],
+        "public_gallery_assets": 9,
+        "public_gallery_sample": [
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/08/905-1-72x72.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]"
+        ]
+      },
+      {
+        "listing_id": "MS-CRAWL-0005",
+        "target_path": "/bg/imoti/MS-CRAWL-0005",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0005",
+        "issues": [
+          "missing_area"
+        ],
+        "required_editor_fields": [
+          "area_sqm"
+        ],
+        "public_gallery_assets": 9,
+        "public_gallery_sample": [
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент под наем в гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg [alt: Апартамент под наем в гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/07/899-1-72x72.jpg [alt: Апартамент под наем в гр.Сандански]"
+        ]
+      },
+      {
         "listing_id": "MS-CRAWL-0006",
         "target_path": "/bg/imoti/MS-CRAWL-0006",
         "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0006",
         "issues": [
+          "missing_area",
           "thin_public_gallery"
         ],
         "required_editor_fields": [
+          "area_sqm",
           "public_gallery"
         ],
         "public_gallery_assets": 1,
@@ -29,108 +116,85 @@
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0012",
-        "target_path": "/bg/imoti/MS-CRAWL-0012",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0012",
+        "listing_id": "MS-CRAWL-0007",
+        "target_path": "/bg/imoti/MS-CRAWL-0007",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0007",
         "issues": [
-          "thin_public_gallery"
+          "missing_area"
         ],
         "required_editor_fields": [
-          "public_gallery"
+          "area_sqm"
         ],
-        "public_gallery_assets": 2,
+        "public_gallery_assets": 7,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]",
-          "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]"
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/09/911-2-72x72.jpg [alt: продажба на апартаменти в гр.Сандански]"
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0049",
-        "target_path": "/bg/imoti/MS-CRAWL-0049",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0049",
+        "listing_id": "MS-CRAWL-0008",
+        "target_path": "/bg/imoti/MS-CRAWL-0008",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0008",
         "issues": [
-          "thin_public_gallery"
+          "missing_area"
         ],
         "required_editor_fields": [
-          "public_gallery"
+          "area_sqm"
         ],
-        "public_gallery_assets": 1,
+        "public_gallery_assets": 18,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща с двор в гр.Сандански]"
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
+          "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
+          "https://makler-realty.com/wp-content/uploads/2023/06/662-4-72x72.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0068",
-        "target_path": "/bg/imoti/MS-CRAWL-0068",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0068",
+        "listing_id": "MS-CRAWL-0009",
+        "target_path": "/bg/imoti/MS-CRAWL-0009",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0009",
         "issues": [
-          "thin_public_gallery"
+          "missing_area"
         ],
         "required_editor_fields": [
-          "public_gallery"
+          "area_sqm"
         ],
-        "public_gallery_assets": 1,
+        "public_gallery_assets": 9,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава 15дка земя в района на с.Капатово]"
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2026/06/957-1-72x72.jpg [alt: Двустаен апартамент под наем в парка на Сандански]"
         ]
       },
       {
-        "listing_id": "MS-CRAWL-0070",
-        "target_path": "/bg/imoti/MS-CRAWL-0070",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0070",
+        "listing_id": "MS-CRAWL-0010",
+        "target_path": "/bg/imoti/MS-CRAWL-0010",
+        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0010",
         "issues": [
-          "thin_public_gallery"
+          "missing_area"
         ],
         "required_editor_fields": [
-          "public_gallery"
+          "area_sqm"
         ],
-        "public_gallery_assets": 1,
+        "public_gallery_assets": 17,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава бизнес сграда в центъра на Петрич]"
-        ]
-      },
-      {
-        "listing_id": "MS-CRAWL-0082",
-        "target_path": "/bg/imoti/MS-CRAWL-0082",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0082",
-        "issues": [
-          "thin_public_gallery"
-        ],
-        "required_editor_fields": [
-          "public_gallery"
-        ],
-        "public_gallery_assets": 1,
-        "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Стопански двор]"
-        ]
-      },
-      {
-        "listing_id": "MS-CRAWL-0112",
-        "target_path": "/bg/imoti/MS-CRAWL-0112",
-        "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0112",
-        "issues": [
-          "thin_public_gallery"
-        ],
-        "required_editor_fields": [
-          "public_gallery"
-        ],
-        "public_gallery_assets": 2,
-        "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Земеделска земя в землището на с.Джигурово]",
-          "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg [alt: Земеделска земя в землището на с.Джигурово]"
+          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2024/05/987-16-72x72.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]"
         ]
       }
     ]
   },
   "summary": {
-    "affected_listings": 7,
-    "expected_review_rows": 7,
+    "affected_listings": 165,
+    "expected_review_rows": 165,
     "review_rows": 0,
-    "missing_review_rows": 7,
+    "missing_review_rows": 165,
     "facts_review_rows": 0,
     "media_review_rows": 0,
     "issue_counts": {
       "missing_price": 0,
+      "missing_area": 165,
       "missing_bedrooms": 0,
       "missing_location": 0,
       "missing_description": 0,

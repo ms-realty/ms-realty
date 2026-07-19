@@ -1,4 +1,14 @@
-export const SEARCH_FILTER_FIELDS = ["location", "property_type", "offer_type", "status", "price_min", "price_max", "bedrooms_min"];
+export const SEARCH_FILTER_FIELDS = [
+  "location",
+  "property_type",
+  "offer_type",
+  "status",
+  "price_min",
+  "price_max",
+  "bedrooms_min",
+  "area_min",
+  "area_max",
+];
 
 export function searchFiltersFromObject(input = {}) {
   const filters = {};
@@ -11,4 +21,9 @@ export function searchFiltersFromObject(input = {}) {
 
 export function searchFiltersFromParams(params) {
   return searchFiltersFromObject(Object.fromEntries(params));
+}
+
+export function searchPageFromParams(params) {
+  const page = Number(params.get("page") || 1);
+  return Number.isInteger(page) && page > 0 ? page : 1;
 }

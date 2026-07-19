@@ -24,9 +24,13 @@
     "offer_type",
     "bedrooms",
     "bedrooms_not_applicable",
+    "area_sqm",
+    "price_eur",
     "price_on_request"
   ],
   "sortableAttributes": [
+    "price_eur",
+    "area_sqm",
     "image_count",
     "word_count"
   ],

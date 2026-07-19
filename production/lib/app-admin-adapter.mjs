@@ -1428,6 +1428,7 @@ function importListingQualityRows(inputCsv, config) {
   return {
     imported: review.summary.review_rows,
     edited: edits.length,
+    factsReviewRows: review.summary.facts_review_rows,
     mediaReviewRows: review.summary.media_review_rows,
     missingReviewRows: review.summary.missing_review_rows,
     report: launchReadiness(config),

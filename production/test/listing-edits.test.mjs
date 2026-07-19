@@ -17,6 +17,7 @@ test("listing edits persist and stale dependent translations", () => {
         description: " Updated approved source description. ",
         price_eur: "123000",
         bedrooms: "2",
+        area_sqm: "86.5",
         bedrooms_not_applicable: "1",
         price_on_request: "on",
         listing_status: "sold",
@@ -33,6 +34,7 @@ test("listing edits persist and stale dependent translations", () => {
   assert.equal(rows[0].patch.description, "Updated approved source description.");
   assert.equal(rows[0].patch.price_eur, 123000);
   assert.equal(rows[0].patch.bedrooms, 2);
+  assert.equal(rows[0].patch.area_sqm, 86.5);
   assert.equal(rows[0].patch.bedrooms_not_applicable, true);
   assert.equal(rows[0].patch.price_on_request, true);
   assert.equal(rows[0].patch.listing_status, "sold");
@@ -88,6 +90,15 @@ test("listing edits reject invalid numeric facts before persistence", () => {
         patch: { bedrooms: "1.5" },
       }),
     /bedrooms must be a non-negative integer/,
+  );
+  assert.throws(
+    () =>
+      createListingEdit(seed, {
+        listingId: "MS-CRAWL-0001",
+        editor: "editor_bg",
+        patch: { area_sqm: "0" },
+      }),
+    /area_sqm must be positive/,
   );
   assert.throws(
     () =>

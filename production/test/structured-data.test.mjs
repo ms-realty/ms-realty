@@ -15,6 +15,7 @@ test("listing schema keeps launch-critical listing facts", () => {
       property_type: "apartment",
       offer_type: "sale",
       bedrooms: 2,
+      area_sqm: 86.5,
       price_eur: 100000,
       source_locale: "bg",
     },
@@ -25,6 +26,11 @@ test("listing schema keeps launch-critical listing facts", () => {
   assert.equal(assertListingSchema(schema), true);
   assert.equal(schema.offers.priceCurrency, "EUR");
   assert.equal(schema.image.length, 1);
+  assert.deepEqual(schema.additionalProperty.find((item) => item.name === "floor_area_sqm"), {
+    "@type": "PropertyValue",
+    name: "floor_area_sqm",
+    value: 86.5,
+  });
 });
 
 test("listing schema omits crawl placeholder prices and internal source metadata", () => {
@@ -85,13 +91,14 @@ test("structured data warnings use reviewed listing edits", () => {
   const reviewed = buildStructuredDataReport({
     seed: seedWithPriceGap,
     listingEdits: [
-      { listing_id: "MS-CRAWL-0001", patch: { price_eur: 123000 } },
+      { listing_id: "MS-CRAWL-0001", patch: { price_eur: 123000, area_sqm: 86.5 } },
       { listing_id: "MS-CRAWL-0044", patch: { bedrooms: 1 } },
     ],
     generatedAt: "2026-07-05T00:00:00Z",
   });
 
   assert.equal(reviewed.summary.warnings.missing_price, base.summary.warnings.missing_price - 3);
+  assert.equal(reviewed.summary.warnings.missing_area, base.summary.warnings.missing_area - 3);
   assert.equal(reviewed.summary.warnings.missing_bedrooms, base.summary.warnings.missing_bedrooms - 1);
 });
 
@@ -136,4 +143,5 @@ test("generated structured data report covers indexable listing sitemap entries"
   assert.equal(report.summary.failing_entries, 0);
   assert.equal(report.rows.some((row) => row.loc === "/en/guides/foreign-buyers" && row.schema_type === "Article"), true);
   assert.equal(Object.hasOwn(report.summary.warnings, "missing_price"), true);
+  assert.equal(Object.hasOwn(report.summary.warnings, "missing_area"), true);
 });

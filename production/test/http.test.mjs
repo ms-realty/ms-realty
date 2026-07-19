@@ -205,6 +205,7 @@ function completeListingQualityReviewCsv(workbookCsv, limit = null) {
   const headers = [
     "listing_id",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "location",
     "description",
@@ -223,11 +224,12 @@ function completeListingQualityReviewCsv(workbookCsv, limit = null) {
   const reviewRows = limit === null ? workbookRows : workbookRows.slice(0, limit);
   const rows = reviewRows.map((row) => {
     const fields = (row.required_editor_fields || "").split("|").filter(Boolean);
-    const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+    const needsFacts = fields.some((field) => ["price_eur", "area_sqm", "bedrooms", "location", "description"].includes(field));
     const needsMedia = fields.some((field) => ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field));
     return [
       row.listing_id,
       fields.includes("price_eur") ? row.price_eur || 123000 : "",
+      fields.includes("area_sqm") ? row.area_sqm || 85 : "",
       fields.includes("bedrooms") ? row.bedrooms || 2 : "",
       fields.includes("location") ? row.location || "Sandanski" : "",
       fields.includes("description") ? "Reviewed listing description" : "",
@@ -1189,7 +1191,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.status, 202);
   assert.equal(qualityImported.body.imported, 1);
   assert.equal(qualityImported.body.edited, 1);
-  assert.equal(qualityImported.body.mediaReviewRows, 1);
+  assert.equal(qualityImported.body.factsReviewRows, 1);
   assert.equal(qualityImported.body.reviewSummary.review_rows, qualityImported.body.imported);
   assert.equal(qualityImported.body.reviewSummary.missing_review_rows, qualityImported.body.missingReviewRows);
   assert.equal(
@@ -1206,8 +1208,8 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(qualityImported.body.reviewPersisted, false);
   assert.equal(qualityImported.body.reviewPath, null);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
-  assert.deepEqual(readListingEdits(listingEditLedgerPath)[0].patch, {});
-  assert.equal(readListingEdits(listingEditLedgerPath)[0].media_reviewer, "media_editor");
+  assert.deepEqual(readListingEdits(listingEditLedgerPath)[0].patch, { area_sqm: 85 });
+  assert.equal(readListingEdits(listingEditLedgerPath)[0].editor, "editor_bg");
   assert.equal(launchChecklistUnauthorized.status, 401);
   assert.equal(launchChecklist.status, 200);
   assert.equal(launchChecklist.headers["content-type"], "text/markdown; charset=utf-8");

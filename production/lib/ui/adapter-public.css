@@ -369,6 +369,25 @@ main.ct-page.pg-narrow { max-width: var(--container-md); }
 .pg-narrow .mk-empty { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
 .mk-empty__actions form { display: contents; }
 
+/* ---- Search result pagination ---- */
+.sr-pagination {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+.sr-pagination > :last-child { justify-self: end; }
+.sr-pagination__status {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .sr-pagination .mk-btn span { display: none; }
+}
+
 /* ---- Breadcrumbs as real links ---- */
 .mk-crumbs { margin-bottom: var(--space-2); }
 .mk-crumbs a { cursor: pointer; }

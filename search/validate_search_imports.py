@@ -30,6 +30,8 @@ def field_ok(value: object, field: dict[str, object]) -> bool:
         return isinstance(value, bool)
     if kind == "int32":
         return isinstance(value, int) and not isinstance(value, bool)
+    if kind == "float":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
     return False
 
 

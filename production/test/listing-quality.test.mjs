@@ -25,7 +25,7 @@ import { loadCmsSeed } from "../lib/runtime.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function needsFactReview(row) {
-  return row.required_editor_fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+  return row.required_editor_fields.some((field) => ["price_eur", "area_sqm", "bedrooms", "location", "description"].includes(field));
 }
 
 function needsMediaReview(row) {
@@ -43,6 +43,7 @@ function completeListingQualityReviewCsv(report) {
   const headers = [
     "listing_id",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "location",
     "description",
@@ -63,6 +64,7 @@ function completeListingQualityReviewCsv(report) {
       [
         row.listing_id,
         row.required_editor_fields.includes("price_eur") ? row.price_eur || 123000 : "",
+        row.required_editor_fields.includes("area_sqm") ? row.area_sqm || 85 : "",
         row.required_editor_fields.includes("bedrooms") ? row.bedrooms ?? 2 : "",
         row.required_editor_fields.includes("location") ? row.location || "Sandanski" : "",
         row.required_editor_fields.includes("description") ? "Reviewed listing description" : "",
@@ -89,6 +91,7 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.equal(report.summary.listings, 165);
   assert.ok(report.summary.affected_listings > 0);
   assert.equal(Object.hasOwn(report.summary.issue_counts, "missing_price"), true);
+  assert.equal(report.summary.issue_counts.missing_area, 165);
   assert.equal(Object.hasOwn(report.summary.issue_counts, "missing_bedrooms"), true);
   assert.equal(Object.hasOwn(report.summary.issue_counts, "media_review_pending"), true);
   assert.equal(Object.hasOwn(report.summary.issue_counts, "missing_alt_text"), true);
@@ -263,10 +266,11 @@ test("listing quality workbook gives editors importable review rows without appr
   const mediaRow = rows.find((row) => row.review_status.includes("media"));
 
   assert.equal(rows.length, report.rows.length);
-  assert.equal(factRow, undefined);
+  assert.ok(factRow);
+  assert.match(factRow.issues, /missing_area/);
   assert.ok(mediaRow);
   assert.match(mediaRow.issues, /thin_public_gallery/);
-  assert.equal(mediaRow.review_status, "needs_media_review");
+  assert.equal(mediaRow.review_status, "needs_facts_and_media_review");
   assert.match(mediaRow.required_editor_fields, /public_gallery/);
   assert.match(mediaRow.public_gallery_sample, /wp-content\/uploads/);
   assert.match(mediaRow.public_gallery_sample, /alt:/);
@@ -296,10 +300,14 @@ test("listing quality review packet is a complete draft but not launch evidence"
   assert.equal(rows.length, report.rows.length);
   assert.ok(rows.every((row) => row.media_reviewer === ""));
   assert.ok(rows.every((row) => row.facts_reviewer === ""));
-  assert.ok(rows.every((row) => row.review_notes.includes("Review public gallery")));
+  assert.ok(
+    rows
+      .filter((row) => row.required_editor_fields.includes("public_gallery"))
+      .every((row) => row.review_notes.includes("Review public gallery")),
+  );
   assert.ok(rows.every((row) => row.public_gallery_sample.includes("wp-content/uploads")));
   assert.equal(packet.paths.draft_review_csv === packet.paths.launch_review_csv, false);
-  assert.throws(() => validateListingQualityReviewCsv(report, draft, { requireComplete: true }), /media_reviewer/);
+  assert.throws(() => validateListingQualityReviewCsv(report, draft, { requireComplete: true }), /facts_reviewer|media_reviewer/);
 });
 
 test("listing quality review CSV preflight validates reviewer fixes without applying edits", () => {
@@ -316,8 +324,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   const row = report.rows.find((candidate) => candidate.review_status.includes("facts"));
   assert.ok(row, "expected a listing quality row that still requires facts review");
   const csv = [
-    "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
-    `${row.listing_id},123000,2,Sandanski,Reviewed listing description,editor_bg,media_editor,Reviewed from source evidence`,
+    "listing_id,price_eur,area_sqm,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+    `${row.listing_id},123000,85,2,Sandanski,Reviewed listing description,editor_bg,media_editor,Reviewed from source evidence`,
   ].join("\n");
 
   const result = validateListingQualityReviewCsv(report, csv);
@@ -341,11 +349,12 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
   assert.equal(completeImportSummary.ready, true);
   assert.ok(completeImportSummary.nextActions.some((action) => action.includes("listing:preflight")));
   const completeWithoutSnapshots = [
-    "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+    "listing_id,price_eur,area_sqm,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
     ...parseCsv(completeListingQualityReviewCsv(report)).map((review) =>
       [
         review.listing_id,
         review.price_eur,
+        review.area_sqm,
         review.bedrooms,
         review.location,
         review.description,
@@ -364,14 +373,14 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
     () => validateListingQualityReviewCsv(report, completeWithoutSnapshots, { requireSnapshots: true }),
     /complete review requires editor_path/,
   );
-  const reviewValues = { price_eur: "123000", bedrooms: "2", description: "Reviewed listing description" };
+  const reviewValues = { price_eur: "123000", area_sqm: "85", bedrooms: "2", description: "Reviewed listing description" };
   const expectedPatch = Object.fromEntries(
     Object.entries(reviewValues).filter(([field]) => row.required_editor_fields.includes(field)),
   );
   assert.deepEqual(result.reviews[0].patch, expectedPatch);
   assert.equal(result.reviews[0].editor, "editor_bg");
   assert.throws(
-    () => validateListingQualityReviewCsv(report, `listing_id,price_eur,bedrooms\n${row.listing_id},,2\n`),
+    () => validateListingQualityReviewCsv(report, `listing_id,price_eur,area_sqm,bedrooms\n${row.listing_id},,85,2\n`),
     /facts_reviewer|price_eur/,
   );
   assert.throws(
@@ -384,7 +393,7 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
     () =>
       validateListingQualityReviewCsv(
         report,
-        `listing_id,media_reviewer\n${mediaReviewRow.listing_id},todo\n`,
+        `listing_id,area_sqm,facts_reviewer,media_reviewer\n${mediaReviewRow.listing_id},85,editor_bg,todo\n`,
       ),
     /real media_reviewer/,
   );
@@ -393,8 +402,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       validateListingQualityReviewCsv(
         report,
         [
-          "listing_id,media_reviewer,review_notes",
-          `${mediaReviewRow.listing_id},hermes_editor,Reviewed source gallery evidence`,
+          "listing_id,area_sqm,facts_reviewer,media_reviewer,review_notes",
+          `${mediaReviewRow.listing_id},85,editor_bg,hermes_editor,Reviewed source gallery evidence`,
         ].join("\n"),
       ),
     /real media_reviewer/,
@@ -404,8 +413,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       validateListingQualityReviewCsv(
         report,
         [
-          "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
-          `${row.listing_id},123000,2,Sandanski,Reviewed listing description,codex-reviewer,media_editor,Reviewed from source evidence`,
+          "listing_id,price_eur,area_sqm,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+          `${row.listing_id},123000,85,2,Sandanski,Reviewed listing description,codex-reviewer,media_editor,Reviewed from source evidence`,
         ].join("\n"),
       ),
     /real facts_reviewer/,
@@ -415,8 +424,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       validateListingQualityReviewCsv(
         report,
         [
-          "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
-          `${row.listing_id},123000,2,Sandanski,Reviewed listing description,editor_bg,media_editor,todo`,
+          "listing_id,price_eur,area_sqm,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+          `${row.listing_id},123000,85,2,Sandanski,Reviewed listing description,editor_bg,media_editor,todo`,
         ].join("\n"),
       ),
     /real review_notes/,
@@ -426,8 +435,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       validateListingQualityReviewCsv(
         report,
         [
-          "listing_id,price_eur,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
-          `${row.listing_id},123000,2,Sandanski,Reviewed listing description,editor_bg,media_editor,`,
+          "listing_id,price_eur,area_sqm,bedrooms,location,description,facts_reviewer,media_reviewer,review_notes",
+          `${row.listing_id},123000,85,2,Sandanski,Reviewed listing description,editor_bg,media_editor,`,
         ].join("\n"),
       ),
     /requires review_notes/,
@@ -437,8 +446,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       validateListingQualityReviewCsv(
         report,
         [
-          "listing_id,media_reviewer,review_notes",
-          `${mediaReviewRow.listing_id},media_editor,Reviewed listing facts against CRM note`,
+          "listing_id,area_sqm,facts_reviewer,media_reviewer,review_notes",
+          `${mediaReviewRow.listing_id},85,editor_bg,media_editor,Reviewed listing facts against CRM note`,
         ].join("\n"),
       ),
     /media review_notes/,
@@ -448,8 +457,8 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       validateListingQualityReviewCsv(
         report,
         [
-          "listing_id,media_reviewer,review_notes",
-          `${mediaReviewRow.listing_id},media_editor,Review public gallery: currently ${mediaReviewRow.public_gallery_assets} public asset(s).`,
+          "listing_id,area_sqm,facts_reviewer,media_reviewer,review_notes",
+          `${mediaReviewRow.listing_id},85,editor_bg,media_editor,Review public gallery: currently ${mediaReviewRow.public_gallery_assets} public asset(s).`,
         ].join("\n"),
       ),
     /draft instructions/,
@@ -487,6 +496,7 @@ test("listing quality review CSV rejects stale draft snapshot columns", () => {
   const headers = [
     "listing_id",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "location",
     "description",
@@ -503,6 +513,7 @@ test("listing quality review CSV rejects stale draft snapshot columns", () => {
   const values = {
     listing_id: row.listing_id,
     price_eur: row.required_editor_fields.includes("price_eur") ? row.price_eur || 123000 : "",
+    area_sqm: row.required_editor_fields.includes("area_sqm") ? row.area_sqm || 85 : "",
     bedrooms: row.required_editor_fields.includes("bedrooms") ? row.bedrooms ?? 2 : "",
     location: row.required_editor_fields.includes("location") ? row.location || "Sandanski" : "",
     description: row.required_editor_fields.includes("description") ? "Reviewed listing description" : "",
@@ -542,6 +553,37 @@ test("listing quality review CSV rejects stale draft snapshot columns", () => {
         reviewCsv({ public_gallery_assets: row.public_gallery_assets + 1 }),
       ),
     /public_gallery_assets is stale/,
+  );
+});
+
+test("listing quality evidence accepts applied fact snapshots only when persisted values still match", () => {
+  const base = applyListingEdits(loadCmsSeed(), readListingEdits());
+  const before = buildListingQualityReport({ seed: base, generatedAt: "2026-07-05T00:00:00Z" });
+  const pending = before.rows.find((row) => row.required_editor_fields.includes("area_sqm") && row.required_editor_fields.includes("public_gallery"));
+  assert.ok(pending);
+  const reviewCsv = completeListingQualityReviewCsv({ ...before, rows: [pending] });
+  const afterSeed = {
+    ...base,
+    records: base.records.map((record) =>
+      record.id === pending.listing_id ? { ...record, facts: { ...record.facts, area_sqm: 85 } } : record,
+    ),
+  };
+  const after = buildListingQualityReport({ seed: afterSeed, generatedAt: "2026-07-05T00:01:00Z" });
+
+  const validated = validateListingQualityReviewCsv(after, reviewCsv, {
+    allowExtraRows: true,
+    allowResolvedSnapshots: true,
+    requireSnapshots: true,
+  });
+  assert.equal(validated.summary.review_rows, 1);
+  assert.throws(
+    () =>
+      validateListingQualityReviewCsv(after, reviewCsv.replace(",85,", ",86,"), {
+        allowExtraRows: true,
+        allowResolvedSnapshots: true,
+        requireSnapshots: true,
+      }),
+    /resolved review area_sqm is stale/,
   );
 });
 
@@ -610,8 +652,8 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
   assert.match(missing.stderr, /npm run listing:preflight/);
   assert.equal(valid.status, 0, valid.stderr);
   assert.match(valid.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
-  assert.match(valid.stdout, /Facts review rows: 0/);
-  assert.match(valid.stdout, new RegExp(`Media review rows: ${report.rows.length}`));
+  assert.match(valid.stdout, new RegExp(`Facts review rows: ${report.rows.length}`));
+  assert.match(valid.stdout, /Media review rows: 7/);
   assert.equal(validFromEnv.status, 0, validFromEnv.stderr);
   assert.match(validFromEnv.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
 });
@@ -715,7 +757,7 @@ test("listing quality preflight report records missing and valid human review st
         ...readyReport,
         summary: { ...readyReport.summary, facts_review_rows: readyReport.summary.facts_review_rows + 1 },
       }),
-    /summary must match review summary/,
+    /review counts cannot exceed reviewed rows|summary must match review summary/,
   );
   assert.throws(
     () =>
@@ -864,8 +906,9 @@ test("listing quality review example names current pending rows without pre-appr
   });
   const pendingIds = new Set(report.rows.map((row) => row.listing_id));
 
-  assert.equal(exampleRows.length, report.rows.length);
+  assert.ok(exampleRows.length > 0);
+  assert.ok(exampleRows.length <= report.rows.length);
   assert.ok(exampleRows.every((row) => pendingIds.has(row.listing_id)));
   assert.ok(exampleRows.every((row) => row.media_reviewer === ""));
-  assert.throws(() => validateListingQualityReviewCsv(report, exampleText), /requires media_reviewer/);
+  assert.throws(() => validateListingQualityReviewCsv(report, exampleText), /requires (area_sqm|facts_reviewer|media_reviewer)/);
 });

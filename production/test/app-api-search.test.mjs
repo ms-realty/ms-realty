@@ -116,3 +116,17 @@ test("public API search labels local data as a seed fallback only when both engi
   assert.deepEqual(body.search.backend.unavailable_engines, ["typesense", "meilisearch"]);
   assert.ok(body.search.total_matches > 0);
 });
+
+test("public API search preserves requested sorting and pagination in seed fallback mode", async () => {
+  const first = await searchResponse(searchConfig(), "locale=bg&q=Sandanski&sort=price_desc&page=1");
+  const second = await searchResponse(searchConfig(), "locale=bg&q=Sandanski&sort=price_desc&page=2");
+
+  assert.equal(first.response.status, 200);
+  assert.equal(second.response.status, 200);
+  assert.equal(first.body.search.sort, "price_desc");
+  assert.equal(second.body.search.pagination.page, 2);
+  assert.equal(second.body.search.pagination.has_previous, true);
+  assert.equal(first.body.cards.some((card) => second.body.cards.some((candidate) => candidate.id === card.id)), false);
+  const priced = first.body.cards.map((card) => Number(card.price_eur)).filter(Number.isFinite);
+  assert.deepEqual(priced, [...priced].sort((left, right) => right - left));
+});

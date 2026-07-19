@@ -62,6 +62,7 @@ function completeListingQualityReviewCsv(workbookCsv, limit = null) {
   const headers = [
     "listing_id",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "location",
     "description",
@@ -80,11 +81,12 @@ function completeListingQualityReviewCsv(workbookCsv, limit = null) {
   const reviewRows = limit === null ? workbookRows : workbookRows.slice(0, limit);
   const rows = reviewRows.map((row) => {
     const fields = (row.required_editor_fields || "").split("|").filter(Boolean);
-    const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+    const needsFacts = fields.some((field) => ["price_eur", "area_sqm", "bedrooms", "location", "description"].includes(field));
     const needsMedia = fields.some((field) => ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field));
     return [
       row.listing_id,
       fields.includes("price_eur") ? row.price_eur || 123000 : "",
+      fields.includes("area_sqm") ? row.area_sqm || 85 : "",
       fields.includes("bedrooms") ? row.bedrooms || 2 : "",
       fields.includes("location") ? row.location || "Sandanski" : "",
       fields.includes("description") ? "Reviewed listing description" : "",
@@ -963,7 +965,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityImport.status, 202);
       assert.equal(listingQualityImportBody.imported, 1);
       assert.equal(listingQualityImportBody.edited, 1);
-      assert.equal(listingQualityImportBody.mediaReviewRows, 1);
+      assert.equal(listingQualityImportBody.factsReviewRows, 1);
       assert.equal(listingQualityImportBody.reviewSummary.review_rows, listingQualityImportBody.imported);
       assert.equal(listingQualityImportBody.reviewSummary.missing_review_rows, listingQualityImportBody.missingReviewRows);
       assert.equal(
@@ -979,7 +981,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityImportBody.report.blockers.includes("listing_quality_review"), true);
       assert.equal(listingQualityImportBody.reviewPersisted, false);
       assert.equal(listingQualityImportBody.reviewPath, null);
-      assert.equal(listingQualityImportBody.edits[0].edit.media_reviewer, "media_editor");
+      assert.deepEqual(listingQualityImportBody.edits[0].edit.patch, { area_sqm: 85 });
+      assert.equal(listingQualityImportBody.edits[0].edit.editor, "editor_bg");
 
       const humanDraft = await translationDraftRoute.POST(
         new Request("https://example.test/api/admin/translations/draft", {

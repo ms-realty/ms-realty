@@ -380,6 +380,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
         "div",
         { className: "mk-pcard__specs" },
         card.bedrooms ? h("span", null, h(Icon, { name: "bed", size: 16 }), ` ${card.bedrooms}`) : null,
+        card.area_sqm ? h("span", null, h(Icon, { name: "ruler", size: 16 }), ` ${card.area_sqm} m²`) : null,
         h("span", null, h(Icon, { name: "camera", size: 16 }), ` ${card.image_count || 0}`),
         h("span", { className: "mk-pcard__ref" }, card.id),
       ),
@@ -418,15 +419,19 @@ function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
   return h(
     "dl",
     { "data-listing-facts": "true" },
-    ...["property_type", "offer_type", "bedrooms"]
+    ...["property_type", "offer_type", "bedrooms", "area_sqm"]
       .map((key) => [key, facts[key]])
       .filter(([, value]) => value !== null && value !== undefined && value !== "")
       .flatMap(([key, value]) => [
-        h("dt", { key: `${key}-term` }, labels.factLabels?.[key] || key.replaceAll("_", " ")),
+        h("dt", { key: `${key}-term` }, key === "area_sqm" ? labels.area : labels.factLabels?.[key] || key.replaceAll("_", " ")),
         h(
           "dd",
           { key: `${key}-value` },
-          key === "property_type" || key === "offer_type" ? localizedListingValue(localeCode, key, value) : value,
+          key === "property_type" || key === "offer_type"
+            ? localizedListingValue(localeCode, key, value)
+            : key === "area_sqm"
+              ? `${value} m²`
+              : value,
         ),
       ]),
   );
@@ -547,9 +552,19 @@ function HomeBody({ page }) {
    Search results (ui_kits/website/SearchResults)
    ============================================================ */
 
-const SEARCH_FILTER_QUERY_KEYS = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "status"];
+const SEARCH_FILTER_QUERY_KEYS = [
+  "location",
+  "property_type",
+  "offer_type",
+  "price_min",
+  "price_max",
+  "bedrooms_min",
+  "area_min",
+  "area_max",
+  "status",
+];
 
-function searchHref(page, omitFilter) {
+function searchHref(page, omitFilter, targetPage = 1) {
   const params = new URLSearchParams();
   if (page.search.query) params.set("q", page.search.query);
   if (page.search.sort && page.search.sort !== "recommended") params.set("sort", page.search.sort);
@@ -558,6 +573,7 @@ function searchHref(page, omitFilter) {
     const value = page.search.filters?.[key];
     if (value) params.set(key, value);
   }
+  if (targetPage > 1) params.set("page", String(targetPage));
   const query = params.toString();
   return query ? `${page.path}?${query}` : page.path;
 }
@@ -653,6 +669,27 @@ function SearchBody({ page }) {
         labels.factLabels?.bedrooms || "Bedrooms",
         filterOptions.bedrooms || [],
         (value) => `${value}+`,
+      ),
+      h(
+        "fieldset",
+        { className: "sr-fg sr-fg--area" },
+        h("legend", { className: "hdr" }, labels.area),
+        h(
+          "div",
+          { className: "sr-fg__pair" },
+          h(
+            "label",
+            { htmlFor: `${idPrefix}-area_min` },
+            labels.areaMin,
+            h("input", { id: `${idPrefix}-area_min`, name: "area_min", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.area_min || "" }),
+          ),
+          h(
+            "label",
+            { htmlFor: `${idPrefix}-area_max` },
+            labels.areaMax,
+            h("input", { id: `${idPrefix}-area_max`, name: "area_max", type: "number", min: "0", step: "any", inputMode: "decimal", defaultValue: page.search.filters?.area_max || "" }),
+          ),
+        ),
       ),
       h(
         "div",
@@ -838,6 +875,19 @@ function SearchBody({ page }) {
           { className: "sr-list", "aria-label": labels.searchResults, "data-search-results": "true" },
           ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal" })),
         ),
+        page.search.pagination?.total_pages > 1
+          ? h(
+              "nav",
+              { className: "sr-pagination", "aria-label": labels.page, "data-search-pagination": "true" },
+              page.search.pagination.has_previous
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: searchHref(page, null, page.search.pagination.page - 1), rel: "prev" }, h(Icon, { name: page.dir === "rtl" ? "arrow-right" : "arrow-left", size: 16 }), h("span", null, labels.previous))
+                : h("span"),
+              h("span", { className: "sr-pagination__status", "aria-current": "page" }, `${labels.page} ${page.search.pagination.page} / ${page.search.pagination.total_pages}`),
+              page.search.pagination.has_next
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: searchHref(page, null, page.search.pagination.page + 1), rel: "next" }, h("span", null, labels.next), h(Icon, { name: page.dir === "rtl" ? "arrow-left" : "arrow-right", size: 16 }))
+                : h("span"),
+            )
+          : null,
       ),
     ),
   );

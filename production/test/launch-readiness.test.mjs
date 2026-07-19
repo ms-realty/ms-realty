@@ -151,6 +151,7 @@ function writeListingQualityReviewFixture(dir) {
   const headers = [
     "listing_id",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "location",
     "description",
@@ -168,13 +169,14 @@ function writeListingQualityReviewFixture(dir) {
   const reviewPath = `${dir}/listing-quality.csv`;
   const rows = listingQuality.rows.map((row) => {
     const fields = row.required_editor_fields || [];
-    const needsFacts = fields.some((field) => ["price_eur", "bedrooms", "location", "description"].includes(field));
+    const needsFacts = fields.some((field) => ["price_eur", "area_sqm", "bedrooms", "location", "description"].includes(field));
     const needsMedia = fields.some((field) =>
       ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field),
     );
     return [
       row.listing_id,
       fields.includes("price_eur") ? row.price_eur || 123000 : "",
+      fields.includes("area_sqm") ? row.area_sqm || 85 : "",
       fields.includes("bedrooms") ? row.bedrooms ?? 2 : "",
       fields.includes("location") ? row.location || "Sandanski" : "",
       fields.includes("description") ? "Reviewed listing description" : "",
@@ -206,6 +208,7 @@ function writePartialListingQualityReviewFixture(dir) {
   const headers = [
     "listing_id",
     "price_eur",
+    "area_sqm",
     "bedrooms",
     "location",
     "description",
@@ -230,10 +233,11 @@ function writePartialListingQualityReviewFixture(dir) {
       [
         row.listing_id,
         "",
+        "85",
         "",
         "",
         "",
-        "",
+        "editor_bg",
         "media_editor",
         "Reviewed public gallery selection",
         row.editor_path,
@@ -639,22 +643,24 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.ok(listingGate.evidence.next_actions.some((action) => action.includes("listing:preflight")));
   assert.match(listingGate.next_actions.join(" "), /npm run listing:preflight/);
   assert.deepEqual(listingGate.evidence.summary, {
-    expected_review_rows: 7,
+    expected_review_rows: 165,
     review_rows: 0,
-    missing_review_rows: 7,
+    missing_review_rows: 165,
     facts_review_rows: 0,
     media_review_rows: 0,
   });
-  assert.equal(listingGate.evidence.pending_review_sample.length, 7);
+  assert.equal(listingGate.evidence.pending_review_sample.length, 10);
   assert.deepEqual(listingGate.evidence.pending_review_sample[0], {
-    listing_id: "MS-CRAWL-0006",
-    target_path: "/bg/imoti/MS-CRAWL-0006",
-    editor_path: "/admin/listings/edit?listingId=MS-CRAWL-0006",
-    issues: ["thin_public_gallery"],
-    required_editor_fields: ["public_gallery"],
-    public_gallery_assets: 1,
+    listing_id: "MS-CRAWL-0001",
+    target_path: "/bg/imoti/MS-CRAWL-0001",
+    editor_path: "/admin/listings/edit?listingId=MS-CRAWL-0001",
+    issues: ["missing_area"],
+    required_editor_fields: ["area_sqm"],
+    public_gallery_assets: 18,
     public_gallery_sample: [
-      "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дава под наем промишлена сграда в Сандански]",
+      "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+      "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+      "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
     ],
   });
   assert.equal(liveGate.status, "blocked");
@@ -2084,13 +2090,14 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /interim admin workbenches do not count/);
   assert.match(markdown, /production\/data\/listing-quality-workbook\.csv/);
   assert.match(markdown, /Current review evidence/);
-  assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv.*expected 7.*reviewed 0.*missing 7/);
+  assert.match(markdown, /missing_review .*migration\/reviews\/listing-quality\.csv.*expected 165.*reviewed 0.*missing 165/);
   assert.match(markdown, /Pending review sample/);
-  assert.match(markdown, /MS-CRAWL-0006: public_gallery \(thin_public_gallery\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0006/);
-  assert.match(markdown, /MS-CRAWL-0112: public_gallery \(thin_public_gallery\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0112/);
+  assert.match(markdown, /MS-CRAWL-0001: area_sqm \(missing_area\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0001/);
+  assert.match(markdown, /MS-CRAWL-0006: area_sqm\|public_gallery \(missing_area\|thin_public_gallery\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0006/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
   assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
+  assert.match(markdown, /listing_quality\.missing_area: 165/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
   assert.match(markdown, /npm run listing:preflight:report/);
   assert.match(markdown, /Draft and example rows intentionally leave reviewer fields blank/);

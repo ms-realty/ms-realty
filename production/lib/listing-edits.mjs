@@ -15,6 +15,7 @@ const EDITABLE_FACT_FIELDS = new Set([
   "listing_status",
   "bedrooms",
   "bedrooms_not_applicable",
+  "area_sqm",
   "price_eur",
   "price_on_request",
 ]);
@@ -98,6 +99,10 @@ function normalizePatchValue(field, value) {
   if (!Number.isFinite(number)) throw new Error(`${field} must be numeric`);
   if (field === "price_eur") {
     if (number <= 0) throw new Error("price_eur must be positive");
+    return number;
+  }
+  if (field === "area_sqm") {
+    if (number <= 0) throw new Error("area_sqm must be positive");
     return number;
   }
   if (field === "bedrooms") {

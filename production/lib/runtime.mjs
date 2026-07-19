@@ -49,6 +49,7 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     listing_status: record.facts.listing_status || "available",
     bedrooms: record.facts.bedrooms,
     bedrooms_not_applicable: record.facts.bedrooms_not_applicable === true,
+    area_sqm: record.facts.area_sqm ?? record.facts.area ?? null,
     price_eur: record.facts.price_eur,
     price_on_request: record.facts.price_on_request === true,
     image_count: record.facts.image_count,
@@ -210,8 +211,21 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
   return { kind: "not_found", status: 404, path: pathname, indexable: false };
 }
 
-export function searchRuntimeListings(registry, seed, { localeCode, query = "", filters = {}, sort = "recommended", translationTasks = [] }) {
-  return renderSearchPage({ registry, localeCode, listings: runtimeListings(seed, translationTasks), query, filters, sort });
+export function searchRuntimeListings(
+  registry,
+  seed,
+  { localeCode, query = "", filters = {}, sort = "recommended", page = 1, pageSize = 12, translationTasks = [] },
+) {
+  return renderSearchPage({
+    registry,
+    localeCode,
+    listings: runtimeListings(seed, translationTasks),
+    query,
+    filters,
+    sort,
+    page,
+    pageSize,
+  });
 }
 
 export function submitRuntimeLead(registry, seed, input) {

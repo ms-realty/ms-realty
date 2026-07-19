@@ -45,6 +45,8 @@ const ACTION_LABELS = {
     location: "Локация",
     propertyType: "Тип",
     area: "Площ (m²)",
+    areaMin: "Мин. площ (m²)",
+    areaMax: "Макс. площ (m²)",
     priceMin: "Мин. цена (EUR)",
     priceMax: "Макс. цена (EUR)",
     clearFilters: "Изчисти филтрите",
@@ -55,6 +57,9 @@ const ACTION_LABELS = {
     activeFilters: "Активни филтри",
     searchResults: "Резултати от търсене",
     matches: "съвпадения",
+    previous: "Предишна",
+    next: "Следваща",
+    page: "Страница",
     reviewedListings: "проверени обяви",
     locationListings: "Имоти в локацията",
     saveAndShare: "Запази и сподели",
@@ -113,6 +118,8 @@ const ACTION_LABELS = {
     location: "Location",
     propertyType: "Type",
     area: "Area (m²)",
+    areaMin: "Min. area (m²)",
+    areaMax: "Max. area (m²)",
     priceMin: "Min. price (EUR)",
     priceMax: "Max. price (EUR)",
     clearFilters: "Clear filters",
@@ -123,6 +130,9 @@ const ACTION_LABELS = {
     activeFilters: "Active filters",
     searchResults: "Search results",
     matches: "matches",
+    previous: "Previous",
+    next: "Next",
+    page: "Page",
     reviewedListings: "reviewed listings",
     locationListings: "Location listings",
     saveAndShare: "Save and share",
@@ -181,6 +191,8 @@ const ACTION_LABELS = {
     location: "Ort",
     propertyType: "Typ",
     area: "Fläche (m²)",
+    areaMin: "Mindestfläche (m²)",
+    areaMax: "Höchstfläche (m²)",
     priceMin: "Mindestpreis (EUR)",
     priceMax: "Höchstpreis (EUR)",
     clearFilters: "Filter löschen",
@@ -191,6 +203,9 @@ const ACTION_LABELS = {
     activeFilters: "Aktive Filter",
     searchResults: "Suchergebnisse",
     matches: "Treffer",
+    previous: "Zurück",
+    next: "Weiter",
+    page: "Seite",
     reviewedListings: "geprüfte Anzeigen",
     locationListings: "Immobilien am Ort",
     saveAndShare: "Speichern und teilen",
@@ -249,6 +264,8 @@ const ACTION_LABELS = {
     location: "Locatie",
     propertyType: "Type",
     area: "Oppervlakte (m²)",
+    areaMin: "Min. oppervlakte (m²)",
+    areaMax: "Max. oppervlakte (m²)",
     priceMin: "Min. prijs (EUR)",
     priceMax: "Max. prijs (EUR)",
     clearFilters: "Filters wissen",
@@ -259,6 +276,9 @@ const ACTION_LABELS = {
     activeFilters: "Actieve filters",
     searchResults: "Zoekresultaten",
     matches: "resultaten",
+    previous: "Vorige",
+    next: "Volgende",
+    page: "Pagina",
     reviewedListings: "beoordeelde objecten",
     locationListings: "Objecten op locatie",
     saveAndShare: "Bewaren en delen",
@@ -317,6 +337,8 @@ const ACTION_LABELS = {
     location: "Локация",
     propertyType: "Тип",
     area: "Площадь (м²)",
+    areaMin: "Мин. площадь (м²)",
+    areaMax: "Макс. площадь (м²)",
     priceMin: "Мин. цена (EUR)",
     priceMax: "Макс. цена (EUR)",
     clearFilters: "Очистить фильтры",
@@ -327,6 +349,9 @@ const ACTION_LABELS = {
     activeFilters: "Активные фильтры",
     searchResults: "Результаты поиска",
     matches: "совпадений",
+    previous: "Назад",
+    next: "Далее",
+    page: "Страница",
     reviewedListings: "проверенных объявлений",
     locationListings: "Объекты в локации",
     saveAndShare: "Сохранить и поделиться",
@@ -385,6 +410,8 @@ const ACTION_LABELS = {
     location: "Τοποθεσία",
     propertyType: "Τύπος",
     area: "Εμβαδόν (m²)",
+    areaMin: "Ελάχ. εμβαδόν (m²)",
+    areaMax: "Μέγ. εμβαδόν (m²)",
     priceMin: "Ελάχ. τιμή (EUR)",
     priceMax: "Μέγ. τιμή (EUR)",
     clearFilters: "Εκκαθάριση φίλτρων",
@@ -395,6 +422,9 @@ const ACTION_LABELS = {
     activeFilters: "Ενεργά φίλτρα",
     searchResults: "Αποτελέσματα αναζήτησης",
     matches: "αποτελέσματα",
+    previous: "Προηγούμενη",
+    next: "Επόμενη",
+    page: "Σελίδα",
     reviewedListings: "ελεγμένες αγγελίες",
     locationListings: "Ακίνητα τοποθεσίας",
     saveAndShare: "Αποθήκευση και κοινή χρήση",
@@ -453,6 +483,8 @@ const ACTION_LABELS = {
     location: "מיקום",
     propertyType: "סוג",
     area: "שטח (מ״ר)",
+    areaMin: "שטח מינימלי (מ״ר)",
+    areaMax: "שטח מרבי (מ״ר)",
     priceMin: "מחיר מינימום (EUR)",
     priceMax: "מחיר מקסימום (EUR)",
     clearFilters: "ניקוי מסננים",
@@ -463,6 +495,9 @@ const ACTION_LABELS = {
     activeFilters: "מסננים פעילים",
     searchResults: "תוצאות חיפוש",
     matches: "תוצאות",
+    previous: "הקודם",
+    next: "הבא",
+    page: "עמוד",
     reviewedListings: "נכסים מאושרים",
     locationListings: "נכסים באזור",
     saveAndShare: "שמירה ושיתוף",
@@ -1096,6 +1131,7 @@ function listingCard(registry, listing, locale) {
     offer_type_label: localizedListingValue(locale.code, "offer_type", view.offer_type),
     bedrooms: view.bedrooms,
     bedrooms_not_applicable: view.bedrooms_not_applicable,
+    area_sqm: view.area_sqm,
     price_eur: view.price_eur,
     price_on_request: view.price_on_request,
     listing_status: view.listing_status,
@@ -1164,6 +1200,7 @@ function matchesSearch(view, query, filters = {}) {
   if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;
   if (!numberFilter(view.price_eur, filters.price_min, filters.price_max)) return false;
   if (!numberFilter(view.bedrooms, filters.bedrooms_min, undefined)) return false;
+  if (!numberFilter(view.area_sqm, filters.area_min, filters.area_max)) return false;
   return true;
 }
 
@@ -1365,6 +1402,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         property_type: view.property_type,
         offer_type: view.offer_type,
         bedrooms: view.bedrooms,
+        area_sqm: view.area_sqm,
         price_eur: view.price_eur,
         price_on_request: view.price_on_request,
         listing_status: view.listing_status,
@@ -1401,7 +1439,16 @@ export function renderListingPage({ registry, listing, localeCode, translations,
   };
 }
 
-export function renderSearchPage({ registry, localeCode, listings, query = "", filters = {}, sort = "recommended" }) {
+export function renderSearchPage({
+  registry,
+  localeCode,
+  listings,
+  query = "",
+  filters = {},
+  sort = "recommended",
+  page = 1,
+  pageSize = 12,
+}) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const ui = uiCopyFor(locale.code);
@@ -1423,8 +1470,17 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
   );
   const selectedSort = publicSearchSort(sort);
   const sortedListings = sortListingsForPublicSearch(matchedListings, selectedSort);
-  const cards = sortedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale));
-  const activeFilterChips = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "status"]
+  const requestedPage = Number(page);
+  const normalizedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const requestedPageSize = pageSize === null ? Math.max(sortedListings.length, 1) : Number(pageSize);
+  const normalizedPageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0 ? Math.min(requestedPageSize, 1000) : 12;
+  const totalPages = Math.max(1, Math.ceil(sortedListings.length / normalizedPageSize));
+  const currentPage = Math.min(normalizedPage, totalPages);
+  const offset = (currentPage - 1) * normalizedPageSize;
+  const cards = sortedListings
+    .slice(offset, offset + normalizedPageSize)
+    .map((listing) => listingCard(registry, listing, locale));
+  const activeFilterChips = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
     .map((key) => ({ key, value: filters[key] || "", active: Boolean(filters[key]) }))
     .filter((chip) => chip.active);
 
@@ -1464,6 +1520,13 @@ export function renderSearchPage({ registry, localeCode, listings, query = "", f
       },
       total_matches: matchedListings.length,
       returned: cards.length,
+      pagination: {
+        page: currentPage,
+        per_page: normalizedPageSize,
+        total_pages: totalPages,
+        has_previous: currentPage > 1,
+        has_next: currentPage < totalPages,
+      },
       controls: {
         view_modes: [{ id: "list", label: ui.list, default: true }],
         sort_options: [
