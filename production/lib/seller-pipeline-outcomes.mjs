@@ -10,6 +10,9 @@ const ACTIONS = new Set([
   "appraisal_completed",
   "mandate_signed",
   "listing_draft_started",
+  "listing_published",
+  "offer_received",
+  "sale_completed",
   "closed_lost",
   "note",
 ]);
@@ -44,9 +47,17 @@ function initialSellerPipelineState(pipeline) {
       appraisal: pipeline.checklist?.appraisal || "not_started",
       mandate: pipeline.checklist?.mandate || "not_started",
       draft_listing: pipeline.checklist?.draft_listing || "not_started",
+      publication: pipeline.checklist?.publication || "not_started",
+      offer: pipeline.checklist?.offer || "not_started",
+      close: pipeline.checklist?.close || "not_started",
     },
     next_task: pipeline.next_task || taskFor(pipeline, "callback"),
     appraisal_at: null,
+    listing_reference: pipeline.listing_reference || null,
+    public_path: null,
+    offer_amount_eur: null,
+    sale_price_eur: null,
+    commission_eur: null,
     last_action: null,
     last_recorded_at: null,
     note_count: 0,
@@ -96,16 +107,47 @@ function applyOutcome(state, outcome) {
 
   if (outcome.action === "listing_draft_started") {
     state.stage = "listing_draft_started";
-    state.status = "completed";
     state.checklist.draft_listing = "in_progress";
-    state.next_task = taskFor(state, "listing_draft", { status: "completed" });
+    state.checklist.publication = "open";
+    state.listing_reference = outcome.listing_reference;
+    state.next_task = taskFor(state, "listing_publish");
+    return;
+  }
+
+  if (outcome.action === "listing_published") {
+    state.stage = "published";
+    state.checklist.draft_listing = "completed";
+    state.checklist.publication = "completed";
+    state.checklist.offer = "open";
+    state.listing_reference = outcome.listing_reference;
+    state.public_path = outcome.public_path;
+    state.next_task = taskFor(state, "listing_offer");
+    return;
+  }
+
+  if (outcome.action === "offer_received") {
+    state.stage = "offer_received";
+    state.checklist.offer = "completed";
+    state.checklist.close = "open";
+    state.offer_amount_eur = outcome.offer_amount_eur;
+    state.next_task = taskFor(state, "seller_close");
+    return;
+  }
+
+  if (outcome.action === "sale_completed") {
+    state.stage = "closed";
+    state.status = "completed";
+    state.checklist.close = "completed";
+    state.sale_price_eur = outcome.sale_price_eur;
+    state.commission_eur = outcome.commission_eur;
+    state.next_task = taskFor(state, "seller_close", { status: "completed" });
     return;
   }
 
   if (outcome.action === "closed_lost") {
     state.stage = "closed_lost";
     state.status = "closed_lost";
-    state.next_task = taskFor(state, "callback", { status: "closed" });
+    state.next_task = { ...(state.next_task || taskFor(state, "callback")), status: "closed" };
   }
 }
 
@@ -136,6 +178,9 @@ function queueRow(state, nowTime) {
     task_status: task.status || "open",
     due_at: task.due_at || null,
     appraisal_at: state.appraisal_at || null,
+    listing_reference: state.listing_reference || null,
+    public_path: state.public_path || null,
+    offer_amount_eur: state.offer_amount_eur,
     last_action: state.last_action,
     note_count: state.note_count,
     overdue: Number.isFinite(dueTime) && dueTime < nowTime,
@@ -179,7 +224,23 @@ export function readSellerPipelineOutcomes(filePath = DEFAULT_SELLER_PIPELINE_OU
     .map((line) => JSON.parse(line));
 }
 
-function normalizedOutcomeInput(pipeline, input, recordedAt) {
+function requiredText(value, label, max = 500) {
+  const text = String(value || "").trim();
+  if (!text || text.length > max) throw new Error(`${label} is required and must be ${max} characters or fewer`);
+  return text;
+}
+
+function money(value, label, { required = false } = {}) {
+  if (value === null || value === undefined || value === "") {
+    if (required) throw new Error(`${label} is required`);
+    return null;
+  }
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount < 0 || (required && amount === 0)) throw new Error(`${label} must be a positive amount`);
+  return Math.round(amount);
+}
+
+function normalizedOutcomeInput(pipeline, state, input, recordedAt) {
   const action = String(input.action || "").trim();
   if (!ACTIONS.has(action)) throw new Error("Seller pipeline action is invalid");
   const actor = String(input.actor || input.broker || "").trim();
@@ -196,6 +257,28 @@ function normalizedOutcomeInput(pipeline, input, recordedAt) {
   if (action === "appraisal_scheduled") {
     outcome.appraisal_at = isoTimestamp(input.appraisalAt || input.appraisal_at, "appraisalAt");
   }
+  if (action === "listing_draft_started") {
+    outcome.listing_reference = requiredText(input.listingReference || input.listing_reference, "listingReference", 120);
+  }
+  if (action === "listing_published") {
+    outcome.listing_reference = requiredText(
+      input.listingReference || input.listing_reference || state.listing_reference,
+      "listingReference",
+      120,
+    );
+    outcome.public_path = requiredText(input.publicPath || input.public_path, "publicPath", 500);
+    if (!outcome.public_path.startsWith("/") || outcome.public_path.startsWith("//")) {
+      throw new Error("publicPath must be a canonical path");
+    }
+  }
+  if (action === "offer_received") {
+    outcome.offer_amount_eur = money(input.offerAmountEur ?? input.offer_amount_eur, "offerAmountEur", { required: true });
+  }
+  if (action === "sale_completed") {
+    outcome.sale_price_eur = money(input.salePriceEur ?? input.sale_price_eur, "salePriceEur", { required: true });
+    outcome.commission_eur = money(input.commissionEur ?? input.commission_eur, "commissionEur");
+  }
+  if (action === "closed_lost" && !outcome.note) throw new Error("Closing a seller pipeline as lost requires a note");
   return outcome;
 }
 
@@ -205,7 +288,12 @@ function sameOutcome(row, outcome) {
     row.actor === outcome.actor &&
     row.action === outcome.action &&
     row.note === outcome.note &&
-    (row.appraisal_at || null) === (outcome.appraisal_at || null)
+    (row.appraisal_at || null) === (outcome.appraisal_at || null) &&
+    (row.listing_reference || null) === (outcome.listing_reference || null) &&
+    (row.public_path || null) === (outcome.public_path || null) &&
+    (row.offer_amount_eur ?? null) === (outcome.offer_amount_eur ?? null) &&
+    (row.sale_price_eur ?? null) === (outcome.sale_price_eur ?? null) &&
+    (row.commission_eur ?? null) === (outcome.commission_eur ?? null)
   );
 }
 
@@ -262,6 +350,18 @@ function assertTransition(state, outcome) {
   if (outcome.action === "listing_draft_started" && state.checklist.draft_listing !== "open") {
     throw new Error("Seller listing draft can start only after the mandate is signed");
   }
+  if (outcome.action === "listing_published" && state.checklist.publication !== "open") {
+    throw new Error("Seller listing can publish only after its draft is started");
+  }
+  if (outcome.action === "listing_published" && state.listing_reference !== outcome.listing_reference) {
+    throw new Error("Published listing reference must match the seller draft");
+  }
+  if (outcome.action === "offer_received" && state.checklist.offer !== "open") {
+    throw new Error("Seller offer can be recorded only after the listing is published");
+  }
+  if (outcome.action === "sale_completed" && state.checklist.close !== "open") {
+    throw new Error("Seller sale can close only after an offer is recorded");
+  }
 }
 
 function nextOutcomeId(rows, pipelineId) {
@@ -285,7 +385,7 @@ export function appendSellerPipelineOutcome(
   if (!pipeline) throw new Error("Seller pipeline outcome requires a known sellerPipelineId");
   const rows = readSellerPipelineOutcomes(filePath);
   const state = deriveSellerPipelineStates(pipelines, rows).find((row) => row.id === pipelineId);
-  const outcome = normalizedOutcomeInput(pipeline, input, recordedAt);
+  const outcome = normalizedOutcomeInput(pipeline, state, input, recordedAt);
   const explicitRetry = existingIdempotentOutcome(rows, outcome);
   if (explicitRetry) return { outcome: explicitRetry, seller_pipeline: state, idempotent: true };
 
@@ -315,6 +415,31 @@ export function assertSellerPipelineOutcomes(rows) {
         throw new Error("Seller appraisal must be scheduled after the recorded action");
       }
     }
+    if (["listing_draft_started", "listing_published"].includes(row.action)) {
+      requiredText(row.listing_reference, "listing_reference", 120);
+    }
+    if (row.action === "listing_published") {
+      const publicPath = requiredText(row.public_path, "public_path", 500);
+      if (!publicPath.startsWith("/") || publicPath.startsWith("//")) throw new Error("public_path must be a canonical path");
+    }
+    if (row.action === "offer_received") money(row.offer_amount_eur, "offer_amount_eur", { required: true });
+    if (row.action === "sale_completed") {
+      money(row.sale_price_eur, "sale_price_eur", { required: true });
+      money(row.commission_eur, "commission_eur");
+    }
+    if (row.action === "closed_lost" && !optionalNote(row.note)) throw new Error("Closed-lost seller outcome requires a note");
+    if (row.contact || row.email || row.phone || row.message) {
+      throw new Error("Seller pipeline outcomes must not contain customer contact or message content");
+    }
   }
   return true;
+}
+
+export function assertSellerCanCloseDeal(pipelines, outcomes, leadId) {
+  const state = deriveSellerPipelineStates(pipelines, outcomes).find((row) => row.lead_id === leadId);
+  if (!state) throw new Error("Seller deal requires a seller pipeline");
+  if (state.status !== "completed" || state.stage !== "closed") {
+    throw new Error("Seller sale must be completed before creating deal aftercare");
+  }
+  return state;
 }

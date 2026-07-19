@@ -482,6 +482,8 @@ export function createHttpApp({
     viewings: readViewings(viewingLedgerPath || undefined),
     viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
     deals: readDeals(dealLedgerPath || undefined),
+    sellerPipelines: readSellerPipeline(sellerPipelinePath || undefined),
+    sellerPipelineOutcomes: readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined),
   });
   const currentLeadPipelineQueue = () =>
     buildLeadPipelineQueue(currentLeadJourneyContext(), {

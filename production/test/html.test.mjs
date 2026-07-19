@@ -236,3 +236,43 @@ test("admin seller valuation queue renders native broker outcome controls", () =
   assert.match(html, /name="action" value="appraisal_scheduled"/);
   assert.match(html, /name="action" value="closed_lost"/);
 });
+
+test("admin seller controls continue from listing publication through offer and sale", () => {
+  const tasks = [
+    { id: "publish", stage: "listing_draft_started", task: "listing_publish", listing_reference: "MS-SELLER-1" },
+    { id: "offer", stage: "published", task: "listing_offer", listing_reference: "MS-SELLER-2", public_path: "/bg/properties/MS-SELLER-2" },
+    { id: "close", stage: "offer_received", task: "seller_close", listing_reference: "MS-SELLER-3", offer_amount_eur: 120000 },
+  ].map((row) => ({
+    seller_pipeline_id: `seller-pipeline-${row.id}`,
+    lead_id: `lead-${row.id}`,
+    property: { location: "Sandanski" },
+    owner: "broker_bg",
+    task_status: "open",
+    due_at: null,
+    overdue: false,
+    ...row,
+  }));
+  const page = renderAdminLeadsPayload(registry, "en", {
+    leads: [],
+    replies: [],
+    languageRequests: [],
+    viewings: [],
+    savedSearches: [],
+    sellerPipeline: tasks.map((row) => ({ id: row.seller_pipeline_id })),
+    sellerPipelineQueue: {
+      rows: tasks,
+      summary: { total: 3, open: 3, overdue: 0, completed: 0, closed_lost: 0 },
+    },
+    deals: [],
+    leadSla: { rows: [], summary: { manager_escalation_required: 0, reminder_required: 0 } },
+  });
+  const html = renderHtmlPage(page);
+
+  assert.match(html, /name="action" value="listing_published"/);
+  assert.match(html, /name="publicPath" required/);
+  assert.match(html, /name="action" value="offer_received"/);
+  assert.match(html, /name="offerAmountEur" type="number" min="1" step="1" required/);
+  assert.match(html, /name="action" value="sale_completed"/);
+  assert.match(html, /name="salePriceEur" type="number" min="1" step="1" required/);
+  assert.match(html, /name="commissionEur" type="number" min="0" step="1"/);
+});

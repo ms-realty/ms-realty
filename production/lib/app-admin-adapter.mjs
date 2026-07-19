@@ -403,6 +403,8 @@ function leadJourneyContext(config) {
     viewings: readViewings(config.viewingLedgerPath),
     viewingFollowUps: readViewingFollowUps(config.viewingFollowUpLedgerPath),
     deals: readDeals(config.dealLedgerPath),
+    sellerPipelines: readSellerPipeline(config.sellerPipelinePath),
+    sellerPipelineOutcomes: readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath),
   };
 }
 

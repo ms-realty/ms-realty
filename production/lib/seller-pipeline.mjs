@@ -40,6 +40,9 @@ export function createSellerPipelineItem(lead, { createdAt = new Date().toISOStr
       appraisal: "not_started",
       mandate: "not_started",
       draft_listing: "not_started",
+      publication: "not_started",
+      offer: "not_started",
+      close: "not_started",
     },
     next_task: {
       id: `seller-callback-${lead.lead.id}`,

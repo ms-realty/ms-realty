@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { assertLeadCanCloseDeal } from "./lead-pipeline-outcomes.mjs";
 import { fromRoot } from "./paths.mjs";
+import { assertSellerCanCloseDeal } from "./seller-pipeline-outcomes.mjs";
 
 export const DEFAULT_DEAL_LEDGER_PATH = fromRoot("production", "data", "deals.jsonl");
 
@@ -52,6 +53,9 @@ export function appendClosedDeal(context, input, { filePath = DEFAULT_DEAL_LEDGE
     return { ...existingForLead, idempotent: true };
   }
   assertLeadCanCloseDeal({ ...context, deals: rows }, input.leadId, normalizedClosedAt);
+  if ((lead.lead_type || lead.leadType) === "seller") {
+    assertSellerCanCloseDeal(context.sellerPipelines || [], context.sellerPipelineOutcomes || [], input.leadId);
+  }
   if (lead.received_at && Date.parse(normalizedClosedAt) < Date.parse(lead.received_at)) {
     throw new Error("closedAt cannot precede the lead received time");
   }
