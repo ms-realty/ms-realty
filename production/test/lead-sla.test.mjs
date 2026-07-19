@@ -24,23 +24,48 @@ const leads = [
 test("lead SLA report suppresses replied leads and escalates missed manager deadlines", () => {
   const report = buildLeadSlaReport({
     leads,
-    replies: [{ lead_id: "lead-answered", broker_approved: true }],
+    replies: [{ id: "reply-lead-answered", lead_id: "lead-answered", broker_approved: true }],
+    replyDeliveryOutcomes: [
+      {
+        id: "delivery-lead-answered",
+        reply_id: "reply-lead-answered",
+        lead_id: "lead-answered",
+        actor: "broker_international",
+        action: "sent",
+        channel: "email",
+        note: null,
+        sent_at: "2026-07-04T00:10:00.000Z",
+        recorded_at: "2026-07-04T00:10:00.000Z",
+      },
+    ],
     generatedAt: "2026-07-04T01:30:00Z",
   });
 
   assert.equal(assertLeadSlaReport(report), true);
-  assert.equal(report.summary.broker_replied, 1);
+  assert.equal(report.summary.customer_reply_sent, 1);
   assert.equal(report.summary.manager_escalation_required, 1);
-  assert.equal(report.rows.find((row) => row.lead_id === "lead-answered").status, "broker_replied");
+  assert.equal(report.rows.find((row) => row.lead_id === "lead-answered").status, "customer_reply_sent");
   assert.equal(report.rows.find((row) => row.lead_id === "lead-missed").manager_escalation.status, "open");
 });
 
 test("lead SLA report creates broker reminders before manager escalation", () => {
-  const report = buildLeadSlaReport({ leads: [leads[1]], replies: [], generatedAt: "2026-07-04T00:30:00Z" });
+  const report = buildLeadSlaReport({ leads: [leads[1]], replies: [], replyDeliveryOutcomes: [], generatedAt: "2026-07-04T00:30:00Z" });
 
   assert.equal(report.summary.reminder_required, 1);
   assert.equal(report.rows[0].reminder_task.status, "open");
   assert.equal(report.rows[0].manager_escalation, null);
+});
+
+test("broker approval alone does not stop the response SLA clock", () => {
+  const report = buildLeadSlaReport({
+    leads: [leads[0]],
+    replies: [{ id: "reply-lead-answered", lead_id: "lead-answered", broker_approved: true }],
+    replyDeliveryOutcomes: [],
+    generatedAt: "2026-07-04T01:30:00Z",
+  });
+
+  assert.equal(report.summary.customer_reply_sent, 0);
+  assert.equal(report.summary.manager_escalation_required, 1);
 });
 
 test("generated lead SLA report is valid when present", () => {

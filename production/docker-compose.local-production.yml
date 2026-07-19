@@ -35,15 +35,22 @@ x-app-environment: &app-environment
   MS_REALTY_LEAD_CONTACT_VAULT_PATH: /runtime-data/lead-contact-vault.jsonl
   MS_REALTY_PUBLIC_CONTACT_VAULT_PATH: /runtime-data/public-contact-vault.jsonl
   MS_REALTY_LISTING_EDIT_LEDGER_PATH: /runtime-data/listing-edits.jsonl
+  MS_REALTY_LISTING_QUALITY_REVIEW_PATH: /runtime-evidence/listing-quality-review.csv
   MS_REALTY_LOCALE_REGISTRY_PATH: /runtime-data/locales.json
+  MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH: /runtime-data/public-request-outcomes.jsonl
   MS_REALTY_REDIRECT_APPROVALS_PATH: /runtime-data/redirect-approvals.jsonl
+  MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH: /runtime-data/reply-delivery-outcomes.jsonl
   MS_REALTY_REPLY_OUTBOX_PATH: /runtime-data/reply-outbox.jsonl
   MS_REALTY_SAVED_SEARCH_LEDGER_PATH: /runtime-data/saved-searches.jsonl
   MS_REALTY_SELLER_PIPELINE_PATH: /runtime-data/seller-pipeline.jsonl
+  MS_REALTY_SELLER_PIPELINE_OUTCOME_LEDGER_PATH: /runtime-data/seller-pipeline-outcomes.jsonl
+  MS_REALTY_SEO_EVIDENCE_INPUT_DIR: /runtime-evidence/seo-inputs
+  MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: /runtime-evidence/seo-evidence-report.json
   MS_REALTY_SLUG_HISTORY_PATH: /runtime-data/slug-history.jsonl
   MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: /runtime-data/tour-approvals.jsonl
   MS_REALTY_TRANSLATION_LEDGER_PATH: /runtime-data/translation-tasks.jsonl
   MS_REALTY_VIEWING_LEDGER_PATH: /runtime-data/viewings.jsonl
+  MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH: /runtime-data/viewing-follow-ups.jsonl
   MS_REALTY_LOCAL_READINESS_SOURCE_PATH: /app/production/data/launch-readiness.json
   MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: /runtime-evidence/local-launch-readiness.json
   MS_REALTY_LOCAL_READINESS_MAX_AGE_SECONDS: "900"

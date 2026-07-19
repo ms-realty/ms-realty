@@ -621,6 +621,44 @@ export const ADMIN_APP_JS = `(function () {
         });
     });
   }
+  function setReplyDeliveryStatus(form, value, state) {
+    var status = form.querySelector("[data-reply-delivery-status]");
+    if (!status) return;
+    status.textContent = value;
+    status.setAttribute("data-state", state);
+  }
+  function initReplyDeliveryForms() {
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-reply-delivery-form")) return;
+      event.preventDefault();
+      var submitter = event.submitter;
+      var buttons = form.querySelectorAll('[type="submit"]');
+      var saving = form.getAttribute("data-reply-delivery-saving") || "Recording reply delivery…";
+      var success = form.getAttribute("data-reply-delivery-success") || "Reply delivery status recorded.";
+      var failure = form.getAttribute("data-reply-delivery-failure") || "Could not record reply delivery status.";
+      var payload = tourPayload(form);
+      if (submitter && submitter.name && submitter.value) payload[submitter.name] = submitter.value;
+      for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setReplyDeliveryStatus(form, saving, "saving");
+      submitReplyJson(form, payload)
+        .then(function (result) {
+          if (!result.delivery || !["queued", "failed", "sent"].includes(result.delivery.status)) {
+            throw new Error("invalid reply delivery response");
+          }
+          setReplyDeliveryStatus(form, success, "success");
+          window.setTimeout(function () { window.location.reload(); }, 150);
+        })
+        .catch(function (error) {
+          setReplyDeliveryStatus(form, error.message || failure, "error");
+        })
+        .then(function () {
+          form.removeAttribute("aria-busy");
+          for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
+        });
+    });
+  }
   function initReplyForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -662,12 +700,13 @@ export const ADMIN_APP_JS = `(function () {
           }
           var leadRow = form.closest("[data-lead-row]");
           if (leadRow) {
-            leadRow.setAttribute("data-lead-replied", "true");
-            leadRow.setAttribute("data-reply-queue-status", result.status);
+            leadRow.setAttribute("data-lead-replied", "false");
+            leadRow.setAttribute("data-reply-queue-status", "queued");
           }
           var details = form.closest("details");
           if (details) details.open = false;
           setReplyStatus(form, success, "success");
+          window.setTimeout(function () { window.location.reload(); }, 150);
         })
         .catch(function () {
           setReplyStatus(form, failure, "error");
@@ -684,5 +723,6 @@ export const ADMIN_APP_JS = `(function () {
   initSellerPipelineOutcomeForms();
   initPublicRequestOutcomeForms();
   initTranslationWorkflowForms();
+  initReplyDeliveryForms();
   initReplyForms();
 })();`;

@@ -7,6 +7,7 @@ import { assertAuditLog, readAuditLog } from "../lib/audit-log.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { buildLiveServiceProvisioningReport } from "../lib/live-service-provisioning.mjs";
 import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
+import { readReplyDeliveryOutcomes } from "../lib/reply-delivery-outcomes.mjs";
 
 function tempJsonl(prefix) {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`)}/${prefix}.jsonl`;
@@ -214,6 +215,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const redirectApprovalsRoute = await import("../../app/api/admin/redirect-approvals/route.js");
       const redirectApprovalsImportRoute = await import("../../app/api/admin/redirect-approvals/import/route.js");
       const replyRoute = await import("../../app/api/admin/replies/route.js");
+      const replyDeliveryRoute = await import("../../app/api/admin/replies/delivery/route.js");
       const seoEvidenceRoute = await import("../../app/api/admin/seo-evidence/route.js");
       const seoEvidenceExportRoute = await import("../../app/api/admin/seo-evidence/export/route.js");
       const seoEvidenceImportRoute = await import("../../app/api/admin/seo-evidence/import/route.js");
@@ -244,6 +246,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const listingEditorRoute = await import("../../app/admin/listings/edit/route.js");
       const migrationReviewHtmlRoute = await import("../../app/admin/migration/review/route.js");
       const migrationReviewRoute = await import("../../app/api/admin/migration/review/route.js");
+
+      assert.equal(typeof replyDeliveryRoute.POST, "function");
 
       const lead = await publicLeadRoute.POST(
         new Request("https://example.test/api/leads", {
@@ -1689,6 +1693,7 @@ test("Next admin replies bind the named production operator before queueing", as
   const leadLedgerPath = tempJsonl("app-admin-operator-reply-leads");
   const replyOutboxPath = tempJsonl("app-admin-operator-reply-outbox");
   const auditLogPath = tempJsonl("app-admin-operator-reply-audit");
+  const replyDeliveryOutcomeLedgerPath = tempJsonl("app-admin-operator-reply-delivery");
   fs.appendFileSync(
     leadLedgerPath,
     `${JSON.stringify({
@@ -1715,7 +1720,9 @@ test("Next admin replies bind the named production operator before queueing", as
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
       MS_REALTY_LEAD_LEDGER_PATH: leadLedgerPath,
       MS_REALTY_REPLY_OUTBOX_PATH: replyOutboxPath,
+      MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH: replyDeliveryOutcomeLedgerPath,
       MS_REALTY_REVIEWED_AT: "2026-07-18T18:00:00Z",
+      MS_REALTY_REPLY_DELIVERED_AT: "2026-07-18T18:05:00Z",
     });
     const headers = {
       authorization: "Bearer next-operations-token-0123456789",
@@ -1758,6 +1765,49 @@ test("Next admin replies bind the named production operator before queueing", as
     assert.equal(queuedBody.broker_approved, true);
     assert.equal(queuedBody.reviewer, "operations_lead");
     assert.equal(readAuditLog(auditLogPath).at(-1).actor, "operations_lead");
+
+    const queuedHtmlResponse = await renderAppAdminResponse(
+      new Request("https://example.test/admin/leads", { headers }),
+      { config },
+    );
+    const queuedHtml = await queuedHtmlResponse.text();
+    assert.match(queuedHtml, /data-reply-delivery-form="true"/);
+    assert.match(queuedHtml, /data-lead-replied="false"/);
+    assert.match(queuedHtml, /Broker-reviewed reply\./);
+
+    const spoofedDelivery = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/replies/delivery", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ replyId: queuedBody.id, actor: "someone_else", action: "sent", channel: "email" }),
+      }),
+      { config },
+    );
+    assert.equal(spoofedDelivery.status, 400);
+
+    const delivered = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/replies/delivery", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ replyId: queuedBody.id, action: "sent", channel: "email" }),
+      }),
+      { config },
+    );
+    const deliveredBody = await delivered.json();
+    assert.equal(delivered.status, 201);
+    assert.equal(deliveredBody.delivery.status, "sent");
+    assert.equal(deliveredBody.outcome.actor, "operations_lead");
+    assert.equal(readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath).length, 1);
+
+    const inboxResponse = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/leads", { headers }),
+      { config },
+    );
+    const inbox = await inboxResponse.json();
+    assert.equal(inbox.summary.repliesQueued, 0);
+    assert.equal(inbox.summary.repliesSent, 1);
+    assert.equal(inbox.leadSla.rows[0].status, "customer_reply_sent");
+    assert.equal(readAuditLog(auditLogPath).filter((row) => row.action === "reply_delivery_recorded").length, 1);
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];

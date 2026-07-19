@@ -858,8 +858,11 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.staleListing.body.body.description, "Updated approved source description.");
   assert.equal(smoke.admin.body.leads.length, 4);
   assert.equal(smoke.admin.body.leadSla.summary.total_leads, 4);
-  assert.equal(smoke.admin.body.leadSla.summary.manager_escalation_required, 2);
-  assert.equal(smoke.admin.body.summary.leadSlaManagerEscalations, 2);
+  assert.equal(smoke.admin.body.leadSla.summary.manager_escalation_required, 4);
+  assert.equal(smoke.admin.body.leadSla.summary.customer_reply_sent, 0);
+  assert.equal(smoke.admin.body.summary.leadSlaManagerEscalations, 4);
+  assert.equal(smoke.admin.body.summary.repliesQueued, 2);
+  assert.equal(smoke.admin.body.summary.repliesSent, 0);
   assert.equal(smoke.admin.headers["cache-control"], "no-store");
   assert.equal(smoke.admin.body.languageRequests.length, 1);
   assert.equal(smoke.adminHtml.body.includes("data-kind=\"admin-lead-inbox\""), true);
@@ -869,6 +872,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminHtml.body.includes("Срок эскалации"), true);
   assert.equal(smoke.adminHtml.body.includes('action="/api/admin/replies/draft"'), true);
   assert.equal(smoke.adminHtml.body.includes('data-hermes-draft-request="true"'), true);
+  assert.equal(smoke.adminHtml.body.includes('data-reply-delivery-form="true"'), true);
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraftText"'), true);
   assert.equal(smoke.adminHtml.body.includes('name="hermesDraft" value="true"'), false);
   assert.equal(smoke.adminHtml.headers["cache-control"], "no-store");

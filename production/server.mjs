@@ -7,7 +7,9 @@ import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mj
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH } from "./lib/lead-contact-vault.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH } from "./lib/public-contact-vault.mjs";
+import { DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH } from "./lib/public-request-outcomes.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH } from "./lib/lead-replies.mjs";
+import { DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH } from "./lib/reply-delivery-outcomes.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
@@ -15,6 +17,7 @@ import { DEFAULT_CONSENT_LEDGER_PATH } from "./lib/consent-ledger.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH } from "./lib/deal-ledger.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
+import { DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/seller-pipeline-outcomes.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./lib/slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./lib/tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./lib/translation-ledger.mjs";
@@ -59,13 +62,21 @@ export function productionServerConfig(env = process.env) {
       env.MS_REALTY_PUBLIC_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_PUBLIC_CONTACT_VAULT_PATH : null),
     publicContactKey: env.MS_REALTY_PUBLIC_CONTACT_KEY || env.MS_REALTY_LEAD_CONTACT_KEY,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
+    replyDeliveryOutcomeLedgerPath:
+      env.MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH || DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
+    publicRequestOutcomeLedgerPath:
+      env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH || DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
+    sellerPipelineOutcomeLedgerPath:
+      env.MS_REALTY_SELLER_PIPELINE_OUTCOME_PATH ||
+      env.MS_REALTY_SELLER_PIPELINE_OUTCOME_LEDGER_PATH ||
+      DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
     slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
@@ -83,6 +94,9 @@ export function productionServerConfig(env = process.env) {
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
+    publicRequestOutcomeAt: env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT,
+    replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
+    sellerPipelineOutcomeAt: env.MS_REALTY_SELLER_PIPELINE_OUTCOME_AT,
   };
 }
 
@@ -97,13 +111,16 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     publicContactVaultPath: config.publicContactVaultPath,
     publicContactKey: config.publicContactKey,
     replyOutboxPath: config.replyOutboxPath,
+    replyDeliveryOutcomeLedgerPath: config.replyDeliveryOutcomeLedgerPath,
     languageRequestPath: config.languageRequestPath,
     translationLedgerPath: config.translationLedgerPath,
     listingEditLedgerPath: config.listingEditLedgerPath,
     viewingLedgerPath: config.viewingLedgerPath,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,
     savedSearchLedgerPath: config.savedSearchLedgerPath,
+    publicRequestOutcomeLedgerPath: config.publicRequestOutcomeLedgerPath,
     sellerPipelinePath: config.sellerPipelinePath,
+    sellerPipelineOutcomeLedgerPath: config.sellerPipelineOutcomeLedgerPath,
     dealLedgerPath: config.dealLedgerPath,
     slugHistoryPath: config.slugHistoryPath,
     brokerContactLedgerPath: config.brokerContactLedgerPath,
@@ -121,6 +138,9 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     liveServiceProvisioningReportPath: config.liveServiceProvisioningReportPath,
     payloadRuntimeReportPath: config.payloadRuntimeReportPath,
     viewingFollowUpAt: config.viewingFollowUpAt,
+    publicRequestOutcomeAt: config.publicRequestOutcomeAt,
+    replyDeliveredAt: config.replyDeliveredAt,
+    sellerPipelineOutcomeAt: config.sellerPipelineOutcomeAt,
   });
 }
 

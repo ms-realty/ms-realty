@@ -42,6 +42,27 @@ function hasHermesDraftReference(input) {
   return Boolean(input.hermesDraft || input.hermesDraftText || input.translatedDraft);
 }
 
+function sameReviewedReply(left, right) {
+  return [
+    "id",
+    "lead_id",
+    "listing_reference",
+    "original_language",
+    "message_original",
+    "reply_language",
+    "translated_draft",
+    "reviewed_reply",
+    "reviewer",
+    "status",
+    "broker_approved",
+    "hermes_draft_used",
+    "hermes_draft_referenced",
+    "show_original_available",
+    "show_original_requested",
+    "translated_draft_available",
+  ].every((key) => (left[key] ?? null) === (right[key] ?? null));
+}
+
 function parseJsonObject(value) {
   if (value && typeof value === "object" && !Array.isArray(value)) return value;
   return JSON.parse(String(value || "").trim().replace(/^```(?:json)?\s*|\s*```$/g, ""));
@@ -184,14 +205,29 @@ export function appendReviewedReply(
     translated_draft_available: Boolean(translatedDraft),
   };
 
+  const existingRows = readReplyOutbox(filePath);
+  const existing = existingRows.find((candidate) => candidate.id === row.id || candidate.lead_id === row.lead_id);
+  if (existing) {
+    if (!sameReviewedReply(existing, row)) {
+      throw new Error("Lead already has a different broker-reviewed reply");
+    }
+    return { ...existing, idempotent: true };
+  }
+
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
-  return row;
+  return { ...row, idempotent: false };
 }
 
 export function assertReplyOutbox(rows) {
   if (!rows.length) throw new Error("Reply outbox must contain at least one row");
+  const ids = new Set();
+  const leadIds = new Set();
   for (const row of rows) {
+    if (!row.id || ids.has(row.id)) throw new Error("Reply outbox ids must be present and unique");
+    if (leadIds.has(row.lead_id)) throw new Error("Reply outbox must contain at most one reviewed reply per lead");
+    ids.add(row.id);
+    leadIds.add(row.lead_id);
     if (!row.lead_id || !row.reviewed_reply || row.broker_approved !== true) {
       throw new Error("Reply outbox row is missing approval data");
     }

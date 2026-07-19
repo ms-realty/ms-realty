@@ -88,7 +88,7 @@ What it proves now:
 - Next App Router admin read pages for CRM lead inbox and CMS listing editor behind the same bearer auth gate.
 - Next App Router admin lead inbox, listing editor, and migration review can render through the React admin body bridge.
 - Next App Router admin JSON lead inbox endpoint for broker CRM consumers.
-- Next App Router admin write handlers for reviewed replies and listing edits used by those admin pages.
+- Next App Router admin write handlers for reviewed replies, attributed reply-delivery outcomes, and listing edits used by those admin pages.
 - Next App Router admin CRM lifecycle handlers for viewing bookings, private append-only follow-up outcomes, viewing calendar export, and deal close tasks.
 - Next App Router admin media/contact handlers for reviewed broker contacts and approved 360 tours.
 - Next App Router admin locale and translation handlers for dynamic language rollout without AI auto-publish.
@@ -105,12 +105,12 @@ What it proves now:
 - Append-only lead ledger for persisted buyer inquiry, viewing request, contact callback, and seller valuation smoke rows, including source classification.
 - Lead intake returns a deterministic instant-confirmation contract without sending unreviewed messages.
 - Lead ledger rows create an immediate broker follow-up SLA task and manager escalation timestamp.
-- Lead SLA report creates broker reminders and manager escalations from unreplied missed leads.
+- Lead SLA report creates broker reminders and manager escalations until actual customer delivery is recorded; broker approval alone does not stop the clock.
 - Broker assignment is rules-based by language plus listing location/type, with validated manual override.
 - Lead ledger duplicate detection stores privacy-safe contact fingerprints instead of raw contact fields.
 - Gated admin lead inbox JSON endpoint with BG/RU/EN interface locale support.
 - Gated admin lead inbox HTML endpoint with BG/RU/EN interface locale support.
-- Broker-approved reply outbox for reviewed CRM replies; Hermes drafts are never auto-sent.
+- Broker-approved reply outbox for reviewed CRM replies plus an append-only queued/failed/requeued/sent delivery ledger; Hermes drafts are never auto-sent and only a human-attributed sent outcome completes the reply SLA.
 - Broker reply approval accepts JSON and form-encoded admin submissions.
 - Broker-booked viewing ledger with open follow-up tasks and admin `.ics` calendar export from existing CRM leads.
 - Private append-only viewing outcomes (complete, reschedule, no-show, note) retain booking history, protect note content from the audit metadata, and leave actionable follow-up/feedback tasks in the broker queue.

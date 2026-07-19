@@ -54,6 +54,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     leadSla: providedLeadSla,
     leadSlaGeneratedAt,
     operatorId,
+    replyDeliveryQueue: providedReplyDeliveryQueue,
     viewingFollowUpQueue: providedViewingFollowUpQueue,
     sellerPipelineQueue: providedSellerPipelineQueue,
     publicRequestQueue: providedPublicRequestQueue,
@@ -64,8 +65,16 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     buildLeadSlaReport({
       leads: data.leads,
       replies: data.replies,
+      replyDeliveryStates: providedReplyDeliveryQueue?.states || [],
       generatedAt: leadSlaGeneratedAt,
     });
+  const replyDeliveryQueue =
+    providedReplyDeliveryQueue ||
+    {
+      rows: [],
+      states: [],
+      summary: { total: data.replies.length, queued: data.replies.length, failed: 0, sent: 0 },
+    };
   const viewingFollowUpQueue =
     providedViewingFollowUpQueue ||
     {
@@ -114,12 +123,16 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
     ...payloadData,
     leadSla,
+    replyDeliveryQueue,
     viewingFollowUpQueue,
     sellerPipelineQueue,
     publicRequestQueue,
     summary: {
       leads: data.leads.length,
       replies: data.replies.length,
+      repliesQueued: replyDeliveryQueue.summary.queued,
+      repliesFailed: replyDeliveryQueue.summary.failed,
+      repliesSent: replyDeliveryQueue.summary.sent,
       leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
       leadSlaReminders: leadSla.summary.reminder_required,
       languageRequests: data.languageRequests.length,

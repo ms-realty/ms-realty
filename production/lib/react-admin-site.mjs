@@ -87,7 +87,7 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Провереният отговор не можа да бъде поставен на опашка.",
     skipToContent: "Към съдържанието",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
+      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
@@ -97,7 +97,7 @@ const ADMIN_UI_COPY = {
       buyer: "Купувач", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
-      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
+      general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", price_eur: "Цена в EUR", area_sqm: "Площ в m²", bedrooms: "Спални" },
@@ -175,7 +175,7 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Не удалось поставить проверенный ответ в очередь.",
     skipToContent: "К содержанию",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
+      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
@@ -185,7 +185,7 @@ const ADMIN_UI_COPY = {
       buyer: "Покупатель", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
-      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
+      general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", price_eur: "Цена в EUR", area_sqm: "Площадь в m²", bedrooms: "Спальни" },
@@ -263,7 +263,7 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Could not queue the reviewed reply.",
     skipToContent: "Skip to content",
     auditActions: {
-      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
+      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
@@ -273,7 +273,7 @@ const ADMIN_UI_COPY = {
       buyer: "Buyer", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
-      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
+      general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", price_eur: "Price in EUR", area_sqm: "Area in m²", bedrooms: "Bedrooms" },
@@ -569,16 +569,23 @@ function adminShell(page, { title, mainAttrs, children }) {
 
 function leadQueueState(page) {
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
-  const repliedLeadIds = new Set((page.replies || []).map((reply) => reply.lead_id || reply.leadId).filter(Boolean));
+  const deliveryByLeadId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.lead_id, row]));
+  const repliedLeadIds = new Set(
+    (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
+  );
   const priority = (lead) => {
-    if (repliedLeadIds.has(lead.lead_id)) return 4;
+    const delivery = deliveryByLeadId.get(lead.lead_id);
+    if (repliedLeadIds.has(lead.lead_id)) return 5;
+    if (delivery?.status === "failed") return 0;
     const status = leadSlaById.get(lead.lead_id)?.status || "pending";
-    if (status === "manager_escalation_required") return 0;
-    if (status === "reminder_required") return 1;
-    return 2;
+    if (status === "manager_escalation_required") return 1;
+    if (delivery?.status === "queued") return 2;
+    if (status === "reminder_required") return 3;
+    return 4;
   };
   return {
     leadSlaById,
+    deliveryByLeadId,
     repliedLeadIds,
     pending: [...(page.leads || [])]
       .filter((lead) => !repliedLeadIds.has(lead.lead_id))
@@ -1012,25 +1019,115 @@ function ActivityBody({ page }) {
    Lead inbox (ui_kits/crm Dashboard + Messages patterns)
    ============================================================ */
 
+function ReplyDeliveryForm({ page, reply, delivery, copy, ui }) {
+  const failed = delivery?.status === "failed";
+  const status = delivery?.status || "queued";
+  const operator = currentOperatorId(page, reply.reviewer);
+  return h(
+    "details",
+    { className: "adm-delivery", open: failed, "data-reply-delivery": status },
+    h(
+      "summary",
+      { className: `mk-btn ${failed ? "mk-btn--accent" : "mk-btn--primary"} mk-btn--sm` },
+      h(Icon, { name: failed ? "triangle-alert" : "send", size: 16 }),
+      h("span", null, failed ? statusText(ui, "failed") : label(copy, "queuedForManualSend", "Ready for manual sending")),
+    ),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/replies/delivery",
+        className: "adm-delivery-form",
+        "data-reply-delivery-form": "true",
+        "data-reply-delivery-saving": label(copy, "replyDeliverySaving", "Recording reply delivery…"),
+        "data-reply-delivery-success": label(copy, "replyDeliverySaved", "Reply delivery status recorded."),
+        "data-reply-delivery-failure": label(copy, "replyDeliverySaveFailed", "Could not record reply delivery status."),
+      },
+      h("input", { type: "hidden", name: "replyId", value: reply.id }),
+      h("input", { type: "hidden", name: "actor", value: operator }),
+      h(
+        "div",
+        { className: "adm-delivery-form__meta" },
+        h(StatusPill, { tone: failed ? "brick" : "sun" }, statusText(ui, status)),
+        h("span", null, `${label(copy, "reviewer", "Reviewer")}: ${reply.reviewer}`),
+        h("time", { dateTime: reply.reviewed_at, title: reply.reviewed_at }, formatAdminDateTime(reply.reviewed_at, page.workspace?.locale)),
+      ),
+      h(
+        "label",
+        null,
+        label(copy, "reviewedReply", "Reviewed reply"),
+        h("textarea", {
+          rows: 5,
+          readOnly: true,
+          defaultValue: reply.reviewed_reply,
+          "data-approved-reply": "true",
+        }),
+      ),
+      h(
+        "label",
+        null,
+        label(copy, "deliveryChannel", "Delivery channel"),
+        h(
+          "select",
+          { name: "channel", required: !failed },
+          h("option", { value: "" }, "—"),
+          ...["email", "phone", "whatsapp", "viber", "sms", "other"].map((channel) =>
+            h("option", { key: channel, value: channel, selected: delivery?.delivery_channel === channel }, valueText(ui, channel)),
+          ),
+        ),
+      ),
+      h(
+        "label",
+        null,
+        label(copy, "deliveryNote", "Delivery note"),
+        h("textarea", { name: "note", rows: 3, maxLength: 2000, required: failed }),
+      ),
+      h(
+        "div",
+        { className: "adm-delivery-form__actions" },
+        failed
+          ? h(
+              "button",
+              { type: "submit", name: "action", value: "requeue", formNoValidate: true, className: "mk-btn mk-btn--secondary mk-btn--sm" },
+              label(copy, "requeueReply", "Return to queue"),
+            )
+          : [
+              h("button", { key: "sent", type: "submit", name: "action", value: "sent", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "markSent", "Mark sent")),
+              h("button", { key: "failed", type: "submit", name: "action", value: "failed", className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "recordDeliveryFailure", "Record delivery failure")),
+            ],
+      ),
+      h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-delivery-status": "true" }),
+    ),
+  );
+}
+
 function LeadInboxBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
-  const repliedLeadIds = new Set((page.replies || []).map((reply) => reply.lead_id || reply.leadId).filter(Boolean));
+  const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
+  const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
+  const repliedLeadIds = new Set(
+    (page.replyDeliveryQueue?.states || []).filter((row) => row.status === "sent").map((row) => row.lead_id),
+  );
   const leadPriority = (lead) => {
-    if (repliedLeadIds.has(lead.lead_id)) return 3;
+    const reply = replyByLeadId.get(lead.lead_id);
+    const delivery = reply ? deliveryByReplyId.get(reply.id) : null;
+    if (repliedLeadIds.has(lead.lead_id)) return 5;
+    if (delivery?.status === "failed") return 0;
     const status = leadSlaById.get(lead.lead_id)?.status || "pending";
-    if (status === "manager_escalation_required") return 0;
-    if (status === "reminder_required") return 1;
-    return 2;
+    if (status === "manager_escalation_required") return 1;
+    if (delivery?.status === "queued") return 2;
+    if (status === "reminder_required") return 3;
+    return 4;
   };
   const leads = [...page.leads].sort((left, right) => leadPriority(left) - leadPriority(right));
   const needsReply = leads.filter((lead) => !repliedLeadIds.has(lead.lead_id));
   const metrics = [
     [label(copy, "needsReply", "Needs reply"), needsReply.length, "messages-square", "sea"],
+    [label(copy, "repliesQueued", "Replies queued"), page.summary.repliesQueued, "send", "sun"],
+    [statusText(ui, "failed"), page.summary.repliesFailed, "triangle-alert", "brick"],
     [label(copy, "managerEscalations", "Manager escalations"), page.summary.leadSlaManagerEscalations, "triangle-alert", "brick"],
-    [label(copy, "viewings", "Viewings"), page.summary.viewings, "calendar-check", "success"],
-    [label(copy, "sellerPipeline", "Seller pipeline"), page.summary.sellerPipeline, "landmark", "sand"],
   ];
   const title = label(copy, "leadInbox", "Lead inbox");
   const leadColumns = {
@@ -1090,6 +1187,9 @@ function LeadInboxBody({ page }) {
               ...leads.map((lead) => {
                 const leadSla = leadSlaById.get(lead.lead_id);
                 const slaStatus = leadSla?.status || "pending";
+                const queuedReply = replyByLeadId.get(lead.lead_id);
+                const delivery = queuedReply ? deliveryByReplyId.get(queuedReply.id) : null;
+                const delivered = delivery?.status === "sent";
                 const brokerId = lead.broker_assignment?.broker_id || "";
                 const leadContext = [lead.listing_reference, lead.property?.location].filter(Boolean).join(" / ");
                 const requestDetails = requestDetailsText(lead);
@@ -1105,8 +1205,9 @@ function LeadInboxBody({ page }) {
                     "data-admin-locale": lead.admin_locale,
                     "data-contact-preference": lead.contact_preference,
                     "data-broker-assignment": brokerId,
-                    "data-lead-replied": repliedLeadIds.has(lead.lead_id) ? "true" : "false",
-                    hidden: repliedLeadIds.has(lead.lead_id),
+                    "data-lead-replied": delivered ? "true" : "false",
+                    "data-reply-queue-status": delivery && !delivered ? delivery.status : undefined,
+                    hidden: delivered,
                   },
                   h(
                     "td",
@@ -1143,6 +1244,7 @@ function LeadInboxBody({ page }) {
                   h(
                     "td",
                     { className: "adm-reply-cell", "data-lead-column": "reply", "data-label": leadColumns.reply },
+                    queuedReply && delivery && !delivered ? h(ReplyDeliveryForm, { page, reply: queuedReply, delivery, copy, ui }) : null,
                     h(
                       "form",
                       {

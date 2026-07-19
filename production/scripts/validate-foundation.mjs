@@ -882,8 +882,8 @@ assertLeadLedger(leadLedger);
 if (leadLedger.length !== 4) throw new Error("Lead ledger artifact must contain buyer, viewing, contact, and seller smoke rows");
 const leadSla = JSON.parse(fs.readFileSync(fromRoot("production", "data", "lead-sla-report.json"), "utf8"));
 assertLeadSlaReport(leadSla);
-if (leadSla.summary.manager_escalation_required !== 2 || leadSla.summary.broker_replied !== 2) {
-  throw new Error("Lead SLA report must create manager escalations only for unreplied missed leads");
+if (leadSla.summary.manager_escalation_required !== 4 || leadSla.summary.customer_reply_sent !== 0) {
+  throw new Error("Lead SLA report must keep approved-but-undelivered smoke replies in manager escalation");
 }
 const leadMatching = JSON.parse(fs.readFileSync(fromRoot("production", "data", "lead-matching-report.json"), "utf8"));
 assertLeadMatchingReport(leadMatching);

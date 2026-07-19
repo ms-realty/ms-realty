@@ -31,6 +31,12 @@ import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, withLeadContacts } from "./lead-contact-vault.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
+import {
+  DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH,
+  appendReplyDeliveryOutcome,
+  buildReplyDeliveryQueue,
+  readReplyDeliveryOutcomes,
+} from "./reply-delivery-outcomes.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import {
   buildListingQualityReviewPacket,
@@ -154,6 +160,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
+    replyDeliveryOutcomeLedgerPath:
+      env.MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH || DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     sellerPipelineOutcomeLedgerPath:
@@ -174,6 +182,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     editedAt: env.MS_REALTY_EDITED_AT,
     reviewedAt: env.MS_REALTY_REVIEWED_AT,
     publicRequestOutcomeAt: env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT,
+    replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
   };
 }
 
@@ -398,6 +407,7 @@ function currentPublicRequestQueue(config) {
 }
 
 function leadInboxPayload(registry, url, config) {
+  const replies = readReplyOutbox(config.replyOutboxPath);
   const viewings = readViewings(config.viewingLedgerPath);
   const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
   const sellerPipeline = readSellerPipeline(config.sellerPipelinePath);
@@ -407,7 +417,11 @@ function leadInboxPayload(registry, url, config) {
       filePath: config.leadContactVaultPath,
       secret: config.leadContactKey,
     }),
-    replies: readReplyOutbox(config.replyOutboxPath),
+    replies,
+    replyDeliveryQueue: buildReplyDeliveryQueue(
+      replies,
+      readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath),
+    ),
     languageRequests: readLanguageRequests(config.languageRequestPath),
     translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     listingEdits: readListingEdits(config.listingEditLedgerPath),
@@ -962,17 +976,19 @@ function appendReply(input, config) {
       reviewedAt: config.reviewedAt,
     },
   );
-  recordAudit(
-    {
-      action: "reply_approved",
-      actor: reply.reviewer,
-      objectType: "reply",
-      objectId: reply.id,
-      locale: reply.reply_language,
-      metadata: { lead_id: reply.lead_id, hermes_draft_used: reply.hermes_draft_used, status: reply.status },
-    },
-    config,
-  );
+  if (!readAuditLog(config.auditLogPath).some((row) => row.action === "reply_approved" && row.object_id === reply.id)) {
+    recordAudit(
+      {
+        action: "reply_approved",
+        actor: reply.reviewer,
+        objectType: "reply",
+        objectId: reply.id,
+        locale: reply.reply_language,
+        metadata: { lead_id: reply.lead_id, hermes_draft_used: reply.hermes_draft_used, status: reply.status },
+      },
+      config,
+    );
+  }
   return reply;
 }
 
@@ -1115,6 +1131,41 @@ function appendPublicRequestOutcomeEntry(input, config) {
           action: result.outcome.action,
           status: result.request.status,
           next_follow_up_at: result.request.next_follow_up_at,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return result;
+}
+
+function appendReplyDeliveryOutcomeEntry(input, config) {
+  const recordedAt = config.replyDeliveredAt || config.reviewedAt || new Date().toISOString();
+  const result = appendReplyDeliveryOutcome(
+    readReplyOutbox(config.replyOutboxPath),
+    bindAuthenticatedOperator(input, config.adminPrincipal),
+    { filePath: config.replyDeliveryOutcomeLedgerPath, recordedAt },
+  );
+  if (
+    !readAuditLog(config.auditLogPath).some(
+      (row) => row.action === "reply_delivery_recorded" && row.object_id === result.outcome.id,
+    )
+  ) {
+    recordAudit(
+      {
+        action: "reply_delivery_recorded",
+        actor: result.outcome.actor,
+        objectType: "reply_delivery_outcome",
+        objectId: result.outcome.id,
+        locale: result.delivery.reply_language,
+        metadata: {
+          reply_id: result.delivery.reply_id,
+          lead_id: result.delivery.lead_id,
+          action: result.outcome.action,
+          channel: result.outcome.channel,
+          status: result.delivery.status,
+          sent_at: result.delivery.sent_at,
         },
       },
       config,
@@ -1688,7 +1739,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.reviewPersisted ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
-      return jsonResponse(201, appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      const reply = appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(reply.idempotent ? 200 : 201, reply);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
+      const result = appendReplyDeliveryOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));

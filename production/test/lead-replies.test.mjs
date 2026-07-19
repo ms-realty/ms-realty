@@ -69,6 +69,33 @@ test("reply outbox requires known lead and broker approval", () => {
   assert.equal(assertReplyOutbox(rows), true);
 });
 
+test("reviewed reply retries are idempotent and conflicting duplicates are rejected", () => {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reply-idempotency-`)}/replies.jsonl`;
+  resetReplyOutbox(file);
+  const leads = [{ lead_id: "lead-retry", listing_reference: "MS-CRAWL-0001", original_language: "en" }];
+  const input = {
+    leadId: "lead-retry",
+    language: "en",
+    reviewedReply: "Approved reply.",
+    reviewer: "broker_en",
+    approved: true,
+  };
+  const created = appendReviewedReply(leads, input, { filePath: file, reviewedAt: "2026-07-18T10:00:00Z" });
+  const retried = appendReviewedReply(leads, input, { filePath: file, reviewedAt: "2026-07-18T10:01:00Z" });
+  assert.equal(created.idempotent, false);
+  assert.equal(retried.idempotent, true);
+  assert.equal(readReplyOutbox(file).length, 1);
+  assert.throws(
+    () =>
+      appendReviewedReply(
+        leads,
+        { ...input, reviewedReply: "A conflicting approved reply." },
+        { filePath: file, reviewedAt: "2026-07-18T10:02:00Z" },
+      ),
+    /different broker-reviewed reply/,
+  );
+});
+
 test("Hermes reply draft calls provider and logs redacted model audit before broker approval", async () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-reply-draft-`);
   const auditLogPath = `${dir}/audit-log.jsonl`;

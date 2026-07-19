@@ -16,6 +16,11 @@ import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
+import {
+  appendReplyDeliveryOutcome,
+  buildReplyDeliveryQueue,
+  readReplyDeliveryOutcomes,
+} from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
@@ -329,6 +334,7 @@ export function createHttpApp({
   publicContactVaultPath = null,
   publicContactKey = null,
   replyOutboxPath = null,
+  replyDeliveryOutcomeLedgerPath = null,
   languageRequestPath = null,
   translationLedgerPath = null,
   listingEditLedgerPath = null,
@@ -365,6 +371,7 @@ export function createHttpApp({
   viewingFollowUpAt,
   savedAt,
   publicRequestOutcomeAt,
+  replyDeliveredAt,
   sellerPipelineCreatedAt,
   sellerPipelineOutcomeAt,
   dealClosedAt,
@@ -431,10 +438,20 @@ export function createHttpApp({
       now: publicRequestOutcomeAt || reviewedAt || receivedAt || new Date().toISOString(),
     });
   };
+  const currentReplyData = () => {
+    const replies = readReplyOutbox(replyOutboxPath || undefined);
+    return {
+      replies,
+      replyDeliveryQueue: buildReplyDeliveryQueue(
+        replies,
+        readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined),
+      ),
+    };
+  };
   const currentAdminLeadPayload = (requestedLocale, operatorId = null) =>
     renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads: currentLeads(),
-      replies: readReplyOutbox(replyOutboxPath || undefined),
+      ...currentReplyData(),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
       translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
       listingEdits: readListingEdits(listingEditLedgerPath || undefined),
@@ -1419,15 +1436,60 @@ export function createHttpApp({
           filePath: replyOutboxPath || undefined,
           reviewedAt,
         });
-        recordAudit({
-          action: "reply_approved",
-          actor: reply.reviewer,
-          objectType: "reply",
-          objectId: reply.id,
-          locale: reply.reply_language,
-          metadata: { lead_id: reply.lead_id, hermes_draft_used: reply.hermes_draft_used, status: reply.status },
-        });
-        return adminJson(201, reply);
+        const existingAudit = auditLogPath
+          ? readAuditLog(auditLogPath).some((row) => row.action === "reply_approved" && row.object_id === reply.id)
+          : false;
+        if (!existingAudit) {
+          recordAudit({
+            action: "reply_approved",
+            actor: reply.reviewer,
+            objectType: "reply",
+            objectId: reply.id,
+            locale: reply.reply_language,
+            metadata: { lead_id: reply.lead_id, hermes_draft_used: reply.hermes_draft_used, status: reply.status },
+          });
+        }
+        return adminJson(reply.idempotent ? 200 : 201, reply);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = replyDeliveredAt || reviewedAt || receivedAt || new Date().toISOString();
+        const result = appendReplyDeliveryOutcome(
+          readReplyOutbox(replyOutboxPath || undefined),
+          bindAuthenticatedOperator(parseBody(request), principal),
+          { filePath: replyDeliveryOutcomeLedgerPath || undefined, recordedAt },
+        );
+        const existingAudit = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "reply_delivery_recorded" && row.object_id === result.outcome.id,
+            )
+          : false;
+        if (!existingAudit) {
+          recordAudit(
+            {
+              action: "reply_delivery_recorded",
+              actor: result.outcome.actor,
+              objectType: "reply_delivery_outcome",
+              objectId: result.outcome.id,
+              locale: result.delivery.reply_language,
+              metadata: {
+                reply_id: result.delivery.reply_id,
+                lead_id: result.delivery.lead_id,
+                action: result.outcome.action,
+                channel: result.outcome.channel,
+                status: result.delivery.status,
+                sent_at: result.delivery.sent_at,
+              },
+            },
+            recordedAt,
+          );
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
