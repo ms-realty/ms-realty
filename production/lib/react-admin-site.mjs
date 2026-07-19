@@ -96,11 +96,46 @@ const ADMIN_UI_COPY = {
     replyQueueReady: "Отговорът е поставен на опашка за ръчно изпращане.",
     replyQueueFailed: "Провереният отговор не можа да бъде поставен на опашка.",
     skipToContent: "Към съдържанието",
+    operationsReports: "Оперативни отчети",
+    actualResponses: "Действително изпратени отговори",
+    responseRate: "Дял с изпратен отговор",
+    medianResponse: "Медианно време за отговор",
+    overdueWork: "Просрочена работа",
+    leadVolume: "Обем на запитванията",
+    bySource: "По източник",
+    byLanguage: "По език",
+    byType: "По тип",
+    sourceQuality: "Качество на източниците",
+    qualified: "Квалифицирани",
+    viewingLeads: "С насрочен оглед",
+    closedDeals: "Затворени сделки",
+    conversion: "Конверсия",
+    responseTime: "Време за отговор",
+    average: "Средно",
+    p90: "90-и персентил",
+    withinSla: "В рамките на SLA",
+    pipelines: "Потоци",
+    workQueueHealth: "Състояние на работните опашки",
+    queue: "Опашка",
+    open: "Отворени",
+    overdue: "Просрочени",
+    blocked: "Блокирани",
+    listingInventory: "Наличност на обявите",
+    activeListings: "Активни обяви",
+    translationReview: "Преводи за преглед",
+    searchSignals: "Сигнали от търсенето",
+    searchEvents: "Търсения",
+    zeroResults: "Без резултати",
+    popularFilters: "Популярни филтри",
+    downloadSourceReport: "Изтегли CSV по източници",
+    privacySafeReport: "Отчетът използва оперативните регистри и не включва лични контакти или съобщения.",
+    minutesShort: "мин",
+    noReportData: "Все още няма данни за този отчет.",
     auditActions: {
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
-      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
+      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
       email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Друг канал",
     },
     statuses: {
@@ -197,11 +232,46 @@ const ADMIN_UI_COPY = {
     replyQueueReady: "Ответ поставлен в очередь для ручной отправки.",
     replyQueueFailed: "Не удалось поставить проверенный ответ в очередь.",
     skipToContent: "К содержанию",
+    operationsReports: "Операционные отчеты",
+    actualResponses: "Фактически отправленные ответы",
+    responseRate: "Доля с отправленным ответом",
+    medianResponse: "Медианное время ответа",
+    overdueWork: "Просроченная работа",
+    leadVolume: "Объем заявок",
+    bySource: "По источнику",
+    byLanguage: "По языку",
+    byType: "По типу",
+    sourceQuality: "Качество источников",
+    qualified: "Квалифицировано",
+    viewingLeads: "С назначенным просмотром",
+    closedDeals: "Закрытые сделки",
+    conversion: "Конверсия",
+    responseTime: "Время ответа",
+    average: "Среднее",
+    p90: "90-й перцентиль",
+    withinSla: "В пределах SLA",
+    pipelines: "Воронки",
+    workQueueHealth: "Состояние рабочих очередей",
+    queue: "Очередь",
+    open: "Открыто",
+    overdue: "Просрочено",
+    blocked: "Заблокировано",
+    listingInventory: "Состояние объектов",
+    activeListings: "Активные объекты",
+    translationReview: "Переводы на проверке",
+    searchSignals: "Сигналы поиска",
+    searchEvents: "Поиски",
+    zeroResults: "Без результатов",
+    popularFilters: "Популярные фильтры",
+    downloadSourceReport: "Скачать CSV по источникам",
+    privacySafeReport: "Отчет использует операционные журналы и не включает личные контакты или сообщения.",
+    minutesShort: "мин",
+    noReportData: "Для этого отчета пока нет данных.",
     auditActions: {
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
-      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
+      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
       email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Другой канал",
     },
     statuses: {
@@ -298,11 +368,46 @@ const ADMIN_UI_COPY = {
     replyQueueReady: "Reply queued for manual sending.",
     replyQueueFailed: "Could not queue the reviewed reply.",
     skipToContent: "Skip to content",
+    operationsReports: "Operations reports",
+    actualResponses: "Actual responses sent",
+    responseRate: "Response sent rate",
+    medianResponse: "Median response time",
+    overdueWork: "Overdue work",
+    leadVolume: "Lead volume",
+    bySource: "By source",
+    byLanguage: "By language",
+    byType: "By type",
+    sourceQuality: "Source quality",
+    qualified: "Qualified",
+    viewingLeads: "With a viewing",
+    closedDeals: "Closed deals",
+    conversion: "Conversion",
+    responseTime: "Response time",
+    average: "Average",
+    p90: "90th percentile",
+    withinSla: "Within SLA",
+    pipelines: "Pipelines",
+    workQueueHealth: "Work queue health",
+    queue: "Queue",
+    open: "Open",
+    overdue: "Overdue",
+    blocked: "Blocked",
+    listingInventory: "Listing inventory",
+    activeListings: "Active listings",
+    translationReview: "Translations to review",
+    searchSignals: "Search signals",
+    searchEvents: "Searches",
+    zeroResults: "Zero results",
+    popularFilters: "Popular filters",
+    downloadSourceReport: "Download source CSV",
+    privacySafeReport: "This report uses operating ledgers and excludes private contacts and messages.",
+    minutesShort: "min",
+    noReportData: "There is no data for this report yet.",
     auditActions: {
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
-      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
+      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
       email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Other channel",
     },
     statuses: {
@@ -468,6 +573,7 @@ const NAV_ROUTES = [
   { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline" },
   { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings" },
+  { id: "reports", module: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports" },
   { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity" },
   { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager" },
   { id: "listing_editor", module: "cms", path: "/admin/listings/edit", icon: "building-2", kind: "admin_listing_editor" },
@@ -507,6 +613,7 @@ function Sidebar({ page }) {
           badge: page.publicRequestQueue?.summary?.open,
         },
         { ...route("viewings"), label: screenLabel("crm", "viewings", "Viewings") },
+        { ...route("reports"), label: screenLabel("crm", "reports", workbenchCopy(page).operationsReports) },
         { ...route("activity"), label: screenLabel("crm", "activity", "Activity") },
       ],
     },
@@ -1091,6 +1198,182 @@ function ActivityBody({ page }) {
               ),
             )
           : h("p", { className: "adm-empty" }, label(copy, "noActivity", "No actions have been recorded yet.")),
+      ),
+    ],
+  });
+}
+
+function ReportBars({ rows = [], ui, keyLabel = (row) => valueText(ui, row.key), valueKey = "count" }) {
+  if (!rows.length) return h("p", { className: "adm-empty" }, ui.noReportData);
+  const max = Math.max(1, ...rows.map((row) => Number(row[valueKey] || 0)));
+  return h(
+    "ol",
+    { className: "adm-report-bars" },
+    ...rows.map((row) => {
+      const value = Number(row[valueKey] || 0);
+      return h(
+        "li",
+        { key: row.key || row.stage },
+        h("span", { className: "adm-report-bars__label" }, keyLabel(row)),
+        h("span", { className: "adm-report-bars__track", "aria-hidden": "true" }, h("span", { style: `width:${Math.max(value ? 4 : 0, (value / max) * 100)}%` })),
+        h("strong", null, value),
+      );
+    }),
+  );
+}
+
+function ReportPipelineCard({ title, pipeline, ui }) {
+  const rows = (pipeline.stages || []).map((row) => ({
+    key: row.stage || row.key,
+    count: row.reached ?? row.count ?? 0,
+  }));
+  return h(
+    "article",
+    { className: "adm-report-card" },
+    h(
+      "header",
+      null,
+      h("div", null, h("h3", null, title), h("small", null, `${ui.open}: ${pipeline.open || 0}`)),
+      h("strong", null, pipeline.total || 0),
+    ),
+    h(ReportBars, { rows, ui, keyLabel: (row) => statusText(ui, row.key) }),
+  );
+}
+
+function OperationsReportsBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const report = page.report;
+  const title = label(copy, "operationsReports", ui.operationsReports);
+  const minuteValue = (value) => (value === null || value === undefined ? "—" : `${value} ${ui.minutesShort}`);
+  const metrics = [
+    [label(copy, "leads", "Leads"), report.summary.leads, "users", "ink"],
+    [ui.responseRate, `${report.summary.response_rate_pct}%`, "send", "sea"],
+    [ui.medianResponse, minuteValue(report.summary.median_response_minutes), "clock", "sun"],
+    [ui.overdueWork, report.summary.overdue_tasks, "triangle-alert", report.summary.overdue_tasks ? "brick" : "success"],
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-operations-reports",
+      "data-react-admin-ui": "operations-reports",
+      "data-admin-workbench": "crm",
+      "data-privacy-safe": "true",
+      "data-admin-locale": page.workspace.locale,
+      "data-report-generated-at": report.generated_at,
+    },
+    children: [
+      h(
+        PageHeader,
+        { title, subtitle: page.metadata?.description },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: "/api/admin/reports/export" }, h(Icon, { name: "download", size: 16 }), ui.downloadSourceReport),
+      ),
+      h("p", { className: "adm-report-privacy" }, h(Icon, { name: "shield-check", size: 17 }), ui.privacySafeReport),
+      h(StatGrid, { metrics }),
+      h(
+        Panel,
+        { title: ui.leadVolume, "data-report-section": "lead-volume" },
+        h(
+          "div",
+          { className: "adm-report-grid adm-report-grid--three" },
+          h("section", { className: "adm-report-card" }, h("h3", null, ui.bySource), h(ReportBars, { rows: report.lead_volume.by_source, ui })),
+          h("section", { className: "adm-report-card" }, h("h3", null, ui.byLanguage), h(ReportBars, { rows: report.lead_volume.by_language, ui, keyLabel: (row) => row.key.toUpperCase() })),
+          h("section", { className: "adm-report-card" }, h("h3", null, ui.byType), h(ReportBars, { rows: report.lead_volume.by_type, ui, keyLabel: (row) => statusText(ui, row.key) })),
+        ),
+      ),
+      h(
+        Panel,
+        { title: ui.sourceQuality, "data-report-section": "source-quality" },
+        report.source_quality.length
+          ? h(
+              "div",
+              { className: "adm-report-source-grid" },
+              ...report.source_quality.map((row) =>
+                h(
+                  "article",
+                  { key: row.source, className: "adm-report-source", "data-report-source": row.source },
+                  h("header", null, h("h3", null, valueText(ui, row.source)), h("strong", null, row.leads)),
+                  h(
+                    "dl",
+                    null,
+                    h("div", null, h("dt", null, ui.actualResponses), h("dd", null, `${row.replies_sent} · ${row.response_rate_pct}%`)),
+                    h("div", null, h("dt", null, ui.qualified), h("dd", null, row.qualified)),
+                    h("div", null, h("dt", null, ui.viewingLeads), h("dd", null, row.viewing_leads)),
+                    h("div", null, h("dt", null, ui.closedDeals), h("dd", null, row.closed_deals)),
+                    h("div", null, h("dt", null, ui.conversion), h("dd", null, `${row.deal_conversion_pct}%`)),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, ui.noReportData),
+      ),
+      h(
+        "div",
+        { className: "adm-report-grid adm-report-grid--two" },
+        h(
+          Panel,
+          { title: ui.responseTime, "data-report-section": "response-time" },
+          h(
+            "dl",
+            { className: "adm-report-facts" },
+            h("div", null, h("dt", null, ui.actualResponses), h("dd", null, report.response_time.sent)),
+            h("div", null, h("dt", null, ui.average), h("dd", null, minuteValue(report.response_time.average_minutes))),
+            h("div", null, h("dt", null, ui.medianResponse), h("dd", null, minuteValue(report.response_time.median_minutes))),
+            h("div", null, h("dt", null, ui.p90), h("dd", null, minuteValue(report.response_time.p90_minutes))),
+            h("div", null, h("dt", null, ui.withinSla), h("dd", null, `${report.response_time.within_sla_rate_pct}%`)),
+          ),
+        ),
+        h(
+          Panel,
+          { title: ui.searchSignals, "data-report-section": "search" },
+          h(
+            "dl",
+            { className: "adm-report-facts" },
+            h("div", null, h("dt", null, ui.searchEvents), h("dd", null, report.search.search_events || 0)),
+            h("div", null, h("dt", null, ui.zeroResults), h("dd", null, report.search.zero_result_events || 0)),
+            h("div", null, h("dt", null, ui.popularFilters), h("dd", null, (report.search.popular_filters || []).slice(0, 3).map((row) => `${row.key} (${row.count})`).join(" · ") || "—")),
+          ),
+        ),
+      ),
+      h(
+        Panel,
+        { title: ui.pipelines, "data-report-section": "pipelines" },
+        h(
+          "div",
+          { className: "adm-report-grid adm-report-grid--three" },
+          h(ReportPipelineCard, { title: label(copy, "buyerPipeline", statusText(ui, "buyer")), pipeline: report.pipelines.buyer, ui }),
+          h(ReportPipelineCard, { title: label(copy, "renterPipeline", statusText(ui, "renter")), pipeline: report.pipelines.renter, ui }),
+          h(ReportPipelineCard, { title: label(copy, "sellerPipeline", statusText(ui, "seller")), pipeline: report.pipelines.seller, ui }),
+        ),
+      ),
+      h(
+        Panel,
+        { title: ui.workQueueHealth, "data-report-section": "task-health" },
+        h(
+          "ul",
+          { className: "adm-report-queues" },
+          ...report.task_health.rows.map((row) =>
+            h(
+              "li",
+              { key: row.queue, "data-report-queue": row.queue, "data-overdue": row.overdue ? "true" : "false" },
+              h("strong", null, valueText(ui, row.queue)),
+              h("span", null, `${ui.open}: ${row.open}`),
+              h("span", null, `${ui.overdue}: ${row.overdue}`),
+              h("span", null, `${ui.blocked}: ${row.blocked}`),
+            ),
+          ),
+        ),
+      ),
+      h(
+        Panel,
+        { title: ui.listingInventory, "data-report-section": "listing-inventory" },
+        h(
+          "div",
+          { className: "adm-report-inventory" },
+          h("dl", { className: "adm-report-facts" }, h("div", null, h("dt", null, ui.activeListings), h("dd", null, `${report.listing_inventory.active} / ${report.listing_inventory.total}`)), h("div", null, h("dt", null, ui.reviewRequired), h("dd", null, report.listing_inventory.review_required)), h("div", null, h("dt", null, ui.translationReview), h("dd", null, report.listing_inventory.translation_review))),
+          h("section", { className: "adm-report-card" }, h("h3", null, label(copy, "qualityStatus", "Status")), h(ReportBars, { rows: report.listing_inventory.by_status, ui, keyLabel: (row) => statusText(ui, row.key) })),
+          h("section", { className: "adm-report-card" }, h("h3", null, label(copy, "language", "Language")), h(ReportBars, { rows: report.listing_inventory.by_source_locale, ui, keyLabel: (row) => row.key.toUpperCase() })),
+        ),
       ),
     ],
   });
@@ -2793,6 +3076,7 @@ export function renderReactAdminBody(page) {
   if (page.kind === "admin_lead_pipeline") return renderStaticElement(h(LeadPipelineBody, { page }));
   if (page.kind === "admin_requests") return renderStaticElement(h(PublicRequestsBody, { page }));
   if (page.kind === "admin_viewings") return renderStaticElement(h(ViewingsBody, { page }));
+  if (page.kind === "admin_operations_reports") return renderStaticElement(h(OperationsReportsBody, { page }));
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
   if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));
   if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));

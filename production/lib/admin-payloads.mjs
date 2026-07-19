@@ -48,6 +48,29 @@ export function renderAdminListingEditorPayload(registry, requestedLocale, seed,
   };
 }
 
+export function renderAdminOperationsReportPayload(registry, requestedLocale, report, operatorId = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_operations_reports",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/reports",
+    canonical: "/admin/reports",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.operationsReports || "Operations reports"} | MS Realty`,
+      description:
+        workspace.copy.operationsReportsDescription ||
+        "Lead volume, actual customer response time, source quality, pipelines, and stale work from the operating ledgers.",
+      robots: "noindex,nofollow",
+    },
+    workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
+    report,
+  };
+}
+
 export function renderAdminLeadsPayload(registry, requestedLocale, data) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const {

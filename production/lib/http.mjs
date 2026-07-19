@@ -1,7 +1,12 @@
 import fs from "node:fs";
 import { bindAuthenticatedOperator, canAdminMutate, isAdminAuthorized, resolveAdminPrincipal, withAuthenticatedAuditActor } from "./admin-auth.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
-import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
+import {
+  LISTING_EDIT_FIELDS,
+  renderAdminLeadsPayload,
+  renderAdminListingEditorPayload,
+  renderAdminOperationsReportPayload,
+} from "./admin-payloads.mjs";
 import {
   addLocaleToRegistry,
   loadLocaleRegistry,
@@ -109,6 +114,7 @@ import {
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
+import { buildOperationsReport, renderOperationsReportCsv } from "./operations-report.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
@@ -124,6 +130,7 @@ import {
 } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
+import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 
 const SECURITY_HEADERS = {
   "x-content-type-options": "nosniff",
@@ -493,6 +500,35 @@ export function createHttpApp({
       deals: readDeals(dealLedgerPath || undefined),
       brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
     });
+  const currentOperationsReport = () => {
+    const generatedAt = reviewedAt || editedAt || receivedAt || new Date().toISOString();
+    const reportSeed = currentSeed();
+    return buildOperationsReport({
+      leads: readLeadLedger(leadLedgerPath || undefined),
+      replies: readReplyOutbox(replyOutboxPath || undefined),
+      replyDeliveryOutcomes: readReplyDeliveryOutcomes(replyDeliveryOutcomeLedgerPath || undefined),
+      leadPipelineOutcomes: readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined),
+      viewings: readViewings(viewingLedgerPath || undefined),
+      viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
+      deals: readDeals(dealLedgerPath || undefined),
+      sellerPipelines: readSellerPipeline(sellerPipelinePath || undefined),
+      sellerPipelineOutcomes: readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath || undefined),
+      savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
+      languageRequests: readLanguageRequests(languageRequestPath || undefined),
+      publicRequestOutcomes: readPublicRequestOutcomes(publicRequestOutcomeLedgerPath || undefined),
+      translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+      seed: reportSeed,
+      searchAnalytics: buildSearchAnalyticsReport({
+        registry: activeRegistry,
+        seed: reportSeed,
+        events: readEventLedger(eventLedgerPath || undefined),
+        generatedAt,
+      }),
+      generatedAt,
+    });
+  };
+  const currentReportsPayload = (requestedLocale, operatorId = null) =>
+    renderAdminOperationsReportPayload(activeRegistry, requestedLocale, currentOperationsReport(), operatorId);
   const currentRequestsPayload = (requestedLocale, operatorId = null) => {
     const payload = currentAdminLeadPayload(requestedLocale, operatorId);
     return {
@@ -818,6 +854,22 @@ export function createHttpApp({
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/reports", "/admin/reports"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentReportsPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      if (url.pathname === "/admin/reports" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/reports/export") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminResponse(200, renderOperationsReportCsv(currentOperationsReport()), "text/csv; charset=utf-8", {
+        "content-disposition": 'attachment; filename="ms-realty-source-quality.csv"',
+      });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {

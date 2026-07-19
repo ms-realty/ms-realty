@@ -9,9 +9,15 @@ import {
   publishApprovedTranslation,
   renderAdminWorkspace,
 } from "./admin-workflows.mjs";
-import { LISTING_EDIT_FIELDS, renderAdminLeadsPayload, renderAdminListingEditorPayload } from "./admin-payloads.mjs";
+import {
+  LISTING_EDIT_FIELDS,
+  renderAdminLeadsPayload,
+  renderAdminListingEditorPayload,
+  renderAdminOperationsReportPayload,
+} from "./admin-payloads.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
+import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
 import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, readLanguageRequests } from "./language-requests.mjs";
@@ -66,6 +72,7 @@ import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
+import { buildOperationsReport, renderOperationsReportCsv } from "./operations-report.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, readPublicContacts } from "./public-contact-vault.mjs";
 import {
   DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
@@ -92,6 +99,7 @@ import {
   writeDeployableRedirects,
 } from "./redirect-approvals.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
+import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
 import {
   DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
@@ -151,6 +159,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
+    eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
@@ -553,6 +562,49 @@ function activityPayload(registry, url, config) {
       objectTypes: new Set(auditLog.map((row) => row.object_type)).size,
     },
   };
+}
+
+function operationsReport(registry, config) {
+  const generatedAt = config.reviewedAt || config.editedAt || new Date().toISOString();
+  const seed = currentSeed(config);
+  const leads = readLeadLedger(config.leadLedgerPath);
+  const replies = readReplyOutbox(config.replyOutboxPath);
+  const viewings = readViewings(config.viewingLedgerPath);
+  const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
+  const deals = readDeals(config.dealLedgerPath);
+  const translationTasks = readTranslationLedger(config.translationLedgerPath);
+  return buildOperationsReport({
+    leads,
+    replies,
+    replyDeliveryOutcomes: readReplyDeliveryOutcomes(config.replyDeliveryOutcomeLedgerPath),
+    leadPipelineOutcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
+    viewings,
+    viewingFollowUps,
+    deals,
+    sellerPipelines: readSellerPipeline(config.sellerPipelinePath),
+    sellerPipelineOutcomes: readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath),
+    savedSearches: readSavedSearches(config.savedSearchLedgerPath),
+    languageRequests: readLanguageRequests(config.languageRequestPath),
+    publicRequestOutcomes: readPublicRequestOutcomes(config.publicRequestOutcomeLedgerPath),
+    translationTasks,
+    seed,
+    searchAnalytics: buildSearchAnalyticsReport({
+      registry,
+      seed,
+      events: readEventLedger(config.eventLedgerPath),
+      generatedAt,
+    }),
+    generatedAt,
+  });
+}
+
+function reportsPayload(registry, url, config) {
+  return renderAdminOperationsReportPayload(
+    registry,
+    url.searchParams.get("locale") || "en",
+    operationsReport(registry, config),
+    config.adminPrincipal?.id || null,
+  );
 }
 
 function listingEditorPayload(registry, url, config) {
@@ -1717,6 +1769,11 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(viewingsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/viewings") return jsonResponse(200, viewingsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/reports") return htmlResponse(reportsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/reports") return jsonResponse(200, reportsPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/reports/export") {
+      return csvResponse(renderOperationsReportCsv(operationsReport(registry, config)), "ms-realty-source-quality.csv");
+    }
     if (request.method === "GET" && url.pathname === "/admin/activity") return htmlResponse(activityPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/activity") return jsonResponse(200, activityPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings") return htmlResponse(listingManagerPayload(registry, url, config));
