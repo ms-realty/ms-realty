@@ -86,6 +86,7 @@ import {
   latestTranslationTasks,
   readTranslationLedger,
 } from "./translation-ledger.mjs";
+import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { DEFAULT_VIEWING_LEDGER_PATH, appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import {
   DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
@@ -306,6 +307,26 @@ function reviewedReplyInput(input) {
   };
 }
 
+function translationDraftInput(input) {
+  if (input.sourceContent || input.draftOutput) return input;
+  const propertyFacts = input.propertyFactsJson ? JSON.parse(input.propertyFactsJson) : {};
+  return {
+    ...input,
+    sourceContent: {
+      title: input.sourceTitle,
+      description: input.sourceDescription,
+    },
+    propertyFacts,
+    draftOutput: {
+      title: input.translatedTitle,
+      body: input.translatedBody,
+      seo_title: input.translatedSeoTitle || input.translatedTitle,
+      meta_description: input.translatedMetaDescription,
+      citations: [{ source: "cms", field: "source_snapshot" }],
+    },
+  };
+}
+
 function listingEditInput(input) {
   if (input.patch) return input;
   const patch = {};
@@ -439,6 +460,212 @@ function listingEditorPayload(registry, url, config) {
     latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     readTourApprovals(config.tourApprovalLedgerPath),
   );
+}
+
+function pageNumber(value) {
+  const parsed = Number.parseInt(String(value || "1"), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function pagedRows(rows, page, pageSize = 25) {
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const offset = (currentPage - 1) * pageSize;
+  return {
+    rows: rows.slice(offset, offset + pageSize),
+    pagination: { page: currentPage, pageSize, totalRows: rows.length, totalPages },
+  };
+}
+
+function listingManagerPayload(registry, url, config) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
+  const seed = currentSeed(config);
+  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const translationCoverage = buildTranslationCoverageReport({
+    registry,
+    seed,
+    translationTasks,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
+  const translationReviewByListing = translationCoverage.rows.reduce((counts, row) => {
+    counts.set(row.listing_id, (counts.get(row.listing_id) || 0) + 1);
+    return counts;
+  }, new Map());
+  const query = String(url.searchParams.get("q") || "").trim().toLocaleLowerCase();
+  const status = String(url.searchParams.get("status") || "").trim();
+  const sourceLocale = String(url.searchParams.get("sourceLocale") || "").trim();
+  const allRows = seed.records
+    .filter((record) => record.collection === "listings")
+    .map((record) => {
+      const facts = record.facts || {};
+      const translations = [
+        ...(record.translations || []),
+        ...translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
+      ];
+      const latestByLocale = new Map(translations.map((row) => [row.locale || row.target_locale, row]));
+      const metadataGaps = Object.values(record.migration?.metadata_gaps || {}).filter(Boolean).length;
+      return {
+        id: record.id,
+        title: facts.title || record.seo?.title || record.id,
+        location: facts.location || "",
+        source_locale: record.source_locale,
+        source_domain: record.source_domain,
+        listing_status: facts.listing_status || "available",
+        cms_status: record.cms_status || "source_imported_review_required",
+        price_eur: facts.price_eur ?? null,
+        price_on_request: facts.price_on_request === true,
+        public_gallery_assets: record.media_workflow?.public_gallery_assets || 0,
+        metadata_gaps: metadataGaps,
+        translation_locales: [...latestByLocale.keys()].filter(Boolean).sort(),
+        translation_review_required: translationReviewByListing.get(record.id) || 0,
+        review_required: record.routing?.review_required === true || metadataGaps > 0,
+        editor_path: `/admin/listings/edit?listingId=${encodeURIComponent(record.id)}`,
+      };
+    });
+  const filtered = allRows.filter((row) => {
+    if (status && row.listing_status !== status && row.cms_status !== status) return false;
+    if (sourceLocale && row.source_locale !== sourceLocale) return false;
+    if (!query) return true;
+    return [row.id, row.title, row.location, row.source_domain].some((value) => String(value || "").toLocaleLowerCase().includes(query));
+  });
+  const page = pagedRows(filtered, pageNumber(url.searchParams.get("page")));
+  return {
+    kind: "admin_listing_manager",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/listings",
+    canonical: "/admin/listings",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.listingManager} | MS Realty`,
+      description: workspace.copy.listingManagerDescription || "Search, review, and open every listing in the CMS workspace.",
+      robots: "noindex,nofollow",
+    },
+    workspace: config.adminPrincipal?.id ? { ...workspace, operator_id: config.adminPrincipal.id } : workspace,
+    listings: page.rows,
+    filters: { q: query, status, sourceLocale },
+    filterOptions: {
+      statuses: [...new Set(allRows.flatMap((row) => [row.listing_status, row.cms_status]))].filter(Boolean).sort(),
+      sourceLocales: [...new Set(allRows.map((row) => row.source_locale))].filter(Boolean).sort(),
+    },
+    pagination: page.pagination,
+    summary: {
+      total: allRows.length,
+      visible: filtered.length,
+      reviewRequired: allRows.filter((row) => row.review_required).length,
+      priceOnRequest: allRows.filter((row) => row.price_on_request).length,
+      translationReviewRequired: allRows.filter((row) => row.translation_review_required > 0).length,
+    },
+  };
+}
+
+function translationQueuePayload(registry, url, config) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
+  const seed = currentSeed(config);
+  const tasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const coverage = buildTranslationCoverageReport({
+    registry,
+    seed,
+    translationTasks: tasks,
+    generatedAt: config.reviewedAt || new Date().toISOString(),
+  });
+  const listings = new Map(
+    seed.records
+      .filter((record) => record.collection === "listings")
+      .map((record) => [record.id, record]),
+  );
+  const taskByObjectLocale = new Map(tasks.map((task) => [`${task.object_id}:${task.target_locale || task.locale}`, task]));
+  const query = String(url.searchParams.get("q") || "").trim().toLocaleLowerCase();
+  const targetLocale = String(url.searchParams.get("targetLocale") || "").trim();
+  const taskType = String(url.searchParams.get("taskType") || "").trim();
+  const enrichRow = (row) => {
+    const record = listings.get(row.listing_id);
+    const task = taskByObjectLocale.get(`${row.listing_id}:${row.target_locale}`);
+    return {
+      ...row,
+      listing_title: record?.facts?.title || record?.seo?.title || row.listing_id,
+      listing_location: record?.facts?.location || "",
+      source_title: record?.facts?.title || record?.seo?.title || row.listing_id,
+      source_description: record?.facts?.description || record?.seo?.description || "",
+      property_facts: {
+        id: row.listing_id,
+        ...(record?.facts?.location ? { location: record.facts.location } : {}),
+        ...(record?.facts?.price_eur ? { price: `${record.facts.price_eur} EUR` } : {}),
+      },
+      existing_task: task
+        ? {
+            id: task.id,
+            status: task.status,
+            reviewer_role: task.reviewer_role,
+            human_approved: task.human_approved === true,
+            public_indexable: task.public_indexable === true,
+            validated_output: Boolean(task.hermes?.output || task.human?.output),
+          }
+        : null,
+      editor_path: `/admin/listings/edit?listingId=${encodeURIComponent(row.listing_id)}#listing-translations`,
+    };
+  };
+  const coverageKeys = new Set(coverage.rows.map((row) => `${row.listing_id}:${row.target_locale}`));
+  const approvedRows = tasks
+    .filter(
+      (task) =>
+        task.object_type === "listing" &&
+        task.status === "approved" &&
+        task.human_approved === true &&
+        !coverageKeys.has(`${task.object_id}:${task.target_locale}`),
+    )
+    .map((task) => ({
+      listing_id: task.object_id,
+      source_locale: task.source_locale,
+      target_locale: task.target_locale,
+      target_direction: task.target_direction,
+      current_status: "approved",
+      task_type: "publish_required",
+      provider_mode: task.provider_mode,
+      reviewer_role: task.reviewer_role,
+      source_hash: task.source_hash,
+      public_indexable: false,
+      requires_human_approval: true,
+      task: { id: task.id, owner: task.reviewer_role, status: "open" },
+    }));
+  const allRows = [...coverage.rows, ...approvedRows].map(enrichRow);
+  const filtered = allRows.filter((row) => {
+    if (targetLocale && row.target_locale !== targetLocale) return false;
+    if (taskType && row.task_type !== taskType && row.current_status !== taskType) return false;
+    if (!query) return true;
+    return [row.listing_id, row.listing_title, row.listing_location].some((value) => String(value || "").toLocaleLowerCase().includes(query));
+  });
+  const page = pagedRows(filtered, pageNumber(url.searchParams.get("page")));
+  return {
+    kind: "admin_translation_queue",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/translations",
+    canonical: "/admin/translations",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.translationQueue} | MS Realty`,
+      description: workspace.copy.translationQueueDescription || "Human review queue for missing, drafted, and stale listing translations.",
+      robots: "noindex,nofollow",
+    },
+    workspace: config.adminPrincipal?.id ? { ...workspace, operator_id: config.adminPrincipal.id } : workspace,
+    translationTasks: page.rows,
+    filters: { q: query, targetLocale, taskType },
+    filterOptions: {
+      targetLocales: [...new Set(allRows.map((row) => row.target_locale))].filter(Boolean).sort(),
+      taskTypes: [...new Set(allRows.map((row) => row.task_type))].filter(Boolean).sort(),
+    },
+    pagination: page.pagination,
+    summary: {
+      ...coverage.summary,
+      open_translation_tasks: allRows.length,
+      approved_waiting_publish: approvedRows.length,
+    },
+  };
 }
 
 function readJsonData(filename) {
@@ -865,11 +1092,12 @@ function appendTourApprovalRow(input, config) {
 }
 
 function appendTranslationDraft(registry, input, config) {
-  const task = appendTranslationTask(createTranslationReviewTask(registry, input), { filePath: config.translationLedgerPath });
+  const attributedInput = bindAuthenticatedOperator(translationDraftInput(input), config.adminPrincipal, ["reviewer"]);
+  const task = appendTranslationTask(createTranslationReviewTask(registry, attributedInput), { filePath: config.translationLedgerPath });
   recordAudit(
     {
       action: "translation_drafted",
-      actor: input.reviewer || "translation_editor",
+      actor: attributedInput.reviewer || "translation_editor",
       objectType: task.object_type,
       objectId: task.id,
       locale: task.target_locale,
@@ -881,6 +1109,7 @@ function appendTranslationDraft(registry, input, config) {
 }
 
 function appendApprovedTranslation(registry, input, config) {
+  input = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
   const task = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)).find((row) => row.id === input.taskId);
   if (!task) throw new Error("Known translation task is required");
   const approved = appendTranslationTask(approveTranslationTask(registry, task, input.reviewer, input.approvedAt || config.reviewedAt), {
@@ -1227,9 +1456,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/viewings") return jsonResponse(200, viewingsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/activity") return htmlResponse(activityPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/activity") return jsonResponse(200, activityPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/listings") return htmlResponse(listingManagerPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/listings") return jsonResponse(200, listingManagerPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
       return htmlResponse(listingEditorPayload(registry, url, config));
     }
+    if (request.method === "GET" && url.pathname === "/admin/translations") return htmlResponse(translationQueuePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/translations") return jsonResponse(200, translationQueuePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/migration/review") {
       return htmlResponse(migrationReviewPayload(registry, url, config));
     }
@@ -1329,13 +1562,13 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, addLocale(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
-      return jsonResponse(201, appendTranslationDraft(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, appendTranslationDraft(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/translations/approve") {
-      return jsonResponse(201, appendApprovedTranslation(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, appendApprovedTranslation(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
-      return jsonResponse(201, appendPublishedTranslation(registry, parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
+      return jsonResponse(201, appendPublishedTranslation(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
       return jsonResponse(201, appendRedirectApprovalRow(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));

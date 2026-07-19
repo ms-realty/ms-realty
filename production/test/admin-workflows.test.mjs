@@ -99,6 +99,43 @@ test("Hermes translation tasks are drafts until human approval and publication",
   assert.equal(published.public_indexable, true);
 });
 
+test("human translation mode can be edited, approved, and published without impersonating Hermes", () => {
+  const propertyFacts = { id: listing.id, location: listing.location };
+  const task = createTranslationReviewTask(registry, {
+    objectType: "listing",
+    objectId: listing.id,
+    sourceLocale: "bg",
+    targetLocale: "en",
+    draftSource: "human",
+    reviewer: "editor_en",
+    sourceContent: { title: listing.h1, description: listing.description || listing.h1 },
+    propertyFacts,
+    draftOutput: hermesDraftOutput(propertyFacts, "en"),
+  });
+
+  assert.equal(task.status, "human_edited");
+  assert.equal(task.public_indexable, false);
+  assert.equal("hermes" in task, false);
+  assert.equal(task.human.editor, "editor_en");
+  assert.equal(task.human.output.status, "human_edited");
+  const approved = approveTranslationTask(registry, task, "editor_en");
+  assert.equal(approved.status, "approved");
+  assert.equal(publishApprovedTranslation(registry, approved).status, "published");
+
+  assert.throws(
+    () =>
+      createTranslationReviewTask(registry, {
+        objectType: "listing",
+        objectId: listing.id,
+        sourceLocale: "bg",
+        targetLocale: "en",
+        draftSource: "human",
+        sourceContent: { title: listing.h1 },
+      }),
+    /reviewer is required/,
+  );
+});
+
 test("Hermes draft output must preserve facts and source snapshot before review", () => {
   const task = createTranslationReviewTask(registry, {
     objectType: "listing",

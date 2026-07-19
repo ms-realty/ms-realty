@@ -98,6 +98,7 @@ const ADMIN_UI_COPY = {
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", open: "Отворено", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
+      booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", price_eur: "Цена в EUR", bedrooms: "Спални" },
   },
@@ -185,6 +186,7 @@ const ADMIN_UI_COPY = {
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", open: "Открыто", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
+      booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", price_eur: "Цена в EUR", bedrooms: "Спальни" },
   },
@@ -272,6 +274,7 @@ const ADMIN_UI_COPY = {
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", open: "Open", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
+      booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", price_eur: "Price in EUR", bedrooms: "Bedrooms" },
   },
@@ -295,7 +298,10 @@ function fieldText(copy, field) {
 
 function adminHref(path, page) {
   const locale = page.workspace?.locale;
-  return locale && locale !== "en" ? `${path}?locale=${locale}` : path;
+  if (!locale || locale === "en") return path;
+  const url = new URL(path, "http://ms-realty.local");
+  url.searchParams.set("locale", locale);
+  return `${url.pathname}${url.search}${url.hash}`;
 }
 
 function currentOperatorId(page, fallback) {
@@ -422,7 +428,9 @@ const NAV_ROUTES = [
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings" },
   { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity" },
+  { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager" },
   { id: "listing_editor", module: "cms", path: "/admin/listings/edit", icon: "building-2", kind: "admin_listing_editor" },
+  { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue" },
   { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review" },
 ];
 
@@ -453,7 +461,10 @@ function Sidebar({ page }) {
     },
     {
       label: modules.find((module) => module.id === "cms")?.label || "CMS",
-      items: [{ ...route("listing_editor"), label: screenLabel("cms", "listing_editor", "Listing editor") }],
+      items: [
+        { ...route("listing_manager"), label: screenLabel("cms", "listing_manager", "Listings") },
+        { ...route("translation_queue"), label: screenLabel("cms", "translation_queue", "Translation review") },
+      ],
     },
     {
       label: label(copy, "launchEvidence", "Launch"),
@@ -1285,6 +1296,253 @@ function SellerPipelineQueue({ page, copy, ui }) {
    Listing editor (ui_kits/crm Listings/LeadDetail patterns)
    ============================================================ */
 
+function adminPageHref(page, path, targetPage) {
+  const url = new URL(path, "http://ms-realty.local");
+  for (const [key, value] of Object.entries(page.filters || {})) {
+    if (value) url.searchParams.set(key, value);
+  }
+  if (page.workspace?.locale && page.workspace.locale !== "en") url.searchParams.set("locale", page.workspace.locale);
+  url.searchParams.set("page", String(targetPage));
+  return `${url.pathname}${url.search}`;
+}
+
+function Pagination({ page, path }) {
+  if ((page.pagination?.totalPages || 1) <= 1) return null;
+  const current = page.pagination.page;
+  return h(
+    "nav",
+    { className: "adm-pagination", "aria-label": label(adminCopy(page), "page", "Page") },
+    current > 1
+      ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminPageHref(page, path, current - 1) }, h(Icon, { name: "chevron-left", size: 16 }), label(adminCopy(page), "previousPage", "Previous"))
+      : h("span", null),
+    h("span", { className: "adm-pagination__status" }, `${label(adminCopy(page), "page", "Page")} ${current} / ${page.pagination.totalPages}`),
+    current < page.pagination.totalPages
+      ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminPageHref(page, path, current + 1) }, label(adminCopy(page), "nextPage", "Next"), h(Icon, { name: "chevron-right", size: 16 }))
+      : h("span", null),
+  );
+}
+
+function filterLocaleInput(page) {
+  return page.workspace.locale !== "en" ? h("input", { type: "hidden", name: "locale", defaultValue: page.workspace.locale }) : null;
+}
+
+function ListingManagerBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "listingManager", "Listings");
+  const metrics = [
+    [label(copy, "listingManager", "Listings"), page.summary.total, "building-2", "ink"],
+    [ui.reviewRequired, page.summary.reviewRequired, "eye", "sun"],
+    [statusText(ui, "price_on_request"), page.summary.priceOnRequest, "banknote", "sea"],
+    [label(copy, "translationQueue", "Translation review"), page.summary.translationReviewRequired, "languages", "brick"],
+  ];
+  const columns = {
+    listing: ui.listing,
+    location: ui.location,
+    status: label(copy, "qualityStatus", "Status"),
+    locale: label(copy, "language", "Language"),
+    quality: label(copy, "quality", "Quality"),
+    action: label(copy, "openEditor", "Open editor"),
+  };
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-listing-manager",
+      "data-react-admin-ui": "listing-manager",
+      "data-admin-workbench": "cms",
+      "data-admin-locale": page.workspace.locale,
+      "data-listing-count": page.summary.total,
+    },
+    children: [
+      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(StatGrid, { metrics }),
+      h(
+        "form",
+        { method: "get", action: "/admin/listings", className: "adm-filterbar", role: "search", "data-listing-filters": "true" },
+        filterLocaleInput(page),
+        h("label", null, label(copy, "searchListings", "Search listings"), h("input", { type: "search", name: "q", defaultValue: page.filters.q, placeholder: "MS-CRAWL-0114" })),
+        h(
+          "label",
+          null,
+          label(copy, "qualityStatus", "Status"),
+          h("select", { name: "status" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.statuses || []).map((value) => h("option", { key: value, value, selected: page.filters.status === value }, statusText(ui, value)))),
+        ),
+        h(
+          "label",
+          null,
+          label(copy, "language", "Language"),
+          h("select", { name: "sourceLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.sourceLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.sourceLocale === value }, value.toUpperCase()))),
+        ),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      h(
+        Panel,
+        { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-listing-manager": "true" },
+        page.listings.length
+          ? h(
+              "div",
+              { className: "adm-scroll-x" },
+              h(
+                "table",
+                { className: "crm-tbl" },
+                h("thead", null, h("tr", null, ...Object.values(columns).map((column) => h("th", { key: column, scope: "col" }, column)))),
+                h(
+                  "tbody",
+                  null,
+                  ...page.listings.map((row) =>
+                    h(
+                      "tr",
+                      { key: row.id, "data-listing-manager-row": row.id },
+                      h("td", { "data-label": columns.listing }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
+                      h("td", { "data-label": columns.location }, row.location || "—"),
+                      h("td", { "data-label": columns.status }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
+                      h("td", { "data-label": columns.locale }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
+                      h("td", { "data-label": columns.quality }, h("span", null, `${row.metadata_gaps} ${ui.issues.toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${ui.publicPhotos.toLocaleLowerCase()}`)),
+                      h("td", { "data-label": columns.action }, h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor"))),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noResults", "No results.")),
+      ),
+      h(Pagination, { page, path: "/admin/listings" }),
+    ],
+  });
+}
+
+function TranslationQueueBody({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const title = label(copy, "translationQueue", "Translation review");
+  const metrics = [
+    [label(copy, "openTasks", "Open tasks"), page.summary.open_translation_tasks, "languages", "ink"],
+    [label(copy, "missingTranslations", "Missing translations"), page.summary.missing_translation_tasks, "circle-alert", "brick"],
+    [label(copy, "staleTranslations", "Stale translations"), page.summary.stale_translation_tasks, "clock", "sun"],
+    [label(copy, "results", "Results"), page.pagination.totalRows, "filter", "sea"],
+  ];
+  const columns = {
+    listing: ui.listing,
+    target: label(copy, "targetLocale", "Target locale"),
+    status: label(copy, "translationState", "Translation state"),
+    owner: label(copy, "reviewer", "Reviewer"),
+    action: label(copy, "reviewTranslation", "Review translation"),
+  };
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-translation-queue",
+      "data-react-admin-ui": "translation-queue",
+      "data-admin-workbench": "cms",
+      "data-human-approval-required": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(StatGrid, { metrics }),
+      h(
+        "form",
+        { method: "get", action: "/admin/translations", className: "adm-filterbar", role: "search", "data-translation-filters": "true" },
+        filterLocaleInput(page),
+        h("label", null, label(copy, "searchTranslations", "Search translations"), h("input", { type: "search", name: "q", defaultValue: page.filters.q })),
+        h("label", null, label(copy, "targetLocale", "Target locale"), h("select", { name: "targetLocale" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.targetLocales || []).map((value) => h("option", { key: value, value, selected: page.filters.targetLocale === value }, value.toUpperCase())))),
+        h("label", null, label(copy, "taskType", "Task type"), h("select", { name: "taskType" }, h("option", { value: "" }, label(copy, "all", "All")), ...(page.filterOptions.taskTypes || []).map((value) => h("option", { key: value, value, selected: page.filters.taskType === value }, statusText(ui, value))))),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/translations", page) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      h(
+        Panel,
+        { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-translation-queue": "true" },
+        h(
+          "div",
+          { className: "adm-scroll-x" },
+          h(
+            "table",
+            { className: "crm-tbl" },
+            h("thead", null, h("tr", null, ...Object.values(columns).map((column) => h("th", { key: column, scope: "col" }, column)))),
+            h(
+              "tbody",
+              null,
+              ...page.translationTasks.map((row) => {
+                const task = row.existing_task;
+                const canApprove = task && ["hermes_drafted", "human_edited"].includes(task.status) && task.validated_output;
+                const canPublish = task?.status === "approved" && task.human_approved;
+                const canEnterHumanDraft = !task && ["human", "external_import"].includes(row.provider_mode);
+                return h(
+                  "tr",
+                  { key: `${row.listing_id}-${row.target_locale}`, "data-translation-task-row": row.task.id, "data-translation-status": task?.status || row.current_status },
+                  h("td", { "data-label": columns.listing }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.listing_id), h("strong", null, row.listing_title), h("small", { className: "adm-lead-context" }, row.listing_location))),
+                  h("td", { "data-label": columns.target }, h("span", { className: "crm-lang" }, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`)),
+                  h("td", { "data-label": columns.status }, h(StatusPill, { tone: row.current_status === "stale" ? "brick" : task ? "sun" : "sand" }, statusText(ui, task?.status || row.current_status)), h("small", { className: "adm-lead-context" }, statusText(ui, row.task_type))),
+                  h("td", { "data-label": columns.owner }, row.reviewer_role),
+                  h(
+                    "td",
+                    { "data-label": columns.action, className: "adm-translation-actions" },
+                    canApprove
+                      ? h(
+                          "form",
+                          { method: "post", action: "/api/admin/translations/approve", "data-translation-workflow-form": "approve", "data-success-message": label(copy, "approveTranslation", "Translation approved"), "data-failure-message": label(copy, "translationSaveFailed", "Could not update translation") },
+                          h("input", { type: "hidden", name: "taskId", defaultValue: task.id }),
+                          h("input", { type: "hidden", name: "reviewer", defaultValue: currentOperatorId(page, row.reviewer_role) }),
+                          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "approveForReview", "Approve translation")),
+                          h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
+                        )
+                      : canPublish
+                        ? h(
+                            "form",
+                            { method: "post", action: "/api/admin/translations/publish", "data-translation-workflow-form": "publish", "data-success-message": label(copy, "publishTranslation", "Translation published"), "data-failure-message": label(copy, "translationSaveFailed", "Could not update translation") },
+                            h("input", { type: "hidden", name: "taskId", defaultValue: task.id }),
+                            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "publishApproved", "Publish approved translation")),
+                            h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
+                          )
+                        : canEnterHumanDraft
+                          ? h(
+                              "details",
+                              { className: "adm-reply" },
+                              h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, label(copy, "enterHumanTranslation", "Enter human translation")),
+                              h(
+                                "form",
+                                {
+                                  method: "post",
+                                  action: "/api/admin/translations/draft",
+                                  className: "adm-human-translation",
+                                  "data-translation-workflow-form": "human",
+                                  "data-success-message": label(copy, "translationDraftSaved", "Translation draft saved."),
+                                  "data-failure-message": label(copy, "translationSaveFailed", "Could not save translation."),
+                                },
+                                h("input", { type: "hidden", name: "draftSource", defaultValue: "human" }),
+                                h("input", { type: "hidden", name: "targetLocale", defaultValue: row.target_locale }),
+                                h("input", { type: "hidden", name: "sourceLocale", defaultValue: row.source_locale }),
+                                h("input", { type: "hidden", name: "objectType", defaultValue: "listing" }),
+                                h("input", { type: "hidden", name: "objectId", defaultValue: row.listing_id }),
+                                h("input", { type: "hidden", name: "sourceTitle", defaultValue: row.source_title }),
+                                h("input", { type: "hidden", name: "sourceDescription", defaultValue: row.source_description }),
+                                h("input", { type: "hidden", name: "propertyFactsJson", defaultValue: JSON.stringify(row.property_facts) }),
+                                h("input", { type: "hidden", name: "reviewer", defaultValue: currentOperatorId(page, row.reviewer_role) }),
+                                h("p", { className: "adm-human-translation__source" }, row.source_title),
+                                h("label", null, label(copy, "translatedTitle", "Translated title"), h("input", { name: "translatedTitle", required: true })),
+                                h("label", null, label(copy, "translatedBody", "Translated description"), h("textarea", { name: "translatedBody", required: true, rows: 5 })),
+                                h("label", null, label(copy, "translatedSeoTitle", "SEO title"), h("input", { name: "translatedSeoTitle", required: true, maxLength: 80 })),
+                                h("label", null, label(copy, "translatedMetaDescription", "Meta description"), h("textarea", { name: "translatedMetaDescription", required: true, rows: 3, maxLength: 220 })),
+                                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "saveDraft", "Save draft")),
+                                h("span", { role: "status", "aria-live": "polite", "data-translation-workflow-status": "true" }),
+                              ),
+                            )
+                          : h("span", { className: "crm-tbl__muted" }, task ? label(copy, "awaitingHermesDraft", "Awaiting Hermes draft") : statusText(ui, row.task_type)),
+                    h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(row.editor_path, page) }, label(copy, "openEditor", "Open editor")),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ),
+      h(Pagination, { page, path: "/admin/translations" }),
+    ],
+  });
+}
+
 function editorInputFor(field, value) {
   const shared = { name: field, defaultValue: value, "data-editor-field": field };
   if (field === "description") return h("textarea", { ...shared, rows: 6 });
@@ -1333,10 +1591,14 @@ function ListingEditorBody({ page }) {
       "data-admin-locale": page.workspace.locale,
     },
     children: [
-      h(PageHeader, {
-        title,
-        subtitle: `${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
-      }),
+      h(
+        PageHeader,
+        {
+          title,
+          subtitle: `${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
+        },
+        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
+      ),
       h(
         "nav",
         { className: "mk-tabs mk-tabs--underline adm-editor-tabs", "aria-label": label(copy, "editorSections", "Editor sections"), "data-editor-tabs": "true" },
@@ -1822,6 +2084,8 @@ export function renderReactAdminBody(page) {
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
   if (page.kind === "admin_viewings") return renderStaticElement(h(ViewingsBody, { page }));
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));
+  if (page.kind === "admin_listing_manager") return renderStaticElement(h(ListingManagerBody, { page }));
+  if (page.kind === "admin_translation_queue") return renderStaticElement(h(TranslationQueueBody, { page }));
   if (page.kind === "admin_listing_editor") return renderStaticElement(h(ListingEditorBody, { page }));
   if (page.kind === "admin_migration_review") return renderStaticElement(h(MigrationReviewBody, { page }));
   return "";

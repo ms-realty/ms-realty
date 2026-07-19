@@ -483,6 +483,53 @@ export const ADMIN_APP_JS = `(function () {
         });
     });
   }
+  function setTranslationWorkflowStatus(form, value, state) {
+    var status = form.querySelector("[data-translation-workflow-status]");
+    if (!status) return;
+    status.textContent = value;
+    status.setAttribute("data-state", state);
+  }
+  function initTranslationWorkflowForms() {
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-translation-workflow-form")) return;
+      event.preventDefault();
+      var submit = form.querySelector('[type="submit"]');
+      var workflow = form.getAttribute("data-translation-workflow-form");
+      var success = form.getAttribute("data-success-message") || "Translation updated.";
+      var failure = form.getAttribute("data-failure-message") || "Could not update translation.";
+      if (submit) submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      setTranslationWorkflowStatus(form, "…", "saving");
+      fetch(form.getAttribute("action"), {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify(tourPayload(form)),
+      })
+        .then(function (response) {
+          return response
+            .json()
+            .catch(function () { return {}; })
+            .then(function (result) {
+              var expected = workflow === "publish" ? "published" : workflow === "approve" ? "approved" : "human_edited";
+              if (!response.ok || result.status !== expected) throw new Error(result.message || "translation workflow failed");
+              return result;
+            });
+        })
+        .then(function () {
+          setTranslationWorkflowStatus(form, success, "success");
+          window.setTimeout(function () { window.location.reload(); }, 150);
+        })
+        .catch(function () {
+          setTranslationWorkflowStatus(form, failure, "error");
+        })
+        .then(function () {
+          form.removeAttribute("aria-busy");
+          if (submit) submit.disabled = false;
+        });
+    });
+  }
   function setReplyStatus(form, value, state) {
     var row = form.closest("[data-lead-row]");
     var status = row ? row.querySelector("[data-reply-status]") : null;
@@ -567,5 +614,6 @@ export const ADMIN_APP_JS = `(function () {
   initTourEditor();
   initViewingFollowUpForms();
   initSellerPipelineOutcomeForms();
+  initTranslationWorkflowForms();
   initReplyForms();
 })();`;

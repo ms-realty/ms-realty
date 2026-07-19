@@ -235,6 +235,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const viewingsJsonRoute = await import("../../app/api/admin/viewings/route.js");
       const activityRoute = await import("../../app/admin/activity/route.js");
       const activityJsonRoute = await import("../../app/api/admin/activity/route.js");
+      const listingManagerRoute = await import("../../app/admin/listings/route.js");
+      const listingManagerJsonRoute = await import("../../app/api/admin/listings/route.js");
+      const translationQueueRoute = await import("../../app/admin/translations/route.js");
+      const translationQueueJsonRoute = await import("../../app/api/admin/translations/route.js");
       const listingEditorRoute = await import("../../app/admin/listings/edit/route.js");
       const migrationReviewHtmlRoute = await import("../../app/admin/migration/review/route.js");
       const migrationReviewRoute = await import("../../app/api/admin/migration/review/route.js");
@@ -336,6 +340,50 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-lead-column="reply"/);
       assert.match(inboxHtml, /data-label="Ответ"/);
       assert.match(inboxHtml, /data-lead-column="escalation_due"[^>]*><time dateTime="[^"]+" title="[^"]+">/);
+
+      const listingManager = await listingManagerRoute.GET(
+        new Request("https://example.test/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),
+      );
+      const listingManagerHtml = await listingManager.text();
+      assert.equal(listingManager.status, 200);
+      assert.equal(listingManager.headers.get("cache-control"), "no-store");
+      assert.match(listingManagerHtml, /data-kind="admin-listing-manager"/);
+      assert.match(listingManagerHtml, /data-listing-manager-row="MS-CRAWL-0001"/);
+      assert.match(listingManagerHtml, /Поиск по номеру/);
+      assert.match(listingManagerHtml, /href="\/admin\/listings\/edit\?listingId=MS-CRAWL-0001&amp;locale=ru"/);
+      assert.match(listingManagerHtml, /href="\/admin\/translations\?locale=ru"/);
+      const listingManagerJson = await listingManagerJsonRoute.GET(
+        new Request("https://example.test/api/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),
+      );
+      const listingManagerJsonBody = await listingManagerJson.json();
+      assert.equal(listingManagerJson.status, 200);
+      assert.equal(listingManagerJsonBody.kind, "admin_listing_manager");
+      assert.ok(listingManagerJsonBody.summary.total > 100);
+      assert.equal(listingManagerJsonBody.summary.visible, 1);
+      assert.ok(listingManagerJsonBody.summary.translationReviewRequired > 0);
+      assert.equal(listingManagerJsonBody.listings[0].id, "MS-CRAWL-0001");
+      assert.ok(listingManagerJsonBody.listings[0].translation_review_required > 0);
+
+      const translationQueue = await translationQueueRoute.GET(
+        new Request("https://example.test/admin/translations?locale=ru&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
+      );
+      const translationQueueHtml = await translationQueue.text();
+      assert.equal(translationQueue.status, 200);
+      assert.equal(translationQueue.headers.get("cache-control"), "no-store");
+      assert.match(translationQueueHtml, /data-kind="admin-translation-queue"/);
+      assert.match(translationQueueHtml, /data-human-approval-required="true"/);
+      assert.match(translationQueueHtml, /data-translation-task-row="translation-MS-CRAWL-0001-en"/);
+      assert.match(translationQueueHtml, /data-translation-workflow-form="human"/);
+      assert.match(translationQueueHtml, /name="propertyFactsJson"/);
+      const translationQueueJson = await translationQueueJsonRoute.GET(
+        new Request("https://example.test/api/admin/translations?locale=ru&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
+      );
+      const translationQueueJsonBody = await translationQueueJson.json();
+      assert.equal(translationQueueJson.status, 200);
+      assert.equal(translationQueueJsonBody.kind, "admin_translation_queue");
+      assert.equal(translationQueueJsonBody.translationTasks.length, 1);
+      assert.equal(translationQueueJsonBody.translationTasks[0].target_locale, "en");
+      assert.equal(translationQueueJsonBody.translationTasks[0].provider_mode, "human");
 
       const russianEditor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?listingId=MS-CRAWL-0001&locale=ru", { headers: auth }),
@@ -933,6 +981,65 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingQualityImportBody.reviewPath, null);
       assert.equal(listingQualityImportBody.edits[0].edit.media_reviewer, "media_editor");
 
+      const humanDraft = await translationDraftRoute.POST(
+        new Request("https://example.test/api/admin/translations/draft", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            draftSource: "human",
+            targetLocale: "en",
+            sourceLocale: "bg",
+            objectType: "listing",
+            objectId: "MS-CRAWL-0001",
+            sourceTitle: "Reviewed source listing",
+            sourceDescription: "Reviewed source description",
+            propertyFactsJson: JSON.stringify({ id: "MS-CRAWL-0001", location: "Sandanski" }),
+            reviewer: "editor_en",
+            translatedTitle: "MS-CRAWL-0001 Sandanski reviewed English listing",
+            translatedBody: "MS-CRAWL-0001 Sandanski reviewed English description",
+            translatedSeoTitle: "MS-CRAWL-0001 Sandanski",
+            translatedMetaDescription: "MS-CRAWL-0001 Sandanski reviewed English listing content.",
+          }),
+        }),
+      );
+      const humanDraftBody = await humanDraft.json();
+      assert.equal(humanDraft.status, 201);
+      assert.equal(humanDraftBody.status, "human_edited");
+      assert.equal(humanDraftBody.human.editor, "editor_en");
+      assert.equal("hermes" in humanDraftBody, false);
+
+      const humanApproved = await translationApproveRoute.POST(
+        new Request("https://example.test/api/admin/translations/approve", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ taskId: humanDraftBody.id, reviewer: "editor_en" }),
+        }),
+      );
+      const humanApprovedBody = await humanApproved.json();
+      assert.equal(humanApproved.status, 201);
+      assert.equal(humanApprovedBody.status, "approved");
+      assert.equal(humanApprovedBody.human_approved, true);
+
+      const publishQueue = await translationQueueRoute.GET(
+        new Request("https://example.test/admin/translations?locale=en&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
+      );
+      const publishQueueHtml = await publishQueue.text();
+      assert.match(publishQueueHtml, /data-translation-status="approved"/);
+      assert.match(publishQueueHtml, /data-translation-workflow-form="publish"/);
+      assert.match(publishQueueHtml, /Approved translation to publish/);
+
+      const humanPublished = await translationPublishRoute.POST(
+        new Request("https://example.test/api/admin/translations/publish", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ taskId: humanApprovedBody.id }),
+        }),
+      );
+      const humanPublishedBody = await humanPublished.json();
+      assert.equal(humanPublished.status, 201);
+      assert.equal(humanPublishedBody.status, "published");
+      assert.equal(humanPublishedBody.public_indexable, true);
+
       const draft = await translationDraftRoute.POST(
         new Request("https://example.test/api/admin/translations/draft", {
           method: "POST",
@@ -1307,9 +1414,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         redirect_approvals_imported: 1,
         deployable_redirects_exported: 1,
         listing_quality_imported: 1,
-        translation_drafted: 1,
-        translation_approved: 1,
-        translation_published: 1,
+        translation_drafted: 2,
+        translation_approved: 2,
+        translation_published: 2,
         reply_approved: 1,
         broker_contact_approved: 1,
         listing_edited: 1,

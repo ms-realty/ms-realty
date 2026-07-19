@@ -8,6 +8,8 @@ const ADMIN_COPY = {
     workspaceTitle: "Администрация MS Realty",
     crm: "CRM",
     cms: "CMS",
+    listingManager: "Обяви",
+    listingManagerDescription: "Търсене, преглед и редакция на всички обяви в CMS.",
     today: "Днес",
     todayDescription: "Приоритетни запитвания, просрочени задачи и предстоящи огледи на едно място.",
     activity: "История на действията",
@@ -15,6 +17,7 @@ const ADMIN_COPY = {
     viewingsWorkspace: "Огледи и последващи действия",
     viewingsDescription: "График на огледите, последващи задачи и календар за брокерите.",
     translationQueue: "Преводи за преглед",
+    translationQueueDescription: "Опашка за човешки преглед на липсващи, чернови и остарели преводи.",
     leadInbox: "Входящи запитвания",
     leadInboxDescription: "Входящи CRM запитвания с отговори, прегледани от брокер.",
     leadDetail: "Детайли на запитване",
@@ -38,6 +41,30 @@ const ADMIN_COPY = {
     replyReview: "Преглед на отговор",
     propertyEditor: "Редактор на имоти",
     listingEditor: "Редактор на обяви",
+    searchListings: "Търси по референция, заглавие или локация",
+    searchTranslations: "Търси преводи по обява или локация",
+    filter: "Филтрирай",
+    resetFilters: "Изчисти филтрите",
+    results: "Резултати",
+    openEditor: "Отвори редактора",
+    targetLocale: "Целеви език",
+    taskType: "Тип задача",
+    missingTranslations: "Липсващи преводи",
+    staleTranslations: "Остарели преводи",
+    validatedDraft: "Проверена чернова",
+    awaitingHermesDraft: "Чака чернова от Hermes",
+    enterHumanTranslation: "Въведи човешки превод",
+    translatedTitle: "Преведено заглавие",
+    translatedBody: "Преведено описание",
+    translatedSeoTitle: "SEO заглавие",
+    translatedMetaDescription: "Мета описание",
+    translationDraftSaved: "Черновата на превода е записана.",
+    translationSaveFailed: "Преводът не можа да бъде записан.",
+    approveForReview: "Одобри превода",
+    publishApproved: "Публикувай одобрения превод",
+    previousPage: "Предишна",
+    nextPage: "Следваща",
+    page: "Страница",
     mediaReview: "Преглед на медия",
     localeRegistry: "Регистър на езици",
     redirectReview: "Преглед на пренасочвания",
@@ -131,6 +158,8 @@ const ADMIN_COPY = {
     workspaceTitle: "Администрирование MS Realty",
     crm: "CRM",
     cms: "CMS",
+    listingManager: "Объекты",
+    listingManagerDescription: "Поиск, проверка и редактирование всех объектов в CMS.",
     today: "Сегодня",
     todayDescription: "Приоритетные заявки, просроченные задачи и предстоящие просмотры в одном месте.",
     activity: "История действий",
@@ -138,6 +167,7 @@ const ADMIN_COPY = {
     viewingsWorkspace: "Просмотры и последующие действия",
     viewingsDescription: "Расписание просмотров, последующие задачи и календарь брокеров.",
     translationQueue: "Переводы на проверку",
+    translationQueueDescription: "Очередь ручной проверки отсутствующих, черновых и устаревших переводов.",
     leadInbox: "Входящие заявки",
     leadInboxDescription: "Входящие заявки CRM с ответами, проверенными брокером.",
     leadDetail: "Детали заявки",
@@ -161,6 +191,30 @@ const ADMIN_COPY = {
     replyReview: "Проверка ответа",
     propertyEditor: "Редактор объектов",
     listingEditor: "Редактор объявлений",
+    searchListings: "Поиск по номеру, названию или локации",
+    searchTranslations: "Поиск переводов по объекту или локации",
+    filter: "Фильтровать",
+    resetFilters: "Сбросить фильтры",
+    results: "Результаты",
+    openEditor: "Открыть редактор",
+    targetLocale: "Целевой язык",
+    taskType: "Тип задачи",
+    missingTranslations: "Отсутствующие переводы",
+    staleTranslations: "Устаревшие переводы",
+    validatedDraft: "Проверенный черновик",
+    awaitingHermesDraft: "Ожидает черновик Hermes",
+    enterHumanTranslation: "Ввести ручной перевод",
+    translatedTitle: "Переведенное название",
+    translatedBody: "Переведенное описание",
+    translatedSeoTitle: "SEO-заголовок",
+    translatedMetaDescription: "Мета-описание",
+    translationDraftSaved: "Черновик перевода сохранен.",
+    translationSaveFailed: "Не удалось сохранить перевод.",
+    approveForReview: "Одобрить перевод",
+    publishApproved: "Опубликовать одобренный перевод",
+    previousPage: "Предыдущая",
+    nextPage: "Следующая",
+    page: "Страница",
     mediaReview: "Проверка медиа",
     localeRegistry: "Реестр языков",
     redirectReview: "Проверка редиректов",
@@ -254,6 +308,8 @@ const ADMIN_COPY = {
     workspaceTitle: "MS Realty Admin",
     crm: "CRM",
     cms: "CMS",
+    listingManager: "Listings",
+    listingManagerDescription: "Search, review, and edit every listing in the CMS workspace.",
     today: "Today",
     todayDescription: "Priority leads, overdue tasks, and upcoming viewings in one place.",
     activity: "Activity history",
@@ -261,6 +317,7 @@ const ADMIN_COPY = {
     viewingsWorkspace: "Viewings and follow-ups",
     viewingsDescription: "Viewing schedule, follow-up tasks, and broker calendar.",
     translationQueue: "Translation review",
+    translationQueueDescription: "Human review queue for missing, drafted, and stale listing translations.",
     leadInbox: "Lead inbox",
     leadInboxDescription: "CRM lead inbox with broker-reviewed replies.",
     leadDetail: "Lead detail",
@@ -284,6 +341,30 @@ const ADMIN_COPY = {
     replyReview: "Reply review",
     propertyEditor: "Property editor",
     listingEditor: "Listing editor",
+    searchListings: "Search by reference, title, or location",
+    searchTranslations: "Search translations by listing or location",
+    filter: "Filter",
+    resetFilters: "Reset filters",
+    results: "Results",
+    openEditor: "Open editor",
+    targetLocale: "Target locale",
+    taskType: "Task type",
+    missingTranslations: "Missing translations",
+    staleTranslations: "Stale translations",
+    validatedDraft: "Validated draft",
+    awaitingHermesDraft: "Awaiting Hermes draft",
+    enterHumanTranslation: "Enter human translation",
+    translatedTitle: "Translated title",
+    translatedBody: "Translated description",
+    translatedSeoTitle: "SEO title",
+    translatedMetaDescription: "Meta description",
+    translationDraftSaved: "Translation draft saved.",
+    translationSaveFailed: "Could not save translation.",
+    approveForReview: "Approve translation",
+    publishApproved: "Publish approved translation",
+    previousPage: "Previous",
+    nextPage: "Next",
+    page: "Page",
     mediaReview: "Media review",
     localeRegistry: "Locale registry",
     redirectReview: "Redirect review",
@@ -437,6 +518,7 @@ export function adminSurfaceCatalog(registry, requestedLocale = "en") {
         label: copy.cms,
         screens: [
           { id: "property_editor", label: copy.propertyEditor },
+          { id: "listing_manager", label: copy.listingManager },
           { id: "listing_editor", label: copy.listingEditor },
           { id: "media_review", label: copy.mediaReview },
           { id: "translation_queue", label: copy.translationQueue },
@@ -482,7 +564,9 @@ export function createTranslationReviewTask(registry, input) {
     throw new Error("objectType, objectId, and source text are required");
   }
 
-  assertHermesActionAllowed("draft_translation");
+  const humanDraft = input.draftSource === "human" || input.draft_source === "human";
+  if (humanDraft && !input.reviewer) throw new Error("reviewer is required for a human translation draft");
+  if (!humanDraft) assertHermesActionAllowed("draft_translation");
   const sourceHash = contentHash({ sourceLocale, sourceContent });
   const sourceSnapshot = {
     object_type: input.objectType,
@@ -491,13 +575,15 @@ export function createTranslationReviewTask(registry, input) {
     source_hash: sourceHash,
     approved_legal_content: input.approvedLegalContent === true,
   };
-  const prompt = translationPrompt({
-    sourceLocale,
-    targetLocale: target.code,
-    sourceText,
-    propertyFacts: input.propertyFacts || {},
-    glossary: input.glossary || {},
-  });
+  const prompt = humanDraft
+    ? null
+    : translationPrompt({
+        sourceLocale,
+        targetLocale: target.code,
+        sourceText,
+        propertyFacts: input.propertyFacts || {},
+        glossary: input.glossary || {},
+      });
   const output = input.draftOutput
     ? validateHermesTranslationDraft({
         draft: input.draftOutput,
@@ -513,32 +599,47 @@ export function createTranslationReviewTask(registry, input) {
     source_locale: sourceLocale,
     target_locale: target.code,
     target_direction: target.direction,
-    status: "hermes_drafted",
+    status: humanDraft ? "human_edited" : "hermes_drafted",
     source_hash: sourceHash,
     draft_hash: contentHash({ targetLocale: target.code, sourceContent, propertyFacts: input.propertyFacts || {} }),
     provider_mode: target.translation_provider_mode,
     reviewer_role: target.reviewer_role,
     public_indexable: false,
     requires_human_approval: true,
-    hermes: {
-      prompt,
-      output,
-      source_snapshot: sourceSnapshot,
-      can_publish: false,
-      can_mark_indexable: false,
-    },
+    ...(humanDraft
+      ? {
+          human: {
+            editor: input.reviewer,
+            output: output ? { ...output, status: "human_edited" } : null,
+            source_snapshot: sourceSnapshot,
+          },
+        }
+      : {
+          hermes: {
+            prompt,
+            output,
+            source_snapshot: sourceSnapshot,
+            can_publish: false,
+            can_mark_indexable: false,
+          },
+        }),
   };
 }
 
-function assertValidatedHermesDraftOutput(task) {
-  const output = task.hermes?.output;
+function assertValidatedTranslationOutput(task) {
+  const humanOutput = task.human?.output;
+  const output = humanOutput || task.hermes?.output;
   if (
     !output ||
-    output.status !== "hermes_drafted" ||
+    !["hermes_drafted", "human_edited"].includes(output.status) ||
     output.public_indexable !== false ||
     output.source_snapshot?.source_hash !== task.source_hash
   ) {
-    throw new Error("Validated Hermes draft output is required before approval");
+    throw new Error(
+      humanOutput || task.human
+        ? "Validated human translation output is required before approval"
+        : "Validated Hermes draft output is required before approval",
+    );
   }
 }
 
@@ -548,7 +649,7 @@ export function approveTranslationTask(registry, task, reviewer, approvedAt = "2
   if (task.status !== "hermes_drafted" && task.status !== "human_edited") {
     throw new Error(`Cannot approve translation in state: ${task.status}`);
   }
-  assertValidatedHermesDraftOutput(task);
+  assertValidatedTranslationOutput(task);
 
   return {
     ...task,
@@ -565,7 +666,7 @@ export function publishApprovedTranslation(registry, task) {
   if (task.status !== "approved" || task.human_approved !== true) {
     throw new Error("Only human-approved translations can be published");
   }
-  assertValidatedHermesDraftOutput(task);
+  assertValidatedTranslationOutput(task);
   assertHermesActionAllowed("draft_translation");
   return {
     ...task,
