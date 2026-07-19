@@ -65,9 +65,9 @@
         "source": "privacy_events",
         "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
         "status": "imported",
-        "row_count": 44,
-        "matched_rows": 22,
-        "unmatched_rows": 22
+        "row_count": 65,
+        "matched_rows": 29,
+        "unmatched_rows": 36
       }
     },
     "missing_required_sources": [
@@ -75,7 +75,7 @@
       "yandex_webmaster",
       "backlinks"
     ],
-    "urls_with_any_evidence": 2
+    "urls_with_any_evidence": 3
   },
   "url_evidence": [
     {
@@ -2021,7 +2021,7 @@
         "referring_domains": 0
       },
       "analytics": {
-        "page_views": 12,
+        "page_views": 17,
         "searches": 0,
         "leads": 0,
         "cta_clicks": 0,
@@ -3087,7 +3087,7 @@
         "referring_domains": 0
       },
       "analytics": {
-        "page_views": 0,
+        "page_views": 2,
         "searches": 0,
         "leads": 0,
         "cta_clicks": 0,

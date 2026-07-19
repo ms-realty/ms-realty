@@ -1744,12 +1744,14 @@
         "minimum_tap_target_px": 44,
         "required_fields": [
           "contact.name",
+          "contact.phone",
           "property.location",
           "property.type",
           "message"
         ],
         "payload": {
           "source": "website_seller_valuation",
+          "intent": "valuation",
           "leadType": "seller",
           "language": "he",
           "contact_preference": "phone"
@@ -1940,10 +1942,11 @@
         "minimum_tap_target_px": 44,
         "required_fields": [
           "contact.name",
-          "message"
+          "contact.phone"
         ],
         "payload": {
           "source": "website_contact_callback",
+          "intent": "callback",
           "leadType": "general",
           "language": "he",
           "contact_preference": "phone"
@@ -4869,12 +4872,15 @@
     "lead": {
       "id": "runtime-lead-he-0001",
       "source": "website_listing_detail",
+      "intent": "inquiry",
       "leadType": "buyer",
       "listingReference": "MS-CRAWL-0001",
       "contact": {
-        "name": "Noa Levi"
+        "name": "Noa Levi",
+        "whatsapp": "+359880000001"
       },
       "property": {},
+      "request_details": {},
       "contact_preference": "whatsapp",
       "message": "Interested in this property.",
       "language": {
@@ -4928,12 +4934,18 @@
     "lead": {
       "id": "runtime-viewing-lead-he-0001",
       "source": "website_viewing_request",
+      "intent": "viewing",
       "leadType": "buyer",
       "listingReference": "MS-CRAWL-0001",
       "contact": {
-        "name": "Noa Levi"
+        "name": "Noa Levi",
+        "phone": "+359880000001"
       },
       "property": {},
+      "request_details": {
+        "viewing_date": "2026-07-20",
+        "viewing_time": "14:00"
+      },
       "contact_preference": "phone",
       "message": "I would like to view this property.",
       "language": {
@@ -4987,12 +4999,17 @@
     "lead": {
       "id": "runtime-contact-lead-he-0001",
       "source": "website_contact_callback",
+      "intent": "callback",
       "leadType": "general",
       "listingReference": null,
       "contact": {
-        "name": "Noa Levi"
+        "name": "Noa Levi",
+        "phone": "+359880000001"
       },
       "property": {},
+      "request_details": {
+        "callback_time": "Weekdays after 14:00"
+      },
       "contact_preference": "phone",
       "message": "Please call me about buying in Sandanski.",
       "language": {

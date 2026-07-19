@@ -1,20 +1,20 @@
 {
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
-    "search_events": 5,
+    "search_events": 8,
     "zero_result_events": 0,
     "filtered_search_events": 1,
     "locales": [
+      {
+        "key": "en",
+        "count": 4
+      },
       {
         "key": "he",
         "count": 3
       },
       {
         "key": "el",
-        "count": 1
-      },
-      {
-        "key": "en",
         "count": 1
       }
     ],
@@ -68,6 +68,30 @@
       "filters": {},
       "filter_key": "none",
       "result_count": 113
+    },
+    {
+      "path": "/en/search",
+      "locale": "en",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/en/search",
+      "locale": "en",
+      "query": "sandanski",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 109
+    },
+    {
+      "path": "/en/search",
+      "locale": "en",
+      "query": "sandanski",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 109
     }
   ]
 }

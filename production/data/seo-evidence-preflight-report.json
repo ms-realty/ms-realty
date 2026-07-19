@@ -4,7 +4,7 @@
   "status": "blocked",
   "summary": {
     "crawl_urls": 457,
-    "urls_with_any_evidence": 2,
+    "urls_with_any_evidence": 3,
     "missing_required_sources": [
       "search_console",
       "yandex_webmaster",
@@ -67,9 +67,9 @@
         "source": "privacy_events",
         "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
         "status": "imported",
-        "row_count": 44,
-        "matched_rows": 22,
-        "unmatched_rows": 22
+        "row_count": 65,
+        "matched_rows": 29,
+        "unmatched_rows": 36
       }
     }
   },

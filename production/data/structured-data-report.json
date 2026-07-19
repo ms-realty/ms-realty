@@ -4,7 +4,7 @@
     "listing_entries": 167,
     "guide_entries": 2,
     "failing_entries": 0,
-    "entries_with_offer": 137,
+    "entries_with_offer": 135,
     "warnings": {
       "missing_location": 0,
       "missing_price": 0,
@@ -28,7 +28,7 @@
       "listing_id": "MS-CRAWL-0001",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -40,7 +40,7 @@
       "listing_id": "MS-CRAWL-0001",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -52,7 +52,7 @@
       "listing_id": "MS-CRAWL-0001",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -64,7 +64,7 @@
       "listing_id": "MS-CRAWL-0002",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -76,7 +76,7 @@
       "listing_id": "MS-CRAWL-0003",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -88,7 +88,7 @@
       "listing_id": "MS-CRAWL-0004",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -100,7 +100,7 @@
       "listing_id": "MS-CRAWL-0005",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -113,7 +113,7 @@
       "indexable": true,
       "schema_type": "RealEstateListing",
       "image_count": 1,
-      "has_offer": true,
+      "has_offer": false,
       "issues": [],
       "warnings": []
     },
@@ -124,7 +124,7 @@
       "listing_id": "MS-CRAWL-0007",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -136,7 +136,7 @@
       "listing_id": "MS-CRAWL-0008",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -148,7 +148,7 @@
       "listing_id": "MS-CRAWL-0009",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -160,7 +160,7 @@
       "listing_id": "MS-CRAWL-0010",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -172,7 +172,7 @@
       "listing_id": "MS-CRAWL-0011",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -184,7 +184,7 @@
       "listing_id": "MS-CRAWL-0012",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -196,7 +196,7 @@
       "listing_id": "MS-CRAWL-0013",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -208,7 +208,7 @@
       "listing_id": "MS-CRAWL-0014",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -220,7 +220,7 @@
       "listing_id": "MS-CRAWL-0015",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -232,7 +232,7 @@
       "listing_id": "MS-CRAWL-0016",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -244,7 +244,7 @@
       "listing_id": "MS-CRAWL-0017",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -256,7 +256,7 @@
       "listing_id": "MS-CRAWL-0018",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -268,7 +268,7 @@
       "listing_id": "MS-CRAWL-0019",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -280,7 +280,7 @@
       "listing_id": "MS-CRAWL-0020",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -292,7 +292,7 @@
       "listing_id": "MS-CRAWL-0021",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -304,7 +304,7 @@
       "listing_id": "MS-CRAWL-0022",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -316,7 +316,7 @@
       "listing_id": "MS-CRAWL-0023",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -328,7 +328,7 @@
       "listing_id": "MS-CRAWL-0024",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -340,7 +340,7 @@
       "listing_id": "MS-CRAWL-0025",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -352,7 +352,7 @@
       "listing_id": "MS-CRAWL-0026",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -364,7 +364,7 @@
       "listing_id": "MS-CRAWL-0027",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -376,7 +376,7 @@
       "listing_id": "MS-CRAWL-0028",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -388,7 +388,7 @@
       "listing_id": "MS-CRAWL-0029",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -400,7 +400,7 @@
       "listing_id": "MS-CRAWL-0030",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -412,7 +412,7 @@
       "listing_id": "MS-CRAWL-0031",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -424,7 +424,7 @@
       "listing_id": "MS-CRAWL-0032",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -436,7 +436,7 @@
       "listing_id": "MS-CRAWL-0033",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -448,7 +448,7 @@
       "listing_id": "MS-CRAWL-0034",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -460,7 +460,7 @@
       "listing_id": "MS-CRAWL-0035",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -472,7 +472,7 @@
       "listing_id": "MS-CRAWL-0036",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -484,7 +484,7 @@
       "listing_id": "MS-CRAWL-0037",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -496,7 +496,7 @@
       "listing_id": "MS-CRAWL-0038",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -508,7 +508,7 @@
       "listing_id": "MS-CRAWL-0039",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -520,7 +520,7 @@
       "listing_id": "MS-CRAWL-0040",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -532,7 +532,7 @@
       "listing_id": "MS-CRAWL-0041",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -544,7 +544,7 @@
       "listing_id": "MS-CRAWL-0042",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -556,7 +556,7 @@
       "listing_id": "MS-CRAWL-0043",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -568,7 +568,7 @@
       "listing_id": "MS-CRAWL-0044",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -580,7 +580,7 @@
       "listing_id": "MS-CRAWL-0045",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -592,7 +592,7 @@
       "listing_id": "MS-CRAWL-0046",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -604,7 +604,7 @@
       "listing_id": "MS-CRAWL-0047",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -616,7 +616,7 @@
       "listing_id": "MS-CRAWL-0048",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -640,7 +640,7 @@
       "listing_id": "MS-CRAWL-0050",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -652,7 +652,7 @@
       "listing_id": "MS-CRAWL-0051",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -664,7 +664,7 @@
       "listing_id": "MS-CRAWL-0052",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -676,7 +676,7 @@
       "listing_id": "MS-CRAWL-0053",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -688,7 +688,7 @@
       "listing_id": "MS-CRAWL-0054",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -700,7 +700,7 @@
       "listing_id": "MS-CRAWL-0055",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -712,7 +712,7 @@
       "listing_id": "MS-CRAWL-0056",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -724,7 +724,7 @@
       "listing_id": "MS-CRAWL-0057",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -736,7 +736,7 @@
       "listing_id": "MS-CRAWL-0058",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -748,7 +748,7 @@
       "listing_id": "MS-CRAWL-0059",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -760,7 +760,7 @@
       "listing_id": "MS-CRAWL-0060",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -772,7 +772,7 @@
       "listing_id": "MS-CRAWL-0061",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -784,7 +784,7 @@
       "listing_id": "MS-CRAWL-0062",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -796,7 +796,7 @@
       "listing_id": "MS-CRAWL-0063",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -808,7 +808,7 @@
       "listing_id": "MS-CRAWL-0064",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -820,7 +820,7 @@
       "listing_id": "MS-CRAWL-0065",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -832,7 +832,7 @@
       "listing_id": "MS-CRAWL-0066",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -844,7 +844,7 @@
       "listing_id": "MS-CRAWL-0067",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -868,7 +868,7 @@
       "listing_id": "MS-CRAWL-0069",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -892,7 +892,7 @@
       "listing_id": "MS-CRAWL-0071",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -904,7 +904,7 @@
       "listing_id": "MS-CRAWL-0072",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -916,7 +916,7 @@
       "listing_id": "MS-CRAWL-0073",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -928,7 +928,7 @@
       "listing_id": "MS-CRAWL-0074",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -940,7 +940,7 @@
       "listing_id": "MS-CRAWL-0075",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -952,7 +952,7 @@
       "listing_id": "MS-3000",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -964,7 +964,7 @@
       "listing_id": "MS-CRAWL-0077",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -976,7 +976,7 @@
       "listing_id": "MS-CRAWL-0078",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -988,7 +988,7 @@
       "listing_id": "MS-CRAWL-0079",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1000,7 +1000,7 @@
       "listing_id": "MS-CRAWL-0080",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1012,7 +1012,7 @@
       "listing_id": "MS-CRAWL-0081",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1036,7 +1036,7 @@
       "listing_id": "MS-CRAWL-0083",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1048,7 +1048,7 @@
       "listing_id": "MS-CRAWL-0084",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1060,7 +1060,7 @@
       "listing_id": "MS-CRAWL-0085",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1072,7 +1072,7 @@
       "listing_id": "MS-CRAWL-0086",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1084,7 +1084,7 @@
       "listing_id": "MS-CRAWL-0087",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1096,7 +1096,7 @@
       "listing_id": "MS-CRAWL-0088",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1108,7 +1108,7 @@
       "listing_id": "MS-CRAWL-0089",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1120,7 +1120,7 @@
       "listing_id": "MS-CRAWL-0090",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1132,7 +1132,7 @@
       "listing_id": "MS-CRAWL-0091",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1144,7 +1144,7 @@
       "listing_id": "MS-CRAWL-0092",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1156,7 +1156,7 @@
       "listing_id": "MS-CRAWL-0093",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1168,8 +1168,8 @@
       "listing_id": "MS-CRAWL-0094",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
-      "has_offer": true,
+      "image_count": 1,
+      "has_offer": false,
       "issues": [],
       "warnings": []
     },
@@ -1180,7 +1180,7 @@
       "listing_id": "MS-CRAWL-0095",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1192,7 +1192,7 @@
       "listing_id": "MS-CRAWL-0096",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1204,7 +1204,7 @@
       "listing_id": "MS-CRAWL-0097",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1216,7 +1216,7 @@
       "listing_id": "MS-CRAWL-0098",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1228,7 +1228,7 @@
       "listing_id": "MS-CRAWL-0099",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1240,7 +1240,7 @@
       "listing_id": "MS-CRAWL-0100",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1252,7 +1252,7 @@
       "listing_id": "MS-CRAWL-0101",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1264,7 +1264,7 @@
       "listing_id": "MS-CRAWL-0102",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1276,7 +1276,7 @@
       "listing_id": "MS-CRAWL-0103",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1288,7 +1288,7 @@
       "listing_id": "MS-CRAWL-0104",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1300,7 +1300,7 @@
       "listing_id": "MS-CRAWL-0105",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1312,7 +1312,7 @@
       "listing_id": "MS-CRAWL-0106",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1324,7 +1324,7 @@
       "listing_id": "MS-CRAWL-0107",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1336,7 +1336,7 @@
       "listing_id": "MS-CRAWL-0108",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1348,7 +1348,7 @@
       "listing_id": "MS-CRAWL-0109",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1360,7 +1360,7 @@
       "listing_id": "MS-CRAWL-0110",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": false,
       "issues": [],
       "warnings": []
@@ -1372,7 +1372,7 @@
       "listing_id": "MS-CRAWL-0111",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1384,7 +1384,7 @@
       "listing_id": "MS-CRAWL-0112",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []
@@ -1396,7 +1396,7 @@
       "listing_id": "MS-CRAWL-0113",
       "indexable": true,
       "schema_type": "RealEstateListing",
-      "image_count": 2,
+      "image_count": 1,
       "has_offer": true,
       "issues": [],
       "warnings": []

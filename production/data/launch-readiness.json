@@ -112,7 +112,7 @@
         "listing_entries": 167,
         "guide_entries": 2,
         "failing_entries": 0,
-        "entries_with_offer": 137,
+        "entries_with_offer": 135,
         "warnings": {
           "missing_location": 0,
           "missing_price": 0,
@@ -141,7 +141,7 @@
           "taxonomy": 146,
           "listing": 165
         },
-        "urls_with_any_evidence": 2,
+        "urls_with_any_evidence": 3,
         "missing_required_sources": [
           "search_console",
           "yandex_webmaster",
@@ -151,9 +151,9 @@
           "source": "privacy_events",
           "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
           "status": "imported",
-          "row_count": 44,
-          "matched_rows": 22,
-          "unmatched_rows": 22
+          "row_count": 65,
+          "matched_rows": 29,
+          "unmatched_rows": 36
         },
         "analytics_export": {
           "source": "analytics_export",
@@ -225,9 +225,9 @@
             "source": "privacy_events",
             "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
             "status": "imported",
-            "row_count": 44,
-            "matched_rows": 22,
-            "unmatched_rows": 22
+            "row_count": 65,
+            "matched_rows": 29,
+            "unmatched_rows": 36
           }
         },
         "next_actions": [
@@ -512,7 +512,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-10T19:04:24.988Z",
+              "generated_at": "2026-07-19T14:19:15.591Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,
