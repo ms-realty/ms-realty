@@ -2,7 +2,15 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
-import { applyListingEdits, createListingEdit, appendListingEdit, assertListingEdits, readListingEdits, resetListingEdits } from "../lib/listing-edits.mjs";
+import {
+  applyListingEdits,
+  createBulkListingStatusEdits,
+  createListingEdit,
+  appendListingEdit,
+  assertListingEdits,
+  readListingEdits,
+  resetListingEdits,
+} from "../lib/listing-edits.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
 
 test("listing edits persist and stale dependent translations", () => {
@@ -127,4 +135,89 @@ test("listing edits can persist media-only review rows", () => {
 
   assert.deepEqual(result.edit.patch, {});
   assert.equal(result.edit.source_hash_before, result.edit.source_hash_after);
+  assert.equal(result.edit.media_reviewer, "media_editor");
+});
+
+test("listing edit persistence assigns collision-safe ids and treats request retries as idempotent", () => {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-edit-retries-`)}/edits.jsonl`;
+  resetListingEdits(file);
+  const seed = loadCmsSeed();
+  const first = createListingEdit(
+    seed,
+    { listingId: "MS-CRAWL-0001", editor: "content_editor", patch: { listing_status: "reserved" } },
+    [],
+    "2026-07-06T08:00:00Z",
+  );
+  const persisted = appendListingEdit(first.edit, { filePath: file });
+  const retriedSeed = applyListingEdits(seed, readListingEdits(file));
+  const retry = createListingEdit(
+    retriedSeed,
+    { listingId: "MS-CRAWL-0001", editor: "content_editor", patch: { listing_status: "reserved" } },
+    [],
+    "2026-07-06T08:01:00Z",
+  );
+  const idempotent = appendListingEdit(retry.edit, { filePath: file });
+  const secondChange = createListingEdit(
+    retriedSeed,
+    { listingId: "MS-CRAWL-0001", editor: "content_editor", patch: { listing_status: "sold" } },
+    [],
+    "2026-07-06T08:02:00Z",
+  );
+  const secondPersisted = appendListingEdit(secondChange.edit, { filePath: file });
+
+  assert.equal(persisted.id, "listing-edit-MS-CRAWL-0001");
+  assert.equal(persisted.idempotent, false);
+  assert.equal(idempotent.id, persisted.id);
+  assert.equal(idempotent.idempotent, true);
+  assert.equal(secondPersisted.id, "listing-edit-MS-CRAWL-0001-2");
+  assert.equal(readListingEdits(file).length, 2);
+  assert.equal(assertListingEdits(readListingEdits(file)), true);
+});
+
+test("explicit listing edit ids reject conflicting reuse", () => {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-edit-conflict-`)}/edits.jsonl`;
+  resetListingEdits(file);
+  const seed = loadCmsSeed();
+  const reserved = createListingEdit(seed, {
+    id: "status-request-1",
+    listingId: "MS-CRAWL-0001",
+    editor: "content_editor",
+    patch: { listing_status: "reserved" },
+  });
+  const sold = createListingEdit(seed, {
+    id: "status-request-1",
+    listingId: "MS-CRAWL-0001",
+    editor: "content_editor",
+    patch: { listing_status: "sold" },
+  });
+  appendListingEdit(reserved.edit, { filePath: file });
+  assert.throws(() => appendListingEdit(sold.edit, { filePath: file }), /different change/);
+});
+
+test("bulk listing status updates validate the complete selection before returning changes", () => {
+  const seed = loadCmsSeed();
+  const batch = createBulkListingStatusEdits(
+    seed,
+    {
+      listingIds: ["MS-CRAWL-0001", "MS-CRAWL-0002", "MS-CRAWL-0001"],
+      targetStatus: "reserved",
+      editor: "listing_manager",
+      requestId: "bulk-status-20260706",
+    },
+    [],
+    "2026-07-06T08:00:00Z",
+  );
+  assert.equal(batch.requestedListingIds.length, 2);
+  assert.equal(batch.changes.length, 2);
+  assert.equal(batch.changes.every((change) => change.edit.patch.listing_status === "reserved"), true);
+  assert.equal(batch.changes[0].edit.id, "bulk-status-20260706-MS-CRAWL-0001");
+  assert.throws(
+    () =>
+      createBulkListingStatusEdits(seed, {
+        listingIds: ["MS-CRAWL-0001", "MS-CRAWL-9999"],
+        targetStatus: "sold",
+        editor: "listing_manager",
+      }),
+    /Unknown listingId/,
+  );
 });

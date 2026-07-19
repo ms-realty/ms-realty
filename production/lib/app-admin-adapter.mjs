@@ -43,7 +43,14 @@ import {
   buildReplyDeliveryQueue,
   readReplyDeliveryOutcomes,
 } from "./reply-delivery-outcomes.mjs";
-import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
+import {
+  DEFAULT_LISTING_EDIT_LEDGER_PATH,
+  appendListingEdit,
+  applyListingEdits,
+  createBulkListingStatusEdits,
+  createListingEdit,
+  readListingEdits,
+} from "./listing-edits.mjs";
 import {
   buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
@@ -292,7 +299,13 @@ function parseJsonBody(body) {
 
 function parseBody(request, body) {
   const contentType = request.headers.get("content-type") || "";
-  if (contentType.includes("application/x-www-form-urlencoded")) return Object.fromEntries(new URLSearchParams(body));
+  if (contentType.includes("application/x-www-form-urlencoded")) {
+    const output = {};
+    for (const [key, value] of new URLSearchParams(body)) {
+      output[key] = key in output ? (Array.isArray(output[key]) ? [...output[key], value] : [output[key], value]) : value;
+    }
+    return output;
+  }
   return parseJsonBody(body);
 }
 
@@ -1030,28 +1043,62 @@ async function draftReply(input, config) {
   });
 }
 
+function attributedListingEditInput(input, config) {
+  let attributed = bindAuthenticatedOperator(listingEditInput(input), config.adminPrincipal, ["editor"]);
+  if (attributed.mediaReviewer) {
+    attributed = bindAuthenticatedOperator(attributed, config.adminPrincipal, ["mediaReviewer"]);
+  }
+  return attributed;
+}
+
+function persistEditorChange(result, config) {
+  const edit = appendListingEdit(result.edit, { filePath: config.listingEditLedgerPath });
+  const persistedStaleTranslations = edit.idempotent
+    ? []
+    : result.staleTranslations
+        .filter((translation) => translation.id)
+        .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
+  if (!edit.idempotent) {
+    recordAudit(
+      {
+        action: "listing_edited",
+        actor: edit.editor,
+        objectType: "listing",
+        objectId: edit.listing_id,
+        metadata: {
+          changed_fields: Object.keys(edit.patch || {}),
+          media_reviewer: edit.media_reviewer || null,
+          stale_translation_count: result.staleTranslations.length,
+        },
+      },
+      config,
+    );
+  }
+  return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
+}
+
 function appendEditorChange(input, config) {
   const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
-  const result = createListingEdit(currentSeed(config), listingEditInput(input), translationTasks, config.editedAt);
-  const edit = appendListingEdit(result.edit, { filePath: config.listingEditLedgerPath });
-  const persistedStaleTranslations = result.staleTranslations
-    .filter((translation) => translation.id)
-    .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
-  recordAudit(
-    {
-      action: "listing_edited",
-      actor: edit.editor,
-      objectType: "listing",
-      objectId: edit.listing_id,
-      metadata: {
-        changed_fields: Object.keys(edit.patch || {}),
-        media_reviewer: edit.media_reviewer || null,
-        stale_translation_count: result.staleTranslations.length,
-      },
-    },
-    config,
-  );
-  return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
+  const result = createListingEdit(currentSeed(config), attributedListingEditInput(input, config), translationTasks, config.editedAt);
+  return persistEditorChange(result, config);
+}
+
+function appendBulkListingStatusChanges(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["editor"]);
+  const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
+  const batch = createBulkListingStatusEdits(currentSeed(config), attributed, translationTasks, config.editedAt);
+  const changes = batch.changes.map((result) => persistEditorChange(result, config));
+  return {
+    kind: "bulk_listing_status_update",
+    targetStatus: batch.targetStatus,
+    requested: batch.requestedListingIds.length,
+    updated: changes.filter((result) => !result.edit.idempotent).length,
+    idempotent: changes.filter((result) => result.edit.idempotent).length,
+    unchanged: batch.unchangedListingIds.length,
+    unchangedListingIds: batch.unchangedListingIds,
+    edits: changes.map((result) => result.edit),
+    staleTranslations: changes.flatMap((result) => result.staleTranslations),
+  };
 }
 
 function appendViewingBooking(input, config) {
@@ -1830,7 +1877,12 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
-      return jsonResponse(201, appendEditorChange(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      const result = appendEditorChange(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.edit.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {
+      const result = appendBulkListingStatusChanges(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.updated ? 201 : 200, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/slug") {
       return jsonResponse(201, appendListingSlugChange(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));

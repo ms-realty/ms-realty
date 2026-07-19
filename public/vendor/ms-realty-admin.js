@@ -35,7 +35,10 @@
     var data = new FormData(form);
     var payload = {};
     data.forEach(function (value, key) {
-      if (String(value) !== "") payload[key] = value;
+      if (String(value) === "") return;
+      if (!(key in payload)) payload[key] = value;
+      else if (Array.isArray(payload[key])) payload[key].push(value);
+      else payload[key] = [payload[key], value];
     });
     return payload;
   }
@@ -428,6 +431,41 @@
     });
     applyFilter("open");
   }
+  function initListingBulkForms() {
+    var forms = document.querySelectorAll("[data-listing-bulk-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      (function (form) {
+        var boxes = form.querySelectorAll("[data-listing-select]");
+        var toggle = form.querySelector("[data-listing-select-all]");
+        var count = form.querySelector("[data-listing-selection-count]");
+        var selectedLabel = form.getAttribute("data-listing-selected-label") || "{count} selected";
+        var selectAllLabel = form.getAttribute("data-listing-select-all-label") || "Select all on this page";
+        var clearLabel = form.getAttribute("data-listing-clear-label") || "Clear selection";
+        function refresh() {
+          var selected = 0;
+          for (var j = 0; j < boxes.length; j += 1) if (boxes[j].checked) selected += 1;
+          if (count) count.textContent = selectedLabel.replace("{count}", String(selected));
+          if (toggle) {
+            var allSelected = boxes.length > 0 && selected === boxes.length;
+            toggle.textContent = allSelected ? clearLabel : selectAllLabel;
+            toggle.setAttribute("aria-pressed", allSelected ? "true" : "false");
+          }
+        }
+        form.addEventListener("change", function (event) {
+          if (event.target && event.target.matches("[data-listing-select]")) refresh();
+        });
+        if (toggle) {
+          toggle.addEventListener("click", function () {
+            var shouldSelect = false;
+            for (var j = 0; j < boxes.length; j += 1) if (!boxes[j].checked) shouldSelect = true;
+            for (var k = 0; k < boxes.length; k += 1) boxes[k].checked = shouldSelect;
+            refresh();
+          });
+        }
+        refresh();
+      })(forms[i]);
+    }
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -468,6 +506,7 @@
   }
   initLeadQueueFilters();
   initLeadPipelineFilters();
+  initListingBulkForms();
   initAdminMutationForms();
   initTourEditor();
   initViewingFollowUpForms();

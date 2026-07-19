@@ -21,7 +21,9 @@ const EDITABLE_FACT_FIELDS = new Set([
 ]);
 const TEXT_FACT_FIELDS = new Set(["title", "h1", "description", "location", "property_type", "offer_type"]);
 const BOOLEAN_FACT_FIELDS = new Set(["bedrooms_not_applicable", "price_on_request"]);
-const LISTING_STATUSES = new Set(["available", "reserved", "sold", "rented", "archived"]);
+export const LISTING_STATUSES = Object.freeze(["available", "reserved", "sold", "rented", "archived"]);
+const LISTING_STATUS_SET = new Set(LISTING_STATUSES);
+const MAX_BULK_LISTING_EDITS = 100;
 
 export function resetListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
@@ -39,9 +41,40 @@ export function readListingEdits(filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH) {
 }
 
 export function appendListingEdit(edit, { filePath = DEFAULT_LISTING_EDIT_LEDGER_PATH } = {}) {
+  const rows = readListingEdits(filePath);
+  const explicitId = String(edit.id || "").trim();
+  const sameIntent = (candidate) =>
+    candidate.listing_id === edit.listing_id &&
+    candidate.editor === edit.editor &&
+    candidate.media_reviewer === edit.media_reviewer &&
+    JSON.stringify(candidate.patch || {}) === JSON.stringify(edit.patch || {});
+  if (explicitId) {
+    const existing = rows.find((row) => row.id === explicitId);
+    if (existing) {
+      if (!sameIntent(existing)) throw new Error("Listing edit id already belongs to a different change");
+      return { ...existing, idempotent: true };
+    }
+  } else {
+    const retry = rows.find(
+      (row) =>
+        sameIntent(row) &&
+        ((row.source_hash_before === edit.source_hash_before && row.source_hash_after === edit.source_hash_after) ||
+          (edit.source_hash_before === edit.source_hash_after && row.source_hash_after === edit.source_hash_after)),
+    );
+    if (retry) return { ...retry, idempotent: true };
+  }
+
+  const baseId = `listing-edit-${edit.listing_id}`;
+  let id = explicitId || baseId;
+  let suffix = 2;
+  while (rows.some((row) => row.id === id)) {
+    id = `${baseId}-${suffix}`;
+    suffix += 1;
+  }
+  const persisted = { ...edit, id };
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(edit)}\n`);
-  return edit;
+  fs.appendFileSync(filePath, `${JSON.stringify(persisted)}\n`);
+  return { ...persisted, idempotent: false };
 }
 
 export function applyListingEdits(seed, edits = []) {
@@ -90,7 +123,7 @@ function normalizePatchValue(field, value) {
   if (TEXT_FACT_FIELDS.has(field)) return typeof value === "string" ? value.trim() : value;
   if (field === "listing_status") {
     const status = String(value || "").trim().toLowerCase();
-    if (!LISTING_STATUSES.has(status)) throw new Error("listing_status must be available, reserved, sold, rented, or archived");
+    if (!LISTING_STATUS_SET.has(status)) throw new Error("listing_status must be available, reserved, sold, rented, or archived");
     return status;
   }
   if (BOOLEAN_FACT_FIELDS.has(field)) return value === true || value === "true" || value === "on" || value === "1";
@@ -144,13 +177,18 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
   const sourceHashBefore = contentHash(record.facts);
   const sourceHashAfter = contentHash(factsAfter);
   const staleTranslations = staleTranslationsForListing(record, sourceHashAfter, translationTasks);
+  const requestedId = String(input.id || "").trim();
+  if (requestedId && !/^[a-z0-9][a-z0-9._:-]{2,159}$/i.test(requestedId)) {
+    throw new Error("Listing edit id must be a stable identifier");
+  }
 
   return {
     edit: {
       edited_at: editedAt,
-      id: input.id || `listing-edit-${record.id}`,
+      ...(requestedId ? { id: requestedId } : {}),
       listing_id: record.id,
       editor: input.editor,
+      media_reviewer: input.mediaReviewer ? String(input.mediaReviewer).trim() : null,
       source_locale: record.source_locale,
       patch,
       source_hash_before: sourceHashBefore,
@@ -162,11 +200,72 @@ export function createListingEdit(seed, input, translationTasks = [], editedAt =
   };
 }
 
+function listingIdsFrom(input) {
+  const source = Array.isArray(input.listingIds) ? input.listingIds : String(input.listingIds || "").split(",");
+  const ids = [...new Set(source.map((value) => String(value || "").trim()).filter(Boolean))];
+  if (!ids.length) throw new Error("Select at least one listing");
+  if (ids.length > MAX_BULK_LISTING_EDITS) throw new Error(`Bulk listing updates are limited to ${MAX_BULK_LISTING_EDITS} listings`);
+  return ids;
+}
+
+export function createBulkListingStatusEdits(seed, input, translationTasks = [], editedAt = new Date().toISOString()) {
+  const listingIds = listingIdsFrom(input);
+  const targetStatus = String(input.targetStatus || input.listingStatus || "").trim().toLowerCase();
+  if (!LISTING_STATUS_SET.has(targetStatus)) {
+    throw new Error("targetStatus must be available, reserved, sold, rented, or archived");
+  }
+  if (!input.editor) throw new Error("Bulk listing update requires an editor");
+  const requestId = String(input.requestId || "").trim();
+  if (requestId && !/^[a-z0-9][a-z0-9._:-]{2,79}$/i.test(requestId)) {
+    throw new Error("Bulk listing requestId must be a stable identifier");
+  }
+
+  const unchangedListingIds = [];
+  const changes = listingIds.flatMap((listingId) => {
+    const record = findListing(seed, listingId);
+    if (!record) throw new Error(`Unknown listingId: ${listingId}`);
+    if ((record.facts?.listing_status || "available") === targetStatus) {
+      unchangedListingIds.push(listingId);
+      return [];
+    }
+    const result = createListingEdit(
+      seed,
+      {
+        id: requestId ? `${requestId}-${listingId}` : undefined,
+        listingId,
+        editor: input.editor,
+        patch: { listing_status: targetStatus },
+      },
+      translationTasks,
+      editedAt,
+    );
+    return [{ listingId, ...result }];
+  });
+
+  return {
+    targetStatus,
+    requestedListingIds: listingIds,
+    unchangedListingIds,
+    changes,
+  };
+}
+
 export function assertListingEdits(rows) {
   if (!rows.length) throw new Error("Listing edit ledger must contain at least one row");
+  const ids = new Set();
   for (const row of rows) {
-    if (!row.listing_id || !row.editor || !row.source_hash_after) throw new Error("Listing edit row is missing review data");
-    if (row.stale_translation_count < 1) throw new Error("Listing edit must stale at least one dependent translation");
+    if (!row.id || !row.listing_id || !row.editor || !row.edited_at || !row.source_hash_before || !row.source_hash_after) {
+      throw new Error("Listing edit row is missing review data");
+    }
+    if (ids.has(row.id)) throw new Error("Listing edit ids must be unique");
+    ids.add(row.id);
+    if (!Number.isInteger(row.stale_translation_count) || row.stale_translation_count < 0) {
+      throw new Error("Listing edit stale translation count must be a non-negative integer");
+    }
+    normalizePatch(row.patch, { allowEmpty: Boolean(row.media_reviewer) });
+    if ("contact" in row || "email" in row || "phone" in row || "message" in row) {
+      throw new Error("Listing edit rows must not contain private contact data");
+    }
   }
   return true;
 }

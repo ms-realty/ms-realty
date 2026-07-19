@@ -57,7 +57,13 @@ import {
   readLanguageRequests,
 } from "./language-requests.mjs";
 import { appendTranslationTask, latestTranslationTasks, readTranslationLedger } from "./translation-ledger.mjs";
-import { appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
+import {
+  appendListingEdit,
+  applyListingEdits,
+  createBulkListingStatusEdits,
+  createListingEdit,
+  readListingEdits,
+} from "./listing-edits.mjs";
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
 import {
@@ -207,7 +213,11 @@ function loadMigrationReviewDashboard(filePath = fromRoot("production", "data", 
 function parseBody(request) {
   const contentType = request.headers?.["content-type"] || request.headers?.["Content-Type"] || "";
   if (contentType.includes("application/x-www-form-urlencoded")) {
-    return Object.fromEntries(new URLSearchParams(request.body || ""));
+    const output = {};
+    for (const [key, value] of new URLSearchParams(request.body || "")) {
+      output[key] = key in output ? (Array.isArray(output[key]) ? [...output[key], value] : [output[key], value]) : value;
+    }
+    return output;
   }
   return parseJsonBody(request);
 }
@@ -1426,24 +1436,78 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = listingEditInput(request);
+        let input = bindAuthenticatedOperator(listingEditInput(request), principal, ["editor"]);
+        if (input.mediaReviewer) input = bindAuthenticatedOperator(input, principal, ["mediaReviewer"]);
         const result = createListingEdit(currentSeed(), input, latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)), editedAt);
         const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
-        const persistedStaleTranslations = result.staleTranslations
-          .filter((translation) => translation.id)
-          .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
-        recordAudit({
-          action: "listing_edited",
-          actor: edit.editor,
-          objectType: "listing",
-          objectId: edit.listing_id,
-          metadata: {
-            changed_fields: Object.keys(edit.patch || {}),
-            media_reviewer: edit.media_reviewer || null,
-            stale_translation_count: result.staleTranslations.length,
-          },
+        const persistedStaleTranslations = edit.idempotent
+          ? []
+          : result.staleTranslations
+              .filter((translation) => translation.id)
+              .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
+        if (!edit.idempotent) {
+          recordAudit({
+            action: "listing_edited",
+            actor: edit.editor,
+            objectType: "listing",
+            objectId: edit.listing_id,
+            metadata: {
+              changed_fields: Object.keys(edit.patch || {}),
+              media_reviewer: edit.media_reviewer || null,
+              stale_translation_count: result.staleTranslations.length,
+            },
+          });
+        }
+        return adminJson(edit.idempotent ? 200 : 201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["editor"]);
+        const batch = createBulkListingStatusEdits(
+          currentSeed(),
+          input,
+          latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+          editedAt,
+        );
+        const changes = batch.changes.map((result) => {
+          const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
+          const persistedStaleTranslations = edit.idempotent
+            ? []
+            : result.staleTranslations
+                .filter((translation) => translation.id)
+                .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
+          if (!edit.idempotent) {
+            recordAudit({
+              action: "listing_edited",
+              actor: edit.editor,
+              objectType: "listing",
+              objectId: edit.listing_id,
+              metadata: {
+                changed_fields: ["listing_status"],
+                bulk_request_id: input.requestId || null,
+                stale_translation_count: result.staleTranslations.length,
+              },
+            });
+          }
+          return { edit, persistedStaleTranslations };
         });
-        return adminJson(201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
+        const body = {
+          kind: "bulk_listing_status_update",
+          targetStatus: batch.targetStatus,
+          requested: batch.requestedListingIds.length,
+          updated: changes.filter((result) => !result.edit.idempotent).length,
+          idempotent: changes.filter((result) => result.edit.idempotent).length,
+          unchanged: batch.unchangedListingIds.length,
+          unchangedListingIds: batch.unchangedListingIds,
+          edits: changes.map((result) => result.edit),
+          staleTranslations: batch.changes.flatMap((result) => result.staleTranslations),
+        };
+        return adminJson(body.updated ? 201 : 200, body);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
