@@ -27,6 +27,7 @@ function ensureEnvFile() {
       `MS_REALTY_POSTGRES_PASSWORD=${secret()}`,
       `PAYLOAD_SECRET=${secret(48)}`,
       `MS_REALTY_ADMIN_TOKEN=local-${secret(24)}`,
+      `MS_REALTY_LEAD_CONTACT_KEY=${secret(48)}`,
       `TYPESENSE_API_KEY=${secret()}`,
       `MEILI_MASTER_KEY=${secret()}`,
       "HERMES_CHAT_COMPLETIONS_URL=",
@@ -44,6 +45,7 @@ function ensureEnvFile() {
   const existing = fs.readFileSync(envFile, "utf8");
   const parsed = parseEnv(existing);
   const missing = [
+    ...(Object.hasOwn(parsed, "MS_REALTY_LEAD_CONTACT_KEY") ? [] : [`MS_REALTY_LEAD_CONTACT_KEY=${secret(48)}`]),
     ...(Object.hasOwn(parsed, "HERMES_AGENT_API_SERVER_KEY") ? [] : [`HERMES_AGENT_API_SERVER_KEY=local-${secret(24)}`]),
     ...(Object.hasOwn(parsed, "HERMES_AGENT_MODEL") ? [] : ["HERMES_AGENT_MODEL="]),
     ...(Object.hasOwn(parsed, "HERMES_AGENT_LLM_BASE_URL") ? [] : ["HERMES_AGENT_LLM_BASE_URL="]),

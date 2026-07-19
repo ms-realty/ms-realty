@@ -43,6 +43,7 @@ const homeCss = `
 .hp-sell h2 { color:#fff; font-size:var(--text-3xl); max-width:20ch; }
 .hp-sell p { color:var(--stone-300); margin-top:8px; font-size:var(--text-lg); max-width:46ch; }
 @media (max-width:1080px){ .hp-resorts{ grid-template-columns:repeat(2,1fr);} .hp-grid{ grid-template-columns:repeat(2,1fr);} .hp-values__in{ grid-template-columns:1fr;} }
+@media (max-width:560px){ .hp-sec__head{ align-items:flex-start; flex-direction:column;} .hp-sec__head .mk-btn{ width:100%;} }
 `;
 if (!document.getElementById('mk-home-css')) { const s=document.createElement('style'); s.id='mk-home-css'; s.textContent=homeCss; document.head.appendChild(s); }
 

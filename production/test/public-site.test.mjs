@@ -255,6 +255,8 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
   assert.equal(he.body.valuation.endpoint, "/api/leads");
   assert.equal(he.body.valuation.payload.leadType, "seller");
   assert.equal(he.body.valuation.payload.source, "website_seller_valuation");
+  assert.equal(he.body.valuation.payload.intent, "valuation");
+  assert.equal(he.body.valuation.required_fields.includes("contact.phone"), true);
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
 });
@@ -270,8 +272,10 @@ test("contact callback page is locale-prefixed and posts generic CRM leads", () 
   assert.equal(he.indexable, true);
   assert.equal(he.body.callback.endpoint, "/api/leads");
   assert.equal(he.body.callback.payload.source, "website_contact_callback");
+  assert.equal(he.body.callback.payload.intent, "callback");
   assert.equal(he.body.callback.payload.leadType, "general");
   assert.equal(he.body.callback.payload.contact_preference, "phone");
+  assert.deepEqual(he.body.callback.required_fields, ["contact.name", "contact.phone"]);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
   assert.equal(el.path, "/el/epikoinonia");
   assert.equal(el.body.callback.label, "Επανάκληση");

@@ -3,7 +3,7 @@ import { approvedContentDocumentsForPath, readApprovedCmsContent } from "./appro
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
 import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
-import { normalizeBuyerListingLeadInput } from "./leads.mjs";
+import { normalizePublicLeadInput } from "./leads.mjs";
 import { applyListingEdits } from "./listing-edits.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
@@ -216,12 +216,7 @@ export function searchRuntimeListings(registry, seed, { localeCode, query = "", 
 
 export function submitRuntimeLead(registry, seed, input) {
   const source = input.source || "website_listing_detail";
-  const hasIntent = String(input.intent || "").trim().length > 0;
-  // ponytail: keep pre-CTA payloads compatible; remove this branch once all callers send intent.
-  const leadInput =
-    input.leadType === "buyer"
-      ? normalizeBuyerListingLeadInput({ ...input, source }, { validateContact: hasIntent })
-      : { ...input, source };
+  const leadInput = normalizePublicLeadInput({ ...input, source });
   const record = listingRecords(seed).find((candidate) => candidate.id === leadInput.listingReference);
   if (!record && leadInput.leadType === "buyer") throw new Error("Buyer lead requires a known listingReference");
   return createCrmInboxItem(registry, {
@@ -258,7 +253,7 @@ export function buildRuntimeSmoke(registry, seed) {
       leadType: "buyer",
       language: "he",
       listingReference: runtimeListing.id,
-      contact: { name: "Noa Levi" },
+      contact: { name: "Noa Levi", whatsapp: "+359880000001" },
       contact_preference: "whatsapp",
       message: "Interested in this property.",
     }),
@@ -268,8 +263,9 @@ export function buildRuntimeSmoke(registry, seed) {
       leadType: "buyer",
       language: "he",
       listingReference: runtimeListing.id,
-      contact: { name: "Noa Levi" },
+      contact: { name: "Noa Levi", phone: "+359880000001" },
       contact_preference: "phone",
+      request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
       message: "I would like to view this property.",
     }),
     contactLead_he: submitRuntimeLead(registry, seed, {
@@ -277,8 +273,9 @@ export function buildRuntimeSmoke(registry, seed) {
       source: "website_contact_callback",
       leadType: "general",
       language: "he",
-      contact: { name: "Noa Levi" },
+      contact: { name: "Noa Levi", phone: "+359880000001" },
       contact_preference: "phone",
+      request_details: { callback_time: "Weekdays after 14:00" },
       message: "Please call me about buying in Sandanski.",
     }),
   };
@@ -360,6 +357,7 @@ export function assertRuntimeSmoke(smoke) {
   }
   if (
     smoke.viewingLead_he.lead.source !== "website_viewing_request" ||
+    smoke.viewingLead_he.lead.request_details?.viewing_date !== "2026-07-20" ||
     smoke.viewingLead_he.contact_preference !== "phone" ||
     smoke.viewingLead_he.broker_assignment?.broker_id !== "broker_international" ||
     smoke.viewingLead_he.hermes_reply_draft.broker_approval_required !== true
@@ -368,6 +366,7 @@ export function assertRuntimeSmoke(smoke) {
   }
   if (
     smoke.contactLead_he.lead.source !== "website_contact_callback" ||
+    smoke.contactLead_he.lead.intent !== "callback" ||
     smoke.contactLead_he.lead.leadType !== "general" ||
     smoke.contactLead_he.contact_preference !== "phone" ||
     smoke.contactLead_he.broker_assignment?.broker_id !== "broker_international" ||

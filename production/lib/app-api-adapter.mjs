@@ -3,6 +3,7 @@ import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord }
 import { DEFAULT_EVENT_LEDGER_PATH, appendEvent, createEvent } from "./events.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH, appendLanguageRequest, createLanguageRequest } from "./language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead } from "./lead-ledger.mjs";
+import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact } from "./lead-contact-vault.mjs";
 import { publicLaunchReadinessHeaders, publicLaunchReadinessPayload } from "./launch-readiness.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
@@ -43,6 +44,9 @@ export function appApiConfigFromEnv(env = process.env) {
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    leadContactVaultPath:
+      env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
+    leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH || LAUNCH_READINESS_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
@@ -230,6 +234,13 @@ function routeLead(request, body, registry, seed, config) {
   try {
     const input = parseBody(request, body);
     const lead = submitRuntimeLead(registry, seed, input);
+    const contactVault = config.leadContactVaultPath
+      ? appendLeadContact(lead, {
+          filePath: config.leadContactVaultPath,
+          secret: config.leadContactKey,
+          storedAt: config.receivedAt,
+        })
+      : null;
     const ledger = appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: config.receivedAt });
     const consent = recordConsent(
       {
@@ -258,7 +269,7 @@ function routeLead(request, body, registry, seed, config) {
       },
       config,
     );
-    return privateJson(201, { ...lead, ledger, consent, sellerPipeline });
+    return privateJson(201, { ...lead, ledger, contactVault, consent, sellerPipeline });
   } catch (error) {
     return privateJson(400, { kind: "bad_request", message: error.message });
   }

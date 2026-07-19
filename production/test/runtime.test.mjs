@@ -276,7 +276,7 @@ test("runtime lead intake stores language and keeps Hermes reply review-gated", 
     leadType: "buyer",
     language: "he",
     listingReference: "MS-CRAWL-0001",
-    contact: { name: "Noa Levi" },
+    contact: { name: "Noa Levi", whatsapp: "+359880000001" },
     contact_preference: "whatsapp",
     message: "Interested in this property.",
   });
@@ -298,8 +298,9 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
     leadType: "buyer",
     language: "he",
     listingReference: "MS-CRAWL-0001",
-    contact: { name: "Noa Levi" },
+    contact: { name: "Noa Levi", phone: "+359880000001" },
     contact_preference: "phone",
+    request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
     message: "I would like to view this property.",
   });
 
@@ -310,6 +311,7 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
   assert.equal(lead.original_language, "he");
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "phone");
+  assert.deepEqual(lead.lead.request_details, { viewing_date: "2026-07-20", viewing_time: "14:00" });
   assert.equal(lead.broker_assignment.broker_id, "broker_international");
   assert.equal(lead.hermes_reply_draft.broker_approval_required, true);
 });
@@ -344,6 +346,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
     listingReference: "MS-CRAWL-0001",
     contact: { name: "Nina", phone: "+359880000000" },
     contact_preference: "phone",
+    request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
   });
 
   assert.deepEqual([inquiry.lead.intent, callback.lead.intent, viewing.lead.intent], ["inquiry", "callback", "viewing"]);
@@ -352,6 +355,7 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
     ["website_listing_detail", "website_callback_request", "website_viewing_request"],
   );
   assert.equal(viewing.hermes_reply_draft.can_send_without_approval, false);
+  assert.deepEqual(viewing.lead.request_details, { viewing_date: "2026-07-20", viewing_time: "14:00" });
   assert.equal("viewing" in viewing, false);
   assert.throws(
     () =>
@@ -389,6 +393,17 @@ test("runtime canonicalizes explicit listing CTA intents and validates their con
   assert.throws(
     () =>
       submitRuntimeLead(registry, seed, {
+        source: "website_viewing_request",
+        intent: "viewing",
+        leadType: "buyer",
+        listingReference: "MS-CRAWL-0001",
+        contact: { name: "Nina", phone: "+359880000000" },
+      }),
+    /preferred date/,
+  );
+  assert.throws(
+    () =>
+      submitRuntimeLead(registry, seed, {
         source: "website_untrusted",
         intent: "inquiry",
         leadType: "buyer",
@@ -403,20 +418,33 @@ test("runtime contact callback lead stays routed through broker-approved CRM flo
   const lead = submitRuntimeLead(registry, seed, {
     id: "runtime-contact-lead-test",
     source: "website_contact_callback",
+    intent: "callback",
     leadType: "general",
     language: "he",
-    contact: { name: "Noa Levi" },
+    contact: { name: "Noa Levi", phone: "+359880000001" },
     contact_preference: "phone",
+    request_details: { callback_time: "Weekdays after 14:00" },
     message: "Please call me about buying in Sandanski.",
   });
 
   assert.equal(lead.lead.source, "website_contact_callback");
   assert.equal(lead.lead.leadType, "general");
+  assert.equal(lead.lead.intent, "callback");
+  assert.equal(lead.lead.request_details.callback_time, "Weekdays after 14:00");
   assert.equal(lead.original_language, "he");
   assert.equal(lead.admin_locale, "en");
   assert.equal(lead.contact_preference, "phone");
   assert.equal(lead.broker_assignment.broker_id, "broker_international");
   assert.equal(lead.hermes_reply_draft.broker_approval_required, true);
+  assert.throws(
+    () =>
+      submitRuntimeLead(registry, seed, {
+        source: "website_contact_callback",
+        leadType: "general",
+        contact: { name: "Noa Levi" },
+      }),
+    /requires a phone/,
+  );
 });
 
 test("runtime smoke fixture proves listing, search, fallback, and lead flow", () => {

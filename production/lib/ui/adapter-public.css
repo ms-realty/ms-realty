@@ -387,4 +387,6 @@ dialog.mk-enquiry .ct-done { display: grid; justify-items: center; gap: var(--sp
    styles), so restate it: the success block only shows after submission. */
 dialog.mk-enquiry .ct-done[hidden],
 dialog.mk-enquiry form[hidden] { display: none; }
+dialog.mk-enquiry [data-enquiry-callback-time-group][hidden],
+dialog.mk-enquiry [data-enquiry-viewing-fields][hidden] { display: none; }
 dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }

@@ -80,6 +80,9 @@ main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { min-width: 0; }
 .adm-reply-cell { min-width: 300px; display: grid; gap: var(--space-2); }
 .adm-lead-identity { display: grid; gap: 3px; min-width: 0; }
 .adm-lead-context { display: block; margin-top: 3px; color: var(--text-muted); font-size: var(--text-xs); overflow-wrap: anywhere; }
+.adm-lead-contact { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: var(--space-1); font-size: var(--text-xs); }
+.adm-lead-contact strong { flex-basis: 100%; color: var(--text-strong); }
+.adm-lead-contact__action { color: var(--text-link); overflow-wrap: anywhere; }
 .adm-lead-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: var(--space-1); }
 .adm-lead-meta__source,
 .adm-lead-meta__contact { color: var(--text-muted); font-size: var(--text-xs); }
@@ -188,6 +191,11 @@ main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { min-width: 0; }
 .adm-tour-form__status[data-state="error"] { color: var(--brick-600); }
 .adm-tour-form[aria-busy="true"] button[type="submit"] { cursor: progress; }
 @media (max-width: 760px) {
+  .adm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+  .adm-kpis .crm-stat { gap: 6px; padding: var(--space-3); }
+  .adm-kpis .crm-stat__ic { width: 28px; height: 28px; }
+  .adm-kpis .crm-stat__val { font-size: var(--text-xl); }
+  .adm-kpis .crm-stat__label { line-height: var(--lh-snug); }
   .adm-form { grid-template-columns: 1fr; }
   .adm-form__group { grid-template-columns: 1fr; }
   .adm-editor-tabs {

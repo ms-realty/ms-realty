@@ -5,6 +5,7 @@ import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
+import { DEFAULT_LEAD_CONTACT_VAULT_PATH } from "./lib/lead-contact-vault.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH } from "./lib/lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
@@ -50,6 +51,9 @@ export function productionServerConfig(env = process.env) {
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    leadContactVaultPath:
+      env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
+    leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -84,6 +88,8 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     consentLedgerPath: config.consentLedgerPath,
     auditLogPath: config.auditLogPath,
     leadLedgerPath: config.leadLedgerPath,
+    leadContactVaultPath: config.leadContactVaultPath,
+    leadContactKey: config.leadContactKey,
     replyOutboxPath: config.replyOutboxPath,
     languageRequestPath: config.languageRequestPath,
     translationLedgerPath: config.translationLedgerPath,

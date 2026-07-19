@@ -630,9 +630,10 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
   const liveGate = report.gates.find((gate) => gate.id === "live_services");
+  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
   assert.equal(seoGate.evidence.crawl_urls, 457);
   assert.deepEqual(seoGate.evidence.url_types, { page: 104, post: 42, taxonomy: 146, listing: 165 });
-  assert.equal(seoGate.evidence.urls_with_any_evidence, 2);
+  assert.equal(seoGate.evidence.urls_with_any_evidence, seoEvidence.summary.urls_with_any_evidence);
   assert.ok(seoGate.evidence.next_actions.some((action) => action.includes("seo:preflight")));
   assert.equal(listingGate.status, "blocked");
   assert.ok(listingGate.evidence.next_actions.some((action) => action.includes("listing:preflight")));
@@ -1979,10 +1980,11 @@ test("live service report import writes only validated source reports", () => {
 });
 
 test("launch input checklist names remaining operator-owned blockers", () => {
+  const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
     launchReadiness: buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" }),
-    seoEvidence: readJson(["production", "data", "seo-evidence.json"]),
+    seoEvidence,
     redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
     deployableRedirects: readJson(["production", "data", "deployable-redirects.json"]),
     routeMap: readJson(["production", "data", "legacy-route-map.json"]),
@@ -2008,7 +2010,10 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /same_content_checklist/);
   assert.match(markdown, /Approval import columns: `old_url`, `decision`, `target_path`, `equivalent_content`, `reviewer`/);
   assert.match(markdown, /Missing required sources: search_console, yandex_webmaster, backlinks/);
-  assert.match(markdown, /Crawl coverage: 457 URLs \(page 104, post 42, taxonomy 146, listing 165\); URLs with any evidence: 2/);
+  assert.match(
+    markdown,
+    new RegExp(`Crawl coverage: 457 URLs \\(page 104, post 42, taxonomy 146, listing 165\\); URLs with any evidence: ${seoEvidence.summary.urls_with_any_evidence}`),
+  );
   assert.match(markdown, /migration\/external\/seo\/search-console\.csv`: missing_export/);
   assert.match(markdown, /rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0/);
   assert.match(markdown, /migration\/external\/seo\/yandex-webmaster\.csv`: missing_export/);

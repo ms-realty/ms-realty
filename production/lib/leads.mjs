@@ -7,6 +7,11 @@ export const BUYER_LISTING_SOURCE_INTENTS = Object.freeze({
   website_callback_request: "callback",
   website_viewing_request: "viewing",
 });
+const NON_BUYER_SOURCE_CONTRACTS = Object.freeze({
+  website_contact_callback: { leadType: "general", intent: "callback", phone: true },
+  website_seller_callback: { leadType: "seller", intent: "callback", phone: true },
+  website_seller_valuation: { leadType: "seller", intent: "valuation", phone: true, property: true },
+});
 const LOCAL_LOCATIONS = ["Sandanski", "Petrich", "Bansko", "Blagoevgrad", "Sveti Vlas", "Sunny Beach", "Melnik"];
 const PROPERTY_TYPES = ["apartment", "house", "villa", "land", "commercial", "hotel", "office", "industrial"];
 const DEFAULT_BROKER_PROFILES = [
@@ -47,6 +52,12 @@ function normalizeContactPreference(input) {
 export function normalizeLeadInput(input = {}) {
   const contact = input.contact && typeof input.contact === "object" && !Array.isArray(input.contact) ? { ...input.contact } : {};
   const property = input.property && typeof input.property === "object" && !Array.isArray(input.property) ? { ...input.property } : {};
+  const requestDetails =
+    input.request_details && typeof input.request_details === "object" && !Array.isArray(input.request_details)
+      ? { ...input.request_details }
+      : input.requestDetails && typeof input.requestDetails === "object" && !Array.isArray(input.requestDetails)
+        ? { ...input.requestDetails }
+        : {};
   for (const field of ["name", "email", "phone", "whatsapp", "viber", "preferred_channel"]) {
     const value = input[`contact.${field}`];
     if (value !== undefined && String(value).trim()) contact[field] = String(value).trim();
@@ -57,14 +68,19 @@ export function normalizeLeadInput(input = {}) {
     if (value !== undefined && String(value).trim()) property[field] = String(value).trim();
     else if (typeof property[field] === "string") property[field] = property[field].trim();
   }
-  return { ...input, contact, property };
+  for (const field of ["callback_time", "viewing_date", "viewing_time"]) {
+    const value = input[`request_details.${field}`];
+    if (value !== undefined && String(value).trim()) requestDetails[field] = String(value).trim();
+    else if (typeof requestDetails[field] === "string") requestDetails[field] = requestDetails[field].trim();
+  }
+  return { ...input, contact, property, request_details: requestDetails };
 }
 
 function hasReachableContact(contact = {}) {
   return ["email", "phone", "whatsapp", "viber"].some((field) => Boolean(String(contact[field] || "").trim()));
 }
 
-export function normalizeBuyerListingLeadInput(input = {}, { validateContact = true } = {}) {
+export function normalizeBuyerListingLeadInput(input = {}) {
   const leadInput = normalizeLeadInput(input);
   const source = String(leadInput.source || "").trim();
   const intent = BUYER_LISTING_SOURCE_INTENTS[source];
@@ -73,16 +89,38 @@ export function normalizeBuyerListingLeadInput(input = {}, { validateContact = t
   const submittedIntent = String(leadInput.intent || "").trim().toLowerCase();
   if (submittedIntent && submittedIntent !== intent) throw new Error("Buyer listing intent must match source");
 
-  if (validateContact) {
-    if (intent === "inquiry" && !hasReachableContact(leadInput.contact)) {
-      throw new Error("Buyer inquiry requires a reachable contact channel");
+  if (intent === "inquiry" && !hasReachableContact(leadInput.contact)) {
+    throw new Error("Buyer inquiry requires a reachable contact channel");
+  }
+  if ((intent === "callback" || intent === "viewing") && !String(leadInput.contact.phone || "").trim()) {
+    throw new Error(`Buyer ${intent} requires a phone`);
+  }
+  if (intent === "viewing") {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(leadInput.request_details.viewing_date || "")) {
+      throw new Error("Buyer viewing requires a preferred date");
     }
-    if ((intent === "callback" || intent === "viewing") && !String(leadInput.contact.phone || "").trim()) {
-      throw new Error(`Buyer ${intent} requires a phone`);
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(leadInput.request_details.viewing_time || "")) {
+      throw new Error("Buyer viewing requires a preferred time");
     }
   }
 
   return { ...leadInput, source, intent };
+}
+
+export function normalizePublicLeadInput(input = {}) {
+  const source = String(input.source || "website_listing_detail").trim();
+  if (input.leadType === "buyer") return normalizeBuyerListingLeadInput({ ...input, source });
+  const leadInput = normalizeLeadInput({ ...input, source });
+  const contract = NON_BUYER_SOURCE_CONTRACTS[source];
+  if (!contract) throw new Error("Lead source must be a known canonical source");
+  if (leadInput.leadType !== contract.leadType) throw new Error("Lead type must match source");
+  const submittedIntent = String(leadInput.intent || "").trim().toLowerCase();
+  if (submittedIntent && submittedIntent !== contract.intent) throw new Error("Lead intent must match source");
+  if (contract.phone && !String(leadInput.contact.phone || "").trim()) throw new Error("Lead source requires a phone");
+  if (contract.property && (!String(leadInput.property.location || "").trim() || !String(leadInput.property.type || "").trim())) {
+    throw new Error("Seller valuation requires property location and type");
+  }
+  return { ...leadInput, source, intent: contract.intent };
 }
 
 export function createLeadDraft(registry, input) {
@@ -99,6 +137,7 @@ export function createLeadDraft(registry, input) {
     listingReference: leadInput.listingReference || null,
     contact: leadInput.contact,
     property: leadInput.property,
+    request_details: leadInput.request_details,
     contact_preference: normalizeContactPreference(leadInput),
     message: leadInput.message || "",
     language,

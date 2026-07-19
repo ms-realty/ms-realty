@@ -249,6 +249,9 @@ token without an operator remains read-only and receives
 misattributed audit row.
 Set `MS_REALTY_MAX_BODY_BYTES` to tune the Node adapter request-body limit
 for large admin CSV imports. The default is 10 MiB.
+Set `MS_REALTY_LEAD_CONTACT_KEY` to a secret of at least 32 characters and
+`MS_REALTY_LEAD_CONTACT_VAULT_PATH` to durable private storage. Public contact
+details are AES-256-GCM encrypted there and never written to the lead ledger.
 Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers
 need to live outside `production/data/`.
 Set `MS_REALTY_LOCALE_REGISTRY_PATH` when admin-added locales must persist

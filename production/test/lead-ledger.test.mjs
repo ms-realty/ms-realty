@@ -22,6 +22,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
         leadType: "buyer",
         listingReference: "MS-CRAWL-0001",
         contact: { email: "Noa@example.com" },
+        request_details: { callback_time: "After 14:00" },
         message: "Interested in this property.",
       },
       hermes_reply_draft: { broker_approval_required: true },
@@ -58,6 +59,7 @@ test("lead ledger appends broker-review-gated CRM leads as JSONL", () => {
   assert.equal(rows[0].message_original, "Interested in this property.");
   assert.equal(rows[0].show_original_available, true);
   assert.equal(rows[0].contact_preference, "whatsapp");
+  assert.deepEqual(rows[0].request_details, { callback_time: "After 14:00" });
   assert.equal(rows[0].confirmation_status, "ready");
   assert.equal(rows[0].confirmation_message_key, "lead_received");
   assert.equal(rows[0].assigned_broker, "broker_international");

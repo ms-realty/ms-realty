@@ -14,6 +14,7 @@ import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
+import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
@@ -306,6 +307,8 @@ export function createHttpApp({
   routeMap = loadLegacyRouteMap(),
   migrationReviewDashboard = loadMigrationReviewDashboard(),
   leadLedgerPath = null,
+  leadContactVaultPath = null,
+  leadContactKey = null,
   replyOutboxPath = null,
   languageRequestPath = null,
   translationLedgerPath = null,
@@ -352,6 +355,11 @@ export function createHttpApp({
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
   const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
+  const currentLeads = () =>
+    withLeadContacts(readLeadLedger(leadLedgerPath || undefined), {
+      filePath: leadContactVaultPath,
+      secret: leadContactKey,
+    });
   const currentListingQualityReport = (options = {}) =>
     buildListingQualityReport({
       seed: currentSeed(),
@@ -640,7 +648,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
       const payload = renderAdminLeadsPayload(activeRegistry, requestedLocale, {
-        leads: readLeadLedger(leadLedgerPath || undefined),
+        leads: currentLeads(),
         replies: readReplyOutbox(replyOutboxPath || undefined),
         languageRequests: readLanguageRequests(languageRequestPath || undefined),
         translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
@@ -663,7 +671,7 @@ export function createHttpApp({
         200,
         adminHtml(
           renderAdminLeadsPayload(activeRegistry, url.searchParams.get("locale") || "en", {
-            leads: readLeadLedger(leadLedgerPath || undefined),
+            leads: currentLeads(),
             replies: readReplyOutbox(replyOutboxPath || undefined),
             languageRequests: readLanguageRequests(languageRequestPath || undefined),
             translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
@@ -1528,6 +1536,9 @@ export function createHttpApp({
       try {
         const input = parseBody(request);
         const lead = submitRuntimeLead(activeRegistry, currentSeed(), input);
+        const contactVault = leadContactVaultPath
+          ? appendLeadContact(lead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt })
+          : null;
         const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         const consent = recordConsent({
           consentType: "inquiry_follow_up",
@@ -1550,7 +1561,7 @@ export function createHttpApp({
           listingReference: lead.lead?.listingReference,
           action: lead.lead?.source,
         });
-        return privateJson(201, { ...lead, ledger, consent, sellerPipeline });
+        return privateJson(201, { ...lead, ledger, contactVault, consent, sellerPipeline });
       } catch (error) {
         return privateJson(400, { kind: "bad_request", message: error.message });
       }

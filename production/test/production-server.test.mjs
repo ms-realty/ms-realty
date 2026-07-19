@@ -259,7 +259,7 @@ test("production server persists public leads and reviewed admin replies", async
         leadType: "buyer",
         language: "he",
         listingReference: "MS-CRAWL-0001",
-        contact: { name: "Noa Levi" },
+        contact: { name: "Noa Levi", whatsapp: "+359880000001" },
         contact_preference: "whatsapp",
         message: "Interested in this property.",
       }),

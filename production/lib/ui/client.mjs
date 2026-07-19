@@ -213,6 +213,10 @@ export const PUBLIC_APP_JS = `(function () {
     var submit = form.querySelector("[data-enquiry-submit]");
     var channel = form.elements.contact_preference;
     var channelGroup = form.querySelector("[data-enquiry-channel-group]");
+    var callbackTimeGroup = form.querySelector("[data-enquiry-callback-time-group]");
+    var viewingFields = form.querySelector("[data-enquiry-viewing-fields]");
+    var viewingDate = form.querySelector("[data-enquiry-viewing-date]");
+    var viewingTime = form.querySelector("[data-enquiry-viewing-time]");
     var error = form.querySelector("[data-enquiry-error]");
     form.hidden = false;
     dialog.querySelector(".ct-done").hidden = true;
@@ -222,6 +226,10 @@ export const PUBLIC_APP_JS = `(function () {
     if (form.elements.listingReference) form.elements.listingReference.value = lead.getAttribute("data-listing-reference") || "";
     if (channel) channel.value = intent === "inquiry" ? lead.getAttribute("data-contact-preference") || "phone" : "phone";
     if (channelGroup) channelGroup.hidden = intent !== "inquiry";
+    if (callbackTimeGroup) callbackTimeGroup.hidden = intent !== "callback";
+    if (viewingFields) viewingFields.hidden = intent !== "viewing";
+    if (viewingDate) viewingDate.required = intent === "viewing";
+    if (viewingTime) viewingTime.required = intent === "viewing";
     if (titleNode) titleNode.textContent = title;
     if (submit) {
       var submitLabel = submit.querySelector("span") || submit;

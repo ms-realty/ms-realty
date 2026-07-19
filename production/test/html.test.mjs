@@ -131,6 +131,11 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.equal(assertHtmlPage(contactHtml, { lang: "he", dir: "rtl", kind: "contact" }), true);
   assert.match(contactHtml, /data-lead-type="general"/);
   assert.match(contactHtml, /website_contact_callback/);
+  assert.match(contactHtml, /name="contact.phone" type="tel" required/);
+  assert.match(contactHtml, /name="request_details.callback_time"/);
+  assert.match(listingHtml, /data-enquiry-callback-time-group="true"/);
+  assert.match(listingHtml, /name="request_details.viewing_date" type="date"/);
+  assert.match(listingHtml, /name="request_details.viewing_time" type="time"/);
   assert.equal(assertHtmlPage(guideHtml, { lang: "en", dir: "ltr", kind: "guide" }), true);
   assert.match(guideHtml, /data-approved-source="cms"/);
   assert.match(guideHtml, /Non-EU buyers cannot own Bulgarian land directly/);

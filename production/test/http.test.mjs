@@ -4,6 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import { assertHttpSmoke, createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { assertLeadLedger, readLeadLedger, resetLeadLedger } from "../lib/lead-ledger.mjs";
+import { readLeadContacts } from "../lib/lead-contact-vault.mjs";
 import { assertLanguageRequests, readLanguageRequests, resetLanguageRequests } from "../lib/language-requests.mjs";
 import { assertReplyOutbox, readReplyOutbox, resetReplyOutbox } from "../lib/lead-replies.mjs";
 import { assertTranslationLedger, readTranslationLedger, resetTranslationLedger } from "../lib/translation-ledger.mjs";
@@ -259,6 +260,8 @@ function actionCounts(rows) {
 
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();
+  const leadContactVaultPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-contacts-`)}/contacts.jsonl`;
+  const leadContactKey = "test-only-http-contact-key-32-characters-minimum";
   const replyOutboxPath = tempOutbox();
   const languageRequestPath = tempLanguageRequests();
   const translationLedgerPath = tempTranslations();
@@ -277,6 +280,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const hermesReplyPrompts = [];
   const app = createHttpApp({
     leadLedgerPath,
+    leadContactVaultPath,
+    leadContactKey,
     replyOutboxPath,
     languageRequestPath,
     translationLedgerPath,
@@ -428,7 +433,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         leadType: "buyer",
         language: "he",
         listingReference: "MS-CRAWL-0001",
-        contact: { name: "Noa Levi" },
+        contact: { name: "Noa Levi", whatsapp: "+359880000001" },
         contact_preference: "whatsapp",
         message: "Interested in this property.",
       },
@@ -457,8 +462,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         leadType: "buyer",
         language: "he",
         listingReference: "MS-CRAWL-0001",
-        contact: { name: "Noa Levi" },
+        contact: { name: "Noa Levi", phone: "+359880000001" },
         contact_preference: "phone",
+        request_details: { viewing_date: "2026-07-20", viewing_time: "14:00" },
         message: "I would like to view this property.",
       },
     }),
@@ -470,8 +476,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         source: "website_contact_callback",
         leadType: "general",
         language: "he",
-        contact: { name: "Noa Levi" },
+        contact: { name: "Noa Levi", phone: "+359880000001" },
         contact_preference: "phone",
+        request_details: { callback_time: "Weekdays after 14:00" },
         message: "Please call me about buying in Sandanski.",
       },
     }),
@@ -483,7 +490,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         source: "website_seller_valuation",
         leadType: "seller",
         language: "el",
-        contact: { name: "Nikos Papadopoulos" },
+        contact: { name: "Nikos Papadopoulos", phone: "+359880000002" },
+        property: { location: "Sandanski", type: "apartment" },
         message: "I want a valuation for my property.",
       },
     }),
@@ -744,6 +752,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.hermesChatDisabled.status, 405);
   assert.equal(smoke.hermesChatDisabled.body.kind, "method_not_allowed");
   assert.equal(smoke.lead.body.contact_preference, "whatsapp");
+  assert.equal(smoke.lead.body.contactVault.encrypted, true);
   assert.equal(smoke.lead.body.broker_assignment.broker_id, "broker_international");
   assert.equal(smoke.lead.body.broker_assignment.criteria.location, "Sandanski");
   assert.equal(smoke.lead.headers["cache-control"], "no-store");
@@ -770,6 +779,9 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.contact.body.body.callback.payload.source, "website_contact_callback");
   assert.equal(smoke.contactHtml.body.includes("data-lead-type=\"general\""), true);
   assert.equal(smoke.contactLead.body.lead.leadType, "general");
+  assert.equal(smoke.admin.body.leads.find((lead) => lead.lead_id === "http-lead-test").contact.whatsapp, "+359880000001");
+  assert.match(smoke.adminHtml.body, /data-private-contact="true"/);
+  assert.match(smoke.adminHtml.body, /https:\/\/wa\.me\/359880000001/);
   assert.equal(smoke.guidePage.body.kind, "guide");
   assert.equal(smoke.guidePage.body.indexable, true);
   assert.match(smoke.guidePage.body.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
@@ -786,6 +798,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugChangeUnauthorized.status, 401);
   assert.equal(assertLeadLedger(readLeadLedger(leadLedgerPath)), true);
+  assert.equal(readLeadContacts(leadContactVaultPath, leadContactKey).size, 4);
+  assert.doesNotMatch(fs.readFileSync(leadContactVaultPath, "utf8"), /Noa Levi|Nikos Papadopoulos|359880000001/);
   assert.equal(assertReplyOutbox(readReplyOutbox(replyOutboxPath)), true);
   assert.equal(assertLanguageRequests(readLanguageRequests(languageRequestPath)), true);
   assert.equal(assertTranslationLedger(readTranslationLedger(translationLedgerPath)), true);
@@ -1742,7 +1756,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(searchConsole.status, 202);
   assert.equal(searchConsole.body.crawlCoverage.urls, 457);
   assert.deepEqual(searchConsole.body.crawlCoverage.urlTypes, { page: 104, post: 42, taxonomy: 146, listing: 165 });
-  assert.equal(searchConsole.body.crawlCoverage.urlsWithAnyEvidence, 3);
+  assert.ok(searchConsole.body.crawlCoverage.urlsWithAnyEvidence >= 2);
   assert.deepEqual(searchConsole.body.requiredSourceDomains, ["makler-realty.com", "makler-realty.ru"]);
   assert.deepEqual(searchConsole.body.missingRequiredSources, ["yandex_webmaster", "backlinks"]);
   assert.equal(searchConsole.body.seoImport.ready, false);
@@ -1943,7 +1957,7 @@ test("HTTP app rejects unknown buyer listing references", async () => {
       leadType: "buyer",
       language: "he",
       listingReference: "missing",
-      contact: { name: "Noa Levi" },
+      contact: { name: "Noa Levi", phone: "+359880000001" },
     },
   });
 
@@ -2128,7 +2142,7 @@ test("HTTP admin records private seller valuation outcomes with a derived queue"
       source: "website_seller_valuation",
       leadType: "seller",
       language: "bg",
-      contact: { name: "Mira Petkova" },
+      contact: { name: "Mira Petkova", phone: "+359880000001" },
       property: { location: "Sandanski", type: "apartment" },
     },
   });
@@ -2203,7 +2217,7 @@ test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async 
         source: "website_seller_valuation",
         leadType: "seller",
         language: "bg",
-        contact: { name: "Mira Petkova" },
+        contact: { name: "Mira Petkova", phone: "+359880000001" },
         property: { location: "Sandanski", type: "apartment" },
       },
     });

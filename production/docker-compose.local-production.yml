@@ -10,6 +10,7 @@ x-app-environment: &app-environment
   MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: "1"
   MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN:?MS_REALTY_ADMIN_TOKEN is required}
   MS_REALTY_ADMIN_ACTOR: local_preview
+  MS_REALTY_LEAD_CONTACT_KEY: ${MS_REALTY_LEAD_CONTACT_KEY:?MS_REALTY_LEAD_CONTACT_KEY is required}
   TYPESENSE_URL: http://typesense:8108
   TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
   TYPESENSE_COLLECTION: ms_realty_listings
@@ -31,6 +32,7 @@ x-app-environment: &app-environment
   MS_REALTY_HERMES_AUDIT_PATH: /runtime-data/hermes-audit.jsonl
   MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: /runtime-data/language-requests.jsonl
   MS_REALTY_LEAD_LEDGER_PATH: /runtime-data/lead-ledger.jsonl
+  MS_REALTY_LEAD_CONTACT_VAULT_PATH: /runtime-data/lead-contact-vault.jsonl
   MS_REALTY_LISTING_EDIT_LEDGER_PATH: /runtime-data/listing-edits.jsonl
   MS_REALTY_LOCALE_REGISTRY_PATH: /runtime-data/locales.json
   MS_REALTY_REDIRECT_APPROVALS_PATH: /runtime-data/redirect-approvals.jsonl

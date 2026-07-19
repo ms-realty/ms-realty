@@ -143,6 +143,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
   const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
   const listingEditLedgerPath = tempDefaultListingEdits();
   const auditLogPath = tempJsonl("app-admin-audit");
+  const leadContactVaultPath = tempJsonl("app-admin-lead-contacts");
   await withEnv(
     {
       MS_REALTY_ADMIN_TOKEN: "next-admin-test",
@@ -155,6 +156,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: tempJsonl("app-admin-language-requests"),
       MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: launchReadinessOutputPath,
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
+      MS_REALTY_LEAD_CONTACT_VAULT_PATH: leadContactVaultPath,
+      MS_REALTY_LEAD_CONTACT_KEY: "test-only-next-contact-key-32-characters-minimum",
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
@@ -238,7 +241,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             leadType: "buyer",
             language: "he",
             listingReference: "MS-CRAWL-0001",
-            contact: { name: "Noa Levi" },
+            contact: { name: "Noa Levi", whatsapp: "+359880000001" },
             contact_preference: "whatsapp",
             message: "Interested in this property.",
           }),
@@ -262,6 +265,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(inboxJsonBody.workspace.locale, "ru");
       assert.equal(inboxJsonBody.leads.length, 1);
       assert.equal(inboxJsonBody.leads[0].original_language, "he");
+      assert.equal(inboxJsonBody.leads[0].contact.whatsapp, "+359880000001");
 
       const inbox = await leadInboxRoute.GET(new Request("https://example.test/admin/leads?locale=ru", { headers: auth }));
       const inboxHtml = await inbox.text();
@@ -276,6 +280,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-lead-queue-tabs="true"/);
       assert.match(inboxHtml, /data-lead-row="true"/);
       assert.match(inboxHtml, /data-original-language="he"/);
+      assert.match(inboxHtml, /data-private-contact="true"/);
+      assert.match(inboxHtml, /https:\/\/wa\.me\/359880000001/);
       assert.match(inboxHtml, /action="\/api\/admin\/replies\/draft"/);
       assert.match(inboxHtml, /data-hermes-draft-request="true"/);
       assert.match(inboxHtml, /data-reply-approval-required="true"/);
@@ -1139,7 +1145,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
             source: "website_seller_valuation",
             leadType: "seller",
             language: "bg",
-            contact: { name: "Mira Petkova" },
+            contact: { name: "Mira Petkova", phone: "+359880000001" },
             property: { location: "Sandanski", type: "apartment" },
             message: "Please arrange a broker valuation.",
           }),

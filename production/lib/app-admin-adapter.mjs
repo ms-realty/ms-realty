@@ -29,6 +29,7 @@ import {
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
+import { DEFAULT_LEAD_CONTACT_VAULT_PATH, withLeadContacts } from "./lead-contact-vault.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, appendListingEdit, applyListingEdits, createListingEdit, readListingEdits } from "./listing-edits.mjs";
 import {
@@ -127,6 +128,9 @@ export function appAdminConfigFromEnv(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    leadContactVaultPath:
+      env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
+    leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
     listingQualityReviewPath: env.MS_REALTY_LISTING_QUALITY_REVIEW_PATH,
     searchSyncReportPath: env.MS_REALTY_SEARCH_SYNC_REPORT_PATH,
     searchQueryReportPath: env.MS_REALTY_SEARCH_QUERY_REPORT_PATH,
@@ -339,7 +343,10 @@ function leadInboxPayload(registry, url, config) {
   const sellerPipeline = readSellerPipeline(config.sellerPipelinePath);
   const sellerPipelineOutcomes = readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath);
   return renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
-    leads: readLeadLedger(config.leadLedgerPath),
+    leads: withLeadContacts(readLeadLedger(config.leadLedgerPath), {
+      filePath: config.leadContactVaultPath,
+      secret: config.leadContactKey,
+    }),
     replies: readReplyOutbox(config.replyOutboxPath),
     languageRequests: readLanguageRequests(config.languageRequestPath),
     translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),

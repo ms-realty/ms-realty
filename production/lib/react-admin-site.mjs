@@ -303,6 +303,36 @@ function formatAdminDateTime(value, locale) {
   }).format(new Date(value));
 }
 
+function leadContactActions(lead, copy) {
+  const contact = lead.contact || {};
+  const channels = ["phone", "whatsapp", "viber", "email"].flatMap((channel) => {
+    const value = String(contact[channel] || "").trim();
+    if (!value) return [];
+    const number = value.replace(/[^\d+]/g, "");
+    const href =
+      channel === "email"
+        ? `mailto:${value}`
+        : channel === "whatsapp"
+          ? `https://wa.me/${number.replace(/^\+/, "")}`
+          : channel === "viber"
+            ? `viber://chat?number=${encodeURIComponent(number)}`
+            : `tel:${number}`;
+    return [h("a", { key: channel, href, className: "adm-lead-contact__action", "data-private-contact-channel": channel }, `${valueText(copy, channel)}: ${value}`)];
+  });
+  if (!contact.name && !channels.length) return null;
+  return h(
+    "div",
+    { className: "adm-lead-contact", "data-private-contact": "true" },
+    contact.name ? h("strong", null, contact.name) : null,
+    ...channels,
+  );
+}
+
+function requestDetailsText(lead) {
+  const details = lead.request_details || {};
+  return [details.viewing_date, details.viewing_time, details.callback_time].filter(Boolean).join(" · ");
+}
+
 /* ============================================================
    CRM shell (ui_kits/crm/CrmKit — Sidebar, Topbar, Panel, StatTile)
    ============================================================ */
@@ -585,6 +615,7 @@ function LeadInboxBody({ page }) {
                 const slaStatus = leadSla?.status || "pending";
                 const brokerId = lead.broker_assignment?.broker_id || "";
                 const leadContext = [lead.listing_reference, lead.property?.location].filter(Boolean).join(" / ");
+                const requestDetails = requestDetailsText(lead);
                 return h(
                   "tr",
                   {
@@ -607,6 +638,8 @@ function LeadInboxBody({ page }) {
                       { className: "adm-lead-identity" },
                       h("code", { className: "crm-mono" }, lead.lead_id),
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
+                      requestDetails ? h("small", { className: "adm-lead-context", "data-lead-request-details": "true" }, requestDetails) : null,
+                      leadContactActions(lead, ui),
                       h(
                         "div",
                         { className: "adm-lead-meta" },

@@ -54,6 +54,7 @@ export function appendLead(
     lead_type: lead.lead?.leadType,
     listing_reference: lead.lead?.listingReference || null,
     property: lead.lead?.property || {},
+    request_details: lead.lead?.request_details || {},
     original_language: lead.original_language,
     admin_locale: lead.admin_locale,
     message_original: messageOriginal,
