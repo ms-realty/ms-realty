@@ -21,6 +21,7 @@ const ADMIN_ACTIONS = new Set([
   "listing_slug_changed",
   "media_reviewed",
   "lead_assigned",
+  "lead_created",
   "lead_pipeline_outcome_recorded",
   "live_service_provisioning_report_imported",
   "live_service_report_imported",

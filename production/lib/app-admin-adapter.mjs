@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { randomUUID } from "node:crypto";
 import {
   bindAuthenticatedOperator,
   canAdminAccess,
@@ -12,6 +13,7 @@ import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplat
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
 import {
   approveTranslationTask,
+  createCrmInboxItem,
   createTranslationReviewTask,
   publishApprovedTranslation,
   renderAdminWorkspace,
@@ -61,8 +63,10 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
-import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
-import { DEFAULT_LEAD_CONTACT_VAULT_PATH, withLeadContacts } from "./lead-contact-vault.mjs";
+import { DEFAULT_LEAD_LEDGER_PATH, appendLead, readLeadLedger } from "./lead-ledger.mjs";
+import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import { normalizeBrokerLeadInput } from "./leads.mjs";
+import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
   appendLeadAssignment,
@@ -152,7 +156,7 @@ import {
 } from "./redirect-approvals.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH, readSavedSearches } from "./saved-searches.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
-import { DEFAULT_SELLER_PIPELINE_PATH, readSellerPipeline } from "./seller-pipeline.mjs";
+import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import {
   DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH,
   appendSellerPipelineOutcome,
@@ -210,6 +214,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     accountLedgerPath: env.MS_REALTY_ACCOUNT_LEDGER_PATH || DEFAULT_ACCOUNT_LEDGER_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+    consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     dealLedgerPath: env.MS_REALTY_DEAL_LEDGER_PATH || DEFAULT_DEAL_LEDGER_PATH,
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
@@ -1399,6 +1404,61 @@ function appendLeadPipelineOutcomeEntry(input, config) {
   return result;
 }
 
+function appendBrokerLeadEntry(input, registry, config) {
+  if (!config.leadContactVaultPath || !config.leadContactKey) {
+    throw new Error("Encrypted lead contact storage is not configured");
+  }
+  const normalized = normalizeBrokerLeadInput(input);
+  const leadId = String(normalized.id || `broker-lead-${randomUUID()}`).trim();
+  const existing = readLeadLedger(config.leadLedgerPath).find((row) => row.lead_id === leadId);
+  if (existing) return { lead: existing, idempotent: true };
+  const recordedAt = config.reviewedAt || new Date().toISOString();
+  const lead = createCrmInboxItem(registry, { ...normalized, id: leadId });
+  const contactVault = appendLeadContact(lead, {
+    filePath: config.leadContactVaultPath,
+    secret: config.leadContactKey,
+    storedAt: recordedAt,
+  });
+  const ledger = appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: recordedAt });
+  const consent = appendConsentRecord(
+    createConsentRecord(
+      {
+        consentType: "inquiry_follow_up",
+        source: lead.lead.source,
+        subjectId: lead.lead.id,
+        locale: lead.original_language,
+        contact: lead.lead.contact,
+        marketingOptIn: false,
+      },
+      recordedAt,
+    ),
+    { filePath: config.consentLedgerPath },
+  );
+  const sellerPipeline =
+    lead.lead.leadType === "seller"
+      ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: recordedAt }), {
+          filePath: config.sellerPipelinePath,
+        })
+      : null;
+  recordAudit(
+    {
+      action: "lead_created",
+      objectType: "lead",
+      objectId: lead.lead.id,
+      locale: lead.original_language,
+      metadata: {
+        source: lead.lead.source,
+        lead_type: lead.lead.leadType,
+        assigned_broker: lead.broker_assignment.broker_id,
+        intake_complete: lead.lead.intake.complete,
+      },
+    },
+    config,
+    recordedAt,
+  );
+  return { lead, ledger, contactVault, consent, sellerPipeline, idempotent: false };
+}
+
 function appendLeadAssignmentEntry(input, config) {
   const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
   const leads = applyLeadAssignments(readLeadLedger(config.leadLedgerPath), readLeadAssignments(config.leadAssignmentLedgerPath));
@@ -2087,6 +2147,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
       const result = appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/leads") {
+      const result = appendBrokerLeadEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), registry, config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {

@@ -491,6 +491,10 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 .adm-pipeline-secondary { min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
 .adm-pipeline-action > summary,
 .adm-pipeline-secondary > summary { padding: var(--space-3); cursor: pointer; color: var(--text-strong); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-manual-lead > summary { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; }
+.adm-manual-lead__intro { margin: 0; max-width: 76ch; }
+.adm-manual-lead__form label:has(> textarea) { grid-column: 1 / -1; }
+.adm-manual-lead__form textarea { min-height: 6rem; resize: vertical; }
 .adm-pipeline-form { grid-template-columns: 1fr; gap: var(--space-3); min-width: 0; padding: 0 var(--space-3) var(--space-3); }
 .adm-pipeline-fields { display: grid; gap: var(--space-3); }
 .adm-pipeline-fields--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }

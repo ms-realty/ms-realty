@@ -201,14 +201,15 @@ const ADMIN_UI_COPY = {
       account_created: "Създаден клиентски акаунт",
       contact_linked: "Контакт, свързан с акаунт",
       document_checklist_updated: "Обновен контролен списък за документи",
+      lead_created: "Създадено запитване от брокер",
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
-      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
+      website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", broker_phone: "Телефонно обаждане", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Имейл", broker_walk_in: "Посещение в офис", partner_referral: "Партньорска препоръка", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
       email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Друг канал",
     },
     statuses: {
-      buyer: "Купувач", renter: "Наемател", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
+      buyer: "Купувач", foreign_buyer: "Чуждестранен купувач", investor: "Инвеститор", renter: "Наемател", seller: "Продавач", landlord: "Наемодател", partner_referral: "Партньор / препоръка", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
       new: "Ново", inquiry: "Запитване", qualified: "Квалифицирано", viewing_booked: "Насрочен оглед", viewed: "Проведен оглед", offer: "Оферта", due_diligence: "Правна проверка", contract: "Договор", application: "Кандидатура", lease: "Договор за наем", lost: "Загубено",
       qualify: "Квалифициране", book_viewing: "Насрочване на оглед", complete_viewing: "Провеждане на оглед", record_offer: "Записване на оферта", start_due_diligence: "Начало на проверка", sign_contract: "Подписване на договор", record_application: "Записване на кандидатура", sign_lease: "Подписване на наем", close_deal: "Затваряне на сделка",
       cash: "В брой", mortgage: "Ипотека", preapproved: "Предварително одобрено", not_applicable: "Не е приложимо",
@@ -392,14 +393,15 @@ const ADMIN_UI_COPY = {
       account_created: "Создан клиентский аккаунт",
       contact_linked: "Контакт связан с аккаунтом",
       document_checklist_updated: "Обновлен чек-лист документов",
+      lead_created: "Заявка создана брокером",
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
-      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
+      website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", broker_phone: "Телефонный звонок", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Эл. почта", broker_walk_in: "Визит в офис", partner_referral: "Партнерская рекомендация", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
       email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Другой канал",
     },
     statuses: {
-      buyer: "Покупатель", renter: "Арендатор", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
+      buyer: "Покупатель", foreign_buyer: "Иностранный покупатель", investor: "Инвестор", renter: "Арендатор", seller: "Продавец", landlord: "Арендодатель", partner_referral: "Партнер / рекомендация", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
       new: "Новая", inquiry: "Запрос", qualified: "Квалифицирована", viewing_booked: "Просмотр назначен", viewed: "Просмотр проведен", offer: "Предложение", due_diligence: "Проверка", contract: "Договор", application: "Заявка", lease: "Договор аренды", lost: "Потеряна",
       qualify: "Квалифицировать", book_viewing: "Назначить просмотр", complete_viewing: "Провести просмотр", record_offer: "Записать предложение", start_due_diligence: "Начать проверку", sign_contract: "Подписать договор", record_application: "Записать заявку", sign_lease: "Подписать аренду", close_deal: "Закрыть сделку",
       cash: "Наличные", mortgage: "Ипотека", preapproved: "Предварительно одобрено", not_applicable: "Не применимо",
@@ -583,14 +585,15 @@ const ADMIN_UI_COPY = {
       account_created: "Customer account created",
       contact_linked: "Contact linked to account",
       document_checklist_updated: "Document checklist updated",
+      lead_created: "Broker-created enquiry",
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
-      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
+      website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", broker_phone: "Phone call", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Email", broker_walk_in: "Office walk-in", partner_referral: "Partner referral", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
       email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Other channel",
     },
     statuses: {
-      buyer: "Buyer", renter: "Renter", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
+      buyer: "Buyer", foreign_buyer: "Foreign buyer", investor: "Investor", renter: "Renter", seller: "Seller", landlord: "Landlord", partner_referral: "Partner / referral", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
       new: "New", inquiry: "Inquiry", qualified: "Qualified", viewing_booked: "Viewing booked", viewed: "Viewed", offer: "Offer", due_diligence: "Due diligence", contract: "Contract", application: "Application", lease: "Lease", lost: "Lost",
       qualify: "Qualify", book_viewing: "Book viewing", complete_viewing: "Complete viewing", record_offer: "Record offer", start_due_diligence: "Start due diligence", sign_contract: "Sign contract", record_application: "Record application", sign_lease: "Sign lease", close_deal: "Close deal",
       cash: "Cash", mortgage: "Mortgage", preapproved: "Pre-approved", not_applicable: "Not applicable",
@@ -2421,6 +2424,82 @@ function ContactsBody({ page }) {
   });
 }
 
+function ManualLeadForm({ page }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const sources = ["broker_phone", "broker_viber", "broker_whatsapp", "broker_email", "broker_walk_in", "partner_referral"];
+  const leadTypes = ["buyer", "foreign_buyer", "investor", "renter", "seller", "landlord", "partner_referral", "general"];
+  const languages = ["bg", "en", "de", "nl", "ru", "el", "he"];
+  return h(
+    "details",
+    { className: "adm-pipeline-action adm-manual-lead", "data-manual-lead-entry": "true" },
+    h("summary", null, h(Icon, { name: "users", size: 16 }), h("span", null, label(copy, "newLead", "New enquiry"))),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/leads",
+        className: "adm-form adm-pipeline-form adm-manual-lead__form",
+        "data-admin-mutation-form": "lead",
+        "data-admin-mutation-saving": label(copy, "leadSaving", "Creating enquiry…"),
+        "data-admin-mutation-success": label(copy, "leadSaved", "Enquiry created and assigned."),
+        "data-admin-mutation-failure": label(copy, "leadSaveFailed", "Could not create the enquiry."),
+      },
+      h("input", { type: "hidden", name: "id", defaultValue: `broker-lead-${Date.now()}` }),
+      h("p", { className: "crm-tbl__muted adm-manual-lead__intro" }, label(copy, "manualLeadDescription", "Record a broker-originated enquiry.")),
+      h(
+        "div",
+        { className: "adm-pipeline-fields adm-pipeline-fields--two" },
+        h(
+          "label",
+          null,
+          label(copy, "leadSource", "Source"),
+          h("select", { name: "source", defaultValue: "broker_phone", required: true }, ...sources.map((source) => h("option", { key: source, value: source }, valueText(ui, source)))),
+        ),
+        h(
+          "label",
+          null,
+          label(copy, "leadType", "Customer type"),
+          h("select", { name: "leadType", defaultValue: "buyer", required: true }, ...leadTypes.map((type) => h("option", { key: type, value: type }, statusText(ui, type)))),
+        ),
+        h(
+          "label",
+          null,
+          label(copy, "language", "Language"),
+          h("select", { name: "language", defaultValue: page.workspace?.locale || "bg", required: true }, ...languages.map((language) => h("option", { key: language, value: language }, language.toUpperCase()))),
+        ),
+        h("label", null, label(copy, "contactName", "Contact name"), h("input", { name: "contact.name", required: true, autoComplete: "name", maxLength: 160 })),
+        h("label", null, label(copy, "contactPhone", "Phone"), h("input", { name: "contact.phone", type: "tel", inputMode: "tel", autoComplete: "tel", maxLength: 80 })),
+        h("label", null, label(copy, "contactEmail", "Email"), h("input", { name: "contact.email", type: "email", inputMode: "email", autoComplete: "email", maxLength: 240 })),
+        h(
+          "label",
+          null,
+          label(copy, "preferredChannel", "Preferred channel"),
+          h("select", { name: "contact_preference", defaultValue: "phone" }, ...["phone", "viber", "whatsapp", "email"].map((channel) => h("option", { key: channel, value: channel }, valueText(ui, channel)))),
+        ),
+        h("label", null, label(copy, "listingReference", "Listing reference"), h("input", { name: "listingReference", maxLength: 120 })),
+        h("label", null, label(copy, "locations", "Locations"), h("input", { name: "requirements.locations", placeholder: "Sandanski", maxLength: 600 })),
+        h("label", null, label(copy, "propertyTypes", "Property types"), h("input", { name: "requirements.property_types", placeholder: "apartment, house", maxLength: 600 })),
+        h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "requirements.budget_max_eur", type: "number", min: 0, step: 1 })),
+        h("label", null, label(copy, "timeline", "Decision timeline"), h("input", { name: "requirements.timeline", maxLength: 200 })),
+        h("label", null, label(copy, "message", "Message"), h("textarea", { name: "message", maxLength: 2000, rows: 3 })),
+      ),
+      h(
+        "label",
+        { className: "adm-check" },
+        h("input", { type: "checkbox", name: "humanConfirmed", required: true }),
+        h("span", null, label(copy, "humanConfirmLead", "I confirm these details came from a real enquiry and have been checked.")),
+      ),
+      h(
+        "div",
+        { className: "adm-form__actions" },
+        h("p", { className: "crm-tbl__muted", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "users", size: 15 }), label(copy, "createLead", "Create enquiry")),
+      ),
+    ),
+  );
+}
+
 function LeadInboxBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -2473,6 +2552,7 @@ function LeadInboxBody({ page }) {
     },
     children: [
       h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(ManualLeadForm, { page }),
       h(StatGrid, { metrics }),
       h(
         "nav",

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { randomUUID } from "node:crypto";
 import {
   adminHomePath,
   bindAuthenticatedOperator,
@@ -37,6 +38,7 @@ import { renderHtmlPage } from "./html.mjs";
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
+import { normalizeBrokerLeadInput } from "./leads.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import {
   appendLeadAssignment,
@@ -63,6 +65,7 @@ import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
   approveTranslationTask,
+  createCrmInboxItem,
   createTranslationReviewTask,
   publishApprovedTranslation,
   renderAdminWorkspace,
@@ -2015,6 +2018,54 @@ export function createHttpApp({
           );
         }
         return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/leads") {
+      try {
+        if (!leadContactVaultPath || !leadContactKey) {
+          throw new Error("Encrypted lead contact storage is not configured");
+        }
+        const input = normalizeBrokerLeadInput(parseBody(request));
+        const leadId = String(input.id || `broker-lead-${randomUUID()}`).trim();
+        const existing = currentLeads().find((row) => row.lead_id === leadId);
+        if (existing) return adminJson(200, { lead: existing, idempotent: true });
+        const lead = createCrmInboxItem(activeRegistry, { ...input, id: leadId });
+        const contactVault = appendLeadContact(lead, {
+          filePath: leadContactVaultPath,
+          secret: leadContactKey,
+          storedAt: receivedAt,
+        });
+        const ledger = appendLead(lead, { filePath: leadLedgerPath || undefined, receivedAt });
+        const consent = recordConsent({
+          consentType: "inquiry_follow_up",
+          source: lead.lead.source,
+          subjectId: lead.lead.id,
+          locale: lead.original_language,
+          contact: lead.lead.contact,
+          marketingOptIn: false,
+        });
+        const sellerPipeline =
+          sellerPipelinePath && lead.lead.leadType === "seller"
+            ? appendSellerPipeline(createSellerPipelineItem(lead, { createdAt: sellerPipelineCreatedAt || receivedAt }), {
+                filePath: sellerPipelinePath,
+              })
+            : null;
+        recordAudit({
+          action: "lead_created",
+          objectType: "lead",
+          objectId: lead.lead.id,
+          locale: lead.original_language,
+          metadata: {
+            source: lead.lead.source,
+            lead_type: lead.lead.leadType,
+            assigned_broker: lead.broker_assignment.broker_id,
+            intake_complete: lead.lead.intake.complete,
+          },
+        });
+        return adminJson(201, { lead, ledger, contactVault, consent, sellerPipeline, idempotent: false });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

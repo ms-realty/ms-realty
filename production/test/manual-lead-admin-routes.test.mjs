@@ -1,0 +1,166 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import { renderAppAdminResponse } from "../lib/app-admin-adapter.mjs";
+import { readAuditLog } from "../lib/audit-log.mjs";
+import { readConsentLedger } from "../lib/consent-ledger.mjs";
+import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
+import { readLeadLedger } from "../lib/lead-ledger.mjs";
+import { readSellerPipeline } from "../lib/seller-pipeline.mjs";
+
+const TOKEN = "manual-lead-admin-token-0123456789abcdef";
+const CONTACT_KEY = "manual-lead-contact-key-0123456789abcdef";
+const HEADERS = { authorization: `Bearer ${TOKEN}` };
+
+function tempFile(name) {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${name}-`)}/${name}.jsonl`;
+  fs.writeFileSync(file, "");
+  return file;
+}
+
+function paths() {
+  return {
+    leadLedgerPath: tempFile("manual-leads"),
+    leadContactVaultPath: tempFile("manual-lead-contacts"),
+    leadAssignmentLedgerPath: tempFile("manual-lead-assignments"),
+    consentLedgerPath: tempFile("manual-lead-consent"),
+    sellerPipelinePath: tempFile("manual-seller-pipeline"),
+    auditLogPath: tempFile("manual-lead-audit"),
+    leadContactKey: CONTACT_KEY,
+    reviewedAt: "2026-07-19T14:00:00.000Z",
+  };
+}
+
+async function withAdmin(fn) {
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    process.env.MS_REALTY_ADMIN_TOKEN = TOKEN;
+    process.env.MS_REALTY_ADMIN_ACTOR = "broker_ivan";
+    delete process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
+    return await fn();
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+}
+
+function foreignBuyerInput(id) {
+  return {
+    id,
+    source: "broker_whatsapp",
+    leadType: "foreign_buyer",
+    language: "de",
+    contact_preference: "whatsapp",
+    "contact.name": "Manual Buyer",
+    "contact.phone": "+359880000099",
+    "requirements.locations": "Sandanski, Petrich",
+    "requirements.property_types": "apartment",
+    "requirements.budget_max_eur": "180000",
+    "requirements.timeline": "Within six months",
+    message: "Looking for a reviewed apartment.",
+    humanConfirmed: "on",
+  };
+}
+
+function assertPersisted(config, leadId) {
+  const leads = readLeadLedger(config.leadLedgerPath);
+  assert.equal(leads.length, 1);
+  assert.equal(leads[0].lead_id, leadId);
+  assert.equal(leads[0].lead_type, "foreign_buyer");
+  assert.equal(leads[0].intake_completion.complete, true);
+  assert.deepEqual(leads[0].requirements.locations, ["Sandanski", "Petrich"]);
+  assert.equal(fs.readFileSync(config.leadContactVaultPath, "utf8").includes("Manual Buyer"), false);
+  assert.equal(readConsentLedger(config.consentLedgerPath)[0].marketing_opt_in, false);
+  assert.equal(readAuditLog(config.auditLogPath)[0].action, "lead_created");
+  assert.equal(readAuditLog(config.auditLogPath)[0].actor, "broker_ivan");
+}
+
+test("standalone broker workspace creates attributed non-website leads with encrypted contact storage", async () => {
+  await withAdmin(async () => {
+    const config = paths();
+    const app = createHttpApp(config);
+    const page = await dispatchHttp(app, { url: "/admin/leads?locale=en", headers: HEADERS });
+    assert.equal(page.status, 200);
+    assert.match(page.body, /data-manual-lead-entry="true"/);
+    assert.match(page.body, /action="\/api\/admin\/leads"/);
+
+    const response = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/leads",
+      headers: HEADERS,
+      body: foreignBuyerInput("broker-lead-standalone"),
+    });
+    assert.equal(response.status, 201);
+    assert.equal(response.body.lead.lead.leadType, "foreign_buyer");
+    assert.equal(response.body.lead.broker_assignment.broker_id, "broker_international");
+    assertPersisted(config, "broker-lead-standalone");
+
+    const retry = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/leads",
+      headers: HEADERS,
+      body: foreignBuyerInput("broker-lead-standalone"),
+    });
+    assert.equal(retry.status, 200);
+    assert.equal(retry.body.idempotent, true);
+    assert.equal(readLeadLedger(config.leadLedgerPath).length, 1);
+  });
+});
+
+test("Next admin adapter exposes the same broker lead creation contract", async () => {
+  await withAdmin(async () => {
+    const config = paths();
+    const response = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/leads", {
+        method: "POST",
+        headers: { ...HEADERS, "content-type": "application/json" },
+        body: JSON.stringify(foreignBuyerInput("broker-lead-next")),
+      }),
+      { config },
+    );
+    assert.equal(response.status, 201);
+    const body = await response.json();
+    assert.equal(body.lead.lead.leadType, "foreign_buyer");
+    assertPersisted(config, "broker-lead-next");
+  });
+});
+
+test("manual seller intake opens the seller pipeline and unconfirmed records fail closed", async () => {
+  await withAdmin(async () => {
+    const config = paths();
+    const app = createHttpApp(config);
+    const rejected = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/leads",
+      headers: HEADERS,
+      body: { ...foreignBuyerInput("broker-lead-rejected"), humanConfirmed: false },
+    });
+    assert.equal(rejected.status, 400);
+    assert.match(rejected.body.message, /human confirmation/);
+
+    const seller = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/leads",
+      headers: HEADERS,
+      body: {
+        ...foreignBuyerInput("broker-lead-seller"),
+        source: "broker_phone",
+        leadType: "seller",
+        language: "bg",
+        "requirements.locations": "Sandanski",
+        "requirements.property_types": "house",
+      },
+    });
+    assert.equal(seller.status, 201);
+    assert.equal(readSellerPipeline(config.sellerPipelinePath)[0].property.location, "Sandanski");
+  });
+});

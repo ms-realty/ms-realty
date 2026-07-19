@@ -46,6 +46,7 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/replies",
   "/api/admin/replies/delivery",
   "/api/admin/replies/draft",
+  "/api/admin/leads",
   "/api/admin/lead-pipeline/outcome",
   "/api/admin/leads/assign",
   "/api/admin/accounts",

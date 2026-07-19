@@ -30,6 +30,15 @@ const PUBLIC_LEAD_SOURCE_CONTRACTS = Object.freeze({
     reachableContact: true,
   },
 });
+export const BROKER_INTAKE_SOURCES = Object.freeze([
+  "broker_phone",
+  "broker_viber",
+  "broker_whatsapp",
+  "broker_email",
+  "broker_walk_in",
+  "partner_referral",
+]);
+const BROKER_INTAKE_SOURCE_SET = new Set(BROKER_INTAKE_SOURCES);
 const LOCAL_LOCATIONS = ["Sandanski", "Petrich", "Bansko", "Blagoevgrad", "Sveti Vlas", "Sunny Beach", "Melnik"];
 const PROPERTY_TYPES = ["apartment", "house", "villa", "land", "commercial", "hotel", "office", "industrial"];
 export const DEFAULT_BROKER_PROFILES = [
@@ -209,6 +218,53 @@ export function normalizeLeadInput(input = {}) {
 
 function hasReachableContact(contact = {}) {
   return ["email", "phone", "whatsapp", "viber"].some((field) => Boolean(String(contact[field] || "").trim()));
+}
+
+function truthy(value) {
+  return value === true || value === "true" || value === "on" || value === "1";
+}
+
+export function normalizeBrokerLeadInput(input = {}) {
+  const source = String(input.source || "").trim();
+  if (!BROKER_INTAKE_SOURCE_SET.has(source)) throw new Error("Manual lead source must be a supported broker channel");
+  if (!truthy(input.humanConfirmed ?? input.human_confirmed)) {
+    throw new Error("Manual lead intake requires human confirmation");
+  }
+  const contact = input.contact && typeof input.contact === "object" && !Array.isArray(input.contact) ? { ...input.contact } : {};
+  for (const field of ["name", "email", "phone", "whatsapp", "viber", "preferred_channel"]) {
+    const value = input[`contact.${field}`];
+    if (value !== undefined && String(value).trim()) contact[field] = String(value).trim();
+  }
+  if (source === "broker_whatsapp" && !contact.whatsapp && contact.phone) contact.whatsapp = contact.phone;
+  if (source === "broker_viber" && !contact.viber && contact.phone) contact.viber = contact.phone;
+  if (!hasReachableContact(contact)) throw new Error("Manual lead intake requires a reachable contact channel");
+  if (source === "broker_email" && !String(contact.email || "").trim()) throw new Error("Email lead source requires an email address");
+  if (["broker_phone", "broker_viber", "broker_whatsapp"].includes(source) && !String(contact.phone || contact.whatsapp || contact.viber || "").trim()) {
+    throw new Error("Phone, Viber, or WhatsApp lead source requires a phone number");
+  }
+  const sourcePreference = {
+    broker_phone: "phone",
+    broker_viber: "viber",
+    broker_whatsapp: "whatsapp",
+    broker_email: "email",
+  }[source];
+  const message = boundedString(input.message, "message", 2000) || "";
+  const normalized = normalizeLeadInput({
+    ...input,
+    source,
+    intent: "broker_intake",
+    contact,
+    contact_preference: input.contact_preference || input.contactPreference || sourcePreference,
+    message,
+  });
+  if (OWNER_REQUIREMENT_TYPES.has(normalized.leadType)) {
+    normalized.property = {
+      ...normalized.property,
+      location: normalized.property.location || normalized.requirements.locations[0] || "",
+      type: normalized.property.type || normalized.requirements.property_types[0] || "",
+    };
+  }
+  return normalized;
 }
 
 export function normalizeBuyerListingLeadInput(input = {}) {
