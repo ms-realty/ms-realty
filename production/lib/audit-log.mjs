@@ -8,6 +8,7 @@ const ADMIN_ACTIONS = new Set([
   "account_created",
   "broker_contact_approved",
   "contact_linked",
+  "consent_withdrawn",
   "deal_closed",
   "deployable_redirects_exported",
   "document_checklist_updated",

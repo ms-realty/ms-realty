@@ -6,6 +6,8 @@ import {
   appendConsentRecord,
   assertConsentLedger,
   createConsentRecord,
+  createConsentWithdrawal,
+  latestConsentStates,
   readConsentLedger,
   resetConsentLedger,
 } from "../lib/consent-ledger.mjs";
@@ -58,6 +60,46 @@ test("consent ledger stores privacy-safe fingerprints instead of raw contact fie
   assert.equal(rows[1].legal_basis, "consent");
   assert.equal(JSON.stringify(rows).includes("Buyer@Example.Test"), false);
   assert.equal(JSON.stringify(rows).includes("+359"), false);
+});
+
+test("consent workspace state is current, privacy-safe, and withdrawal-only", () => {
+  const original = createConsentRecord(
+    {
+      consentType: "saved_search_alerts",
+      source: "website_saved_search",
+      subjectId: "saved-search-0001",
+      locale: "en",
+      contact: { email: "buyer@example.test" },
+      legalBasis: "consent",
+    },
+    "2026-07-06T00:00:00Z",
+  );
+  const withdrawal = createConsentWithdrawal(
+    {
+      consentType: "saved_search_alerts",
+      subjectId: "saved-search-0001",
+      actor: "broker_en",
+      reasonCode: "customer_request",
+      humanConfirmed: true,
+    },
+    [original],
+    "2026-07-06T01:00:00Z",
+  );
+  assert.equal(withdrawal.idempotent, false);
+  assert.equal(withdrawal.record.granted, false);
+  assert.equal(withdrawal.record.marketing_opt_in, false);
+  assert.equal(withdrawal.record.actor, "broker_en");
+  assert.equal(withdrawal.record.contact_fingerprint, original.contact_fingerprint);
+  const states = latestConsentStates([original, withdrawal.record]);
+  assert.equal(states.length, 1);
+  assert.equal(states[0].granted, false);
+  assert.match(states[0].contact_reference, /^fp:[a-f0-9]{12}$/);
+  assert.equal(JSON.stringify(states).includes(original.contact_fingerprint), false);
+  assert.equal(createConsentWithdrawal({ consentType: "saved_search_alerts", subjectId: "saved-search-0001", actor: "broker_en", humanConfirmed: true }, [original, withdrawal.record]).idempotent, true);
+  assert.throws(
+    () => createConsentWithdrawal({ consentType: "saved_search_alerts", subjectId: "unknown", actor: "broker_en", humanConfirmed: true }, [original]),
+    /not found/,
+  );
 });
 
 test("consent ledger rejects unknown consent types and raw private fields", () => {

@@ -22,6 +22,7 @@ import {
   LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
   renderAdminContactsPayload,
+  renderAdminConsentPayload,
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
@@ -66,7 +67,14 @@ import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
-import { DEFAULT_CONSENT_LEDGER_PATH, appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
+import {
+  DEFAULT_CONSENT_LEDGER_PATH,
+  appendConsentRecord,
+  createConsentRecord,
+  createConsentWithdrawal,
+  latestConsentStates,
+  readConsentLedger,
+} from "./consent-ledger.mjs";
 import {
   DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH,
   appendLeadAssignment,
@@ -620,6 +628,15 @@ function documentChecklistPayload(registry, url, config) {
     registry,
     locale,
     buildDocumentChecklistQueue(leads, readDocumentChecklistOutcomes(config.documentChecklistLedgerPath), { locale }),
+    config.adminPrincipal || null,
+  );
+}
+
+function consentPayload(registry, url, config) {
+  return renderAdminConsentPayload(
+    registry,
+    url.searchParams.get("locale") || "en",
+    latestConsentStates(readConsentLedger(config.consentLedgerPath)),
     config.adminPrincipal || null,
   );
 }
@@ -1559,6 +1576,35 @@ function appendDocumentChecklistOutcomeEntry(input, config) {
   return result;
 }
 
+function appendConsentWithdrawalEntry(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const result = createConsentWithdrawal(
+    attributed,
+    readConsentLedger(config.consentLedgerPath),
+    config.reviewedAt || new Date().toISOString(),
+  );
+  if (!result.idempotent) {
+    appendConsentRecord(result.record, { filePath: config.consentLedgerPath });
+    recordAudit(
+      {
+        action: "consent_withdrawn",
+        actor: result.record.actor,
+        objectType: "consent",
+        objectId: result.record.subject_id,
+        locale: result.record.locale,
+        metadata: {
+          consent_type: result.record.consent_type,
+          reason_code: result.record.reason_code,
+          granted: false,
+        },
+      },
+      config,
+      result.record.recorded_at,
+    );
+  }
+  return result;
+}
+
 function appendDealClose(input, config) {
   const deal = appendClosedDeal(leadJourneyContext(config), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.dealLedgerPath,
@@ -1982,6 +2028,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/contacts") return jsonResponse(200, contactsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/documents") return htmlResponse(documentChecklistPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/documents") return jsonResponse(200, documentChecklistPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/consents") return htmlResponse(consentPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/consents") return jsonResponse(200, consentPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
@@ -2167,6 +2215,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/documents/outcome") {
       const result = appendDocumentChecklistOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
+      const result = appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {

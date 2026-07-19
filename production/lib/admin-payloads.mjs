@@ -569,3 +569,31 @@ export function renderAdminDocumentChecklistPayload(registry, requestedLocale, c
     summary: checklistQueue.summary,
   };
 }
+
+export function renderAdminConsentPayload(registry, requestedLocale, consentStates, operator = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  const states = consentStates || [];
+  return {
+    kind: "admin_consents",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/consents",
+    canonical: "/admin/consents",
+    indexable: false,
+    metadata: {
+      title: `${workspace.copy.consentsWorkspace || "Consent records"} | MS Realty`,
+      description: workspace.copy.consentsDescription || "Current follow-up and alert consent state without raw contact values.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    consentStates: states,
+    summary: {
+      records: states.length,
+      granted: states.filter((row) => row.granted).length,
+      withdrawn: states.filter((row) => !row.granted).length,
+      marketing_opt_in: states.filter((row) => row.marketing_opt_in).length,
+    },
+  };
+}

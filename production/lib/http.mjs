@@ -15,6 +15,7 @@ import {
   LISTING_EDIT_FIELDS,
   renderAdminActivityPayload,
   renderAdminContactsPayload,
+  renderAdminConsentPayload,
   renderAdminDocumentChecklistPayload,
   renderAdminLeadsPayload,
   renderAdminListingEditorPayload,
@@ -127,7 +128,13 @@ import { appendSellerPipelineOutcome, buildSellerPipelineQueue, readSellerPipeli
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
-import { appendConsentRecord, createConsentRecord } from "./consent-ledger.mjs";
+import {
+  appendConsentRecord,
+  createConsentRecord,
+  createConsentWithdrawal,
+  latestConsentStates,
+  readConsentLedger,
+} from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
 import {
@@ -593,6 +600,13 @@ export function createHttpApp({
       }),
       operatorId,
     );
+  const currentConsentPayload = (requestedLocale, operatorId = null) =>
+    renderAdminConsentPayload(
+      activeRegistry,
+      requestedLocale,
+      latestConsentStates(readConsentLedger(consentLedgerPath || undefined)),
+      operatorId,
+    );
   const currentOperationsReport = () => {
     const generatedAt = reviewedAt || editedAt || receivedAt || new Date().toISOString();
     const reportSeed = currentSeed();
@@ -988,6 +1002,15 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/documents" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/consents", "/admin/consents"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentConsentPayload(url.searchParams.get("locale") || "en", principal);
+      if (url.pathname === "/admin/consents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
@@ -2164,6 +2187,36 @@ export function createHttpApp({
               item_key: result.outcome.item_key,
               status: result.outcome.status,
               has_reference: Boolean(result.outcome.reference),
+            },
+          });
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const result = createConsentWithdrawal(
+          input,
+          readConsentLedger(consentLedgerPath || undefined),
+          reviewedAt || receivedAt || new Date().toISOString(),
+        );
+        if (!result.idempotent) {
+          appendConsentRecord(result.record, { filePath: consentLedgerPath || undefined });
+          recordAudit({
+            action: "consent_withdrawn",
+            actor: result.record.actor,
+            objectType: "consent",
+            objectId: result.record.subject_id,
+            locale: result.record.locale,
+            metadata: {
+              consent_type: result.record.consent_type,
+              reason_code: result.record.reason_code,
+              granted: false,
             },
           });
         }

@@ -200,6 +200,7 @@ const ADMIN_UI_COPY = {
       lead_assigned: "Запитването е пренасочено към брокер",
       account_created: "Създаден клиентски акаунт",
       contact_linked: "Контакт, свързан с акаунт",
+      consent_withdrawn: "Оттеглено съгласие или известие",
       document_checklist_updated: "Обновен контролен списък за документи",
       lead_created: "Създадено запитване от брокер",
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
@@ -392,6 +393,7 @@ const ADMIN_UI_COPY = {
       lead_assigned: "Заявка переназначена брокеру",
       account_created: "Создан клиентский аккаунт",
       contact_linked: "Контакт связан с аккаунтом",
+      consent_withdrawn: "Согласие или уведомление отозвано",
       document_checklist_updated: "Обновлен чек-лист документов",
       lead_created: "Заявка создана брокером",
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
@@ -584,6 +586,7 @@ const ADMIN_UI_COPY = {
       lead_assigned: "Lead assigned to broker",
       account_created: "Customer account created",
       contact_linked: "Contact linked to account",
+      consent_withdrawn: "Consent or notification withdrawn",
       document_checklist_updated: "Document checklist updated",
       lead_created: "Broker-created enquiry",
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
@@ -753,6 +756,7 @@ const NAV_ROUTES = [
   { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
   { id: "contacts", module: "crm", path: "/admin/contacts", icon: "users", kind: "admin_contacts", capability: "operations:read" },
+  { id: "consents", module: "crm", path: "/admin/consents", icon: "shield-check", kind: "admin_consents", capability: "operations:read" },
   { id: "documents", module: "crm", path: "/admin/documents", icon: "file-check", kind: "admin_document_checklists", capability: "operations:read" },
   { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
   { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
@@ -787,6 +791,7 @@ function Sidebar({ page }) {
           badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
         },
         { ...route("contacts"), label: screenLabel("crm", "contacts", "Contacts and accounts") },
+        { ...route("consents"), label: screenLabel("crm", "consents", "Consent and preferences") },
         { ...route("documents"), label: screenLabel("crm", "documents", "Documents and process") },
         {
           ...route("lead_pipeline"),
@@ -2263,6 +2268,115 @@ function DocumentOutcomeForm({ page, checklist, item, copy }) {
       h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "saveDocumentOutcome", "Save outcome")),
     ),
   );
+}
+
+function ConsentWithdrawalForm({ page, row, copy }) {
+  if (!row.withdrawable || !row.subject_id || !pageCan(page, "operations:write")) return null;
+  return h(
+    "details",
+    { className: "adm-consent-action", "data-consent-withdrawal-control": row.id },
+    h("summary", { className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "x", size: 15 }), h("span", null, label(copy, "withdrawConsent", "Record withdrawal"))),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/consents/withdraw",
+        className: "adm-form",
+        "data-admin-mutation-form": "consent",
+        "data-admin-mutation-saving": label(copy, "consentSaving", "Recording withdrawal…"),
+        "data-admin-mutation-success": label(copy, "consentSaved", "Withdrawal recorded."),
+        "data-admin-mutation-failure": label(copy, "consentFailed", "Could not record the withdrawal."),
+      },
+      h("input", { type: "hidden", name: "subjectId", value: row.subject_id }),
+      h("input", { type: "hidden", name: "consentType", value: row.consent_type }),
+      page.workspace?.operator_id ? h("input", { type: "hidden", name: "actor", value: currentOperatorId(page) }) : null,
+      h(
+        "label",
+        null,
+        label(copy, "withdrawalReason", "Withdrawal reason"),
+        h(
+          "select",
+          { name: "reasonCode", required: true },
+          h("option", { value: "customer_request" }, label(copy, "customerRequest", "Customer request")),
+          h("option", { value: "broker_recorded_request" }, label(copy, "brokerRecordedRequest", "Request recorded by broker")),
+          h("option", { value: "data_correction" }, label(copy, "dataCorrection", "Data correction")),
+        ),
+      ),
+      h(
+        "label",
+        { className: "adm-check" },
+        h("input", { type: "checkbox", name: "humanConfirmed", required: true }),
+        h("span", null, label(copy, "confirmConsentWithdrawal", "I confirm the customer asked for this purpose to stop.")),
+      ),
+      h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+      h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "withdrawConsent", "Record withdrawal")),
+    ),
+  );
+}
+
+function ConsentsBody({ page }) {
+  const copy = adminCopy(page);
+  const metrics = [
+    [label(copy, "consentGranted", "Active permissions"), page.summary.granted, "shield-check", "success"],
+    [label(copy, "consentWithdrawn", "Withdrawn"), page.summary.withdrawn, "x", "brick"],
+    [label(copy, "marketingOptIns", "Marketing opt-ins"), page.summary.marketing_opt_in, "mail", "sand"],
+  ];
+  return adminShell(page, {
+    title: label(copy, "consentsWorkspace", "Consent and preferences"),
+    mainAttrs: {
+      "data-kind": "admin-consents",
+      "data-react-admin-ui": "consents",
+      "data-privacy-safe": "true",
+      "data-consent-state-count": page.summary.records,
+    },
+    children: [
+      h(PageHeader, { title: label(copy, "consentsWorkspace", "Consent and preferences"), subtitle: page.metadata.description }),
+      h("p", { className: "adm-inline-alert", "data-consent-guardrail": "true" }, label(copy, "consentGuardrail", "Withdrawal stops this purpose. New consent requires a new explicit customer action.")),
+      h(StatGrid, { metrics }),
+      h(
+        Panel,
+        { title: label(copy, "consentsWorkspace", "Consent and preferences") },
+        page.consentStates.length
+          ? h(
+              "div",
+              { className: "crm-tbl-wrap" },
+              h(
+                "table",
+                { className: "crm-tbl" },
+                h(
+                  "thead",
+                  null,
+                  h(
+                    "tr",
+                    null,
+                    h("th", { scope: "col" }, label(copy, "consentSubject", "Enquiry or subscription")),
+                    h("th", { scope: "col" }, label(copy, "consentPurpose", "Purpose")),
+                    h("th", { scope: "col" }, label(copy, "consentState", "State")),
+                    h("th", { scope: "col" }, label(copy, "consentRecordedAt", "Recorded")),
+                    h("th", { scope: "col" }, label(copy, "action", "Action")),
+                  ),
+                ),
+                h(
+                  "tbody",
+                  null,
+                  ...page.consentStates.map((row) =>
+                    h(
+                      "tr",
+                      { key: row.id, "data-consent-state": row.granted ? "granted" : "withdrawn" },
+                      h("td", null, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || "—"), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
+                      h("td", null, h("strong", null, label(copy, row.consent_type, row.consent_type)), h("small", { className: "adm-lead-context" }, label(copy, row.legal_basis, row.legal_basis))),
+                      h("td", null, h(StatusPill, { tone: row.granted ? "success" : "brick" }, row.granted ? label(copy, "consentActive", "Active") : label(copy, "consentStopped", "Withdrawn"))),
+                      h("td", { className: "crm-tbl__muted crm-mono" }, formatAdminDateTime(row.recorded_at, page.workspace?.locale)),
+                      h("td", null, h(ConsentWithdrawalForm, { page, row, copy })),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noConsentRecords", "No consent records yet.")),
+      ),
+    ],
+  });
 }
 
 function DocumentChecklistsBody({ page }) {
@@ -4178,6 +4292,7 @@ function MigrationReviewBody({ page }) {
 export function renderReactAdminBody(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_contacts") return renderStaticElement(h(ContactsBody, { page }));
+  if (page.kind === "admin_consents") return renderStaticElement(h(ConsentsBody, { page }));
   if (page.kind === "admin_document_checklists") return renderStaticElement(h(DocumentChecklistsBody, { page }));
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
   if (page.kind === "admin_lead_pipeline") return renderStaticElement(h(LeadPipelineBody, { page }));
