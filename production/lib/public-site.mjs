@@ -20,7 +20,7 @@ import {
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
-import { publicMediaLibrary, selectPublicThumbnail } from "./media.mjs";
+import { publicMediaLibrary } from "./media.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
 
@@ -1125,15 +1125,15 @@ function listingCard(registry, listing, locale) {
   const copy = localizedCopy(copyLocale, view);
   const ui = uiCopyFor(locale.code);
   const reviewedTranslation = state.indexable && copyLocale !== view.source_locale && state.translation?.human_approved === true;
-  const thumbnail = selectPublicThumbnail(
-    view.media,
-    view.thumbnail_url
+  const publicMedia = publicMediaLibrary(view.media, {
+    fallback: view.thumbnail_url
       ? {
           url: view.thumbnail_url,
           alt: view.thumbnail_alt || copy.title,
         }
       : null,
-  );
+  });
+  const thumbnail = publicMedia.gallery[0] || null;
   return {
     id: listing.id,
     title: copy.title,
@@ -1145,6 +1145,7 @@ function listingCard(registry, listing, locale) {
     translation_indexable: state.indexable,
     translation_human_approved: state.translation?.human_approved === true,
     source_locale: listing.locale,
+    content_locale: copyLocale,
     location: view.location,
     property_type: view.property_type,
     property_type_label: localizedListingValue(locale.code, "property_type", view.property_type),
@@ -1157,7 +1158,10 @@ function listingCard(registry, listing, locale) {
     price_on_request: view.price_on_request,
     listing_status: view.listing_status,
     listing_active: isActiveListing(listing),
-    image_count: Number(listing.image_count || 0),
+    // Public claims must describe the reviewed media we can actually render,
+    // not a legacy page's unverified gallery counter.
+    image_count: publicMedia.gallery_count,
+    legacy_image_count: Number(view.image_count || listing.image_count || 0),
     thumbnail,
     actions: {
       detail: { label: ui.details, href: listingPath(registry, locale.code, listing.id) },
@@ -1421,6 +1425,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       reviewer: translation?.reviewer || null,
     },
     body: {
+      content_locale: translationIndexable ? locale.code : view.source_locale || registry.source_locale,
       h1: copy.h1,
       description: copy.description,
       facts: {

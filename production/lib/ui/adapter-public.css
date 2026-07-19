@@ -13,6 +13,17 @@
 .site-hd__lang { flex: none; }
 .site-hd__mobile,
 .site-hd__mobile-call { display: none; }
+.site-hd__mobile-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
 .site-hd__lang a {
   display: inline-flex;
   align-items: center;

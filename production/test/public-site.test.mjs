@@ -229,6 +229,8 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").translation_display, "reviewed_translation");
   assert.equal(search.cards.find((card) => card.id === "MS-CRAWL-0001").review_badge, "reviewed_translation");
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
+  assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale" && card.content_locale === "bg"));
+  assert.match(renderReactPublicBody(search), /data-content-language="bg"/);
 });
 
 test("public UI localizes structured values and excludes operational crawl imagery", () => {
@@ -245,9 +247,17 @@ test("public UI localizes structured values and excludes operational crawl image
   assert.equal(card.property_type_label, "Апартаменты");
   assert.equal(card.offer_type_label, "Продажа");
   assert.equal(card.thumbnail, null);
+  assert.equal(card.image_count, ruPage.body.media.gallery_count);
+  assert.equal(card.legacy_image_count, ruListing.image_count);
   assert.ok(ruPage.body.media.gallery.every((image) => !image.url.includes("taxi")));
   assert.ok(importedGallery.some((image) => image.url.includes("/191-1.jpg")));
   assert.ok(importedGallery.every((image) => !image.url.includes("taxi")));
+});
+
+test("public chrome gives the icon-only mobile menu an explicit accessible name", () => {
+  const html = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
+
+  assert.match(html, /class="site-hd__mobile-label">Primary navigation<\/span>/);
 });
 
 test("search applies text and facet filters before paginating cards", () => {
