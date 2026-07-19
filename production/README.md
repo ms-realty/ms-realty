@@ -129,6 +129,12 @@ What it proves now:
 - Production Node HTML adapter uses the same React public/admin body bridges as the App Router, while listing `?print=1` stays on the print renderer.
 - Public seller and contact pages are included in the localized sitemap for approved website locales.
 - Generated mobile/elderly QA report over rendered public HTML, including Hebrew RTL, search form, sticky listing actions, phone-first forms, fallback noindex, and BG/RU/EN admin language policy.
+- Distinct inquiry, callback, and viewing forms persist their own intent-specific fields instead of collapsing into one generic modal.
+- Public cards expose only reviewed/renderable gallery counts and label fallback source-language content without making it indexable.
+- Search normalizes accents and Cyrillic/Latin keyboard variants in both runtime matching and Typesense/Meilisearch documents without manufacturing translations.
+- Task-first BG/RU/EN broker routes cover Today, leads, contacts/accounts, consent, documents, buyer/renter and seller pipelines, requests, viewings, reports, activity, listings, translations, and migration review.
+- Role-scoped, attributable operations include broker-originated intake, manual assignment, lead next actions, inventory matching, publication schedules, bulk status changes, consent withdrawal, document outcomes, communication threads, delivery outcomes, and entity timelines.
+- Local recovery snapshots quiesce writes and checksum Payload/Postgres plus CRM/CMS and evidence volumes; restore requires explicit confirmation, validates secret compatibility and archive paths, retains a rollback snapshot, then rebuilds migrations, search, and runtime reports.
 
 Run:
 

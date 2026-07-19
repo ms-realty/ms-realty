@@ -1,7 +1,7 @@
 # MS Realty — Source of Truth
 
 **Single canonical document for the MS Realty rebuild** (`makler-realty.com` + `makler-realty.ru`).
-Last updated: 2026-07-13.
+Last updated: 2026-07-19.
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
 > subsystem READMEs (`production/`, `migration/`, `search/`, `locales/`,
@@ -111,7 +111,7 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 | Layer | Choice | Notes |
 |---|---|---|
 | Public app | **Next.js** (App Router), server-rendered/static | SEO-first; indexable content must render without JS |
-| CMS / admin | **Payload CMS**-style, code-first TypeScript content model | Directus is the fallback if no-code DB admin becomes the priority |
+| CMS / admin | **Payload CMS 3**, code-first TypeScript content model + task-first broker workspace | Directus remains only a historical fallback if no-code DB administration becomes the priority |
 | Database | **PostgreSQL** | Canonical business data; keep Property identity separate from Listing publication |
 | Search | **Typesense or Meilisearch** | Both prototyped with real data; final pick after BG/RU transliteration + geo + rebuild-speed testing |
 | Maps | **MapLibre GL JS** | No Google billing; Google optional only for geocoding if justified |
@@ -122,15 +122,17 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 | AI | **Hermes Agent** — self-hosted Nous Research **open-weight Hermes models** + Hermes function-calling format (model-agnostic seam) | Authenticated internal draft assistant only; schema-validated JSON outputs; human approval; full audit logs. No public chat capability. Full spec in §11 |
 | Locales | Admin-managed dynamic registry | Hermes drafts; humans approve; RTL support before Hebrew launch |
 
-The current app is a **hybrid production foundation**: `production/` keeps the dependency-light
-executable contracts for URL/locale/AI/lead/migration policy, while `app/` exposes those contracts
-through Next.js App Router route handlers that pass `next build`. It is still **not** the final app:
-the React public UI bridge now renders App Router bodies for home, search, listings, locations,
-seller valuation, contact, approved guides, and unavailable-language fallback, while the React admin
-bridge renders the lead inbox, property editor, and migration review workbench. Full React visual
-polish and the Payload runtime/admin app remain to land on top of these contracts.
-Payload-compatible collection configs are generated from the CMS manifest and exposed at
-`GET /api/admin/payload-collections`.
+The current app is a **hybrid operating platform**: `production/` keeps dependency-light,
+deterministically tested policy and workflow contracts, while `app/` exposes them through a Next.js
+App Router runtime. The React public UI covers home, search, listings, locations, seller valuation,
+contact, approved guides, and unavailable-language fallback. The role-scoped React broker workspace
+covers Today, leads, contacts/accounts, consent, documents, buyer/renter and seller pipelines,
+requests, viewings, reports, activity, listings, translations, and migration review. Those surfaces
+have been browser-audited locally across all seven public locales, including Hebrew RTL and compact
+mobile layouts. Payload 3.85 runs against PostgreSQL in the loopback Docker production preview with
+versioned migrations and its real admin shell at `/payload-admin`; generated collection configs are
+also exposed at `GET /api/admin/payload-collections`. This local runtime proof does **not** replace a
+provisioned production database, operator setup, durable storage, or the external launch evidence.
 
 **OSS reference set (learn-from, don't fork):** PropertyWebBuilder, Open Real Estate CMS,
 MicroRealEstate, EspoCRM real-estate extension (domain models); Twenty, Frappe CRM, EspoCRM, SuiteCRM
@@ -469,12 +471,12 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | Phase | Scope | Status |
 |---|---|---|
 | **P0 · Local evidence pack** | Crawl/export pack, search fixtures, design-system screens, 360 CMS field prototype, CRM intake fixtures, static mobile/elderly QA gate | **Complete locally** |
-| **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Contracts built** (`production/data/migration.sqlite`, `GET /api/admin/migration/review`, `POST /api/admin/redirect-approvals`, `seo-evidence.json`) |
-| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Contracts + stdlib HTML adapter + React App Router body bridge for public routes built**; full React public UI polish pending |
-| **P3 · CMS & CRM** | Payload-style content/admin model, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, buyer/seller pipelines, viewing/calendar/task | **Contracts + admin workbenches + React bodies for lead inbox/property editor/migration review + private append-only post-viewing follow-up queue + broker verification report + generated Payload-compatible collection configs + Payload runtime bootstrap built**; real Payload runtime env/database pending |
-| **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Fixtures, saved-search alert evaluator, gated-tour contract, Typesense/Meilisearch sync/query worker paths, and redacted live provisioning report built; live engine URLs/API keys pending |
-| **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Guardrails, ledgers, translation coverage, locale rollout, dispatch batch, OpenAI-compatible draft worker path, and Hermes provisioning contract built; self-hosted Hermes/vLLM endpoint pending |
-| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; rollback plan | Launch-readiness report aggregates gates; the full 457-row route workbook now supports reviewed `200`/`301`/`410` terminal decisions, with 165 reviewed listing `301`s and 292 page/post/taxonomy rows still unresolved; listing-quality review packet is generated; **blocked on full legacy-route coverage, external SEO exports, reviewed listing-quality CSV, live service provisioning/reports, and Payload runtime env/database configuration** |
+| **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Operator workflow implemented; human evidence incomplete.** The SQLite inventory, reviewer UI/API, import/export workbooks, terminal-decision validator, and evidence join are built. All 165 listing redirects are reviewed; 292 page/post/taxonomy decisions and the external exports remain blocked inputs. |
+| **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Implemented and browser-audited locally** across phone/desktop and BG/EN/DE/NL/RU/EL/HE; only human-approved translations index, fallback-language content is labelled/noindex, and listing claims use reviewed facts/media only. Production cutover remains gated by P6. |
+| **P3 · CMS & CRM** | Payload content runtime, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, contacts/accounts, consent/documents, buyer/seller pipelines, viewing/calendar/tasks | **Implemented and browser-audited locally** with encrypted contact vaults, attributable role-scoped mutations, append-only audit/activity, assignment, matching, distinct communication threads, delivery outcomes, publication schedules, and operations reports. Payload/Postgres migrations and admin runtime are proven locally; production operator initialization, durable provider storage, and deployment proof remain external work. |
+| **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Both engines sync/query 167 reviewed locale documents locally; facets, pagination, cross-keyboard Cyrillic/Latin matching, saved-search matching, human-reviewed media, gallery fallbacks, and gated 360 tours are implemented. Final live engine provisioning and geo/map behavior remain blocked on provider credentials and reviewed coordinates. |
+| **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Deterministic workflow truth, human approval boundaries, translation coverage/rollout, draft dispatch/worker validation, and audit contracts are implemented. Hermes still has no public/customer write capability; a real self-hosted Hermes/private-model endpoint and live worker report remain required. |
+| **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; backup/rollback plan | Local build/runtime, mobile/RTL/browser QA, privacy analytics, and a checksummed backup/restore drill across Payload/Postgres plus CRM/CMS/evidence volumes are proven. The 457-row workbook still has 292 unresolved page/post/taxonomy URLs; **launch remains blocked on those reviews, Search Console/Yandex/backlink exports, the complete 165-row human listing review, provisioned live search/Hermes/Payload reports, and a real encrypted off-site backup/DR policy**. |
 
 **What is proven in code right now** (see `production/README.md` and git history):
 crawl pack for both domains (457 URLs), SQLite migration DB + review dashboards, Typesense/Meilisearch
@@ -482,23 +484,29 @@ import fixtures (165 source listings → 167 locale-scoped docs), 457-row legacy
 reviewer-gated deployable 301 export plus retained-200/approved-410 terminal-decision artifact,
 authenticated admin migration/editor/lead workbenches,
 approved-translation-gated localized sitemap (`sitemap.xml` + `robots.txt`), `RealEstateListing`
-JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with OG
-+ hreflang + schema, approved CMS guide pages cited by Hermes, broker-approval-gated phone/WhatsApp/Viber, 360-tour approval overlay, append-only
-lead/reply/viewing/viewing-follow-up/deal/saved-search/seller/broker-contact/tour/analytics ledgers, SEO-evidence join,
+JSON-LD report over all indexable entries, listing-quality report, server-rendered public HTML with
+Open Graph, hreflang, and schema, approved CMS guide pages cited by Hermes, broker-approval-gated
+phone/WhatsApp/Viber, distinct inquiry/callback/viewing journeys, an honest reviewed-media gallery,
+360-tour approval overlay, encrypted contact vaults, unified contacts/accounts, consent/document
+workspaces, buyer/renter and seller pipelines, broker assignment and inventory matching, communication
+templates/threads with actual delivery outcomes, and append-only
+lead/reply/viewing/viewing-follow-up/deal/saved-search/seller/broker-contact/tour/analytics/audit ledgers, SEO-evidence join,
 missed-SLA report that creates broker reminders and manager escalations from unreplied leads,
 listing-status workflow that keeps sold pages live while removing them from active inventory,
 CMS slug-history workflow that creates path-only automatic 301s to canonical listing routes,
-Payload-compatible collection config export and runtime bootstrap handoff for the implemented CMS manifest,
+Payload-compatible collection config export, versioned database migrations, and locally proven real Payload/Postgres runtime,
 redacted live-service provisioning report for Typesense/Meilisearch/Hermes readiness,
 complete draft listing-quality review packet for the remaining human gallery checks,
 listing-publication workflow that proves sitemap paths and internal-link suggestions,
-mobile/elderly QA report, and a live Node server (`npm start`) exposing the same contracts.
+mobile/elderly QA report, a Next production runtime, and a private checksummed local backup/restore
+path with an automatic pre-restore rollback snapshot.
 
 **Blocked until launch:** real external SEO exports (Search Console / Yandex / backlinks) under
 `migration/external/seo/`, explicit route decisions for the 292 non-listing legacy URLs, reviewed listing-quality fixes under `migration/reviews/listing-quality.csv`,
 live Typesense/Meilisearch URLs/API keys, Hermes/vLLM endpoint, sync/query and Hermes draft-worker
-reports, plus real Payload `PAYLOAD_SECRET`, `DATABASE_URL`, and reachable database. Only the 165 mapped listing redirects are covered by
-the reviewed deployable 301 export; the remaining legacy URLs must not be treated as complete.
+reports, plus production Payload secrets/database/operator setup and encrypted off-site backup/restore
+evidence. Only the 165 mapped listing redirects are covered by the reviewed deployable 301 export; the
+remaining legacy URLs must not be treated as complete.
 
 ---
 
@@ -552,7 +560,7 @@ code-local documentation:
 |---|---|
 | `README.md` | Short entry point + the one-line stack/facts |
 | `SOURCE_OF_TRUTH.md` | **This file** — strategy + product + stack + migration + status |
-| `production/` | Interim executable contracts, Node server, build scripts, generated `data/` (`production/README.md`) |
+| `production/` | Executable workflow/policy contracts, local production runtime, Node adapter, build scripts, generated `data/` (`production/README.md`) |
 | `migration/` | Crawler, migration DB builder, versioned crawl artifacts, external SEO templates (`migration/README.md`) |
 | `search/` | Typesense/Meilisearch fixture builders + validators (`search/README.md`) |
 | `locales/` | Locale registry + validator (`locales/README.md`) |
@@ -562,5 +570,5 @@ code-local documentation:
 
 ```bash
 npm run check     # tests + full validate pipeline (crawl → migration → search → sitemap → SEO → QA → launch readiness)
-npm start         # run the interim production Node adapter (set a named, role-scoped admin credential)
+npm start         # run the production Node adapter (set a named, role-scoped admin credential)
 ```
