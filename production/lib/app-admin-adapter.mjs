@@ -69,6 +69,15 @@ import {
   readListingEdits,
 } from "./listing-edits.mjs";
 import {
+  DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
+  appendListingPublicationSchedule,
+  buildListingPublicationScheduleQueue,
+  cancelListingPublicationSchedule,
+  executeDueListingPublicationSchedules,
+  listingPublicationExecutionAuditRecords,
+  readListingPublicationSchedules,
+} from "./listing-publication-schedules.mjs";
+import {
   buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
@@ -192,6 +201,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    listingPublicationSchedulePath:
+      env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
     replyOutboxPath: env.MS_REALTY_REPLY_OUTBOX_PATH || DEFAULT_REPLY_OUTBOX_PATH,
     replyDeliveryOutcomeLedgerPath:
@@ -218,6 +229,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     publicRequestOutcomeAt: env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT,
     leadPipelineOutcomeAt: env.MS_REALTY_LEAD_PIPELINE_OUTCOME_AT,
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
+    listingPublicationAt: env.MS_REALTY_LISTING_PUBLICATION_AT,
   };
 }
 
@@ -633,6 +645,10 @@ function listingManagerPayload(registry, url, config) {
     translationTasks,
     generatedAt: config.reviewedAt || new Date().toISOString(),
     operatorId: config.adminPrincipal || null,
+    publicationScheduleQueue: buildListingPublicationScheduleQueue(
+      readListingPublicationSchedules(config.listingPublicationSchedulePath),
+      { now: config.listingPublicationAt || config.reviewedAt || new Date().toISOString() },
+    ),
     query: url.searchParams.get("q") || "",
     status: url.searchParams.get("status") || "",
     sourceLocale: url.searchParams.get("sourceLocale") || "",
@@ -980,6 +996,88 @@ function appendBulkListingStatusChanges(input, config) {
     edits: changes.map((result) => result.edit),
     staleTranslations: changes.flatMap((result) => result.staleTranslations),
   };
+}
+
+function scheduleListingPublication(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const schedule = appendListingPublicationSchedule(currentSeed(config), attributed, {
+    filePath: config.listingPublicationSchedulePath,
+    createdAt: config.listingPublicationAt || config.editedAt,
+  });
+  const scheduleAuditExists = readAuditLog(config.auditLogPath).some(
+    (audit) => audit.action === "listing_publication_scheduled" && audit.object_id === schedule.schedule_id,
+  );
+  if (!scheduleAuditExists) {
+    recordAudit(
+      {
+        action: "listing_publication_scheduled",
+        actor: schedule.actor,
+        objectType: "listing_publication_schedule",
+        objectId: schedule.schedule_id,
+        metadata: {
+          listing_id: schedule.listing_id,
+          publication_action: schedule.action,
+          target_status: schedule.target_status,
+          scheduled_at: schedule.scheduled_at,
+        },
+      },
+      config,
+      schedule.created_at,
+    );
+  }
+  return {
+    schedule,
+    queue: buildListingPublicationScheduleQueue(readListingPublicationSchedules(config.listingPublicationSchedulePath), {
+      now: config.listingPublicationAt || config.reviewedAt || new Date().toISOString(),
+    }),
+  };
+}
+
+function cancelScheduledListingPublication(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["actor"]);
+  const cancellation = cancelListingPublicationSchedule(attributed, {
+    filePath: config.listingPublicationSchedulePath,
+    cancelledAt: config.listingPublicationAt || config.editedAt,
+  });
+  const cancellationAuditExists = readAuditLog(config.auditLogPath).some(
+    (audit) => audit.action === "listing_publication_cancelled" && audit.object_id === cancellation.schedule_id,
+  );
+  if (!cancellationAuditExists) {
+    recordAudit(
+      {
+        action: "listing_publication_cancelled",
+        actor: cancellation.actor,
+        objectType: "listing_publication_schedule",
+        objectId: cancellation.schedule_id,
+        metadata: { reason: cancellation.reason },
+      },
+      config,
+      cancellation.cancelled_at,
+    );
+  }
+  return { cancellation };
+}
+
+function runDueListingPublications(config) {
+  const result = executeDueListingPublicationSchedules({
+    seed: currentSeed(config),
+    schedules: readListingPublicationSchedules(config.listingPublicationSchedulePath),
+    translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
+    executor: config.adminPrincipal?.id,
+    now: config.listingPublicationAt || config.editedAt || new Date().toISOString(),
+    scheduleFilePath: config.listingPublicationSchedulePath,
+    listingEditFilePath: config.listingEditLedgerPath,
+    translationLedgerPath: config.translationLedgerPath,
+  });
+  for (const auditRecord of listingPublicationExecutionAuditRecords(result.queue)) {
+    const existing = readAuditLog(config.auditLogPath).some(
+      (audit) => audit.action === auditRecord.input.action && audit.object_id === auditRecord.input.objectId,
+    );
+    if (!existing) {
+      recordAudit(auditRecord.input, config, auditRecord.recordedAt);
+    }
+  }
+  return result;
 }
 
 function appendViewingBooking(input, config) {
@@ -1773,6 +1871,18 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {
       const result = appendBulkListingStatusChanges(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.updated ? 201 : 200, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules") {
+      const result = scheduleListingPublication(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.schedule.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules/cancel") {
+      const result = cancelScheduledListingPublication(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.cancellation.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules/run-due") {
+      const result = runDueListingPublications(config);
+      return jsonResponse(200, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/slug") {
       return jsonResponse(201, appendListingSlugChange(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));

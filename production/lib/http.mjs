@@ -82,6 +82,14 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
+import {
+  appendListingPublicationSchedule,
+  buildListingPublicationScheduleQueue,
+  cancelListingPublicationSchedule,
+  executeDueListingPublicationSchedules,
+  listingPublicationExecutionAuditRecords,
+  readListingPublicationSchedules,
+} from "./listing-publication-schedules.mjs";
 import { appendViewing, readViewings, renderViewingCalendar } from "./viewing-ledger.mjs";
 import { appendViewingFollowUp, buildViewingFollowUpQueue, readViewingFollowUps } from "./viewing-follow-ups.mjs";
 import {
@@ -378,6 +386,7 @@ export function createHttpApp({
   languageRequestPath = null,
   translationLedgerPath = null,
   listingEditLedgerPath = null,
+  listingPublicationSchedulePath = null,
   viewingLedgerPath = null,
   viewingFollowUpLedgerPath = null,
   savedSearchLedgerPath = null,
@@ -406,6 +415,7 @@ export function createHttpApp({
   receivedAt,
   requestedAt,
   editedAt,
+  listingPublicationAt,
   reviewedAt,
   bookedAt,
   viewingFollowUpAt,
@@ -590,6 +600,10 @@ export function createHttpApp({
       page: url.searchParams.get("page") || 1,
       generatedAt: reviewedAt || new Date().toISOString(),
       operatorId,
+      publicationScheduleQueue: buildListingPublicationScheduleQueue(
+        readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
+        { now: listingPublicationAt || reviewedAt || editedAt || new Date().toISOString() },
+      ),
     });
   const currentTranslationQueuePayload = (url, operatorId = null) =>
     renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
@@ -1661,6 +1675,101 @@ export function createHttpApp({
           staleTranslations: batch.changes.flatMap((result) => result.staleTranslations),
         };
         return adminJson(body.updated ? 201 : 200, body);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules") {
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const schedule = appendListingPublicationSchedule(currentSeed(), input, {
+          filePath: listingPublicationSchedulePath || undefined,
+          createdAt: listingPublicationAt || editedAt,
+        });
+        if (
+          !readAuditLog(auditLogPath || undefined).some(
+            (row) => row.action === "listing_publication_scheduled" && row.object_id === schedule.schedule_id,
+          )
+        ) {
+          recordAudit(
+            {
+              action: "listing_publication_scheduled",
+              actor: schedule.actor,
+              objectType: "listing_publication_schedule",
+              objectId: schedule.schedule_id,
+              metadata: {
+                listing_id: schedule.listing_id,
+                publication_action: schedule.action,
+                target_status: schedule.target_status,
+                scheduled_at: schedule.scheduled_at,
+              },
+            },
+            schedule.created_at,
+          );
+        }
+        return adminJson(schedule.idempotent ? 200 : 201, {
+          schedule,
+          queue: buildListingPublicationScheduleQueue(
+            readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
+            { now: listingPublicationAt || reviewedAt || editedAt || new Date().toISOString() },
+          ),
+        });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules/cancel") {
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
+        const cancellation = cancelListingPublicationSchedule(input, {
+          filePath: listingPublicationSchedulePath || undefined,
+          cancelledAt: listingPublicationAt || editedAt,
+        });
+        if (
+          !readAuditLog(auditLogPath || undefined).some(
+            (row) => row.action === "listing_publication_cancelled" && row.object_id === cancellation.schedule_id,
+          )
+        ) {
+          recordAudit(
+            {
+              action: "listing_publication_cancelled",
+              actor: cancellation.actor,
+              objectType: "listing_publication_schedule",
+              objectId: cancellation.schedule_id,
+              metadata: { reason: cancellation.reason },
+            },
+            cancellation.cancelled_at,
+          );
+        }
+        return adminJson(cancellation.idempotent ? 200 : 201, { cancellation });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/listings/publication-schedules/run-due") {
+      try {
+        const result = executeDueListingPublicationSchedules({
+          seed: currentSeed(),
+          schedules: readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
+          translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+          executor: principal?.id,
+          now: listingPublicationAt || editedAt || new Date().toISOString(),
+          scheduleFilePath: listingPublicationSchedulePath || undefined,
+          listingEditFilePath: listingEditLedgerPath || undefined,
+          translationLedgerPath: translationLedgerPath || undefined,
+        });
+        for (const auditRecord of listingPublicationExecutionAuditRecords(result.queue)) {
+          const existing = readAuditLog(auditLogPath || undefined).some(
+            (audit) => audit.action === auditRecord.input.action && audit.object_id === auditRecord.input.objectId,
+          );
+          if (!existing) {
+            recordAudit(auditRecord.input, auditRecord.recordedAt);
+          }
+        }
+        return adminJson(200, result);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

@@ -8,6 +8,7 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
   const requiredPaths = [
     "MS_REALTY_LEAD_LEDGER_PATH: /runtime-data/lead-ledger.jsonl",
     "MS_REALTY_LISTING_EDIT_LEDGER_PATH: /runtime-data/listing-edits.jsonl",
+    "MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH: /runtime-data/listing-publication-schedules.jsonl",
     "MS_REALTY_TRANSLATION_LEDGER_PATH: /runtime-data/translation-tasks.jsonl",
     "MS_REALTY_REPLY_OUTBOX_PATH: /runtime-data/reply-outbox.jsonl",
     "MS_REALTY_REPLY_DELIVERY_OUTCOME_LEDGER_PATH: /runtime-data/reply-delivery-outcomes.jsonl",

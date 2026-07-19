@@ -257,6 +257,16 @@ only admins can enter commission values or change launch evidence. Unauthorized
 routes return a capability-specific `403 forbidden` response and are omitted
 from the authenticated workspace navigation.
 
+Editors can schedule a human-approved listing publication or retained-URL
+archive from `/admin/listings`. The authenticated workspace can run due changes
+manually; production automation should invoke `npm run listing:publication:run`
+on the deployment scheduler. The command executes only already-approved, due
+rows, records the listing edit and stale-translation tasks, repairs a missing
+execution audit on retry, and never delegates publication authority to Hermes.
+Set `MS_REALTY_LISTING_PUBLICATION_EXECUTOR` to the scheduler service identity;
+the default is `listing_publication_scheduler`. The schedule, listing-edit,
+translation, and audit paths must all point at durable mounted storage.
+
 A production shared
 token without an operator remains read-only and receives
 `403 operator_identity_required` for any mutation, so it cannot create a

@@ -34,6 +34,7 @@
     "cms:build": "node production/scripts/build-cms-seed.mjs",
     "listing:quality": "node production/scripts/build-listing-quality-report.mjs",
     "listing:publication": "node production/scripts/build-listing-publication-report.mjs",
+    "listing:publication:run": "node production/scripts/run-listing-publication-schedules.mjs",
     "listing:verification": "node production/scripts/build-listing-verification-report.mjs",
     "listing:preflight:report": "node production/scripts/build-listing-quality-preflight-report.mjs",
     "listing:review-pack": "node production/scripts/build-listing-quality-review-packet.mjs",

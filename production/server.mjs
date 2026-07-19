@@ -12,6 +12,7 @@ import { DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH } from "./lib/public-request
 import { DEFAULT_REPLY_OUTBOX_PATH } from "./lib/lead-replies.mjs";
 import { DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH } from "./lib/reply-delivery-outcomes.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
+import { DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH } from "./lib/listing-publication-schedules.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
 import { DEFAULT_CONSENT_LEDGER_PATH } from "./lib/consent-ledger.mjs";
@@ -70,6 +71,8 @@ export function productionServerConfig(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    listingPublicationSchedulePath:
+      env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
     viewingFollowUpLedgerPath: env.MS_REALTY_VIEWING_FOLLOW_UP_LEDGER_PATH || DEFAULT_VIEWING_FOLLOW_UP_LEDGER_PATH,
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
@@ -101,6 +104,7 @@ export function productionServerConfig(env = process.env) {
     leadPipelineOutcomeAt: env.MS_REALTY_LEAD_PIPELINE_OUTCOME_AT,
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
     sellerPipelineOutcomeAt: env.MS_REALTY_SELLER_PIPELINE_OUTCOME_AT,
+    listingPublicationAt: env.MS_REALTY_LISTING_PUBLICATION_AT,
   };
 }
 
@@ -120,6 +124,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     languageRequestPath: config.languageRequestPath,
     translationLedgerPath: config.translationLedgerPath,
     listingEditLedgerPath: config.listingEditLedgerPath,
+    listingPublicationSchedulePath: config.listingPublicationSchedulePath,
     viewingLedgerPath: config.viewingLedgerPath,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,
     savedSearchLedgerPath: config.savedSearchLedgerPath,
@@ -147,6 +152,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     leadPipelineOutcomeAt: config.leadPipelineOutcomeAt,
     replyDeliveredAt: config.replyDeliveredAt,
     sellerPipelineOutcomeAt: config.sellerPipelineOutcomeAt,
+    listingPublicationAt: config.listingPublicationAt,
   });
 }
 

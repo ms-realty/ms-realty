@@ -85,6 +85,22 @@ const ADMIN_UI_COPY = {
     bulkStatusSaving: "Промяна на избраните обяви…",
     bulkStatusSaved: "Статусът на избраните обяви е променен.",
     bulkStatusFailed: "Статусът на избраните обяви не беше променен.",
+    publicationSchedule: "Планирано публикуване",
+    publicationScheduleHint: "Публикуването и свалянето се одобряват от човек. Свалянето архивира обявата и запазва стария URL.",
+    publicationAction: "Действие",
+    publishListing: "Публикувай",
+    unpublishListing: "Свали в архив",
+    publicationTime: "Дата и час (София)",
+    publishStatus: "Статус след публикуване",
+    schedulePublication: "Планирай",
+    runDuePublications: "Изпълни дължимите",
+    scheduledPublications: "Предстоящи промени",
+    noScheduledPublications: "Няма планирани промени.",
+    cancelSchedule: "Отмени",
+    cancellationReason: "Причина за отмяна",
+    publicationSaving: "Записване на графика…",
+    publicationSaved: "Графикът е записан.",
+    publicationFailed: "Графикът не беше записан.",
     missingAlt: "Липсващ alt текст",
     reviewGatedMedia: "Медия за преглед",
     approvedRedirects: "Одобрени пренасочвания",
@@ -147,7 +163,7 @@ const ADMIN_UI_COPY = {
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
+      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
@@ -222,6 +238,22 @@ const ADMIN_UI_COPY = {
     bulkStatusSaving: "Изменяем выбранные объекты…",
     bulkStatusSaved: "Статус выбранных объектов изменен.",
     bulkStatusFailed: "Не удалось изменить статус выбранных объектов.",
+    publicationSchedule: "Отложенная публикация",
+    publicationScheduleHint: "Публикация и снятие подтверждаются человеком. Снятие архивирует объект и сохраняет старый URL.",
+    publicationAction: "Действие",
+    publishListing: "Опубликовать",
+    unpublishListing: "Снять в архив",
+    publicationTime: "Дата и время (София)",
+    publishStatus: "Статус после публикации",
+    schedulePublication: "Запланировать",
+    runDuePublications: "Выполнить наступившие",
+    scheduledPublications: "Предстоящие изменения",
+    noScheduledPublications: "Нет запланированных изменений.",
+    cancelSchedule: "Отменить",
+    cancellationReason: "Причина отмены",
+    publicationSaving: "Сохраняем расписание…",
+    publicationSaved: "Расписание сохранено.",
+    publicationFailed: "Не удалось сохранить расписание.",
     missingAlt: "Нет alt-текста",
     reviewGatedMedia: "Медиа на проверке",
     approvedRedirects: "Одобренные редиректы",
@@ -284,7 +316,7 @@ const ADMIN_UI_COPY = {
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
+      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
@@ -359,6 +391,22 @@ const ADMIN_UI_COPY = {
     bulkStatusSaving: "Updating selected listings…",
     bulkStatusSaved: "Selected listing statuses updated.",
     bulkStatusFailed: "Could not update selected listing statuses.",
+    publicationSchedule: "Scheduled publication",
+    publicationScheduleHint: "Publishing and unpublishing are human-approved. Unpublishing archives the listing and preserves its legacy URL.",
+    publicationAction: "Action",
+    publishListing: "Publish",
+    unpublishListing: "Unpublish to archive",
+    publicationTime: "Date and time (Sofia)",
+    publishStatus: "Status after publishing",
+    schedulePublication: "Schedule",
+    runDuePublications: "Run due changes",
+    scheduledPublications: "Upcoming changes",
+    noScheduledPublications: "No publication changes are scheduled.",
+    cancelSchedule: "Cancel",
+    cancellationReason: "Cancellation reason",
+    publicationSaving: "Saving publication schedule…",
+    publicationSaved: "Publication schedule saved.",
+    publicationFailed: "Could not save publication schedule.",
     missingAlt: "Missing alt text",
     reviewGatedMedia: "Review-gated media",
     approvedRedirects: "Approved redirects",
@@ -421,7 +469,7 @@ const ADMIN_UI_COPY = {
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
     auditActions: {
-      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
+      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
@@ -2318,9 +2366,130 @@ function filterLocaleInput(page) {
   return page.workspace.locale !== "en" ? h("input", { type: "hidden", name: "locale", defaultValue: page.workspace.locale }) : null;
 }
 
+function PublicationSchedulePanel({ page }) {
+  const ui = workbenchCopy(page);
+  const queue = page.publicationSchedules || { open: [], summary: { due: 0 } };
+  return h(
+    Panel,
+    { title: ui.publicationSchedule, "data-publication-schedule-panel": "true" },
+    h("p", { className: "adm-note" }, ui.publicationScheduleHint),
+    h(
+      "div",
+      { className: "adm-report-grid adm-report-grid--two", style: "padding:var(--space-5)" },
+      h(
+        "form",
+        {
+          method: "post",
+          action: "/api/admin/listings/publication-schedules",
+          className: "adm-form adm-report-card",
+          "data-admin-mutation-form": "publication-schedule",
+          "data-admin-mutation-saving": ui.publicationSaving,
+          "data-admin-mutation-success": ui.publicationSaved,
+          "data-admin-mutation-failure": ui.publicationFailed,
+        },
+        h("input", { type: "hidden", name: "actor", value: currentOperatorId(page, "listing_editor") }),
+        h(
+          "label",
+          null,
+          ui.listing,
+          h("input", { name: "listingId", required: true, list: "publication-listings", placeholder: "MS-CRAWL-0001", autoComplete: "off" }),
+          h(
+            "datalist",
+            { id: "publication-listings" },
+            ...page.listings.map((row) => h("option", { key: row.id, value: row.id }, row.title)),
+          ),
+        ),
+        h(
+          "label",
+          null,
+          ui.publicationAction,
+          h(
+            "select",
+            { name: "action", required: true },
+            h("option", { value: "publish" }, ui.publishListing),
+            h("option", { value: "unpublish" }, ui.unpublishListing),
+          ),
+        ),
+        h("label", null, ui.publicationTime, h("input", { type: "datetime-local", name: "scheduledAt", required: true })),
+        h(
+          "label",
+          null,
+          ui.publishStatus,
+          h(
+            "select",
+            { name: "targetStatus" },
+            h("option", { value: "available" }, statusText(ui, "available")),
+            h("option", { value: "reserved" }, statusText(ui, "reserved")),
+          ),
+        ),
+        h("label", null, ui.sellerPipelineNote, h("textarea", { name: "note", maxLength: 500, rows: 3 })),
+        h(
+          "div",
+          { className: "adm-form__actions" },
+          h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "clock", size: 16 }), ui.schedulePublication),
+        ),
+      ),
+      h(
+        "section",
+        { className: "adm-report-card", "aria-label": ui.scheduledPublications },
+        h(
+          "header",
+          null,
+          h("div", null, h("h3", null, ui.scheduledPublications), h("small", null, `${queue.open.length} · ${statusText(ui, "open")}`)),
+          h(
+            "form",
+            {
+              method: "post",
+              action: "/api/admin/listings/publication-schedules/run-due",
+              "data-admin-mutation-form": "publication-run-due",
+              "data-admin-mutation-saving": ui.publicationSaving,
+              "data-admin-mutation-success": ui.publicationSaved,
+              "data-admin-mutation-failure": ui.publicationFailed,
+            },
+            h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: !queue.summary.due }, `${ui.runDuePublications} · ${queue.summary.due}`),
+            h("span", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          ),
+        ),
+        queue.open.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...queue.open.map((row) =>
+                h(
+                  "li",
+                  { key: row.id, "data-publication-schedule-row": row.id, "data-due": row.due ? "true" : "false" },
+                  h("div", null, h("strong", null, row.listing_title), h("small", { className: "crm-mono" }, row.listing_id), h("small", null, `${row.action === "publish" ? ui.publishListing : ui.unpublishListing} · ${formatAdminDateTime(row.scheduled_at, page.workspace.locale)}`)),
+                  h(
+                    "form",
+                    {
+                      method: "post",
+                      action: "/api/admin/listings/publication-schedules/cancel",
+                      className: "adm-inline-form",
+                      "data-admin-mutation-form": "publication-cancel",
+                      "data-admin-mutation-saving": ui.publicationSaving,
+                      "data-admin-mutation-success": ui.publicationSaved,
+                      "data-admin-mutation-failure": ui.publicationFailed,
+                    },
+                    h("input", { type: "hidden", name: "scheduleId", value: row.id }),
+                    h("input", { type: "hidden", name: "actor", value: currentOperatorId(page, "listing_editor") }),
+                    h("label", null, ui.cancellationReason, h("input", { name: "reason", required: true, maxLength: 500 })),
+                    h("button", { type: "submit", className: "mk-btn mk-btn--ghost mk-btn--sm" }, ui.cancelSchedule),
+                    h("span", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, ui.noScheduledPublications),
+      ),
+    ),
+  );
+}
+
 function ListingManagerBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const canEditContent = pageCan(page, "content:write");
   const title = label(copy, "listingManager", "Listings");
   const metrics = [
     [label(copy, "listingManager", "Listings"), page.summary.total, "building-2", "ink"],
@@ -2369,6 +2538,7 @@ function ListingManagerBody({ page }) {
         h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
       ),
+      canEditContent ? h(PublicationSchedulePanel, { page }) : null,
       h(
         Panel,
         { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-listing-manager": "true" },
@@ -2380,7 +2550,7 @@ function ListingManagerBody({ page }) {
                 action: "/api/admin/listings/status",
                 className: "adm-listing-bulk",
                 "data-listing-bulk-form": "true",
-                "data-admin-mutation-form": "listing-status",
+                "data-admin-mutation-form": canEditContent ? "listing-status" : undefined,
                 "data-admin-mutation-saving": ui.bulkStatusSaving,
                 "data-admin-mutation-success": ui.bulkStatusSaved,
                 "data-admin-mutation-failure": ui.bulkStatusFailed,
@@ -2398,7 +2568,7 @@ function ListingManagerBody({ page }) {
                   h("strong", null, ui.bulkStatus),
                   h("small", null, ui.bulkStatusHint),
                 ),
-                h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--sm", "data-listing-select-all": "true" }, ui.selectAllVisible),
+                h("button", { type: "button", className: "mk-btn mk-btn--ghost mk-btn--sm", disabled: !canEditContent, "data-listing-select-all": "true" }, ui.selectAllVisible),
                 h("span", { className: "adm-listing-bulk__count", "data-listing-selection-count": "true", "aria-live": "polite" }, ui.selectedListings.replace("{count}", "0")),
                 h(
                   "label",
@@ -2406,12 +2576,13 @@ function ListingManagerBody({ page }) {
                   ui.bulkStatus,
                   h(
                     "select",
-                    { name: "targetStatus", required: true },
+                    { name: "targetStatus", required: true, disabled: !canEditContent },
                     h("option", { value: "" }, "—"),
                     ...["available", "reserved", "sold", "rented", "archived"].map((status) => h("option", { key: status, value: status }, statusText(ui, status))),
                   ),
                 ),
-                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "check", size: 16 }), ui.updateSelected),
+                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm", disabled: !canEditContent }, h(Icon, { name: "check", size: 16 }), ui.updateSelected),
+                !canEditContent ? h("small", { className: "adm-note", "data-read-only-role": "true" }, ui.readOnlyAccess) : null,
                 h("p", { className: "adm-listing-bulk__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
               ),
               h(
@@ -2431,7 +2602,7 @@ function ListingManagerBody({ page }) {
                       h(
                         "td",
                         { "data-label": columns.select, className: "adm-listing-bulk__select" },
-                        h("input", { type: "checkbox", name: "listingIds", value: row.id, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
+                        h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
                       ),
                       h("td", { "data-label": columns.listing }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
                       h("td", { "data-label": columns.location }, row.location || "—"),

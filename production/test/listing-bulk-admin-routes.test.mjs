@@ -6,6 +6,7 @@ import { appAdminConfigFromEnv, renderAppAdminResponse } from "../lib/app-admin-
 import { readAuditLog } from "../lib/audit-log.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readListingEdits } from "../lib/listing-edits.mjs";
+import { buildListingPublicationScheduleQueue, readListingPublicationSchedules } from "../lib/listing-publication-schedules.mjs";
 
 function tempWorkspace(prefix) {
   const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-${prefix}-`);
@@ -13,6 +14,7 @@ function tempWorkspace(prefix) {
     listingEdits: `${directory}/listing-edits.jsonl`,
     translations: `${directory}/translation-tasks.jsonl`,
     audit: `${directory}/audit-log.jsonl`,
+    publicationSchedules: `${directory}/listing-publication-schedules.jsonl`,
   };
   for (const file of Object.values(paths)) fs.writeFileSync(file, "");
   return paths;
@@ -107,6 +109,154 @@ test("Next listing manager bulk status changes are selected, attributed, audited
       { config },
     );
     assert.equal((await json.json()).listings[0].listing_status, "reserved");
+  });
+});
+
+test("Next listing manager schedules and executes retained-archive publication changes", async () => {
+  await withNamedOperator(async (auth) => {
+    const paths = tempWorkspace("next-listing-publication");
+    const configAt = (time) =>
+      appAdminConfigFromEnv({
+        MS_REALTY_LISTING_EDIT_LEDGER_PATH: paths.listingEdits,
+        MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH: paths.publicationSchedules,
+        MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translations,
+        MS_REALTY_AUDIT_LOG_PATH: paths.audit,
+        MS_REALTY_LISTING_PUBLICATION_AT: time,
+      });
+
+    const initialPage = await renderAppAdminResponse(
+      new Request("https://example.test/admin/listings?q=MS-CRAWL-0001", { headers: auth }),
+      { config: configAt("2026-07-19T08:00:00.000Z") },
+    );
+    assert.match(await initialPage.text(), /data-publication-schedule-panel="true"/);
+
+    const scheduled = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/listings/publication-schedules", {
+        method: "POST",
+        headers: { ...auth, "content-type": "application/json" },
+        body: JSON.stringify({
+          id: "next-publication-unpublish-1",
+          listingId: "MS-CRAWL-0001",
+          action: "unpublish",
+          scheduledAt: "2026-07-19T09:00:00.000Z",
+        }),
+      }),
+      { config: configAt("2026-07-19T08:00:00.000Z") },
+    );
+    assert.equal(scheduled.status, 201);
+    assert.equal((await scheduled.json()).schedule.actor, "listing_operations");
+
+    fs.writeFileSync(paths.audit, "");
+    const scheduledRetry = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/listings/publication-schedules", {
+        method: "POST",
+        headers: { ...auth, "content-type": "application/json" },
+        body: JSON.stringify({
+          id: "next-publication-unpublish-1",
+          listingId: "MS-CRAWL-0001",
+          action: "unpublish",
+          scheduledAt: "2026-07-19T09:00:00.000Z",
+        }),
+      }),
+      { config: configAt("2026-07-19T08:05:00.000Z") },
+    );
+    assert.equal(scheduledRetry.status, 200);
+    assert.deepEqual(readAuditLog(paths.audit).map((row) => row.action), ["listing_publication_scheduled"]);
+
+    const run = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/listings/publication-schedules/run-due", {
+        method: "POST",
+        headers: { ...auth, "content-type": "application/json" },
+        body: "{}",
+      }),
+      { config: configAt("2026-07-19T09:00:00.000Z") },
+    );
+    const runBody = await run.json();
+    assert.equal(run.status, 200);
+    assert.equal(runBody.executed, 1);
+    assert.equal(readListingEdits(paths.listingEdits)[0].patch.listing_status, "archived");
+    assert.equal(
+      buildListingPublicationScheduleQueue(readListingPublicationSchedules(paths.publicationSchedules), {
+        now: "2026-07-19T09:00:00.000Z",
+      }).summary.executed,
+      1,
+    );
+    assert.deepEqual(readAuditLog(paths.audit).map((row) => row.action), [
+      "listing_publication_scheduled",
+      "listing_publication_executed",
+    ]);
+
+    fs.writeFileSync(paths.audit, `${JSON.stringify(readAuditLog(paths.audit)[0])}\n`);
+    const runRetry = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/listings/publication-schedules/run-due", {
+        method: "POST",
+        headers: { ...auth, "content-type": "application/json" },
+        body: "{}",
+      }),
+      { config: configAt("2026-07-19T09:05:00.000Z") },
+    );
+    assert.equal(runRetry.status, 200);
+    assert.equal((await runRetry.json()).executed, 0);
+    assert.deepEqual(readAuditLog(paths.audit).map((row) => row.action), [
+      "listing_publication_scheduled",
+      "listing_publication_executed",
+    ]);
+  });
+});
+
+test("HTTP listing publication schedule can be cancelled before it changes inventory", async () => {
+  await withNamedOperator(async (auth) => {
+    const paths = tempWorkspace("http-listing-publication");
+    const app = createHttpApp({
+      listingEditLedgerPath: paths.listingEdits,
+      listingPublicationSchedulePath: paths.publicationSchedules,
+      translationLedgerPath: paths.translations,
+      auditLogPath: paths.audit,
+      listingPublicationAt: "2026-07-19T08:00:00.000Z",
+    });
+    const scheduled = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/listings/publication-schedules",
+      headers: auth,
+      body: {
+        id: "http-publication-unpublish-1",
+        listingId: "MS-CRAWL-0002",
+        action: "unpublish",
+        scheduledAt: "2026-07-20T09:00:00.000Z",
+      },
+    });
+    assert.equal(scheduled.status, 201);
+    const cancelled = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/listings/publication-schedules/cancel",
+      headers: auth,
+      body: { scheduleId: "http-publication-unpublish-1", reason: "Owner requested a later date." },
+    });
+    assert.equal(cancelled.status, 201);
+    assert.equal(readListingEdits(paths.listingEdits).length, 0);
+    assert.equal(
+      buildListingPublicationScheduleQueue(readListingPublicationSchedules(paths.publicationSchedules), {
+        now: "2026-07-21T09:00:00.000Z",
+      }).summary.cancelled,
+      1,
+    );
+    assert.deepEqual(readAuditLog(paths.audit).map((row) => row.action), [
+      "listing_publication_scheduled",
+      "listing_publication_cancelled",
+    ]);
+
+    fs.writeFileSync(paths.audit, `${JSON.stringify(readAuditLog(paths.audit)[0])}\n`);
+    const cancelledRetry = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/listings/publication-schedules/cancel",
+      headers: auth,
+      body: { scheduleId: "http-publication-unpublish-1", reason: "Owner requested a later date." },
+    });
+    assert.equal(cancelledRetry.status, 200);
+    assert.deepEqual(readAuditLog(paths.audit).map((row) => row.action), [
+      "listing_publication_scheduled",
+      "listing_publication_cancelled",
+    ]);
   });
 });
 

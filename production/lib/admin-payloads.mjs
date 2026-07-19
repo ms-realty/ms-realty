@@ -165,6 +165,11 @@ export function renderAdminListingManagerPayload(
     page = 1,
     generatedAt = new Date().toISOString(),
     operatorId = null,
+    publicationScheduleQueue = {
+      rows: [],
+      open: [],
+      summary: { total: 0, scheduled: 0, due: 0, upcoming: 0, executed: 0, cancelled: 0 },
+    },
   },
 ) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
@@ -213,6 +218,12 @@ export function renderAdminListingManagerPayload(
     );
   });
   const paged = pagedRows(filtered, page);
+  const listingTitleById = new Map(allRows.map((row) => [row.id, row.title]));
+  const publicationSchedules = {
+    ...publicationScheduleQueue,
+    rows: publicationScheduleQueue.rows.map((row) => ({ ...row, listing_title: listingTitleById.get(row.listing_id) || row.listing_id })),
+    open: publicationScheduleQueue.open.map((row) => ({ ...row, listing_title: listingTitleById.get(row.listing_id) || row.listing_id })),
+  };
   return {
     kind: "admin_listing_manager",
     status: 200,
@@ -235,6 +246,7 @@ export function renderAdminListingManagerPayload(
       sourceLocales: [...new Set(allRows.map((row) => row.source_locale))].filter(Boolean).sort(),
     },
     pagination: paged.pagination,
+    publicationSchedules,
     summary: {
       total: allRows.length,
       visible: filtered.length,
