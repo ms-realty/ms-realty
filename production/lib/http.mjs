@@ -599,8 +599,20 @@ export function createHttpApp({
       titleKey: "viewingsWorkspace",
       descriptionKey: "viewingsDescription",
     });
-  const currentActivityPayload = (requestedLocale, operatorId = null) =>
-    renderAdminActivityPayload(activeRegistry, requestedLocale, readAuditLog(auditLogPath || undefined), operatorId);
+  const currentActivityPayload = (url, operatorId = null) =>
+    renderAdminActivityPayload(
+      activeRegistry,
+      url.searchParams.get("locale") || "en",
+      readAuditLog(auditLogPath || undefined),
+      operatorId,
+      {
+        leadId: url.searchParams.get("leadId"),
+        listingId: url.searchParams.get("listingId"),
+        actor: url.searchParams.get("actor"),
+        action: url.searchParams.get("action"),
+        page: url.searchParams.get("page"),
+      },
+    );
   const currentListingManagerPayload = (url, operatorId = null) =>
     renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
       seed: currentSeed(),
@@ -956,7 +968,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/activity", "/admin/activity"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentActivityPayload(url.searchParams.get("locale") || "en", principal);
+      const payload = currentActivityPayload(url, principal);
       if (url.pathname === "/admin/activity" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }

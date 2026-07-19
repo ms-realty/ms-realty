@@ -31,7 +31,7 @@ test("individual admin credentials are authoritative and bind a stable operator"
   assert.equal(canAdminMutate(principal), true);
   assert.equal(canAdminAccess(principal, "operations:write"), true);
   assert.equal(canAdminAccess(principal, "translations:write"), false);
-  assert.deepEqual(adminCapabilities(principal), ["content:read", "operations:read", "operations:write", "workspace:read"]);
+  assert.deepEqual(adminCapabilities(principal), ["activity:read", "content:read", "operations:read", "operations:write", "workspace:read"]);
   assert.equal(adminHomePath(principal), "/admin/today");
   assert.equal(isAdminAuthorized("Bearer legacy-shared-token", env), false);
   assert.equal(resolveAdminPrincipal("Bearer broker-bg-token-0123456789abcdef-extra", env), null);

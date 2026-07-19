@@ -9,9 +9,9 @@ export const ADMIN_ROLES = ["admin", "broker", "editor", "translator"];
 
 const ROLE_CAPABILITIES = {
   admin: ["*"],
-  broker: ["workspace:read", "operations:read", "operations:write", "content:read"],
-  editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish"],
-  translator: ["workspace:read", "content:read", "translations:read", "translations:write"],
+  broker: ["workspace:read", "operations:read", "operations:write", "content:read", "activity:read"],
+  editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish", "activity:read"],
+  translator: ["workspace:read", "content:read", "translations:read", "translations:write", "activity:read"],
 };
 
 const OPERATIONS_READ_PATHS = new Set([
@@ -103,6 +103,7 @@ export function canAdminAccess(principal, capability) {
 export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
+  if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
   if (verb === "GET" && OPERATIONS_READ_PATHS.has(pathname)) return "operations:read";
   if (verb === "GET" && CONTENT_READ_PATHS.has(pathname)) return "content:read";
   if (verb === "GET" && TRANSLATION_READ_PATHS.has(pathname)) return "translations:read";

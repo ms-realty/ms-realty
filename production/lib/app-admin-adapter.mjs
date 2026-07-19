@@ -586,6 +586,13 @@ function activityPayload(registry, url, config) {
     url.searchParams.get("locale") || "en",
     readAuditLog(config.auditLogPath),
     config.adminPrincipal || null,
+    {
+      leadId: url.searchParams.get("leadId"),
+      listingId: url.searchParams.get("listingId"),
+      actor: url.searchParams.get("actor"),
+      action: url.searchParams.get("action"),
+      page: url.searchParams.get("page"),
+    },
   );
 }
 

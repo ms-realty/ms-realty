@@ -111,9 +111,37 @@ export function renderAdminOperationalQueuePayload(payload, { kind, path, titleK
   };
 }
 
-export function renderAdminActivityPayload(registry, requestedLocale, auditLog, operator = null) {
+function normalizedActivityFilter(value, max = 160) {
+  return String(value || "").trim().slice(0, max);
+}
+
+function auditEntityValue(row, type) {
+  const metadata = row.metadata || {};
+  if (type === "lead") {
+    return [metadata.lead_id, row.object_type === "lead" ? row.object_id : null].filter(Boolean);
+  }
+  return [
+    metadata.listing_id,
+    metadata.listing_reference,
+    row.object_type === "listing" ? row.object_id : null,
+  ].filter(Boolean);
+}
+
+export function renderAdminActivityPayload(registry, requestedLocale, auditLog, operator = null, requestedFilters = {}) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
-  const rows = [...auditLog].toReversed();
+  const filters = {
+    leadId: normalizedActivityFilter(requestedFilters.leadId || requestedFilters.lead_id),
+    listingId: normalizedActivityFilter(requestedFilters.listingId || requestedFilters.listing_id),
+    actor: normalizedActivityFilter(requestedFilters.actor, 80),
+    action: normalizedActivityFilter(requestedFilters.action, 80),
+  };
+  const filteredRows = [...auditLog]
+    .toReversed()
+    .filter((row) => !filters.leadId || auditEntityValue(row, "lead").includes(filters.leadId))
+    .filter((row) => !filters.listingId || auditEntityValue(row, "listing").includes(filters.listingId))
+    .filter((row) => !filters.actor || row.actor === filters.actor)
+    .filter((row) => !filters.action || row.action === filters.action);
+  const paged = pagedRows(filteredRows, requestedFilters.page, 50);
   return {
     kind: "admin_activity",
     status: 200,
@@ -129,11 +157,14 @@ export function renderAdminActivityPayload(registry, requestedLocale, auditLog, 
       robots: "noindex,nofollow",
     },
     workspace: workspaceWithOperator(workspace, operator),
-    auditLog: rows,
+    auditLog: paged.rows,
+    filters,
+    pagination: paged.pagination,
     summary: {
-      totalActions: rows.length,
-      activeOperators: new Set(rows.map((row) => row.actor)).size,
-      objectTypes: new Set(rows.map((row) => row.object_type)).size,
+      totalActions: filteredRows.length,
+      totalAvailable: auditLog.length,
+      activeOperators: new Set(filteredRows.map((row) => row.actor)).size,
+      objectTypes: new Set(filteredRows.map((row) => row.object_type)).size,
     },
   };
 }

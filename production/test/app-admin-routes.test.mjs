@@ -462,10 +462,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(activityHtml, /Язык добавлен/);
       assert.equal(activityHtml.includes("Noa Levi"), false);
       assert.equal(activityHtml.includes("+359880000001"), false);
-      const activityJson = await activityJsonRoute.GET(new Request("https://example.test/api/admin/activity?locale=ru", { headers: auth }));
+      const activityJson = await activityJsonRoute.GET(new Request("https://example.test/api/admin/activity?locale=ru&action=locale_created", { headers: auth }));
       const activityJsonBody = await activityJson.json();
       assert.equal(activityJsonBody.kind, "admin_activity");
       assert.ok(activityJsonBody.auditLog.some((row) => row.action === "locale_created"));
+      assert.equal(activityJsonBody.filters.action, "locale_created");
+      assert.equal(activityJsonBody.auditLog.every((row) => row.action === "locale_created"), true);
       assert.equal("leads" in activityJsonBody, false);
 
       const launchReadiness = await launchReadinessRoute.GET(

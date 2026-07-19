@@ -639,7 +639,7 @@ const NAV_ROUTES = [
   { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
   { id: "reports", module: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports", capability: "operations:read" },
-  { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "administration:read" },
+  { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "activity:read" },
   { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
   { id: "listing_editor", module: "cms", path: "/admin/listings/edit", icon: "building-2", kind: "admin_listing_editor", capability: "content:read" },
   { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
@@ -1223,6 +1223,17 @@ function ActivityBody({ page }) {
       h(PageHeader, { title, subtitle: page.metadata?.description }),
       h(StatGrid, { metrics }),
       h(
+        "form",
+        { method: "get", action: "/admin/activity", className: "adm-filterbar", role: "search", "data-activity-filters": "true" },
+        filterLocaleInput(page),
+        h("label", null, label(copy, "leadReference", "Lead ID"), h("input", { name: "leadId", defaultValue: page.filters?.leadId, placeholder: "lead-…" })),
+        h("label", null, label(copy, "listingReference", "Listing ID"), h("input", { name: "listingId", defaultValue: page.filters?.listingId, placeholder: "MS-CRAWL-0001" })),
+        h("label", null, label(copy, "actor", "Operator"), h("input", { name: "actor", defaultValue: page.filters?.actor })),
+        h("label", null, label(copy, "action", "Action"), h("input", { name: "action", defaultValue: page.filters?.action })),
+        h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/activity", page) }, label(copy, "resetFilters", "Reset filters")),
+      ),
+      h(
         Panel,
         { title: label(copy, "activityLog", "Action log"), "data-audit-log": "true" },
         page.auditLog.length
@@ -1267,6 +1278,7 @@ function ActivityBody({ page }) {
             )
           : h("p", { className: "adm-empty" }, label(copy, "noActivity", "No actions have been recorded yet.")),
       ),
+      h(Pagination, { page, path: "/admin/activity" }),
     ],
   });
 }
@@ -1722,7 +1734,12 @@ function PipelineCard({ page, state, lead }) {
         h("h2", null, lead?.contact?.name || state.lead_id),
         h("code", { className: "crm-mono" }, state.lead_id),
       ),
-      h(StatusPill, { tone: stageTone }, statusText(ui, state.stage)),
+      h(
+        "div",
+        { className: "adm-task-list__actions" },
+        h(StatusPill, { tone: stageTone }, statusText(ui, state.stage)),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(state.lead_id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+      ),
     ),
     leadContactActions(lead || {}, ui),
     h(
@@ -1962,6 +1979,7 @@ function LeadInboxBody({ page }) {
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
                       requestDetails ? h("small", { className: "adm-lead-context", "data-lead-request-details": "true" }, requestDetails) : null,
                       leadContactActions(lead, ui),
+                      h("a", { className: "adm-lead-context", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id }, label(copy, "viewHistory", "History")),
                       h(
                         "div",
                         { className: "adm-lead-meta" },
@@ -2645,7 +2663,16 @@ function ListingManagerBody({ page }) {
                       h("td", { "data-label": columns.status }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
                       h("td", { "data-label": columns.locale }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
                       h("td", { "data-label": columns.quality }, h("span", null, `${row.metadata_gaps} ${ui.issues.toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${ui.publicPhotos.toLocaleLowerCase()}`)),
-                      h("td", { "data-label": columns.action }, h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor"))),
+                      h(
+                        "td",
+                        { "data-label": columns.action },
+                        h(
+                          "div",
+                          { className: "adm-task-list__actions" },
+                          h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref(row.editor_path, page) }, h(Icon, { name: "pencil", size: 16 }), label(copy, "openEditor", "Open editor")),
+                          h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(row.id)}`, page) }, h(Icon, { name: "list", size: 15 }), label(copy, "viewHistory", "History")),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -2851,6 +2878,7 @@ function ListingEditorBody({ page }) {
           subtitle: `${page.listing.source_domain} · ${page.listing.source_locale} · ${page.listing.id}`,
         },
         h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/listings", page) }, h(Icon, { name: "arrow-left", size: 16 }), h("span", null, label(copy, "listingManager", "Listings"))),
+        h("a", { className: "mk-btn mk-btn--ghost mk-btn--sm", href: adminHref(`/admin/activity?listingId=${encodeURIComponent(page.listing.id)}`, page) }, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "viewHistory", "History"))),
       ),
       h(
         "nav",

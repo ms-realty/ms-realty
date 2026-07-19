@@ -43,9 +43,10 @@ test("standalone admin routes enforce role capabilities and hide unavailable wor
     assert.equal(brokerToday.status, 200);
     assert.match(brokerToday.body, /href="\/admin\/listings"/);
     assert.doesNotMatch(brokerToday.body, /href="\/admin\/translations"/);
-    assert.doesNotMatch(brokerToday.body, /href="\/admin\/activity"/);
+    assert.match(brokerToday.body, /href="\/admin\/activity"/);
     const brokerActivity = await dispatchHttp(app, { url: "/api/admin/activity", headers: headers.broker });
-    assert.deepEqual(brokerActivity.body, { kind: "forbidden", required_capability: "administration:read" });
+    assert.equal(brokerActivity.status, 200);
+    assert.equal(brokerActivity.body.workspace.operator_id, "broker_operator");
 
     const editorRoot = await dispatchHttp(app, { url: "/admin?locale=bg", headers: headers.editor });
     assert.equal(editorRoot.headers.location, "/admin/listings?locale=bg");
