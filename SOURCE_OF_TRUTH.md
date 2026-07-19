@@ -562,5 +562,5 @@ code-local documentation:
 
 ```bash
 npm run check     # tests + full validate pipeline (crawl → migration → search → sitemap → SEO → QA → launch readiness)
-npm start         # run the interim production Node adapter (set MS_REALTY_ADMIN_TOKEN)
+npm start         # run the interim production Node adapter (set a named, role-scoped admin credential)
 ```

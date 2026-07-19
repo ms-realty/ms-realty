@@ -1,5 +1,12 @@
 import fs from "node:fs";
-import { bindAuthenticatedOperator, canAdminMutate, resolveAdminPrincipal, withAuthenticatedAuditActor } from "./admin-auth.mjs";
+import {
+  bindAuthenticatedOperator,
+  canAdminAccess,
+  canAdminMutate,
+  requiredAdminCapability,
+  resolveAdminPrincipal,
+  withAuthenticatedAuditActor,
+} from "./admin-auth.mjs";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import { importAppSeoEvidenceRows, readAppSeoEvidence, readAppSeoEvidenceTemplate, seoEvidencePayload } from "./app-seo-evidence.mjs";
 import { buildSeoEvidencePreflightReportFromEvidence } from "./seo-evidence-contract.mjs";
@@ -223,6 +230,13 @@ function adminUnauthorized() {
 
 function adminOperatorIdentityRequired() {
   return new Response(JSON.stringify({ kind: "operator_identity_required" }), {
+    status: 403,
+    headers: PRIVATE_JSON_HEADERS,
+  });
+}
+
+function adminForbidden(capability) {
+  return new Response(JSON.stringify({ kind: "forbidden", required_capability: capability }), {
     status: 403,
     headers: PRIVATE_JSON_HEADERS,
   });
@@ -484,7 +498,7 @@ function leadInboxPayload(registry, url, config) {
     translationTasks: latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     listingEdits: readListingEdits(config.listingEditLedgerPath),
     leadSlaGeneratedAt: config.reviewedAt,
-    operatorId: config.adminPrincipal?.id || null,
+    operatorId: config.adminPrincipal || null,
     viewings,
     viewingFollowUpQueue: buildViewingFollowUpQueue(viewings, viewingFollowUps, {
       now: config.viewingFollowUpAt || config.bookedAt || config.reviewedAt || new Date().toISOString(),
@@ -550,7 +564,7 @@ function activityPayload(registry, url, config) {
     registry,
     url.searchParams.get("locale") || "en",
     readAuditLog(config.auditLogPath),
-    config.adminPrincipal?.id || null,
+    config.adminPrincipal || null,
   );
 }
 
@@ -593,7 +607,7 @@ function reportsPayload(registry, url, config) {
     registry,
     url.searchParams.get("locale") || "en",
     operationsReport(registry, config),
-    config.adminPrincipal?.id || null,
+    config.adminPrincipal || null,
   );
 }
 
@@ -607,6 +621,7 @@ function listingEditorPayload(registry, url, config) {
     edits,
     latestTranslationTasks(readTranslationLedger(config.translationLedgerPath)),
     readTourApprovals(config.tourApprovalLedgerPath),
+    config.adminPrincipal || null,
   );
 }
 
@@ -617,7 +632,7 @@ function listingManagerPayload(registry, url, config) {
     seed,
     translationTasks,
     generatedAt: config.reviewedAt || new Date().toISOString(),
-    operatorId: config.adminPrincipal?.id || null,
+    operatorId: config.adminPrincipal || null,
     query: url.searchParams.get("q") || "",
     status: url.searchParams.get("status") || "",
     sourceLocale: url.searchParams.get("sourceLocale") || "",
@@ -632,7 +647,7 @@ function translationQueuePayload(registry, url, config) {
     seed,
     translationTasks: tasks,
     generatedAt: config.reviewedAt || new Date().toISOString(),
-    operatorId: config.adminPrincipal?.id || null,
+    operatorId: config.adminPrincipal || null,
     query: url.searchParams.get("q") || "",
     targetLocale: url.searchParams.get("targetLocale") || "",
     taskType: url.searchParams.get("taskType") || "",
@@ -1020,7 +1035,14 @@ function appendViewingFollowUpEntry(input, config) {
 
 function appendSellerPipelineOutcomeEntry(input, config) {
   const recordedAt = config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
-  const result = appendSellerPipelineOutcome(readSellerPipeline(config.sellerPipelinePath), bindAuthenticatedOperator(input, config.adminPrincipal), {
+  const authenticatedInput = bindAuthenticatedOperator(input, config.adminPrincipal);
+  if ((authenticatedInput.commissionEur ?? authenticatedInput.commission_eur) !== undefined && !canAdminAccess(config.adminPrincipal, "financials:write")) {
+    throw Object.assign(new Error("Commission entry requires financials:write"), {
+      status: 403,
+      capability: "financials:write",
+    });
+  }
+  const result = appendSellerPipelineOutcome(readSellerPipeline(config.sellerPipelinePath), authenticatedInput, {
     filePath: config.sellerPipelineOutcomeLedgerPath,
     recordedAt,
   });
@@ -1567,6 +1589,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
   config = { ...config, adminPrincipal: principal };
   try {
     const url = new URL(request.url, "http://localhost");
+    const requiredCapability = requiredAdminCapability(request.method, url.pathname);
+    if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
@@ -1785,6 +1809,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     return jsonResponse(405, { kind: "method_not_allowed" });
   } catch (error) {
     if (error.status === 413) return jsonResponse(413, { kind: "request_too_large" });
+    if (error.status === 403) return adminForbidden(error.capability || "administration:write");
     return adminBadRequest(error);
   }
 }

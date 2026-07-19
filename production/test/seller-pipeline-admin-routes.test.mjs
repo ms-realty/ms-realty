@@ -68,7 +68,7 @@ async function withBroker(fn) {
     delete process.env.MS_REALTY_ADMIN_TOKEN;
     delete process.env.MS_REALTY_ADMIN_ACTOR;
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "broker_bg", token: "seller-route-token-0123456789abcdef" },
+      { id: "broker_bg", token: "seller-route-token-0123456789abcdef", roles: ["admin"] },
     ]);
     return await fn({ authorization: "Bearer seller-route-token-0123456789abcdef" });
   } finally {

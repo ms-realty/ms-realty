@@ -20,7 +20,7 @@ function jsonl(directory, name, rows = []) {
 
 async function withCredentials(fn) {
   const previous = process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON;
-  process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([{ id: "broker_anna", token: TOKEN }]);
+  process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([{ id: "broker_anna", token: TOKEN, roles: ["broker"] }]);
   try {
     return await fn();
   } finally {

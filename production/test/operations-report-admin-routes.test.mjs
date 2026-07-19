@@ -15,7 +15,7 @@ async function withReportOperator(fn) {
     delete process.env.MS_REALTY_ADMIN_TOKEN;
     delete process.env.MS_REALTY_ADMIN_ACTOR;
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "agency_manager", token: "agency-manager-report-token-0123456789" },
+      { id: "agency_manager", token: "agency-manager-report-token-0123456789", roles: ["broker"] },
     ]);
     return await fn({ authorization: "Bearer agency-manager-report-token-0123456789" });
   } finally {
@@ -89,4 +89,3 @@ test("HTTP adapter exposes the same operations report contract", async () => {
     assert.match(html.body, /data-report-section="listing-inventory"/);
   });
 });
-

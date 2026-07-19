@@ -1,5 +1,14 @@
 import fs from "node:fs";
-import { bindAuthenticatedOperator, canAdminMutate, isAdminAuthorized, resolveAdminPrincipal, withAuthenticatedAuditActor } from "./admin-auth.mjs";
+import {
+  adminHomePath,
+  bindAuthenticatedOperator,
+  canAdminAccess,
+  canAdminMutate,
+  isAdminAuthorized,
+  resolveAdminPrincipal,
+  requiredAdminCapability,
+  withAuthenticatedAuditActor,
+} from "./admin-auth.mjs";
 import { appendAuditLog, createAuditLogEntry, readAuditLog } from "./audit-log.mjs";
 import {
   LISTING_EDIT_FIELDS,
@@ -203,6 +212,10 @@ function adminUnauthorized() {
 
 function adminOperatorIdentityRequired() {
   return adminJson(403, { kind: "operator_identity_required" });
+}
+
+function adminForbidden(capability) {
+  return adminJson(403, { kind: "forbidden", required_capability: capability });
 }
 
 function parseJsonBody(request) {
@@ -706,6 +719,8 @@ export function createHttpApp({
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
     if (adminRequest && !principal) return adminUnauthorized();
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
+    const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;
+    if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
     const host =
       request.headers?.["x-forwarded-host"] ||
@@ -856,7 +871,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
-      const payload = currentAdminLeadPayload(requestedLocale, principal?.id || null);
+      const payload = currentAdminLeadPayload(requestedLocale, principal);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
@@ -865,7 +880,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminResponse(
         200,
-        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal?.id || null)),
+        adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal)),
         "text/html; charset=utf-8",
       );
     }
@@ -874,13 +889,13 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const locale = url.searchParams.get("locale") || "en";
       return adminResponse(302, "", "text/plain; charset=utf-8", {
-        location: `/admin/today?locale=${encodeURIComponent(locale)}`,
+        location: `${adminHomePath(principal)}?locale=${encodeURIComponent(locale)}`,
       });
     }
 
     if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/today" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -889,7 +904,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -898,7 +913,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -907,7 +922,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/viewings", "/admin/viewings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentViewingsPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      const payload = currentViewingsPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/viewings" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -916,7 +931,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/activity", "/admin/activity"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentActivityPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      const payload = currentActivityPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/activity" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -925,7 +940,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/listings", "/admin/listings"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentListingManagerPayload(url, principal?.id || null);
+      const payload = currentListingManagerPayload(url, principal);
       if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -934,7 +949,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/translations", "/admin/translations"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentTranslationQueuePayload(url, principal?.id || null);
+      const payload = currentTranslationQueuePayload(url, principal);
       if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -943,7 +958,7 @@ export function createHttpApp({
 
     if (request.method === "GET" && ["/api/admin/reports", "/admin/reports"].includes(url.pathname)) {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const payload = currentReportsPayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      const payload = currentReportsPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/reports" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
@@ -1000,6 +1015,7 @@ export function createHttpApp({
               readListingEdits(listingEditLedgerPath || undefined),
               latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
               readTourApprovals(tourApprovalLedgerPath || undefined),
+              principal,
             ),
           ),
           "text/html; charset=utf-8",
@@ -1851,7 +1867,11 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const recordedAt = sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
-        const result = appendSellerPipelineOutcome(readSellerPipeline(sellerPipelinePath || undefined), bindAuthenticatedOperator(parseBody(request), principal), {
+        const input = bindAuthenticatedOperator(parseBody(request), principal);
+        if ((input.commissionEur ?? input.commission_eur) !== undefined && !canAdminAccess(principal, "financials:write")) {
+          return adminForbidden("financials:write");
+        }
+        const result = appendSellerPipelineOutcome(readSellerPipeline(sellerPipelinePath || undefined), input, {
           filePath: sellerPipelineOutcomeLedgerPath || undefined,
           recordedAt,
         });

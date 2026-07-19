@@ -1713,7 +1713,7 @@ test("Next admin mutations require an attributable production operator", async (
     assert.equal((await sharedWrite.json()).kind, "operator_identity_required");
 
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "operations_lead", token: "next-operations-token-0123456789" },
+      { id: "operations_lead", token: "next-operations-token-0123456789", roles: ["admin"] },
     ]);
     const credentialWrite = await renderAppAdminResponse(
       new Request("https://example.test/api/admin/launch-readiness/export", {
@@ -1757,7 +1757,7 @@ test("Next admin replies bind the named production operator before queueing", as
     process.env.MS_REALTY_ADMIN_TOKEN = "next-shared-admin-token";
     delete process.env.MS_REALTY_ADMIN_ACTOR;
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "operations_lead", token: "next-operations-token-0123456789" },
+      { id: "operations_lead", token: "next-operations-token-0123456789", roles: ["admin"] },
     ]);
     const config = appAdminConfigFromEnv({
       MS_REALTY_AUDIT_LOG_PATH: auditLogPath,

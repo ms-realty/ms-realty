@@ -14,7 +14,7 @@ async function withNamedOperator(fn) {
     delete process.env.MS_REALTY_ADMIN_TOKEN;
     delete process.env.MS_REALTY_ADMIN_ACTOR;
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "surface_parity_operator", token: "surface-parity-token-0123456789" },
+      { id: "surface_parity_operator", token: "surface-parity-token-0123456789", roles: ["admin"] },
     ]);
     return await fn({ authorization: "Bearer surface-parity-token-0123456789" });
   } finally {

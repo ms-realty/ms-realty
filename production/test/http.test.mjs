@@ -1516,7 +1516,7 @@ test("HTTP admin auth does not accept local smoke token in production without co
     const auditLogPath = tempAuditLog();
     const launchReadinessOutputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-auth-`)}/launch-readiness.json`;
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "operations_lead", token: "operations-lead-token-0123456789" },
+      { id: "operations_lead", token: "operations-lead-token-0123456789", roles: ["admin"] },
     ]);
     const credentialApp = createHttpApp({ auditLogPath, launchReadinessOutputPath });
     const legacyAfterMigration = await dispatchHttp(credentialApp, {
@@ -2211,7 +2211,7 @@ test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async 
     delete process.env.MS_REALTY_ADMIN_TOKEN;
     delete process.env.MS_REALTY_ADMIN_ACTOR;
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "broker_bg", token: "broker-bg-production-token-0123456789" },
+      { id: "broker_bg", token: "broker-bg-production-token-0123456789", roles: ["broker"] },
     ]);
 
     const leadLedgerPath = tempLedger();

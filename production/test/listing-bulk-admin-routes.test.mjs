@@ -30,7 +30,7 @@ async function withNamedOperator(fn) {
     delete process.env.MS_REALTY_ADMIN_TOKEN;
     delete process.env.MS_REALTY_ADMIN_ACTOR;
     process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
-      { id: "listing_operations", token: "listing-operations-token-0123456789" },
+      { id: "listing_operations", token: "listing-operations-token-0123456789", roles: ["editor"] },
     ]);
     return await fn({ authorization: "Bearer listing-operations-token-0123456789" });
   } finally {
@@ -137,4 +137,3 @@ test("HTTP adapter preserves repeated form selections for bulk listing status ch
     assert.equal(readAuditLog(paths.audit).length, 2);
   });
 });
-

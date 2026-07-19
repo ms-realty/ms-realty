@@ -5,6 +5,58 @@ const CREDENTIALS_ENV = "MS_REALTY_ADMIN_CREDENTIALS_JSON";
 const OPERATOR_ID = /^[a-z0-9][a-z0-9._-]{1,63}$/i;
 const MIN_OPERATOR_TOKEN_LENGTH = 24;
 
+export const ADMIN_ROLES = ["admin", "broker", "editor", "translator"];
+
+const ROLE_CAPABILITIES = {
+  admin: ["*"],
+  broker: ["workspace:read", "operations:read", "operations:write", "content:read"],
+  editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish"],
+  translator: ["workspace:read", "content:read", "translations:read", "translations:write"],
+};
+
+const OPERATIONS_READ_PATHS = new Set([
+  "/admin/today",
+  "/api/admin/today",
+  "/admin/leads",
+  "/api/admin/leads",
+  "/admin/pipeline",
+  "/api/admin/pipeline",
+  "/admin/requests",
+  "/api/admin/requests",
+  "/admin/viewings",
+  "/api/admin/viewings",
+  "/admin/reports",
+  "/api/admin/reports",
+  "/api/admin/reports/export",
+  "/api/admin/viewings.ics",
+]);
+
+const CONTENT_READ_PATHS = new Set([
+  "/admin/listings",
+  "/api/admin/listings",
+  "/admin/listings/edit",
+]);
+
+const TRANSLATION_READ_PATHS = new Set(["/admin/translations", "/api/admin/translations"]);
+const OPERATIONS_WRITE_PATHS = new Set([
+  "/api/admin/replies",
+  "/api/admin/replies/delivery",
+  "/api/admin/replies/draft",
+  "/api/admin/lead-pipeline/outcome",
+  "/api/admin/viewings",
+  "/api/admin/viewings/follow-up",
+  "/api/admin/seller-pipeline/outcome",
+  "/api/admin/public-requests/outcome",
+  "/api/admin/deals/close",
+]);
+
+const CONTENT_WRITE_PATHS = new Set([
+  "/api/admin/listings/edit",
+  "/api/admin/listings/status",
+  "/api/admin/listings/slug",
+  "/api/admin/tours/approve",
+]);
+
 function timingSafeMatch(actual, expected) {
   if (!actual || Buffer.byteLength(actual) !== Buffer.byteLength(expected)) return false;
   return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
@@ -14,6 +66,72 @@ function operatorId(value, label) {
   const id = String(value || "").trim();
   if (!OPERATOR_ID.test(id)) throw new Error(`${label} must be a stable operator ID`);
   return id;
+}
+
+function normalizedRoles(value, label, { fallbackAdmin = false } = {}) {
+  const values = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",")
+      : fallbackAdmin && (value === undefined || value === null || value === "")
+        ? ["admin"]
+        : [];
+  const roles = [...new Set(values.map((role) => String(role || "").trim().toLowerCase()).filter(Boolean))].sort();
+  if (!roles.length || roles.some((role) => !ADMIN_ROLES.includes(role))) {
+    throw new Error(`${label} must contain one or more of: ${ADMIN_ROLES.join(", ")}`);
+  }
+  return roles;
+}
+
+export function adminCapabilities(principal) {
+  const capabilities = new Set();
+  for (const role of principal?.roles || []) {
+    for (const capability of ROLE_CAPABILITIES[role] || []) capabilities.add(capability);
+  }
+  return [...capabilities].sort();
+}
+
+export function canAdminAccess(principal, capability) {
+  if (!principal || !capability) return false;
+  const capabilities = adminCapabilities(principal);
+  return capabilities.includes("*") || capabilities.includes(capability);
+}
+
+export function requiredAdminCapability(method, pathname) {
+  const verb = String(method || "GET").toUpperCase();
+  if (pathname === "/admin") return "workspace:read";
+  if (verb === "GET" && OPERATIONS_READ_PATHS.has(pathname)) return "operations:read";
+  if (verb === "GET" && CONTENT_READ_PATHS.has(pathname)) return "content:read";
+  if (verb === "GET" && TRANSLATION_READ_PATHS.has(pathname)) return "translations:read";
+  if (verb !== "GET" && OPERATIONS_WRITE_PATHS.has(pathname)) return "operations:write";
+  if (verb !== "GET" && CONTENT_WRITE_PATHS.has(pathname)) return "content:write";
+  if (verb !== "GET" && ["/api/admin/translations/draft", "/api/admin/translations/approve"].includes(pathname)) {
+    return "translations:write";
+  }
+  if (verb !== "GET" && pathname === "/api/admin/translations/publish") return "translations:publish";
+  if (pathname === "/api/admin/locales" && verb === "GET") return "content:read";
+  if (pathname.startsWith("/admin/") || pathname.startsWith("/api/admin/")) {
+    return verb === "GET" ? "administration:read" : "administration:write";
+  }
+  return null;
+}
+
+export function adminHomePath(principal) {
+  if (principal?.roles?.includes("admin") || principal?.roles?.includes("broker")) return "/admin/today";
+  if (principal?.roles?.includes("editor")) return "/admin/listings";
+  if (principal?.roles?.includes("translator")) return "/admin/translations";
+  return "/admin";
+}
+
+export function publicAdminPrincipal(principal) {
+  if (!principal) return null;
+  return {
+    id: principal.id || null,
+    source: principal.source,
+    can_mutate: Boolean(principal.can_mutate),
+    roles: [...(principal.roles || [])],
+    capabilities: adminCapabilities(principal),
+  };
 }
 
 export function adminCredentials(env = process.env) {
@@ -28,6 +146,7 @@ export function adminCredentials(env = process.env) {
   if (!Array.isArray(parsed) || !parsed.length) throw new Error(`${CREDENTIALS_ENV} must be a non-empty array`);
 
   const tokens = new Set();
+  const rolesByOperator = new Map();
   return parsed.map((row, index) => {
     if (!row || typeof row !== "object" || Array.isArray(row)) {
       throw new Error(`${CREDENTIALS_ENV} entry ${index + 1} must be an object`);
@@ -39,7 +158,13 @@ export function adminCredentials(env = process.env) {
     }
     if (tokens.has(token)) throw new Error(`${CREDENTIALS_ENV} entries must use unique bearer tokens`);
     tokens.add(token);
-    return { id, token };
+    const roles = normalizedRoles(row.roles, `${CREDENTIALS_ENV} entry ${index + 1} roles`);
+    const priorRoles = rolesByOperator.get(id);
+    if (priorRoles && priorRoles.join(",") !== roles.join(",")) {
+      throw new Error(`${CREDENTIALS_ENV} entries for ${id} must use the same roles`);
+    }
+    rolesByOperator.set(id, roles);
+    return { id, token, roles };
   });
 }
 
@@ -57,7 +182,7 @@ export function resolveAdminPrincipal(auth, env = process.env) {
   }
   for (const credential of credentials) {
     if (timingSafeMatch(auth, `Bearer ${credential.token}`)) {
-      return { id: credential.id, source: "credential_registry", can_mutate: true };
+      return { id: credential.id, source: "credential_registry", can_mutate: true, roles: credential.roles };
     }
   }
   // Once individual credentials are configured, do not leave the shared token as a second path.
@@ -68,7 +193,12 @@ export function resolveAdminPrincipal(auth, env = process.env) {
   const id = String(env.MS_REALTY_ADMIN_ACTOR || "").trim();
   if (id) {
     try {
-      return { id: operatorId(id, "MS_REALTY_ADMIN_ACTOR"), source: "named_legacy_token", can_mutate: true };
+      return {
+        id: operatorId(id, "MS_REALTY_ADMIN_ACTOR"),
+        source: "named_legacy_token",
+        can_mutate: true,
+        roles: normalizedRoles(env.MS_REALTY_ADMIN_ROLES, "MS_REALTY_ADMIN_ROLES", { fallbackAdmin: true }),
+      };
     } catch {
       return null;
     }
@@ -78,6 +208,7 @@ export function resolveAdminPrincipal(auth, env = process.env) {
     source: "shared_token",
     // Local fixtures can keep exercising workflows; a deployed shared token cannot claim a human action.
     can_mutate: env.NODE_ENV !== "production",
+    roles: ["admin"],
   };
 }
 

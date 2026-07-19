@@ -1,4 +1,5 @@
 import { renderAdminWorkspace } from "./admin-workflows.mjs";
+import { publicAdminPrincipal } from "./admin-auth.mjs";
 import { buildLeadSlaReport } from "./lead-sla.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { latestTourForListing } from "./tours.mjs";
@@ -22,7 +23,30 @@ function listingRecord(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
 }
 
-export function renderAdminListingEditorPayload(registry, requestedLocale, seed, listingId, edits, translationTasks, tourApprovals = []) {
+function workspaceWithOperator(workspace, operator) {
+  if (!operator) return workspace;
+  if (typeof operator === "string") return { ...workspace, operator_id: operator };
+  const principal = publicAdminPrincipal(operator);
+  return principal
+    ? {
+        ...workspace,
+        operator_id: principal.id,
+        operator_roles: principal.roles,
+        operator_capabilities: principal.capabilities,
+      }
+    : workspace;
+}
+
+export function renderAdminListingEditorPayload(
+  registry,
+  requestedLocale,
+  seed,
+  listingId,
+  edits,
+  translationTasks,
+  tourApprovals = [],
+  operator = null,
+) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const record = listingRecord(seed, listingId || "MS-CRAWL-0001");
   if (!record) throw new Error("Known listingId is required");
@@ -41,7 +65,7 @@ export function renderAdminListingEditorPayload(registry, requestedLocale, seed,
       description: "Admin-only listing fact editor with stale translation review state.",
       robots: "noindex,nofollow",
     },
-    workspace,
+    workspace: workspaceWithOperator(workspace, operator),
     listing: reviewedTour ? { ...record, tour: reviewedTour } : record,
     edits: edits.filter((edit) => edit.listing_id === record.id),
     translationTasks: translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
@@ -49,7 +73,7 @@ export function renderAdminListingEditorPayload(registry, requestedLocale, seed,
   };
 }
 
-export function renderAdminOperationsReportPayload(registry, requestedLocale, report, operatorId = null) {
+export function renderAdminOperationsReportPayload(registry, requestedLocale, report, operator = null) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   return {
     kind: "admin_operations_reports",
@@ -67,7 +91,7 @@ export function renderAdminOperationsReportPayload(registry, requestedLocale, re
         "Lead volume, actual customer response time, source quality, pipelines, and stale work from the operating ledgers.",
       robots: "noindex,nofollow",
     },
-    workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
+    workspace: workspaceWithOperator(workspace, operator),
     report,
   };
 }
@@ -87,7 +111,7 @@ export function renderAdminOperationalQueuePayload(payload, { kind, path, titleK
   };
 }
 
-export function renderAdminActivityPayload(registry, requestedLocale, auditLog, operatorId = null) {
+export function renderAdminActivityPayload(registry, requestedLocale, auditLog, operator = null) {
   const workspace = renderAdminWorkspace({ registry, requestedLocale });
   const rows = [...auditLog].toReversed();
   return {
@@ -104,7 +128,7 @@ export function renderAdminActivityPayload(registry, requestedLocale, auditLog, 
       description: workspace.copy.activityDescription,
       robots: "noindex,nofollow",
     },
-    workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
+    workspace: workspaceWithOperator(workspace, operator),
     auditLog: rows,
     summary: {
       totalActions: rows.length,
@@ -203,7 +227,7 @@ export function renderAdminListingManagerPayload(
       description: workspace.copy.listingManagerDescription || "Search, review, and open every listing in the CMS workspace.",
       robots: "noindex,nofollow",
     },
-    workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
+    workspace: workspaceWithOperator(workspace, operatorId),
     listings: paged.rows,
     filters: { q: normalizedQuery, status: normalizedStatus, sourceLocale: normalizedSourceLocale },
     filterOptions: {
@@ -318,7 +342,7 @@ export function renderAdminTranslationQueuePayload(
       description: workspace.copy.translationQueueDescription || "Human review queue for missing, drafted, and stale listing translations.",
       robots: "noindex,nofollow",
     },
-    workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
+    workspace: workspaceWithOperator(workspace, operatorId),
     translationTasks: paged.rows,
     filters: { q: normalizedQuery, targetLocale: normalizedTargetLocale, taskType: normalizedTaskType },
     filterOptions: {
@@ -414,7 +438,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       description: workspace.copy.leadInboxDescription || "CRM lead inbox with broker-reviewed replies.",
       robots: "noindex,nofollow",
     },
-    workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
+    workspace: workspaceWithOperator(workspace, operatorId),
     ...payloadData,
     leadSla,
     leadPipelineQueue,

@@ -54,7 +54,7 @@ async function withNamedAdmin(fn) {
   };
   const token = "pipeline-admin-token-with-24-characters";
   process.env.NODE_ENV = "production";
-  process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([{ id: "broker_en", token }]);
+  process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([{ id: "broker_en", token, roles: ["broker"] }]);
   try {
     return await fn({ authorization: `Bearer ${token}` });
   } finally {

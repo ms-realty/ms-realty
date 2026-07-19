@@ -10,6 +10,20 @@ function label(copy, key, fallback) {
   return copy[key] || fallback;
 }
 
+function pageCan(page, capability) {
+  const capabilities = page.workspace?.operator_capabilities;
+  if (!Array.isArray(capabilities)) return true;
+  return capabilities.includes("*") || capabilities.includes(capability);
+}
+
+function adminHomeForPage(page) {
+  const roles = page.workspace?.operator_roles || [];
+  if (roles.includes("admin") || roles.includes("broker")) return "/admin/today";
+  if (roles.includes("editor")) return "/admin/listings";
+  if (roles.includes("translator")) return "/admin/translations";
+  return "/admin";
+}
+
 // Design-workbench vocabulary that is not part of the domain workflow model.
 // The CMS/CRM stays limited to BG, RU, and EN, so every visible operator label
 // can be reviewed in the same locale set as the rest of the admin surface.
@@ -129,6 +143,7 @@ const ADMIN_UI_COPY = {
     popularFilters: "Популярни филтри",
     downloadSourceReport: "Изтегли CSV по източници",
     privacySafeReport: "Отчетът използва оперативните регистри и не включва лични контакти или съобщения.",
+    readOnlyAccess: "Достъп само за преглед за тази роля.",
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
     auditActions: {
@@ -265,6 +280,7 @@ const ADMIN_UI_COPY = {
     popularFilters: "Популярные фильтры",
     downloadSourceReport: "Скачать CSV по источникам",
     privacySafeReport: "Отчет использует операционные журналы и не включает личные контакты или сообщения.",
+    readOnlyAccess: "Для этой роли доступен только просмотр.",
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
     auditActions: {
@@ -401,6 +417,7 @@ const ADMIN_UI_COPY = {
     popularFilters: "Popular filters",
     downloadSourceReport: "Download source CSV",
     privacySafeReport: "This report uses operating ledgers and excludes private contacts and messages.",
+    readOnlyAccess: "This role has read-only access.",
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
     auditActions: {
@@ -568,17 +585,17 @@ function PageHeader({ title, subtitle, children }) {
 }
 
 const NAV_ROUTES = [
-  { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today" },
-  { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox" },
-  { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline" },
-  { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests" },
-  { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings" },
-  { id: "reports", module: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports" },
-  { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity" },
-  { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager" },
-  { id: "listing_editor", module: "cms", path: "/admin/listings/edit", icon: "building-2", kind: "admin_listing_editor" },
-  { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue" },
-  { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review" },
+  { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today", capability: "operations:read" },
+  { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox", capability: "operations:read" },
+  { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline", capability: "operations:read" },
+  { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests", capability: "operations:read" },
+  { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings", capability: "operations:read" },
+  { id: "reports", module: "crm", path: "/admin/reports", icon: "bar-chart-3", kind: "admin_operations_reports", capability: "operations:read" },
+  { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity", capability: "administration:read" },
+  { id: "listing_manager", module: "cms", path: "/admin/listings", icon: "building-2", kind: "admin_listing_manager", capability: "content:read" },
+  { id: "listing_editor", module: "cms", path: "/admin/listings/edit", icon: "building-2", kind: "admin_listing_editor", capability: "content:read" },
+  { id: "translation_queue", module: "cms", path: "/admin/translations", icon: "languages", kind: "admin_translation_queue", capability: "translations:read" },
+  { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
 ];
 
 function Sidebar({ page }) {
@@ -629,6 +646,9 @@ function Sidebar({ page }) {
       items: [{ ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") }],
     },
   ];
+  const visibleGroups = groups
+    .map((group) => ({ ...group, items: group.items.filter((item) => pageCan(page, item.capability)) }))
+    .filter((group) => group.items.length);
   return h(
     "aside",
     { className: "crm-sb" },
@@ -637,14 +657,14 @@ function Sidebar({ page }) {
       { className: "crm-sb__brand" },
       h(
         "a",
-        { href: adminHref("/admin/today", page), "aria-label": "MS Realty" },
+        { href: adminHref(adminHomeForPage(page), page), "aria-label": "MS Realty" },
         h("img", { src: LOGO_SRC_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
       ),
     ),
     h(
       "nav",
       { className: "crm-sb__nav", "aria-label": page.workspace?.title || "Admin" },
-      ...groups.flatMap((group) => [
+      ...visibleGroups.flatMap((group) => [
         h("div", { key: `group-${group.label}`, className: "crm-sb__group" }, group.label),
         ...group.items.map((item) =>
           h(
@@ -2235,7 +2255,9 @@ function SellerPipelineQueue({ page, copy, ui }) {
                               "div",
                               { className: "adm-pipeline-fields adm-pipeline-fields--two" },
                               h("label", null, label(copy, "sellerSalePrice", "Sale price (€)"), h("input", { name: "salePriceEur", type: "number", min: 1, step: 1, required: true })),
-                              h("label", null, label(copy, "sellerCommission", "Commission (€)"), h("input", { name: "commissionEur", type: "number", min: 0, step: 1 })),
+                              pageCan(page, "financials:write")
+                                ? h("label", null, label(copy, "sellerCommission", "Commission (€)"), h("input", { name: "commissionEur", type: "number", min: 0, step: 1 }))
+                                : null,
                             )
                           : null,
                         h("label", null, label(copy, "sellerPipelineNote", "Seller pipeline note"), h("textarea", { name: "note", maxLength: 2000 })),
@@ -2484,9 +2506,14 @@ function TranslationQueueBody({ page }) {
               null,
               ...page.translationTasks.map((row) => {
                 const task = row.existing_task;
-                const canApprove = task && ["hermes_drafted", "human_edited"].includes(task.status) && task.validated_output;
-                const canPublish = task?.status === "approved" && task.human_approved;
-                const canEnterHumanDraft = !task && ["human", "external_import"].includes(row.provider_mode);
+                const canApprove =
+                  pageCan(page, "translations:write") &&
+                  task &&
+                  ["hermes_drafted", "human_edited"].includes(task.status) &&
+                  task.validated_output;
+                const canPublish = pageCan(page, "translations:publish") && task?.status === "approved" && task.human_approved;
+                const canEnterHumanDraft =
+                  pageCan(page, "translations:write") && !task && ["human", "external_import"].includes(row.provider_mode);
                 return h(
                   "tr",
                   { key: `${row.listing_id}-${row.target_locale}`, "data-translation-task-row": row.task.id, "data-translation-status": task?.status || row.current_status },
@@ -2561,24 +2588,24 @@ function TranslationQueueBody({ page }) {
   });
 }
 
-function editorInputFor(field, value) {
-  const shared = { name: field, defaultValue: value, "data-editor-field": field };
+function editorInputFor(field, value, disabled = false) {
+  const shared = { name: field, defaultValue: value, disabled, "data-editor-field": field };
   if (field === "description") return h("textarea", { ...shared, rows: 6 });
   if (field === "price_eur" || field === "area_sqm") return h("input", { ...shared, type: "number", min: "0", step: "any", inputMode: "decimal" });
   if (field === "bedrooms") return h("input", { ...shared, inputMode: "numeric" });
   return h("input", shared);
 }
 
-function editorField(copy, ui, field, value) {
-  return h("label", { key: field }, fieldText(ui, field), editorInputFor(field, value));
+function editorField(copy, ui, field, value, disabled = false) {
+  return h("label", { key: field }, fieldText(ui, field), editorInputFor(field, value, disabled));
 }
 
-function editorFieldGroup(copy, ui, title, fields, facts) {
+function editorFieldGroup(copy, ui, title, fields, facts, disabled = false) {
   return h(
     "fieldset",
     { className: "adm-form__group" },
     h("legend", null, title),
-    ...fields.map((field) => editorField(copy, ui, field, facts[field] ?? "")),
+    ...fields.map((field) => editorField(copy, ui, field, facts[field] ?? "", disabled)),
   );
 }
 
@@ -2595,6 +2622,7 @@ function ListingEditorBody({ page }) {
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
   const termsFields = page.editableFields.filter((field) => ["price_eur", "price_on_request"].includes(field));
   const detailFields = page.editableFields.filter((field) => !contentFields.includes(field) && !termsFields.includes(field));
+  const canEditContent = pageCan(page, "content:write");
   return adminShell(page, {
     title,
     mainAttrs: {
@@ -2643,20 +2671,23 @@ function ListingEditorBody({ page }) {
               h("input", {
                 name: "editor",
                 required: true,
+                disabled: !canEditContent,
                 autoComplete: "name",
                 placeholder: label(copy, "editorNamePlaceholder", "Editor name"),
                 "data-editor-name": "true",
               }),
             ),
           ),
-          editorFieldGroup(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, facts),
-          editorFieldGroup(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, facts),
-          editorFieldGroup(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, facts),
-          h(
-            "div",
-            { className: "adm-form__actions" },
-            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
-          ),
+          editorFieldGroup(copy, ui, label(copy, "sourceContent", "Source content"), contentFields, facts, !canEditContent),
+          editorFieldGroup(copy, ui, label(copy, "propertyDetails", "Property details"), detailFields, facts, !canEditContent),
+          editorFieldGroup(copy, ui, label(copy, "commercialTerms", "Commercial terms"), termsFields, facts, !canEditContent),
+          canEditContent
+            ? h(
+                "div",
+                { className: "adm-form__actions" },
+                h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h("span", null, label(copy, "saveSourceEdit", "Save source edit"))),
+              )
+            : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
         ),
       ),
       h(
@@ -2705,8 +2736,9 @@ function ListingEditorBody({ page }) {
             [ui.tourFallbackGallery, fallbackGalleryCount, "camera", fallbackGalleryCount ? "sea" : "brick"],
           ],
         }),
-        h(
-          "form",
+        canEditContent
+          ? h(
+              "form",
           {
             method: "post",
             action: "/api/admin/tours/approve",
@@ -2791,7 +2823,8 @@ function ListingEditorBody({ page }) {
               h("span", null, ui.tourApprovePublish),
             ),
           ),
-        ),
+        )
+          : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
       ),
       h(
         Panel,

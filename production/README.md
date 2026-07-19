@@ -239,15 +239,25 @@ Useful operator endpoints:
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.
 Set `MS_REALTY_ADMIN_TOKEN` before running the production server. Production
 mutations also require an attributable operator: either set
-`MS_REALTY_ADMIN_ACTOR` for a single named credential, or prefer a distinct
+`MS_REALTY_ADMIN_ACTOR` for a single named admin credential, or prefer a distinct
 per-person credential registry in the deployment secret store:
 
 ```bash
-MS_REALTY_ADMIN_CREDENTIALS_JSON='[{"id":"broker_bg","token":"a-long-random-bearer-secret"}]'
+MS_REALTY_ADMIN_CREDENTIALS_JSON='[{"id":"broker_bg","token":"a-long-random-bearer-secret","roles":["broker"]}]'
 ```
 
 The registry supersedes `MS_REALTY_ADMIN_TOKEN` when configured. Keep every
-token only in deployment secrets; never commit this value. A production shared
+token only in deployment secrets; never commit this value. Every registry row
+must declare one or more supported roles: `admin`, `broker`, `editor`, or
+`translator`; rotated credentials for the same operator must keep the same
+roles. Broker accounts can operate CRM workflows and read listing facts,
+editors own listing/media changes and approved translation publication,
+translators can draft and approve translations but cannot publish them, and
+only admins can enter commission values or change launch evidence. Unauthorized
+routes return a capability-specific `403 forbidden` response and are omitted
+from the authenticated workspace navigation.
+
+A production shared
 token without an operator remains read-only and receives
 `403 operator_identity_required` for any mutation, so it cannot create a
 misattributed audit row.
