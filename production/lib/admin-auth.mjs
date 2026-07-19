@@ -57,6 +57,7 @@ const CONTENT_WRITE_PATHS = new Set([
   "/api/admin/listings/publication-schedules",
   "/api/admin/listings/publication-schedules/cancel",
   "/api/admin/listings/publication-schedules/run-due",
+  "/api/admin/media/reviews",
   "/api/admin/tours/approve",
 ]);
 

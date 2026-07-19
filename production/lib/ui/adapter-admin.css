@@ -296,6 +296,26 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 #listing-media,
 #listing-quality { scroll-margin-top: 124px; }
 
+.adm-media-manager { display: grid; gap: var(--space-4); padding: 0 var(--space-5) var(--space-5); }
+.adm-media-asset { display: grid; min-width: 0; gap: var(--space-3); }
+.adm-media-asset__header { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+.adm-media-asset__header > div { display: grid; min-width: 0; gap: 3px; }
+.adm-media-asset__header small { overflow: hidden; text-overflow: ellipsis; }
+.adm-media-asset__source { width: max-content; max-width: 100%; color: var(--sea-700); font-size: var(--text-sm); text-decoration: none; }
+.adm-media-review-form { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0; }
+.adm-media-review-form label { display: grid; min-width: 0; gap: 6px; color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
+.adm-media-review-form label:has(> textarea),
+.adm-media-review-form .adm-check,
+.adm-media-review-form .adm-form__status,
+.adm-media-review-form button { grid-column: 1 / -1; }
+.adm-media-review-form input,
+.adm-media-review-form select,
+.adm-media-review-form textarea { width: 100%; min-width: 0; }
+.adm-media-review-form textarea { resize: vertical; }
+.adm-media-review-form .adm-check { display: flex; align-items: flex-start; font-weight: var(--fw-regular); }
+.adm-media-review-form .adm-check input { width: 20px; min-height: 20px; margin-top: 1px; }
+.adm-media-review-form button { width: max-content; }
+
 /* Reviewed 360-tour publishing stays in the media panel and uses the same form scale. */
 .adm-tour-form {
   display: grid;
@@ -474,6 +494,9 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .adm-activity__details dl { grid-template-columns: 1fr; gap: 2px; }
   .adm-activity__details dd { margin-bottom: var(--space-2); }
   .adm-form { grid-template-columns: 1fr; }
+  .adm-media-manager { padding-inline: var(--space-4); }
+  .adm-media-review-form { grid-template-columns: 1fr; }
+  .adm-media-review-form button { width: 100%; min-height: 44px; justify-content: center; }
   .adm-form__group { grid-template-columns: 1fr; }
   .adm-editor-tabs {
     position: sticky;

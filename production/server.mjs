@@ -13,6 +13,7 @@ import { DEFAULT_REPLY_OUTBOX_PATH } from "./lib/lead-replies.mjs";
 import { DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH } from "./lib/reply-delivery-outcomes.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH } from "./lib/listing-edits.mjs";
 import { DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH } from "./lib/listing-publication-schedules.mjs";
+import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH } from "./lib/media-reviews.mjs";
 import { createNodeServer, listen, close } from "./lib/node-server.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH } from "./lib/events.mjs";
 import { DEFAULT_CONSENT_LEDGER_PATH } from "./lib/consent-ledger.mjs";
@@ -71,6 +72,7 @@ export function productionServerConfig(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
     listingPublicationSchedulePath:
       env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     viewingLedgerPath: env.MS_REALTY_VIEWING_LEDGER_PATH || DEFAULT_VIEWING_LEDGER_PATH,
@@ -124,6 +126,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     languageRequestPath: config.languageRequestPath,
     translationLedgerPath: config.translationLedgerPath,
     listingEditLedgerPath: config.listingEditLedgerPath,
+    mediaReviewLedgerPath: config.mediaReviewLedgerPath,
     listingPublicationSchedulePath: config.listingPublicationSchedulePath,
     viewingLedgerPath: config.viewingLedgerPath,
     viewingFollowUpLedgerPath: config.viewingFollowUpLedgerPath,

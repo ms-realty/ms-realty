@@ -38,6 +38,38 @@ test("reviewed private media no longer blocks media review", () => {
   assert.equal(library.review.review_gated_assets, 0);
 });
 
+test("only individually human-approved plans and videos reach public media", () => {
+  const library = publicMediaLibrary([
+    {
+      asset_url: "https://cdn.example.test/floor-plan.webp",
+      alt: "Reviewed floor plan",
+      kind: "floor_plan",
+      is_public: true,
+      review_status: "approved_by_human",
+      media_reviewer: "media_editor",
+    },
+    {
+      asset_url: "https://cdn.example.test/walkthrough.mp4",
+      alt: "Accessible walkthrough caption",
+      kind: "video",
+      is_public: true,
+      review_status: "approved_by_human",
+      media_reviewer: "media_editor",
+    },
+    {
+      asset_url: "https://cdn.example.test/unreviewed.mp4",
+      alt: "Unreviewed video",
+      kind: "video",
+      is_public: true,
+      review_status: "needs_media_review",
+    },
+  ]);
+
+  assert.equal(library.floor_plans.length, 1);
+  assert.equal(library.videos.length, 1);
+  assert.equal(library.videos[0].url, "https://cdn.example.test/walkthrough.mp4");
+});
+
 test("imported public photos use listing fallback alt text", () => {
   const photo = normalizeMediaAsset(
     { image_url: "https://makler-realty.com/wp-content/uploads/2025/04/front.jpg", alt: "" },

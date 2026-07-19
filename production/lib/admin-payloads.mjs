@@ -3,6 +3,7 @@ import { publicAdminPrincipal } from "./admin-auth.mjs";
 import { buildLeadSlaReport } from "./lead-sla.mjs";
 import { buildTranslationCoverageReport } from "./translation-coverage.mjs";
 import { latestTourForListing } from "./tours.mjs";
+import { mediaAssetId } from "./media-reviews.mjs";
 export { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 import { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 
@@ -38,6 +39,11 @@ export function renderAdminListingEditorPayload(
   const record = listingRecord(seed, listingId || "MS-CRAWL-0001");
   if (!record) throw new Error("Known listingId is required");
   const reviewedTour = latestTourForListing(tourApprovals, record.id);
+  const listing = {
+    ...record,
+    media: (record.media || []).map((item) => ({ ...item, asset_id: mediaAssetId(item) })),
+    ...(reviewedTour ? { tour: reviewedTour } : {}),
+  };
   return {
     kind: "admin_listing_editor",
     status: 200,
@@ -53,7 +59,7 @@ export function renderAdminListingEditorPayload(
       robots: "noindex,nofollow",
     },
     workspace: workspaceWithOperator(workspace, operator),
-    listing: reviewedTour ? { ...record, tour: reviewedTour } : record,
+    listing,
     edits: edits.filter((edit) => edit.listing_id === record.id),
     translationTasks: translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
     editableFields: LISTING_EDIT_FIELDS,

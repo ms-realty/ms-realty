@@ -155,6 +155,18 @@ function renderListing(page) {
     .map((card) => `<article data-related-listing="true"><h2><a href="${escapeHtml(card.path)}">${escapeHtml(card.title)}</a></h2></article>`)
     .join("");
   const tour = page.body.media.tour || {};
+  const floorPlans = (page.body.media.floor_plans || [])
+    .map((plan) => `<img src="${escapeHtml(plan.url)}" alt="${escapeHtml(plan.alt)}" loading="lazy">`)
+    .join("");
+  const videos = (page.body.media.videos || [])
+    .map((video) => {
+      const url = escapeHtml(video.url);
+      const alt = escapeHtml(video.alt);
+      return /\.(?:m3u8|mov|mp4|webm)(?:[?#]|$)/i.test(video.url)
+        ? `<figure><video controls preload="metadata" src="${url}" aria-label="${alt}"></video><figcaption>${alt}</figcaption></figure>`
+        : `<figure><a href="${url}" target="_blank" rel="noreferrer">Video</a><figcaption>${alt}</figcaption></figure>`;
+    })
+    .join("");
   const verification = page.body.verification?.verified
     ? `<p data-availability-verification="true">availability verified <time datetime="${escapeHtml(
         page.body.verification.availability_verified_at,
@@ -182,9 +194,13 @@ function renderListing(page) {
         page.body.media.gallery_count || 0,
       )}" data-tour-status="${escapeHtml(tour.available ? "available" : tour.review_status || "review_required")}">
         <a href="#listing-gallery">Photos</a>
+        ${floorPlans ? '<a href="#listing-floor-plans">Floor plans</a>' : ""}
+        ${videos ? '<a href="#listing-videos">Videos</a>' : ""}
         <a href="#listing-tour" aria-disabled="${escapeHtml(tour.available ? "false" : "true")}">360</a>
       </nav>
       <section id="listing-gallery" aria-label="Gallery" data-photo-carousel="true">${gallery}</section>
+      ${floorPlans ? `<section id="listing-floor-plans" aria-label="Floor plans" data-floor-plan-gallery="true">${floorPlans}</section>` : ""}
+      ${videos ? `<section id="listing-videos" aria-label="Videos" data-listing-videos="true" data-low-bandwidth="metadata-only">${videos}</section>` : ""}
       <section id="listing-tour" aria-label="360 tour" data-photo-sphere-viewer="${escapeHtml(
         tour.available ? tour.mount_target : "review_required",
       )}" data-tour-provider="${escapeHtml(tour.provider || "photo-sphere-viewer")}">

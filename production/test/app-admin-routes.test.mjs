@@ -172,6 +172,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_RECEIVED_AT: "2026-07-04T00:00:00Z",
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
+      MS_REALTY_MEDIA_REVIEW_LEDGER_PATH: tempJsonl("app-admin-media-reviews"),
       MS_REALTY_REDIRECT_APPROVALS_PATH: tempJsonl("app-admin-redirect-approvals"),
       MS_REALTY_REPLY_OUTBOX_PATH: tempJsonl("app-admin-replies"),
       MS_REALTY_SAVED_SEARCH_LEDGER_PATH: tempJsonl("app-admin-saved-searches"),
@@ -226,6 +227,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const seoEvidenceImportRoute = await import("../../app/api/admin/seo-evidence/import/route.js");
       const seoEvidenceTemplateRoute = await import("../../app/api/admin/seo-evidence/template/route.js");
       const listingEditRoute = await import("../../app/api/admin/listings/edit/route.js");
+      const mediaReviewRoute = await import("../../app/api/admin/media/reviews/route.js");
       const listingSlugRoute = await import("../../app/api/admin/listings/slug/route.js");
       const translationDraftRoute = await import("../../app/api/admin/translations/draft/route.js");
       const translationApproveRoute = await import("../../app/api/admin/translations/approve/route.js");
@@ -1198,6 +1200,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /data-seo-panel="true"/);
       assert.match(editorHtml, /data-translation-panel="true"/);
       assert.match(editorHtml, /data-media-review-panel="true"/);
+      assert.match(editorHtml, /data-media-manager="true"/);
+      assert.match(editorHtml, /action="\/api\/admin\/media\/reviews"/);
       assert.match(editorHtml, /data-tour-review-status=/);
       assert.match(editorHtml, /data-tour-editor-form="true"/);
       assert.match(editorHtml, /action="\/api\/admin\/tours\/approve"/);
@@ -1209,6 +1213,36 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /name="reviewer"/);
       assert.match(editorHtml, /data-tour-review-confirmation="true"/);
       assert.match(editorHtml, /data-listing-id="MS-CRAWL-0001"/);
+      const mediaAssetMatch = editorHtml.match(/data-media-asset="(media-[a-f0-9]{20})"/);
+      assert.ok(mediaAssetMatch, "listing editor must expose a stable reviewable media asset id");
+
+      const mediaReview = await mediaReviewRoute.POST(
+        new Request("https://example.test/api/admin/media/reviews", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            listingId: "MS-CRAWL-0001",
+            assetId: mediaAssetMatch[1],
+            decision: "publish",
+            kind: "floor_plan",
+            alt: "Human-reviewed floor plan for MS-CRAWL-0001.",
+            replacementUrl: "https://cdn.example.test/listings/MS-CRAWL-0001-floor-plan.webp",
+            reviewer: "media_editor",
+            reviewConfirmed: "on",
+          }),
+        }),
+      );
+      const mediaReviewBody = await mediaReview.json();
+      assert.equal(mediaReview.status, 201);
+      assert.equal(mediaReviewBody.review_status, "approved_by_human");
+      assert.equal(mediaReviewBody.kind, "floor_plan");
+
+      const editorAfterMediaReview = await listingEditorRoute.GET(
+        new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
+      );
+      const editorAfterMediaReviewHtml = await editorAfterMediaReview.text();
+      assert.match(editorAfterMediaReviewHtml, /data-media-public="true"/);
+      assert.match(editorAfterMediaReviewHtml, /MS-CRAWL-0001-floor-plan\.webp/);
 
       const edit = await listingEditRoute.POST(
         new Request("https://example.test/api/admin/listings/edit", {
@@ -1502,6 +1536,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         listing_edited: 1,
         listing_slug_changed: 1,
         tour_approved: 1,
+        media_reviewed: 1,
         viewing_booked: 1,
         viewing_follow_up_recorded: 1,
         seller_pipeline_outcome_recorded: 1,

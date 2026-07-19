@@ -113,6 +113,21 @@ const ADMIN_UI_COPY = {
     publishApproval: "Одобрение за публикуване",
     approvedForPublishing: "Одобрена за публикуване",
     notApprovedForPublishing: "Не е одобрена",
+    mediaManager: "Медиен мениджър",
+    mediaManagerHint: "Всяка публична снимка, схема или видео изисква преглед от човек. Изходният URL се запазва в одита.",
+    mediaDecision: "Решение",
+    publishMedia: "Одобри за публично показване",
+    keepMediaPrivate: "Остави скрито",
+    mediaKind: "Тип медия",
+    mediaAlt: "Alt текст или описание за достъпност",
+    replacementUrl: "Проверен заместващ URL (по избор)",
+    mediaReviewConfirmation: "Потвърждавам, че прегледах файла, типа и описанието.",
+    saveMediaReview: "Запази прегледа",
+    mediaReviewSaving: "Записване на прегледа…",
+    mediaReviewSaved: "Медийният преглед е записан.",
+    mediaReviewFailed: "Медийният преглед не беше записан.",
+    sourceAsset: "Изходен файл",
+    noReviewableMedia: "Няма медийни файлове за преглед.",
     tour360: "360 обиколка",
     tourStatus: "Статус на обиколката",
     tourPanoramaUrl: "URL на панорамата",
@@ -170,6 +185,7 @@ const ADMIN_UI_COPY = {
     minutesShort: "мин",
     noReportData: "Все още няма данни за този отчет.",
     auditActions: {
+      media_reviewed: "Прегледан медиен файл",
       broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_publication_scheduled: "Планирана промяна на публикация", listing_publication_cancelled: "Отменена промяна на публикация", listing_publication_executed: "Изпълнена промяна на публикация", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
@@ -186,7 +202,7 @@ const ADMIN_UI_COPY = {
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
-    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация" },
+    fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
   },
   ru: {
     urls: "URL-адреса",
@@ -273,6 +289,21 @@ const ADMIN_UI_COPY = {
     publishApproval: "Одобрение публикации",
     approvedForPublishing: "Одобрено к публикации",
     notApprovedForPublishing: "Не одобрено",
+    mediaManager: "Медиаменеджер",
+    mediaManagerHint: "Каждое публичное фото, план или видео требует проверки человеком. Исходный URL сохраняется в аудите.",
+    mediaDecision: "Решение",
+    publishMedia: "Одобрить для публикации",
+    keepMediaPrivate: "Оставить скрытым",
+    mediaKind: "Тип медиа",
+    mediaAlt: "Alt-текст или описание доступности",
+    replacementUrl: "Проверенный URL замены (необязательно)",
+    mediaReviewConfirmation: "Подтверждаю, что проверил файл, тип и описание.",
+    saveMediaReview: "Сохранить проверку",
+    mediaReviewSaving: "Сохранение проверки…",
+    mediaReviewSaved: "Проверка медиа сохранена.",
+    mediaReviewFailed: "Не удалось сохранить проверку медиа.",
+    sourceAsset: "Исходный файл",
+    noReviewableMedia: "Нет медиафайлов для проверки.",
     tour360: "360 тур",
     tourStatus: "Статус тура",
     tourPanoramaUrl: "URL панорамы",
@@ -330,6 +361,7 @@ const ADMIN_UI_COPY = {
     minutesShort: "мин",
     noReportData: "Для этого отчета пока нет данных.",
     auditActions: {
+      media_reviewed: "Медиафайл проверен",
       broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_publication_scheduled: "Изменение публикации запланировано", listing_publication_cancelled: "Изменение публикации отменено", listing_publication_executed: "Изменение публикации выполнено", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
@@ -346,7 +378,7 @@ const ADMIN_UI_COPY = {
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
-    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация" },
+    fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
   },
   en: {
     urls: "URLs",
@@ -433,6 +465,21 @@ const ADMIN_UI_COPY = {
     publishApproval: "Publication approval",
     approvedForPublishing: "Approved for publishing",
     notApprovedForPublishing: "Not approved",
+    mediaManager: "Media manager",
+    mediaManagerHint: "Every public photo, floor plan, or video requires human review. The source URL remains in the audit trail.",
+    mediaDecision: "Decision",
+    publishMedia: "Approve for public display",
+    keepMediaPrivate: "Keep hidden",
+    mediaKind: "Media type",
+    mediaAlt: "Alt text or accessibility caption",
+    replacementUrl: "Reviewed replacement URL (optional)",
+    mediaReviewConfirmation: "I confirm that I reviewed the file, type, and accessibility text.",
+    saveMediaReview: "Save media review",
+    mediaReviewSaving: "Saving media review…",
+    mediaReviewSaved: "Media review saved.",
+    mediaReviewFailed: "Could not save media review.",
+    sourceAsset: "Source asset",
+    noReviewableMedia: "There are no media assets to review.",
     tour360: "360 tour",
     tourStatus: "Tour status",
     tourPanoramaUrl: "Panorama URL",
@@ -490,6 +537,7 @@ const ADMIN_UI_COPY = {
     minutesShort: "min",
     noReportData: "There is no data for this report yet.",
     auditActions: {
+      media_reviewed: "Media asset reviewed",
       broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_publication_scheduled: "Publication change scheduled", listing_publication_cancelled: "Publication change cancelled", listing_publication_executed: "Publication change executed", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
@@ -506,7 +554,7 @@ const ADMIN_UI_COPY = {
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
-    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location" },
+    fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
   },
 };
 
@@ -2923,6 +2971,9 @@ function ListingEditorBody({ page }) {
   const tourPublished = tour.is_public === true;
   const tourStatus = tourPublished ? "approved" : tour.review_status || "review_required";
   const fallbackGalleryCount = (tour.fallback_gallery || []).length;
+  const reviewableMedia = (page.listing.media || [])
+    .filter((item) => ["photo", "floor_plan", "video"].includes(item.kind))
+    .slice(0, 50);
   const staleTranslations = page.translationTasks.filter((task) => task.status === "stale");
   const title = label(copy, "propertyEditor", "Property editor");
   const contentFields = page.editableFields.filter((field) => ["title", "h1", "description"].includes(field));
@@ -3056,6 +3107,86 @@ function ListingEditorBody({ page }) {
             [ui.tourFallbackGallery, fallbackGalleryCount, "camera", fallbackGalleryCount ? "sea" : "brick"],
           ],
         }),
+        h("p", { className: "adm-note" }, ui.mediaManagerHint),
+        h(
+          "section",
+          { className: "adm-media-manager", "aria-label": ui.mediaManager, "data-media-manager": "true" },
+          reviewableMedia.length
+            ? reviewableMedia.map((item) => {
+                const sourceUrl = item.asset_url || item.url || "";
+                const published = item.is_public === true;
+                return h(
+                  "article",
+                  {
+                    key: item.asset_id,
+                    className: "mk-card mk-card--sunken mk-card--pad-md adm-media-asset",
+                    "data-media-asset": item.asset_id,
+                    "data-media-kind": item.kind,
+                    "data-media-public": published ? "true" : "false",
+                  },
+                  h(
+                    "header",
+                    { className: "adm-media-asset__header" },
+                    h("div", null, h("strong", null, fieldText(ui, `media_kind_${item.kind}`)), h("small", { className: "crm-mono" }, item.asset_id)),
+                    h(StatusPill, { tone: published ? "success" : "sun" }, statusText(ui, item.review_status)),
+                  ),
+                  sourceUrl
+                    ? h("a", { href: sourceUrl, target: "_blank", rel: "noreferrer", className: "adm-media-asset__source" }, h(Icon, { name: "external-link", size: 15 }), ` ${ui.sourceAsset}`)
+                    : null,
+                  canEditContent
+                    ? h(
+                        "form",
+                        {
+                          method: "post",
+                          action: "/api/admin/media/reviews",
+                          className: "adm-form adm-media-review-form",
+                          "data-admin-mutation-form": "media-review",
+                          "data-admin-mutation-saving": ui.mediaReviewSaving,
+                          "data-admin-mutation-success": ui.mediaReviewSaved,
+                          "data-admin-mutation-failure": ui.mediaReviewFailed,
+                        },
+                        h("input", { type: "hidden", name: "listingId", defaultValue: page.listing.id }),
+                        h("input", { type: "hidden", name: "assetId", defaultValue: item.asset_id }),
+                        h(
+                          "label",
+                          null,
+                          ui.mediaDecision,
+                          h(
+                            "select",
+                            { name: "decision", defaultValue: published ? "publish" : "keep_private" },
+                            h("option", { value: "keep_private", selected: published ? undefined : true }, ui.keepMediaPrivate),
+                            h("option", { value: "publish", selected: published ? true : undefined }, ui.publishMedia),
+                          ),
+                        ),
+                        h(
+                          "label",
+                          null,
+                          ui.mediaKind,
+                          h(
+                            "select",
+                            { name: "kind", defaultValue: item.kind },
+                            ...["photo", "floor_plan", "video"].map((kind) =>
+                              h("option", { key: kind, value: kind, selected: item.kind === kind ? true : undefined }, fieldText(ui, `media_kind_${kind}`)),
+                            ),
+                          ),
+                        ),
+                        h("label", null, ui.mediaAlt, h("textarea", { name: "alt", rows: 2, defaultValue: item.alt || "" })),
+                        h("label", null, ui.replacementUrl, h("input", { type: "url", name: "replacementUrl", inputMode: "url", placeholder: "https://cdn.example.test/listing/asset.webp" })),
+                        h("label", null, label(copy, "reviewer", "Reviewer"), h("input", { name: "reviewer", required: true, defaultValue: currentOperatorId(page, "") })),
+                        h(
+                          "label",
+                          { className: "adm-check" },
+                          h("input", { type: "checkbox", name: "reviewConfirmed", required: true }),
+                          ` ${ui.mediaReviewConfirmation}`,
+                        ),
+                        h("p", { className: "adm-form__status", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                        h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "shield-check", size: 16 }), h("span", null, ui.saveMediaReview)),
+                      )
+                    : h("p", { className: "adm-note", role: "note", "data-read-only-role": "true" }, ui.readOnlyAccess),
+                );
+              })
+            : h("p", { className: "adm-note", "data-media-empty": "true" }, ui.noReviewableMedia),
+        ),
         canEditContent
           ? h(
               "form",

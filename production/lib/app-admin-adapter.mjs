@@ -70,6 +70,13 @@ import {
   readListingEdits,
 } from "./listing-edits.mjs";
 import {
+  DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
+  appendMediaReview,
+  applyMediaReviews,
+  createMediaReview,
+  readMediaReviews,
+} from "./media-reviews.mjs";
+import {
   DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
   appendListingPublicationSchedule,
   buildListingPublicationScheduleQueue,
@@ -202,6 +209,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
     listingPublicationSchedulePath:
       env.MS_REALTY_LISTING_PUBLICATION_SCHEDULE_PATH || DEFAULT_LISTING_PUBLICATION_SCHEDULE_PATH,
     redirectApprovalPath: env.MS_REALTY_REDIRECT_APPROVALS_PATH || DEFAULT_REDIRECT_APPROVALS_PATH,
@@ -420,7 +428,10 @@ function listingEditInput(input) {
 }
 
 function currentSeed(config) {
-  return applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath));
+  return applyMediaReviews(
+    applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
+    readMediaReviews(config.mediaReviewLedgerPath),
+  );
 }
 
 function leadJourneyContext(config) {
@@ -994,6 +1005,30 @@ function appendEditorChange(input, config) {
   const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
   const result = createListingEdit(currentSeed(config), attributedListingEditInput(input, config), translationTasks, config.editedAt);
   return persistEditorChange(result, config);
+}
+
+function appendMediaReviewEntry(input, config) {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const review = createMediaReview(currentSeed(config), attributed, config.reviewedAt);
+  const persisted = appendMediaReview(review, { filePath: config.mediaReviewLedgerPath });
+  if (!persisted.idempotent) {
+    recordAudit(
+      {
+        action: "media_reviewed",
+        actor: persisted.reviewer,
+        objectType: "media_asset",
+        objectId: persisted.asset_id,
+        metadata: {
+          listing_id: persisted.listing_id,
+          decision: persisted.decision,
+          kind: persisted.kind,
+          is_public: persisted.is_public,
+        },
+      },
+      config,
+    );
+  }
+  return persisted;
 }
 
 function appendBulkListingStatusChanges(input, config) {
@@ -1883,6 +1918,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
       const result = appendEditorChange(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.edit.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
+      const result = appendMediaReviewEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {
       const result = appendBulkListingStatusChanges(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

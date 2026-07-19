@@ -4,6 +4,7 @@ import { loadLocaleRegistry } from "./locales.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
+import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
 import { searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
@@ -17,6 +18,7 @@ export function appRouterConfigFromEnv(env = process.env) {
   return {
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
+    mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
@@ -33,7 +35,10 @@ function currentRegistry(config) {
 }
 
 function currentSeed(config) {
-  return applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath));
+  return applyMediaReviews(
+    applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
+    readMediaReviews(config.mediaReviewLedgerPath),
+  );
 }
 
 function currentTranslationTasks(config) {

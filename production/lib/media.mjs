@@ -52,11 +52,33 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
 
 function publicAsset(item) {
   return {
-    url: item.asset_url,
+    url: item.asset_url || item.url,
     alt: item.alt || "Property photo",
     width: item.width,
     height: item.height,
   };
+}
+
+function reviewedPublicAsset(item = {}, kind) {
+  if (item.kind !== kind || item.is_public !== true || item.review_status !== "approved_by_human") return false;
+  const url = item.asset_url || item.url || "";
+  if (!httpsUrl(url)) return false;
+  if (!String(item.alt || "").trim()) return false;
+  if (kind === "video") return /\.(?:m3u8|mov|mp4|webm)(?:[?#]|$)|(?:youtube\.com|youtu\.be|vimeo\.com)/i.test(url);
+  return /\.(?:avif|gif|jpe?g|png|webp)(?:[?#]|$)/i.test(url);
+}
+
+function uniqueReviewedAssets(media, kind) {
+  const seen = new Set();
+  return media
+    .filter((item) => reviewedPublicAsset(item, kind))
+    .filter((item) => {
+      const url = item.asset_url || item.url;
+      if (seen.has(url)) return false;
+      seen.add(url);
+      return true;
+    })
+    .map((item) => ({ ...publicAsset(item), kind }));
 }
 
 // Imported pages frequently include operational imagery (taxi, phone, logos)
@@ -183,8 +205,8 @@ export function publicMediaLibrary(media = [], { fallback = null } = {}) {
   return {
     gallery,
     gallery_count: gallery.length,
-    floor_plans: [],
-    videos: [],
+    floor_plans: uniqueReviewedAssets(media, "floor_plan"),
+    videos: uniqueReviewedAssets(media, "video"),
     review: mediaWorkflow(media),
   };
 }

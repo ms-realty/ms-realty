@@ -22,6 +22,7 @@ import { assertSellerPipelineOutcomes, readSellerPipelineOutcomes, resetSellerPi
 import { assertDealLedger, readDeals, resetDealLedger } from "../lib/deal-ledger.mjs";
 import { assertBrokerContacts, readBrokerContacts, resetBrokerContacts } from "../lib/broker-contacts.mjs";
 import { assertTourApprovals, readTourApprovals, resetTourApprovals } from "../lib/tours.mjs";
+import { assertMediaReviews, mediaAssetId, readMediaReviews, resetMediaReviews } from "../lib/media-reviews.mjs";
 import { assertEventLedger, readEventLedger, resetEventLedger } from "../lib/events.mjs";
 import { assertConsentLedger, readConsentLedger, resetConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertAuditLog, readAuditLog, resetAuditLog } from "../lib/audit-log.mjs";
@@ -132,6 +133,12 @@ function tempBrokerContacts() {
 function tempTourApprovals() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-tour-approvals-`)}/tour-approvals.jsonl`;
   resetTourApprovals(file);
+  return file;
+}
+
+function tempMediaReviews() {
+  const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-media-reviews-`)}/media-reviews.jsonl`;
+  resetMediaReviews(file);
   return file;
 }
 
@@ -278,6 +285,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   const dealLedgerPath = tempDeals();
   const brokerContactLedgerPath = tempBrokerContacts();
   const tourApprovalLedgerPath = tempTourApprovals();
+  const mediaReviewLedgerPath = tempMediaReviews();
   const eventLedgerPath = tempEvents();
   const consentLedgerPath = tempConsents();
   const auditLogPath = tempAuditLog();
@@ -300,6 +308,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     dealLedgerPath,
     brokerContactLedgerPath,
     tourApprovalLedgerPath,
+    mediaReviewLedgerPath,
     eventLedgerPath,
     consentLedgerPath,
     auditLogPath,
@@ -716,6 +725,24 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     url: "/admin/migration/review?locale=bg",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const reviewedAssetId = mediaAssetId({ asset_url: smoke.listing.body.body.media.gallery[0].url });
+  smoke.mediaReview = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/media/reviews",
+    headers: { authorization: "Bearer local-admin-smoke" },
+    body: {
+      listingId: "MS-CRAWL-0001",
+      assetId: reviewedAssetId,
+      decision: "publish",
+      kind: "floor_plan",
+      alt: "Human-reviewed floor plan for MS-CRAWL-0001.",
+      replacementUrl: "https://cdn.example.test/listings/MS-CRAWL-0001-floor-plan.webp",
+      reviewer: "media_editor",
+      reviewConfirmed: true,
+    },
+  });
+  smoke.listingAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" });
+  smoke.listingHtmlAfterMediaReview = await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001?format=html" });
 
   assert.equal(assertHttpSmoke(smoke), true);
   assert.equal(smoke.health.body.status, "ok");
@@ -807,6 +834,12 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.listingAfterTourApproval.body.body.media.tour.mount_target, "psv-listing-tour");
   assert.match(smoke.listingHtmlAfterTourApproval.body, /data-photo-sphere-viewer="psv-listing-tour"/);
   assert.match(smoke.listingHtmlAfterTourApproval.body, /data-panorama-url="https:\/\/cdn\.example\.test\/tours\/MS-CRAWL-0001\.jpg"/);
+  assert.equal(smoke.mediaReview.status, 201);
+  assert.equal(smoke.mediaReview.body.review_status, "approved_by_human");
+  assert.equal(smoke.listingAfterMediaReview.body.body.media.floor_plans.length, 1);
+  assert.equal(smoke.listingAfterMediaReview.body.body.media.floor_plans[0].reviewer, undefined);
+  assert.match(smoke.listingHtmlAfterMediaReview.body, /data-floor-plan-gallery="true"/);
+  assert.match(smoke.listingHtmlAfterMediaReview.body, /MS-CRAWL-0001-floor-plan\.webp/);
   assert.equal(smoke.slugChange.body.new_path, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugRedirect.headers.location, "/he/properties/MS-CRAWL-0001");
   assert.equal(smoke.slugChangeUnauthorized.status, 401);
@@ -825,6 +858,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(assertDealLedger(readDeals(dealLedgerPath)), true);
   assert.equal(assertBrokerContacts(readBrokerContacts(brokerContactLedgerPath)), true);
   assert.equal(assertTourApprovals(readTourApprovals(tourApprovalLedgerPath)), true);
+  assert.equal(assertMediaReviews(readMediaReviews(mediaReviewLedgerPath)), true);
   assert.equal(assertEventLedger(readEventLedger(eventLedgerPath)), true);
   assert.equal(assertConsentLedger(readConsentLedger(consentLedgerPath)), true);
   assert.equal(assertSlugHistory(readSlugHistory(slugHistoryPath)), true);
@@ -841,6 +875,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     broker_contact_approved: 1,
     hermes_model_call: 1,
     tour_approved: 1,
+    media_reviewed: 1,
     listing_slug_changed: 1,
     reply_approved: 2,
     viewing_booked: 1,

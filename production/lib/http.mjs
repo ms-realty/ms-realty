@@ -83,6 +83,7 @@ import {
   createListingEdit,
   readListingEdits,
 } from "./listing-edits.mjs";
+import { appendMediaReview, applyMediaReviews, createMediaReview, readMediaReviews } from "./media-reviews.mjs";
 import {
   appendListingPublicationSchedule,
   buildListingPublicationScheduleQueue,
@@ -387,6 +388,7 @@ export function createHttpApp({
   languageRequestPath = null,
   translationLedgerPath = null,
   listingEditLedgerPath = null,
+  mediaReviewLedgerPath = null,
   listingPublicationSchedulePath = null,
   viewingLedgerPath = null,
   viewingFollowUpLedgerPath = null,
@@ -434,7 +436,11 @@ export function createHttpApp({
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
-  const currentSeed = () => applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined));
+  const currentSeed = () =>
+    applyMediaReviews(
+      applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
+      readMediaReviews(mediaReviewLedgerPath || undefined),
+    );
   const currentLeads = () =>
     withLeadContacts(readLeadLedger(leadLedgerPath || undefined), {
       filePath: leadContactVaultPath,
@@ -1649,6 +1655,32 @@ export function createHttpApp({
           });
         }
         return adminJson(edit.idempotent ? 200 : 201, { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
+        const review = createMediaReview(currentSeed(), input, reviewedAt);
+        const persisted = appendMediaReview(review, { filePath: mediaReviewLedgerPath || undefined });
+        if (!persisted.idempotent) {
+          recordAudit({
+            action: "media_reviewed",
+            actor: persisted.reviewer,
+            objectType: "media_asset",
+            objectId: persisted.asset_id,
+            metadata: {
+              listing_id: persisted.listing_id,
+              decision: persisted.decision,
+              kind: persisted.kind,
+              is_public: persisted.is_public,
+            },
+          });
+        }
+        return adminJson(persisted.idempotent ? 200 : 201, persisted);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

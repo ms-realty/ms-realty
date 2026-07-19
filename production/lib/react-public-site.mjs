@@ -958,6 +958,10 @@ function listingVerificationDate(value, localeCode) {
   return new Intl.DateTimeFormat(language, { dateStyle: "medium", timeZone: "Europe/Sofia" }).format(new Date(value));
 }
 
+function nativeListingVideo(url = "") {
+  return /\.(?:mov|mp4|webm)(?:[?#]|$)/i.test(url);
+}
+
 function ListingBody({ page }) {
   const labels = uiLabels(page);
   const ui = uiCopyFor(page.locale);
@@ -965,6 +969,8 @@ function ListingBody({ page }) {
   const facts = page.body.facts || {};
   const tour = page.body.media.tour || {};
   const gallery = (page.body.media.gallery || []).slice(0, 12);
+  const floorPlans = page.body.media.floor_plans || [];
+  const videos = page.body.media.videos || [];
   const channels = page.body.actions.direct_contact.channels || [];
   const brokerChannels = channels.filter((channel) => channel.enabled);
   const tone = toneFor(page.body.facts?.id || page.path);
@@ -1149,7 +1155,7 @@ function ListingBody({ page }) {
             h("p", { className: "ld-desc", "data-listing-description": "true" }, page.body.description || ""),
           ),
           hasDetailFacts ? h("div", { className: "ld-sec" }, h("h2", null, labels.listingMediaFacts), factsList(facts, labels, page.locale)) : null,
-          tour.available
+          tour.available || floorPlans.length || videos.length
             ? h(
                 "nav",
                 {
@@ -1159,7 +1165,9 @@ function ListingBody({ page }) {
                   "data-tour-status": "available",
                 },
                 h("a", { className: "mk-tab", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 16 }), labels.gallery),
-                h("a", { className: "mk-tab", href: "#listing-tour" }, h(Icon, { name: "globe", size: 16 }), labels.tour360),
+                floorPlans.length ? h("a", { className: "mk-tab", href: "#listing-floor-plans" }, h(Icon, { name: "file-check", size: 16 }), labels.floorPlans) : null,
+                videos.length ? h("a", { className: "mk-tab", href: "#listing-videos" }, h(Icon, { name: "external-link", size: 16 }), labels.videos) : null,
+                tour.available ? h("a", { className: "mk-tab", href: "#listing-tour" }, h(Icon, { name: "globe", size: 16 }), labels.tour360) : null,
               )
             : null,
           h(
@@ -1167,6 +1175,29 @@ function ListingBody({ page }) {
             { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
             ...gallery.map((image) => h("img", { key: image.url, src: image.url, alt: image.alt || page.body.h1, loading: "lazy" })),
           ),
+          floorPlans.length
+            ? h(
+                "section",
+                { id: "listing-floor-plans", className: "ld-gallery-full", "aria-label": labels.floorPlans, "data-floor-plan-gallery": "true" },
+                ...floorPlans.map((plan) => h("img", { key: plan.url, src: plan.url, alt: plan.alt, loading: "lazy" })),
+              )
+            : null,
+          videos.length
+            ? h(
+                "section",
+                { id: "listing-videos", className: "ld-videos", "aria-label": labels.videos, "data-listing-videos": "true", "data-low-bandwidth": "metadata-only" },
+                ...videos.map((video) =>
+                  h(
+                    "figure",
+                    { key: video.url, className: "mk-card mk-card--sunken mk-card--pad-md" },
+                    nativeListingVideo(video.url)
+                      ? h("video", { controls: true, preload: "metadata", src: video.url, "aria-label": video.alt })
+                      : h("a", { className: "mk-btn mk-btn--secondary mk-btn--md", href: video.url, target: "_blank", rel: "noreferrer" }, h(Icon, { name: "external-link", size: 16 }), labels.videos),
+                    h("figcaption", null, video.alt),
+                  ),
+                ),
+              )
+            : null,
           tour.available
             ? h(
                 "section",
