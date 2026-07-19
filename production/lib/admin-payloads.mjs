@@ -54,6 +54,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     leadSla: providedLeadSla,
     leadSlaGeneratedAt,
     operatorId,
+    leadPipelineQueue: providedLeadPipelineQueue,
     replyDeliveryQueue: providedReplyDeliveryQueue,
     viewingFollowUpQueue: providedViewingFollowUpQueue,
     sellerPipelineQueue: providedSellerPipelineQueue,
@@ -74,6 +75,13 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       rows: [],
       states: [],
       summary: { total: data.replies.length, queued: data.replies.length, failed: 0, sent: 0 },
+    };
+  const leadPipelineQueue =
+    providedLeadPipelineQueue ||
+    {
+      rows: [],
+      states: [],
+      summary: { total: 0, open: 0, overdue: 0, buyers_open: 0, renters_open: 0, lost: 0, closed: 0, qualified: 0 },
     };
   const viewingFollowUpQueue =
     providedViewingFollowUpQueue ||
@@ -123,6 +131,7 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
     workspace: operatorId ? { ...workspace, operator_id: operatorId } : workspace,
     ...payloadData,
     leadSla,
+    leadPipelineQueue,
     replyDeliveryQueue,
     viewingFollowUpQueue,
     sellerPipelineQueue,
@@ -133,6 +142,10 @@ export function renderAdminLeadsPayload(registry, requestedLocale, data) {
       repliesQueued: replyDeliveryQueue.summary.queued,
       repliesFailed: replyDeliveryQueue.summary.failed,
       repliesSent: replyDeliveryQueue.summary.sent,
+      buyerPipelineOpen: leadPipelineQueue.summary.buyers_open,
+      renterPipelineOpen: leadPipelineQueue.summary.renters_open,
+      leadPipelineOverdue: leadPipelineQueue.summary.overdue,
+      leadPipelineQualified: leadPipelineQueue.summary.qualified,
       leadSlaManagerEscalations: leadSla.summary.manager_escalation_required,
       leadSlaReminders: leadSla.summary.reminder_required,
       languageRequests: data.languageRequests.length,

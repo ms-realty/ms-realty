@@ -400,7 +400,75 @@
         });
     });
   }
+  function initLeadPipelineFilters() {
+    var tabs = document.querySelector("[data-pipeline-tabs]");
+    var grid = document.querySelector("[data-pipeline-grid]");
+    if (!tabs || !grid) return;
+    var buttons = tabs.querySelectorAll("[data-pipeline-filter]");
+    var cards = grid.querySelectorAll("[data-pipeline-card]");
+    function applyFilter(filter) {
+      for (var i = 0; i < cards.length; i += 1) {
+        var card = cards[i];
+        var matches =
+          filter === "open"
+            ? card.getAttribute("data-pipeline-status") === "open"
+            : card.getAttribute("data-pipeline-kind") === filter || card.getAttribute("data-pipeline-status") === filter;
+        card.hidden = !matches;
+      }
+      for (var j = 0; j < buttons.length; j += 1) {
+        var on = buttons[j].getAttribute("data-pipeline-filter") === filter;
+        buttons[j].setAttribute("data-on", on ? "1" : "0");
+        buttons[j].setAttribute("aria-pressed", on ? "true" : "false");
+      }
+    }
+    tabs.addEventListener("click", function (event) {
+      var button = event.target.closest("[data-pipeline-filter]");
+      if (!button) return;
+      applyFilter(button.getAttribute("data-pipeline-filter") || "open");
+    });
+    applyFilter("open");
+  }
+  function initAdminMutationForms() {
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.hasAttribute("data-admin-mutation-form")) return;
+      event.preventDefault();
+      var buttons = form.querySelectorAll('[type="submit"]');
+      var status = form.querySelector("[data-admin-mutation-status]");
+      var saving = form.getAttribute("data-admin-mutation-saving") || "Saving…";
+      var success = form.getAttribute("data-admin-mutation-success") || "Saved.";
+      var failure = form.getAttribute("data-admin-mutation-failure") || "Could not save.";
+      for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = true;
+      form.setAttribute("aria-busy", "true");
+      if (status) { status.textContent = saving; status.setAttribute("data-state", "saving"); }
+      fetch(form.getAttribute("action"), {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify(tourPayload(form)),
+      })
+        .then(function (response) {
+          return response.json().catch(function () { return {}; }).then(function (payload) {
+            if (!response.ok) throw new Error(payload.message || failure);
+            return payload;
+          });
+        })
+        .then(function () {
+          if (status) { status.textContent = success; status.setAttribute("data-state", "success"); }
+          window.setTimeout(function () { window.location.reload(); }, 150);
+        })
+        .catch(function (error) {
+          if (status) { status.textContent = error.message || failure; status.setAttribute("data-state", "error"); }
+        })
+        .then(function () {
+          form.removeAttribute("aria-busy");
+          for (var i = 0; i < buttons.length; i += 1) buttons[i].disabled = false;
+        });
+    });
+  }
   initLeadQueueFilters();
+  initLeadPipelineFilters();
+  initAdminMutationForms();
   initTourEditor();
   initViewingFollowUpForms();
   initSellerPipelineOutcomeForms();

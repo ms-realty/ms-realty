@@ -15,6 +15,11 @@ import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
+import {
+  appendLeadPipelineOutcome,
+  buildLeadPipelineQueue,
+  readLeadPipelineOutcomes,
+} from "./lead-pipeline-outcomes.mjs";
 import { appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
 import {
   appendReplyDeliveryOutcome,
@@ -329,6 +334,7 @@ export function createHttpApp({
   routeMap = loadLegacyRouteMap(),
   migrationReviewDashboard = loadMigrationReviewDashboard(),
   leadLedgerPath = null,
+  leadPipelineOutcomeLedgerPath = null,
   leadContactVaultPath = null,
   leadContactKey = null,
   publicContactVaultPath = null,
@@ -371,6 +377,7 @@ export function createHttpApp({
   viewingFollowUpAt,
   savedAt,
   publicRequestOutcomeAt,
+  leadPipelineOutcomeAt,
   replyDeliveredAt,
   sellerPipelineCreatedAt,
   sellerPipelineOutcomeAt,
@@ -448,9 +455,21 @@ export function createHttpApp({
       ),
     };
   };
+  const currentLeadPipelineQueue = () =>
+    buildLeadPipelineQueue(
+      {
+        leads: currentLeads(),
+        outcomes: readLeadPipelineOutcomes(leadPipelineOutcomeLedgerPath || undefined),
+        viewings: readViewings(viewingLedgerPath || undefined),
+        viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
+        deals: readDeals(dealLedgerPath || undefined),
+      },
+      { now: leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString() },
+    );
   const currentAdminLeadPayload = (requestedLocale, operatorId = null) =>
     renderAdminLeadsPayload(activeRegistry, requestedLocale, {
       leads: currentLeads(),
+      leadPipelineQueue: currentLeadPipelineQueue(),
       ...currentReplyData(),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
       translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
@@ -474,6 +493,20 @@ export function createHttpApp({
       metadata: {
         title: `${payload.workspace.copy.requestsWorkspace} | MS Realty`,
         description: payload.workspace.copy.requestsDescription,
+        robots: "noindex,nofollow",
+      },
+    };
+  };
+  const currentPipelinePayload = (requestedLocale, operatorId = null) => {
+    const payload = currentAdminLeadPayload(requestedLocale, operatorId);
+    return {
+      ...payload,
+      kind: "admin_lead_pipeline",
+      path: "/admin/pipeline",
+      canonical: "/admin/pipeline",
+      metadata: {
+        title: `${payload.workspace.copy.pipelineWorkspace} | MS Realty`,
+        description: payload.workspace.copy.pipelineDescription,
         robots: "noindex,nofollow",
       },
     };
@@ -757,6 +790,15 @@ export function createHttpApp({
         adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal?.id || null)),
         "text/html; charset=utf-8",
       );
+    }
+
+    if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal?.id || null);
+      if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
     }
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
@@ -1495,6 +1537,51 @@ export function createHttpApp({
       }
     }
 
+    if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
+        const result = appendLeadPipelineOutcome(
+          {
+            leads: readLeadLedger(leadLedgerPath || undefined),
+            viewings: readViewings(viewingLedgerPath || undefined),
+            viewingFollowUps: readViewingFollowUps(viewingFollowUpLedgerPath || undefined),
+            deals: readDeals(dealLedgerPath || undefined),
+          },
+          bindAuthenticatedOperator(parseBody(request), principal),
+          { filePath: leadPipelineOutcomeLedgerPath || undefined, recordedAt },
+        );
+        const existingAudit = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === result.outcome.id,
+            )
+          : false;
+        if (!existingAudit) {
+          recordAudit(
+            {
+              action: "lead_pipeline_outcome_recorded",
+              actor: result.outcome.actor,
+              objectType: "lead_pipeline_outcome",
+              objectId: result.outcome.id,
+              locale: result.lead_pipeline.original_language,
+              metadata: {
+                lead_id: result.outcome.lead_id,
+                pipeline: result.outcome.pipeline,
+                action: result.outcome.action,
+                from_stage: result.outcome.from_stage,
+                to_stage: result.outcome.to_stage,
+                next_follow_up_at: result.outcome.next_follow_up_at,
+              },
+            },
+            recordedAt,
+          );
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
@@ -1512,20 +1599,22 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const input = parseJsonBody(request);
+        const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
         const viewing = appendViewing(readLeadLedger(leadLedgerPath || undefined), input, {
           filePath: viewingLedgerPath || undefined,
           bookedAt,
         });
-        recordAudit({
-          action: "viewing_booked",
-          actor: viewing.broker,
-          objectType: "viewing",
-          objectId: viewing.id,
-          locale: viewing.original_language,
-          metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
-        });
-        return adminJson(201, viewing);
+        if (!viewing.idempotent) {
+          recordAudit({
+            action: "viewing_booked",
+            actor: viewing.broker,
+            objectType: "viewing",
+            objectId: viewing.id,
+            locale: viewing.original_language,
+            metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
+          });
+        }
+        return adminJson(viewing.idempotent ? 200 : 201, viewing);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
@@ -1644,19 +1733,22 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const deal = appendClosedDeal(readLeadLedger(leadLedgerPath || undefined), parseJsonBody(request), {
+        const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
+        const deal = appendClosedDeal(readLeadLedger(leadLedgerPath || undefined), input, {
           filePath: dealLedgerPath || undefined,
           closedAt: dealClosedAt,
         });
-        recordAudit({
-          action: "deal_closed",
-          actor: deal.broker,
-          objectType: "deal",
-          objectId: deal.id,
-          locale: deal.original_language,
-          metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
-        });
-        return adminJson(201, deal);
+        if (!deal.idempotent) {
+          recordAudit({
+            action: "deal_closed",
+            actor: deal.broker,
+            objectType: "deal",
+            objectId: deal.id,
+            locale: deal.original_language,
+            metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
+          });
+        }
+        return adminJson(deal.idempotent ? 200 : 201, deal);
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

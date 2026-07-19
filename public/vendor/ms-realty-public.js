@@ -222,6 +222,7 @@
     if (error) error.remove();
     if (form.elements.source) form.elements.source.value = lead.getAttribute("data-lead-source") || form.elements.source.value;
     if (form.elements.intent) form.elements.intent.value = intent;
+    if (form.elements.leadType) form.elements.leadType.value = lead.getAttribute("data-lead-type") || "buyer";
     if (form.elements.listingReference) form.elements.listingReference.value = lead.getAttribute("data-listing-reference") || "";
     if (channel) channel.value = intent === "inquiry" ? lead.getAttribute("data-contact-preference") || "phone" : "phone";
     if (channelGroup) channelGroup.hidden = intent !== "inquiry";

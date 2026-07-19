@@ -33,6 +33,7 @@ x-app-environment: &app-environment
   MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH: /runtime-data/language-requests.jsonl
   MS_REALTY_LEAD_LEDGER_PATH: /runtime-data/lead-ledger.jsonl
   MS_REALTY_LEAD_CONTACT_VAULT_PATH: /runtime-data/lead-contact-vault.jsonl
+  MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: /runtime-data/lead-pipeline-outcomes.jsonl
   MS_REALTY_PUBLIC_CONTACT_VAULT_PATH: /runtime-data/public-contact-vault.jsonl
   MS_REALTY_LISTING_EDIT_LEDGER_PATH: /runtime-data/listing-edits.jsonl
   MS_REALTY_LISTING_QUALITY_REVIEW_PATH: /runtime-evidence/listing-quality-review.csv

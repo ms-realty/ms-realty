@@ -87,14 +87,17 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Провереният отговор не можа да бъде поставен на опашка.",
     skipToContent: "Към съдържанието",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
+      broker_contact_approved: "Одобрен контакт на брокер", deal_closed: "Затворена сделка", deployable_redirects_exported: "Експортирани пренасочвания", hermes_model_call: "Заявена чернова от Hermes", launch_readiness_exported: "Експортирана готовност за пускане", listing_edited: "Редактирана обява", listing_quality_imported: "Импортиран преглед на качеството", listing_slug_changed: "Променен адрес на обява", lead_pipeline_outcome_recorded: "Записано действие за купувач или наемател", live_service_provisioning_report_imported: "Импортиран отчет за услугите", live_service_report_imported: "Импортиран отчет от работеща услуга", locale_created: "Добавен език", payload_runtime_report_imported: "Импортиран отчет от Payload", public_request_outcome_recorded: "Записан резултат за заявка от сайта", redirect_approval_created: "Одобрено пренасочване", redirect_approvals_imported: "Импортирани одобрения на пренасочвания", reply_approved: "Одобрен отговор", reply_delivery_recorded: "Записано изпращане на отговор", seller_pipeline_outcome_recorded: "Записан резултат за продавач", seo_evidence_imported: "Импортирани SEO данни", tour_approved: "Одобрена 360 обиколка", translation_drafted: "Създадена чернова на превод", translation_approved: "Одобрен превод", translation_published: "Публикуван превод", viewing_booked: "Насрочен оглед", viewing_follow_up_recorded: "Записано действие след оглед",
     },
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане",
-      email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
+      email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Друг канал",
     },
     statuses: {
-      buyer: "Купувач", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
+      buyer: "Купувач", renter: "Наемател", seller: "Продавач", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
+      new: "Ново", inquiry: "Запитване", qualified: "Квалифицирано", viewing_booked: "Насрочен оглед", viewed: "Проведен оглед", offer: "Оферта", due_diligence: "Правна проверка", contract: "Договор", application: "Кандидатура", lease: "Договор за наем", lost: "Загубено",
+      qualify: "Квалифициране", book_viewing: "Насрочване на оглед", complete_viewing: "Провеждане на оглед", record_offer: "Записване на оферта", start_due_diligence: "Начало на проверка", sign_contract: "Подписване на договор", record_application: "Записване на кандидатура", sign_lease: "Подписване на наем", close_deal: "Затваряне на сделка",
+      cash: "В брой", mortgage: "Ипотека", preapproved: "Предварително одобрено", not_applicable: "Не е приложимо",
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
@@ -175,14 +178,17 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Не удалось поставить проверенный ответ в очередь.",
     skipToContent: "К содержанию",
     auditActions: {
-      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
+      broker_contact_approved: "Одобрен контакт брокера", deal_closed: "Сделка закрыта", deployable_redirects_exported: "Редиректы экспортированы", hermes_model_call: "Запрошен черновик Hermes", launch_readiness_exported: "Готовность к запуску экспортирована", listing_edited: "Объект отредактирован", listing_quality_imported: "Проверка качества импортирована", listing_slug_changed: "Адрес объекта изменен", lead_pipeline_outcome_recorded: "Действие по покупателю или арендатору записано", live_service_provisioning_report_imported: "Отчет настройки сервисов импортирован", live_service_report_imported: "Отчет рабочего сервиса импортирован", locale_created: "Язык добавлен", payload_runtime_report_imported: "Отчет Payload импортирован", public_request_outcome_recorded: "Результат заявки с сайта записан", redirect_approval_created: "Редирект одобрен", redirect_approvals_imported: "Одобрения редиректов импортированы", reply_approved: "Ответ одобрен", reply_delivery_recorded: "Отправка ответа записана", seller_pipeline_outcome_recorded: "Результат по продавцу записан", seo_evidence_imported: "SEO-данные импортированы", tour_approved: "360 тур одобрен", translation_drafted: "Черновик перевода создан", translation_approved: "Перевод одобрен", translation_published: "Перевод опубликован", viewing_booked: "Просмотр назначен", viewing_follow_up_recorded: "Действие после просмотра записано",
     },
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок",
-      email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber",
+      email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Другой канал",
     },
     statuses: {
-      buyer: "Покупатель", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
+      buyer: "Покупатель", renter: "Арендатор", seller: "Продавец", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
+      new: "Новая", inquiry: "Запрос", qualified: "Квалифицирована", viewing_booked: "Просмотр назначен", viewed: "Просмотр проведен", offer: "Предложение", due_diligence: "Проверка", contract: "Договор", application: "Заявка", lease: "Договор аренды", lost: "Потеряна",
+      qualify: "Квалифицировать", book_viewing: "Назначить просмотр", complete_viewing: "Провести просмотр", record_offer: "Записать предложение", start_due_diligence: "Начать проверку", sign_contract: "Подписать договор", record_application: "Записать заявку", sign_lease: "Подписать аренду", close_deal: "Закрыть сделку",
+      cash: "Наличные", mortgage: "Ипотека", preapproved: "Предварительно одобрено", not_applicable: "Не применимо",
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
@@ -263,14 +269,17 @@ const ADMIN_UI_COPY = {
     replyQueueFailed: "Could not queue the reviewed reply.",
     skipToContent: "Skip to content",
     auditActions: {
-      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
+      broker_contact_approved: "Broker contact approved", deal_closed: "Deal closed", deployable_redirects_exported: "Redirects exported", hermes_model_call: "Hermes draft requested", launch_readiness_exported: "Launch readiness exported", listing_edited: "Listing edited", listing_quality_imported: "Listing quality review imported", listing_slug_changed: "Listing URL changed", lead_pipeline_outcome_recorded: "Buyer or renter action recorded", live_service_provisioning_report_imported: "Service provisioning report imported", live_service_report_imported: "Live service report imported", locale_created: "Locale added", payload_runtime_report_imported: "Payload runtime report imported", public_request_outcome_recorded: "Website request outcome recorded", redirect_approval_created: "Redirect approved", redirect_approvals_imported: "Redirect approvals imported", reply_approved: "Reply approved", reply_delivery_recorded: "Reply delivery recorded", seller_pipeline_outcome_recorded: "Seller outcome recorded", seo_evidence_imported: "SEO evidence imported", tour_approved: "360 tour approved", translation_drafted: "Translation draft created", translation_approved: "Translation approved", translation_published: "Translation published", viewing_booked: "Viewing booked", viewing_follow_up_recorded: "Viewing follow-up recorded",
     },
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request",
-      email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber",
+      email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Other channel",
     },
     statuses: {
-      buyer: "Buyer", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
+      buyer: "Buyer", renter: "Renter", seller: "Seller", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
+      new: "New", inquiry: "Inquiry", qualified: "Qualified", viewing_booked: "Viewing booked", viewed: "Viewed", offer: "Offer", due_diligence: "Due diligence", contract: "Contract", application: "Application", lease: "Lease", lost: "Lost",
+      qualify: "Qualify", book_viewing: "Book viewing", complete_viewing: "Complete viewing", record_offer: "Record offer", start_due_diligence: "Start due diligence", sign_contract: "Sign contract", record_application: "Record application", sign_lease: "Sign lease", close_deal: "Close deal",
+      cash: "Cash", mortgage: "Mortgage", preapproved: "Pre-approved", not_applicable: "Not applicable",
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
@@ -426,6 +435,7 @@ function PageHeader({ title, subtitle, children }) {
 const NAV_ROUTES = [
   { id: "today", module: "crm", path: "/admin/today", icon: "layout-dashboard", kind: "admin_today" },
   { id: "lead_inbox", module: "crm", path: "/admin/leads", icon: "inbox", kind: "admin_lead_inbox" },
+  { id: "lead_pipeline", module: "crm", path: "/admin/pipeline", icon: "kanban-square", kind: "admin_lead_pipeline" },
   { id: "requests", module: "crm", path: "/admin/requests", icon: "bell", kind: "admin_requests" },
   { id: "viewings", module: "crm", path: "/admin/viewings", icon: "calendar-days", kind: "admin_viewings" },
   { id: "activity", module: "crm", path: "/admin/activity", icon: "list", kind: "admin_activity" },
@@ -455,6 +465,11 @@ function Sidebar({ page }) {
           ...route("lead_inbox"),
           label: screenLabel("crm", "lead_inbox", "Lead inbox"),
           badge: page.kind === "admin_lead_inbox" ? page.summary?.leads : undefined,
+        },
+        {
+          ...route("lead_pipeline"),
+          label: screenLabel("crm", "lead_pipeline", "Buyers and renters"),
+          badge: page.leadPipelineQueue?.summary?.open,
         },
         {
           ...route("requests"),
@@ -606,11 +621,14 @@ function TodayBody({ page }) {
   const openTasks =
     (page.summary?.viewingFollowUpsOpen || 0) +
     (page.summary?.sellerPipelineOpen || 0) +
-    (page.summary?.publicRequestsOpen || 0);
+    (page.summary?.publicRequestsOpen || 0) +
+    (page.summary?.buyerPipelineOpen || 0) +
+    (page.summary?.renterPipelineOpen || 0);
   const overdueTasks =
     (page.summary?.viewingFollowUpsOverdue || 0) +
     (page.summary?.sellerPipelineOverdue || 0) +
-    (page.summary?.publicRequestsOverdue || 0);
+    (page.summary?.publicRequestsOverdue || 0) +
+    (page.summary?.leadPipelineOverdue || 0);
   const metrics = [
     [label(copy, "needsReply", "Needs reply"), queue.pending.length, "messages-square", "sea"],
     [label(copy, "managerEscalations", "Manager escalations"), page.summary?.leadSlaManagerEscalations || 0, "triangle-alert", "brick"],
@@ -666,6 +684,39 @@ function TodayBody({ page }) {
               }),
             )
           : h("p", { className: "adm-empty" }, label(copy, "noPriorityLeads", "No leads are waiting for a reply.")),
+      ),
+      h(
+        Panel,
+        {
+          title: label(copy, "pipelineWorkspace", "Buyers and renters"),
+          action: h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, label(copy, "openPipeline", "Open opportunities")),
+          "data-lead-pipeline-preview": "true",
+        },
+        page.leadPipelineQueue?.rows?.length
+          ? h(
+              "ul",
+              { className: "adm-task-list" },
+              ...page.leadPipelineQueue.rows.slice(0, 3).map((state) =>
+                h(
+                  "li",
+                  { key: state.lead_id, "data-pipeline-preview-row": state.lead_id },
+                  h(
+                    "div",
+                    { className: "adm-task-list__body" },
+                    h("code", { className: "crm-mono" }, state.lead_id),
+                    h("strong", null, `${statusText(ui, state.lead_type)} · ${statusText(ui, state.stage)}`),
+                    h("small", { className: "adm-lead-context" }, state.next_action ? statusText(ui, state.next_action) : ""),
+                  ),
+                  h(
+                    "div",
+                    { className: "adm-task-list__actions" },
+                    h(StatusPill, { tone: state.overdue ? "brick" : "sea" }, state.overdue ? statusText(ui, "overdue") : statusText(ui, state.status)),
+                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/pipeline", page) }, statusText(ui, "open")),
+                  ),
+                ),
+              ),
+            )
+          : h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities.")),
       ),
       h(ViewingFollowUpQueue, { page, copy, ui }),
       h(SellerPipelineQueue, { page, copy, ui }),
@@ -1099,6 +1150,281 @@ function ReplyDeliveryForm({ page, reply, delivery, copy, ui }) {
       h("p", { className: "adm-reply-status", role: "status", "aria-live": "polite", "data-reply-delivery-status": "true" }),
     ),
   );
+}
+
+function PipelineOutcomeForm({ page, state, action, submitLabel, children, noteRequired = false, variant = "primary" }) {
+  const copy = adminCopy(page);
+  return h(
+    "form",
+    {
+      method: "post",
+      action: "/api/admin/lead-pipeline/outcome",
+      className: "adm-form adm-pipeline-form",
+      "data-admin-mutation-form": "lead-pipeline",
+      "data-admin-mutation-saving": label(copy, "pipelineSaving", "Recording pipeline action…"),
+      "data-admin-mutation-success": label(copy, "pipelineSaved", "Pipeline action recorded."),
+      "data-admin-mutation-failure": label(copy, "pipelineSaveFailed", "Could not record pipeline action."),
+    },
+    h("input", { type: "hidden", name: "leadId", defaultValue: state.lead_id }),
+    h("input", { type: "hidden", name: "actor", defaultValue: currentOperatorId(page, state.assigned_broker) }),
+    h("input", { type: "hidden", name: "action", defaultValue: action }),
+    children,
+    action === "note" || action === "lost"
+      ? h(
+          "label",
+          null,
+          label(copy, "pipelineNote", "Internal note"),
+          h("textarea", { name: "note", required: noteRequired, maxLength: "2000", rows: "3" }),
+        )
+      : null,
+    h(
+      "div",
+      { className: "adm-form__actions" },
+      h("p", { className: "crm-tbl__muted", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+      h("button", { type: "submit", className: `mk-btn mk-btn--${variant} mk-btn--sm` }, submitLabel),
+    ),
+  );
+}
+
+function PipelinePrimaryAction({ page, state }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const next = state.next_action;
+  if (!next) return null;
+  if (next === "qualify") {
+    return h(
+      "details",
+      { className: "adm-pipeline-action", open: true },
+      h("summary", null, label(copy, "qualification", "Qualification")),
+      h(
+        PipelineOutcomeForm,
+        { page, state, action: "qualify", submitLabel: label(copy, "qualifyLead", "Qualify lead") },
+        h(
+          "div",
+          { className: "adm-pipeline-fields adm-pipeline-fields--two" },
+          h("label", null, label(copy, "budgetMin", "Minimum budget (€)"), h("input", { name: "budgetMinEur", type: "number", min: "0", step: "1" })),
+          h("label", null, label(copy, "budgetMax", "Maximum budget (€)"), h("input", { name: "budgetMaxEur", type: "number", min: "1", step: "1", required: true })),
+          h("label", null, label(copy, "locations", "Locations"), h("input", { name: "locations", required: true, placeholder: "Sandanski" })),
+          h("label", null, label(copy, "propertyTypes", "Property types"), h("input", { name: "propertyTypes", placeholder: "apartment, house" })),
+          h("label", null, label(copy, "bedroomsMin", "Minimum bedrooms"), h("input", { name: "bedroomsMin", type: "number", min: "0", max: "20", step: "1" })),
+          h(
+            "label",
+            null,
+            label(copy, "financeStatus", "Finance status"),
+            h(
+              "select",
+              { name: "financeStatus", defaultValue: state.pipeline === "renter" ? "not_applicable" : "unknown" },
+              ...["unknown", "cash", "mortgage", "preapproved", "not_applicable"].map((value) => h("option", { key: value, value }, statusText(ui, value))),
+            ),
+          ),
+          h("label", null, label(copy, "timeline", "Decision timeline"), h("input", { name: "timeline", required: true })),
+          h("label", null, label(copy, "nextFollowUp", "Next follow-up"), h("input", { name: "nextFollowUpAt", type: "datetime-local", required: true })),
+        ),
+      ),
+    );
+  }
+  if (next === "book_viewing") {
+    return h(
+      "details",
+      { className: "adm-pipeline-action", open: true },
+      h("summary", null, label(copy, "bookViewing", "Book viewing")),
+      h(
+        "form",
+        {
+          method: "post",
+          action: "/api/admin/viewings",
+          className: "adm-form adm-pipeline-form",
+          "data-admin-mutation-form": "viewing",
+          "data-admin-mutation-saving": label(copy, "viewingBookingSaving", "Booking viewing…"),
+          "data-admin-mutation-success": label(copy, "viewingBookingSaved", "Viewing booked."),
+          "data-admin-mutation-failure": label(copy, "viewingBookingSaveFailed", "Could not book viewing."),
+        },
+        h("input", { type: "hidden", name: "leadId", defaultValue: state.lead_id }),
+        h("input", { type: "hidden", name: "broker", defaultValue: currentOperatorId(page, state.assigned_broker) }),
+        h(
+          "div",
+          { className: "adm-pipeline-fields adm-pipeline-fields--two" },
+          h("label", null, label(copy, "listingReference", "Listing reference"), h("input", { name: "listingReference", required: true, defaultValue: state.listing_reference || "" })),
+          h("label", null, label(copy, "viewingStartsAt", "Viewing date and time"), h("input", { name: "startsAt", type: "datetime-local", required: true })),
+        ),
+        h(
+          "div",
+          { className: "adm-form__actions" },
+          h("p", { className: "crm-tbl__muted", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, label(copy, "bookViewing", "Book viewing")),
+        ),
+      ),
+    );
+  }
+  if (next === "complete_viewing") {
+    return h(
+      "a",
+      { className: "mk-btn mk-btn--primary mk-btn--sm", href: adminHref("/admin/viewings", page) },
+      h(Icon, { name: "calendar-check", size: 16 }),
+      h("span", null, statusText(ui, next)),
+    );
+  }
+  if (next === "close_deal") {
+    return h(
+      "details",
+      { className: "adm-pipeline-action", open: true },
+      h("summary", null, statusText(ui, next)),
+      h(
+        "form",
+        {
+          method: "post",
+          action: "/api/admin/deals/close",
+          className: "adm-form adm-pipeline-form",
+          "data-admin-mutation-form": "deal",
+          "data-admin-mutation-saving": label(copy, "dealClosing", "Closing deal…"),
+          "data-admin-mutation-success": label(copy, "dealClosed", "Deal closed."),
+          "data-admin-mutation-failure": label(copy, "dealCloseFailed", "Could not close deal."),
+        },
+        h("input", { type: "hidden", name: "leadId", defaultValue: state.lead_id }),
+        h("input", { type: "hidden", name: "broker", defaultValue: currentOperatorId(page, state.assigned_broker) }),
+        h("label", null, label(copy, "listingReference", "Listing reference"), h("input", { name: "listingReference", required: true, defaultValue: state.listing_reference || "" })),
+        h(
+          "div",
+          { className: "adm-form__actions" },
+          h("p", { className: "crm-tbl__muted", role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, statusText(ui, next)),
+        ),
+      ),
+    );
+  }
+  const actions = {
+    record_offer: ["offer_submitted", label(copy, "recordOffer", "Record offer")],
+    start_due_diligence: ["due_diligence_started", label(copy, "startDueDiligence", "Start due diligence")],
+    sign_contract: ["contract_signed", label(copy, "signContract", "Record contract")],
+    record_application: ["application_submitted", label(copy, "recordApplication", "Record application")],
+    sign_lease: ["lease_signed", label(copy, "signLease", "Record lease")],
+  };
+  const [action, submitLabel] = actions[next] || [];
+  if (!action) return null;
+  return h(
+    "details",
+    { className: "adm-pipeline-action", open: true },
+    h("summary", null, submitLabel),
+    h(
+      PipelineOutcomeForm,
+      { page, state, action, submitLabel },
+      next === "record_offer"
+        ? h("label", null, label(copy, "offerAmount", "Offer amount (€)"), h("input", { name: "offerAmountEur", type: "number", min: "1", step: "1", required: true }))
+        : null,
+      h("label", null, label(copy, "nextFollowUp", "Next follow-up"), h("input", { name: "nextFollowUpAt", type: "datetime-local" })),
+    ),
+  );
+}
+
+function PipelineCard({ page, state, lead }) {
+  const copy = adminCopy(page);
+  const ui = workbenchCopy(page);
+  const requirements = state.requirements;
+  const stageTone = state.status === "lost" ? "brick" : state.status === "closed" ? "success" : state.overdue ? "brick" : "sea";
+  return h(
+    "article",
+    {
+      className: "adm-pipeline-card",
+      "data-pipeline-card": "true",
+      "data-pipeline-kind": state.pipeline,
+      "data-pipeline-status": state.status,
+      "data-overdue": state.overdue ? "true" : "false",
+    },
+    h(
+      "header",
+      { className: "adm-pipeline-card__header" },
+      h(
+        "div",
+        null,
+        h("small", { className: "t-eyebrow" }, statusText(ui, state.lead_type)),
+        h("h2", null, lead?.contact?.name || state.lead_id),
+        h("code", { className: "crm-mono" }, state.lead_id),
+      ),
+      h(StatusPill, { tone: stageTone }, statusText(ui, state.stage)),
+    ),
+    leadContactActions(lead || {}, ui),
+    h(
+      "dl",
+      { className: "adm-pipeline-facts" },
+      h("div", null, h("dt", null, label(copy, "listing", "Listing")), h("dd", null, state.listing_reference || "—")),
+      h("div", null, h("dt", null, label(copy, "nextAction", "Next action")), h("dd", null, state.next_action ? statusText(ui, state.next_action) : "—")),
+      h("div", null, h("dt", null, label(copy, "nextFollowUp", "Next follow-up")), h("dd", null, formatAdminDateTime(state.next_follow_up_at, page.workspace.locale) || "—")),
+      h("div", null, h("dt", null, label(copy, "broker", "Broker")), h("dd", null, state.assigned_broker || "—")),
+    ),
+    requirements
+      ? h(
+          "div",
+          { className: "adm-pipeline-requirements" },
+          h("strong", null, label(copy, "qualification", "Qualification")),
+          h("span", null, `€${requirements.budget_min_eur || 0}–€${requirements.budget_max_eur}`),
+          h("span", null, requirements.locations.join(", ")),
+          requirements.property_types.length ? h("span", null, requirements.property_types.join(", ")) : null,
+          requirements.bedrooms_min !== null ? h("span", null, `${label(copy, "bedroomsMin", "Minimum bedrooms")}: ${requirements.bedrooms_min}`) : null,
+          h("span", null, requirements.timeline),
+          h("span", null, statusText(ui, requirements.finance_status)),
+        )
+      : null,
+    state.status === "open" ? h("div", { className: "adm-pipeline-card__primary" }, h(PipelinePrimaryAction, { page, state })) : null,
+    h(
+      "details",
+      { className: "adm-pipeline-secondary" },
+      h("summary", null, label(copy, "moreActions", "More actions")),
+      state.status === "lost"
+        ? h(PipelineOutcomeForm, { page, state, action: "reopen", submitLabel: label(copy, "reopenLead", "Reopen lead"), variant: "secondary" })
+        : null,
+      state.status === "open"
+        ? h(PipelineOutcomeForm, { page, state, action: "lost", submitLabel: label(copy, "markLeadLost", "Mark lost"), noteRequired: true, variant: "secondary" })
+        : null,
+      state.status !== "closed"
+        ? h(PipelineOutcomeForm, { page, state, action: "note", submitLabel: label(copy, "recordNote", "Record note"), noteRequired: true, variant: "ghost" })
+        : null,
+    ),
+  );
+}
+
+function LeadPipelineBody({ page }) {
+  const copy = adminCopy(page);
+  const queue = page.leadPipelineQueue || { rows: [], states: [], summary: {} };
+  const leads = new Map((page.leads || []).map((lead) => [lead.lead_id, lead]));
+  const openById = new Map((queue.rows || []).map((state) => [state.lead_id, state]));
+  const states = (queue.states || []).map((state) => openById.get(state.lead_id) || state);
+  const title = label(copy, "pipelineWorkspace", "Buyers and renters");
+  const metrics = [
+    [label(copy, "openPipeline", "Open opportunities"), queue.summary?.open || 0, "kanban-square", "sea"],
+    [label(copy, "buyerPipeline", "Buyers"), queue.summary?.buyers_open || 0, "users", "ink"],
+    [label(copy, "renterPipeline", "Renters"), queue.summary?.renters_open || 0, "key", "sand"],
+    [statusText(workbenchCopy(page), "overdue"), queue.summary?.overdue || 0, "triangle-alert", "brick"],
+  ];
+  return adminShell(page, {
+    title,
+    mainAttrs: {
+      "data-kind": "admin-lead-pipeline",
+      "data-react-admin-ui": "lead-pipeline",
+      "data-admin-workbench": "crm",
+      "data-task-led": "true",
+      "data-admin-locale": page.workspace.locale,
+    },
+    children: [
+      h(PageHeader, { title, subtitle: page.metadata?.description }),
+      h(StatGrid, { metrics }),
+      h(
+        "nav",
+        { className: "crm-seg adm-pipeline-tabs", "aria-label": title, "data-pipeline-tabs": "true" },
+        h("button", { type: "button", "data-pipeline-filter": "open", "data-on": "1" }, label(copy, "openPipeline", "Open")),
+        h("button", { type: "button", "data-pipeline-filter": "buyer", "data-on": "0" }, label(copy, "buyerPipeline", "Buyers")),
+        h("button", { type: "button", "data-pipeline-filter": "renter", "data-on": "0" }, label(copy, "renterPipeline", "Renters")),
+        h("button", { type: "button", "data-pipeline-filter": "lost", "data-on": "0" }, statusText(workbenchCopy(page), "lost")),
+        h("button", { type: "button", "data-pipeline-filter": "closed", "data-on": "0" }, statusText(workbenchCopy(page), "closed")),
+      ),
+      states.length
+        ? h(
+            "section",
+            { className: "adm-pipeline-grid", "data-pipeline-grid": "true", "aria-label": label(copy, "openPipeline", "Open opportunities") },
+            ...states.map((state) => h(PipelineCard, { key: state.lead_id, page, state, lead: leads.get(state.lead_id) })),
+          )
+        : h(Panel, { title: label(copy, "openPipeline", "Open opportunities") }, h("p", { className: "adm-empty" }, label(copy, "noOpenPipeline", "No open buyer or renter opportunities."))),
+    ],
+  });
 }
 
 function LeadInboxBody({ page }) {
@@ -2386,6 +2712,7 @@ function MigrationReviewBody({ page }) {
 export function renderReactAdminBody(page) {
   if (page.kind === "admin_today") return renderStaticElement(h(TodayBody, { page }));
   if (page.kind === "admin_lead_inbox") return renderStaticElement(h(LeadInboxBody, { page }));
+  if (page.kind === "admin_lead_pipeline") return renderStaticElement(h(LeadPipelineBody, { page }));
   if (page.kind === "admin_requests") return renderStaticElement(h(PublicRequestsBody, { page }));
   if (page.kind === "admin_viewings") return renderStaticElement(h(ViewingsBody, { page }));
   if (page.kind === "admin_activity") return renderStaticElement(h(ActivityBody, { page }));

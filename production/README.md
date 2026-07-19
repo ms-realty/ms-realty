@@ -230,6 +230,8 @@ Useful operator endpoints:
 - `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
 - `GET /api/admin/payload-collections` returns Payload-compatible collection configs generated from that manifest.
 - `GET /admin/requests?locale=bg|ru|en` and `GET /api/admin/requests` return the broker queue for saved-search alerts and language requests. Private contact values are decrypted only for this authenticated, `no-store` response.
+- `GET /admin/pipeline?locale=bg|ru|en` and `GET /api/admin/pipeline` return the buyer/renter operating queue, derived from attributed qualification outcomes plus actual viewing and closed-deal ledgers.
+- `POST /api/admin/lead-pipeline/outcome` records qualification, offer/application, due-diligence/contract/lease, loss/reopen, and internal-note transitions. The authenticated principal replaces any actor supplied by the browser.
 - `POST /api/admin/public-requests/outcome` records an attributed contacted, complete, close, reopen, or note transition and appends a privacy-safe audit row. Completed and closed saved searches are suppressed from future alert reports.
 - `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
 - `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest; launch readiness still blocks until the Payload runtime dependency and config exist.
@@ -261,6 +263,9 @@ only contact references and delivery routing, never raw contact values.
 Set `MS_REALTY_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH` when the append-only request
 outcome ledger is mounted outside the repo. `MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT`
 is a deterministic test/smoke timestamp only; production should use wall-clock time.
+Set `MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH` to durable private storage for
+buyer/renter milestones. `MS_REALTY_LEAD_PIPELINE_OUTCOME_AT` is a deterministic
+test/smoke timestamp only; production should use wall-clock time.
 Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers
 need to live outside `production/data/`.
 Set `MS_REALTY_LOCALE_REGISTRY_PATH` when admin-added locales must persist

@@ -230,9 +230,12 @@ export function searchRuntimeListings(
 
 export function submitRuntimeLead(registry, seed, input) {
   const source = input.source || "website_listing_detail";
-  const leadInput = normalizePublicLeadInput({ ...input, source });
-  const record = listingRecords(seed).find((candidate) => candidate.id === leadInput.listingReference);
-  if (!record && leadInput.leadType === "buyer") throw new Error("Buyer lead requires a known listingReference");
+  const record = listingRecords(seed).find((candidate) => candidate.id === input.listingReference);
+  const listingLeadType = record?.facts?.offer_type === "rent" ? "renter" : record ? "buyer" : input.leadType;
+  const leadInput = normalizePublicLeadInput({ ...input, source, leadType: listingLeadType });
+  if (!record && ["buyer", "renter"].includes(leadInput.leadType)) {
+    throw new Error("Buyer or renter lead requires a known listingReference");
+  }
   return createCrmInboxItem(registry, {
     ...leadInput,
     listingContext: record

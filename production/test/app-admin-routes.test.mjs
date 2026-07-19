@@ -161,6 +161,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_LEAD_LEDGER_PATH: tempJsonl("app-admin-leads"),
       MS_REALTY_LEAD_CONTACT_VAULT_PATH: leadContactVaultPath,
       MS_REALTY_LEAD_CONTACT_KEY: "test-only-next-contact-key-32-characters-minimum",
+      MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH: tempJsonl("app-admin-lead-pipeline-outcomes"),
+      MS_REALTY_LEAD_PIPELINE_OUTCOME_AT: "2026-07-18T10:05:00.000Z",
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: searchSyncReportPath,
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: searchQueryReportPath,
@@ -235,6 +237,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const todayJsonRoute = await import("../../app/api/admin/today/route.js");
       const leadInboxRoute = await import("../../app/admin/leads/route.js");
       const leadInboxJsonRoute = await import("../../app/api/admin/leads/route.js");
+      const leadPipelineRoute = await import("../../app/admin/pipeline/route.js");
+      const leadPipelineJsonRoute = await import("../../app/api/admin/pipeline/route.js");
+      const leadPipelineOutcomeRoute = await import("../../app/api/admin/lead-pipeline/outcome/route.js");
       const viewingsPageRoute = await import("../../app/admin/viewings/route.js");
       const viewingsJsonRoute = await import("../../app/api/admin/viewings/route.js");
       const activityRoute = await import("../../app/admin/activity/route.js");
@@ -341,11 +346,24 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /he -&gt; en/);
       assert.match(inboxHtml, /Входящие заявки/);
       assert.match(inboxHtml, /Входящие заявки CRM с ответами, проверенными брокером\./);
-      assert.match(inboxHtml, /Покупатель/);
+      assert.match(inboxHtml, /Арендатор/);
       assert.match(inboxHtml, /scope="col"/);
       assert.match(inboxHtml, /data-lead-column="reply"/);
       assert.match(inboxHtml, /data-label="Ответ"/);
       assert.match(inboxHtml, /data-lead-column="escalation_due"[^>]*><time dateTime="[^"]+" title="[^"]+">/);
+
+      const pipeline = await leadPipelineRoute.GET(new Request("https://example.test/admin/pipeline?locale=ru", { headers: auth }));
+      const pipelineHtml = await pipeline.text();
+      assert.equal(pipeline.status, 200);
+      assert.match(pipelineHtml, /data-kind="admin-lead-pipeline"/);
+      assert.match(pipelineHtml, /data-react-admin-ui="lead-pipeline"/);
+      assert.match(pipelineHtml, /data-pipeline-kind="renter"/);
+      assert.match(pipelineHtml, /data-admin-mutation-form="lead-pipeline"/);
+      const pipelineJson = await leadPipelineJsonRoute.GET(new Request("https://example.test/api/admin/pipeline?locale=ru", { headers: auth }));
+      const pipelineJsonBody = await pipelineJson.json();
+      assert.equal(pipelineJsonBody.kind, "admin_lead_pipeline");
+      assert.equal(pipelineJsonBody.leadPipelineQueue.summary.renters_open, 1);
+      assert.equal(typeof leadPipelineOutcomeRoute.POST, "function");
 
       const listingManager = await listingManagerRoute.GET(
         new Request("https://example.test/admin/listings?locale=ru&q=MS-CRAWL-0001", { headers: auth }),

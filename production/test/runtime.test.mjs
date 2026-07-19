@@ -306,7 +306,7 @@ test("runtime viewing request lead stays routed through broker-approved CRM flow
 
   assert.equal(lead.lead.source, "website_viewing_request");
   assert.equal(lead.lead.intent, "viewing");
-  assert.equal(lead.lead.leadType, "buyer");
+  assert.equal(lead.lead.leadType, "renter");
   assert.equal(lead.lead.listingReference, "MS-CRAWL-0001");
   assert.equal(lead.original_language, "he");
   assert.equal(lead.admin_locale, "en");

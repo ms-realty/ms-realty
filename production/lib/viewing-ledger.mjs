@@ -24,28 +24,50 @@ export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_
   if (!lead) throw new Error("Viewing requires a known leadId");
   if (!input.startsAt || !input.broker) throw new Error("startsAt and broker are required");
   if (Number.isNaN(Date.parse(input.startsAt))) throw new Error("startsAt must be an ISO date");
+  const startsAt = new Date(input.startsAt).toISOString();
+  const rows = readViewings(filePath);
+  const listingReference = input.listingReference || lead.listing_reference || null;
+  const semanticMatch = rows.find(
+    (row) =>
+      row.lead_id === input.leadId &&
+      row.broker === input.broker &&
+      row.starts_at === startsAt &&
+      (row.listing_reference || null) === listingReference,
+  );
+  if (semanticMatch) return { ...semanticMatch, idempotent: true };
+  const requestedId = String(input.id || "").trim();
+  const conflictingId = requestedId ? rows.find((row) => row.id === requestedId) : null;
+  if (conflictingId) throw new Error("Viewing id already belongs to another booking");
+  let ordinal = rows.filter((row) => row.lead_id === input.leadId).length + 1;
+  let id = requestedId || `viewing-${input.leadId}${ordinal === 1 ? "" : `-${ordinal}`}`;
+  const ids = new Set(rows.map((row) => row.id));
+  while (ids.has(id)) {
+    ordinal += 1;
+    id = `viewing-${input.leadId}-${ordinal}`;
+  }
   const feedbackDueAt =
-    input.feedbackDueAt || new Date(Date.parse(input.startsAt) + 2 * 60 * 60 * 1000).toISOString();
+    input.feedbackDueAt || new Date(Date.parse(startsAt) + 2 * 60 * 60 * 1000).toISOString();
+  const taskSuffix = ordinal === 1 && id === `viewing-${input.leadId}` ? input.leadId : id;
 
   const row = {
-    id: input.id || `viewing-${input.leadId}`,
+    id,
     lead_id: input.leadId,
-    listing_reference: input.listingReference || lead.listing_reference || null,
+    listing_reference: listingReference,
     original_language: lead.original_language,
     admin_locale: lead.admin_locale,
     broker: input.broker,
-    starts_at: input.startsAt,
+    starts_at: startsAt,
     booked_at: bookedAt,
     channel: input.channel || "property_viewing",
     status: "booked",
     follow_up_task: {
-      id: input.taskId || `task-${input.leadId}`,
+      id: input.taskId || `task-${taskSuffix}`,
       owner: input.broker,
       status: "open",
-      due_at: input.followUpDueAt || input.startsAt,
+      due_at: input.followUpDueAt || startsAt,
     },
     feedback_request: {
-      id: input.feedbackTaskId || `feedback-${input.leadId}`,
+      id: input.feedbackTaskId || `feedback-${taskSuffix}`,
       owner: input.broker,
       status: "open",
       due_at: feedbackDueAt,
@@ -55,12 +77,15 @@ export function appendViewing(leads, input, { filePath = DEFAULT_VIEWING_LEDGER_
 
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
-  return row;
+  return { ...row, idempotent: false };
 }
 
 export function assertViewingLedger(rows) {
   if (!rows.length) throw new Error("Viewing ledger must contain at least one row");
+  const ids = new Set();
   for (const row of rows) {
+    if (!row.id || ids.has(row.id)) throw new Error("Viewing ids must be present and unique");
+    ids.add(row.id);
     if (!row.lead_id || !row.broker || !row.starts_at) throw new Error("Viewing row is missing booking data");
     if (row.status !== "booked") throw new Error("Viewing must be booked");
     if (row.follow_up_task?.status !== "open") throw new Error("Viewing must create an open follow-up task");

@@ -48,3 +48,44 @@ test("generated lead matching report is valid when present", () => {
   if (!fs.existsSync(file)) return;
   assert.equal(assertLeadMatchingReport(JSON.parse(fs.readFileSync(file, "utf8"))), true);
 });
+
+test("qualified renter requirements drive inventory matching without a source listing", () => {
+  const renter = {
+    lead_id: "lead-renter-en",
+    lead_type: "renter",
+    listing_reference: null,
+    original_language: "en",
+    admin_locale: "en",
+    assigned_broker: "broker_international",
+  };
+  const report = buildLeadMatchingReport({
+    registry,
+    seed,
+    generatedAt: "2026-07-19T00:00:00Z",
+    leads: [renter],
+    leadPipelineStates: [
+      {
+        lead_id: renter.lead_id,
+        pipeline: "renter",
+        stage: "qualified",
+        status: "open",
+        requirements: {
+          budget_min_eur: 0,
+          budget_max_eur: 2000000,
+          locations: ["Sandanski"],
+          property_types: ["commercial"],
+          bedrooms_min: null,
+          timeline: "This month",
+          finance_status: "not_applicable",
+        },
+      },
+    ],
+  });
+
+  assert.equal(assertLeadMatchingReport(report), true);
+  assert.equal(report.summary.active_buyer_renter_leads, 1);
+  assert.equal(report.summary.qualified_leads, 1);
+  assert.equal(report.rows[0].source_listing_id, null);
+  assert.equal(report.rows[0].criteria.offer_type, "rent");
+  assert.ok(report.rows[0].matches.every((match) => match.offer_type === "rent"));
+});

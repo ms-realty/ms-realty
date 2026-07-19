@@ -18,18 +18,59 @@ function sourceFilters(view) {
   );
 }
 
-function matchLead(registry, seed, listingById, lead) {
+function qualifiedFilterSets(state, fallbackFilters = {}) {
+  const requirements = state?.requirements;
+  if (!requirements) return [fallbackFilters];
+  const locations = requirements.locations?.length ? requirements.locations : [fallbackFilters.location].filter(Boolean);
+  const propertyTypes = requirements.property_types?.length ? requirements.property_types : [fallbackFilters.property_type].filter(Boolean);
+  const offerType = state.pipeline === "renter" ? "rent" : "sale";
+  const common = Object.fromEntries(
+    Object.entries({
+      offer_type: offerType,
+      price_max: requirements.budget_max_eur,
+      bedrooms_min: requirements.bedrooms_min,
+    }).filter(([, value]) => value !== null && value !== undefined && value !== ""),
+  );
+  const locationValues = locations.length ? locations : [null];
+  const typeValues = propertyTypes.length ? propertyTypes : [null];
+  return locationValues.flatMap((location) =>
+    typeValues.map((propertyType) => ({
+      ...common,
+      ...(location ? { location } : {}),
+      ...(propertyType ? { property_type: propertyType } : {}),
+    })),
+  );
+}
+
+function matchLead(registry, seed, listingById, lead, pipelineState) {
   const sourceListing = listingById.get(lead.listing_reference);
-  if (!sourceListing) return null;
-  const view = sourceListing.facts || listingToPublicViewModel(sourceListing);
-  const filters = sourceFilters(view);
-  const search = searchRuntimeListings(registry, seed, {
-    localeCode: lead.original_language || lead.admin_locale || registry.source_locale,
-    query: "",
-    filters,
-    translationTasks: [],
-  });
-  const matches = search.cards.filter((card) => card.id !== lead.listing_reference).slice(0, 5);
+  if (!sourceListing && !pipelineState?.requirements) return null;
+  const view = sourceListing ? sourceListing.facts || listingToPublicViewModel(sourceListing) : {};
+  const fallbackFilters = sourceFilters(view);
+  const filterSets = qualifiedFilterSets(pipelineState, fallbackFilters);
+  const matchesById = new Map();
+  for (const filters of filterSets) {
+    const search = searchRuntimeListings(registry, seed, {
+      localeCode: lead.original_language || lead.admin_locale || registry.source_locale,
+      query: "",
+      filters,
+      pageSize: 24,
+      translationTasks: [],
+    });
+    for (const card of search.cards) {
+      if (card.id !== lead.listing_reference && !matchesById.has(card.id)) matchesById.set(card.id, card);
+    }
+  }
+  const matches = [...matchesById.values()].slice(0, 5);
+  const criteria = pipelineState?.requirements
+    ? {
+        locations: pipelineState.requirements.locations,
+        property_types: pipelineState.requirements.property_types,
+        offer_type: pipelineState.pipeline === "renter" ? "rent" : "sale",
+        price_max: pipelineState.requirements.budget_max_eur,
+        bedrooms_min: pipelineState.requirements.bedrooms_min,
+      }
+    : fallbackFilters;
 
   return {
     lead_id: lead.lead_id,
@@ -37,8 +78,9 @@ function matchLead(registry, seed, listingById, lead) {
     original_language: lead.original_language,
     admin_locale: lead.admin_locale,
     assigned_broker: lead.assigned_broker,
-    source_listing_id: lead.listing_reference,
-    criteria: filters,
+    source_listing_id: lead.listing_reference || null,
+    qualification_stage: pipelineState?.stage || null,
+    criteria,
     match_count: matches.length,
     matches: matches.map((card) => ({
       listing_id: card.id,
@@ -66,18 +108,23 @@ export function buildLeadMatchingReport({
   registry = loadLocaleRegistry(),
   seed = loadCmsSeed(),
   leads = readLeadLedger(),
+  leadPipelineStates = [],
   generatedAt = new Date().toISOString(),
 } = {}) {
   const listingById = new Map(seed.records.map((record) => [record.id, record]));
+  const stateByLeadId = new Map(leadPipelineStates.map((state) => [state.lead_id, state]));
   const rows = leads
-    .filter((lead) => lead.lead_type === "buyer" && lead.listing_reference)
-    .map((lead) => matchLead(registry, seed, listingById, lead))
+    .filter((lead) => ["buyer", "renter"].includes(lead.lead_type) && (lead.listing_reference || stateByLeadId.get(lead.lead_id)?.requirements))
+    .filter((lead) => !["lost", "closed"].includes(stateByLeadId.get(lead.lead_id)?.status))
+    .map((lead) => matchLead(registry, seed, listingById, lead, stateByLeadId.get(lead.lead_id)))
     .filter(Boolean);
 
   return {
     generated_at: generatedAt,
     summary: {
-      buyer_leads_with_listing_reference: rows.length,
+      buyer_leads_with_listing_reference: rows.filter((row) => row.lead_type === "buyer" && row.source_listing_id).length,
+      active_buyer_renter_leads: rows.length,
+      qualified_leads: rows.filter((row) => row.qualification_stage).length,
       leads_with_matches: rows.filter((row) => row.match_count > 0).length,
       open_broker_tasks: rows.filter((row) => row.broker_task?.status === "open").length,
     },
@@ -86,15 +133,19 @@ export function buildLeadMatchingReport({
 }
 
 export function assertLeadMatchingReport(report) {
-  if (report.summary.buyer_leads_with_listing_reference !== report.rows.length) {
+  const buyerRowsWithSource = report.rows.filter((row) => row.lead_type === "buyer" && row.source_listing_id).length;
+  if (report.summary.buyer_leads_with_listing_reference !== buyerRowsWithSource) {
     throw new Error("Lead matching summary must match rows");
+  }
+  if (report.summary.active_buyer_renter_leads !== undefined && report.summary.active_buyer_renter_leads !== report.rows.length) {
+    throw new Error("Lead matching active summary must match rows");
   }
   if (report.summary.leads_with_matches !== report.rows.filter((row) => row.match_count > 0).length) {
     throw new Error("Lead matching matched summary must match rows");
   }
   for (const row of report.rows) {
-    if (!row.lead_id || !row.source_listing_id || !row.assigned_broker) {
-      throw new Error("Lead matching rows must preserve lead, source listing, and broker assignment");
+    if (!row.lead_id || (!row.source_listing_id && !row.qualification_stage) || !row.assigned_broker) {
+      throw new Error("Lead matching rows must preserve lead criteria and broker assignment");
     }
     if ("contact" in row || "email" in row || "phone" in row) throw new Error("Lead matching rows must not store raw contact data");
     if (row.match_count !== row.matches.length) throw new Error("Lead matching count must match listed inventory rows");

@@ -34,7 +34,9 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
 });
 
 test("admin client enhances the reviewed 360 form without disabling lead queue filters", () => {
-  assert.match(ADMIN_APP_JS, /initLeadQueueFilters\(\);\s*initTourEditor\(\);/);
+  assert.match(ADMIN_APP_JS, /initLeadQueueFilters\(\);/);
+  assert.match(ADMIN_APP_JS, /initLeadPipelineFilters\(\);/);
+  assert.match(ADMIN_APP_JS, /initTourEditor\(\);/);
   assert.match(ADMIN_APP_JS, /data-tour-editor-form/);
   assert.match(ADMIN_APP_JS, /function tourPayload/);
   assert.match(ADMIN_APP_JS, /credentials: "same-origin"/);

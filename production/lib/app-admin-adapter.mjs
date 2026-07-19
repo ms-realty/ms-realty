@@ -30,6 +30,12 @@ import {
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, withLeadContacts } from "./lead-contact-vault.mjs";
+import {
+  DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
+  appendLeadPipelineOutcome,
+  buildLeadPipelineQueue,
+  readLeadPipelineOutcomes,
+} from "./lead-pipeline-outcomes.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH, appendReviewedReply, createHermesReplyDraft, readReplyOutbox } from "./lead-replies.mjs";
 import {
   DEFAULT_REPLY_DELIVERY_OUTCOME_LEDGER_PATH,
@@ -142,6 +148,8 @@ export function appAdminConfigFromEnv(env = process.env) {
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
     launchReadinessOutputPath: env.MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    leadPipelineOutcomeLedgerPath:
+      env.MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH || DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -182,6 +190,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     editedAt: env.MS_REALTY_EDITED_AT,
     reviewedAt: env.MS_REALTY_REVIEWED_AT,
     publicRequestOutcomeAt: env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT,
+    leadPipelineOutcomeAt: env.MS_REALTY_LEAD_PIPELINE_OUTCOME_AT,
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
   };
 }
@@ -407,16 +416,28 @@ function currentPublicRequestQueue(config) {
 }
 
 function leadInboxPayload(registry, url, config) {
+  const leads = withLeadContacts(readLeadLedger(config.leadLedgerPath), {
+    filePath: config.leadContactVaultPath,
+    secret: config.leadContactKey,
+  });
   const replies = readReplyOutbox(config.replyOutboxPath);
   const viewings = readViewings(config.viewingLedgerPath);
   const viewingFollowUps = readViewingFollowUps(config.viewingFollowUpLedgerPath);
+  const deals = readDeals(config.dealLedgerPath);
   const sellerPipeline = readSellerPipeline(config.sellerPipelinePath);
   const sellerPipelineOutcomes = readSellerPipelineOutcomes(config.sellerPipelineOutcomeLedgerPath);
   return renderAdminLeadsPayload(registry, url.searchParams.get("locale") || "en", {
-    leads: withLeadContacts(readLeadLedger(config.leadLedgerPath), {
-      filePath: config.leadContactVaultPath,
-      secret: config.leadContactKey,
-    }),
+    leads,
+    leadPipelineQueue: buildLeadPipelineQueue(
+      {
+        leads,
+        outcomes: readLeadPipelineOutcomes(config.leadPipelineOutcomeLedgerPath),
+        viewings,
+        viewingFollowUps,
+        deals,
+      },
+      { now: config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString() },
+    ),
     replies,
     replyDeliveryQueue: buildReplyDeliveryQueue(
       replies,
@@ -437,7 +458,7 @@ function leadInboxPayload(registry, url, config) {
     sellerPipelineQueue: buildSellerPipelineQueue(sellerPipeline, sellerPipelineOutcomes, {
       now: config.sellerPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString(),
     }),
-    deals: readDeals(config.dealLedgerPath),
+    deals,
     brokerContacts: readBrokerContacts(config.brokerContactLedgerPath),
   });
 }
@@ -448,6 +469,15 @@ function requestsPayload(registry, url, config) {
     path: "/admin/requests",
     titleKey: "requestsWorkspace",
     descriptionKey: "requestsDescription",
+  });
+}
+
+function pipelinePayload(registry, url, config) {
+  return operationalQueuePayload(registry, url, config, {
+    kind: "admin_lead_pipeline",
+    path: "/admin/pipeline",
+    titleKey: "pipelineWorkspace",
+    descriptionKey: "pipelineDescription",
   });
 }
 
@@ -1025,21 +1055,23 @@ function appendEditorChange(input, config) {
 }
 
 function appendViewingBooking(input, config) {
-  const viewing = appendViewing(readLeadLedger(config.leadLedgerPath), input, {
+  const viewing = appendViewing(readLeadLedger(config.leadLedgerPath), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.viewingLedgerPath,
     bookedAt: config.bookedAt,
   });
-  recordAudit(
-    {
-      action: "viewing_booked",
-      actor: viewing.broker,
-      objectType: "viewing",
-      objectId: viewing.id,
-      locale: viewing.original_language,
-      metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
-    },
-    config,
-  );
+  if (!viewing.idempotent) {
+    recordAudit(
+      {
+        action: "viewing_booked",
+        actor: viewing.broker,
+        objectType: "viewing",
+        objectId: viewing.id,
+        locale: viewing.original_language,
+        metadata: { lead_id: viewing.lead_id, listing_reference: viewing.listing_reference, status: viewing.status },
+      },
+      config,
+    );
+  }
   return viewing;
 }
 
@@ -1175,22 +1207,64 @@ function appendReplyDeliveryOutcomeEntry(input, config) {
   return result;
 }
 
+function appendLeadPipelineOutcomeEntry(input, config) {
+  const recordedAt = config.leadPipelineOutcomeAt || config.reviewedAt || config.bookedAt || new Date().toISOString();
+  const result = appendLeadPipelineOutcome(
+    {
+      leads: readLeadLedger(config.leadLedgerPath),
+      viewings: readViewings(config.viewingLedgerPath),
+      viewingFollowUps: readViewingFollowUps(config.viewingFollowUpLedgerPath),
+      deals: readDeals(config.dealLedgerPath),
+    },
+    bindAuthenticatedOperator(input, config.adminPrincipal),
+    { filePath: config.leadPipelineOutcomeLedgerPath, recordedAt },
+  );
+  if (
+    !readAuditLog(config.auditLogPath).some(
+      (row) => row.action === "lead_pipeline_outcome_recorded" && row.object_id === result.outcome.id,
+    )
+  ) {
+    recordAudit(
+      {
+        action: "lead_pipeline_outcome_recorded",
+        actor: result.outcome.actor,
+        objectType: "lead_pipeline_outcome",
+        objectId: result.outcome.id,
+        locale: result.lead_pipeline.original_language,
+        metadata: {
+          lead_id: result.outcome.lead_id,
+          pipeline: result.outcome.pipeline,
+          action: result.outcome.action,
+          from_stage: result.outcome.from_stage,
+          to_stage: result.outcome.to_stage,
+          next_follow_up_at: result.outcome.next_follow_up_at,
+        },
+      },
+      config,
+      recordedAt,
+    );
+  }
+  return result;
+}
+
 function appendDealClose(input, config) {
-  const deal = appendClosedDeal(readLeadLedger(config.leadLedgerPath), input, {
+  const deal = appendClosedDeal(readLeadLedger(config.leadLedgerPath), bindAuthenticatedOperator(input, config.adminPrincipal, ["broker"]), {
     filePath: config.dealLedgerPath,
     closedAt: config.dealClosedAt,
   });
-  recordAudit(
-    {
-      action: "deal_closed",
-      actor: deal.broker,
-      objectType: "deal",
-      objectId: deal.id,
-      locale: deal.original_language,
-      metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
-    },
-    config,
-  );
+  if (!deal.idempotent) {
+    recordAudit(
+      {
+        action: "deal_closed",
+        actor: deal.broker,
+        objectType: "deal",
+        objectId: deal.id,
+        locale: deal.original_language,
+        metadata: { lead_id: deal.lead_id, listing_reference: deal.listing_reference, status: deal.status },
+      },
+      config,
+    );
+  }
   return deal;
 }
 
@@ -1590,6 +1664,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/admin/pipeline") return htmlResponse(pipelinePayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(viewingsPayload(registry, url, config));
@@ -1746,6 +1822,10 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       const result = appendReplyDeliveryOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
+    if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
+      const result = appendLeadPipelineOutcomeEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));
     }
@@ -1756,7 +1836,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(201, appendListingSlugChange(registry, parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
-      return jsonResponse(201, appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      const viewing = appendViewingBooking(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(viewing.idempotent ? 200 : 201, viewing);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
       const result = appendViewingFollowUpEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
@@ -1774,7 +1855,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return calendarResponse(renderViewingCalendar(readViewings(config.viewingLedgerPath), { now: config.bookedAt }));
     }
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
-      return jsonResponse(201, appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config));
+      const deal = appendDealClose(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      return jsonResponse(deal.idempotent ? 200 : 201, deal);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
       return jsonResponse(201, appendBrokerContactApproval(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));

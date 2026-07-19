@@ -6,6 +6,7 @@ import { createHttpApp } from "./lib/http.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH } from "./lib/lead-contact-vault.mjs";
+import { DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/lead-pipeline-outcomes.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH } from "./lib/public-contact-vault.mjs";
 import { DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH } from "./lib/public-request-outcomes.mjs";
 import { DEFAULT_REPLY_OUTBOX_PATH } from "./lib/lead-replies.mjs";
@@ -55,6 +56,8 @@ export function productionServerConfig(env = process.env) {
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
     leadLedgerPath: env.MS_REALTY_LEAD_LEDGER_PATH || DEFAULT_LEAD_LEDGER_PATH,
+    leadPipelineOutcomeLedgerPath:
+      env.MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH || DEFAULT_LEAD_PIPELINE_OUTCOME_LEDGER_PATH,
     leadContactVaultPath:
       env.MS_REALTY_LEAD_CONTACT_VAULT_PATH || (env.NODE_ENV === "production" ? DEFAULT_LEAD_CONTACT_VAULT_PATH : null),
     leadContactKey: env.MS_REALTY_LEAD_CONTACT_KEY,
@@ -95,6 +98,7 @@ export function productionServerConfig(env = process.env) {
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
     viewingFollowUpAt: env.MS_REALTY_VIEWING_FOLLOW_UP_AT,
     publicRequestOutcomeAt: env.MS_REALTY_PUBLIC_REQUEST_OUTCOME_AT,
+    leadPipelineOutcomeAt: env.MS_REALTY_LEAD_PIPELINE_OUTCOME_AT,
     replyDeliveredAt: env.MS_REALTY_REPLY_DELIVERED_AT,
     sellerPipelineOutcomeAt: env.MS_REALTY_SELLER_PIPELINE_OUTCOME_AT,
   };
@@ -106,6 +110,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     consentLedgerPath: config.consentLedgerPath,
     auditLogPath: config.auditLogPath,
     leadLedgerPath: config.leadLedgerPath,
+    leadPipelineOutcomeLedgerPath: config.leadPipelineOutcomeLedgerPath,
     leadContactVaultPath: config.leadContactVaultPath,
     leadContactKey: config.leadContactKey,
     publicContactVaultPath: config.publicContactVaultPath,
@@ -139,6 +144,7 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     payloadRuntimeReportPath: config.payloadRuntimeReportPath,
     viewingFollowUpAt: config.viewingFollowUpAt,
     publicRequestOutcomeAt: config.publicRequestOutcomeAt,
+    leadPipelineOutcomeAt: config.leadPipelineOutcomeAt,
     replyDeliveredAt: config.replyDeliveredAt,
     sellerPipelineOutcomeAt: config.sellerPipelineOutcomeAt,
   });

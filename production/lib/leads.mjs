@@ -15,14 +15,14 @@ const NON_BUYER_SOURCE_CONTRACTS = Object.freeze({
 const LOCAL_LOCATIONS = ["Sandanski", "Petrich", "Bansko", "Blagoevgrad", "Sveti Vlas", "Sunny Beach", "Melnik"];
 const PROPERTY_TYPES = ["apartment", "house", "villa", "land", "commercial", "hotel", "office", "industrial"];
 const DEFAULT_BROKER_PROFILES = [
-  { id: "broker_bg", languages: ["bg"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "seller", "general"] },
-  { id: "broker_ru", languages: ["ru"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "seller", "general"] },
+  { id: "broker_bg", languages: ["bg"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "renter", "seller", "general"] },
+  { id: "broker_ru", languages: ["ru"], locations: LOCAL_LOCATIONS, property_types: PROPERTY_TYPES, lead_types: ["buyer", "renter", "seller", "general"] },
   {
     id: "broker_international",
     languages: ["en", "de", "nl", "el", "he"],
     locations: LOCAL_LOCATIONS,
     property_types: PROPERTY_TYPES,
-    lead_types: ["buyer", "seller", "general"],
+    lead_types: ["buyer", "renter", "seller", "general"],
   },
 ];
 
@@ -84,23 +84,23 @@ export function normalizeBuyerListingLeadInput(input = {}) {
   const leadInput = normalizeLeadInput(input);
   const source = String(leadInput.source || "").trim();
   const intent = BUYER_LISTING_SOURCE_INTENTS[source];
-  if (!intent) throw new Error("Buyer listing source must be a known canonical source");
+  if (!intent) throw new Error("Listing lead source must be a known canonical source");
 
   const submittedIntent = String(leadInput.intent || "").trim().toLowerCase();
-  if (submittedIntent && submittedIntent !== intent) throw new Error("Buyer listing intent must match source");
+  if (submittedIntent && submittedIntent !== intent) throw new Error("Listing lead intent must match source");
 
   if (intent === "inquiry" && !hasReachableContact(leadInput.contact)) {
-    throw new Error("Buyer inquiry requires a reachable contact channel");
+    throw new Error("Listing inquiry requires a reachable contact channel");
   }
   if ((intent === "callback" || intent === "viewing") && !String(leadInput.contact.phone || "").trim()) {
-    throw new Error(`Buyer ${intent} requires a phone`);
+    throw new Error(`Listing ${intent} requires a phone`);
   }
   if (intent === "viewing") {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(leadInput.request_details.viewing_date || "")) {
-      throw new Error("Buyer viewing requires a preferred date");
+      throw new Error("Listing viewing requires a preferred date");
     }
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(leadInput.request_details.viewing_time || "")) {
-      throw new Error("Buyer viewing requires a preferred time");
+      throw new Error("Listing viewing requires a preferred time");
     }
   }
 
@@ -109,7 +109,7 @@ export function normalizeBuyerListingLeadInput(input = {}) {
 
 export function normalizePublicLeadInput(input = {}) {
   const source = String(input.source || "website_listing_detail").trim();
-  if (input.leadType === "buyer") return normalizeBuyerListingLeadInput({ ...input, source });
+  if (["buyer", "renter"].includes(input.leadType)) return normalizeBuyerListingLeadInput({ ...input, source });
   const leadInput = normalizeLeadInput({ ...input, source });
   const contract = NON_BUYER_SOURCE_CONTRACTS[source];
   if (!contract) throw new Error("Lead source must be a known canonical source");

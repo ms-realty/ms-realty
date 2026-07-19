@@ -16,4 +16,8 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /function initReplyDeliveryForms\(\)/);
   assert.match(ADMIN_APP_JS, /data-reply-delivery-form/);
   assert.match(ADMIN_APP_JS, /result\.delivery\.status/);
+  assert.match(ADMIN_APP_JS, /function initLeadPipelineFilters\(\)/);
+  assert.match(ADMIN_APP_JS, /data-pipeline-card/);
+  assert.match(ADMIN_APP_JS, /function initAdminMutationForms\(\)/);
+  assert.match(ADMIN_APP_JS, /data-admin-mutation-form/);
 });

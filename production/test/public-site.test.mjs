@@ -73,6 +73,7 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-lead-source="website_listing_detail"/);
   assert.match(html, /data-lead-source="website_callback_request"/);
   assert.match(html, /data-lead-source="website_viewing_request"/);
+  assert.match(html, /data-lead-type="renter"/);
   assert.doesNotMatch(html, /\/api\/admin\/(viewings|replies)/);
 });
 
