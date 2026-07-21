@@ -484,7 +484,8 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 
 /* Buyer and renter pipeline: compact operating cards with one visible next
    action and secondary notes/loss controls kept out of the primary path. */
-.adm-pipeline-tabs { width: max-content; max-width: 100%; overflow-x: auto; }
+.adm-pipeline-tabs { width: max-content; max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+.adm-pipeline-tabs::-webkit-scrollbar { display: none; }
 .adm-pipeline-tabs button { white-space: nowrap; }
 .adm-pipeline-grid {
   display: grid;
@@ -677,9 +678,12 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .adm-public-request__outcome > summary { min-height: 44px; }
   .adm-public-request-form { padding: var(--space-3); }
   .adm-public-request-form .adm-form__actions { grid-template-columns: 1fr; }
-  .adm-pipeline-tabs { width: 100%; padding: 4px; }
-  .adm-pipeline-tabs button { flex: 0 0 auto; min-height: 40px; }
+  .adm-pipeline-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; padding: 4px; overflow: hidden; }
+  .adm-pipeline-tabs button { min-width: 0; min-height: 42px; padding-inline: 4px; font-size: var(--text-xs); }
   .adm-pipeline-card { gap: var(--space-3); padding: var(--space-4); }
+  .adm-pipeline-card__header { align-items: stretch; flex-direction: column; }
+  .adm-pipeline-card__header .adm-task-list__actions { justify-content: space-between; width: 100%; }
+  .adm-pipeline-card__header h2 { font-size: var(--text-xl); }
   .adm-pipeline-facts,
   .adm-pipeline-fields--two { grid-template-columns: 1fr; }
   .adm-pipeline-form .adm-form__actions { grid-template-columns: 1fr; }

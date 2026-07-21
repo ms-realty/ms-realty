@@ -2112,7 +2112,7 @@ function LeadPipelineBody({ page }) {
       h(
         "nav",
         { className: "crm-seg adm-pipeline-tabs", "aria-label": title, "data-pipeline-tabs": "true" },
-        h("button", { type: "button", "data-pipeline-filter": "open", "data-on": "1" }, label(copy, "openPipeline", "Open")),
+        h("button", { type: "button", "data-pipeline-filter": "open", "data-on": "1" }, statusText(workbenchCopy(page), "open")),
         h("button", { type: "button", "data-pipeline-filter": "buyer", "data-on": "0" }, label(copy, "buyerPipeline", "Buyers")),
         h("button", { type: "button", "data-pipeline-filter": "renter", "data-on": "0" }, label(copy, "renterPipeline", "Renters")),
         h("button", { type: "button", "data-pipeline-filter": "lost", "data-on": "0" }, statusText(workbenchCopy(page), "lost")),
