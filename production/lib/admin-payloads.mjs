@@ -170,7 +170,7 @@ function positivePage(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 }
 
-function pagedRows(rows, requestedPage, pageSize = 25) {
+function pagedRows(rows, requestedPage, pageSize = 12) {
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const page = Math.min(positivePage(requestedPage), totalPages);
   const offset = (page - 1) * pageSize;

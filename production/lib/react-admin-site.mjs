@@ -2399,6 +2399,24 @@ function DocumentOutcomeForm({ page, checklist, item, copy }) {
   );
 }
 
+function DocumentChecklistItem({ page, checklist, item, copy }) {
+  return h(
+    "li",
+    { key: item.id, "data-document-item": item.key, "data-document-status": item.status },
+    h(
+      "div",
+      { className: "adm-checklist-item__head" },
+      h("span", { className: "adm-checklist-item__ordinal" }, item.ordinal),
+      h("strong", null, item.label),
+      h(StatusPill, { tone: item.blocked ? "brick" : item.complete ? "success" : "sun" }, documentStatusLabel(copy, item.status)),
+    ),
+    item.outcome
+      ? h("small", null, `${item.outcome.actor} · ${formatAdminDateTime(item.outcome.recorded_at, page.workspace?.locale)}${item.outcome.reference ? ` · ${item.outcome.reference}` : ""}`)
+      : null,
+    h(DocumentOutcomeForm, { page, checklist, item, copy }),
+  );
+}
+
 function ConsentWithdrawalForm({ page, row, copy }) {
   if (!row.withdrawable || !row.subject_id || !pageCan(page, "operations:write")) return null;
   return h(
@@ -2543,8 +2561,12 @@ function DocumentChecklistsBody({ page }) {
       h(
         "div",
         { className: "adm-checklist-grid" },
-        ...queue.rows.map((checklist) =>
-          h(
+        ...queue.rows.map((checklist) => {
+          const nextItem = checklist.next_item
+            ? checklist.items.find((item) => item.id === checklist.next_item.id || item.key === checklist.next_item.key)
+            : null;
+          const remainingItems = nextItem ? checklist.items.filter((item) => item.id !== nextItem.id) : checklist.items;
+          return h(
             "article",
             { key: checklist.id, className: "adm-checklist-card", "data-document-checklist": checklist.lead_id, "data-checklist-blocked": checklist.blocked_count ? "true" : "false" },
             h(
@@ -2562,29 +2584,32 @@ function DocumentChecklistsBody({ page }) {
             checklist.next_item
               ? h("p", { className: "adm-checklist-next" }, h("strong", null, `${label(copy, "nextDocumentStep", "Next step")}: `), checklist.next_item.label)
               : null,
-            h(
-              "ol",
-              { className: "adm-checklist-items" },
-              ...checklist.items.map((item) =>
-                h(
-                  "li",
-                  { key: item.id, "data-document-item": item.key, "data-document-status": item.status },
+            nextItem
+              ? h(
+                  "ol",
+                  { className: "adm-checklist-items adm-checklist-items--next" },
+                  h(DocumentChecklistItem, { page, checklist, item: nextItem, copy }),
+                )
+              : null,
+            remainingItems.length
+              ? h(
+                  "details",
+                  { className: "adm-checklist-more" },
                   h(
-                    "div",
-                    { className: "adm-checklist-item__head" },
-                    h("span", { className: "adm-checklist-item__ordinal" }, item.ordinal),
-                    h("strong", null, item.label),
-                    h(StatusPill, { tone: item.blocked ? "brick" : item.complete ? "success" : "sun" }, documentStatusLabel(copy, item.status)),
+                    "summary",
+                    null,
+                    h(Icon, { name: "list", size: 16 }),
+                    h("span", null, `${label(copy, "allDocumentSteps", "All steps")} · ${checklist.completed_count}/${checklist.item_count}`),
                   ),
-                  item.outcome
-                    ? h("small", null, `${item.outcome.actor} · ${formatAdminDateTime(item.outcome.recorded_at, page.workspace?.locale)}${item.outcome.reference ? ` · ${item.outcome.reference}` : ""}`)
-                    : null,
-                  h(DocumentOutcomeForm, { page, checklist, item, copy }),
-                ),
-              ),
-            ),
-          ),
-        ),
+                  h(
+                    "ol",
+                    { className: "adm-checklist-items" },
+                    ...remainingItems.map((item) => h(DocumentChecklistItem, { key: item.id, page, checklist, item, copy })),
+                  ),
+                )
+              : null,
+          );
+        }),
       ),
     ],
   });
@@ -3380,116 +3405,130 @@ function PublicationSchedulePanel({ page }) {
   const queue = page.publicationSchedules || { open: [], summary: { due: 0 } };
   return h(
     Panel,
-    { title: ui.publicationSchedule, "data-publication-schedule-panel": "true" },
-    h("p", { className: "adm-note" }, ui.publicationScheduleHint),
+    {
+      title: ui.publicationSchedule,
+      action: h(StatusPill, { tone: queue.summary.due ? "brick" : queue.open.length ? "sun" : "sand" }, `${queue.open.length} ${statusText(ui, "open")}`),
+      "data-publication-schedule-panel": "true",
+    },
     h(
-      "div",
-      { className: "adm-report-grid adm-report-grid--two", style: "padding:var(--space-5)" },
+      "details",
+      { className: "adm-publication-disclosure", open: queue.summary.due > 0 },
       h(
-        "form",
-        {
-          method: "post",
-          action: "/api/admin/listings/publication-schedules",
-          className: "adm-form adm-report-card",
-          "data-admin-mutation-form": "publication-schedule",
-          "data-admin-mutation-saving": ui.publicationSaving,
-          "data-admin-mutation-success": ui.publicationSaved,
-          "data-admin-mutation-failure": ui.publicationFailed,
-        },
-        h("input", { type: "hidden", name: "actor", value: currentOperatorId(page, "listing_editor") }),
-        h(
-          "label",
-          null,
-          ui.listing,
-          h("input", { name: "listingId", required: true, list: "publication-listings", placeholder: "MS-CRAWL-0001", autoComplete: "off" }),
-          h(
-            "datalist",
-            { id: "publication-listings" },
-            ...page.listings.map((row) => h("option", { key: row.id, value: row.id }, row.title)),
-          ),
-        ),
-        h(
-          "label",
-          null,
-          ui.publicationAction,
-          h(
-            "select",
-            { name: "action", required: true },
-            h("option", { value: "publish" }, ui.publishListing),
-            h("option", { value: "unpublish" }, ui.unpublishListing),
-          ),
-        ),
-        h("label", null, ui.publicationTime, h("input", { type: "datetime-local", name: "scheduledAt", required: true })),
-        h(
-          "label",
-          null,
-          ui.publishStatus,
-          h(
-            "select",
-            { name: "targetStatus" },
-            h("option", { value: "available" }, statusText(ui, "available")),
-            h("option", { value: "reserved" }, statusText(ui, "reserved")),
-          ),
-        ),
-        h("label", null, ui.sellerPipelineNote, h("textarea", { name: "note", maxLength: 500, rows: 3 })),
-        h(
-          "div",
-          { className: "adm-form__actions" },
-          h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
-          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "clock", size: 16 }), ui.schedulePublication),
-        ),
+        "summary",
+        { className: "adm-publication-disclosure__summary" },
+        h(Icon, { name: "clock", size: 17 }),
+        h("span", null, ui.schedulePublication),
       ),
+      h("p", { className: "adm-note" }, ui.publicationScheduleHint),
       h(
-        "section",
-        { className: "adm-report-card", "aria-label": ui.scheduledPublications },
+        "div",
+        { className: "adm-report-grid adm-report-grid--two adm-publication-disclosure__body" },
         h(
-          "header",
-          null,
-          h("div", null, h("h3", null, ui.scheduledPublications), h("small", null, `${queue.open.length} · ${statusText(ui, "open")}`)),
+          "form",
+          {
+            method: "post",
+            action: "/api/admin/listings/publication-schedules",
+            className: "adm-form adm-report-card",
+            "data-admin-mutation-form": "publication-schedule",
+            "data-admin-mutation-saving": ui.publicationSaving,
+            "data-admin-mutation-success": ui.publicationSaved,
+            "data-admin-mutation-failure": ui.publicationFailed,
+          },
+          h("input", { type: "hidden", name: "actor", value: currentOperatorId(page, "listing_editor") }),
           h(
-            "form",
-            {
-              method: "post",
-              action: "/api/admin/listings/publication-schedules/run-due",
-              "data-admin-mutation-form": "publication-run-due",
-              "data-admin-mutation-saving": ui.publicationSaving,
-              "data-admin-mutation-success": ui.publicationSaved,
-              "data-admin-mutation-failure": ui.publicationFailed,
-            },
-            h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: !queue.summary.due }, `${ui.runDuePublications} · ${queue.summary.due}`),
-            h("span", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+            "label",
+            null,
+            ui.listing,
+            h("input", { name: "listingId", required: true, list: "publication-listings", placeholder: "MS-CRAWL-0001", autoComplete: "off" }),
+            h(
+              "datalist",
+              { id: "publication-listings" },
+              ...page.listings.map((row) => h("option", { key: row.id, value: row.id }, row.title)),
+            ),
+          ),
+          h(
+            "label",
+            null,
+            ui.publicationAction,
+            h(
+              "select",
+              { name: "action", required: true },
+              h("option", { value: "publish" }, ui.publishListing),
+              h("option", { value: "unpublish" }, ui.unpublishListing),
+            ),
+          ),
+          h("label", null, ui.publicationTime, h("input", { type: "datetime-local", name: "scheduledAt", required: true })),
+          h(
+            "label",
+            null,
+            ui.publishStatus,
+            h(
+              "select",
+              { name: "targetStatus" },
+              h("option", { value: "available" }, statusText(ui, "available")),
+              h("option", { value: "reserved" }, statusText(ui, "reserved")),
+            ),
+          ),
+          h("label", null, ui.sellerPipelineNote, h("textarea", { name: "note", maxLength: 500, rows: 3 })),
+          h(
+            "div",
+            { className: "adm-form__actions" },
+            h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+            h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "clock", size: 16 }), ui.schedulePublication),
           ),
         ),
-        queue.open.length
-          ? h(
-              "ul",
-              { className: "adm-task-list" },
-              ...queue.open.map((row) =>
-                h(
-                  "li",
-                  { key: row.id, "data-publication-schedule-row": row.id, "data-due": row.due ? "true" : "false" },
-                  h("div", null, h("strong", null, row.listing_title), h("small", { className: "crm-mono" }, row.listing_id), h("small", null, `${row.action === "publish" ? ui.publishListing : ui.unpublishListing} · ${formatAdminDateTime(row.scheduled_at, page.workspace.locale)}`)),
+        h(
+          "section",
+          { className: "adm-report-card", "aria-label": ui.scheduledPublications },
+          h(
+            "header",
+            null,
+            h("div", null, h("h3", null, ui.scheduledPublications), h("small", null, `${queue.open.length} · ${statusText(ui, "open")}`)),
+            h(
+              "form",
+              {
+                method: "post",
+                action: "/api/admin/listings/publication-schedules/run-due",
+                "data-admin-mutation-form": "publication-run-due",
+                "data-admin-mutation-saving": ui.publicationSaving,
+                "data-admin-mutation-success": ui.publicationSaved,
+                "data-admin-mutation-failure": ui.publicationFailed,
+              },
+              h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm", disabled: !queue.summary.due }, `${ui.runDuePublications} · ${queue.summary.due}`),
+              h("span", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+            ),
+          ),
+          queue.open.length
+            ? h(
+                "ul",
+                { className: "adm-task-list" },
+                ...queue.open.map((row) =>
                   h(
-                    "form",
-                    {
-                      method: "post",
-                      action: "/api/admin/listings/publication-schedules/cancel",
-                      className: "adm-inline-form",
-                      "data-admin-mutation-form": "publication-cancel",
-                      "data-admin-mutation-saving": ui.publicationSaving,
-                      "data-admin-mutation-success": ui.publicationSaved,
-                      "data-admin-mutation-failure": ui.publicationFailed,
-                    },
-                    h("input", { type: "hidden", name: "scheduleId", value: row.id }),
-                    h("input", { type: "hidden", name: "actor", value: currentOperatorId(page, "listing_editor") }),
-                    h("label", null, ui.cancellationReason, h("input", { name: "reason", required: true, maxLength: 500 })),
-                    h("button", { type: "submit", className: "mk-btn mk-btn--ghost mk-btn--sm" }, ui.cancelSchedule),
-                    h("span", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                    "li",
+                    { key: row.id, "data-publication-schedule-row": row.id, "data-due": row.due ? "true" : "false" },
+                    h("div", null, h("strong", null, row.listing_title), h("small", { className: "crm-mono" }, row.listing_id), h("small", null, `${row.action === "publish" ? ui.publishListing : ui.unpublishListing} · ${formatAdminDateTime(row.scheduled_at, page.workspace.locale)}`)),
+                    h(
+                      "form",
+                      {
+                        method: "post",
+                        action: "/api/admin/listings/publication-schedules/cancel",
+                        className: "adm-inline-form",
+                        "data-admin-mutation-form": "publication-cancel",
+                        "data-admin-mutation-saving": ui.publicationSaving,
+                        "data-admin-mutation-success": ui.publicationSaved,
+                        "data-admin-mutation-failure": ui.publicationFailed,
+                      },
+                      h("input", { type: "hidden", name: "scheduleId", value: row.id }),
+                      h("input", { type: "hidden", name: "actor", value: currentOperatorId(page, "listing_editor") }),
+                      h("label", null, ui.cancellationReason, h("input", { name: "reason", required: true, maxLength: 500 })),
+                      h("button", { type: "submit", className: "mk-btn mk-btn--ghost mk-btn--sm" }, ui.cancelSchedule),
+                      h("span", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+                    ),
                   ),
                 ),
-              ),
-            )
-          : h("p", { className: "adm-empty" }, ui.noScheduledPublications),
+              )
+            : h("p", { className: "adm-empty" }, ui.noScheduledPublications),
+        ),
       ),
     ),
   );
@@ -3547,7 +3586,6 @@ function ListingManagerBody({ page }) {
         h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
         h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/listings", page) }, label(copy, "resetFilters", "Reset filters")),
       ),
-      canEditContent ? h(PublicationSchedulePanel, { page }) : null,
       h(
         Panel,
         { title: `${label(copy, "results", "Results")} · ${page.pagination.totalRows}`, "data-listing-manager": "true" },
@@ -3610,17 +3648,17 @@ function ListingManagerBody({ page }) {
                       { key: row.id, "data-listing-manager-row": row.id },
                       h(
                         "td",
-                        { "data-label": columns.select, className: "adm-listing-bulk__select" },
+                        { "data-label": columns.select, "data-listing-column": "select", className: "adm-listing-bulk__select" },
                         h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
                       ),
-                      h("td", { "data-label": columns.listing }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
-                      h("td", { "data-label": columns.location }, row.location || "—"),
-                      h("td", { "data-label": columns.status }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
-                      h("td", { "data-label": columns.locale }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
-                      h("td", { "data-label": columns.quality }, h("span", null, `${row.metadata_gaps} ${ui.issues.toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${ui.publicPhotos.toLocaleLowerCase()}`)),
+                      h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
+                      h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || "—"),
+                      h("td", { "data-label": columns.status, "data-listing-column": "status" }, h(StatusPill, { tone: PILL_TONES[row.listing_status] || (row.review_required ? "sun" : "success") }, statusText(ui, row.listing_status))),
+                      h("td", { "data-label": columns.locale, "data-listing-column": "locale" }, h("span", { className: "crm-lang" }, row.source_locale.toUpperCase()), h("small", { className: "adm-lead-context" }, row.translation_locales.map((locale) => locale.toUpperCase()).join(" · "))),
+                      h("td", { "data-label": columns.quality, "data-listing-column": "quality" }, h("span", null, `${row.metadata_gaps} ${ui.issues.toLocaleLowerCase()}`), h("small", { className: "adm-lead-context" }, `${row.public_gallery_assets} ${ui.publicPhotos.toLocaleLowerCase()}`)),
                       h(
                         "td",
-                        { "data-label": columns.action },
+                        { "data-label": columns.action, "data-listing-column": "action" },
                         h(
                           "div",
                           { className: "adm-task-list__actions" },
@@ -3637,6 +3675,7 @@ function ListingManagerBody({ page }) {
           : h("p", { className: "adm-empty" }, label(copy, "noResults", "No results.")),
       ),
       h(Pagination, { page, path: "/admin/listings" }),
+      canEditContent ? h(PublicationSchedulePanel, { page }) : null,
     ],
   });
 }
@@ -3706,13 +3745,13 @@ function TranslationQueueBody({ page }) {
                 return h(
                   "tr",
                   { key: `${row.listing_id}-${row.target_locale}`, "data-translation-task-row": row.task.id, "data-translation-status": task?.status || row.current_status },
-                  h("td", { "data-label": columns.listing }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.listing_id), h("strong", null, row.listing_title), h("small", { className: "adm-lead-context" }, row.listing_location))),
-                  h("td", { "data-label": columns.target }, h("span", { className: "crm-lang" }, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`)),
-                  h("td", { "data-label": columns.status }, h(StatusPill, { tone: row.current_status === "stale" ? "brick" : task ? "sun" : "sand" }, statusText(ui, task?.status || row.current_status)), h("small", { className: "adm-lead-context" }, statusText(ui, row.task_type))),
-                  h("td", { "data-label": columns.owner }, row.reviewer_role),
+                  h("td", { "data-label": columns.listing, "data-translation-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.listing_id), h("strong", null, row.listing_title), h("small", { className: "adm-lead-context" }, row.listing_location))),
+                  h("td", { "data-label": columns.target, "data-translation-column": "target" }, h("span", { className: "crm-lang" }, `${row.source_locale.toUpperCase()} → ${row.target_locale.toUpperCase()}`)),
+                  h("td", { "data-label": columns.status, "data-translation-column": "status" }, h(StatusPill, { tone: row.current_status === "stale" ? "brick" : task ? "sun" : "sand" }, statusText(ui, task?.status || row.current_status)), h("small", { className: "adm-lead-context" }, statusText(ui, row.task_type))),
+                  h("td", { "data-label": columns.owner, "data-translation-column": "owner" }, row.reviewer_role),
                   h(
                     "td",
-                    { "data-label": columns.action, className: "adm-translation-actions" },
+                    { "data-label": columns.action, "data-translation-column": "action", className: "adm-translation-actions" },
                     canApprove
                       ? h(
                           "form",
@@ -4233,142 +4272,151 @@ function PendingLegacyRouteDecision({ page, route, ui }) {
       "data-source-domain": route.source_domain,
     },
     h(
-      "header",
-      { className: "adm-route-decision__header" },
-      h("code", { className: "crm-mono" }, route.old_url),
+      "details",
+      { className: "adm-route-decision__disclosure" },
       h(
-        "div",
-        { className: "adm-route-decision__meta" },
-        h(StatusPill, { tone: "sun" }, route.url_type),
-        h("span", null, route.source_domain),
-      ),
-    ),
-    h(
-      "section",
-      {
-        className: "adm-route-evidence",
-        "aria-label": ui.sourceEvidence,
-        "data-source-evidence": "true",
-        "data-source-title": evidence.title || "",
-      },
-      h(
-        "dl",
-        { className: "adm-route-evidence__facts" },
-        evidence.title
-          ? h("div", null, h("dt", null, ui.sourceTitle), h("dd", null, evidence.title))
-          : null,
-        evidence.h1 && evidence.h1 !== evidence.title
-          ? h("div", null, h("dt", null, ui.sourceHeading), h("dd", null, evidence.h1))
-          : null,
-        evidence.canonical
-          ? h(
-              "div",
-              null,
-              h("dt", null, ui.sourceCanonical),
-              h("dd", null, h("code", { className: "crm-mono" }, evidence.canonical)),
-            )
-          : null,
+        "summary",
+        { className: "adm-route-decision__header" },
         h(
-          "div",
-          null,
-          h("dt", null, ui.sourceMetrics),
-          h(
-            "dd",
-            null,
-            `${evidence.word_count || 0} ${ui.sourceWords} · ${evidence.image_count || 0} ${ui.sourceImages} · ${evidence.internal_link_count || 0} ${ui.sourceLinks}`,
-          ),
+          "span",
+          { className: "adm-route-decision__summary" },
+          h("code", { className: "crm-mono" }, route.old_url),
+          evidence.title ? h("small", null, evidence.title) : null,
         ),
-        evidence.review_owner
-          ? h("div", null, h("dt", null, ui.reviewOwner), h("dd", null, evidence.review_owner))
-          : null,
-        evidence.action_required
-          ? h("div", null, h("dt", null, ui.requiredAction), h("dd", null, evidence.action_required))
-          : null,
+        h(
+          "span",
+          { className: "adm-route-decision__meta" },
+          h(StatusPill, { tone: "sun" }, route.url_type),
+          h("span", null, route.source_domain),
+        ),
       ),
       h(
-        "a",
+        "section",
         {
-          className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open",
-          href: route.old_url,
-          target: "_blank",
-          rel: "noreferrer",
+          className: "adm-route-evidence",
+          "aria-label": ui.sourceEvidence,
+          "data-source-evidence": "true",
+          "data-source-title": evidence.title || "",
         },
-        h(Icon, { name: "external-link", size: 16 }),
-        h("span", null, ui.openLegacyPage),
-      ),
-    ),
-    h(
-      "form",
-      {
-        method: "post",
-        action: "/api/admin/redirect-approvals",
-        className: "adm-route-decision__form",
-        "data-route-decision-form": "true",
-        "data-admin-mutation-form": "true",
-        "data-admin-mutation-saving": ui.routeDecisionSaving,
-        "data-admin-mutation-success": ui.routeDecisionSaved,
-        "data-admin-mutation-failure": ui.routeDecisionFailed,
-      },
-      h("input", { type: "hidden", name: "oldUrl", value: route.old_url }),
-      h(
-        "label",
-        null,
-        ui.decision,
         h(
-          "select",
-          { name: "decision", required: true, "data-route-decision-select": "true" },
-          h("option", { value: "" }, ui.chooseDecision),
-          h("option", { value: "redirect_301" }, ui.redirect301),
-          h("option", { value: "retain_200" }, ui.retain200),
-          h("option", { value: "approved_410" }, ui.approved410),
+          "dl",
+          { className: "adm-route-evidence__facts" },
+          evidence.title
+            ? h("div", null, h("dt", null, ui.sourceTitle), h("dd", null, evidence.title))
+            : null,
+          evidence.h1 && evidence.h1 !== evidence.title
+            ? h("div", null, h("dt", null, ui.sourceHeading), h("dd", null, evidence.h1))
+            : null,
+          evidence.canonical
+            ? h(
+                "div",
+                null,
+                h("dt", null, ui.sourceCanonical),
+                h("dd", null, h("code", { className: "crm-mono" }, evidence.canonical)),
+              )
+            : null,
+          h(
+            "div",
+            null,
+            h("dt", null, ui.sourceMetrics),
+            h(
+              "dd",
+              null,
+              `${evidence.word_count || 0} ${ui.sourceWords} · ${evidence.image_count || 0} ${ui.sourceImages} · ${evidence.internal_link_count || 0} ${ui.sourceLinks}`,
+            ),
+          ),
+          evidence.review_owner
+            ? h("div", null, h("dt", null, ui.reviewOwner), h("dd", null, evidence.review_owner))
+            : null,
+          evidence.action_required
+            ? h("div", null, h("dt", null, ui.requiredAction), h("dd", null, evidence.action_required))
+            : null,
+        ),
+        h(
+          "a",
+          {
+            className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open",
+            href: route.old_url,
+            target: "_blank",
+            rel: "noreferrer",
+          },
+          h(Icon, { name: "external-link", size: 16 }),
+          h("span", null, ui.openLegacyPage),
         ),
       ),
       h(
-        "label",
-        null,
-        ui.targetPath,
-        h("input", {
-          type: "text",
-          name: "targetPath",
-          defaultValue: route.target_path || "",
-          placeholder: "/bg/imoti/...",
-          autoComplete: "off",
-          "data-route-decision-target": "true",
-        }),
-      ),
-      h(
-        "label",
-        null,
-        ui.reviewer,
-        h("input", { name: "reviewer", defaultValue: operatorId, required: true, autoComplete: "name" }),
-      ),
-      h(
-        "label",
-        { className: "adm-route-decision__reason" },
-        ui.reason,
-        h("textarea", { name: "reason", rows: 2, required: true }),
-      ),
-      h(
-        "label",
-        { className: "adm-route-decision__equivalence" },
-        h("input", {
-          type: "checkbox",
-          name: "equivalentContent",
-          value: "true",
-          "data-route-decision-equivalence": "true",
-        }),
-        h("span", null, ui.equivalentContent),
-      ),
-      h(
-        "div",
-        { className: "adm-route-decision__actions" },
-        h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
-        h(
-          "button",
-          { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
-          h(Icon, { name: "circle-check", size: 16 }),
-          h("span", null, ui.saveDecision),
-        ),
+        "form",
+        {
+          method: "post",
+          action: "/api/admin/redirect-approvals",
+          className: "adm-route-decision__form",
+          "data-route-decision-form": "true",
+          "data-admin-mutation-form": "true",
+          "data-admin-mutation-saving": ui.routeDecisionSaving,
+          "data-admin-mutation-success": ui.routeDecisionSaved,
+          "data-admin-mutation-failure": ui.routeDecisionFailed,
+        },
+          h("input", { type: "hidden", name: "oldUrl", value: route.old_url }),
+          h(
+            "label",
+            null,
+            ui.decision,
+            h(
+              "select",
+              { name: "decision", required: true, "data-route-decision-select": "true" },
+              h("option", { value: "" }, ui.chooseDecision),
+              h("option", { value: "redirect_301" }, ui.redirect301),
+              h("option", { value: "retain_200" }, ui.retain200),
+              h("option", { value: "approved_410" }, ui.approved410),
+            ),
+          ),
+          h(
+            "label",
+            null,
+            ui.targetPath,
+            h("input", {
+              type: "text",
+              name: "targetPath",
+              defaultValue: route.target_path || "",
+              placeholder: "/bg/imoti/...",
+              autoComplete: "off",
+              "data-route-decision-target": "true",
+            }),
+          ),
+          h(
+            "label",
+            null,
+            ui.reviewer,
+            h("input", { name: "reviewer", defaultValue: operatorId, required: true, autoComplete: "name" }),
+          ),
+          h(
+            "label",
+            { className: "adm-route-decision__reason" },
+            ui.reason,
+            h("textarea", { name: "reason", rows: 2, required: true }),
+          ),
+          h(
+            "label",
+            { className: "adm-route-decision__equivalence" },
+            h("input", {
+              type: "checkbox",
+              name: "equivalentContent",
+              value: "true",
+              "data-route-decision-equivalence": "true",
+            }),
+            h("span", null, ui.equivalentContent),
+          ),
+          h(
+            "div",
+            { className: "adm-route-decision__actions" },
+            h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+            h(
+              "button",
+              { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+              h(Icon, { name: "circle-check", size: 16 }),
+              h("span", null, ui.saveDecision),
+            ),
+          ),
       ),
     ),
   );
@@ -4665,15 +4713,25 @@ function MigrationReviewBody({ page }) {
         Panel,
         { title: ui.approvedRedirects, "aria-label": ui.approvedRedirects },
         h(
-          "ul",
-          { className: "adm-redirects" },
-          ...page.redirectApprovals.map((approval) =>
-            h(
-              "li",
-              { key: approval.old_url },
-              h("code", { className: "crm-mono" }, approval.old_url),
-              " → ",
-              h("code", { className: "crm-mono" }, approval.target_path),
+          "details",
+          { className: "adm-archive-disclosure" },
+          h(
+            "summary",
+            null,
+            h(StatusPill, { tone: "success" }, page.redirectApprovals.length),
+            h("span", null, ui.approvedRedirects),
+          ),
+          h(
+            "ul",
+            { className: "adm-redirects" },
+            ...page.redirectApprovals.map((approval) =>
+              h(
+                "li",
+                { key: approval.old_url },
+                h("code", { className: "crm-mono" }, approval.old_url),
+                " → ",
+                h("code", { className: "crm-mono" }, approval.target_path),
+              ),
             ),
           ),
         ),
