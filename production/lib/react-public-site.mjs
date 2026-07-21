@@ -792,7 +792,7 @@ function SearchBody({ page }) {
   const filterForm = (idPrefix) =>
     h(
       "form",
-      { action: page.path, method: "get", role: "search", "data-search-filter-form": "true", "data-filter-form-id": idPrefix },
+      { id: `${idPrefix}-filter-form`, action: page.path, method: "get", role: "search", "data-search-filter-form": "true", "data-filter-form-id": idPrefix },
       h(
         "div",
         { className: "sr-fg" },
@@ -994,7 +994,20 @@ function SearchBody({ page }) {
       ),
       h(Btn, { type: "submit", variant: "secondary", full: true, iconStart: "bell", disabled: !hasSavedSearchCriteria }, labels.saveSearch),
     );
-  const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchForm(idPrefix)];
+  const saveSearchDisclosure = (idPrefix) =>
+    h(
+      "details",
+      { className: "sr-save-disclosure", "data-save-search-disclosure": idPrefix },
+      h(
+        "summary",
+        null,
+        h(Icon, { name: "bell", size: 17 }),
+        h("span", null, labels.saveSearch),
+        h(Icon, { name: "chevron-down", size: 14, "aria-hidden": "true" }),
+      ),
+      h("div", { className: "sr-save-disclosure__body" }, saveSearchForm(idPrefix)),
+    );
+  const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchDisclosure(idPrefix)];
   const main = h(
     "main",
     {
@@ -1019,7 +1032,28 @@ function SearchBody({ page }) {
           h("span", { className: "sr-mobile-filters__label" }, chrome.copy.filters || labels.activeFilters),
           activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
         ),
-        h("div", { className: "sr-mobile-filters__panel" }, ...filterForms("sr-mobile")),
+        h("button", { type: "button", className: "sr-mobile-filters__backdrop", "data-mobile-filter-close": "true", "aria-label": chrome.copy.close }),
+        h(
+          "div",
+          { className: "sr-mobile-filters__panel", "data-mobile-filter-sheet": "true" },
+          h(
+            "header",
+            { className: "sr-mobile-filters__sheet-head" },
+            h("h2", null, chrome.copy.filters || labels.activeFilters),
+            h(
+              "button",
+              { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-mobile-filter-close": "true", "aria-label": chrome.copy.close },
+              h(Icon, { name: "x", size: 20 }),
+            ),
+          ),
+          h("div", { className: "sr-mobile-filters__sheet-body" }, ...filterForms("sr-mobile")),
+          h(
+            "footer",
+            { className: "sr-mobile-filters__sheet-foot" },
+            activeFilterCount ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters) : null,
+            h(Btn, { type: "submit", form: "sr-mobile-filter-form", variant: "primary", full: true, iconStart: "search" }, `${labels.search} · ${page.search.total_matches} ${labels.matches}`),
+          ),
+        ),
       ),
       h(
         "aside",

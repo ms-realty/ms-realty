@@ -277,6 +277,11 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /<h1>Property search \| MS Realty<\/h1>/);
   assert.match(html, /class="sr-results__count" role="status" aria-live="polite">\d+ matches<\/p>/);
   assert.doesNotMatch(html, /<h1>Property search \| MS Realty<small>/);
+  assert.match(html, /data-mobile-filter-sheet="true"/);
+  assert.match(html, /data-mobile-filter-close="true"/);
+  assert.match(html, /data-save-search-disclosure="sr-mobile"/);
+  assert.match(html, /form="sr-mobile-filter-form"/);
+  assert.match(html, /class="sr-mobile-filters__sheet-foot"/);
 });
 
 test("search applies text and facet filters before paginating cards", () => {

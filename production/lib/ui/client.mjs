@@ -266,6 +266,30 @@ export const PUBLIC_APP_JS = `(function () {
     var forms = document.querySelectorAll("[data-save-search-form]");
     for (var i = 0; i < forms.length; i += 1) updateSavedSearchContact(forms[i]);
   }
+  function initMobileSearchFilters() {
+    var sheet = document.querySelector("[data-mobile-search-filters]");
+    if (!sheet) return;
+    var summary = sheet.querySelector("summary");
+    function syncSheetState() {
+      document.documentElement.classList.toggle("mobile-sheet-open", Boolean(sheet.open));
+    }
+    sheet.addEventListener("toggle", syncSheetState);
+    sheet.addEventListener("click", function (event) {
+      var close = event.target.closest("[data-mobile-filter-close]");
+      if (!close) return;
+      event.preventDefault();
+      sheet.open = false;
+      syncSheetState();
+      if (summary) summary.focus();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || !sheet.open) return;
+      sheet.open = false;
+      syncSheetState();
+      if (summary) summary.focus();
+    });
+    syncSheetState();
+  }
   function initImageFallbacks() {
     var images = document.querySelectorAll("img[data-fallback-src]");
     function useFallback(image) {
@@ -348,6 +372,7 @@ export const PUBLIC_APP_JS = `(function () {
   });
   markSaved();
   initSavedSearchContacts();
+  initMobileSearchFilters();
   initImageFallbacks();
   initPhotoSphereViewers();
 })();`;
