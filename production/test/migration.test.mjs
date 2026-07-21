@@ -10,7 +10,11 @@ import {
   normalizeMigrationRecords,
   summarizeMigrationRecords,
 } from "../lib/migration.mjs";
-import { assertMigrationReviewQueue, buildMigrationReviewQueue } from "../lib/migration-review.mjs";
+import {
+  assertMigrationReviewQueue,
+  attachMigrationReviewEvidence,
+  buildMigrationReviewQueue,
+} from "../lib/migration-review.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { loadListings } from "../lib/content.mjs";
@@ -117,6 +121,22 @@ test("migration review queue assigns owners without making rows deployable", () 
   assert.equal(summary.byOwner.content_editor, 68);
   assert.ok(queue.rows.every((row) => row.deployable === false));
   assert.ok(queue.rows.some((row) => row.url_type === "taxonomy" && row.action_required === "map_or_rebuild_taxonomy_landing"));
+});
+
+test("migration review routes expose crawl evidence without making a terminal decision", () => {
+  const records = normalizeMigrationRecords(loadCrawlArtifact());
+  const routeMap = buildLegacyRouteMap(loadLocaleRegistry(), records, loadListings());
+  const [route] = attachMigrationReviewEvidence(routeMap.slice(0, 1), records);
+
+  assert.equal(route.old_url, records[0].old_url);
+  assert.equal(route.review_required, true);
+  assert.equal(route.deployable, false);
+  assert.equal(route.source_evidence.title, records[0].title);
+  assert.equal(route.source_evidence.h1, records[0].h1);
+  assert.equal(route.source_evidence.canonical, records[0].canonical);
+  assert.equal(route.source_evidence.word_count, records[0].word_count);
+  assert.equal(route.source_evidence.review_owner, "content_editor");
+  assert.equal(route.source_evidence.action_required, "map_or_rebuild_content_page");
 });
 
 test("generated migration review queue file is valid when present", () => {

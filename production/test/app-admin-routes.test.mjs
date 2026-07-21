@@ -966,6 +966,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-pending-route-count="457"/);
       assert.match(migrationReviewHtmlBody, /data-reviewed-route-count="0"/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
+      assert.match(migrationReviewHtmlBody, /data-source-evidence="true"/);
+      assert.match(migrationReviewHtmlBody, /data-source-title="Недвижими имоти в Сандански \| MS Realty"/);
+      assert.match(migrationReviewHtmlBody, /href="https:\/\/makler-realty\.com" target="_blank" rel="noreferrer"/);
+      assert.match(migrationReviewHtmlBody, /map_or_rebuild_content_page/);
       assert.match(migrationReviewHtmlBody, /data-route-decision-form="true"/);
       assert.match(migrationReviewHtmlBody, /name="decision" required data-route-decision-select="true"/);
       assert.match(migrationReviewHtmlBody, /value="redirect_301"/);

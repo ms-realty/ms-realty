@@ -50,6 +50,31 @@ function priority(record, route, gaps) {
   return "low";
 }
 
+export function attachMigrationReviewEvidence(routes, records) {
+  const recordsByUrl = new Map(records.map((record) => [record.old_url, record]));
+  return routes.map((route) => {
+    const record = recordsByUrl.get(route.old_url);
+    if (!record) return route;
+    const gaps = gapNames(record.metadata_gaps);
+    return {
+      ...route,
+      source_evidence: {
+        title: record.title || "",
+        h1: record.h1 || "",
+        canonical: record.canonical || "",
+        word_count: Number(record.word_count || 0),
+        image_count: Number(record.image_count || 0),
+        internal_link_count: Number(record.internal_link_count || 0),
+        migration_action: record.migration_action || "",
+        review_owner: reviewOwner(record),
+        action_required: actionRequired(record),
+        priority: priority(record, route, gaps),
+        metadata_gaps: gaps,
+      },
+    };
+  });
+}
+
 export function buildMigrationReviewQueue(records, routeMap) {
   const routesByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const rows = records.map((record) => {

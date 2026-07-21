@@ -53,6 +53,17 @@ const ADMIN_UI_COPY = {
     reviewedDecisions: "Прегледани решения",
     pendingLegacyDecisions: "Чакащи решения за стари URL адреси",
     pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници — никога начална страница или общо търсене.",
+    sourceEvidence: "Данни от стария сайт",
+    sourceTitle: "Заглавие",
+    sourceHeading: "H1 заглавие",
+    sourceCanonical: "Canonical",
+    sourceMetrics: "Съдържание",
+    sourceWords: "думи",
+    sourceImages: "снимки",
+    sourceLinks: "вътрешни връзки",
+    openLegacyPage: "Отвори старата страница",
+    reviewOwner: "Отговорник",
+    requiredAction: "Нужно действие",
     approvableRedirects: "Пренасочвания за одобрение",
     oldUrl: "Стар URL",
     routeType: "Тип маршрут",
@@ -263,6 +274,17 @@ const ADMIN_UI_COPY = {
     reviewedDecisions: "Проверенные решения",
     pendingLegacyDecisions: "Ожидающие решения по старым URL",
     pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница — не главная и не общий поиск.",
+    sourceEvidence: "Данные со старого сайта",
+    sourceTitle: "Заголовок",
+    sourceHeading: "Заголовок H1",
+    sourceCanonical: "Canonical",
+    sourceMetrics: "Содержимое",
+    sourceWords: "слов",
+    sourceImages: "изображений",
+    sourceLinks: "внутренних ссылок",
+    openLegacyPage: "Открыть старую страницу",
+    reviewOwner: "Ответственный",
+    requiredAction: "Нужное действие",
     approvableRedirects: "Редиректы для одобрения",
     oldUrl: "Старый URL",
     routeType: "Тип маршрута",
@@ -473,6 +495,17 @@ const ADMIN_UI_COPY = {
     reviewedDecisions: "Reviewed decisions",
     pendingLegacyDecisions: "Pending legacy URL decisions",
     pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages—never a homepage or generic search fallback.",
+    sourceEvidence: "Legacy source evidence",
+    sourceTitle: "Title",
+    sourceHeading: "H1 heading",
+    sourceCanonical: "Canonical",
+    sourceMetrics: "Content",
+    sourceWords: "words",
+    sourceImages: "images",
+    sourceLinks: "internal links",
+    openLegacyPage: "Open legacy page",
+    reviewOwner: "Review owner",
+    requiredAction: "Required action",
     approvableRedirects: "Approvable listing redirects",
     oldUrl: "Old URL",
     routeType: "Route type",
@@ -4190,6 +4223,7 @@ function MigrationRoutePagination({ page }) {
 
 function PendingLegacyRouteDecision({ page, route, ui }) {
   const operatorId = currentOperatorId(page, "seo_editor");
+  const evidence = route.source_evidence || {};
   return h(
     "li",
     {
@@ -4207,6 +4241,60 @@ function PendingLegacyRouteDecision({ page, route, ui }) {
         { className: "adm-route-decision__meta" },
         h(StatusPill, { tone: "sun" }, route.url_type),
         h("span", null, route.source_domain),
+      ),
+    ),
+    h(
+      "section",
+      {
+        className: "adm-route-evidence",
+        "aria-label": ui.sourceEvidence,
+        "data-source-evidence": "true",
+        "data-source-title": evidence.title || "",
+      },
+      h(
+        "dl",
+        { className: "adm-route-evidence__facts" },
+        evidence.title
+          ? h("div", null, h("dt", null, ui.sourceTitle), h("dd", null, evidence.title))
+          : null,
+        evidence.h1 && evidence.h1 !== evidence.title
+          ? h("div", null, h("dt", null, ui.sourceHeading), h("dd", null, evidence.h1))
+          : null,
+        evidence.canonical
+          ? h(
+              "div",
+              null,
+              h("dt", null, ui.sourceCanonical),
+              h("dd", null, h("code", { className: "crm-mono" }, evidence.canonical)),
+            )
+          : null,
+        h(
+          "div",
+          null,
+          h("dt", null, ui.sourceMetrics),
+          h(
+            "dd",
+            null,
+            `${evidence.word_count || 0} ${ui.sourceWords} · ${evidence.image_count || 0} ${ui.sourceImages} · ${evidence.internal_link_count || 0} ${ui.sourceLinks}`,
+          ),
+        ),
+        evidence.review_owner
+          ? h("div", null, h("dt", null, ui.reviewOwner), h("dd", null, evidence.review_owner))
+          : null,
+        evidence.action_required
+          ? h("div", null, h("dt", null, ui.requiredAction), h("dd", null, evidence.action_required))
+          : null,
+      ),
+      h(
+        "a",
+        {
+          className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open",
+          href: route.old_url,
+          target: "_blank",
+          rel: "noreferrer",
+        },
+        h(Icon, { name: "external-link", size: 16 }),
+        h("span", null, ui.openLegacyPage),
       ),
     ),
     h(

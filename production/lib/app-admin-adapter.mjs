@@ -45,6 +45,7 @@ import {
   readAccountLedger,
 } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
+import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
 import { DEFAULT_EVENT_LEDGER_PATH, readEventLedger } from "./events.mjs";
@@ -146,6 +147,7 @@ import {
 } from "./public-request-outcomes.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
+import { attachMigrationReviewEvidence } from "./migration-review.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -940,6 +942,7 @@ function migrationReviewPayload(registry, url, config) {
   const requestedRoutePage = Number.parseInt(url.searchParams.get("routePage") || "1", 10);
   const routePage = Math.min(Math.max(Number.isFinite(requestedRoutePage) ? requestedRoutePage : 1, 1), routePages);
   const pendingRoutes = reviewRequired.slice((routePage - 1) * routePageSize, routePage * routePageSize);
+  const pendingRoutesWithEvidence = attachMigrationReviewEvidence(pendingRoutes, loadMigrationRecords());
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
   const readiness = launchReadiness(config);
   return {
@@ -964,7 +967,7 @@ function migrationReviewPayload(registry, url, config) {
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
       terminalDecisionsReviewed: decisions.length,
-      pendingSample: pendingRoutes,
+      pendingSample: pendingRoutesWithEvidence,
       pendingPagination: {
         page: routePage,
         pageSize: routePageSize,

@@ -27,6 +27,7 @@ import {
 import { appendDocumentChecklistOutcome, buildDocumentChecklistQueue, readDocumentChecklistOutcomes } from "./document-checklists.mjs";
 import { appendAccountContactLink, appendAccountCreation, deriveAccounts, readAccountLedger } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
+import { loadMigrationRecords } from "./content.mjs";
 import {
   addLocaleToRegistry,
   loadLocaleRegistry,
@@ -63,6 +64,7 @@ import {
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
+import { attachMigrationReviewEvidence } from "./migration-review.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
   approveTranslationTask,
@@ -331,9 +333,18 @@ function listingEditInput(request) {
   return { ...input, patch };
 }
 
-function renderMigrationReviewPayload(registry, requestedLocale, dashboard, routes, approvals, seoEvidence, listingQuality, launchReadiness) {
-  const workspace = renderAdminWorkspace({ registry, requestedLocale });
-  const reviewRequired = routes.filter((route) => route.review_required);
+function renderMigrationReviewPayload(registry, url, dashboard, routes, approvals, seoEvidence, listingQuality, launchReadiness) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
+  const decisions = buildLegacyRouteDecisions(routes, approvals);
+  const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
+  const sourceReviewRequired = routes.filter((route) => route.review_required);
+  const reviewRequired = sourceReviewRequired.filter((route) => !decidedOldUrls.has(route.old_url));
+  const routePageSize = 20;
+  const routePages = Math.max(1, Math.ceil(reviewRequired.length / routePageSize));
+  const requestedRoutePage = Number.parseInt(url.searchParams.get("routePage") || "1", 10);
+  const routePage = Math.min(Math.max(Number.isFinite(requestedRoutePage) ? requestedRoutePage : 1, 1), routePages);
+  const pendingRoutes = reviewRequired.slice((routePage - 1) * routePageSize, routePage * routePageSize);
+  const pendingRoutesWithEvidence = attachMigrationReviewEvidence(pendingRoutes, loadMigrationRecords());
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
   return {
     kind: "admin_migration_review",
@@ -353,11 +364,20 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     dashboard,
     routeMap: {
       total: routes.length,
+      sourceReviewRequired: sourceReviewRequired.length,
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
-      terminalDecisionsReviewed: buildLegacyRouteDecisions(routes, approvals).length,
-      pendingSample: reviewRequired.slice(0, 20),
-      approvableSample: mappedListings.filter((route) => route.review_required && route.planned_status === 301).slice(0, 20),
+      terminalDecisionsReviewed: decisions.length,
+      pendingSample: pendingRoutesWithEvidence,
+      pendingPagination: {
+        page: routePage,
+        pageSize: routePageSize,
+        totalPages: routePages,
+        totalRows: reviewRequired.length,
+      },
+      approvableSample: mappedListings
+        .filter((route) => route.review_required && route.planned_status === 301 && !decidedOldUrls.has(route.old_url))
+        .slice(0, 20),
     },
     redirectApprovals: approvals,
     redirectApprovalImport: {
@@ -389,7 +409,7 @@ function renderMigrationReviewPayload(registry, requestedLocale, dashboard, rout
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     listingQualityEndpoint: "/api/admin/listing-quality",
     deployablePreview: buildDeployableRedirects(routes, approvals),
-    terminalDecisionPreview: buildLegacyRouteDecisions(routes, approvals),
+    terminalDecisionPreview: decisions,
   };
 }
 
@@ -1160,7 +1180,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = renderMigrationReviewPayload(
         activeRegistry,
-        url.searchParams.get("locale") || "en",
+        url,
         migrationReviewDashboard,
         routeMap,
         readRedirectApprovals(redirectApprovalPath || undefined),
@@ -1173,11 +1193,10 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
-      const requestedLocale = url.searchParams.get("locale") || "en";
       const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
       const payload = renderMigrationReviewPayload(
         activeRegistry,
-        requestedLocale,
+        url,
         migrationReviewDashboard,
         routeMap,
         approvals,
@@ -2909,7 +2928,8 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReview.body.launchInputChecklistEndpoint !== "/api/admin/launch-input-checklist" ||
     smoke.adminMigrationReview.body.cmsCollectionsEndpoint !== "/api/admin/cms-collections" ||
     smoke.adminMigrationReview.body.payloadCollectionsEndpoint !== "/api/admin/payload-collections" ||
-    smoke.adminMigrationReview.body.routeMap.approvableSample?.length < 1
+    smoke.adminMigrationReview.body.routeMap.pendingSample?.length < 1 ||
+    !smoke.adminMigrationReview.body.routeMap.pendingSample[0].source_evidence?.title
   ) {
     throw new Error("HTTP smoke must serve admin migration review workbench contract");
   }
@@ -2917,7 +2937,8 @@ export function assertHttpSmoke(smoke) {
     smoke.adminMigrationReviewHtml?.status !== 200 ||
     smoke.adminMigrationReviewHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\"") ||
-    !smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\"") ||
+    !smoke.adminMigrationReviewHtml.body.includes("data-source-evidence=\"true\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-import-endpoint=\"/api/admin/redirect-approvals/import\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-export-endpoint=\"/api/admin/deployable-redirects/export\"") ||
     !smoke.adminMigrationReviewHtml.body.includes("data-redirect-workbook-endpoint=\"/api/admin/redirect-approval-workbook\"") ||

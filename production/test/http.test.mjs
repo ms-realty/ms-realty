@@ -1076,11 +1076,21 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminMigrationReview.body.workspace.locale, "bg");
   assert.equal(smoke.adminMigrationReview.body.dashboard.media_reconciliation.media_rows, 11859);
   assert.equal(smoke.adminMigrationReview.body.routeMap.total, 457);
+  assert.equal(smoke.adminMigrationReview.body.routeMap.sourceReviewRequired, 457);
+  assert.equal(smoke.adminMigrationReview.body.routeMap.reviewRequired, 292);
   assert.equal(smoke.adminMigrationReview.body.routeMap.mappedListings, 165);
+  assert.deepEqual(smoke.adminMigrationReview.body.routeMap.pendingPagination, {
+    page: 1,
+    pageSize: 20,
+    totalPages: 15,
+    totalRows: 292,
+  });
+  assert.equal(smoke.adminMigrationReview.body.routeMap.pendingSample[0].source_evidence.title, "Недвижими имоти в Сандански | MS Realty");
   assert.equal(smoke.adminMigrationReview.headers["cache-control"], "no-store");
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-kind=\"admin-migration-review\""), true);
   assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-react-admin-ui=\"migration-review\""), true);
-  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-approvable-listing=\"true\""), true);
+  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-source-evidence=\"true\""), true);
+  assert.equal(smoke.adminMigrationReviewHtml.body.includes("data-pending-route-decision=\"true\""), true);
   assert.equal(smoke.adminMigrationReviewUnauthorized.status, 401);
   assert.equal(smoke.adminMigrationReviewUnauthorized.headers["cache-control"], "no-store");
   assert.equal(smoke.adminMigrationReviewUnauthorized.headers["www-authenticate"], 'Bearer realm="ms-realty-admin"');
