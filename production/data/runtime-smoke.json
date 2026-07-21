@@ -3096,8 +3096,8 @@
     "canonical": "/he/locations/sandanski",
     "indexable": true,
     "metadata": {
-      "title": "MS Realty properties in Sandanski",
-      "description": "Reviewed MS Realty property inventory for Sandanski.",
+      "title": "נכסים ב-Sandanski | MS Realty",
+      "description": "נכסים שנבדקו על ידי MS Realty ב-Sandanski.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -3236,7 +3236,7 @@
       }
     },
     "body": {
-      "h1": "Properties in Sandanski",
+      "h1": "נכסים ב-Sandanski",
       "location": "Sandanski",
       "listing_count": 1
     },
@@ -4893,8 +4893,8 @@
     "canonical": "/he/locations/sandanski",
     "indexable": false,
     "metadata": {
-      "title": "MS Realty properties in Sandanski",
-      "description": "Reviewed MS Realty property inventory for Sandanski.",
+      "title": "נכסים ב-Sandanski | MS Realty",
+      "description": "נכסים שנבדקו על ידי MS Realty ב-Sandanski.",
       "robots": "noindex,follow"
     },
     "hreflang": [],
@@ -5012,7 +5012,7 @@
       }
     },
     "body": {
-      "h1": "Properties in Sandanski",
+      "h1": "נכסים ב-Sandanski",
       "location": "Sandanski",
       "listing_count": 0
     },
