@@ -3649,7 +3649,11 @@ function ListingManagerBody({ page }) {
                       h(
                         "td",
                         { "data-label": columns.select, "data-listing-column": "select", className: "adm-listing-bulk__select" },
-                        h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
+                        h(
+                          "label",
+                          { className: "adm-listing-select-hit" },
+                          h("input", { type: "checkbox", name: "listingIds", value: row.id, disabled: !canEditContent, "aria-label": `${ui.selectListings}: ${row.id}`, "data-listing-select": "true" }),
+                        ),
                       ),
                       h("td", { "data-label": columns.listing, "data-listing-column": "listing" }, h("div", { className: "adm-lead-identity" }, h("code", { className: "crm-mono" }, row.id), h("strong", null, row.title), h("small", { className: "adm-lead-context" }, row.price_on_request ? statusText(ui, "price_on_request") : row.price_eur ? `€${Number(row.price_eur).toLocaleString("en")}` : "—"))),
                       h("td", { "data-label": columns.location, "data-listing-column": "location" }, row.location || "—"),

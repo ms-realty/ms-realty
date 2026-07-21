@@ -327,6 +327,7 @@ main[data-react-admin-ui="lead-inbox"] .adm-reply-cell { min-width: 0; }
 .adm-listing-bulk__status[data-state="success"] { color: var(--success-500); }
 .adm-listing-bulk__status[data-state="error"] { color: var(--brick-600); }
 .adm-listing-bulk__select input { width: 20px; height: 20px; min-height: 20px; accent-color: var(--sea-600); }
+.adm-listing-select-hit { display: grid; width: 44px; height: 44px; place-items: center; cursor: pointer; }
 .adm-publication-disclosure { min-width: 0; }
 .adm-publication-disclosure__summary {
   display: flex;
@@ -637,14 +638,19 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 .adm-report-inventory { display: grid; grid-template-columns: minmax(220px, 0.7fr) repeat(2, minmax(260px, 1fr)); gap: var(--space-4); padding: var(--space-5); }
 .adm-report-inventory > .adm-report-facts { grid-template-columns: 1fr; padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface-sunken); }
 @media (max-width: 760px) {
+  main[data-react-admin-ui] .mk-btn,
+  main[data-react-admin-ui] button,
+  main[data-react-admin-ui] summary { min-height: 44px; }
+  main[data-react-admin-ui] .adm-check,
+  main[data-react-admin-ui] label:has(input[type="checkbox"]) { min-height: 44px; align-items: center; }
   .crm-top { justify-content: flex-end; gap: var(--space-2); padding-inline: var(--space-4); }
   .crm-top > div:first-child { display: none; }
   .adm-mobile-nav { display: block; margin: 0 auto 0 0; }
   [dir="rtl"] .adm-mobile-nav { margin: 0 0 0 auto; }
   .adm-mobile-nav__summary {
     display: grid;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     place-items: center;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius-button);
@@ -704,17 +710,17 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .adm-kpis .crm-stat { min-height: 80px; gap: 4px; padding: var(--space-3); }
   .adm-kpis .crm-stat__label { line-height: var(--lh-snug); }
   .adm-lead-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
-  .adm-lead-tabs button { width: 100%; min-width: 0; min-height: 42px; justify-content: center; }
+  .adm-lead-tabs button { width: 100%; min-width: 0; min-height: 44px; justify-content: center; }
   .adm-task-list > li { align-items: stretch; flex-direction: column; padding: var(--space-4); }
   .adm-task-list__actions { justify-content: space-between; width: 100%; }
-  .adm-task-list__actions .mk-btn { min-height: 40px; }
+  .adm-task-list__actions .mk-btn { min-height: 44px; }
   .adm-public-request { grid-template-columns: 1fr; gap: var(--space-4); padding: var(--space-4); }
   .adm-public-request__facts { grid-template-columns: 1fr; }
   .adm-public-request__outcome > summary { min-height: 44px; }
   .adm-public-request-form { padding: var(--space-3); }
   .adm-public-request-form .adm-form__actions { grid-template-columns: 1fr; }
   .adm-pipeline-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); width: 100%; padding: 4px; overflow: hidden; }
-  .adm-pipeline-tabs button { min-width: 0; min-height: 42px; padding-inline: 4px; font-size: var(--text-xs); }
+  .adm-pipeline-tabs button { min-width: 0; min-height: 44px; padding-inline: 4px; font-size: var(--text-xs); }
   .adm-pipeline-card { gap: var(--space-3); padding: var(--space-4); }
   .adm-pipeline-card__header { align-items: stretch; flex-direction: column; }
   .adm-pipeline-card__header .adm-task-list__actions { justify-content: space-between; width: 100%; }
@@ -735,7 +741,7 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .adm-filterbar { grid-template-columns: 1fr; }
   .adm-filterbar .mk-btn { width: 100%; }
   .adm-listing-bulk__bar { grid-template-columns: 1fr; align-items: stretch; padding: var(--space-4); }
-  .adm-listing-bulk__bar .mk-btn { width: 100%; min-height: 42px; justify-content: center; }
+  .adm-listing-bulk__bar .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
   .adm-listing-bulk__count { text-align: center; }
   .adm-pagination { grid-template-columns: auto 1fr auto; }
   .adm-pagination__status { text-align: center; }
@@ -1108,6 +1114,7 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .adm-route-decision__reason,
   .adm-route-decision__equivalence,
   .adm-route-decision__actions { grid-column: 1; }
+  .adm-route-decision__equivalence { min-height: 44px; }
   .adm-route-decision__actions { align-items: stretch; flex-direction: column; }
   .adm-route-decision__actions .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
 }
