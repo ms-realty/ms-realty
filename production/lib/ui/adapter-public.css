@@ -442,7 +442,7 @@ a.mk-btn:hover { text-decoration: none; }
 .ld-g > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .ld-g__more { text-decoration: none; }
 .ld-media-nav { margin-bottom: var(--space-4); }
-.ld-media-nav .mk-tab { text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+.ld-media-nav .mk-tab { display: inline-flex; min-height: 44px; align-items: center; gap: 7px; text-decoration: none; }
 .ld-media-nav .mk-tab[aria-disabled="true"] { opacity: 0.55; }
 dl[data-listing-facts="true"] {
   display: grid;
