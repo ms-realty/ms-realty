@@ -349,6 +349,12 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-admin-workbench="crm"/);
       assert.match(inboxHtml, /data-inbox-layout="action-queue"/);
       assert.match(inboxHtml, /data-task-led="true"/);
+      assert.match(inboxHtml, /data-admin-mobile-nav="true"/);
+      assert.match(inboxHtml, /aria-label="Навигация по рабочему пространству"/);
+      assert.match(inboxHtml, /class="adm-mobile-nav__link adm-mobile-nav__link--on" href="\/admin\/leads\?locale=ru" aria-current="page"/);
+      assert.match(inboxHtml, /class="adm-mobile-nav__link" href="\/admin\/viewings\?locale=ru"/);
+      assert.match(inboxHtml, /class="adm-mobile-nav__link" href="\/admin\/listings\?locale=ru"/);
+      assert.match(inboxHtml, /class="adm-mobile-nav__link" href="\/admin\/migration\/review\?locale=ru"/);
       assert.match(inboxHtml, /data-lead-queue-tabs="true"/);
       assert.match(inboxHtml, /data-lead-row="true"/);
       assert.match(inboxHtml, /data-original-language="he"/);
@@ -888,7 +894,17 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.workspace.locale, "bg");
       assert.equal(migrationReviewBody.dashboard.media_reconciliation.media_rows, 11859);
       assert.equal(migrationReviewBody.routeMap.total, 457);
+      assert.equal(migrationReviewBody.routeMap.sourceReviewRequired, 457);
+      assert.equal(migrationReviewBody.routeMap.reviewRequired, 457);
       assert.equal(migrationReviewBody.routeMap.mappedListings, 165);
+      assert.equal(migrationReviewBody.routeMap.terminalDecisionsReviewed, 0);
+      assert.deepEqual(migrationReviewBody.routeMap.pendingPagination, {
+        page: 1,
+        pageSize: 20,
+        totalPages: 23,
+        totalRows: 457,
+      });
+      assert.equal(migrationReviewBody.routeMap.pendingSample.length, 20);
       assert.equal(migrationReviewBody.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
       assert.equal(migrationReviewBody.preflightReportsEndpoint, "/api/admin/preflight-reports");
       assert.equal(migrationReviewBody.seoPreflightEndpoint, "/api/admin/seo-preflight");
@@ -947,6 +963,15 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
+      assert.match(migrationReviewHtmlBody, /data-pending-route-count="457"/);
+      assert.match(migrationReviewHtmlBody, /data-reviewed-route-count="0"/);
+      assert.match(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
+      assert.match(migrationReviewHtmlBody, /data-route-decision-form="true"/);
+      assert.match(migrationReviewHtmlBody, /name="decision" required data-route-decision-select="true"/);
+      assert.match(migrationReviewHtmlBody, /value="redirect_301"/);
+      assert.match(migrationReviewHtmlBody, /value="retain_200"/);
+      assert.match(migrationReviewHtmlBody, /value="approved_410"/);
+      assert.match(migrationReviewHtmlBody, /routePage=2/);
       assert.match(migrationReviewHtmlBody, /data-approvable-listing="true"/);
       assert.match(migrationReviewHtmlBody, /data-seo-import-endpoint="\/api\/admin\/seo-evidence\/import"/);
       assert.match(migrationReviewHtmlBody, /data-launch-readiness-export-endpoint="\/api\/admin\/launch-readiness\/export"/);
@@ -1055,6 +1080,15 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectApprovalBody.approval.target_path, firstRedirect.target_path);
       assert.equal(redirectApprovalBody.deployablePreview.length, 1);
       assert.equal(redirectApprovalBody.report.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
+
+      const migrationReviewAfterDecision = await migrationReviewRoute.GET(
+        new Request("https://example.test/api/admin/migration/review?locale=bg", { headers: auth }),
+      );
+      const migrationReviewAfterDecisionBody = await migrationReviewAfterDecision.json();
+      assert.equal(migrationReviewAfterDecisionBody.routeMap.sourceReviewRequired, 457);
+      assert.equal(migrationReviewAfterDecisionBody.routeMap.reviewRequired, 456);
+      assert.equal(migrationReviewAfterDecisionBody.routeMap.terminalDecisionsReviewed, 1);
+      assert.equal(migrationReviewAfterDecisionBody.routeMap.pendingPagination.totalRows, 456);
 
       const redirectImport = await redirectApprovalsImportRoute.POST(
         new Request("https://example.test/api/admin/redirect-approvals/import", {

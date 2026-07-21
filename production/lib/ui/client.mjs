@@ -256,6 +256,21 @@ export const PUBLIC_APP_JS = `(function () {
     var forms = document.querySelectorAll("[data-save-search-form]");
     for (var i = 0; i < forms.length; i += 1) updateSavedSearchContact(forms[i]);
   }
+  function initImageFallbacks() {
+    var images = document.querySelectorAll("img[data-fallback-src]");
+    function useFallback(image) {
+      var fallback = image.getAttribute("data-fallback-src");
+      if (!fallback || image.getAttribute("src") === fallback) return;
+      image.removeAttribute("data-fallback-src");
+      image.setAttribute("src", fallback);
+    }
+    for (var i = 0; i < images.length; i += 1) {
+      (function (image) {
+        image.addEventListener("error", function () { useFallback(image); }, { once: true });
+        if (image.complete && image.naturalWidth === 0) useFallback(image);
+      })(images[i]);
+    }
+  }
   document.addEventListener("click", function (event) {
     var save = event.target.closest("[data-client-save-listing]");
     if (save) {
@@ -316,6 +331,7 @@ export const PUBLIC_APP_JS = `(function () {
   });
   markSaved();
   initSavedSearchContacts();
+  initImageFallbacks();
   initPhotoSphereViewers();
 })();`;
 
@@ -800,6 +816,33 @@ export const ADMIN_APP_JS = `(function () {
       })(forms[i]);
     }
   }
+  function syncRouteDecisionForm(form) {
+    var select = form.querySelector("[data-route-decision-select]");
+    var target = form.querySelector("[data-route-decision-target]");
+    var equivalent = form.querySelector("[data-route-decision-equivalence]");
+    if (!select) return;
+    var decision = select.value;
+    var requiresEquivalentTarget = decision === "redirect_301" || decision === "retain_200";
+    if (target) {
+      target.disabled = !requiresEquivalentTarget;
+      target.required = requiresEquivalentTarget;
+    }
+    if (equivalent) {
+      equivalent.disabled = !requiresEquivalentTarget;
+      equivalent.required = requiresEquivalentTarget;
+      if (!requiresEquivalentTarget) equivalent.checked = false;
+    }
+  }
+  function initRouteDecisionForms() {
+    var forms = document.querySelectorAll("[data-route-decision-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      (function (form) {
+        var select = form.querySelector("[data-route-decision-select]");
+        if (select) select.addEventListener("change", function () { syncRouteDecisionForm(form); });
+        syncRouteDecisionForm(form);
+      })(forms[i]);
+    }
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -841,6 +884,7 @@ export const ADMIN_APP_JS = `(function () {
   initLeadQueueFilters();
   initLeadPipelineFilters();
   initListingBulkForms();
+  initRouteDecisionForms();
   initAdminMutationForms();
   initTourEditor();
   initViewingFollowUpForms();

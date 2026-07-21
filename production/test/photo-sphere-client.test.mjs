@@ -30,6 +30,8 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /keyboard: false/);
   assert.match(PUBLIC_APP_JS, /startKeyboardControl/);
   assert.match(PUBLIC_APP_JS, /data-photo-sphere-viewer-state", "fallback/);
+  assert.match(PUBLIC_APP_JS, /function initImageFallbacks/);
+  assert.match(PUBLIC_APP_JS, /img\[data-fallback-src\]/);
   assert.match(PUBLIC_APP_JS, /addEventListener\("pagehide"/);
 });
 

@@ -129,7 +129,12 @@ function listingHighlights(facts = {}) {
 function renderListing(page) {
   const gallery = (page.body.media.gallery || [])
     .slice(0, 12)
-    .map((image) => `<img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt || page.body.h1)}" loading="lazy">`)
+    .map(
+      (image) =>
+        `<img src="${escapeHtml(image.url)}"${image.fallback_url ? ` data-fallback-src="${escapeHtml(image.fallback_url)}"` : ""} alt="${escapeHtml(
+          image.alt || page.body.h1,
+        )}" loading="lazy">`,
+    )
     .join("");
   const direct = page.body.actions.direct_contact.channels
     .map((channel) =>

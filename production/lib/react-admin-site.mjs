@@ -50,13 +50,29 @@ const ADMIN_UI_COPY = {
     payloadCollections: "Payload колекции",
     listingQuality: "Качество на обявите",
     exportLaunchReadiness: "Изтегли готовността",
+    reviewedDecisions: "Прегледани решения",
+    pendingLegacyDecisions: "Чакащи решения за стари URL адреси",
+    pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници — никога начална страница или общо търсене.",
     approvableRedirects: "Пренасочвания за одобрение",
     oldUrl: "Стар URL",
+    routeType: "Тип маршрут",
     target: "Цел",
+    targetPath: "Целеви вътрешен път",
     locale: "Език",
     approval: "Одобрение",
+    decision: "Решение",
+    chooseDecision: "Избери решение",
+    redirect301: "301 към еквивалентна страница",
+    retain200: "Запази URL с 200",
+    approved410: "Одобрено премахване с 410",
+    equivalentContent: "Потвърждавам еквивалентно публикувано съдържание",
     reviewer: "Проверяващ",
     reason: "Причина",
+    saveDecision: "Запази решението",
+    routeDecisionSaving: "Записване на решението…",
+    routeDecisionSaved: "Решението за стария URL е записано.",
+    routeDecisionFailed: "Решението не беше записано.",
+    noPendingLegacyDecisions: "Няма чакащи решения за стари URL адреси.",
     approve301: "Одобри 301",
     reviewedSameContent: "Проверено пренасочване към същото съдържание.",
     importRedirectCsv: "Импортирай проверен CSV за пренасочвания",
@@ -159,6 +175,7 @@ const ADMIN_UI_COPY = {
     chooseReplyTemplate: "Изберете проверим начален шаблон",
     templateReviewNotice: "Шаблонът е само начална точка. Проверете фактите и редактирайте текста преди одобрение.",
     skipToContent: "Към съдържанието",
+    workspaceNavigation: "Навигация в работното пространство",
     operationsReports: "Оперативни отчети",
     actualResponses: "Действително изпратени отговори",
     responseRate: "Дял с изпратен отговор",
@@ -243,13 +260,29 @@ const ADMIN_UI_COPY = {
     payloadCollections: "Коллекции Payload",
     listingQuality: "Качество объектов",
     exportLaunchReadiness: "Скачать готовность",
+    reviewedDecisions: "Проверенные решения",
+    pendingLegacyDecisions: "Ожидающие решения по старым URL",
+    pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница — не главная и не общий поиск.",
     approvableRedirects: "Редиректы для одобрения",
     oldUrl: "Старый URL",
+    routeType: "Тип маршрута",
     target: "Цель",
+    targetPath: "Целевой внутренний путь",
     locale: "Язык",
     approval: "Одобрение",
+    decision: "Решение",
+    chooseDecision: "Выберите решение",
+    redirect301: "301 на эквивалентную страницу",
+    retain200: "Сохранить URL с 200",
+    approved410: "Подтвержденное удаление с 410",
+    equivalentContent: "Подтверждаю эквивалентный опубликованный контент",
     reviewer: "Проверяющий",
     reason: "Причина",
+    saveDecision: "Сохранить решение",
+    routeDecisionSaving: "Сохраняем решение…",
+    routeDecisionSaved: "Решение по старому URL сохранено.",
+    routeDecisionFailed: "Не удалось сохранить решение.",
+    noPendingLegacyDecisions: "Нет ожидающих решений по старым URL.",
     approve301: "Одобрить 301",
     reviewedSameContent: "Проверенное перенаправление на тот же контент.",
     importRedirectCsv: "Импортировать проверенный CSV редиректов",
@@ -352,6 +385,7 @@ const ADMIN_UI_COPY = {
     chooseReplyTemplate: "Выберите проверяемый начальный шаблон",
     templateReviewNotice: "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением.",
     skipToContent: "К содержанию",
+    workspaceNavigation: "Навигация по рабочему пространству",
     operationsReports: "Операционные отчеты",
     actualResponses: "Фактически отправленные ответы",
     responseRate: "Доля с отправленным ответом",
@@ -436,13 +470,29 @@ const ADMIN_UI_COPY = {
     payloadCollections: "Payload collection configs",
     listingQuality: "Listing quality",
     exportLaunchReadiness: "Export launch readiness",
+    reviewedDecisions: "Reviewed decisions",
+    pendingLegacyDecisions: "Pending legacy URL decisions",
+    pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages—never a homepage or generic search fallback.",
     approvableRedirects: "Approvable listing redirects",
     oldUrl: "Old URL",
+    routeType: "Route type",
     target: "Target",
+    targetPath: "Target internal path",
     locale: "Locale",
     approval: "Approval",
+    decision: "Decision",
+    chooseDecision: "Choose a decision",
+    redirect301: "301 to equivalent page",
+    retain200: "Retain URL with 200",
+    approved410: "Approved removal with 410",
+    equivalentContent: "I confirm equivalent published content",
     reviewer: "Reviewer",
     reason: "Reason",
+    saveDecision: "Save decision",
+    routeDecisionSaving: "Saving route decision…",
+    routeDecisionSaved: "Legacy URL decision recorded.",
+    routeDecisionFailed: "Could not record the route decision.",
+    noPendingLegacyDecisions: "No legacy URL decisions are pending.",
     approve301: "Approve 301",
     reviewedSameContent: "Reviewed same-content route mapping.",
     importRedirectCsv: "Import reviewed redirect CSV",
@@ -545,6 +595,7 @@ const ADMIN_UI_COPY = {
     chooseReplyTemplate: "Choose a reviewable starting template",
     templateReviewNotice: "Templates are a starting point only. Check the facts and edit the text before approval.",
     skipToContent: "Skip to content",
+    workspaceNavigation: "Workspace navigation",
     operationsReports: "Operations reports",
     actualResponses: "Actual responses sent",
     responseRate: "Response sent rate",
@@ -769,7 +820,7 @@ const NAV_ROUTES = [
   { id: "migration_review", module: "launch", path: "/admin/migration/review", icon: "file-check", kind: "admin_migration_review", capability: "administration:read" },
 ];
 
-function Sidebar({ page }) {
+function adminNavigationGroups(page) {
   const copy = adminCopy(page);
   const modules = page.workspace?.modules || [];
   const screenLabel = (moduleId, screenId, fallback) => {
@@ -820,9 +871,13 @@ function Sidebar({ page }) {
       items: [{ ...route("migration_review"), label: label(copy, "migrationReview", "Migration review") }],
     },
   ];
-  const visibleGroups = groups
+  return groups
     .map((group) => ({ ...group, items: group.items.filter((item) => pageCan(page, item.capability)) }))
     .filter((group) => group.items.length);
+}
+
+function Sidebar({ page }) {
+  const visibleGroups = adminNavigationGroups(page);
   return h(
     "aside",
     { className: "crm-sb" },
@@ -864,6 +919,46 @@ function Sidebar({ page }) {
   );
 }
 
+function MobileNavigation({ page }) {
+  const ui = workbenchCopy(page);
+  const menuLabel = ui.workspaceNavigation;
+  const visibleGroups = adminNavigationGroups(page);
+  return h(
+    "details",
+    { className: "adm-mobile-nav", "data-admin-mobile-nav": "true" },
+    h(
+      "summary",
+      { className: "adm-mobile-nav__summary", "aria-label": menuLabel, title: menuLabel },
+      h(Icon, { name: "menu", size: 20 }),
+    ),
+    h(
+      "div",
+      { className: "adm-mobile-nav__panel" },
+      h(
+        "nav",
+        { className: "adm-mobile-nav__links", "aria-label": menuLabel },
+        ...visibleGroups.flatMap((group) => [
+          h("div", { key: `mobile-group-${group.label}`, className: "adm-mobile-nav__group" }, group.label),
+          ...group.items.map((item) =>
+            h(
+              "a",
+              {
+                key: `mobile-${item.id}`,
+                className: `adm-mobile-nav__link${page.kind === item.kind ? " adm-mobile-nav__link--on" : ""}`,
+                href: adminHref(item.path, page),
+                "aria-current": page.kind === item.kind ? "page" : undefined,
+              },
+              h(Icon, { name: item.icon, size: 18 }),
+              h("span", null, item.label),
+              item.badge ? h("span", { className: "crm-nav__badge" }, item.badge) : null,
+            ),
+          ),
+        ]),
+      ),
+    ),
+  );
+}
+
 function Topbar({ page, title }) {
   const copy = adminCopy(page);
   const locales = page.workspace?.interface_locales || [];
@@ -876,6 +971,7 @@ function Topbar({ page, title }) {
       h("div", { className: "crm-top__title" }, title),
       h("div", { className: "crm-top__sub" }, page.workspace?.title || ""),
     ),
+    h(MobileNavigation, { page }),
     h(
       "nav",
       { className: "crm-seg adm-locales", "aria-label": label(copy, "language", "Language") },
@@ -2316,6 +2412,13 @@ function ConsentWithdrawalForm({ page, row, copy }) {
 
 function ConsentsBody({ page }) {
   const copy = adminCopy(page);
+  const columns = {
+    subject: label(copy, "consentSubject", "Enquiry or subscription"),
+    purpose: label(copy, "consentPurpose", "Purpose"),
+    state: label(copy, "consentState", "State"),
+    recordedAt: label(copy, "consentRecordedAt", "Recorded"),
+    action: label(copy, "action", "Action"),
+  };
   const metrics = [
     [label(copy, "consentGranted", "Active permissions"), page.summary.granted, "shield-check", "success"],
     [label(copy, "consentWithdrawn", "Withdrawn"), page.summary.withdrawn, "x", "brick"],
@@ -2349,11 +2452,11 @@ function ConsentsBody({ page }) {
                   h(
                     "tr",
                     null,
-                    h("th", { scope: "col" }, label(copy, "consentSubject", "Enquiry or subscription")),
-                    h("th", { scope: "col" }, label(copy, "consentPurpose", "Purpose")),
-                    h("th", { scope: "col" }, label(copy, "consentState", "State")),
-                    h("th", { scope: "col" }, label(copy, "consentRecordedAt", "Recorded")),
-                    h("th", { scope: "col" }, label(copy, "action", "Action")),
+                    h("th", { scope: "col" }, columns.subject),
+                    h("th", { scope: "col" }, columns.purpose),
+                    h("th", { scope: "col" }, columns.state),
+                    h("th", { scope: "col" }, columns.recordedAt),
+                    h("th", { scope: "col" }, columns.action),
                   ),
                 ),
                 h(
@@ -2362,12 +2465,16 @@ function ConsentsBody({ page }) {
                   ...page.consentStates.map((row) =>
                     h(
                       "tr",
-                      { key: row.id, "data-consent-state": row.granted ? "granted" : "withdrawn" },
-                      h("td", null, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || "—"), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
-                      h("td", null, h("strong", null, label(copy, row.consent_type, row.consent_type)), h("small", { className: "adm-lead-context" }, label(copy, row.legal_basis, row.legal_basis))),
-                      h("td", null, h(StatusPill, { tone: row.granted ? "success" : "brick" }, row.granted ? label(copy, "consentActive", "Active") : label(copy, "consentStopped", "Withdrawn"))),
-                      h("td", { className: "crm-tbl__muted crm-mono" }, formatAdminDateTime(row.recorded_at, page.workspace?.locale)),
-                      h("td", null, h(ConsentWithdrawalForm, { page, row, copy })),
+                      {
+                        key: row.id,
+                        "data-consent-row": "true",
+                        "data-consent-state": row.granted ? "granted" : "withdrawn",
+                      },
+                      h("td", { "data-consent-column": "subject", "data-label": columns.subject }, h("code", { className: "crm-mono" }, row.subject_id || row.contact_reference || "—"), h("small", { className: "adm-lead-context" }, row.locale.toUpperCase())),
+                      h("td", { "data-consent-column": "purpose", "data-label": columns.purpose }, h("strong", null, label(copy, row.consent_type, row.consent_type)), h("small", { className: "adm-lead-context" }, label(copy, row.legal_basis, row.legal_basis))),
+                      h("td", { "data-consent-column": "state", "data-label": columns.state }, h(StatusPill, { tone: row.granted ? "success" : "brick" }, row.granted ? label(copy, "consentActive", "Active") : label(copy, "consentStopped", "Withdrawn"))),
+                      h("td", { className: "crm-tbl__muted crm-mono", "data-consent-column": "recorded_at", "data-label": columns.recordedAt }, formatAdminDateTime(row.recorded_at, page.workspace?.locale)),
+                      h("td", { "data-consent-column": "action", "data-label": columns.action }, h(ConsentWithdrawalForm, { page, row, copy })),
                     ),
                   ),
                 ),
@@ -4043,6 +4150,142 @@ function ListingEditorBody({ page }) {
    Migration review (launch workbench)
    ============================================================ */
 
+function migrationRoutePageHref(page, targetPage) {
+  const url = new URL("/admin/migration/review", "http://ms-realty.local");
+  if (page.workspace?.locale && page.workspace.locale !== "en") url.searchParams.set("locale", page.workspace.locale);
+  url.searchParams.set("routePage", String(targetPage));
+  return `${url.pathname}${url.search}`;
+}
+
+function MigrationRoutePagination({ page }) {
+  const pagination = page.routeMap?.pendingPagination;
+  if (!pagination || pagination.totalPages <= 1) return null;
+  const copy = adminCopy(page);
+  return h(
+    "nav",
+    { className: "adm-pagination", "aria-label": label(copy, "page", "Page") },
+    pagination.page > 1
+      ? h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: migrationRoutePageHref(page, pagination.page - 1) },
+          h(Icon, { name: "chevron-left", size: 16 }),
+          label(copy, "previousPage", "Previous"),
+        )
+      : h("span", null),
+    h(
+      "span",
+      { className: "adm-pagination__status" },
+      `${label(copy, "page", "Page")} ${pagination.page} / ${pagination.totalPages}`,
+    ),
+    pagination.page < pagination.totalPages
+      ? h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: migrationRoutePageHref(page, pagination.page + 1) },
+          label(copy, "nextPage", "Next"),
+          h(Icon, { name: "chevron-right", size: 16 }),
+        )
+      : h("span", null),
+  );
+}
+
+function PendingLegacyRouteDecision({ page, route, ui }) {
+  const operatorId = currentOperatorId(page, "seo_editor");
+  return h(
+    "li",
+    {
+      className: "adm-route-decision",
+      "data-pending-route-decision": "true",
+      "data-route-type": route.url_type,
+      "data-source-domain": route.source_domain,
+    },
+    h(
+      "header",
+      { className: "adm-route-decision__header" },
+      h("code", { className: "crm-mono" }, route.old_url),
+      h(
+        "div",
+        { className: "adm-route-decision__meta" },
+        h(StatusPill, { tone: "sun" }, route.url_type),
+        h("span", null, route.source_domain),
+      ),
+    ),
+    h(
+      "form",
+      {
+        method: "post",
+        action: "/api/admin/redirect-approvals",
+        className: "adm-route-decision__form",
+        "data-route-decision-form": "true",
+        "data-admin-mutation-form": "true",
+        "data-admin-mutation-saving": ui.routeDecisionSaving,
+        "data-admin-mutation-success": ui.routeDecisionSaved,
+        "data-admin-mutation-failure": ui.routeDecisionFailed,
+      },
+      h("input", { type: "hidden", name: "oldUrl", value: route.old_url }),
+      h(
+        "label",
+        null,
+        ui.decision,
+        h(
+          "select",
+          { name: "decision", required: true, "data-route-decision-select": "true" },
+          h("option", { value: "" }, ui.chooseDecision),
+          h("option", { value: "redirect_301" }, ui.redirect301),
+          h("option", { value: "retain_200" }, ui.retain200),
+          h("option", { value: "approved_410" }, ui.approved410),
+        ),
+      ),
+      h(
+        "label",
+        null,
+        ui.targetPath,
+        h("input", {
+          type: "text",
+          name: "targetPath",
+          defaultValue: route.target_path || "",
+          placeholder: "/bg/imoti/...",
+          autoComplete: "off",
+          "data-route-decision-target": "true",
+        }),
+      ),
+      h(
+        "label",
+        null,
+        ui.reviewer,
+        h("input", { name: "reviewer", defaultValue: operatorId, required: true, autoComplete: "name" }),
+      ),
+      h(
+        "label",
+        { className: "adm-route-decision__reason" },
+        ui.reason,
+        h("textarea", { name: "reason", rows: 2, required: true }),
+      ),
+      h(
+        "label",
+        { className: "adm-route-decision__equivalence" },
+        h("input", {
+          type: "checkbox",
+          name: "equivalentContent",
+          value: "true",
+          "data-route-decision-equivalence": "true",
+        }),
+        h("span", null, ui.equivalentContent),
+      ),
+      h(
+        "div",
+        { className: "adm-route-decision__actions" },
+        h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+        h(
+          "button",
+          { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+          h(Icon, { name: "circle-check", size: 16 }),
+          h("span", null, ui.saveDecision),
+        ),
+      ),
+    ),
+  );
+}
+
 function MigrationReviewBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -4051,7 +4294,7 @@ function MigrationReviewBody({ page }) {
     [ui.urls, page.routeMap.total, "link", "ink"],
     [ui.reviewRequired, page.routeMap.reviewRequired, "eye", "sun"],
     [ui.mappedListings, page.routeMap.mappedListings, "building-2", "sea"],
-    [ui.deployablePreview, page.deployablePreview.length, "upload", "success"],
+    [ui.reviewedDecisions, page.routeMap.terminalDecisionsReviewed, "circle-check", "success"],
     [ui.missingDescriptions, gaps.missing_description, "file-text", "brick"],
     [ui.mediaRows, page.dashboard.media_reconciliation?.media_rows, "camera", "sand"],
   ];
@@ -4138,7 +4381,28 @@ function MigrationReviewBody({ page }) {
       ),
       h(
         Panel,
-        { title: ui.approvableRedirects, "aria-label": ui.approvableRedirects },
+        {
+          title: ui.pendingLegacyDecisions,
+          "aria-label": ui.pendingLegacyDecisions,
+          "data-pending-route-count": page.routeMap.reviewRequired,
+          "data-reviewed-route-count": page.routeMap.terminalDecisionsReviewed,
+        },
+        h("p", { className: "adm-note" }, ui.pendingLegacyHint),
+        (page.routeMap.pendingSample || []).length
+          ? h(
+              "ol",
+              { className: "adm-route-decisions" },
+              ...(page.routeMap.pendingSample || []).map((route) =>
+                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui }),
+              ),
+            )
+          : h("p", { className: "adm-empty", "data-empty-route-decisions": "true" }, ui.noPendingLegacyDecisions),
+        h(MigrationRoutePagination, { page }),
+      ),
+      (page.routeMap.approvableSample || []).length
+        ? h(
+            Panel,
+            { title: ui.approvableRedirects, "aria-label": ui.approvableRedirects },
         h(
           "div",
           { className: "adm-scroll-x" },
@@ -4174,7 +4438,8 @@ function MigrationReviewBody({ page }) {
             ),
           ),
         ),
-      ),
+          )
+        : null,
       h(
         Panel,
         {

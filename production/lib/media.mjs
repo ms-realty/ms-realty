@@ -6,7 +6,7 @@ function mediaUrl(item = {}) {
   return item.asset_url || item.url || item.image_url || item.source_url || "";
 }
 
-export function imageUrlFromMediaItem(item = {}) {
+function importedImageUrl(item = {}) {
   const url = mediaUrl(item);
   if (!httpsUrl(url)) return null;
 
@@ -22,6 +22,22 @@ export function imageUrlFromMediaItem(item = {}) {
   }
 }
 
+const WORDPRESS_IMAGE_DERIVATIVE = /-(\d{1,4})x(\d{1,4})(\.(?:avif|gif|jpe?g|png|webp)(?:\?.*)?)$/i;
+
+function recoverWordPressOriginal(url = "") {
+  const match = String(url).match(WORDPRESS_IMAGE_DERIVATIVE);
+  if (!match) return url;
+  const width = Number(match[1]);
+  const height = Number(match[2]);
+  if (width >= 240 && height >= 180) return url;
+  return String(url).replace(WORDPRESS_IMAGE_DERIVATIVE, "$3");
+}
+
+export function imageUrlFromMediaItem(item = {}) {
+  const importedUrl = importedImageUrl(item);
+  return importedUrl ? recoverWordPressOriginal(importedUrl) : null;
+}
+
 export function classifyMediaAsset(item = {}) {
   const rawUrl = mediaUrl(item);
   const text = `${rawUrl} ${item.alt || ""}`;
@@ -33,17 +49,20 @@ export function classifyMediaAsset(item = {}) {
 
 export function normalizeMediaAsset(row, { width = null, height = null, fallbackAlt = "" } = {}) {
   const url = row.image_url || row.url || "";
+  const importedUrl = importedImageUrl({ url });
   const assetUrl = imageUrlFromMediaItem({ url });
   const kind = classifyMediaAsset({ url, alt: row.alt });
   const publicImportedPhoto = kind === "photo" && Boolean(assetUrl);
   const reviewedPrivate = kind === "site_chrome";
+  const recoveredOriginal = Boolean(importedUrl && assetUrl && importedUrl !== assetUrl);
 
   return {
     url,
     asset_url: assetUrl,
+    ...(recoveredOriginal ? { fallback_asset_url: importedUrl } : {}),
     alt: row.alt || (publicImportedPhoto ? fallbackAlt : ""),
-    width,
-    height,
+    width: recoveredOriginal ? null : width,
+    height: recoveredOriginal ? null : height,
     kind,
     is_public: publicImportedPhoto,
     review_status: publicImportedPhoto ? "approved_imported_photo" : reviewedPrivate ? "reviewed_private" : "needs_media_review",
@@ -53,6 +72,7 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
 function publicAsset(item) {
   return {
     url: item.asset_url || item.url,
+    fallback_url: item.fallback_asset_url || undefined,
     alt: item.alt || "Property photo",
     width: item.width,
     height: item.height,
@@ -158,28 +178,9 @@ export function selectPublicThumbnail(media = [], fallback = null) {
   return null;
 }
 
-export function mediaWorkflow(media = []) {
-  const publicGalleryAssets = new Set(
-    media.filter((item) => item.kind === "photo" && item.is_public).map((item) => item.asset_url).filter(Boolean),
-  ).size;
-  const suppressedPublicAssets = new Set(
-    media
-      .filter((item) => item.kind === "photo" && item.is_public && item.asset_url && !isPublicPropertyPhoto(item))
-      .map((item) => item.asset_url),
-  ).size;
-  return {
-    total_assets: media.length,
-    public_gallery_assets: publicGalleryAssets,
-    suppressed_public_assets: suppressedPublicAssets,
-    floor_plan_candidates: media.filter((item) => item.kind === "floor_plan").length,
-    video_candidates: media.filter((item) => item.kind === "video").length,
-    review_gated_assets: media.filter((item) => !item.is_public && item.review_status !== "reviewed_private").length,
-  };
-}
-
-export function publicMediaLibrary(media = [], { fallback = null } = {}) {
+function uniquePublicPropertyPhotos(media = []) {
   const seen = new Set();
-  const candidates = media
+  return media
     .filter(isPublicPropertyPhoto)
     .filter((item) => {
       if (seen.has(item.asset_url)) return false;
@@ -187,15 +188,37 @@ export function publicMediaLibrary(media = [], { fallback = null } = {}) {
       return true;
     })
     .sort((left, right) => photoPriority(right) - photoPriority(left));
+}
 
-  // Keep alternate photos only when they are close to the strongest source
-  // image. This removes inherited 45px crawler thumbnails from galleries
-  // while retaining legitimate lower-priority listing shots.
+function galleryPhotos(media = []) {
+  const candidates = uniquePublicPropertyPhotos(media);
   const strongestPriority = candidates.length ? photoPriority(candidates[0]) : null;
-  const gallery = candidates
+  return candidates
     .filter((item) => strongestPriority === null || photoPriority(item) >= strongestPriority - 60)
-    .slice(0, 30)
-    .map(publicAsset);
+    .slice(0, 30);
+}
+
+export function mediaWorkflow(media = []) {
+  const importedPublicAssets = new Set(
+    media.filter((item) => item.kind === "photo" && item.is_public).map((item) => item.asset_url).filter(Boolean),
+  );
+  const publicGalleryAssets = galleryPhotos(media);
+  const publicGalleryUrls = new Set(publicGalleryAssets.map((item) => item.asset_url));
+  return {
+    total_assets: media.length,
+    public_gallery_assets: publicGalleryAssets.length,
+    suppressed_public_assets: [...importedPublicAssets].filter((url) => !publicGalleryUrls.has(url)).length,
+    floor_plan_candidates: media.filter((item) => item.kind === "floor_plan").length,
+    video_candidates: media.filter((item) => item.kind === "video").length,
+    review_gated_assets: media.filter((item) => !item.is_public && item.review_status !== "reviewed_private").length,
+  };
+}
+
+export function publicMediaLibrary(media = [], { fallback = null } = {}) {
+  // Keep alternate photos only when they are close to the strongest source
+  // image. This removes inherited crawler chrome from galleries while retaining
+  // legitimate listing shots recovered from WordPress thumbnail derivatives.
+  const gallery = galleryPhotos(media).map(publicAsset);
 
   if (!gallery.length) {
     const thumbnail = selectPublicThumbnail(media, fallback);

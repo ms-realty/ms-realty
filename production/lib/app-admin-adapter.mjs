@@ -931,7 +931,15 @@ function preflightReports(config) {
 function migrationReviewPayload(registry, url, config) {
   const routes = routeMapRows();
   const workspace = renderAdminWorkspace({ registry, requestedLocale: url.searchParams.get("locale") || "en" });
-  const reviewRequired = routes.filter((route) => route.review_required);
+  const decisions = currentLegacyRouteDecisions(config);
+  const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
+  const sourceReviewRequired = routes.filter((route) => route.review_required);
+  const reviewRequired = sourceReviewRequired.filter((route) => !decidedOldUrls.has(route.old_url));
+  const routePageSize = 20;
+  const routePages = Math.max(1, Math.ceil(reviewRequired.length / routePageSize));
+  const requestedRoutePage = Number.parseInt(url.searchParams.get("routePage") || "1", 10);
+  const routePage = Math.min(Math.max(Number.isFinite(requestedRoutePage) ? requestedRoutePage : 1, 1), routePages);
+  const pendingRoutes = reviewRequired.slice((routePage - 1) * routePageSize, routePage * routePageSize);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
   const readiness = launchReadiness(config);
   return {
@@ -952,11 +960,20 @@ function migrationReviewPayload(registry, url, config) {
     dashboard: readJsonData("migration-review-dashboard.json"),
     routeMap: {
       total: routes.length,
+      sourceReviewRequired: sourceReviewRequired.length,
       reviewRequired: reviewRequired.length,
       mappedListings: mappedListings.length,
-      terminalDecisionsReviewed: currentLegacyRouteDecisions(config).length,
-      pendingSample: reviewRequired.slice(0, 20),
-      approvableSample: mappedListings.filter((route) => route.review_required && route.planned_status === 301).slice(0, 20),
+      terminalDecisionsReviewed: decisions.length,
+      pendingSample: pendingRoutes,
+      pendingPagination: {
+        page: routePage,
+        pageSize: routePageSize,
+        totalPages: routePages,
+        totalRows: reviewRequired.length,
+      },
+      approvableSample: mappedListings
+        .filter((route) => route.review_required && route.planned_status === 301 && !decidedOldUrls.has(route.old_url))
+        .slice(0, 20),
     },
     redirectApprovals: readRedirectApprovals(config.redirectApprovalPath),
     redirectApprovalImport: {
@@ -988,7 +1005,7 @@ function migrationReviewPayload(registry, url, config) {
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     listingQualityEndpoint: "/api/admin/listing-quality",
     deployablePreview: currentDeployableRedirects(config),
-    terminalDecisionPreview: currentLegacyRouteDecisions(config),
+    terminalDecisionPreview: decisions,
   };
 }
 

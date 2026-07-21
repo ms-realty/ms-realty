@@ -6,6 +6,7 @@ import { latestTourForListing } from "./tours.mjs";
 import { mediaAssetId } from "./media-reviews.mjs";
 import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
 import { buildLeadBriefs } from "./lead-briefs.mjs";
+import { publicMediaLibrary } from "./media.mjs";
 export { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 import { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 
@@ -227,7 +228,7 @@ export function renderAdminListingManagerPayload(
         cms_status: record.cms_status || "source_imported_review_required",
         price_eur: facts.price_eur ?? null,
         price_on_request: facts.price_on_request === true,
-        public_gallery_assets: record.media_workflow?.public_gallery_assets || 0,
+        public_gallery_assets: publicMediaLibrary(record.media || []).gallery_count,
         metadata_gaps: metadataGaps,
         translation_locales: [...latestByLocale.keys()].filter(Boolean).sort(),
         translation_review_required: translationReviewByListing.get(record.id) || 0,

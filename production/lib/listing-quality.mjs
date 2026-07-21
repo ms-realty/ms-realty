@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseCsv } from "./csv.mjs";
 import { bedroomsRequired } from "./listing-facts.mjs";
+import { publicMediaLibrary } from "./media.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { latestTourForListing, readTourApprovals } from "./tours.mjs";
 import { fromRoot } from "./paths.mjs";
@@ -144,8 +145,9 @@ function publicGallerySample(publicPhotos) {
 function qualityRow(record, approvedTour = null) {
   const facts = record.facts || {};
   const tour = approvedTour || record.tour;
-  const publicPhotos = (record.media || []).filter((media) => media.kind === "photo" && media.is_public);
-  const publicGalleryAssets = record.media_workflow?.public_gallery_assets ?? publicPhotos.length;
+  const publicMedia = publicMediaLibrary(record.media || []);
+  const publicPhotos = publicMedia.gallery;
+  const publicGalleryAssets = publicMedia.gallery_count;
   const missingAltTextAssets = publicPhotos.filter((media) => !filled(media.alt)).length;
   const issues = [];
   if (!filled(facts.price_eur) && facts.price_on_request !== true) issues.push("missing_price");

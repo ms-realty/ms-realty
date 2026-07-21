@@ -482,6 +482,33 @@
       })(forms[i]);
     }
   }
+  function syncRouteDecisionForm(form) {
+    var select = form.querySelector("[data-route-decision-select]");
+    var target = form.querySelector("[data-route-decision-target]");
+    var equivalent = form.querySelector("[data-route-decision-equivalence]");
+    if (!select) return;
+    var decision = select.value;
+    var requiresEquivalentTarget = decision === "redirect_301" || decision === "retain_200";
+    if (target) {
+      target.disabled = !requiresEquivalentTarget;
+      target.required = requiresEquivalentTarget;
+    }
+    if (equivalent) {
+      equivalent.disabled = !requiresEquivalentTarget;
+      equivalent.required = requiresEquivalentTarget;
+      if (!requiresEquivalentTarget) equivalent.checked = false;
+    }
+  }
+  function initRouteDecisionForms() {
+    var forms = document.querySelectorAll("[data-route-decision-form]");
+    for (var i = 0; i < forms.length; i += 1) {
+      (function (form) {
+        var select = form.querySelector("[data-route-decision-select]");
+        if (select) select.addEventListener("change", function () { syncRouteDecisionForm(form); });
+        syncRouteDecisionForm(form);
+      })(forms[i]);
+    }
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -523,6 +550,7 @@
   initLeadQueueFilters();
   initLeadPipelineFilters();
   initListingBulkForms();
+  initRouteDecisionForms();
   initAdminMutationForms();
   initTourEditor();
   initViewingFollowUpForms();

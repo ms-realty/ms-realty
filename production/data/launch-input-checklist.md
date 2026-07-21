@@ -120,7 +120,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - missing_review (path /Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv; expected 165; reviewed 0; missing 165)
 - Pending review sample:
 - MS-CRAWL-0001: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0001
-- MS-CRAWL-0002: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0002
+- MS-CRAWL-0002: area_sqm|public_gallery (missing_area|thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0002
 - MS-CRAWL-0003: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0003
 - MS-CRAWL-0004: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0004
 - MS-CRAWL-0005: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0005
@@ -152,7 +152,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - structured_data.missing_area: 167
 - structured_data.missing_public_images: 4
 - listing_quality.missing_area: 165
-- listing_quality.thin_public_gallery: 7
+- listing_quality.thin_public_gallery: 18
 
 ## Broker Verification
 

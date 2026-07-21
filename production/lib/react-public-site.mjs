@@ -336,6 +336,15 @@ function cardBadge(card, labels, localeCode) {
   return null;
 }
 
+function publicImageProps(image, fallbackAlt, loading = "lazy") {
+  return {
+    src: image.url,
+    alt: image.alt || fallbackAlt,
+    loading,
+    "data-fallback-src": image.fallback_url || undefined,
+  };
+}
+
 function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs }) {
   const badge = cardBadge(card, labels, localeCode);
   const tone = toneFor(card.id);
@@ -374,7 +383,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
           "aria-label": card.title,
           lang: card.content_locale || undefined,
         },
-        h("img", { src: card.thumbnail.url, alt: card.thumbnail.alt || card.title, loading: "lazy" }),
+        h("img", publicImageProps(card.thumbnail, card.title)),
         ...mediaChildren,
       )
     : h(
@@ -1174,13 +1183,13 @@ function ListingBody({ page }) {
         h(
           "div",
           { className: `ld-g ld-g--main mk-photo mk-photo--${tone}` },
-          gallery[0] ? h("img", { src: gallery[0].url, alt: gallery[0].alt || page.body.h1, loading: "eager" }) : null,
+          gallery[0] ? h("img", publicImageProps(gallery[0], page.body.h1, "eager")) : null,
         ),
-        h("div", { className: "ld-g mk-photo mk-photo--sand" }, gallery[1] ? h("img", { src: gallery[1].url, alt: gallery[1].alt || page.body.h1, loading: "lazy" }) : null),
+        h("div", { className: "ld-g mk-photo mk-photo--sand" }, gallery[1] ? h("img", publicImageProps(gallery[1], page.body.h1)) : null),
         h(
           "div",
           { className: "ld-g mk-photo mk-photo--sky" },
-          gallery[2] ? h("img", { src: gallery[2].url, alt: gallery[2].alt || page.body.h1, loading: "lazy" }) : null,
+          gallery[2] ? h("img", publicImageProps(gallery[2], page.body.h1)) : null,
           h("a", { className: "ld-g__more", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${labels.photos}`),
         ),
       ),
@@ -1216,7 +1225,7 @@ function ListingBody({ page }) {
           h(
             "section",
             { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
-            ...gallery.map((image) => h("img", { key: image.url, src: image.url, alt: image.alt || page.body.h1, loading: "lazy" })),
+            ...gallery.map((image) => h("img", { key: image.url, ...publicImageProps(image, page.body.h1) })),
           ),
           floorPlans.length
             ? h(

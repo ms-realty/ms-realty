@@ -255,6 +255,21 @@
     var forms = document.querySelectorAll("[data-save-search-form]");
     for (var i = 0; i < forms.length; i += 1) updateSavedSearchContact(forms[i]);
   }
+  function initImageFallbacks() {
+    var images = document.querySelectorAll("img[data-fallback-src]");
+    function useFallback(image) {
+      var fallback = image.getAttribute("data-fallback-src");
+      if (!fallback || image.getAttribute("src") === fallback) return;
+      image.removeAttribute("data-fallback-src");
+      image.setAttribute("src", fallback);
+    }
+    for (var i = 0; i < images.length; i += 1) {
+      (function (image) {
+        image.addEventListener("error", function () { useFallback(image); }, { once: true });
+        if (image.complete && image.naturalWidth === 0) useFallback(image);
+      })(images[i]);
+    }
+  }
   document.addEventListener("click", function (event) {
     var save = event.target.closest("[data-client-save-listing]");
     if (save) {
@@ -315,5 +330,6 @@
   });
   markSaved();
   initSavedSearchContacts();
+  initImageFallbacks();
   initPhotoSphereViewers();
 })();

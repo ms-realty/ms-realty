@@ -104,7 +104,10 @@ test("listing quality report exposes actionable source listing gaps", () => {
   assert.ok(
     report.rows
       .filter((row) => row.required_editor_fields.includes("public_gallery"))
-      .every((row) => row.public_gallery_sample.some((item) => item.includes("wp-content/uploads"))),
+      .every(
+        (row) =>
+          row.public_gallery_assets === 0 || row.public_gallery_sample.some((item) => item.includes("wp-content/uploads")),
+      ),
   );
 
   assert.throws(
@@ -305,7 +308,11 @@ test("listing quality review packet is a complete draft but not launch evidence"
       .filter((row) => row.required_editor_fields.includes("public_gallery"))
       .every((row) => row.review_notes.includes("Review public gallery")),
   );
-  assert.ok(rows.every((row) => row.public_gallery_sample.includes("wp-content/uploads")));
+  assert.ok(
+    rows.every(
+      (row) => Number(row.public_gallery_assets) === 0 || row.public_gallery_sample.includes("wp-content/uploads"),
+    ),
+  );
   assert.equal(packet.paths.draft_review_csv === packet.paths.launch_review_csv, false);
   assert.throws(() => validateListingQualityReviewCsv(report, draft, { requireComplete: true }), /facts_reviewer|media_reviewer/);
 });
@@ -653,7 +660,10 @@ test("listing quality preflight CLI fails missing CSV and passes valid CSV", () 
   assert.equal(valid.status, 0, valid.stderr);
   assert.match(valid.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
   assert.match(valid.stdout, new RegExp(`Facts review rows: ${report.rows.length}`));
-  assert.match(valid.stdout, /Media review rows: 7/);
+  const mediaReviewRows = report.rows.filter((row) =>
+    row.required_editor_fields.some((field) => ["media_review", "media_alt_text", "public_gallery", "tour_review"].includes(field)),
+  ).length;
+  assert.match(valid.stdout, new RegExp(`Media review rows: ${mediaReviewRows}`));
   assert.equal(validFromEnv.status, 0, validFromEnv.stderr);
   assert.match(validFromEnv.stdout, new RegExp(`Listing quality review CSV valid: ${report.rows.length} rows`));
 });
@@ -893,7 +903,11 @@ test("generated listing quality workbook is valid when present", () => {
   assert.equal(rows.length, report.rows.length);
   assert.ok(rows.every((row) => row.review_status));
   assert.ok(rows.every((row) => row.required_editor_fields));
-  assert.ok(rows.every((row) => row.public_gallery_sample.includes("wp-content/uploads")));
+  assert.ok(
+    rows.every(
+      (row) => Number(row.public_gallery_assets) === 0 || row.public_gallery_sample.includes("wp-content/uploads"),
+    ),
+  );
   assert.ok(rows.every((row) => row.editor_path.startsWith("/admin/listings/edit?listingId=")));
 });
 

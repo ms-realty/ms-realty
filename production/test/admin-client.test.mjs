@@ -23,4 +23,8 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /data-pipeline-card/);
   assert.match(ADMIN_APP_JS, /function initAdminMutationForms\(\)/);
   assert.match(ADMIN_APP_JS, /data-admin-mutation-form/);
+  assert.match(ADMIN_APP_JS, /function initRouteDecisionForms\(\)/);
+  assert.match(ADMIN_APP_JS, /data-route-decision-select/);
+  assert.match(ADMIN_APP_JS, /decision === "redirect_301" \|\| decision === "retain_200"/);
+  assert.match(ADMIN_APP_JS, /equivalent\.required = requiresEquivalentTarget/);
 });

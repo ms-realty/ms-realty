@@ -176,6 +176,22 @@ test("App Router adapter honors mounted public listing edit ledger", () => {
   assert.match(listing.html, /Operator edited Sandanski listing/);
 });
 
+test("App Router restores a legacy WordPress gallery without serving tiny derivatives", () => {
+  const listing = renderAppRoute({
+    pathname: "/ru/properties/MS-CRAWL-0114",
+    url: "https://example.test/ru/properties/MS-CRAWL-0114",
+  });
+
+  assert.equal(listing.status, 200);
+  assert.equal(listing.rendered.body.media.gallery_count, 10);
+  assert.equal(listing.rendered.body.media.gallery.every((image) => !/-72x72\./.test(image.url)), true);
+  assert.equal(listing.rendered.body.media.gallery.some((image) => /-72x72\./.test(image.fallback_url || "")), true);
+  assert.match(
+    listing.html,
+    /data-fallback-src="https:\/\/makler-realty\.ru\/wp-content\/uploads\/2013\/11\/191-2-72x72\.jpg"/,
+  );
+});
+
 test("App Router adapter serves approved sitemap, robots text, and favicon", async () => {
   const sitemap = renderAppSitemap();
   assert.equal(sitemap.status, 200);

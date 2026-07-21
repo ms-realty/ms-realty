@@ -11,7 +11,7 @@
       "missing_description": 0,
       "media_review_pending": 0,
       "missing_alt_text": 0,
-      "thin_public_gallery": 7,
+      "thin_public_gallery": 18,
       "tour_review_pending": 0
     },
     "by_source_locale": {
@@ -45,11 +45,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 18,
+      "public_gallery_assets": 17,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
         "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-        "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]"
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+        "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -60,26 +60,27 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0002",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Апартаменти в парка на Сандански. Затворен комплекс",
       "location": "Sandanski",
       "description": "Жилищен комплекс от затворен тип в парка на гр.Сандански с прекрасна архитектура, изграден в съответствие с всички съвременни изисквания за качество, който предлага апартаменти категория “лукс”, с всички необходими удобства за целогодишно ползване. Комплексът разполага със собствена територия и е разположен на прекрасно място, в горната част на парка на град Сандански, в подножието на Пирин планина, по поречието на река Санданска Бистрица. Апартаментите са с панорамни изгледи към планината и реката. Излизайки от територията на комплекса, вие попадате в прекрасния парк на град Сандански, с неговата вечнозелена растителност и минерални извори. Комплекса се състои от 3 жилищни сгради, като 2 от тях вече са построени и въведени в експлоатация, като във втората сграда има СПА център и басеин с размери 6м на 16 м. Третата сграда е в процес на строеж, където все още има свободни апартаменти.",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": null,
       "price_on_request": true,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 3,
+      "public_gallery_assets": 2,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]",
         "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]",
-        "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-72x72.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]"
+        "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -105,11 +106,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 15,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
         "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
-        "https://makler-realty.com/wp-content/uploads/2025/10/922-1-72x72.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]"
+        "https://makler-realty.com/wp-content/uploads/2025/10/922-1.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
+        "https://makler-realty.com/wp-content/uploads/2025/10/922-2.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -135,11 +136,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/08/905-1-72x72.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/08/905-1.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/08/905-2.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -165,11 +166,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент под наем в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg [alt: Апартамент под наем в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/07/899-1-72x72.jpg [alt: Апартамент под наем в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/07/899-1.jpg [alt: Апартамент под наем в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/07/899-2.jpg [alt: Апартамент под наем в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -225,11 +226,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/09/911-2-72x72.jpg [alt: продажба на апартаменти в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/09/911-2.jpg [alt: продажба на апартаменти в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/09/911-5.jpg [alt: продажба на апартаменти в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -255,11 +256,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 18,
+      "public_gallery_assets": 17,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
         "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-        "https://makler-realty.com/wp-content/uploads/2023/06/662-4-72x72.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
+        "https://makler-realty.com/wp-content/uploads/2023/06/662-4.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
+        "https://makler-realty.com/wp-content/uploads/2018/07/662.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -285,11 +286,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
         "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2026/06/957-1-72x72.jpg [alt: Двустаен апартамент под наем в парка на Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2026/06/957-1.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2026/06/957-8.jpg [alt: Двустаен апартамент под наем в парка на Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -315,11 +316,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
         "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/05/987-16-72x72.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/05/987-16.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/05/987-14.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -345,11 +346,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 21,
+      "public_gallery_assets": 20,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дългосрочен наем в Парк Хотел Пирин – гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2018/03/778-dron-680x383.jpg [alt: Дългосрочен наем в Парк Хотел Пирин – гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2023/06/858-2-72x72.jpeg [alt: Дългосрочен наем в Парк Хотел Пирин – гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2023/06/858-2.jpeg [alt: Дългосрочен наем в Парк Хотел Пирин – гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2023/06/858-8.jpeg [alt: Дългосрочен наем в Парк Хотел Пирин – гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -377,9 +378,8 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 2,
+      "public_gallery_assets": 1,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]",
         "https://makler-realty.com/wp-content/uploads/2025/06/IMG_20250604_101804-680x510.jpg [alt: Инвестиционен проект в Сандански – хотел ресторант]"
       ],
       "missing_alt_text_assets": 0,
@@ -406,11 +406,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Къща за продажба в с. Хотово – имот с парцел и отличен потенциал]",
         "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg [alt: Къща за продажба в с. Хотово – имот с парцел и отличен потенциал]",
-        "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-72x72.jpg [alt: продава къща в с.Хотово]"
+        "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532.jpg [alt: продава къща в с.Хотово]",
+        "https://makler-realty.com/wp-content/uploads/2024/10/1729152754546.jpg [alt: Къща за продажба в с. Хотово – имот с парцел и отличен потенциал]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -436,11 +436,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Наем – Двустаен апартамент в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/10/876-1-680x510.jpg [alt: Наем – Двустаен апартамент в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/10/876-1-72x72.jpg [alt: Наем – Двустаен апартамент в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/10/876-1.jpg [alt: Наем – Двустаен апартамент в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/10/876-2.jpg [alt: Наем – Двустаен апартамент в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -466,11 +466,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 22,
+      "public_gallery_assets": 21,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Нова къща под наем в с.Микрево]",
         "https://makler-realty.com/wp-content/uploads/2026/04/942-1-680x510.jpg [alt: Нова къща под наем в с.Микрево]",
-        "https://makler-realty.com/wp-content/uploads/2026/04/942-1-72x72.jpg [alt: Нова къща под наем в с.Микрево]"
+        "https://makler-realty.com/wp-content/uploads/2026/04/942-1.jpg [alt: Нова къща под наем в с.Микрево]",
+        "https://makler-realty.com/wp-content/uploads/2026/04/942-2.jpg [alt: Нова къща под наем в с.Микрево]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -496,11 +496,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 21,
+      "public_gallery_assets": 20,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Новостроящи се къщи в с.Джигурово]",
         "https://makler-realty.com/wp-content/uploads/2021/07/803-680x381.jpg [alt: Новостроящи се къщи в с.Джигурово]",
-        "https://makler-realty.com/wp-content/uploads/2021/07/803-1-72x72.jpg [alt: продава нови къщи в с.Джигурово]"
+        "https://makler-realty.com/wp-content/uploads/2021/07/803-1.jpg [alt: продава нови къщи в с.Джигурово]",
+        "https://makler-realty.com/wp-content/uploads/2021/07/803-2.jpg [alt: продава нови къщи в с.Джигурово]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -526,11 +526,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 11,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Нов двустаен апартамент в гр.Сандански – продажба]",
         "https://makler-realty.com/wp-content/uploads/2026/02/ChatGPT-Image-20.05.2026-г.-09_39_24-680x383.png [alt: Нов двустаен апартамент в гр.Сандански – продажба]",
-        "https://makler-realty.com/wp-content/uploads/2026/02/938-1-72x72.jpg [alt: продава двустаен апартамент в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2026/02/938-1.jpg [alt: продава двустаен апартамент в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2026/02/938-2.jpg [alt: продава двустаен апартамент в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -556,11 +556,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 29,
+      "public_gallery_assets": 28,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Оборудвана оранжерия в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/12/814-2-680x383.jpeg [alt: Оборудвана оранжерия в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/12/814-72x72.jpeg [alt: Оборудвана оранжерия в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/12/814.jpeg [alt: Оборудвана оранжерия в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/12/814-2.jpeg [alt: продава оранжерия сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -586,11 +586,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Офиси/магазини под наем в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/12/812-2-680x510.jpg [alt: Офиси/магазини под наем в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/12/812-1-72x72.jpg [alt: Офиси/магазини под наем в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/12/812-1.jpg [alt: Офиси/магазини под наем в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/12/812-2.jpg [alt: Офиси/магазини под наем в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -616,11 +616,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Офис под наем в центъра на гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/02/890-2-680x510.jpeg [alt: Офис под наем в центъра на гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/02/890-1-72x72.jpeg [alt: Офис под наем в центъра на гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/02/890-1.jpeg [alt: Офис под наем в центъра на гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/02/890-2.jpeg [alt: Офис под наем в центъра на гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -646,11 +646,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 27,
+      "public_gallery_assets": 26,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Панорамен двустаен апартамент с гараж – паркова зона]",
         "https://makler-realty.com/wp-content/uploads/2026/05/944-1-510x680.jpg [alt: Панорамен двустаен апартамент с гараж – паркова зона]",
-        "https://makler-realty.com/wp-content/uploads/2026/05/944-1-72x72.jpg [alt: Панорамен двустаен апартамент с гараж – паркова зона]"
+        "https://makler-realty.com/wp-content/uploads/2026/05/944-1.jpg [alt: Панорамен двустаен апартамент с гараж – паркова зона]",
+        "https://makler-realty.com/wp-content/uploads/2026/05/944-2.jpg [alt: Панорамен двустаен апартамент с гараж – паркова зона]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -676,11 +676,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Дава под наем производствено помещение в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2020/05/756-8-680x510.jpg [alt: Дава под наем производствено помещение в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2020/05/756-1-72x72.jpg [alt: Дава под наем производствено помещение в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2020/05/756-1.jpg [alt: Дава под наем производствено помещение в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2020/05/756-2.jpg [alt: Дава под наем производствено помещение в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -706,11 +706,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Прекрасна къща в близост до СПА курорт Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/04/833-new-6-1-680x510.jpg [alt: Прекрасна къща в близост до СПА курорт Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/04/833-new-6-1-72x72.jpg [alt: продава къща около сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/04/833-new-6-1.jpg [alt: продава къща около сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/04/833-new-5-1.jpg [alt: Прекрасна къща в близост до СПА курорт Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -736,11 +736,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава апартамент в Солун]",
         "https://makler-realty.com/wp-content/uploads/2024/01/101-1-510x680.jpg [alt: Продава апартамент в Солун]",
-        "https://makler-realty.com/wp-content/uploads/2024/01/101-7-72x72.jpg [alt: Продава апартамент в Солун]"
+        "https://makler-realty.com/wp-content/uploads/2024/01/101-7.jpg [alt: Продава апартамент в Солун]",
+        "https://makler-realty.com/wp-content/uploads/2024/01/101-1.jpg [alt: Продава апартамент в Солун]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -766,11 +766,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 20,
+      "public_gallery_assets": 18,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава вила в Пирин планина]",
         "https://makler-realty.com/wp-content/uploads/2017/07/637-2.jpg [alt: Продава вила в Пирин планина]",
-        "https://makler-realty.com/wp-content/uploads/2017/07/637-1-72x72.jpg [alt: Продава вила в Пирин планина]"
+        "https://makler-realty.com/wp-content/uploads/2017/07/637-1.jpg [alt: Продава вила в Пирин планина]",
+        "https://makler-realty.com/wp-content/uploads/2026/06/IMG-20260604-WA0010.jpg [alt: Продава вила в Пирин планина]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -796,11 +796,11 @@
       "area_sqm": null,
       "bedrooms": 4,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава голяма къща в близост до гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/06/890-3-680x510.jpg [alt: Продава голяма къща в близост до гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/06/890-3-72x72.jpg [alt: Продава голяма къща в близост до гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/06/890-3.jpg [alt: Продава голяма къща в близост до гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/06/890-1.jpg [alt: Продава голяма къща в близост до гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -826,11 +826,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/09/911-1-680x514.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/09/911-2-72x72.jpg [alt: продажба на апартаменти в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/09/911-2.jpg [alt: продажба на апартаменти в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/09/911-1.jpg [alt: продажба на апартаменти в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -856,11 +856,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава двустаен апартамент в центъра на гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/10/10621480_144682647_big-510x680.jpg [alt: Продава двустаен апартамент в центъра на гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/08/903-6-1-72x72.jpg [alt: Продава двустаен апартамент в центъра на гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/08/903-6-1.jpg [alt: Продава двустаен апартамент в центъра на гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/08/903-5-1.jpg [alt: Продава двустаен апартамент в центъра на гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -886,11 +886,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава едностаен апартамент/студио в центъра на Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/08/903-2-1-680x510.jpg [alt: Продава едностаен апартамент/студио в центъра на Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/08/903-1-1-72x72.jpg [alt: Продава едностаен апартамент/студио в центъра на Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/08/903-1-1.jpg [alt: Продава едностаен апартамент/студио в центъра на Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/08/903-2-1.jpg [alt: Продава едностаен апартамент/студио в центъра на Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -916,11 +916,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава едностаен апартамент]",
         "https://makler-realty.com/wp-content/uploads/2026/04/943-1-680x510.jpg [alt: Продава едностаен апартамент]",
-        "https://makler-realty.com/wp-content/uploads/2026/04/943-1-72x72.jpg [alt: Продава едностаен апартамент]"
+        "https://makler-realty.com/wp-content/uploads/2026/04/943-1.jpg [alt: Продава едностаен апартамент]",
+        "https://makler-realty.com/wp-content/uploads/2026/04/943-2.jpg [alt: Продава едностаен апартамент]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -946,11 +946,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 11,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава етаж от къща в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2026/03/940-1-680x383.jpg [alt: Продава етаж от къща в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2026/03/940-10-72x72.jpg [alt: Продава етаж от къща в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2026/03/940-10.jpg [alt: Продава етаж от къща в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2026/03/940-9.jpg [alt: Продава етаж от къща в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -976,11 +976,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава етаж от къща в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/11/932-1-680x510.jpg [alt: Продава етаж от къща в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/11/932-1-72x72.jpg [alt: продава етаж от къща в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/11/932-1.jpg [alt: продава етаж от къща в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/11/932-2.jpg [alt: Продава етаж от къща в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1006,11 +1006,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 12,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава етаж от къща в с.Поленица]",
         "https://makler-realty.com/wp-content/uploads/2023/09/856-6-680x510.jpeg [alt: Продава етаж от къща в с.Поленица]",
-        "https://makler-realty.com/wp-content/uploads/2023/09/856-6-72x72.jpeg [alt: Продава етаж от къща в с.Поленица]"
+        "https://makler-realty.com/wp-content/uploads/2023/09/856-6.jpeg [alt: Продава етаж от къща в с.Поленица]",
+        "https://makler-realty.com/wp-content/uploads/2023/09/856-1.jpeg [alt: Продава етаж от къща в с.Поленица]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1036,11 +1036,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава етаж от къща в широкия център на гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/09/963-3-680x510.jpeg [alt: Продава етаж от къща в широкия център на гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/09/963-5-72x72.jpeg [alt: Продава етаж от къща в широкия център на гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/09/963-5.jpeg [alt: Продава етаж от къща в широкия център на гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/09/963-1.jpeg [alt: Продава етаж от къща в широкия център на гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1066,11 +1066,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 12,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава етаж от къща с парцел в с.Левуново]",
         "https://makler-realty.com/wp-content/uploads/2020/09/774-1-1-680x510.jpg [alt: Продава етаж от къща с парцел в с.Левуново]",
-        "https://makler-realty.com/wp-content/uploads/2020/09/774-1-1-72x72.jpg [alt: Продава етаж от къща с парцел в с.Левуново]"
+        "https://makler-realty.com/wp-content/uploads/2020/09/774-1-1.jpg [alt: Продава етаж от къща с парцел в с.Левуново]",
+        "https://makler-realty.com/wp-content/uploads/2020/09/774-2.jpg [alt: Продава етаж от къща с парцел в с.Левуново]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1096,11 +1096,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава земеделска земя – с.Джигурово]",
         "https://makler-realty.com/wp-content/uploads/2025/06/897-1-680x510.jpg [alt: Продава земеделска земя – с.Джигурово]",
-        "https://makler-realty.com/wp-content/uploads/2025/06/897-72x72.jpg [alt: Продава земеделска земя – с.Джигурово]"
+        "https://makler-realty.com/wp-content/uploads/2025/06/897.jpg [alt: Продава земеделска земя – с.Джигурово]",
+        "https://makler-realty.com/wp-content/uploads/2025/06/897-2.jpg [alt: Продава земеделска земя – с.Джигурово]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1126,11 +1126,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава земя на Е79 в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2019/08/719-1-680x510.jpg [alt: Продава земя на Е79 в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2019/08/719-1-72x72.jpg [alt: продава имот на е79 Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2019/08/719-1.jpg [alt: продава имот на е79 Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2019/08/719-2.jpg [alt: продава имот на е79 Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1156,11 +1156,11 @@
       "area_sqm": null,
       "bedrooms": 4,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 44,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава имение в района на гр. Сандански]",
         "https://makler-realty.com/wp-content/uploads/2023/11/873-10-680x510.jpeg [alt: Продава имение в района на гр. Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2023/11/873-10-72x72.jpeg [alt: Продава имение в района на гр. Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2023/11/873-10.jpeg [alt: Продава имение в района на гр. Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2023/11/873-14.jpeg [alt: Продава имение в района на гр. Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1171,26 +1171,27 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0039",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0039",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Продава имот в м.Ранковец, гр.Сандански",
       "location": "Sandanski",
       "description": "Продава 1/2 идеална част от имот с идентификатор 57176.41.8 в местността РАНКОВЕЦ. Имота е равен, с категория на земята 5, НТП Нива, площ на целия имот 8995 кв. м Имота граничи с полски път и е на около 45 метра от напоителния канал. В близост до имота има и застрояване.",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": null,
       "price_on_request": true,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 3,
+      "public_gallery_assets": 2,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава имот в м.Ранковец, гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/08/906-680x347.jpg [alt: Продава имот в м.Ранковец, гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/08/906-72x72.jpg [alt: Продава имот в м.Ранковец, гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/08/906.jpg [alt: Продава имот в м.Ранковец, гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1201,26 +1202,27 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0040",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0040",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Продава имот в с.Ласкарево",
       "location": "Sandanski",
       "description": "Имота се намира в новия район на с.Ласкарево. Невероятен изглед във всички посоки. Статута на земята е нива, но всичките съседни имоти са с променено предназначение – урбанизирана територия, застроени с еднофамилни къщи.",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 18000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 3,
+      "public_gallery_assets": 2,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава имот в с.Ласкарево]",
         "https://makler-realty.com/wp-content/uploads/2024/03/laskarevo-680x382.jpg [alt: Продава имот в с.Ласкарево]",
-        "https://makler-realty.com/wp-content/uploads/2024/03/laskarevo-72x72.jpg [alt: продава имот в с.Ласкарево]"
+        "https://makler-realty.com/wp-content/uploads/2024/03/laskarevo.jpg [alt: продава имот в с.Ласкарево]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1246,11 +1248,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": true,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава имот в центъра на с.Левуново]",
         "https://makler-realty.com/wp-content/uploads/2021/02/788-1-680x510.jpg [alt: Продава имот в центъра на с.Левуново]",
-        "https://makler-realty.com/wp-content/uploads/2021/02/788-1-72x72.jpg [alt: Продава имот в центъра на с.Левуново]"
+        "https://makler-realty.com/wp-content/uploads/2021/02/788-1.jpg [alt: Продава имот в центъра на с.Левуново]",
+        "https://makler-realty.com/wp-content/uploads/2021/02/788-2.jpg [alt: Продава имот в центъра на с.Левуново]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1276,11 +1278,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава имот на гл.път Е79 в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2021/08/811-1-680x383.png [alt: Продава имот на гл.път Е79 в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2021/08/811-1-72x72.png [alt: Продава имот на гл.път Е79 в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2021/08/811-1.png [alt: Продава имот на гл.път Е79 в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2021/08/811-2.png [alt: Продава имот на гл.път Е79 в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1306,11 +1308,11 @@
       "area_sqm": null,
       "bedrooms": 6,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 16,
+      "public_gallery_assets": 15,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в Гърция, Еретрия – Котрони]",
         "https://makler-realty.com/wp-content/uploads/2024/04/987-5-680x510.jpg [alt: Продава къща в Гърция, Еретрия – Котрони]",
-        "https://makler-realty.com/wp-content/uploads/2024/04/987-8-72x72.jpg [alt: Eine exklusive dreistöckige Villa zum Verkauf in Eretria-Kotroni, Griechenland]"
+        "https://makler-realty.com/wp-content/uploads/2024/04/987-8.jpg [alt: Eine exklusive dreistöckige Villa zum Verkauf in Eretria-Kotroni, Griechenland]",
+        "https://makler-realty.com/wp-content/uploads/2024/04/987-9.jpg [alt: Продава къща в Гърция, Еретрия – Котрони]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1336,11 +1338,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": true,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в с. Кулата]",
         "https://makler-realty.com/wp-content/uploads/2024/02/345-3-680x510.jpg [alt: Продава къща в с. Кулата]",
-        "https://makler-realty.com/wp-content/uploads/2024/02/345-1-72x72.jpg [alt: Продава къща в с. Кулата]"
+        "https://makler-realty.com/wp-content/uploads/2024/02/345-1.jpg [alt: Продава къща в с. Кулата]",
+        "https://makler-realty.com/wp-content/uploads/2024/02/345-2.jpg [alt: Продава къща в с. Кулата]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1366,11 +1368,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в с.Пирин]",
         "https://makler-realty.com/wp-content/uploads/2025/09/908-1-1-680x510.jpg [alt: Продава къща в с.Пирин]",
-        "https://makler-realty.com/wp-content/uploads/2025/09/908-2-72x72.jpg [alt: продава къща в с.Пирин]"
+        "https://makler-realty.com/wp-content/uploads/2025/09/908-2.jpg [alt: продава къща в с.Пирин]",
+        "https://makler-realty.com/wp-content/uploads/2025/09/908-3.jpg [alt: Продава къща в с.Пирин]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1396,11 +1398,11 @@
       "area_sqm": null,
       "bedrooms": 7,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в с.Поленица]",
         "https://makler-realty.com/wp-content/uploads/2026/03/PHOTO-2026-03-19-10-28-52_1-680x510.jpg [alt: Продава къща в с.Поленица]",
-        "https://makler-realty.com/wp-content/uploads/2026/03/PHOTO-2026-03-19-10-28-53_1-72x72.jpg [alt: Продава къща в с.Поленица]"
+        "https://makler-realty.com/wp-content/uploads/2026/03/PHOTO-2026-03-19-10-28-53_1.jpg [alt: Продава къща в с.Поленица]",
+        "https://makler-realty.com/wp-content/uploads/2026/03/PHOTO-2026-03-19-10-28-51.jpg [alt: Продава къща в с.Поленица]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1426,11 +1428,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в с. Спатово, община Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/11/927-4-680x510.jpg [alt: Продава къща в с. Спатово, община Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/11/927-1-72x72.jpg [alt: Продава къща в с. Спатово, община Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/11/927-1.jpg [alt: Продава къща в с. Спатово, община Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/11/927-2.jpg [alt: Продава къща в с. Спатово, община Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1456,11 +1458,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 16,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в с.Цапарево]",
         "https://makler-realty.com/wp-content/uploads/2025/08/904-2.jpg [alt: Продава къща в с.Цапарево]",
-        "https://makler-realty.com/wp-content/uploads/2025/08/904-2-72x72.jpg [alt: Продава къща в с.Цапарево]"
+        "https://makler-realty.com/wp-content/uploads/2025/08/904-1.jpg [alt: Продава къща в с.Цапарево]",
+        "https://makler-realty.com/wp-content/uploads/2025/08/904-12.jpg [alt: Продава къща в с.Цапарево]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1516,11 +1518,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава мезонет в Халкидики, р-н Елани Сани]",
         "https://makler-realty.com/wp-content/uploads/2024/01/100-1-680x510.jpg [alt: Продава мезонет в Халкидики, р-н Елани Сани]",
-        "https://makler-realty.com/wp-content/uploads/2024/01/100-1-72x72.jpg [alt: Продава мезонет в Халкидики, р-н Елани Сани]"
+        "https://makler-realty.com/wp-content/uploads/2024/01/100-1.jpg [alt: Продава мезонет в Халкидики, р-н Елани Сани]",
+        "https://makler-realty.com/wp-content/uploads/2024/01/100-9.jpg [alt: Продава мезонет в Халкидики, р-н Елани Сани]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1546,11 +1548,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава нова къща в община Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/01/816-6-680x510.jpg [alt: Продава нова къща в община Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/01/816-1-72x72.jpg [alt: Продава нова къща в община Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/01/816-1.jpg [alt: Продава нова къща в община Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/01/816-2.jpg [alt: Продава нова къща в община Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1576,11 +1578,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 12,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава оранжерия в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2018/06/657-11-680x510.jpg [alt: Продава оранжерия в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2018/06/657-1-1-72x72.jpg [alt: продава оранжерия в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2018/06/657-1-1.jpg [alt: продава оранжерия в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2018/06/657-2-1.jpg [alt: продава оранжерия в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1606,11 +1608,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава офис в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2020/07/766-1-680x510.jpg [alt: Продава офис в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2020/07/766-1-72x72.jpg [alt: Продава офис в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2020/07/766-1.jpg [alt: Продава офис в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2020/07/766-3.jpg [alt: Продава офис в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1636,11 +1638,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава панорамен двустаен апартамент в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/02/333-2-680x510.jpeg [alt: Продава панорамен двустаен апартамент в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/02/333-1-72x72.jpeg [alt: Панорамен двустаен апартамент под наем в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/02/333-1.jpeg [alt: Панорамен двустаен апартамент под наем в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/02/333-2.jpeg [alt: Продава панорамен двустаен апартамент в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1666,11 +1668,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2020/08/770-2-680x383.jpg [alt: Продава парцел в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2020/08/770-1-72x72.jpg [alt: Продава парцел в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2020/08/770-1.jpg [alt: Продава парцел в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2020/08/770-2.jpg [alt: Продава парцел в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1681,26 +1683,27 @@
       "source_domain": "makler-realty.com",
       "target_path": "/bg/imoti/MS-CRAWL-0056",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0056",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Продава парцел в Сандански",
       "location": "Sandanski",
       "description": "Имота се намира в новия и активно развиващ се район на гр.Сандански – местността Нишан Таши. Имота е с площ 1495 кв.м. – урбанизирана територия. Достъпа до имота към момента е черен път, но района се застроява интензивно.",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 60000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 3,
+      "public_gallery_assets": 2,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/03/321-680x383.jpg [alt: Продава парцел в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/03/321-72x72.jpg [alt: продава парцел в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/03/321.jpg [alt: продава парцел в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1726,11 +1729,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел в с.Микрево]",
         "https://makler-realty.com/wp-content/uploads/2025/07/898-1-680x510.jpg [alt: Продава парцел в с.Микрево]",
-        "https://makler-realty.com/wp-content/uploads/2025/07/898-1-72x72.jpg [alt: Продава парцел в с.Микрево]"
+        "https://makler-realty.com/wp-content/uploads/2025/07/898-1.jpg [alt: Продава парцел в с.Микрево]",
+        "https://makler-realty.com/wp-content/uploads/2025/07/898-2.jpg [alt: Продава парцел в с.Микрево]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1756,11 +1759,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел в с.Поленица]",
         "https://makler-realty.com/wp-content/uploads/2020/04/749-1-680x383.jpg [alt: Продава парцел в с.Поленица]",
-        "https://makler-realty.com/wp-content/uploads/2020/04/749-1-72x72.jpg [alt: продава парцел в поленица]"
+        "https://makler-realty.com/wp-content/uploads/2020/04/749-1.jpg [alt: продава парцел в поленица]",
+        "https://makler-realty.com/wp-content/uploads/2020/04/749-2.jpg [alt: продава парцел в поленица]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1786,11 +1789,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел в с.Хотово]",
         "https://makler-realty.com/wp-content/uploads/2026/06/954-1-680x510.jpg [alt: Продава парцел в с.Хотово]",
-        "https://makler-realty.com/wp-content/uploads/2026/06/954-1-72x72.jpg [alt: продава парцел в хотово]"
+        "https://makler-realty.com/wp-content/uploads/2026/06/954-1.jpg [alt: продава парцел в хотово]",
+        "https://makler-realty.com/wp-content/uploads/2026/06/954-2.jpg [alt: Продава парцел в с.Хотово]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1816,11 +1819,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел за строителство в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/02/234-2-680x510.jpg [alt: Продава парцел за строителство в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/02/234-1-72x72.jpg [alt: Продава парцел за строителство в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/02/234-1.jpg [alt: Продава парцел за строителство в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/02/234-2.jpg [alt: Продава парцел за строителство в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1846,11 +1849,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел за строителство в с.Струмяни]",
         "https://makler-realty.com/wp-content/uploads/2020/01/470-dron-new-680x383.jpg [alt: Продава парцел за строителство в с.Струмяни]",
-        "https://makler-realty.com/wp-content/uploads/2018/09/470-2-72x72.jpg [alt: продава парцел в струмяни]"
+        "https://makler-realty.com/wp-content/uploads/2018/09/470-2.jpg [alt: продава парцел в струмяни]",
+        "https://makler-realty.com/wp-content/uploads/2018/09/470-4.jpg [alt: Продава парцел за строителство в с.Струмяни]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1876,11 +1879,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 15,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава промишлени халета в близост до гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/05/894-1-680x510.jpg [alt: Продава промишлени халета в близост до гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/05/894-1-72x72.jpg [alt: продава промишлени халета около сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/05/894-1.jpg [alt: продава промишлени халета около сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/05/894-2.jpg [alt: Продава промишлени халета в близост до гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1906,11 +1909,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава се вила в с. Игралище, община Струмяни]",
         "https://makler-realty.com/wp-content/uploads/2026/06/960-v-680x456.jpg [alt: Продава се вила в с. Игралище, община Струмяни]",
-        "https://makler-realty.com/wp-content/uploads/2026/06/960-1-72x72.jpg [alt: Продава се вила в с. Игралище, община Струмяни]"
+        "https://makler-realty.com/wp-content/uploads/2026/06/960-1.jpg [alt: Продава се вила в с. Игралище, община Струмяни]",
+        "https://makler-realty.com/wp-content/uploads/2026/06/960-2.jpg [alt: Продава се вила в с. Игралище, община Струмяни]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1936,11 +1939,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": true,
-      "public_gallery_assets": 4,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава стара къща в с.Хотово]",
         "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-680x510.jpg [alt: Продава стара къща в с.Хотово]",
-        "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532-72x72.jpg [alt: продава къща в с.Хотово]"
+        "https://makler-realty.com/wp-content/uploads/2024/10/1729152754532.jpg [alt: продава къща в с.Хотово]",
+        "https://makler-realty.com/wp-content/uploads/2024/10/1729152754546.jpg [alt: Продава стара къща в с.Хотово]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1966,11 +1969,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]",
         "https://makler-realty.com/wp-content/uploads/2026/01/сапфир-резиденс-банско-680x510.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]",
-        "https://makler-realty.com/wp-content/uploads/2026/01/937-1-72x72.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]"
+        "https://makler-realty.com/wp-content/uploads/2026/01/937-1.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]",
+        "https://makler-realty.com/wp-content/uploads/2026/01/937-2.jpg [alt: Продава обзаведено студио в Сапфир Резиденс Банско]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -1996,11 +1999,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 25,
+      "public_gallery_assets": 24,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава тристаен апартамент в Паралия Офринио, Гърция]",
         "https://makler-realty.com/wp-content/uploads/2025/05/893-1-2-680x395.jpg [alt: Продава тристаен апартамент в Паралия Офринио, Гърция]",
-        "https://makler-realty.com/wp-content/uploads/2025/05/893-1-2-72x72.jpg [alt: продава апартамент паралия офринио]"
+        "https://makler-realty.com/wp-content/uploads/2025/05/893-1-2.jpg [alt: продава апартамент паралия офринио]",
+        "https://makler-realty.com/wp-content/uploads/2025/05/893-3-1.jpg [alt: Продава тристаен апартамент в Паралия Офринио, Гърция]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2026,11 +2029,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава тристаен апартамент в центъра на гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/08/903-2-680x510.jpg [alt: Продава тристаен апартамент в центъра на гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/08/903-2-72x72.jpg [alt: продава тристаен апартамент в сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/08/903-2.jpg [alt: продава тристаен апартамент в сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/08/903-6.jpg [alt: тристаен апартамент в сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2086,11 +2089,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава 8дка земя в землището на с.Лешница]",
         "https://makler-realty.com/wp-content/uploads/2020/02/744-2-680x383.jpg [alt: Продава 8дка земя в землището на с.Лешница]",
-        "https://makler-realty.com/wp-content/uploads/2020/02/744-1-72x72.jpg [alt: Landwirtschaftliche Grundstücke zum Verkauf in der Nähe von Sandanski]"
+        "https://makler-realty.com/wp-content/uploads/2020/02/744-1.jpg [alt: Landwirtschaftliche Grundstücke zum Verkauf in der Nähe von Sandanski]",
+        "https://makler-realty.com/wp-content/uploads/2020/02/744-2.jpg [alt: Продава 8дка земя в землището на с.Лешница]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2146,11 +2149,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продажба на 38дка земя в близост до минерална вода]",
         "https://makler-realty.com/wp-content/uploads/2016/01/499-680x382.jpg [alt: Продажба на 38дка земя в близост до минерална вода]",
-        "https://makler-realty.com/wp-content/uploads/2016/01/499-map-72x72.jpg [alt: Продажба на 38дка земя в близост до минерална вода]"
+        "https://makler-realty.com/wp-content/uploads/2016/01/499-map.jpg [alt: Продажба на 38дка земя в близост до минерална вода]",
+        "https://makler-realty.com/wp-content/uploads/2016/01/499-скица-хотово.jpg [alt: Продажба на 38дка земя в близост до минерална вода]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2176,11 +2179,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продажба на апартаменти в Логари, Гърция]",
         "https://makler-realty.com/wp-content/uploads/2025/11/930-4-1-680x382.jpg [alt: Продажба на апартаменти в Логари, Гърция]",
-        "https://makler-realty.com/wp-content/uploads/2025/11/930-1-1-72x72.jpg [alt: Продажба на апартаменти в Логари, Гърция]"
+        "https://makler-realty.com/wp-content/uploads/2025/11/930-1-1.jpg [alt: Продажба на апартаменти в Логари, Гърция]",
+        "https://makler-realty.com/wp-content/uploads/2025/11/930-1.png [alt: Продажба на апартаменти в Логари, Гърция]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2206,11 +2209,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продажба на апартаменти в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/03/IMG_20260325_172443-680x356.jpg [alt: Продажба на апартаменти в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/03/2-1-72x72.jpg [alt: sunset home sandanski]"
+        "https://makler-realty.com/wp-content/uploads/2025/03/2-1.jpg [alt: sunset home sandanski]",
+        "https://makler-realty.com/wp-content/uploads/2025/03/E2_4-1.jpg [alt: sunset homes sandanski]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2236,11 +2239,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 23,
+      "public_gallery_assets": 22,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продажба на луксозна къща в гр. Сандански]",
         "https://makler-realty.com/wp-content/uploads/2026/03/939-1-680x510.jpg [alt: Продажба на луксозна къща в гр. Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2026/03/939-5-72x72.jpg [alt: Луксозна къща в паркова зона гр. Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2026/03/939-5.jpg [alt: Луксозна къща в паркова зона гр. Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2026/03/939-6.jpg [alt: Луксозна къща в паркова зона гр. Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2266,11 +2269,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 19,
+      "public_gallery_assets": 18,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продажба на магазин в гр.Благоевград]",
         "https://makler-realty.com/wp-content/uploads/2023/03/852-4-680x510.jpeg [alt: Продажба на магазин в гр.Благоевград]",
-        "https://makler-realty.com/wp-content/uploads/2023/03/852-1-72x72.jpeg [alt: Продажба на магазин в гр.Благоевград]"
+        "https://makler-realty.com/wp-content/uploads/2023/03/852-1.jpeg [alt: Продажба на магазин в гр.Благоевград]",
+        "https://makler-realty.com/wp-content/uploads/2023/03/852-2.jpeg [alt: Продажба на магазин в гр.Благоевград]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2296,11 +2299,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продажба на парцел в Струмяни – 3000 кв.м]",
         "https://makler-realty.com/wp-content/uploads/2025/03/PHOTO-2025-06-03-13-42-17_1-680x383.jpg [alt: Продажба на парцел в Струмяни – 3000 кв.м]",
-        "https://makler-realty.com/wp-content/uploads/2025/03/PHOTO-2025-06-03-13-42-17_1-72x72.jpg [alt: Продажба на парцел в Струмяни – 3000 кв.м]"
+        "https://makler-realty.com/wp-content/uploads/2025/03/PHOTO-2025-06-03-13-42-17_1.jpg [alt: Продажба на парцел в Струмяни – 3000 кв.м]",
+        "https://makler-realty.com/wp-content/uploads/2025/03/PHOTO-2025-06-03-13-42-17.jpg [alt: Продажба на парцел в Струмяни – 3000 кв.м]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2326,11 +2329,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Светъл южен апартамент до парка на гр. Сандански]",
         "https://makler-realty.com/wp-content/uploads/2026/06/959-2-680x510.jpg [alt: Светъл южен апартамент до парка на гр. Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2026/06/959-1-72x72.jpg [alt: Светъл южен апартамент до парка на гр. Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2026/06/959-1.jpg [alt: Светъл южен апартамент до парка на гр. Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2026/06/959-2.jpg [alt: Светъл южен апартамент до парка на гр. Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2356,11 +2359,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продажба на тристаен апартамент в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/03/900-1-680x510.jpg [alt: Продажба на тристаен апартамент в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/03/900-1-72x72.jpg [alt: Продажба на тристаен апартамент в гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/03/900-1.jpg [alt: Продажба на тристаен апартамент в гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/03/900-2.jpg [alt: Продажба на тристаен апартамент в гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2386,11 +2389,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 18,
+      "public_gallery_assets": 17,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Тристаен апартамент в центъра на гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/05/242-7-680x510.jpg [alt: Тристаен апартамент в центъра на гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/05/242-1-72x72.jpg [alt: Тристаен апартамент в центъра на гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/05/242-1.jpg [alt: Тристаен апартамент в центъра на гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/05/242-2.jpg [alt: Тристаен апартамент в центъра на гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2416,11 +2419,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 27,
+      "public_gallery_assets": 26,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Тристаен апартамент под наем в с.Поленица]",
         "https://makler-realty.com/wp-content/uploads/2026/06/955-9-680x510.jpg [alt: Тристаен апартамент под наем в с.Поленица]",
-        "https://makler-realty.com/wp-content/uploads/2026/06/955-17-72x72.jpg [alt: Тристаен апартамент под наем в с.Поленица]"
+        "https://makler-realty.com/wp-content/uploads/2026/06/955-17.jpg [alt: Тристаен апартамент под наем в с.Поленица]",
+        "https://makler-realty.com/wp-content/uploads/2026/06/955-16.jpg [alt: Тристаен апартамент под наем в с.Поленица]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2446,11 +2449,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Недвижими имоти в Сандански. Продава парцел в с.Струмяни]",
         "https://makler-realty.com/wp-content/uploads/2013/11/286-dron-680x510.jpg [alt: Недвижими имоти в Сандански. Продава парцел в с.Струмяни]",
-        "https://makler-realty.com/wp-content/uploads/2013/11/286-1-72x72.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2013/11/286-1.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2013/11/286-2.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2506,11 +2509,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]",
         "https://makler-realty.com/wp-content/uploads/2025/04/891-2-680x510.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]",
-        "https://makler-realty.com/wp-content/uploads/2025/04/891-1-72x72.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]"
+        "https://makler-realty.com/wp-content/uploads/2025/04/891-1.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]",
+        "https://makler-realty.com/wp-content/uploads/2025/04/891-2.jpg [alt: Център за профилактика, рехабилитация и разкрасителни процедури]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2536,11 +2539,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Тристаен апартамент в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2023/11/869-1-680x510.jpg [alt: Тристаен апартамент в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2023/11/869-1-72x72.jpg [alt: Тристаен апартамент в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2023/11/869-1.jpg [alt: Тристаен апартамент в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2023/11/869-2.jpg [alt: Тристаен апартамент в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2566,11 +2569,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в Сандански. Наем]",
         "https://makler-realty.com/wp-content/uploads/2021/11/851-1-680x510.jpg [alt: Двустаен апартамент в Сандански. Наем]",
-        "https://makler-realty.com/wp-content/uploads/2021/11/851-5-72x72.jpg [alt: Двустаен апартамент в Сандански. Наем]"
+        "https://makler-realty.com/wp-content/uploads/2021/11/851-5.jpg [alt: Двустаен апартамент в Сандански. Наем]",
+        "https://makler-realty.com/wp-content/uploads/2021/11/851-2.jpg [alt: Двустаен апартамент в Сандански. Наем]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2596,11 +2599,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава апартаменти в Парк Хотел Пирин]",
         "https://makler-realty.com/wp-content/uploads/2013/11/191-1.jpg [alt: Продава апартаменти в Парк Хотел Пирин]",
-        "https://makler-realty.com/wp-content/uploads/2013/11/191-1-72x72.jpg [alt: Продава апартаменти в Парк Хотел Пирин]"
+        "https://makler-realty.com/wp-content/uploads/2013/11/191-2.jpg [alt: Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.]",
+        "https://makler-realty.com/wp-content/uploads/2013/11/191-3.jpg [alt: Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2626,11 +2629,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава земя и сгради в близост до Сандански]",
         "https://makler-realty.com/wp-content/uploads/2021/03/791-1-680x383.jpg [alt: Продава земя и сгради в близост до Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2021/03/791-1-72x72.jpg [alt: Big plot of land and buildings for sale]"
+        "https://makler-realty.com/wp-content/uploads/2021/03/791-1.jpg [alt: Big plot of land and buildings for sale]",
+        "https://makler-realty.com/wp-content/uploads/2021/03/791-2.jpg [alt: Großes Grundstück und Gebäude zum Verkauf]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2656,11 +2659,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава парцел в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2019/12/734-dron-680x382.jpg [alt: Продава парцел в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2019/12/734-dron-1-72x72.jpg [alt: Land for sale in Sandanski. MS Realty company]"
+        "https://makler-realty.com/wp-content/uploads/2019/12/734-dron-1.jpg [alt: Land for sale in Sandanski. MS Realty company]",
+        "https://makler-realty.com/wp-content/uploads/2019/12/734-dron.jpg [alt: Land for sale in Sandanski. MS Realty company]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2686,11 +2689,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава двустаен апартамент в ПАРК ХОТЕЛ ПИРИН САНДАНСКИ]",
         "https://makler-realty.com/wp-content/uploads/2019/03/707-1-680x510.jpg [alt: Продава двустаен апартамент в ПАРК ХОТЕЛ ПИРИН САНДАНСКИ]",
-        "https://makler-realty.com/wp-content/uploads/2019/03/707-1-72x72.jpg [alt: Ein-Zimmer-Wohnung zum Verkauf im Park Hotel Pirin Sandanski]"
+        "https://makler-realty.com/wp-content/uploads/2019/03/707-1.jpg [alt: Ein-Zimmer-Wohnung zum Verkauf im Park Hotel Pirin Sandanski]",
+        "https://makler-realty.com/wp-content/uploads/2019/03/707-6.jpg [alt: One bedroom apartment for sale in Park Hotel Pirin Sandanski]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2716,11 +2719,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 49,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент на първа линия в Пасалимани, Пиреус -Гърция]",
         "https://makler-realty.com/wp-content/uploads/2024/04/543-17.jpeg [alt: Апартамент на първа линия в Пасалимани, Пиреус -Гърция]",
-        "https://makler-realty.com/wp-content/uploads/2024/04/543-1-72x72.jpeg [alt: Апартамент на първа линия в Пасалимани, Пиреус -Гърция]"
+        "https://makler-realty.com/wp-content/uploads/2024/04/543-1.jpeg [alt: Апартамент на първа линия в Пасалимани, Пиреус -Гърция]",
+        "https://makler-realty.com/wp-content/uploads/2024/04/543-2.jpeg [alt: Апартамент на първа линия в Пасалимани, Пиреус -Гърция]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2746,11 +2749,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 12,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в с.Виногради, 3 км от Мелник]",
         "https://makler-realty.com/wp-content/uploads/2023/11/870-2-680x510.jpeg [alt: Продава къща в с.Виногради, 3 км от Мелник]",
-        "https://makler-realty.com/wp-content/uploads/2023/11/870-4-72x72.jpeg [alt: Haus zu vermieten im Dorf Vinogradi, 3 km von Melnik entfernt]"
+        "https://makler-realty.com/wp-content/uploads/2023/11/870-4.jpeg [alt: Haus zu vermieten im Dorf Vinogradi, 3 km von Melnik entfernt]",
+        "https://makler-realty.com/wp-content/uploads/2023/11/870-3.jpeg [alt: Haus zu vermieten im Dorf Vinogradi, 3 km von Melnik entfernt]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2776,11 +2779,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 16,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в парка на Сандански]",
         "https://makler-realty.com/wp-content/uploads/2018/08/671-new-1-680x510.jpg [alt: Продава къща в парка на Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2018/08/671-7-72x72.jpg [alt: Продава къща в парка на Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2018/08/671-7.jpg [alt: Продава къща в парка на Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2018/08/671-8.jpg [alt: Продава къща в парка на Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2806,11 +2809,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава къща в с. Лешница]",
         "https://makler-realty.com/wp-content/uploads/2024/09/190-17-680x510.jpg [alt: Продава къща в с. Лешница]",
-        "https://makler-realty.com/wp-content/uploads/2024/09/190-17-72x72.jpg [alt: Продава къща в с. Лешница]"
+        "https://makler-realty.com/wp-content/uploads/2024/09/190-17.jpg [alt: Продава къща в с. Лешница]",
+        "https://makler-realty.com/wp-content/uploads/2024/09/190-16.jpg [alt: Продава къща в с. Лешница]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2836,11 +2839,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Индустриална сграда под наем в Петрич]",
         "https://makler-realty.com/wp-content/uploads/2016/08/619-1.jpg [alt: Индустриална сграда под наем в Петрич]",
-        "https://makler-realty.com/wp-content/uploads/2016/08/619-3-72x72.jpg [alt: Industrial building for rent in Petrich]"
+        "https://makler-realty.com/wp-content/uploads/2016/08/619-3.jpg [alt: Industrial building for rent in Petrich]",
+        "https://makler-realty.com/wp-content/uploads/2016/08/619-2.jpg [alt: Industrial building for rent in Petrich]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2866,11 +2869,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава индустриална сграда. Община Петрич]",
         "https://makler-realty.com/wp-content/uploads/2019/02/699-dron-7-680x383.jpg [alt: Продава индустриална сграда. Община Петрич]",
-        "https://makler-realty.com/wp-content/uploads/2019/02/699-dron-1-72x72.jpg [alt: индустриална сграда в община петрич]"
+        "https://makler-realty.com/wp-content/uploads/2019/02/699-dron-1.jpg [alt: индустриална сграда в община петрич]",
+        "https://makler-realty.com/wp-content/uploads/2019/02/699-dron-2.jpg [alt: Industriegebäude zu verkaufen. Petrich Gemeinde]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2896,11 +2899,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Индустриална сграда под наем]",
         "https://makler-realty.com/wp-content/uploads/2020/04/750-outside-2-680x510.jpg [alt: Индустриална сграда под наем]",
-        "https://makler-realty.com/wp-content/uploads/2020/04/750-outside-5-72x72.jpg [alt: Индустриална сграда под наем]"
+        "https://makler-realty.com/wp-content/uploads/2020/04/750-outside-5.jpg [alt: Индустриална сграда под наем]",
+        "https://makler-realty.com/wp-content/uploads/2020/04/750-outside-4.jpg [alt: Индустриална сграда под наем]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2926,11 +2929,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 5,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Индустриално помещение под наем в гр.Петрич]",
         "https://makler-realty.com/wp-content/uploads/2020/04/751-1-680x510.jpg [alt: Индустриално помещение под наем в гр.Петрич]",
-        "https://makler-realty.com/wp-content/uploads/2020/04/751-1-72x72.jpg [alt: Industriegebäude zur Miete in Petrich, Bulgarien]"
+        "https://makler-realty.com/wp-content/uploads/2020/04/751-1.jpg [alt: Industriegebäude zur Miete in Petrich, Bulgarien]",
+        "https://makler-realty.com/wp-content/uploads/2020/04/751-2.jpg [alt: наем на индустиална сграда в петрич]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2956,11 +2959,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава индустриална база около Сандански]",
         "https://makler-realty.com/wp-content/uploads/2020/04/750-outside-2-680x510.jpg [alt: Продава индустриална база около Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2020/04/750-5-72x72.jpg [alt: Продава индустриална база около Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2020/04/750-5.jpg [alt: Продава индустриална база около Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2020/04/750-1.jpg [alt: Продава индустриална база около Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -2986,11 +2989,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 23,
+      "public_gallery_assets": 21,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава луксозна къща в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2014/10/400-6.jpg [alt: Продава луксозна къща в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2014/10/400-72x72.jpg [alt: Аренда домов в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2014/10/400.jpg [alt: Аренда домов в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2014/10/400-0.jpg [alt: Аренда домов в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3016,11 +3019,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен луксозен апартамент под наем в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2019/01/695-1-1.jpg [alt: Двустаен луксозен апартамент под наем в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2019/01/695-1-1-72x72.jpg [alt: Двустаен луксозен апартамент под наем в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2019/01/695-2-1.jpg [alt: Двустаен луксозен апартамент под наем в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2019/01/695-3-1.jpg [alt: Двустаен луксозен апартамент под наем в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3046,11 +3049,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 20,
+      "public_gallery_assets": 19,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент под наем в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2019/11/731-1-680x505.jpg [alt: Двустаен апартамент под наем в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2019/11/731-19-72x72.jpg [alt: нов апартамент за дългосрочен и краткосрочен наем]"
+        "https://makler-realty.com/wp-content/uploads/2019/11/731-19.jpg [alt: нов апартамент за дългосрочен и краткосрочен наем]",
+        "https://makler-realty.com/wp-content/uploads/2019/11/731-18.jpg [alt: Двустаен апартамент под наем в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3076,11 +3079,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в парка на гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2025/03/PHOTO-2026-03-04-13-00-13-680x383.jpg [alt: Двустаен апартамент в парка на гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2025/03/879-dron-4-72x72.jpg [alt: продава апартаменти в парка на сандански]"
+        "https://makler-realty.com/wp-content/uploads/2025/03/879-dron-4.jpg [alt: продава апартаменти в парка на сандански]",
+        "https://makler-realty.com/wp-content/uploads/2025/03/879-dron-1.jpg [alt: апартаменти в парка на сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3106,11 +3109,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава мезонет на ул.Пирин, гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2024/02/123-1-680x510.jpeg [alt: Продава мезонет на ул.Пирин, гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2024/02/123-new-1-72x72.jpg [alt: Продава мезонет на ул.Пирин, гр.Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2024/02/123-new-1.jpg [alt: Продава мезонет на ул.Пирин, гр.Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2024/02/123-new-3.jpg [alt: Продава мезонет на ул.Пирин, гр.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3136,11 +3139,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 60,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава имение в Гърция, гр.Нафлио]",
         "https://makler-realty.com/wp-content/uploads/2024/04/999-10-510x680.jpeg [alt: Продава имение в Гърция, гр.Нафлио]",
-        "https://makler-realty.com/wp-content/uploads/2024/04/999-10-72x72.jpeg [alt: Продава имение в Гърция, гр.Нафлио]"
+        "https://makler-realty.com/wp-content/uploads/2024/04/999-10.jpeg [alt: Продава имение в Гърция, гр.Нафлио]",
+        "https://makler-realty.com/wp-content/uploads/2024/04/999-17.jpeg [alt: Продава имение в Гърция, гр.Нафлио]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3166,11 +3169,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 31,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава СПА Хотел в гр.Сандански]",
         "https://makler-realty.com/wp-content/uploads/2020/01/IMG_6227-680x453.jpg [alt: Продава СПА Хотел в гр.Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2020/01/1-72x72.jpg [alt: SPA Hotel mit Mineralwasser zum Verkauf in Sandanski, Bulgarien]"
+        "https://makler-realty.com/wp-content/uploads/2020/01/1.jpg [alt: SPA Hotel mit Mineralwasser zum Verkauf in Sandanski, Bulgarien]",
+        "https://makler-realty.com/wp-content/uploads/2020/01/1ВА-СТАЯ.jpg [alt: SPA Hotel mit Mineralwasser zum Verkauf in Sandanski, Bulgarien]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3196,11 +3199,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 15,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Едностаен апартамент под наем]",
         "https://makler-realty.com/wp-content/uploads/2018/07/635-1-800x600-680x510.jpg [alt: Едностаен апартамент под наем]",
-        "https://makler-realty.com/wp-content/uploads/2018/07/635-2-800x600-72x72.jpg [alt: Studio zum Verkauf in Sandanski, Bulgarien]"
+        "https://makler-realty.com/wp-content/uploads/2018/07/635-2-800x600.jpg [alt: Studio zum Verkauf in Sandanski, Bulgarien]",
+        "https://makler-realty.com/wp-content/uploads/2018/07/635-1-800x600.jpg [alt: Studio zum Verkauf in Sandanski, Bulgarien]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3226,11 +3229,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 15,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава тристаен апартамент в комплек “Арена 1”, Св.Влас]",
         "https://makler-realty.com/wp-content/uploads/2025/11/933-1-680x510.jpg [alt: Продава тристаен апартамент в комплек “Арена 1”, Св.Влас]",
-        "https://makler-realty.com/wp-content/uploads/2025/11/933-1-72x72.jpg [alt: Тристаен апартамент в Арена 1, Свети Влас]"
+        "https://makler-realty.com/wp-content/uploads/2025/11/933-1.jpg [alt: Тристаен апартамент в Арена 1, Свети Влас]",
+        "https://makler-realty.com/wp-content/uploads/2025/11/933-2.jpg [alt: Продава тристаен апартамент в комплек “Арена 1”, Св.Влас]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3256,11 +3259,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава вила в Малешевска планина]",
         "https://makler-realty.com/wp-content/uploads/2025/03/870-3-680x510.jpg [alt: Продава вила в Малешевска планина]",
-        "https://makler-realty.com/wp-content/uploads/2025/03/870-3-72x72.jpg [alt: villa for sale in the mountains. Blagoevgrad region]"
+        "https://makler-realty.com/wp-content/uploads/2025/03/870-3.jpg [alt: villa for sale in the mountains. Blagoevgrad region]",
+        "https://makler-realty.com/wp-content/uploads/2025/03/870-1.jpg [alt: villa for sale in the mountains. Blagoevgrad region]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3286,11 +3289,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 18,
+      "public_gallery_assets": 17,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент под наем в Сандански]",
         "https://makler-realty.com/wp-content/uploads/2020/06/760-1-680x510.jpg [alt: Двустаен апартамент под наем в Сандански]",
-        "https://makler-realty.com/wp-content/uploads/2020/06/760-1-72x72.jpg [alt: Двустаен апартамент под наем в Сандански]"
+        "https://makler-realty.com/wp-content/uploads/2020/06/760-1.jpg [alt: Двустаен апартамент под наем в Сандански]",
+        "https://makler-realty.com/wp-content/uploads/2020/06/760-2.jpg [alt: Двустаен апартамент под наем в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3316,11 +3319,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 11,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент под наем в комплекс Медите]",
         "https://makler-realty.com/wp-content/uploads/2018/04/651-7-680x510.jpg [alt: Апартамент под наем в комплекс Медите]",
-        "https://makler-realty.com/wp-content/uploads/2018/04/651-11-72x72.jpg [alt: Апартамент под наем в комплекс Медите]"
+        "https://makler-realty.com/wp-content/uploads/2018/04/651-11.jpg [alt: Апартамент под наем в комплекс Медите]",
+        "https://makler-realty.com/wp-content/uploads/2018/04/651-10.jpg [alt: Апартамент под наем в комплекс Медите]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3346,11 +3349,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 23,
+      "public_gallery_assets": 22,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава работещ бизнес – производство на пелети]",
         "https://makler-realty.com/wp-content/uploads/2024/02/444-14-680x510.jpg [alt: Продава работещ бизнес – производство на пелети]",
-        "https://makler-realty.com/wp-content/uploads/2024/02/444-1-72x72.jpg [alt: working business for sale - pellet production]"
+        "https://makler-realty.com/wp-content/uploads/2024/02/444-1.jpg [alt: working business for sale - pellet production]",
+        "https://makler-realty.com/wp-content/uploads/2024/02/444-2.jpg [alt: working business for sale - pellet production]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3378,9 +3381,8 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 2,
+      "public_gallery_assets": 1,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Земеделска земя в землището на с.Джигурово]",
         "https://makler-realty.com/wp-content/uploads/2025/06/20780.127.427-680x365.jpg [alt: Земеделска земя в землището на с.Джигурово]"
       ],
       "missing_alt_text_assets": 0,
@@ -3407,11 +3409,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 21,
+      "public_gallery_assets": 20,
       "public_gallery_sample": [
-        "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава тристаен апартамент в Парк Хотел Пирин]",
         "https://makler-realty.com/wp-content/uploads/2018/03/778-dron-680x383.jpg [alt: Продава тристаен апартамент в Парк Хотел Пирин]",
-        "https://makler-realty.com/wp-content/uploads/2018/03/778-3-1-72x72.jpg [alt: Продава тристаен апартамент в Парк Хотел Пирин]"
+        "https://makler-realty.com/wp-content/uploads/2018/03/778-3-1.jpg [alt: Продава тристаен апартамент в Парк Хотел Пирин]",
+        "https://makler-realty.com/wp-content/uploads/2018/03/778-1-1.jpg [alt: Продава тристаен апартамент в Парк Хотел Пирин]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3437,11 +3439,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 15,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Апартаменты в Парк отеле Пирин — г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Апартаменты в Парк отеле Пирин — г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Апартаменты в Парк отеле Пирин — г.Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-1.jpg [alt: Апартаменты в Парк отеле Пирин — г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-2.jpg [alt: Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-3.jpg [alt: Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3467,11 +3469,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 19,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Аренда панорамной двушки в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Аренда панорамной двушки в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Аренда панорамной двушки в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/07/760-1-680x510.jpg [alt: Аренда панорамной двушки в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/07/760-2-680x510.jpg [alt: Аренда панорамной двушки в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/07/760-4-680x510.jpg [alt: Аренда панорамной двушки в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3497,11 +3499,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Земля и здания на продажу недалеко от Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Земля и здания на продажу недалеко от Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Земля и здания на продажу недалеко от Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2021/03/791-1-680x383.jpg [alt: Земля и здания на продажу недалеко от Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2021/03/791-2-680x383.jpg [alt: Земля и здания на продажу недалеко от Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2021/03/791-3-680x383.jpg [alt: Земля и здания на продажу недалеко от Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3527,11 +3529,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Дом в деревне Спатово, муниципалитет Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Дом в деревне Спатово, муниципалитет Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Дом в деревне Спатово, муниципалитет Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2026/02/927-2-680x510.jpg [alt: Дом в деревне Спатово, муниципалитет Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/927-1-680x510.jpg [alt: Дом в деревне Спатово, муниципалитет Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/927-3-680x510.jpg [alt: Дом в деревне Спатово, муниципалитет Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3557,11 +3559,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Дом на продажу в селе Петрово, муниципалитет Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Дом на продажу в селе Петрово, муниципалитет Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Дом на продажу в селе Петрово, муниципалитет Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2026/02/935-2-680x510.jpg [alt: Дом на продажу в селе Петрово, муниципалитет Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/935-1-680x510.jpg [alt: Дом на продажу в селе Петрово, муниципалитет Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/935-3-680x510.jpg [alt: Дом на продажу в селе Петрово, муниципалитет Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3587,11 +3589,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 24,
+      "public_gallery_assets": 19,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Трехкомнатная квартира в Парк Отеле Пирин — Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Трехкомнатная квартира в Парк Отеле Пирин — Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Трехкомнатная квартира в Парк Отеле Пирин — Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2018/03/778-dron.jpg [alt: Трехкомнатная квартира в Парк Отеле Пирин — Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-9.jpg [alt: Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/191-5.jpg [alt: Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3617,11 +3619,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 27,
+      "public_gallery_assets": 23,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа отеля с рестораном в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа отеля с рестораном в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа отеля с рестораном в г.Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2015/03/382-dron-4-800x600.jpg [alt: Продажа отеля с рестораном в г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2015/03/382-4-680x510.jpg [alt: Продажа отеля с рестораном в г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2015/03/382-5-680x510.jpg [alt: Продажа отеля с рестораном в г.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3632,27 +3634,25 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0121",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0121",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Офис на продажу в Сандански",
       "location": "Sandanski",
       "description": "Офис находится в новом здании, рядом с Интер Отелем Сандански. Офис на 3-х уровнях, общей площадью 315 кв.м. Первый этаж площадью 120 квадратных метров, состоит из большой комнаты, туалета, 2 складских помещений и имеет выход во двор. Уровень над цокольным этажом, площадью 58 кв.м., состоит из одной комнаты с туалетом. На этот уровень можно подняться по внутренней лестнице через комнату на первом этаже. Уровень ниже первого этажа — площадь 136 м2 Офис предлагается с полной отделкой, со всеми отделочными работами. В стоимость офиса входят идеальные части участка, на котором он построен, а именно 450 м2, а также место для парковки во дворе.",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 128000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
-      "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Офис на продажу в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Офис на продажу в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Офис на продажу в Сандански]"
-      ],
+      "public_gallery_assets": 0,
+      "public_gallery_sample": [],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -3677,11 +3677,11 @@
       "area_sqm": null,
       "bedrooms": 4,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 46,
+      "public_gallery_assets": 30,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продается особняк в районе города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продается особняк в районе города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продается особняк в районе города Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2023/12/873-10-800x600.jpeg [alt: Продается особняк в районе города Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2023/12/873-10.jpeg [alt: продается особняк в районе г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2023/12/873-14.jpeg [alt: продается особняк в районе г.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3707,11 +3707,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продается производственное здание oколо г. Петрич]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продается производственное здание oколо г. Петрич]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продается производственное здание oколо г. Петрич]"
+        "https://makler-realty.ru/wp-content/uploads/2019/03/699-dron-5-1000x563.jpg [alt: Продается производственное здание oколо г. Петрич]",
+        "https://makler-realty.ru/wp-content/uploads/2019/03/699-dron-6.jpg [alt: Продается производственное здание oколо г. Петрич]",
+        "https://makler-realty.ru/wp-content/uploads/2019/03/699-dron-7.jpg [alt: Продается производственное здание oколо г. Петрич]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3737,11 +3737,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 26,
+      "public_gallery_assets": 21,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продается элитный дом в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продается элитный дом в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продается элитный дом в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2014/10/400-4.jpg [alt: Продается элитный дом в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2014/10/400-19.jpg [alt: Продается элитный дом в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2014/10/400-18.jpg [alt: Продается элитный дом в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3767,11 +3767,11 @@
       "area_sqm": null,
       "bedrooms": 4,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа большого дома недалеко от города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа большого дома недалеко от города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа большого дома недалеко от города Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2025/06/890-3-800x600.jpg [alt: Продажа большого дома недалеко от города Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/890-3.jpg [alt: Продажа большого дома недалеко от города Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/890-4.jpg [alt: Продажа большого дома недалеко от города Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3797,11 +3797,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 7,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа большого, панорамного участка в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа большого, панорамного участка в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа большого, панорамного участка в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/01/734-dron-1000x562.jpg [alt: Продажа большого, панорамного участка в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/01/734-dron-2.jpg [alt: Продажа большого, панорамного участка в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/01/734-dron.jpg [alt: Продажа большого, панорамного участка в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3827,11 +3827,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа большого участка рядом с мин.водой]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа большого участка рядом с мин.водой]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа большого участка рядом с мин.водой]"
+        "https://makler-realty.ru/wp-content/uploads/2016/01/499-1000x562.jpg [alt: Продажа большого участка рядом с мин.водой]",
+        "https://makler-realty.ru/wp-content/uploads/2016/01/499-map.jpg [alt: участок рядом с минеральной водой]",
+        "https://makler-realty.ru/wp-content/uploads/2016/01/499-скица-хотово.jpg [alt: Продажа большого участка рядом с мин.водой]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3857,11 +3857,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа виноградника рядом с Сандански. Сорт Мерло]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа виноградника рядом с Сандански. Сорт Мерло]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа виноградника рядом с Сандански. Сорт Мерло]"
+        "https://makler-realty.ru/wp-content/uploads/2019/02/670-1-800x600.jpg [alt: Продажа виноградника рядом с Сандански. Сорт Мерло]",
+        "https://makler-realty.ru/wp-content/uploads/2019/02/670-1.jpg [alt: Продажа виноградника рядом с Сандански. Сорт Мерло]",
+        "https://makler-realty.ru/wp-content/uploads/2019/02/670-2.jpg [alt: Продажа виноградника рядом с Сандански. Сорт Мерло]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3887,11 +3887,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа дома в поселке Виногради ( Мелник)]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа дома в поселке Виногради ( Мелник)]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа дома в поселке Виногради ( Мелник)]"
+        "https://makler-realty.ru/wp-content/uploads/2024/02/870-1-800x600.jpeg [alt: Продажа дома в поселке Виногради ( Мелник)]",
+        "https://makler-realty.ru/wp-content/uploads/2024/02/image9.jpeg [alt: продажа нового дома виногради мелник]",
+        "https://makler-realty.ru/wp-content/uploads/2024/02/870-1.jpeg [alt: продажа нового дома виногради мелник]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3917,11 +3917,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 15,
+      "public_gallery_assets": 11,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа дома в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа дома в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа дома в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2018/08/671-new-1-800x600.jpg [alt: Продажа дома в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/08/671-new-1.jpg [alt: продажа дома в паре Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/08/671-new-2.jpg [alt: продажа дома в паре Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3947,11 +3947,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа дома в центре г. Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа дома в центре г. Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа дома в центре г. Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/280-1.jpg [alt: Продажа дома в центре г. Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/280-2.jpg [alt: Продажа дома в центре г. Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/280-3.jpg [alt: Продажа дома в центре г. Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3977,11 +3977,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа дома рядом со СПА-курортом Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа дома рядом со СПА-курортом Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа дома рядом со СПА-курортом Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2025/06/833-new-6-800x600.jpg [alt: Продажа дома рядом со СПА-курортом Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/833-new-6.jpg [alt: Продажа дома рядом со СПА-курортом Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/833-new-5.jpg [alt: Продажа дома рядом со СПА-курортом Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -3992,27 +3992,25 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0133",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0133",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Продажа дома с участком в городе Сандански",
       "location": "Sandanski",
       "description": "Дом построен на участке площадью 417 кв. м. Участок огорожен массивным забором. Участок условно разделён на две части, расположенные на разных уровнях (примерно 2,6 метра по уровн/, что обеспечивает удобный доступ с участка на два отдельных этажа дома /квартира 1 и квартира 2/. Участок в хорошем состоянии, на нём построен гараж на две машины площадью 47,1 кв. м, помещение, используемое как винный погреб, зона отдыха с барбекю и газон. Дом состоит из 3 квартир, которые документально оформленны как отдельные объекты. На нижнем уровне находится квартира площадью 105,2 кв. м. Квартира состоит из гостиной с кухней площадью 37,2 кв.м., комнаты площадью 20,5 кв.м., комнаты площадью 10,5 кв.м., кладовой площадью 5,3 кв.м., ванной комнаты площадью 4,6 кв.м. и коридора площадью 10,6 кв.м. Из квартиры есть прямой выход в ту часть дома, где расположено барбекю. Квартира 2 – 111 кв.м. Квартира",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 594000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
-      "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа дома с участком в городе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа дома с участком в городе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа дома с участком в городе Сандански]"
-      ],
+      "public_gallery_assets": 0,
+      "public_gallery_sample": [],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -4037,11 +4035,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 8,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2019/03/707-1-800x600.jpg [alt: Продажа двухкомнатной квартиры в Парк Oтеле Пирин в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2019/03/707-1.jpg [alt: Продажа двухкомнатной квартиры в Парк Хотел Пирин в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2019/03/707-2.jpg [alt: Продажа двухкомнатной квартиры в Парк Хотел Пирин в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4067,11 +4065,11 @@
       "area_sqm": null,
       "bedrooms": 0,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа меблированной студии в жилом комплексе Сапфир в Банско]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа меблированной студии в жилом комплексе Сапфир в Банско]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа меблированной студии в жилом комплексе Сапфир в Банско]"
+        "https://makler-realty.ru/wp-content/uploads/2026/02/PHOTO-2026-01-22-15-21-29-680x510.jpg [alt: Продажа меблированной студии в жилом комплексе Сапфир в Банско]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/937-1-680x510.jpg [alt: продажа однокомнатной квартиры в Банско]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/937-2-680x510.jpg [alt: продажа однокомнатной квартиры в Банско]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4097,11 +4095,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа недвижимости в центре села Левуново, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа недвижимости в центре села Левуново, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа недвижимости в центре села Левуново, Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2021/07/788-1-680x510.jpg [alt: Продажа недвижимости в центре села Левуново, Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2021/07/788-2-680x510.jpg [alt: Продажа недвижимости в центре села Левуново]",
+        "https://makler-realty.ru/wp-content/uploads/2021/07/788-3-680x510.jpg [alt: Продажа недвижимости в центре села Левуново, Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4112,26 +4110,26 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0137",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0137",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Продажа недвижимости в селе Ласкарево, г.Сандански",
       "location": "Sandanski",
       "description": "Объект расположен в новом районе села Ласкарево, все соседние дома собственность иностранцев /немцы, русские, бельгийцы, англичане/. Потрясающие виды во все стороны.",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": null,
       "price_on_request": true,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 1,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа недвижимости в селе Ласкарево, г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа недвижимости в селе Ласкарево, г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа недвижимости в селе Ласкарево, г.Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2024/03/laskarevo-680x382.jpg [alt: Продажа недвижимости в селе Ласкарево, г.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4157,11 +4155,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа новостройки в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа новостройки в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа новостройки в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2025/06/2-1000x563.jpg [alt: Продажа новостройки в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/2-1.jpg [alt: новостройка сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/E2_4-1.jpg [alt: новостройка сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4187,11 +4185,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа производственной базы около Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа производственной базы около Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа производственной базы около Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/05/750-outside-1-800x600.jpg [alt: Продажа производственной базы около Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/750-outside-3.jpg [alt: Продажа производственной базы около Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/750-outside-4.jpg [alt: Продажа производственной базы около Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4217,11 +4215,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 33,
+      "public_gallery_assets": 29,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа СПА Отеля в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа СПА Отеля в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа СПА Отеля в г.Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/01/739-32-900x600.jpg [alt: Продажа СПА Отеля в г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/01/739-33.jpg [alt: Продажа СПА Отеля в г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/01/739-1.jpg [alt: Продажа СПА Отеля в г.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4247,11 +4245,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка в поселке Дербере, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка в поселке Дербере, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка в поселке Дербере, Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2018/01/645-1.jpg [alt: Продажа участка в поселке Дербере, Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/01/645-2.jpg [alt: Продажа участка в поселке Дербере, Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/01/645-3.jpg [alt: Продажа участка в поселке Дербере, Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4277,11 +4275,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": true,
-      "public_gallery_assets": 12,
+      "public_gallery_assets": 7,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2025/10/920-1.jpg [alt: Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/10/920-3.jpg [alt: Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2025/10/920-4.jpg [alt: Продажа участка со старым домом в поселке Лиляново — 6 км от г.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4307,11 +4305,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 13,
+      "public_gallery_assets": 9,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка на международной трассе София — Салоники]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка на международной трассе София — Салоники]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка на международной трассе София — Салоники]"
+        "https://makler-realty.ru/wp-content/uploads/2019/10/719-1-800x600.jpg [alt: Продажа участка на международной трассе София — Салоники]",
+        "https://makler-realty.ru/wp-content/uploads/2019/10/719-1.jpg [alt: Продажа участка на международной трассе София - Салоники]",
+        "https://makler-realty.ru/wp-content/uploads/2019/10/719-2.jpg [alt: Продажа участка на международной трассе София - Салоники]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4337,11 +4335,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка с видом на Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка с видом на Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка с видом на Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/05/749-1-680x383.jpg [alt: Продажа участка с видом на Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/749-3-680x383.jpg [alt: Продажа участка с видом на Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/749-2-680x383.jpg [alt: Продажа участка с видом на Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4352,27 +4350,25 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0145",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0145",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Продажа участка 2 гка в районе г.Сандански",
       "location": "Sandanski",
       "description": "Продажа участка 2 гка в районе г.Сандански. Общая площадь участка 21 400 кв.м., огорожен, подведен кабель для електричества, цена 25 000 Евро",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 25000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
-      "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка 2 гка в районе г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка 2 гка в районе г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка 2 гка в районе г.Сандански]"
-      ],
+      "public_gallery_assets": 0,
+      "public_gallery_sample": [],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -4382,27 +4378,25 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0146",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0146",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Продажа ресторана с отелем в г.Сандански",
       "location": "Sandanski",
       "description": "Продажа ресторана с отелем в г.Сандански. Недвижимость в Сандански",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 550000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 4,
-      "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа ресторана с отелем в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа ресторана с отелем в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа ресторана с отелем в г.Сандански]"
-      ],
+      "public_gallery_assets": 0,
+      "public_gallery_sample": [],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
     },
@@ -4427,11 +4421,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 18,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Посуточная аренда в центре города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Посуточная аренда в центре города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Посуточная аренда в центре города Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2018/07/662-800x600.jpg [alt: Посуточная аренда в центре города Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/07/662.jpg [alt: аренда квартиры в центре Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/07/662-1.jpg [alt: аренда квартиры в центре Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4457,11 +4451,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 17,
+      "public_gallery_assets": 13,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Сдается дом в селе Виногради, 3 км от Мельника]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Сдается дом в селе Виногради, 3 км от Мельника]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Сдается дом в селе Виногради, 3 км от Мельника]"
+        "https://makler-realty.ru/wp-content/uploads/2024/02/870-2-800x600.jpeg [alt: Сдается дом в селе Виногради, 3 км от Мельника]",
+        "https://makler-realty.ru/wp-content/uploads/2024/02/870-11.jpeg [alt: Сдается дом в селе Виногради, 3 км от Мельника]",
+        "https://makler-realty.ru/wp-content/uploads/2024/02/870-10.jpeg [alt: Сдается дом в селе Виногради, 3 км от Мельника]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4487,11 +4481,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 16,
+      "public_gallery_assets": 11,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Сдается производственное помещение в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Сдается производственное помещение в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Сдается производственное помещение в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/05/756-19-680x510.jpg [alt: Сдается производственное помещение в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/756-2-680x510.jpg [alt: Сдается производственное помещение в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/756-5-680x510.jpg [alt: Сдается производственное помещение в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4517,11 +4511,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 8,
+      "public_gallery_assets": 3,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Сельхоз земля в районе деревни Лешница, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Сельхоз земля в районе деревни Лешница, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Сельхоз земля в районе деревни Лешница, Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/05/744-1-680x383.jpg [alt: Сельхоз земля в районе деревни Лешница, Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/744-2-680x383.jpg [alt: Сельхоз земля в районе деревни Лешница, Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2020/05/744-2-680x383-1.jpg [alt: Сельхоз земля в районе деревни Лешница, Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4547,11 +4541,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продается теплица в городе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продается теплица в городе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продается теплица в городе Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2018/07/657-11-680x510.jpg [alt: Продается теплица в городе Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/07/657-5-1-680x510.jpg [alt: продажа теплицы в сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2018/07/657-3-1-680x510.jpg [alt: Продается теплица в городе Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4577,11 +4571,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Участок в поселке Лешница — район города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Участок в поселке Лешница — район города Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Участок в поселке Лешница — район города Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/296-5.jpg [alt: Участок в поселке Лешница — район города Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/296-1.jpg [alt: Участок в поселке Лешница — район города Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/296-2.jpg [alt: Участок в поселке Лешница — район города Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4607,11 +4601,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/286-dron-800x600.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/286-1.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/286-2.jpg [alt: Участок в поселке Струмяни. Недвижимость в районе Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4637,11 +4631,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 14,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка в поселке Струмяни. Недвижимость в районе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка в поселке Струмяни. Недвижимость в районе Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка в поселке Струмяни. Недвижимость в районе Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2020/01/470-dron-new-1000x563.jpg [alt: Продажа участка в поселке Струмяни. Недвижимость в районе Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2015/09/470.jpg [alt: продам участок в струмяни]",
+        "https://makler-realty.ru/wp-content/uploads/2015/09/470-1.jpg [alt: продам участок в струмяни]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4652,26 +4646,26 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0155",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0155",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Участок под застройку в Сандански",
       "location": "Sandanski",
       "description": "Участок под застройку в Сандански",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 76580,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 1,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Участок под застройку в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Участок под застройку в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Участок под застройку в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/232.jpg [alt: Участок под застройку в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4697,11 +4691,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Участок под застройку в поселке Ласкарево / Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Участок под застройку в поселке Ласкарево / Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Участок под застройку в поселке Ласкарево / Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2014/07/362-4.jpg [alt: Участок под застройку в поселке Ласкарево / Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2014/07/362-1.jpg [alt: Продажа участка в поселке Ласкарево - Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2014/07/362-2.jpg [alt: Продажа участка в поселке Ласкарево - Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4712,26 +4706,26 @@
       "source_domain": "makler-realty.ru",
       "target_path": "/ru/properties/MS-CRAWL-0157",
       "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0157",
-      "review_status": "needs_facts_review",
+      "review_status": "needs_facts_and_media_review",
       "required_editor_fields": [
-        "area_sqm"
+        "area_sqm",
+        "public_gallery"
       ],
       "title": "Участок под строительство отеля",
       "location": "Sandanski",
       "description": "Участок под строительство отеля в Сандански",
       "issues": [
-        "missing_area"
+        "missing_area",
+        "thin_public_gallery"
       ],
       "price_eur": 120000,
       "price_on_request": false,
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 6,
+      "public_gallery_assets": 1,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Участок под строительство отеля]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Участок под строительство отеля]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Участок под строительство отеля]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/74-1.jpg [alt: Участок под строительство отеля]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4757,11 +4751,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 10,
+      "public_gallery_assets": 5,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Участок под строительство]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Участок под строительство]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Участок под строительство]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/46-4.jpg [alt: Участок под строительство]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/46-1.jpg [alt: Участок под строительство]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/46-2.jpg [alt: Участок под строительство]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4787,11 +4781,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 19,
+      "public_gallery_assets": 15,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Центр профилактики, реабилитации и косметических процедур — продажа]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Центр профилактики, реабилитации и косметических процедур — продажа]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Центр профилактики, реабилитации и косметических процедур — продажа]"
+        "https://makler-realty.ru/wp-content/uploads/2025/04/891-2-800x600.jpg [alt: Центр профилактики, реабилитации и косметических процедур — продажа]",
+        "https://makler-realty.ru/wp-content/uploads/2025/04/891-1.jpg [alt: Центр профилактики, реабилитации и косметических процедур — продажа]",
+        "https://makler-realty.ru/wp-content/uploads/2025/04/891-2.jpg [alt: Центр профилактики, реабилитации и косметических процедур — продажа]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4817,11 +4811,11 @@
       "area_sqm": null,
       "bedrooms": 3,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 11,
+      "public_gallery_assets": 6,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2021/04/774-1-1-680x510.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2021/04/774-2-680x510.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2021/04/774-3-680x510.jpg [alt: Этаж дома с земельным участком в селе Левуново, Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4847,11 +4841,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 9,
+      "public_gallery_assets": 4,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Этаж дома с участком в г.Сандански — продажа]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Этаж дома с участком в г.Сандански — продажа]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Этаж дома с участком в г.Сандански — продажа]"
+        "https://makler-realty.ru/wp-content/uploads/2026/02/932-1-680x510.jpg [alt: Этаж дома с участком в г.Сандански — продажа]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/932-2-680x510.jpg [alt: Этаж дома с участком в г.Сандански — продажа]",
+        "https://makler-realty.ru/wp-content/uploads/2026/02/932-3-680x510.jpg [alt: Этаж дома с участком в г.Сандански — продажа]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4877,11 +4871,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 23,
+      "public_gallery_assets": 19,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Aренда двухкомнатной квартиры в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Aренда двухкомнатной квартиры в г.Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Aренда двухкомнатной квартиры в г.Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2019/11/731-4-899x600.jpg [alt: Aренда двухкомнатной квартиры в г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2019/11/731-5.jpg [alt: Aренда двухкомнатной квартиры в г.Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2019/11/731-6.jpg [alt: Aренда двухкомнатной квартиры в г.Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4907,11 +4901,11 @@
       "area_sqm": null,
       "bedrooms": 1,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 18,
+      "public_gallery_assets": 14,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Большая двухкомнатная квартира в аренду в Сандански + гараж]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Большая двухкомнатная квартира в аренду в Сандански + гараж]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Большая двухкомнатная квартира в аренду в Сандански + гараж]"
+        "https://makler-realty.ru/wp-content/uploads/2019/02/696-3-800x600.jpg [alt: Большая двухкомнатная квартира в аренду в Сандански + гараж]",
+        "https://makler-realty.ru/wp-content/uploads/2019/02/696-3.jpg [alt: аренда квартиры в сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2019/02/696-2.jpg [alt: Большая двухкомнатная квартира в аренду в Сандански + гараж]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4937,11 +4931,11 @@
       "area_sqm": null,
       "bedrooms": 2,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 23,
+      "public_gallery_assets": 19,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа трехкомнатной квартиры в Паралия Офринио, Греция]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа трехкомнатной квартиры в Паралия Офринио, Греция]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа трехкомнатной квартиры в Паралия Офринио, Греция]"
+        "https://makler-realty.ru/wp-content/uploads/2025/06/893-1-1000x581.jpg [alt: Продажа трехкомнатной квартиры в Паралия Офринио, Греция]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/plan-ofrinio-680x650.jpg [alt: Продажа трехкомнатной квартиры в Паралия Офринио, Греция]",
+        "https://makler-realty.ru/wp-content/uploads/2025/06/893-1.jpg [alt: Продажа трехкомнатной квартиры в Паралия Офринио, Греция]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0
@@ -4967,11 +4961,11 @@
       "area_sqm": null,
       "bedrooms": null,
       "bedrooms_not_applicable": false,
-      "public_gallery_assets": 15,
+      "public_gallery_assets": 10,
       "public_gallery_sample": [
-        "https://makler-realty.ru/wp-content/uploads/2013/11/860768-8021-taxi-e1466493831316.jpg [alt: Продажа участка в Струмяни. Недвижимость в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/taxi-sandanski-e1466493648783.jpg [alt: Продажа участка в Струмяни. Недвижимость в Сандански]",
-        "https://makler-realty.ru/wp-content/uploads/2013/11/домик.jpg [alt: Продажа участка в Струмяни. Недвижимость в Сандански]"
+        "https://makler-realty.ru/wp-content/uploads/2013/11/PHOTO-2025-06-03-13-42-17_1.jpg [alt: Продажа участка в Струмяни. Недвижимость в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/PHOTO-2025-06-03-13-42-17_2.jpg [alt: Продажа участка в Струмяни. Недвижимость в Сандански]",
+        "https://makler-realty.ru/wp-content/uploads/2013/11/PHOTO-2025-06-03-13-42-17.jpg [alt: Продажа участка в Струмяни. Недвижимость в Сандански]"
       ],
       "missing_alt_text_assets": 0,
       "review_gated_assets": 0

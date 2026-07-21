@@ -75,6 +75,9 @@ test("standalone consent workspace exposes current privacy-safe state and record
     const page = await dispatchHttp(app, { url: "/admin/consents?locale=en", headers: HEADERS });
     assert.equal(page.status, 200);
     assert.match(page.body, /data-react-admin-ui="consents"/);
+    assert.match(page.body, /data-consent-row="true"/);
+    assert.match(page.body, /data-consent-column="subject" data-label="Enquiry or subscription"/);
+    assert.match(page.body, /data-consent-column="action" data-label="Action"/);
     assert.match(page.body, /saved-search-consent-1/);
     assert.doesNotMatch(page.body, /private-buyer@example\.test/);
     const response = await dispatchHttp(app, {

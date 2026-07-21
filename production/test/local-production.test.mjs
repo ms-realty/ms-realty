@@ -28,7 +28,23 @@ test("local Docker compose persists preview CRM and CMS state in a named local-o
   ];
   for (const line of requiredPaths) assert.ok(compose.includes(line), `missing ${line}`);
   assert.match(compose, /- local-dev-app-data:\/runtime-data/);
-  assert.match(compose, /if \[ ! -f \/runtime-data\/locales\.json \]; then cp \/app\/locales\/registry\.json \/runtime-data\/locales\.json; fi/);
+  assert.match(compose, /seed_runtime_file\(\)/);
+  const committedBaselines = [
+    ["/app/locales/registry.json", "/runtime-data/locales.json"],
+    ["/app/production/data/listing-edits.jsonl", "/runtime-data/listing-edits.jsonl"],
+    ["/app/production/data/broker-contacts.jsonl", "/runtime-data/broker-contacts.jsonl"],
+    ["/app/production/data/translation-tasks.jsonl", "/runtime-data/translation-tasks.jsonl"],
+    ["/app/production/data/tour-approvals.jsonl", "/runtime-data/tour-approvals.jsonl"],
+    ["/app/production/data/slug-history.jsonl", "/runtime-data/slug-history.jsonl"],
+    ["/app/production/data/redirect-approvals.jsonl", "/runtime-data/redirect-approvals.jsonl"],
+    ["/app/production/data/deployable-redirects.json", "/runtime-data/deployable-redirects.json"],
+  ];
+  for (const [source, target] of committedBaselines) {
+    assert.ok(compose.includes(`seed_runtime_file ${source} ${target}`), `missing runtime baseline ${target}`);
+  }
+  assert.match(compose, /if \[ ! -e "\$\$target_file" \] && \[ -f "\$\$source_file" \]/);
+  assert.doesNotMatch(compose, /seed_runtime_file \/app\/production\/data\/lead-ledger\.jsonl/);
+  assert.doesNotMatch(compose, /seed_runtime_file \/app\/production\/data\/events\.jsonl/);
   assert.match(compose, /runtime-init:\n[\s\S]*local-dev-app-data:\n/);
   assert.match(compose, /# Local preview only: JSONL CRM\/CMS state survives app recreate, not production deployment\./);
 });

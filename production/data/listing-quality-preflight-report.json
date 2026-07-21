@@ -23,11 +23,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 18,
+        "public_gallery_assets": 17,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
           "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-          "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]"
+          "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+          "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]"
         ]
       },
       {
@@ -35,16 +35,17 @@
         "target_path": "/bg/imoti/MS-CRAWL-0002",
         "editor_path": "/admin/listings/edit?listingId=MS-CRAWL-0002",
         "issues": [
-          "missing_area"
+          "missing_area",
+          "thin_public_gallery"
         ],
         "required_editor_fields": [
-          "area_sqm"
+          "area_sqm",
+          "public_gallery"
         ],
-        "public_gallery_assets": 3,
+        "public_gallery_assets": 2,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]",
           "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]",
-          "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-72x72.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]"
+          "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1.jpg [alt: Апартаменти в парка на Сандански. Затворен комплекс]"
         ]
       },
       {
@@ -57,11 +58,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 15,
+        "public_gallery_assets": 14,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
           "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
-          "https://makler-realty.com/wp-content/uploads/2025/10/922-1-72x72.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]"
+          "https://makler-realty.com/wp-content/uploads/2025/10/922-1.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]",
+          "https://makler-realty.com/wp-content/uploads/2025/10/922-2.jpg [alt: Тристаен апартамент под наем в Сандански + паркомясто]"
         ]
       },
       {
@@ -74,11 +75,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 9,
+        "public_gallery_assets": 8,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
           "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
-          "https://makler-realty.com/wp-content/uploads/2025/08/905-1-72x72.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]"
+          "https://makler-realty.com/wp-content/uploads/2025/08/905-1.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/08/905-2.jpg [alt: Апартамент под наем, ул.Банска 2, гр.Сандански]"
         ]
       },
       {
@@ -91,11 +92,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 9,
+        "public_gallery_assets": 8,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Апартамент под наем в гр.Сандански]",
           "https://makler-realty.com/wp-content/uploads/2025/07/899-2-680x510.jpg [alt: Апартамент под наем в гр.Сандански]",
-          "https://makler-realty.com/wp-content/uploads/2025/07/899-1-72x72.jpg [alt: Апартамент под наем в гр.Сандански]"
+          "https://makler-realty.com/wp-content/uploads/2025/07/899-1.jpg [alt: Апартамент под наем в гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/07/899-2.jpg [alt: Апартамент под наем в гр.Сандански]"
         ]
       },
       {
@@ -125,11 +126,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 7,
+        "public_gallery_assets": 6,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
           "https://makler-realty.com/wp-content/uploads/2025/09/911-2-680x514.jpg [alt: Продава двустаен апартамент в гр.Сандански]",
-          "https://makler-realty.com/wp-content/uploads/2025/09/911-2-72x72.jpg [alt: продажба на апартаменти в гр.Сандански]"
+          "https://makler-realty.com/wp-content/uploads/2025/09/911-2.jpg [alt: продажба на апартаменти в гр.Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2025/09/911-5.jpg [alt: продажба на апартаменти в гр.Сандански]"
         ]
       },
       {
@@ -142,11 +143,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 18,
+        "public_gallery_assets": 17,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
           "https://makler-realty.com/wp-content/uploads/2023/06/662-4-680x510.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
-          "https://makler-realty.com/wp-content/uploads/2023/06/662-4-72x72.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
+          "https://makler-realty.com/wp-content/uploads/2023/06/662-4.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]",
+          "https://makler-realty.com/wp-content/uploads/2018/07/662.jpg [alt: Двустаен апартамент в центъра на Сандански – наем]"
         ]
       },
       {
@@ -159,11 +160,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 9,
+        "public_gallery_assets": 8,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
           "https://makler-realty.com/wp-content/uploads/2026/06/957-1-680x510.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
-          "https://makler-realty.com/wp-content/uploads/2026/06/957-1-72x72.jpg [alt: Двустаен апартамент под наем в парка на Сандански]"
+          "https://makler-realty.com/wp-content/uploads/2026/06/957-1.jpg [alt: Двустаен апартамент под наем в парка на Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2026/06/957-8.jpg [alt: Двустаен апартамент под наем в парка на Сандански]"
         ]
       },
       {
@@ -176,11 +177,11 @@
         "required_editor_fields": [
           "area_sqm"
         ],
-        "public_gallery_assets": 17,
+        "public_gallery_assets": 16,
         "public_gallery_sample": [
-          "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
           "https://makler-realty.com/wp-content/uploads/2026/06/987-main-1-510x680.jpg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
-          "https://makler-realty.com/wp-content/uploads/2024/05/987-16-72x72.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]"
+          "https://makler-realty.com/wp-content/uploads/2024/05/987-16.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]",
+          "https://makler-realty.com/wp-content/uploads/2024/05/987-14.jpeg [alt: Двустаен апартамент в идеалния център на гр. Сандански]"
         ]
       }
     ]
@@ -200,7 +201,7 @@
       "missing_description": 0,
       "media_review_pending": 0,
       "missing_alt_text": 0,
-      "thin_public_gallery": 7,
+      "thin_public_gallery": 18,
       "tour_review_pending": 0
     }
   },

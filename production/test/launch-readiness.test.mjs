@@ -656,11 +656,11 @@ test("launch readiness stays blocked until production launch blockers are cleare
     editor_path: "/admin/listings/edit?listingId=MS-CRAWL-0001",
     issues: ["missing_area"],
     required_editor_fields: ["area_sqm"],
-    public_gallery_assets: 18,
+    public_gallery_assets: 17,
     public_gallery_sample: [
-      "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
       "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
-      "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+      "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
+      "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg [alt: Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!]",
     ],
   });
   assert.equal(liveGate.status, "blocked");
@@ -677,7 +677,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
   assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {
     id: "listing_quality.thin_public_gallery",
-    count: 7,
+    count: 18,
   });
   assert.ok(report.rollback_plan.length >= 3);
 
@@ -2096,7 +2096,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /MS-CRAWL-0006: area_sqm\|public_gallery \(missing_area\|thin_public_gallery\) \/admin\/listings\/edit\?listingId=MS-CRAWL-0006/);
   assert.match(markdown, /production\/data\/listing-quality-review-packet\.json/);
   assert.match(markdown, /production\/data\/listing-quality-review-draft\.csv/);
-  assert.match(markdown, /listing_quality\.thin_public_gallery: 7/);
+  assert.match(markdown, /listing_quality\.thin_public_gallery: 18/);
   assert.match(markdown, /listing_quality\.missing_area: 165/);
   assert.match(markdown, /MS_REALTY_LISTING_QUALITY_REVIEW_PATH/);
   assert.match(markdown, /npm run listing:preflight:report/);
