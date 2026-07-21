@@ -644,8 +644,12 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   main[data-react-admin-ui] .adm-check,
   main[data-react-admin-ui] label:has(input[type="checkbox"]) { min-height: 44px; align-items: center; }
   .crm-seg a { min-width: 44px; min-height: 44px; justify-content: center; padding-block: 0; }
-  main[data-react-admin-ui="lead-inbox"] a.adm-lead-context,
-  main[data-react-admin-ui="lead-inbox"] .adm-lead-contact__action,
+  main[data-react-admin-ui] a.adm-lead-context,
+  main[data-react-admin-ui] .adm-lead-contact__action,
+  main[data-react-admin-ui] a.crm-mono,
+  main[data-react-admin-ui] a.crm-tbl__primary,
+  .adm-contact-card__leads a,
+  .adm-media-asset__source,
   .adm-note a,
   .adm-seo-sources a { display: inline-flex; min-height: 44px; align-items: center; }
   .crm-top { justify-content: flex-end; gap: var(--space-2); padding-inline: var(--space-4); }
