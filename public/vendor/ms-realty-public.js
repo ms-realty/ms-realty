@@ -209,6 +209,9 @@
     var title = lead.getAttribute("data-lead-title") || lead.textContent.trim();
     var submitText = lead.getAttribute("data-lead-submit") || title;
     var titleNode = dialog.querySelector("[data-enquiry-title]");
+    var helpNode = dialog.querySelector("[data-enquiry-help]");
+    var nextNode = dialog.querySelector("[data-enquiry-next] p");
+    var intentIcons = dialog.querySelectorAll("[data-enquiry-icon]");
     var submit = form.querySelector("[data-enquiry-submit]");
     var channel = form.elements.contact_preference;
     var channelGroup = form.querySelector("[data-enquiry-channel-group]");
@@ -216,6 +219,7 @@
     var viewingFields = form.querySelector("[data-enquiry-viewing-fields]");
     var viewingDate = form.querySelector("[data-enquiry-viewing-date]");
     var viewingTime = form.querySelector("[data-enquiry-viewing-time]");
+    var message = form.querySelector("[data-enquiry-message]");
     var error = form.querySelector("[data-enquiry-error]");
     form.hidden = false;
     dialog.querySelector(".ct-done").hidden = true;
@@ -230,12 +234,18 @@
     if (viewingFields) viewingFields.hidden = intent !== "viewing";
     if (viewingDate) viewingDate.required = intent === "viewing";
     if (viewingTime) viewingTime.required = intent === "viewing";
+    if (viewingDate) viewingDate.min = new Date().toISOString().slice(0, 10);
+    if (message) message.required = intent === "inquiry";
     if (titleNode) titleNode.textContent = title;
+    if (helpNode) helpNode.textContent = form.getAttribute("data-help-" + intent) || "";
+    if (nextNode) nextNode.textContent = form.getAttribute("data-next-" + intent) || "";
+    for (var i = 0; i < intentIcons.length; i += 1) intentIcons[i].hidden = intentIcons[i].getAttribute("data-enquiry-icon") !== intent;
     if (submit) {
       var submitLabel = submit.querySelector("span") || submit;
       submitLabel.textContent = submitText;
     }
     dialog.setAttribute("aria-label", title);
+    dialog.setAttribute("data-enquiry-intent", intent);
     form.setAttribute("data-lead-intent", intent);
     updateEnquiryContact(form);
   }
@@ -295,6 +305,10 @@
       if (!dialog || typeof dialog.showModal !== "function") return;
       configureEnquiryDialog(dialog, lead);
       dialog.showModal();
+      window.requestAnimationFrame(function () {
+        var firstField = dialog.querySelector('input[name="contact.name"]');
+        if (firstField) firstField.focus();
+      });
       return;
     }
     var close = event.target.closest("[data-enquiry-close]");
@@ -320,6 +334,9 @@
     submitJson(form, function () {
       if (isEnquiry) {
         var dialog = document.getElementById("mk-enquiry");
+        var successDetail = dialog.querySelector("[data-enquiry-success-detail]");
+        var nextDetail = form.querySelector("[data-enquiry-next] p");
+        if (successDetail) successDetail.textContent = nextDetail ? nextDetail.textContent : "";
         form.hidden = true;
         dialog.querySelector(".ct-done").hidden = false;
         form.reset();

@@ -277,19 +277,104 @@ function SiteFooter({ chrome, labels }) {
   );
 }
 
-// One listing CTA dialog with explicit intent; the client selects the matching
-// title, submit label, source, and validation (see ui/client.mjs).
+const INTENT_DIALOG_COPY = {
+  bg: {
+    inquiryHelp: "Попитайте за цената, условията или документите на имота.",
+    callbackHelp: "Посочете удобно време и брокер ще ви се обади.",
+    viewingHelp: "Изберете предпочитани дата и час за оглед.",
+    inquiryNext: "Брокер ще прегледа въпроса и ще отговори по избрания канал.",
+    callbackNext: "Брокер ще потвърди часа преди обаждането.",
+    viewingNext: "Това е заявка; брокер ще потвърди наличността и часа.",
+  },
+  en: {
+    inquiryHelp: "Ask about the price, terms, or property documents.",
+    callbackHelp: "Tell us when you are free and a broker will call.",
+    viewingHelp: "Choose your preferred date and time for a viewing.",
+    inquiryNext: "A broker will review your question and reply through your chosen channel.",
+    callbackNext: "A broker will confirm the time before calling.",
+    viewingNext: "This is a request; a broker will confirm availability and timing.",
+  },
+  de: {
+    inquiryHelp: "Fragen Sie nach Preis, Konditionen oder Objektunterlagen.",
+    callbackHelp: "Nennen Sie eine passende Zeit und ein Makler ruft Sie an.",
+    viewingHelp: "Wählen Sie Ihren Wunschtermin für die Besichtigung.",
+    inquiryNext: "Ein Makler prüft Ihre Frage und antwortet über den gewählten Kanal.",
+    callbackNext: "Ein Makler bestätigt den Zeitpunkt vor dem Anruf.",
+    viewingNext: "Dies ist eine Anfrage; ein Makler bestätigt Verfügbarkeit und Termin.",
+  },
+  nl: {
+    inquiryHelp: "Vraag naar de prijs, voorwaarden of woningdocumenten.",
+    callbackHelp: "Geef aan wanneer u kunt en een makelaar belt u terug.",
+    viewingHelp: "Kies uw voorkeursdatum en -tijd voor een bezichtiging.",
+    inquiryNext: "Een makelaar beoordeelt uw vraag en antwoordt via het gekozen kanaal.",
+    callbackNext: "Een makelaar bevestigt het tijdstip vóór het gesprek.",
+    viewingNext: "Dit is een aanvraag; een makelaar bevestigt beschikbaarheid en tijd.",
+  },
+  ru: {
+    inquiryHelp: "Спросите о цене, условиях или документах по объекту.",
+    callbackHelp: "Укажите удобное время, и брокер вам позвонит.",
+    viewingHelp: "Выберите желаемые дату и время просмотра.",
+    inquiryNext: "Брокер изучит вопрос и ответит по выбранному каналу.",
+    callbackNext: "Брокер подтвердит время перед звонком.",
+    viewingNext: "Это заявка: брокер подтвердит доступность объекта и время.",
+  },
+  el: {
+    inquiryHelp: "Ρωτήστε για την τιμή, τους όρους ή τα έγγραφα του ακινήτου.",
+    callbackHelp: "Πείτε μας πότε σας εξυπηρετεί και θα σας καλέσει μεσίτης.",
+    viewingHelp: "Επιλέξτε ημερομηνία και ώρα προτίμησης για την επίσκεψη.",
+    inquiryNext: "Μεσίτης θα εξετάσει την ερώτηση και θα απαντήσει από το κανάλι που επιλέξατε.",
+    callbackNext: "Μεσίτης θα επιβεβαιώσει την ώρα πριν από την κλήση.",
+    viewingNext: "Πρόκειται για αίτημα· μεσίτης θα επιβεβαιώσει διαθεσιμότητα και ώρα.",
+  },
+  he: {
+    inquiryHelp: "שאלו על המחיר, התנאים או מסמכי הנכס.",
+    callbackHelp: "ציינו מתי נוח לכם ומתווך יחזור אליכם.",
+    viewingHelp: "בחרו תאריך ושעה מועדפים לביקור בנכס.",
+    inquiryNext: "מתווך יבדוק את השאלה וישיב בערוץ שבחרתם.",
+    callbackNext: "מתווך יאשר את השעה לפני השיחה.",
+    viewingNext: "זו בקשה; מתווך יאשר את זמינות הנכס ואת השעה.",
+  },
+};
+
+// One implementation with three explicit task states. Each state has its own
+// context, fields, validation, and confirmation while sharing the lead schema.
 function EnquiryDialog({ page, labels, copy }) {
+  const intentCopy = INTENT_DIALOG_COPY[page.locale] || INTENT_DIALOG_COPY.en;
+  const facts = page.kind === "listing" ? page.body?.facts || {} : {};
+  const propertyTitle = page.kind === "listing" ? page.body?.h1 || "" : "";
+  const propertyMeta = [facts.location, price(facts.price_eur, labels)].filter(Boolean).join(" · ");
   return h(
     "dialog",
-    { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-label": labels.inquiry },
+    { id: "mk-enquiry", className: "ct-modal mk-enquiry", "aria-label": labels.inquiry, "data-enquiry-intent": "inquiry" },
     h(
       "form",
-      { method: "post", action: "/api/leads", className: "ct-form", "data-enquiry-form": "true" },
+      {
+        method: "post",
+        action: "/api/leads",
+        className: "ct-form",
+        "data-enquiry-form": "true",
+        "data-help-inquiry": intentCopy.inquiryHelp,
+        "data-help-callback": intentCopy.callbackHelp,
+        "data-help-viewing": intentCopy.viewingHelp,
+        "data-next-inquiry": intentCopy.inquiryNext,
+        "data-next-callback": intentCopy.callbackNext,
+        "data-next-viewing": intentCopy.viewingNext,
+      },
       h(
         "div",
         { className: "ct-modal__hd" },
-        h("div", null, h("h2", { "data-enquiry-title": "true" }, labels.inquiry)),
+        h(
+          "div",
+          { className: "mk-enquiry__heading" },
+          h(
+            "span",
+            { className: "mk-enquiry__intent-icon", "aria-hidden": "true" },
+            h("span", { "data-enquiry-icon": "inquiry" }, h(Icon, { name: "message-circle", size: 21 })),
+            h("span", { "data-enquiry-icon": "callback", hidden: true }, h(Icon, { name: "phone", size: 21 })),
+            h("span", { "data-enquiry-icon": "viewing", hidden: true }, h(Icon, { name: "calendar", size: 21 })),
+          ),
+          h("div", null, h("h2", { "data-enquiry-title": "true" }, labels.inquiry), h("p", { "data-enquiry-help": "true" }, intentCopy.inquiryHelp)),
+        ),
         h(
           "button",
           { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-enquiry-close": "true", "aria-label": copy.close },
@@ -301,6 +386,14 @@ function EnquiryDialog({ page, labels, copy }) {
       h("input", { type: "hidden", name: "leadType", defaultValue: "buyer" }),
       h("input", { type: "hidden", name: "language", defaultValue: page.locale }),
       h("input", { type: "hidden", name: "listingReference", defaultValue: "" }),
+      propertyTitle
+        ? h(
+            "aside",
+            { className: "mk-enquiry__property", "data-enquiry-property": "true" },
+            h("div", null, h("strong", null, propertyTitle), h("span", null, propertyMeta)),
+            h("code", null, facts.id || ""),
+          )
+        : null,
       h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
       h(
         "label",
@@ -342,7 +435,13 @@ function EnquiryDialog({ page, labels, copy }) {
           h("input", { name: "request_details.viewing_time", type: "time", "data-enquiry-viewing-time": "true" }),
         ),
       ),
-      h("label", null, labels.message, h("textarea", { name: "message" })),
+      h("label", null, labels.message, h("textarea", { name: "message", "data-enquiry-message": "true" })),
+      h(
+        "div",
+        { className: "mk-enquiry__next", "data-enquiry-next": "true" },
+        h(Icon, { name: "shield-check", size: 18 }),
+        h("p", null, intentCopy.inquiryNext),
+      ),
       h(Btn, { type: "submit", variant: "accent", size: "lg", full: true, iconStart: "send", "data-enquiry-submit": "true" }, labels.inquiry),
     ),
     h(
@@ -350,6 +449,7 @@ function EnquiryDialog({ page, labels, copy }) {
       { className: "ct-done", hidden: true },
       h("div", { className: "ct-done__ic" }, h(Icon, { name: "check", size: 30, strokeWidth: 2.5 })),
       h("h2", null, copy.requestSent),
+      h("p", { "data-enquiry-success-detail": "true" }),
       h(Btn, { variant: "primary", "data-enquiry-close": "true" }, copy.close),
     ),
   );
@@ -1112,7 +1212,7 @@ function ListingBody({ page }) {
       );
     });
 
-  const primaryIcons = ["calendar", "phone"];
+  const primaryIcons = { inquiry: "message-circle", callback: "phone", request_viewing: "calendar" };
   const primaryActions = h(
     "nav",
     {
@@ -1128,7 +1228,7 @@ function ListingBody({ page }) {
           variant: index === 0 ? "accent" : "secondary",
           size: "lg",
           full: true,
-          iconStart: primaryIcons[index % primaryIcons.length],
+          iconStart: primaryIcons[action.id] || "message-circle",
           "data-endpoint": action.endpoint,
           "data-lead-source": action.payload?.source,
           "data-lead-intent": action.id === "request_viewing" ? "viewing" : action.id,

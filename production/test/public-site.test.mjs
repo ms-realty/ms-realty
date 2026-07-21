@@ -68,6 +68,13 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-enquiry-submit="true"/);
   assert.match(html, /data-enquiry-channel="true"/);
   assert.match(html, /data-enquiry-contact="true"/);
+  assert.match(html, /data-enquiry-icon="inquiry"/);
+  assert.match(html, /data-enquiry-icon="callback" hidden/);
+  assert.match(html, /data-enquiry-icon="viewing" hidden/);
+  assert.match(html, /data-enquiry-property="true"/);
+  assert.match(html, /data-help-inquiry="Спросите о цене/);
+  assert.match(html, /data-next-callback="Брокер подтвердит время/);
+  assert.match(html, /data-enquiry-success-detail="true"/);
   assert.match(html, /data-lead-intent="inquiry"/);
   assert.match(html, /data-lead-intent="callback"/);
   assert.match(html, /data-lead-intent="viewing"/);
