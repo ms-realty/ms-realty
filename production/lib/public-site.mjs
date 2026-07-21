@@ -1801,6 +1801,47 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
   };
 }
 
+function locationPageCopy(localeCode, location) {
+  const copy = {
+    bg: {
+      title: `Имоти в ${location} | MS Realty`,
+      description: `Проверени обяви на MS Realty за имоти в ${location}.`,
+      heading: `Имоти в ${location}`,
+    },
+    en: {
+      title: `Properties in ${location} | MS Realty`,
+      description: `Reviewed MS Realty property listings in ${location}.`,
+      heading: `Properties in ${location}`,
+    },
+    de: {
+      title: `Immobilien in ${location} | MS Realty`,
+      description: `Geprüfte Immobilienangebote von MS Realty in ${location}.`,
+      heading: `Immobilien in ${location}`,
+    },
+    nl: {
+      title: `Vastgoed in ${location} | MS Realty`,
+      description: `Gecontroleerd vastgoedaanbod van MS Realty in ${location}.`,
+      heading: `Vastgoed in ${location}`,
+    },
+    ru: {
+      title: `Недвижимость в ${location} | MS Realty`,
+      description: `Проверенные объявления MS Realty о недвижимости в ${location}.`,
+      heading: `Недвижимость в ${location}`,
+    },
+    el: {
+      title: `Ακίνητα: ${location} | MS Realty`,
+      description: `Ελεγμένες αγγελίες ακινήτων της MS Realty στην περιοχή ${location}.`,
+      heading: `Ακίνητα: ${location}`,
+    },
+    he: {
+      title: `נכסים ב-${location} | MS Realty`,
+      description: `נכסים שנבדקו על ידי MS Realty ב-${location}.`,
+      heading: `נכסים ב-${location}`,
+    },
+  };
+  return copy[localeCode] || copy.en;
+}
+
 export function renderLocationPage({ registry, localeCode, location, listings }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -1810,6 +1851,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   });
   const path = locationPath(registry, locale.code, location);
   const indexable = resolved.available && matchedListings.length > 0;
+  const copy = locationPageCopy(locale.code, location);
   const locales = publicIndexableLocales(registry)
     .filter((candidate) =>
       listings.some((listing) => {
@@ -1830,14 +1872,14 @@ export function renderLocationPage({ registry, localeCode, location, listings })
     canonical: path,
     indexable,
     metadata: {
-      title: `MS Realty properties in ${location}`,
-      description: `Reviewed MS Realty property inventory for ${location}.`,
+      title: copy.title,
+      description: copy.description,
       robots: indexable ? "index,follow" : "noindex,follow",
     },
     hreflang: indexable ? hreflangForLocation(registry, location, locales) : [],
     chrome: publicChrome(registry, locale, { hreflang: indexable ? hreflangForLocation(registry, location, locales) : [], active: "location" }),
     body: {
-      h1: `Properties in ${location}`,
+      h1: copy.heading,
       location,
       listing_count: matchedListings.length,
     },

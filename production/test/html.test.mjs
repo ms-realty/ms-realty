@@ -140,6 +140,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);
   assert.equal(assertHtmlPage(locationHtml, { lang: "he", dir: "rtl", kind: "location" }), true);
+  assert.match(locationHtml, /<h1>נכסים ב-Sandanski<\/h1>/);
   assert.match(locationHtml, /data-location="Sandanski"/);
   assert.match(locationHtml, /data-location-listings="true"/);
   assert.match(locationHtml, /data-card-thumbnail="true"/);

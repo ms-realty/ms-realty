@@ -258,6 +258,18 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   const html = renderReactPublicBody(renderHomePage({ registry, listings, localeCode: "en" }));
 
   assert.match(html, /class="site-hd__mobile-label">Primary navigation<\/span>/);
+  assert.match(html, /data-language-switcher="desktop"/);
+  assert.match(html, /aria-label="Language: English"/);
+  assert.match(html, /data-language-switcher="mobile"/);
+  assert.match(html, /data-mobile-task-navigation="true"/);
+});
+
+test("search result count is announced separately from the page heading", () => {
+  const html = renderReactPublicBody(renderSearchPage({ registry, listings, localeCode: "en" }));
+
+  assert.match(html, /<h1>Property search \| MS Realty<\/h1>/);
+  assert.match(html, /class="sr-results__count" role="status" aria-live="polite">\d+ matches<\/p>/);
+  assert.doesNotMatch(html, /<h1>Property search \| MS Realty<small>/);
 });
 
 test("search applies text and facet filters before paginating cards", () => {
@@ -353,6 +365,9 @@ test("location page exposes only indexable locale inventory", () => {
   assert.equal(he.cards[0].translation_indexable, true);
   assert.match(he.cards[0].thumbnail.url, /\/wp-content\/uploads\//);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
+  assert.equal(he.body.h1, "נכסים ב-Sandanski");
+  assert.equal(he.metadata.title, "נכסים ב-Sandanski | MS Realty");
+  assert.match(he.metadata.description, /נכסים שנבדקו/);
   assert.equal(missing.status, 404);
   assert.equal(missing.indexable, false);
   assert.equal(missing.metadata.robots, "noindex,follow");

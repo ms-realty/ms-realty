@@ -49,6 +49,41 @@ function Badge({ variant = "neutral", solid = false, icon, children, ...attrs })
    Site chrome — header, footer, skip link (ui_kits/website/SiteChrome)
    ============================================================ */
 
+function LanguageMenu({ languages, label }) {
+  const active = languages.find((language) => language.active) || languages[0];
+  if (!active) return null;
+  return h(
+    "details",
+    { className: "site-language", "data-language-switcher": "desktop" },
+    h(
+      "summary",
+      { "aria-label": `${label}: ${active.label}`, title: `${label}: ${active.label}` },
+      h(Icon, { name: "globe", size: 17 }),
+      h("span", { className: "site-language__current", lang: active.code }, active.code.toUpperCase()),
+      h(Icon, { name: "chevron-down", size: 14, "aria-hidden": "true" }),
+    ),
+    h(
+      "nav",
+      { className: "site-language__menu", "aria-label": label },
+      ...languages.map((language) =>
+        h(
+          "a",
+          {
+            key: language.code,
+            href: language.href,
+            hrefLang: language.code,
+            lang: language.code,
+            "aria-current": language.active ? "true" : undefined,
+          },
+          h("span", { className: "site-language__code" }, language.code.toUpperCase()),
+          h("span", { className: "site-language__label" }, language.label),
+          language.active ? h(Icon, { name: "check", size: 16, "aria-hidden": "true" }) : null,
+        ),
+      ),
+    ),
+  );
+}
+
 function SiteHeader({ chrome }) {
   const copy = chrome.copy;
   const mobileMenu = h(
@@ -76,7 +111,7 @@ function SiteHeader({ chrome }) {
       ),
       h(
         "nav",
-        { className: "site-hd__mobile-langs", "aria-label": copy.languageLabel },
+        { className: "site-hd__mobile-langs", "aria-label": copy.languageLabel, "data-language-switcher": "mobile" },
         ...chrome.languages.map((language) =>
           h(
             "a",
@@ -123,26 +158,9 @@ function SiteHeader({ chrome }) {
         ),
       ),
       h(
-        "div",
-        { className: "site-hd__right" },
-        h(
-          "nav",
-          { className: "site-hd__lang", "aria-label": copy.languageLabel },
-          ...chrome.languages.map((language) =>
-            h(
-              "a",
-              {
-                key: language.code,
-                href: language.href,
-                hrefLang: language.code,
-                lang: language.code,
-                title: language.label,
-                "aria-current": language.active ? "true" : undefined,
-              },
-              language.code.toUpperCase(),
-            ),
-          ),
-        ),
+      "div",
+      { className: "site-hd__right" },
+        h(LanguageMenu, { languages: chrome.languages, label: copy.languageLabel }),
         h(
           Btn,
           { tag: "a", variant: "accent", size: "sm", iconStart: "phone", href: chrome.contact.phone_href, className: "site-hd__call mk-btn mk-btn--accent mk-btn--sm" },
@@ -151,6 +169,32 @@ function SiteHeader({ chrome }) {
       ),
       h("a", { className: "site-hd__mobile-call", href: chrome.contact.phone_href, "aria-label": copy.callBroker, title: copy.callBroker }, h(Icon, { name: "phone", size: 20 })),
       mobileMenu,
+    ),
+  );
+}
+
+function MobileTaskNavigation({ page, chrome }) {
+  if (page.kind === "listing") return null;
+  const iconById = { buy: "search", rent: "key", sell: "landmark", contact: "message-circle" };
+  return h(
+    "nav",
+    {
+      className: "site-mobile-tabs",
+      "aria-label": chrome.copy.menuLabel,
+      "data-mobile-task-navigation": "true",
+    },
+    ...chrome.nav.map((item) =>
+      h(
+        "a",
+        {
+          key: item.id,
+          href: item.href,
+          "data-active": item.active ? "true" : undefined,
+          "aria-current": item.active ? "page" : undefined,
+        },
+        h(Icon, { name: iconById[item.id] || "circle", size: 20 }),
+        h("span", null, item.label),
+      ),
     ),
   );
 }
@@ -319,6 +363,7 @@ function shell(page, main) {
     h("a", { key: "skip", className: "skip-link", href: "#main" }, chrome.copy.skipToContent),
     h(SiteHeader, { key: "header", chrome }),
     main,
+    h(MobileTaskNavigation, { key: "mobile-tasks", page, chrome }),
     h(SiteFooter, { key: "footer", chrome, labels }),
     h(EnquiryDialog, { key: "enquiry", page, labels, copy: chrome.copy }),
   ];
@@ -888,7 +933,8 @@ function SearchBody({ page }) {
         h(
           "div",
           { className: "sr-results__head" },
-          h("h1", null, page.metadata.title, h("small", null, `${page.search.total_matches} ${labels.matches}`)),
+          h("h1", null, page.metadata.title),
+          h("p", { className: "sr-results__count", role: "status", "aria-live": "polite" }, `${page.search.total_matches} ${labels.matches}`),
         ),
         h(
           "section",
