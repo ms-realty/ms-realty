@@ -1067,7 +1067,7 @@ function SearchBody({ page }) {
         h(
           "div",
           { className: "sr-results__head" },
-          h("h1", null, page.metadata.title),
+          h("h1", null, page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
           h("p", { className: "sr-results__count", role: "status", "aria-live": "polite" }, `${page.search.total_matches} ${labels.matches}`),
         ),
         h(
@@ -1123,6 +1123,8 @@ function SearchBody({ page }) {
 
 function LocationBody({ page }) {
   const labels = uiLabels(page);
+  const cards = page.cards || [];
+  const searchPath = page.chrome?.nav?.find((item) => item.id === "buy")?.href || `/${page.locale}/search`;
   const main = h(
     "main",
     {
@@ -1141,11 +1143,23 @@ function LocationBody({ page }) {
         { className: "hp-sec__head" },
         h("div", null, h("h1", null, page.body.h1), h("p", null, `${page.body.listing_count} ${labels.reviewedListings}`)),
       ),
-      h(
-        "div",
-        { className: "hp-grid", "aria-label": labels.locationListings, "data-location-listings": "true" },
-        ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
-      ),
+      cards.length
+        ? h(
+            "div",
+            { className: "hp-grid", "aria-label": labels.locationListings, "data-location-listings": "true" },
+            ...cards.map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
+          )
+        : h(
+            "section",
+            { className: "mk-empty loc-empty", "data-location-empty": "true", "aria-label": labels.noLocationListings },
+            h("span", { className: "loc-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "map-pin", size: 24 })),
+            h("h2", null, labels.noLocationListings),
+            h(
+              "div",
+              { className: "mk-empty__actions" },
+              h(Btn, { tag: "a", variant: "primary", size: "lg", iconStart: "search", href: searchPath }, labels.browseAllListings),
+            ),
+          ),
     ),
   );
   return shell(page, main);

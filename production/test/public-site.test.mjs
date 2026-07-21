@@ -274,7 +274,7 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
 test("search result count is announced separately from the page heading", () => {
   const html = renderReactPublicBody(renderSearchPage({ registry, listings, localeCode: "en" }));
 
-  assert.match(html, /<h1>Property search \| MS Realty<\/h1>/);
+  assert.match(html, /<h1>Property search<\/h1>/);
   assert.match(html, /class="sr-results__count" role="status" aria-live="polite">\d+ matches<\/p>/);
   assert.doesNotMatch(html, /<h1>Property search \| MS Realty<small>/);
   assert.match(html, /data-mobile-filter-sheet="true"/);
@@ -383,6 +383,9 @@ test("location page exposes only indexable locale inventory", () => {
   assert.equal(missing.status, 404);
   assert.equal(missing.indexable, false);
   assert.equal(missing.metadata.robots, "noindex,follow");
+  const missingHtml = renderReactPublicBody(missing);
+  assert.match(missingHtml, /data-location-empty="true"/);
+  assert.match(missingHtml, /href="\/he\/search"/);
 });
 
 test("seller valuation page is locale-prefixed and posts seller leads", () => {
