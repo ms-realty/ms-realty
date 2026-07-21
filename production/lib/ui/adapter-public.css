@@ -160,6 +160,7 @@
 @media (max-width: 560px) {
   .site-ft__in { grid-template-columns: 1fr; padding-block: 40px 24px; }
   .site-ft__bar-in { flex-direction: column; align-items: flex-start; }
+  .site-ft a { display: inline-flex; min-height: 44px; align-items: center; }
 }
 
 /* ---- Mobile task navigation: app-like, thumb-reachable, and absent on
@@ -578,6 +579,10 @@ main.ct-page.pg-narrow { max-width: var(--container-md); }
 /* ---- Breadcrumbs as real links ---- */
 .mk-crumbs { margin-bottom: var(--space-2); }
 .mk-crumbs a { cursor: pointer; }
+@media (max-width: 760px) {
+  .mk-crumbs a,
+  .mk-pcard__title a { display: inline-flex; min-height: 44px; align-items: center; }
+}
 
 /* ---- Enquiry dialog (native <dialog> wearing the kit ct-modal look) ---- */
 dialog.mk-enquiry {
