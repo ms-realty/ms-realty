@@ -111,8 +111,8 @@ test("mobile listing gallery exposes every reviewed photo and its swipe position
   assert.match(html, /data-mobile-gallery-slide="5"/);
   assert.match(html, /data-mobile-gallery-progress="true" data-gallery-total="5"/);
   assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 5/);
-  assert.match(html, /aria-roledescription="carousel"/);
-  assert.match(html, /aria-roledescription="slide" aria-label="5 \/ 5"/);
+  assert.match(html, /role="region" aria-label="Галерея"/);
+  assert.match(html, /role="group" aria-label="5 \/ 5:/);
 });
 
 test("approved broker contact data enables direct listing contact links", () => {
@@ -359,7 +359,11 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-mobile-filter-close="true"/);
   assert.match(html, /data-save-search-disclosure="sr-mobile"/);
   assert.match(html, /form="sr-mobile-filter-form"/);
-  assert.match(html, /class="sr-mobile-filters__sheet-foot"/);
+  assert.match(html, /class="sr-mobile-filters__sheet-foot/);
+  assert.match(html, /data-mobile-filter-preview-status="true"/);
+  assert.match(html, /data-mobile-filter-submit="true"/);
+  assert.match(html, /data-mobile-filter-base-label="Search"/);
+  assert.match(html, /data-mobile-filter-matches-label="matches"/);
   assert.match(html, /data-card-action="detail"/);
   assert.match(html, /data-card-action="inquiry"/);
   assert.match(html, /data-card-action="save"/);

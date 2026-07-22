@@ -38,6 +38,12 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /navigationLink\.hidden = true/);
   assert.match(PUBLIC_APP_JS, /section\.hidden = true/);
   assert.match(PUBLIC_APP_JS, /function initImageFallbacks/);
+  assert.match(PUBLIC_APP_JS, /\.mk-photo > img, img\[data-fallback-src\]/);
+  assert.match(PUBLIC_APP_JS, /data-image-state", "unavailable/);
+  assert.match(PUBLIC_APP_JS, /function initMobileFilterPreview/);
+  assert.match(PUBLIC_APP_JS, /window\.setTimeout\(preview, 320\)/);
+  assert.match(PUBLIC_APP_JS, /x-ms-realty-preview": "search-count/);
+  assert.match(PUBLIC_APP_JS, /initMobileFilterPreview\(\);/);
   assert.match(PUBLIC_APP_JS, /function initPublicMobileNavigation/);
   assert.match(PUBLIC_APP_JS, /initPublicMobileNavigation\(\);/);
   assert.match(PUBLIC_APP_JS, /function initSearchScrollRestoration/);
@@ -65,6 +71,7 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /data-mobile-contact-options-open/);
   assert.match(PUBLIC_APP_JS, /leadOptionsDialog\.close\(\)/);
   assert.match(PUBLIC_APP_JS, /callbackTime\.required = intent === "callback"/);
+  assert.match(PUBLIC_APP_JS, /getTimezoneOffset\(\)/);
   assert.match(PUBLIC_APP_JS, /function useSameOriginHistoryBack/);
   assert.match(PUBLIC_APP_JS, /previous\.origin !== window\.location\.origin/);
   assert.match(PUBLIC_APP_JS, /window\.history\.back\(\)/);

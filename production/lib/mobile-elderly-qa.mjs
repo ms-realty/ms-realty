@@ -3,6 +3,7 @@ import path from "node:path";
 import { findListingById, loadListings } from "./content.mjs";
 import { assertHtmlPage, renderHtmlPage } from "./html.mjs";
 import { loadLocaleRegistry, websiteLanguageCoverage } from "./locales.mjs";
+import { normalizeMediaAsset } from "./media.mjs";
 import { fromRoot } from "./paths.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { createTourField } from "./tours.mjs";
@@ -15,6 +16,7 @@ import {
   renderSellerPage,
 } from "./public-site.mjs";
 import { DESIGN_CSS } from "./ui/design-assets.mjs";
+import { PUBLIC_APP_JS } from "./ui/client.mjs";
 
 export const DEFAULT_MOBILE_ELDERLY_QA_OUTPUT = fromRoot("production", "data", "mobile-elderly-qa-report.json");
 
@@ -38,6 +40,19 @@ export function buildMobileElderlyQaReport({
   listings = loadListings(),
 } = {}) {
   const listing = findListingById(listings, "MS-CRAWL-0001");
+  const galleryListing = findListingById(listings, "MS-CRAWL-0114");
+  const galleryQaListing = {
+    ...galleryListing,
+    media: ["191-1.jpg", "191-2-72x72.jpg", "191-3-72x72.jpg", "191-4-72x72.jpg", "191-5-72x72.jpg"].map((filename, index) =>
+      normalizeMediaAsset(
+        {
+          image_url: `https://makler-realty.ru/wp-content/uploads/2013/11/${filename}`,
+          alt: `Reviewed mobile gallery photo ${index + 1}`,
+        },
+        { width: filename.includes("72x72") ? 72 : 1200, height: filename.includes("72x72") ? 72 : 900 },
+      ),
+    ),
+  };
   const tourListing = {
     ...listing,
     tour: createTourField({
@@ -68,6 +83,8 @@ export function buildMobileElderlyQaReport({
     renderSearchPage({ registry, listings, localeCode: "he", query: "no-such-listing-987654" }),
   );
   const approvedTourHtml = renderReactPage(renderListingPage({ registry, listing: tourListing, localeCode: "he" }));
+  const galleryListingHtml = renderReactPage(renderListingPage({ registry, listing: galleryQaListing, localeCode: "ru" }));
+  const gallerySlideCount = (galleryListingHtml.match(/data-mobile-gallery-slide=/g) || []).length;
   const publicAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public.css"), "utf8");
 
   for (const [kind, html] of Object.entries(pages)) {
@@ -123,6 +140,14 @@ export function buildMobileElderlyQaReport({
         includes(pages.search, "data-endpoint=\"/api/leads\""),
     ),
     check(
+      "mobile_search_live_preview",
+      includes(pages.search, "data-mobile-filter-submit=\"true\"") &&
+        includes(pages.search, "data-mobile-filter-preview-status=\"true\"") &&
+        includes(PUBLIC_APP_JS, "function initMobileFilterPreview()") &&
+        includes(PUBLIC_APP_JS, "window.setTimeout(preview, 320)") &&
+        includes(PUBLIC_APP_JS, "controller.abort()"),
+    ),
+    check(
       "mobile_search_empty_recovery",
       includes(emptySearch, "data-search-empty=\"true\"") &&
         includes(emptySearch, "href=\"/he/search\"") &&
@@ -166,6 +191,16 @@ export function buildMobileElderlyQaReport({
         includes(pages.listing, "data-photo-carousel=\"true\"") &&
         includes(pages.listing, "data-listing-action=\"print\"") &&
         includes(pages.listing, "data-client-save-listing="),
+    ),
+    check(
+      "mobile_full_reviewed_gallery",
+      gallerySlideCount > 3 &&
+        includes(galleryListingHtml, `data-gallery-total=\"${gallerySlideCount}\"`) &&
+        includes(galleryListingHtml, `data-mobile-gallery-slide=\"${gallerySlideCount}\"`) &&
+        !/data-fallback-src="[^"]+-72x72\./.test(galleryListingHtml) &&
+        includes(publicAdapterCss, ".ld-g--desktop-extra { display: none; }") &&
+        includes(publicAdapterCss, ".ld-gallery .ld-g--desktop-extra { display: block; }"),
+      { listing_id: galleryListing.id, reviewed_slides: gallerySlideCount, fixture: "recovered_wordpress_originals" },
     ),
     check(
       "approved_360_tour_accessibility",
@@ -228,12 +263,14 @@ export function assertMobileElderlyQaReport(report) {
   for (const id of [
     "mobile_search_form",
     "mobile_search_actions",
+    "mobile_search_live_preview",
     "mobile_search_empty_recovery",
     "mobile_app_navigation",
     "mobile_safe_area_and_feedback",
     "listing_sticky_actions",
     "intent_specific_lead_forms",
     "listing_detail_media_actions",
+    "mobile_full_reviewed_gallery",
     "approved_360_tour_accessibility",
     "seller_valuation_broker_review",
     "seller_property_intake",

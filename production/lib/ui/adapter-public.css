@@ -5,6 +5,17 @@
    ============================================================ */
 
 /* ---- Header: real links instead of the kit's onClick anchors ---- */
+.mk-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
 .site-hd__logo { display: inline-flex; min-height: 44px; align-items: center; flex: none; }
 .site-hd__logo img { height: 40px; width: auto; }
 .site-hd__nav a { cursor: pointer; white-space: nowrap; }
@@ -613,6 +624,7 @@ main[data-saved-listings-view="true"]:not([data-saved-listings-ready="true"]) [d
     box-shadow: 0 -6px 16px rgba(22, 19, 14, 0.06);
   }
   .sr-mobile-filters__sheet-foot > :only-child { grid-column: 1 / -1; }
+  .sr-mobile-filters__sheet-foot--single [data-mobile-filter-submit] { grid-column: 1 / -1; }
   .sr-mobile-filters[open] .sr-mobile-filters__summary { background: var(--surface); }
   .sr-mobile-filters[open] .sr-mobile-filters__panel { padding: 0; }
 }

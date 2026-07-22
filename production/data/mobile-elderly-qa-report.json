@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 18,
-    "passed": 18,
+    "checks": 20,
+    "passed": 20,
     "failed": 0
   },
   "checks": [
@@ -38,6 +38,11 @@
       "evidence": {}
     },
     {
+      "id": "mobile_search_live_preview",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
       "id": "mobile_search_empty_recovery",
       "status": "pass",
       "evidence": {}
@@ -61,6 +66,15 @@
       "id": "listing_detail_media_actions",
       "status": "pass",
       "evidence": {}
+    },
+    {
+      "id": "mobile_full_reviewed_gallery",
+      "status": "pass",
+      "evidence": {
+        "listing_id": "MS-CRAWL-0114",
+        "reviewed_slides": 5,
+        "fixture": "recovered_wordpress_originals"
+      }
     },
     {
       "id": "approved_360_tour_accessibility",

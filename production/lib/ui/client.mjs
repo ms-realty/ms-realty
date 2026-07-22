@@ -301,7 +301,11 @@ export const PUBLIC_APP_JS = `(function () {
     if (viewingFields) viewingFields.hidden = intent !== "viewing";
     if (viewingDate) viewingDate.required = intent === "viewing";
     if (viewingTime) viewingTime.required = intent === "viewing";
-    if (viewingDate) viewingDate.min = new Date().toISOString().slice(0, 10);
+    if (viewingDate) {
+      var localToday = new Date();
+      localToday.setMinutes(localToday.getMinutes() - localToday.getTimezoneOffset());
+      viewingDate.min = localToday.toISOString().slice(0, 10);
+    }
     if (message) message.required = intent === "inquiry";
     if (titleNode) titleNode.textContent = title;
     if (helpNode) helpNode.textContent = form.getAttribute("data-help-" + intent) || "";
@@ -398,18 +402,90 @@ export const PUBLIC_APP_JS = `(function () {
     });
     syncSheetState();
   }
+  function initMobileFilterPreview() {
+    var form = document.getElementById("sr-mobile-filter-form");
+    var submit = document.querySelector("[data-mobile-filter-submit]");
+    var status = document.querySelector("[data-mobile-filter-preview-status]");
+    if (!form || !submit || typeof window.fetch !== "function" || typeof window.DOMParser !== "function") return;
+    var timer = 0;
+    var controller = null;
+    var requestNumber = 0;
+    function setBusy(value) {
+      if (value) submit.setAttribute("aria-busy", "true");
+      else submit.removeAttribute("aria-busy");
+    }
+    function updateCount(total) {
+      var base = submit.getAttribute("data-mobile-filter-base-label") || "Search";
+      var matches = submit.getAttribute("data-mobile-filter-matches-label") || "matches";
+      var text = base + " · " + String(total) + " " + matches;
+      var label = submit.querySelector("span") || submit;
+      label.textContent = text;
+      submit.setAttribute("aria-label", text);
+      if (status) status.textContent = String(total) + " " + matches;
+    }
+    function preview() {
+      requestNumber += 1;
+      var currentRequest = requestNumber;
+      if (controller) controller.abort();
+      controller = typeof AbortController === "function" ? new AbortController() : null;
+      var url = new URL(form.getAttribute("action") || window.location.pathname, window.location.href);
+      var params = new URLSearchParams();
+      new FormData(form).forEach(function (value, key) {
+        if (String(value) !== "") params.set(key, String(value));
+      });
+      url.search = params.toString();
+      setBusy(true);
+      fetch(url.toString(), {
+        credentials: "same-origin",
+        headers: { accept: "text/html", "x-ms-realty-preview": "search-count" },
+        signal: controller ? controller.signal : undefined,
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error(String(response.status));
+          return response.text();
+        })
+        .then(function (html) {
+          if (currentRequest !== requestNumber) return;
+          var parsed = new DOMParser().parseFromString(html, "text/html");
+          var root = parsed.querySelector('main[data-kind="search"][data-total-matches]');
+          var total = root ? Number(root.getAttribute("data-total-matches")) : NaN;
+          if (Number.isFinite(total) && total >= 0) updateCount(total);
+        })
+        .catch(function (error) {
+          if (error && error.name === "AbortError") return;
+        })
+        .then(function () {
+          if (currentRequest === requestNumber) setBusy(false);
+        });
+    }
+    function schedulePreview() {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(preview, 320);
+    }
+    form.addEventListener("input", schedulePreview);
+    form.addEventListener("change", schedulePreview);
+    form.addEventListener("submit", function () {
+      window.clearTimeout(timer);
+      if (controller) controller.abort();
+    });
+  }
   function initImageFallbacks() {
-    var images = document.querySelectorAll("img[data-fallback-src]");
-    function useFallback(image) {
+    var images = document.querySelectorAll(".mk-photo > img, img[data-fallback-src]");
+    function recoverImage(image) {
       var fallback = image.getAttribute("data-fallback-src");
-      if (!fallback || image.getAttribute("src") === fallback) return;
-      image.removeAttribute("data-fallback-src");
-      image.setAttribute("src", fallback);
+      if (fallback && image.getAttribute("src") !== fallback) {
+        image.removeAttribute("data-fallback-src");
+        image.setAttribute("src", fallback);
+        return;
+      }
+      image.hidden = true;
+      image.setAttribute("data-image-state", "unavailable");
+      if (image.parentElement) image.parentElement.setAttribute("data-image-state", "unavailable");
     }
     for (var i = 0; i < images.length; i += 1) {
       (function (image) {
-        image.addEventListener("error", function () { useFallback(image); }, { once: true });
-        if (image.complete && image.naturalWidth === 0) useFallback(image);
+        image.addEventListener("error", function () { recoverImage(image); });
+        if (image.complete && image.naturalWidth === 0) recoverImage(image);
       })(images[i]);
     }
   }
@@ -711,6 +787,7 @@ export const PUBLIC_APP_JS = `(function () {
   initPublicMobileNavigation();
   initSavedSearchContacts();
   initMobileSearchFilters();
+  initMobileFilterPreview();
   initImageFallbacks();
   initMobileListingGallery();
   initPhotoSphereViewers();
