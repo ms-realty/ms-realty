@@ -182,7 +182,7 @@
         "locations": [
           {
             "href": "/he/locations/sandanski",
-            "label": "Sandanski"
+            "label": "סנדנסקי"
           }
         ],
         "locationsLabel": "אזורים",
@@ -218,7 +218,7 @@
       },
       "locations": [
         {
-          "location": "Sandanski",
+          "location": "סנדנסקי",
           "path": "/he/locations/sandanski",
           "listing_count": 1,
           "image": {
@@ -233,7 +233,7 @@
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
         "path": "/he/properties/MS-CRAWL-0001",
         "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
@@ -243,7 +243,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "content_locale": "he",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -279,6 +279,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -297,7 +298,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
         "offer_type": "sale",
@@ -333,6 +334,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0002"
@@ -351,7 +353,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -387,6 +389,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0003"
@@ -405,7 +408,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -441,6 +444,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0004"
@@ -459,7 +463,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -495,6 +499,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0005"
@@ -513,7 +518,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -549,6 +554,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0006"
@@ -746,7 +752,7 @@
       "description": "Updated approved source description.",
       "facts": {
         "id": "MS-CRAWL-0001",
-        "location": "Sandanski",
+        "location": "Сандански",
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
@@ -888,6 +894,7 @@
           {
             "id": "save",
             "label": "Запази",
+            "saved_label": "Запазено",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -932,10 +939,10 @@
       "resolved_locale": "el"
     },
     "metadata": {
-      "title": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
-      "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
-      "og_title": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
-      "og_description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
+      "title": "Ακίνητο MS Realty MS-CRAWL-0001 στο Σαντάνσκι",
+      "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Σαντάνσκι.",
+      "og_title": "Ακίνητο MS Realty MS-CRAWL-0001 στο Σαντάνσκι",
+      "og_description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Σαντάνσκι.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -1075,8 +1082,8 @@
       "@id": "/el/akinita/MS-CRAWL-0001#listing",
       "url": "/el/akinita/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
-      "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
+      "name": "Ακίνητο MS Realty MS-CRAWL-0001 στο Σαντάνσκι",
+      "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Σαντάνσκι.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg"
@@ -1101,11 +1108,11 @@
     },
     "body": {
       "content_locale": "el",
-      "h1": "Ακίνητο MS Realty MS-CRAWL-0001 στο Sandanski",
-      "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Sandanski.",
+      "h1": "Ακίνητο MS Realty MS-CRAWL-0001 στο Σαντάνσκι",
+      "description": "Ελεγμένα στοιχεία ακινήτου MS Realty για το Σαντάνσκι.",
       "facts": {
         "id": "MS-CRAWL-0001",
-        "location": "Sandanski",
+        "location": "Σαντάνσκι",
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
@@ -1247,6 +1254,7 @@
           {
             "id": "save",
             "label": "Αποθήκευση",
+            "saved_label": "Αποθηκεύτηκε",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -1291,10 +1299,10 @@
       "resolved_locale": "he"
     },
     "metadata": {
-      "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
-      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "og_description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
+      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "og_description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -1434,8 +1442,8 @@
       "@id": "/he/properties/MS-CRAWL-0001#listing",
       "url": "/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg"
@@ -1460,11 +1468,11 @@
     },
     "body": {
       "content_locale": "he",
-      "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "h1": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "facts": {
         "id": "MS-CRAWL-0001",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
@@ -1606,6 +1614,7 @@
           {
             "id": "save",
             "label": "שמירה",
+            "saved_label": "נשמר",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -1948,6 +1957,7 @@
           {
             "id": "save",
             "label": "Save",
+            "saved_label": "Saved",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -2243,6 +2253,7 @@
       }
     },
     "search": {
+      "saved_view": false,
       "engines": [
         "typesense",
         "meilisearch"
@@ -2336,7 +2347,7 @@
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
         "path": "/he/properties/MS-CRAWL-0001",
         "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
@@ -2346,7 +2357,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "content_locale": "he",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -2382,6 +2393,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -2400,7 +2412,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
         "offer_type": "sale",
@@ -2436,6 +2448,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0002"
@@ -2454,7 +2467,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2490,6 +2503,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0003"
@@ -2508,7 +2522,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2544,6 +2558,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0004"
@@ -2562,7 +2577,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2598,6 +2613,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0005"
@@ -2616,7 +2632,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -2652,6 +2668,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0006"
@@ -2670,7 +2687,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "sale",
@@ -2706,6 +2723,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0007"
@@ -2724,7 +2742,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2760,6 +2778,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0008"
@@ -2778,7 +2797,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2814,6 +2833,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0009"
@@ -2832,7 +2852,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "sale",
@@ -2868,6 +2888,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0010"
@@ -2886,7 +2907,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "hotel",
         "property_type_label": "מלון",
         "offer_type": "rent",
@@ -2922,6 +2943,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0011"
@@ -2940,7 +2962,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "hotel",
         "property_type_label": "מלון",
         "offer_type": "sale",
@@ -2976,6 +2998,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0012"
@@ -2995,8 +3018,8 @@
     "canonical": "/he/locations/sandanski",
     "indexable": true,
     "metadata": {
-      "title": "נכסים ב-Sandanski | MS Realty",
-      "description": "נכסים שנבדקו על ידי MS Realty ב-Sandanski.",
+      "title": "נכסים ב-סנדנסקי | MS Realty",
+      "description": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -3135,14 +3158,14 @@
       }
     },
     "body": {
-      "h1": "נכסים ב-Sandanski",
+      "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
       "listing_count": 1
     },
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
         "path": "/he/properties/MS-CRAWL-0001",
         "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
@@ -3152,7 +3175,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "content_locale": "he",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -3188,6 +3211,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -3942,6 +3966,10 @@
         "leadReadiness": "Готовность",
         "nextBestAction": "Следующее действие",
         "deterministicDecision": "Рассчитано рабочим процессом; Hermes может только предложить черновик.",
+        "qualificationDetails": "Данные квалификации",
+        "leadDetails": "Детали заявки",
+        "leadReference": "Внутренний номер заявки",
+        "inventoryMatches": "подходящих объектов",
         "readiness_ready": "Готово к действию",
         "readiness_developing": "Нужно дополнить",
         "readiness_incomplete": "Неполные данные",
@@ -4029,6 +4057,7 @@
         "duplicateOf": "Связанная более ранняя заявка",
         "priorityLeads": "Приоритетные заявки",
         "viewLeadInbox": "Открыть входящие заявки",
+        "openAndReply": "Открыть и ответить",
         "noPriorityLeads": "Нет заявок, ожидающих ответа.",
         "repliesQueued": "Ответы в очереди",
         "replyDelivery": "Отправка одобренного ответа",
@@ -4139,7 +4168,31 @@
         "translationState": "Состояние переводов",
         "qualityStatus": "Качество",
         "migrationReview": "Проверка миграции",
-        "launchEvidence": "Доказательства запуска"
+        "launchEvidence": "Доказательства запуска",
+        "action": "Действие",
+        "approvedReply": "Одобренный ответ",
+        "blocked": "Заблокировано",
+        "chooseReplyTemplate": "Выберите шаблон ответа",
+        "communicationHistory": "История коммуникации",
+        "deliveryFailed": "Ошибка отправки",
+        "deliveryRequeue": "Возвращено в очередь",
+        "deliverySent": "Отправлено",
+        "inboundRequest": "Полученная заявка",
+        "listing": "Объект",
+        "noMessageBody": "Текст не указан.",
+        "noResults": "Нет результатов.",
+        "open": "Открыто",
+        "priceOnRequest": "Цена по запросу",
+        "readOnlyAccess": "Для этой роли доступен только просмотр.",
+        "replyDraftFailed": "Не удалось подготовить черновик для брокера.",
+        "replyDraftPending": "Готовим черновик только для брокера…",
+        "replyDraftReady": "Черновик готов к проверке брокером.",
+        "replyQueueFailed": "Не удалось поставить проверенный ответ в очередь.",
+        "replyQueuePending": "Ответ, одобренный брокером, ставится в очередь…",
+        "replyQueueReady": "Ответ поставлен в очередь для ручной отправки.",
+        "replyTemplate": "Шаблон ответа",
+        "reviewTranslation": "Проверить перевод",
+        "templateReviewNotice": "Шаблон — только отправная точка. Проверьте факты и отредактируйте текст перед одобрением."
       },
       "interface_locales": [
         "bg",
@@ -4514,6 +4567,10 @@
         "leadReadiness": "Readiness",
         "nextBestAction": "Next best action",
         "deterministicDecision": "Calculated from workflow evidence; Hermes may only suggest a draft.",
+        "qualificationDetails": "Qualification evidence",
+        "leadDetails": "Lead details",
+        "leadReference": "Internal lead reference",
+        "inventoryMatches": "matching properties",
         "readiness_ready": "Ready to act",
         "readiness_developing": "Needs enrichment",
         "readiness_incomplete": "Incomplete data",
@@ -4601,6 +4658,7 @@
         "duplicateOf": "Related earlier lead",
         "priorityLeads": "Priority leads",
         "viewLeadInbox": "Open lead inbox",
+        "openAndReply": "Open and reply",
         "noPriorityLeads": "No leads are waiting for a reply.",
         "repliesQueued": "Replies queued",
         "replyDelivery": "Approved reply delivery",
@@ -4711,7 +4769,31 @@
         "translationState": "Translation state",
         "qualityStatus": "Quality",
         "migrationReview": "Migration review",
-        "launchEvidence": "Launch evidence"
+        "launchEvidence": "Launch evidence",
+        "action": "Action",
+        "approvedReply": "Approved reply",
+        "blocked": "Blocked",
+        "chooseReplyTemplate": "Choose a reply template",
+        "communicationHistory": "Communication history",
+        "deliveryFailed": "Delivery failed",
+        "deliveryRequeue": "Returned to queue",
+        "deliverySent": "Sent",
+        "inboundRequest": "Inbound request",
+        "listing": "Listing",
+        "noMessageBody": "No message body was provided.",
+        "noResults": "No results.",
+        "open": "Open",
+        "priceOnRequest": "Price on request",
+        "readOnlyAccess": "This role has read-only access.",
+        "replyDraftFailed": "Could not prepare the broker draft.",
+        "replyDraftPending": "Preparing a broker-only draft…",
+        "replyDraftReady": "Draft ready for broker review.",
+        "replyQueueFailed": "Could not queue the reviewed reply.",
+        "replyQueuePending": "Queueing the broker-approved reply…",
+        "replyQueueReady": "Reply queued for manual delivery.",
+        "replyTemplate": "Reply template",
+        "reviewTranslation": "Review translation",
+        "templateReviewNotice": "The template is only a starting point. Verify facts and edit the message before approval."
       },
       "interface_locales": [
         "bg",

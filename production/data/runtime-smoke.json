@@ -16,10 +16,10 @@
       "resolved_locale": "he"
     },
     "metadata": {
-      "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
-      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "og_description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
+      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "og_description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -159,8 +159,8 @@
       "@id": "/he/properties/MS-CRAWL-0001#listing",
       "url": "/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
@@ -201,11 +201,11 @@
     },
     "body": {
       "content_locale": "he",
-      "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "h1": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "facts": {
         "id": "MS-CRAWL-0001",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
@@ -486,6 +486,7 @@
           {
             "id": "save",
             "label": "שמירה",
+            "saved_label": "נשמר",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -507,9 +508,9 @@
       },
       "related_listings": [
         {
-          "id": "MS-CRAWL-0002",
-          "title": "Апартаменти в парка на Сандански. Затворен комплекс",
-          "path": "/he/properties/MS-CRAWL-0002",
+          "id": "MS-CRAWL-0006",
+          "title": "Дава под наем промишлена сграда в Сандански",
+          "path": "/he/properties/MS-CRAWL-0006",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
@@ -518,30 +519,30 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "multi_unit",
-          "property_type_label": "דירות",
-          "offer_type": "sale",
-          "offer_type_label": "למכירה",
+          "location": "סנדנסקי",
+          "property_type": "commercial",
+          "property_type_label": "נכס מסחרי",
+          "offer_type": "rent",
+          "offer_type_label": "להשכרה",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": null,
-          "price_on_request": true,
+          "price_eur": 1,
+          "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 2,
-          "legacy_image_count": 20,
+          "image_count": 1,
+          "legacy_image_count": 18,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
-            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
-            "width": null,
-            "height": null
+            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+            "alt": "Дава под наем промишлена сграда в Сандански",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
               "label": "פרטים",
-              "href": "/he/properties/MS-CRAWL-0002"
+              "href": "/he/properties/MS-CRAWL-0006"
             },
             "inquiry": {
               "label": "פנייה",
@@ -550,22 +551,23 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "he",
-                "listingReference": "MS-CRAWL-0002",
+                "listingReference": "MS-CRAWL-0006",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "שמירה",
+              "saved_label": "נשמר",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0002"
+              "listing_id": "MS-CRAWL-0006"
             }
           }
         },
         {
-          "id": "MS-CRAWL-0003",
-          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
-          "path": "/he/properties/MS-CRAWL-0003",
+          "id": "MS-CRAWL-0019",
+          "title": "Офиси/магазини под наем в гр.Сандански",
+          "path": "/he/properties/MS-CRAWL-0019",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
@@ -574,30 +576,30 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "apartment",
-          "property_type_label": "דירה",
+          "location": "סנדנסקי",
+          "property_type": "commercial",
+          "property_type_label": "נכס מסחרי",
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
-          "bedrooms": 2,
+          "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": 600,
+          "price_eur": 6,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 14,
-          "legacy_image_count": 32,
+          "image_count": 13,
+          "legacy_image_count": 31,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
-            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/812-2-680x510.jpg",
+            "alt": "Офиси/магазини под наем в гр.Сандански",
             "width": null,
             "height": null
           },
           "actions": {
             "detail": {
               "label": "פרטים",
-              "href": "/he/properties/MS-CRAWL-0003"
+              "href": "/he/properties/MS-CRAWL-0019"
             },
             "inquiry": {
               "label": "פנייה",
@@ -606,22 +608,23 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "he",
-                "listingReference": "MS-CRAWL-0003",
+                "listingReference": "MS-CRAWL-0019",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "שמירה",
+              "saved_label": "נשמר",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0003"
+              "listing_id": "MS-CRAWL-0019"
             }
           }
         },
         {
-          "id": "MS-CRAWL-0004",
-          "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
-          "path": "/he/properties/MS-CRAWL-0004",
+          "id": "MS-CRAWL-0020",
+          "title": "Офис под наем в центъра на гр.Сандански",
+          "path": "/he/properties/MS-CRAWL-0020",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
@@ -630,30 +633,30 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "apartment",
-          "property_type_label": "דירה",
+          "location": "סנדנסקי",
+          "property_type": "commercial",
+          "property_type_label": "נכס מסחרי",
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
-          "bedrooms": 1,
+          "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": 355,
+          "price_eur": 83,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 8,
-          "legacy_image_count": 26,
+          "image_count": 3,
+          "legacy_image_count": 21,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
-            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+            "url": "https://makler-realty.com/wp-content/uploads/2025/02/890-2-680x510.jpeg",
+            "alt": "Офис под наем в центъра на гр.Сандански",
             "width": null,
             "height": null
           },
           "actions": {
             "detail": {
               "label": "פרטים",
-              "href": "/he/properties/MS-CRAWL-0004"
+              "href": "/he/properties/MS-CRAWL-0020"
             },
             "inquiry": {
               "label": "פנייה",
@@ -662,15 +665,16 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "he",
-                "listingReference": "MS-CRAWL-0004",
+                "listingReference": "MS-CRAWL-0020",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "שמירה",
+              "saved_label": "נשמר",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0004"
+              "listing_id": "MS-CRAWL-0020"
             }
           }
         }
@@ -1152,6 +1156,7 @@
           {
             "id": "save",
             "label": "Save",
+            "saved_label": "Saved",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -1173,9 +1178,9 @@
       },
       "related_listings": [
         {
-          "id": "MS-CRAWL-0002",
-          "title": "Апартаменти в парка на Сандански. Затворен комплекс",
-          "path": "/en/properties/MS-CRAWL-0002",
+          "id": "MS-CRAWL-0006",
+          "title": "Дава под наем промишлена сграда в Сандански",
+          "path": "/en/properties/MS-CRAWL-0006",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "en",
@@ -1185,29 +1190,29 @@
           "source_locale": "bg",
           "content_locale": "bg",
           "location": "Sandanski",
-          "property_type": "multi_unit",
-          "property_type_label": "Apartments",
-          "offer_type": "sale",
-          "offer_type_label": "For sale",
+          "property_type": "commercial",
+          "property_type_label": "Commercial property",
+          "offer_type": "rent",
+          "offer_type_label": "For rent",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": null,
-          "price_on_request": true,
+          "price_eur": 1,
+          "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 2,
-          "legacy_image_count": 20,
+          "image_count": 1,
+          "legacy_image_count": 18,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
-            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
-            "width": null,
-            "height": null
+            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+            "alt": "Дава под наем промишлена сграда в Сандански",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
               "label": "Details",
-              "href": "/en/properties/MS-CRAWL-0002"
+              "href": "/en/properties/MS-CRAWL-0006"
             },
             "inquiry": {
               "label": "Inquiry",
@@ -1216,22 +1221,23 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "en",
-                "listingReference": "MS-CRAWL-0002",
+                "listingReference": "MS-CRAWL-0006",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "Save",
+              "saved_label": "Saved",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0002"
+              "listing_id": "MS-CRAWL-0006"
             }
           }
         },
         {
-          "id": "MS-CRAWL-0003",
-          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
-          "path": "/en/properties/MS-CRAWL-0003",
+          "id": "MS-CRAWL-0019",
+          "title": "Офиси/магазини под наем в гр.Сандански",
+          "path": "/en/properties/MS-CRAWL-0019",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "en",
@@ -1241,29 +1247,29 @@
           "source_locale": "bg",
           "content_locale": "bg",
           "location": "Sandanski",
-          "property_type": "apartment",
-          "property_type_label": "Apartment",
+          "property_type": "commercial",
+          "property_type_label": "Commercial property",
           "offer_type": "rent",
           "offer_type_label": "For rent",
-          "bedrooms": 2,
+          "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": 600,
+          "price_eur": 6,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 14,
-          "legacy_image_count": 32,
+          "image_count": 13,
+          "legacy_image_count": 31,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
-            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/812-2-680x510.jpg",
+            "alt": "Офиси/магазини под наем в гр.Сандански",
             "width": null,
             "height": null
           },
           "actions": {
             "detail": {
               "label": "Details",
-              "href": "/en/properties/MS-CRAWL-0003"
+              "href": "/en/properties/MS-CRAWL-0019"
             },
             "inquiry": {
               "label": "Inquiry",
@@ -1272,22 +1278,23 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "en",
-                "listingReference": "MS-CRAWL-0003",
+                "listingReference": "MS-CRAWL-0019",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "Save",
+              "saved_label": "Saved",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0003"
+              "listing_id": "MS-CRAWL-0019"
             }
           }
         },
         {
-          "id": "MS-CRAWL-0004",
-          "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
-          "path": "/en/properties/MS-CRAWL-0004",
+          "id": "MS-CRAWL-0020",
+          "title": "Офис под наем в центъра на гр.Сандански",
+          "path": "/en/properties/MS-CRAWL-0020",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "en",
@@ -1297,29 +1304,29 @@
           "source_locale": "bg",
           "content_locale": "bg",
           "location": "Sandanski",
-          "property_type": "apartment",
-          "property_type_label": "Apartment",
+          "property_type": "commercial",
+          "property_type_label": "Commercial property",
           "offer_type": "rent",
           "offer_type_label": "For rent",
-          "bedrooms": 1,
+          "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": 355,
+          "price_eur": 83,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 8,
-          "legacy_image_count": 26,
+          "image_count": 3,
+          "legacy_image_count": 21,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
-            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+            "url": "https://makler-realty.com/wp-content/uploads/2025/02/890-2-680x510.jpeg",
+            "alt": "Офис под наем в центъра на гр.Сандански",
             "width": null,
             "height": null
           },
           "actions": {
             "detail": {
               "label": "Details",
-              "href": "/en/properties/MS-CRAWL-0004"
+              "href": "/en/properties/MS-CRAWL-0020"
             },
             "inquiry": {
               "label": "Inquiry",
@@ -1328,15 +1335,16 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "en",
-                "listingReference": "MS-CRAWL-0004",
+                "listingReference": "MS-CRAWL-0020",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "Save",
+              "saved_label": "Saved",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0004"
+              "listing_id": "MS-CRAWL-0020"
             }
           }
         }
@@ -1535,7 +1543,7 @@
       "description": "Апартаменты в Парк отеле Пирин - г.Сандански. Продажа апартаментов и квартир в Парк отеле Пирин Сандански. Цена квартир в Парк отеле Пирин.",
       "facts": {
         "id": "MS-CRAWL-0114",
-        "location": "Sandanski",
+        "location": "Сандански",
         "property_type": "multi_unit",
         "offer_type": "sale",
         "bedrooms": null,
@@ -1767,6 +1775,7 @@
           {
             "id": "save",
             "label": "Сохранить",
+            "saved_label": "Сохранено",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0114"
@@ -1788,74 +1797,18 @@
       },
       "related_listings": [
         {
-          "id": "MS-CRAWL-0001",
-          "title": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-          "path": "/ru/properties/MS-CRAWL-0001",
+          "id": "MS-CRAWL-0133",
+          "title": "Продажа дома с участком в городе Сандански",
+          "path": "/ru/properties/MS-CRAWL-0133",
           "review_badge": null,
-          "translation_display": "fallback_source_locale",
+          "translation_display": "reviewed_translation",
           "translation_locale": "ru",
-          "translation_status": "missing",
-          "translation_indexable": false,
-          "translation_human_approved": false,
-          "source_locale": "bg",
-          "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "commercial",
-          "property_type_label": "Коммерческая недвижимость",
-          "offer_type": "rent",
-          "offer_type_label": "Аренда",
-          "bedrooms": null,
-          "bedrooms_not_applicable": false,
-          "area_sqm": null,
-          "price_eur": null,
-          "price_on_request": true,
-          "listing_status": "available",
-          "listing_active": true,
-          "image_count": 17,
-          "legacy_image_count": 35,
-          "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
-            "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
-            "width": null,
-            "height": null
-          },
-          "actions": {
-            "detail": {
-              "label": "Подробнее",
-              "href": "/ru/properties/MS-CRAWL-0001"
-            },
-            "inquiry": {
-              "label": "Запрос",
-              "endpoint": "/api/leads",
-              "method": "POST",
-              "payload": {
-                "leadType": "buyer",
-                "language": "ru",
-                "listingReference": "MS-CRAWL-0001",
-                "source": "website_search_result"
-              }
-            },
-            "save": {
-              "label": "Сохранить",
-              "endpoint": "/api/saved-searches",
-              "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0001"
-            }
-          }
-        },
-        {
-          "id": "MS-CRAWL-0002",
-          "title": "Апартаменти в парка на Сандански. Затворен комплекс",
-          "path": "/ru/properties/MS-CRAWL-0002",
-          "review_badge": null,
-          "translation_display": "fallback_source_locale",
-          "translation_locale": "ru",
-          "translation_status": "missing",
-          "translation_indexable": false,
-          "translation_human_approved": false,
-          "source_locale": "bg",
-          "content_locale": "bg",
-          "location": "Sandanski",
+          "translation_status": "published",
+          "translation_indexable": true,
+          "translation_human_approved": true,
+          "source_locale": "ru",
+          "content_locale": "ru",
+          "location": "Сандански",
           "property_type": "multi_unit",
           "property_type_label": "Апартаменты",
           "offer_type": "sale",
@@ -1863,22 +1816,17 @@
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": null,
-          "price_on_request": true,
+          "price_eur": 594000,
+          "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 2,
-          "legacy_image_count": 20,
-          "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
-            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
-            "width": null,
-            "height": null
-          },
+          "image_count": 0,
+          "legacy_image_count": 22,
+          "thumbnail": null,
           "actions": {
             "detail": {
               "label": "Подробнее",
-              "href": "/ru/properties/MS-CRAWL-0002"
+              "href": "/ru/properties/MS-CRAWL-0133"
             },
             "inquiry": {
               "label": "Запрос",
@@ -1887,54 +1835,55 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "ru",
-                "listingReference": "MS-CRAWL-0002",
+                "listingReference": "MS-CRAWL-0133",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "Сохранить",
+              "saved_label": "Сохранено",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0002"
+              "listing_id": "MS-CRAWL-0133"
             }
           }
         },
         {
-          "id": "MS-CRAWL-0003",
-          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
-          "path": "/ru/properties/MS-CRAWL-0003",
+          "id": "MS-CRAWL-0138",
+          "title": "Продажа новостройки в Сандански",
+          "path": "/ru/properties/MS-CRAWL-0138",
           "review_badge": null,
-          "translation_display": "fallback_source_locale",
+          "translation_display": "reviewed_translation",
           "translation_locale": "ru",
-          "translation_status": "missing",
-          "translation_indexable": false,
-          "translation_human_approved": false,
-          "source_locale": "bg",
-          "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "apartment",
-          "property_type_label": "Квартира",
-          "offer_type": "rent",
-          "offer_type_label": "Аренда",
-          "bedrooms": 2,
+          "translation_status": "published",
+          "translation_indexable": true,
+          "translation_human_approved": true,
+          "source_locale": "ru",
+          "content_locale": "ru",
+          "location": "Сандански",
+          "property_type": "multi_unit",
+          "property_type_label": "Апартаменты",
+          "offer_type": "sale",
+          "offer_type_label": "Продажа",
+          "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": 600,
+          "price_eur": 46200,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 14,
-          "legacy_image_count": 32,
+          "image_count": 5,
+          "legacy_image_count": 27,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
-            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "url": "https://makler-realty.ru/wp-content/uploads/2025/06/2-1000x563.jpg",
+            "alt": "Продажа новостройки в Сандански",
             "width": null,
             "height": null
           },
           "actions": {
             "detail": {
               "label": "Подробнее",
-              "href": "/ru/properties/MS-CRAWL-0003"
+              "href": "/ru/properties/MS-CRAWL-0138"
             },
             "inquiry": {
               "label": "Запрос",
@@ -1943,15 +1892,73 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "ru",
-                "listingReference": "MS-CRAWL-0003",
+                "listingReference": "MS-CRAWL-0138",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "Сохранить",
+              "saved_label": "Сохранено",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0003"
+              "listing_id": "MS-CRAWL-0138"
+            }
+          }
+        },
+        {
+          "id": "MS-CRAWL-0116",
+          "title": "Земля и здания на продажу недалеко от Сандански",
+          "path": "/ru/properties/MS-CRAWL-0116",
+          "review_badge": null,
+          "translation_display": "reviewed_translation",
+          "translation_locale": "ru",
+          "translation_status": "published",
+          "translation_indexable": true,
+          "translation_human_approved": true,
+          "source_locale": "ru",
+          "content_locale": "ru",
+          "location": "Сандански",
+          "property_type": "land",
+          "property_type_label": "Участок",
+          "offer_type": "sale",
+          "offer_type_label": "Продажа",
+          "bedrooms": null,
+          "bedrooms_not_applicable": false,
+          "area_sqm": null,
+          "price_eur": 75000,
+          "price_on_request": false,
+          "listing_status": "available",
+          "listing_active": true,
+          "image_count": 7,
+          "legacy_image_count": 30,
+          "thumbnail": {
+            "url": "https://makler-realty.ru/wp-content/uploads/2021/03/791-1-680x383.jpg",
+            "alt": "Земля и здания на продажу недалеко от Сандански",
+            "width": null,
+            "height": null
+          },
+          "actions": {
+            "detail": {
+              "label": "Подробнее",
+              "href": "/ru/properties/MS-CRAWL-0116"
+            },
+            "inquiry": {
+              "label": "Запрос",
+              "endpoint": "/api/leads",
+              "method": "POST",
+              "payload": {
+                "leadType": "buyer",
+                "language": "ru",
+                "listingReference": "MS-CRAWL-0116",
+                "source": "website_search_result"
+              }
+            },
+            "save": {
+              "label": "Сохранить",
+              "saved_label": "Сохранено",
+              "endpoint": "/api/saved-searches",
+              "storage_key": "ms-realty:saved-listings",
+              "listing_id": "MS-CRAWL-0116"
             }
           }
         }
@@ -2124,7 +2131,7 @@
         "locations": [
           {
             "href": "/he/locations/sandanski",
-            "label": "Sandanski"
+            "label": "סנדנסקי"
           }
         ],
         "locationsLabel": "אזורים",
@@ -2160,7 +2167,7 @@
       },
       "locations": [
         {
-          "location": "Sandanski",
+          "location": "סנדנסקי",
           "path": "/he/locations/sandanski",
           "listing_count": 1,
           "image": {
@@ -2175,7 +2182,7 @@
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
         "path": "/he/properties/MS-CRAWL-0001",
         "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
@@ -2185,7 +2192,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "content_locale": "he",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -2223,6 +2230,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -2241,7 +2249,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
         "offer_type": "sale",
@@ -2279,6 +2287,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0002"
@@ -2297,7 +2306,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2335,6 +2344,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0003"
@@ -2353,7 +2363,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2391,6 +2401,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0004"
@@ -2409,7 +2420,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -2447,6 +2458,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0005"
@@ -2465,7 +2477,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -2503,6 +2515,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0006"
@@ -3096,8 +3109,8 @@
     "canonical": "/he/locations/sandanski",
     "indexable": true,
     "metadata": {
-      "title": "נכסים ב-Sandanski | MS Realty",
-      "description": "נכסים שנבדקו על ידי MS Realty ב-Sandanski.",
+      "title": "נכסים ב-סנדנסקי | MS Realty",
+      "description": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -3236,14 +3249,14 @@
       }
     },
     "body": {
-      "h1": "נכסים ב-Sandanski",
+      "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
       "listing_count": 1
     },
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
         "path": "/he/properties/MS-CRAWL-0001",
         "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
@@ -3253,7 +3266,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "content_locale": "he",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -3291,6 +3304,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -3315,10 +3329,10 @@
       "resolved_locale": "he"
     },
     "metadata": {
-      "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
-      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "og_description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
+      "og_title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "og_description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "robots": "index,follow"
     },
     "hreflang": [
@@ -3458,8 +3472,8 @@
       "@id": "/he/properties/MS-CRAWL-0001#listing",
       "url": "/he/properties/MS-CRAWL-0001",
       "identifier": "MS-CRAWL-0001",
-      "name": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "name": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "category": "commercial",
       "image": [
         "https://makler-realty.com/wp-content/uploads/2024/12/815-2-680x451.jpg",
@@ -3500,11 +3514,11 @@
     },
     "body": {
       "content_locale": "he",
-      "h1": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
-      "description": "פרטי נכס מאושרים של MS Realty עבור Sandanski.",
+      "h1": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
+      "description": "פרטי נכס מאושרים של MS Realty עבור סנדנסקי.",
       "facts": {
         "id": "MS-CRAWL-0001",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "offer_type": "rent",
         "bedrooms": null,
@@ -3785,6 +3799,7 @@
           {
             "id": "save",
             "label": "שמירה",
+            "saved_label": "נשמר",
             "kind": "client_saved_listing",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -3806,9 +3821,9 @@
       },
       "related_listings": [
         {
-          "id": "MS-CRAWL-0002",
-          "title": "Апартаменти в парка на Сандански. Затворен комплекс",
-          "path": "/he/properties/MS-CRAWL-0002",
+          "id": "MS-CRAWL-0006",
+          "title": "Дава под наем промишлена сграда в Сандански",
+          "path": "/he/properties/MS-CRAWL-0006",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
@@ -3817,30 +3832,30 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "multi_unit",
-          "property_type_label": "דירות",
-          "offer_type": "sale",
-          "offer_type_label": "למכירה",
+          "location": "סנדנסקי",
+          "property_type": "commercial",
+          "property_type_label": "נכס מסחרי",
+          "offer_type": "rent",
+          "offer_type_label": "להשכרה",
           "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": null,
-          "price_on_request": true,
+          "price_eur": 1,
+          "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 2,
-          "legacy_image_count": 20,
+          "image_count": 1,
+          "legacy_image_count": 18,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/08/907-dron-1-680x383.jpg",
-            "alt": "Апартаменти в парка на Сандански. Затворен комплекс",
-            "width": null,
-            "height": null
+            "url": "https://makler-realty.com/wp-content/uploads/2025/04/DJI_0696-680x383.jpg",
+            "alt": "Дава под наем промишлена сграда в Сандански",
+            "width": 45,
+            "height": 45
           },
           "actions": {
             "detail": {
               "label": "פרטים",
-              "href": "/he/properties/MS-CRAWL-0002"
+              "href": "/he/properties/MS-CRAWL-0006"
             },
             "inquiry": {
               "label": "פנייה",
@@ -3849,22 +3864,23 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "he",
-                "listingReference": "MS-CRAWL-0002",
+                "listingReference": "MS-CRAWL-0006",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "שמירה",
+              "saved_label": "נשמר",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0002"
+              "listing_id": "MS-CRAWL-0006"
             }
           }
         },
         {
-          "id": "MS-CRAWL-0003",
-          "title": "Тристаен апартамент под наем в Сандански + паркомясто",
-          "path": "/he/properties/MS-CRAWL-0003",
+          "id": "MS-CRAWL-0019",
+          "title": "Офиси/магазини под наем в гр.Сандански",
+          "path": "/he/properties/MS-CRAWL-0019",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
@@ -3873,30 +3889,30 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "apartment",
-          "property_type_label": "דירה",
+          "location": "סנדנסקי",
+          "property_type": "commercial",
+          "property_type_label": "נכס מסחרי",
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
-          "bedrooms": 2,
+          "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": 600,
+          "price_eur": 6,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 14,
-          "legacy_image_count": 32,
+          "image_count": 13,
+          "legacy_image_count": 31,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/10/922-2-680x510.jpg",
-            "alt": "Тристаен апартамент под наем в Сандански + паркомясто",
+            "url": "https://makler-realty.com/wp-content/uploads/2024/12/812-2-680x510.jpg",
+            "alt": "Офиси/магазини под наем в гр.Сандански",
             "width": null,
             "height": null
           },
           "actions": {
             "detail": {
               "label": "פרטים",
-              "href": "/he/properties/MS-CRAWL-0003"
+              "href": "/he/properties/MS-CRAWL-0019"
             },
             "inquiry": {
               "label": "פנייה",
@@ -3905,22 +3921,23 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "he",
-                "listingReference": "MS-CRAWL-0003",
+                "listingReference": "MS-CRAWL-0019",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "שמירה",
+              "saved_label": "נשמר",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0003"
+              "listing_id": "MS-CRAWL-0019"
             }
           }
         },
         {
-          "id": "MS-CRAWL-0004",
-          "title": "Апартамент под наем, ул.Банска 2, гр.Сандански",
-          "path": "/he/properties/MS-CRAWL-0004",
+          "id": "MS-CRAWL-0020",
+          "title": "Офис под наем в центъра на гр.Сандански",
+          "path": "/he/properties/MS-CRAWL-0020",
           "review_badge": null,
           "translation_display": "fallback_source_locale",
           "translation_locale": "he",
@@ -3929,30 +3946,30 @@
           "translation_human_approved": false,
           "source_locale": "bg",
           "content_locale": "bg",
-          "location": "Sandanski",
-          "property_type": "apartment",
-          "property_type_label": "דירה",
+          "location": "סנדנסקי",
+          "property_type": "commercial",
+          "property_type_label": "נכס מסחרי",
           "offer_type": "rent",
           "offer_type_label": "להשכרה",
-          "bedrooms": 1,
+          "bedrooms": null,
           "bedrooms_not_applicable": false,
           "area_sqm": null,
-          "price_eur": 355,
+          "price_eur": 83,
           "price_on_request": false,
           "listing_status": "available",
           "listing_active": true,
-          "image_count": 8,
-          "legacy_image_count": 26,
+          "image_count": 3,
+          "legacy_image_count": 21,
           "thumbnail": {
-            "url": "https://makler-realty.com/wp-content/uploads/2025/08/905-2-680x510.jpg",
-            "alt": "Апартамент под наем, ул.Банска 2, гр.Сандански",
+            "url": "https://makler-realty.com/wp-content/uploads/2025/02/890-2-680x510.jpeg",
+            "alt": "Офис под наем в центъра на гр.Сандански",
             "width": null,
             "height": null
           },
           "actions": {
             "detail": {
               "label": "פרטים",
-              "href": "/he/properties/MS-CRAWL-0004"
+              "href": "/he/properties/MS-CRAWL-0020"
             },
             "inquiry": {
               "label": "פנייה",
@@ -3961,15 +3978,16 @@
               "payload": {
                 "leadType": "buyer",
                 "language": "he",
-                "listingReference": "MS-CRAWL-0004",
+                "listingReference": "MS-CRAWL-0020",
                 "source": "website_search_result"
               }
             },
             "save": {
               "label": "שמירה",
+              "saved_label": "נשמר",
               "endpoint": "/api/saved-searches",
               "storage_key": "ms-realty:saved-listings",
-              "listing_id": "MS-CRAWL-0004"
+              "listing_id": "MS-CRAWL-0020"
             }
           }
         }
@@ -4117,6 +4135,7 @@
       }
     },
     "search": {
+      "saved_view": false,
       "engines": [
         "typesense",
         "meilisearch"
@@ -4220,7 +4239,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
         "offer_type": "sale",
@@ -4258,6 +4277,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0002"
@@ -4276,7 +4296,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -4314,6 +4334,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0003"
@@ -4332,7 +4353,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -4370,6 +4391,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0004"
@@ -4388,7 +4410,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -4426,6 +4448,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0005"
@@ -4444,7 +4467,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -4482,6 +4505,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0006"
@@ -4500,7 +4524,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "sale",
@@ -4538,6 +4562,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0007"
@@ -4556,7 +4581,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -4594,6 +4619,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0008"
@@ -4612,7 +4638,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -4650,6 +4676,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0009"
@@ -4668,7 +4695,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "sale",
@@ -4706,6 +4733,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0010"
@@ -4724,7 +4752,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "hotel",
         "property_type_label": "מלון",
         "offer_type": "rent",
@@ -4762,6 +4790,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0011"
@@ -4780,7 +4809,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "hotel",
         "property_type_label": "מלון",
         "offer_type": "sale",
@@ -4818,6 +4847,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0012"
@@ -4836,7 +4866,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -4874,6 +4904,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0014"
@@ -4893,8 +4924,8 @@
     "canonical": "/he/locations/sandanski",
     "indexable": false,
     "metadata": {
-      "title": "נכסים ב-Sandanski | MS Realty",
-      "description": "נכסים שנבדקו על ידי MS Realty ב-Sandanski.",
+      "title": "נכסים ב-סנדנסקי | MS Realty",
+      "description": "נכסים שנבדקו על ידי MS Realty ב-סנדנסקי.",
       "robots": "noindex,follow"
     },
     "hreflang": [],
@@ -5012,7 +5043,7 @@
       }
     },
     "body": {
-      "h1": "נכסים ב-Sandanski",
+      "h1": "נכסים ב-סנדנסקי",
       "location": "Sandanski",
       "listing_count": 0
     },
@@ -5285,6 +5316,7 @@
       }
     },
     "search": {
+      "saved_view": false,
       "engines": [
         "typesense",
         "meilisearch"
@@ -5378,7 +5410,7 @@
     "cards": [
       {
         "id": "MS-CRAWL-0001",
-        "title": "נכס MS Realty MS-CRAWL-0001 ב-Sandanski",
+        "title": "נכס MS Realty MS-CRAWL-0001 ב-סנדנסקי",
         "path": "/he/properties/MS-CRAWL-0001",
         "review_badge": "reviewed_translation",
         "translation_display": "reviewed_translation",
@@ -5388,7 +5420,7 @@
         "translation_human_approved": true,
         "source_locale": "bg",
         "content_locale": "he",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -5426,6 +5458,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0001"
@@ -5444,7 +5477,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "multi_unit",
         "property_type_label": "דירות",
         "offer_type": "sale",
@@ -5482,6 +5515,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0002"
@@ -5500,7 +5534,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -5538,6 +5572,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0003"
@@ -5556,7 +5591,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -5594,6 +5629,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0004"
@@ -5612,7 +5648,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -5650,6 +5686,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0005"
@@ -5668,7 +5705,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "commercial",
         "property_type_label": "נכס מסחרי",
         "offer_type": "rent",
@@ -5706,6 +5743,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0006"
@@ -5724,7 +5762,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "sale",
@@ -5762,6 +5800,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0007"
@@ -5780,7 +5819,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -5818,6 +5857,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0008"
@@ -5836,7 +5876,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "rent",
@@ -5874,6 +5914,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0009"
@@ -5892,7 +5933,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "apartment",
         "property_type_label": "דירה",
         "offer_type": "sale",
@@ -5930,6 +5971,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0010"
@@ -5948,7 +5990,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "hotel",
         "property_type_label": "מלון",
         "offer_type": "rent",
@@ -5986,6 +6028,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0011"
@@ -6004,7 +6047,7 @@
         "translation_human_approved": false,
         "source_locale": "bg",
         "content_locale": "bg",
-        "location": "Sandanski",
+        "location": "סנדנסקי",
         "property_type": "hotel",
         "property_type_label": "מלון",
         "offer_type": "sale",
@@ -6042,6 +6085,7 @@
           },
           "save": {
             "label": "שמירה",
+            "saved_label": "נשמר",
             "endpoint": "/api/saved-searches",
             "storage_key": "ms-realty:saved-listings",
             "listing_id": "MS-CRAWL-0012"
