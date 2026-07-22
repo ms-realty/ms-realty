@@ -979,6 +979,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewHtmlBody.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
       assert.match(migrationReviewHtmlBody, /data-kind="admin-migration-review"/);
       assert.match(migrationReviewHtmlBody, /data-react-admin-ui="migration-review"/);
+      assert.match(migrationReviewHtmlBody, /Работно място за преглед на старите URL адреси/);
+      assert.match(migrationReviewHtmlBody, />Търсене<input type="search"/);
+      assert.match(migrationReviewHtmlBody, /преглед на старите URL адреси, външни SEO данни/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-count="457"/);
       assert.match(migrationReviewHtmlBody, /data-reviewed-route-count="0"/);
       assert.match(migrationReviewHtmlBody, /data-pending-route-decision="true"/);
