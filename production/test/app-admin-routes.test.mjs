@@ -1406,6 +1406,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /data-translation-panel="true"/);
       assert.match(editorHtml, /data-media-review-panel="true"/);
       assert.match(editorHtml, /data-media-manager="true"/);
+      assert.match(editorHtml, /<details class="adm-media-review" data-media-review-disclosure=/);
+      assert.match(editorHtml, /Прегледай файла/);
       assert.match(editorHtml, /action="\/api\/admin\/media\/reviews"/);
       assert.match(editorHtml, /data-tour-review-status=/);
       assert.match(editorHtml, /data-tour-editor-form="true"/);
