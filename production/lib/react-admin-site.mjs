@@ -128,6 +128,7 @@ const ADMIN_UI_COPY = {
     bulkStatusSaved: "Статусът на избраните обяви е променен.",
     bulkStatusFailed: "Статусът на избраните обяви не беше променен.",
     publicationSchedule: "Планирано публикуване",
+    sellerPipelineNote: "Бележка по потока за продавача",
     publicationScheduleHint: "Публикуването и свалянето се одобряват от човек. Свалянето архивира обявата и запазва стария URL.",
     publicationAction: "Действие",
     publishListing: "Публикувай",
@@ -261,6 +262,8 @@ const ADMIN_UI_COPY = {
       published: "Публикувано", approved: "Одобрено", stale: "Остаряло", missing: "Липсва", present: "Налично",
       available: "Налична", reserved: "Резервирана", sold: "Продадена", rented: "Отдадена", archived: "Архивирана", source_imported_review_required: "Внесена от източник - изисква преглед", review_required: "Изисква преглед", needs_panorama_upload: "Нужна е панорама",
       general: "Общо запитване", viewing: "Оглед", draft: "Чернова", ai_drafted: "AI чернова", human_edited: "Редактирано от човек", manager_escalation_required: "Нужна е ескалация към мениджър", reminder_required: "Напомняне за отговор", needs_reply: "Нужен отговор", queued: "В опашка", sent: "Изпратено", failed: "Неуспешно", open: "Отворено", contacted: "Осъществен контакт", completed: "Завършено", rescheduled: "Пренасрочено", no_show: "Не се яви", not_required: "Не е нужно", overdue: "Просрочено", valuation_requested: "Заявка за оценка", callback_completed: "Обратното обаждане е завършено", appraisal_scheduled: "Оценката е насрочена", appraisal_completed: "Оценката е завършена", mandate_signed: "Договорът е подписан", listing_draft_started: "Черновата на обявата е започната", offer_received: "Получена оферта", closed_lost: "Затворено без сделка", seller_callback: "Обратно обаждане към продавача", callback: "Обратно обаждане", appraisal: "Оценка", mandate: "Договор", listing_draft: "Чернова на обявата", listing_publish: "Публикуване на обявата", listing_offer: "Оферта за обявата", seller_close: "Приключване на продажбата", scheduled: "Насрочено", in_progress: "В процес", closed: "Затворено",
+      commercial: "Търговски имот", multi_unit: "Апартаменти", apartment: "Апартамент", hotel: "Хотел", house: "Къща", land: "Парцел", property: "Имот", sale: "Продажба", rent: "Наем",
+      instant: "Веднага", daily: "Ежедневно", weekly: "Седмично",
       booked: "Насрочено", price_on_request: "Цена при запитване", hermes_drafted: "Чернова от Hermes", human_translation_required: "Нужен е човешки превод", hermes_draft_required: "Нужна е чернова от Hermes", external_import_required: "Нужен е външен превод", draft_review_required: "Чернова за преглед", stale_review_required: "Остарял превод за преглед", publish_required: "Одобрен превод за публикуване",
     },
     fields: { title: "Заглавие", h1: "Основно заглавие", description: "Описание", location: "Локация", property_type: "Тип имот", offer_type: "Тип оферта", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена при запитване", area_sqm: "Площ в m²", bedrooms: "Спални", bedrooms_not_applicable: "Спалните не са приложими", floor: "Етаж", total_floors: "Общо етажи", land_area_sqm: "Площ на парцела в m²", condition: "Състояние", location_precision: "Точност на локацията", availability_verified_at: "Наличността е проверена на", publish_approved: "Одобрена за публикуване", seo_title: "SEO заглавие", seo_description: "Meta описание", seo_canonical: "Canonical път", seo_og_title: "Open Graph заглавие", seo_og_description: "Open Graph описание", seo_robots: "Robots", seo_review_confirmed: "SEO е прегледано и одобрено от човек", option_yes: "Да", option_no: "Не", option_area_only: "Само район", option_approximate: "Приблизителна локация", option_exact: "Точна локация", media_kind_photo: "Снимка", media_kind_floor_plan: "План", media_kind_video: "Видео" },
@@ -365,6 +368,7 @@ const ADMIN_UI_COPY = {
     bulkStatusSaved: "Статус выбранных объектов изменен.",
     bulkStatusFailed: "Не удалось изменить статус выбранных объектов.",
     publicationSchedule: "Отложенная публикация",
+    sellerPipelineNote: "Заметка по воронке продавца",
     publicationScheduleHint: "Публикация и снятие подтверждаются человеком. Снятие архивирует объект и сохраняет старый URL.",
     publicationAction: "Действие",
     publishListing: "Опубликовать",
@@ -498,6 +502,8 @@ const ADMIN_UI_COPY = {
       published: "Опубликовано", approved: "Одобрено", stale: "Устарело", missing: "Отсутствует", present: "Есть",
       available: "Доступно", reserved: "Зарезервировано", sold: "Продано", rented: "Сдано", archived: "В архиве", source_imported_review_required: "Импортировано из источника - нужна проверка", review_required: "Требует проверки", needs_panorama_upload: "Нужна панорама",
       general: "Общий запрос", viewing: "Просмотр", draft: "Черновик", ai_drafted: "Черновик AI", human_edited: "Отредактировано человеком", manager_escalation_required: "Нужна эскалация менеджеру", reminder_required: "Напоминание об ответе", needs_reply: "Нужен ответ", queued: "В очереди", sent: "Отправлено", failed: "Ошибка", open: "Открыто", contacted: "Контакт установлен", completed: "Завершено", rescheduled: "Перенесено", no_show: "Не пришел", not_required: "Не требуется", overdue: "Просрочено", valuation_requested: "Запрос оценки", callback_completed: "Обратный звонок завершен", appraisal_scheduled: "Оценка назначена", appraisal_completed: "Оценка завершена", mandate_signed: "Договор подписан", listing_draft_started: "Черновик объекта начат", offer_received: "Предложение получено", closed_lost: "Закрыто без сделки", seller_callback: "Обратный звонок продавцу", callback: "Обратный звонок", appraisal: "Оценка", mandate: "Договор", listing_draft: "Черновик объекта", listing_publish: "Публикация объекта", listing_offer: "Предложение по объекту", seller_close: "Завершение продажи", scheduled: "Назначено", in_progress: "В работе", closed: "Закрыто",
+      commercial: "Коммерческая недвижимость", multi_unit: "Апартаменты", apartment: "Квартира", hotel: "Отель", house: "Дом", land: "Участок", property: "Объект", sale: "Продажа", rent: "Аренда",
+      instant: "Сразу", daily: "Ежедневно", weekly: "Еженедельно",
       booked: "Назначено", price_on_request: "Цена по запросу", hermes_drafted: "Черновик Hermes", human_translation_required: "Нужен ручной перевод", hermes_draft_required: "Нужен черновик Hermes", external_import_required: "Нужен внешний перевод", draft_review_required: "Черновик на проверку", stale_review_required: "Устаревший перевод на проверку", publish_required: "Одобренный перевод к публикации",
     },
     fields: { title: "Название", h1: "Основной заголовок", description: "Описание", location: "Локация", property_type: "Тип объекта", offer_type: "Тип предложения", listing_status: "Статус", price_eur: "Цена в EUR", price_on_request: "Цена по запросу", area_sqm: "Площадь в m²", bedrooms: "Спальни", bedrooms_not_applicable: "Спальни не применимы", floor: "Этаж", total_floors: "Всего этажей", land_area_sqm: "Площадь участка в m²", condition: "Состояние", location_precision: "Точность локации", availability_verified_at: "Доступность проверена", publish_approved: "Одобрено к публикации", seo_title: "SEO-заголовок", seo_description: "Meta-описание", seo_canonical: "Canonical-путь", seo_og_title: "Заголовок Open Graph", seo_og_description: "Описание Open Graph", seo_robots: "Robots", seo_review_confirmed: "SEO проверено и одобрено человеком", option_yes: "Да", option_no: "Нет", option_area_only: "Только район", option_approximate: "Приблизительная локация", option_exact: "Точная локация", media_kind_photo: "Фото", media_kind_floor_plan: "Планировка", media_kind_video: "Видео" },
@@ -602,6 +608,7 @@ const ADMIN_UI_COPY = {
     bulkStatusSaved: "Selected listing statuses updated.",
     bulkStatusFailed: "Could not update selected listing statuses.",
     publicationSchedule: "Scheduled publication",
+    sellerPipelineNote: "Seller pipeline note",
     publicationScheduleHint: "Publishing and unpublishing are human-approved. Unpublishing archives the listing and preserves its legacy URL.",
     publicationAction: "Action",
     publishListing: "Publish",
@@ -735,6 +742,8 @@ const ADMIN_UI_COPY = {
       published: "Published", approved: "Approved", stale: "Stale", missing: "Missing", present: "Present",
       available: "Available", reserved: "Reserved", sold: "Sold", rented: "Rented", archived: "Archived", source_imported_review_required: "Imported from source - review required", review_required: "Review required", needs_panorama_upload: "Panorama required",
       general: "General inquiry", viewing: "Viewing", draft: "Draft", ai_drafted: "AI draft", human_edited: "Human edited", manager_escalation_required: "Manager escalation required", reminder_required: "Reply reminder", needs_reply: "Needs reply", queued: "Queued", sent: "Sent", failed: "Failed", open: "Open", contacted: "Contacted", completed: "Completed", rescheduled: "Rescheduled", no_show: "No-show", not_required: "Not required", overdue: "Overdue", valuation_requested: "Valuation requested", callback_completed: "Callback completed", appraisal_scheduled: "Appraisal scheduled", appraisal_completed: "Appraisal completed", mandate_signed: "Mandate signed", listing_draft_started: "Listing draft started", offer_received: "Offer received", closed_lost: "Closed lost", seller_callback: "Seller callback", callback: "Callback", appraisal: "Appraisal", mandate: "Mandate", listing_draft: "Listing draft", listing_publish: "Listing publication", listing_offer: "Listing offer", seller_close: "Sale completion", scheduled: "Scheduled", in_progress: "In progress", closed: "Closed",
+      commercial: "Commercial property", multi_unit: "Apartments", apartment: "Apartment", hotel: "Hotel", house: "House", land: "Land", property: "Property", sale: "For sale", rent: "For rent",
+      instant: "As soon as possible", daily: "Daily", weekly: "Weekly",
       booked: "Booked", price_on_request: "Price on request", hermes_drafted: "Hermes draft", human_translation_required: "Human translation required", hermes_draft_required: "Hermes draft required", external_import_required: "External translation required", draft_review_required: "Draft review required", stale_review_required: "Stale translation review", publish_required: "Approved translation to publish",
     },
     fields: { title: "Title", h1: "Primary heading", description: "Description", location: "Location", property_type: "Property type", offer_type: "Offer type", listing_status: "Status", price_eur: "Price in EUR", price_on_request: "Price on request", area_sqm: "Area in m²", bedrooms: "Bedrooms", bedrooms_not_applicable: "Bedrooms not applicable", floor: "Floor", total_floors: "Total floors", land_area_sqm: "Land area in m²", condition: "Condition", location_precision: "Location precision", availability_verified_at: "Availability verified at", publish_approved: "Approved for publishing", seo_title: "SEO title", seo_description: "Meta description", seo_canonical: "Canonical path", seo_og_title: "Open Graph title", seo_og_description: "Open Graph description", seo_robots: "Robots", seo_review_confirmed: "SEO reviewed and approved by a human", option_yes: "Yes", option_no: "No", option_area_only: "Area only", option_approximate: "Approximate location", option_exact: "Exact location", media_kind_photo: "Photo", media_kind_floor_plan: "Floor plan", media_kind_video: "Video" },
@@ -1463,7 +1472,7 @@ function PublicRequestCard({ page, row, copy, ui, terminal = false }) {
           ? h("div", null, h("dt", null, label(copy, "searchCriteria", "Search criteria")), h("dd", null, publicRequestCriteria(row)))
           : h("div", null, h("dt", null, label(copy, "requestedPath", "Requested page")), h("dd", { className: "crm-mono" }, row.requested_path || "—")),
         row.request_type === "saved_search"
-          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency || "—"))
+          ? h("div", null, h("dt", null, label(copy, "alertFrequency", "Alert frequency")), h("dd", null, row.alert_frequency ? statusText(ui, row.alert_frequency) : "—"))
           : null,
         row.request_type === "saved_search"
           ? h("div", null, h("dt", null, label(copy, "matches", "Matches")), h("dd", null, row.match_count ?? 0))
@@ -2105,7 +2114,7 @@ function PipelineCard({ page, state, lead }) {
           h("strong", null, label(copy, "qualification", "Qualification")),
           h("span", null, `€${requirements.budget_min_eur || 0}–€${requirements.budget_max_eur}`),
           h("span", null, requirements.locations.join(", ")),
-          requirements.property_types.length ? h("span", null, requirements.property_types.join(", ")) : null,
+          requirements.property_types.length ? h("span", null, requirements.property_types.map((value) => statusText(ui, value)).join(", ")) : null,
           requirements.bedrooms_min !== null ? h("span", null, `${label(copy, "bedroomsMin", "Minimum bedrooms")}: ${requirements.bedrooms_min}`) : null,
           h("span", null, requirements.timeline),
           h("span", null, statusText(ui, requirements.finance_status)),
@@ -2118,7 +2127,7 @@ function PipelineCard({ page, state, lead }) {
           h("strong", null, label(copy, "intakeIncomplete", "Qualification details missing")),
           intake.budget_max_eur !== null && intake.budget_max_eur !== undefined ? h("span", null, `≤ €${intake.budget_max_eur}`) : null,
           intake.locations?.length ? h("span", null, intake.locations.join(", ")) : null,
-          intake.property_types?.length ? h("span", null, intake.property_types.join(", ")) : null,
+          intake.property_types?.length ? h("span", null, intake.property_types.map((value) => statusText(ui, value)).join(", ")) : null,
           intake.timeline ? h("span", null, intake.timeline) : null,
         )
       : null,
@@ -3973,6 +3982,12 @@ function editorInputFor(ui, field, value, disabled = false) {
   }
   if (field === "listing_status") {
     return editorSelect(field, value || "available", disabled, ["available", "reserved", "sold", "rented", "archived"].map((status) => [status, statusText(ui, status)]));
+  }
+  if (field === "property_type") {
+    return editorSelect(field, value || "property", disabled, ["commercial", "multi_unit", "apartment", "hotel", "house", "land", "property"].map((type) => [type, statusText(ui, type)]));
+  }
+  if (field === "offer_type") {
+    return editorSelect(field, value || "sale", disabled, ["sale", "rent"].map((type) => [type, statusText(ui, type)]));
   }
   if (field === "location_precision") {
     return editorSelect(field, value || "approximate", disabled, ["area_only", "approximate", "exact"].map((precision) => [precision, fieldText(ui, `option_${precision}`)]));

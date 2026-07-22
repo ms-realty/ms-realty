@@ -80,6 +80,10 @@ test("standalone consent workspace exposes current privacy-safe state and record
     assert.match(page.body, /data-consent-column="action" data-label="Action"/);
     assert.match(page.body, /saved-search-consent-1/);
     assert.doesNotMatch(page.body, /private-buyer@example\.test/);
+    const russianPage = await dispatchHttp(app, { url: "/admin/consents?locale=ru", headers: HEADERS });
+    assert.equal(russianPage.status, 200);
+    assert.match(russianPage.body, /data-consent-column="action" data-label="Действие"/);
+    assert.doesNotMatch(russianPage.body, /data-label="Action"/);
     const response = await dispatchHttp(app, {
       method: "POST",
       url: "/api/admin/consents/withdraw",

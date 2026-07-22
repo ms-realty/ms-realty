@@ -447,6 +447,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(documentsHtml, /data-kind="admin-document-checklists"/);
       assert.match(documentsHtml, /data-process-guardrail="true"/);
       assert.match(documentsHtml, /action="\/api\/admin\/documents\/outcome"/);
+      assert.match(documentsHtml, /Открыто/);
+      assert.doesNotMatch(documentsHtml, />Open</);
       const documentOutcome = await documentOutcomeRoute.POST(
         new Request("https://example.test/api/admin/documents/outcome", {
           method: "POST",
@@ -536,6 +538,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(translationQueueHtml, /data-human-approval-required="true"/);
       assert.match(translationQueueHtml, /data-translation-task-row="translation-MS-CRAWL-0001-en"/);
       assert.match(translationQueueHtml, /data-translation-workflow-form="human"/);
+      assert.match(translationQueueHtml, /data-label="Проверить перевод"/);
+      assert.doesNotMatch(translationQueueHtml, /REVIEW TRANSLATION/);
       assert.match(translationQueueHtml, /name="propertyFactsJson"/);
       const translationQueueJson = await translationQueueJsonRoute.GET(
         new Request("https://example.test/api/admin/translations?locale=ru&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
@@ -1409,6 +1413,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(editorHtml, /data-editor-layout="facts-translations-quality"/);
       assert.match(editorHtml, /data-editor-tabs="true"/);
       assert.match(editorHtml, /data-editor-panel="facts"/);
+      assert.match(editorHtml, /<select name="property_type"/);
+      assert.match(editorHtml, /<select name="offer_type"/);
       assert.match(editorHtml, /data-editor-tab="seo"/);
       assert.match(editorHtml, /data-seo-panel="true"/);
       assert.match(editorHtml, /data-translation-panel="true"/);

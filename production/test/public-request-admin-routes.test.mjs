@@ -148,6 +148,8 @@ test("authenticated request workspace joins private contacts without leaking the
     );
     const html = await htmlResponse.text();
     assert.match(html, /Заявки и уведомления/);
+    assert.match(html, /Ежедневно/);
+    assert.doesNotMatch(html, />daily</);
     assert.match(html, /data-public-request-outcome-form="true"/);
     assert.match(html, /mailto:elena@example\.test/);
     assert.match(html, /data-private-request-message="true"/);
