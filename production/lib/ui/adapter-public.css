@@ -135,6 +135,7 @@
     align-content: start;
     gap: var(--space-4);
     width: min(420px, 100vw);
+    height: calc(100dvh - 64px);
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: var(--space-5) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
