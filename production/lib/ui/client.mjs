@@ -10,6 +10,9 @@ export const PUBLIC_APP_JS = `(function () {
     requestFailed: publicClientScript ? publicClientScript.getAttribute("data-request-failed") || "" : "",
   };
   var KEY = "ms-realty:saved-listings";
+  var SEARCH_SCROLL_KEY = "ms-realty:search-scroll";
+  var lastLeadTrigger = null;
+  var lastContactOptionsTrigger = null;
   var PHOTO_SPHERE_VIEWER_SCRIPT_URL = "/vendor/photo-sphere-viewer.js";
   var PHOTO_SPHERE_VIEWER_CSS_URL = "/vendor/photo-sphere-viewer.css";
   var photoSphereViewerPromise = null;
@@ -95,7 +98,11 @@ export const PUBLIC_APP_JS = `(function () {
   }
   function submitJson(form, onDone) {
     var submit = form.querySelector('[type="submit"]');
-    if (submit) submit.setAttribute("data-loading", "");
+    if (submit) {
+      submit.setAttribute("data-loading", "");
+      submit.setAttribute("aria-busy", "true");
+      submit.disabled = true;
+    }
     fetch(form.getAttribute("action"), {
       method: (form.getAttribute("method") || "POST").toUpperCase(),
       headers: { "content-type": "application/json" },
@@ -117,7 +124,11 @@ export const PUBLIC_APP_JS = `(function () {
         warn.textContent = (I18N.requestFailed || "Request failed") + " (" + (form.getAttribute("action") || "") + ")";
       })
       .then(function () {
-        if (submit) submit.removeAttribute("data-loading");
+        if (submit) {
+          submit.removeAttribute("data-loading");
+          submit.removeAttribute("aria-busy");
+          submit.disabled = false;
+        }
       });
   }
   function isApprovedPanoramaUrl(value) {
@@ -396,6 +407,77 @@ export const PUBLIC_APP_JS = `(function () {
       })(images[i]);
     }
   }
+  function initSearchScrollRestoration() {
+    var searchRoot = document.querySelector("[data-search-results], [data-saved-listings-view='true']");
+    if (!searchRoot) return;
+    var lastListingId = null;
+    function writePosition() {
+      try {
+        sessionStorage.setItem(SEARCH_SCROLL_KEY, JSON.stringify({
+          path: location.pathname + location.search,
+          top: Math.max(0, Math.round(window.scrollY || 0)),
+          listingId: lastListingId,
+          savedAt: Date.now(),
+        }));
+      } catch (error) {}
+    }
+    function readPosition() {
+      try {
+        var value = JSON.parse(sessionStorage.getItem(SEARCH_SCROLL_KEY));
+        return value && typeof value === "object" ? value : null;
+      } catch (error) { return null; }
+    }
+    document.addEventListener("click", function (event) {
+      var link = event.target.closest("[data-search-card] a[href]");
+      if (!link) return;
+      var card = link.closest("[data-search-card][data-listing-id]");
+      lastListingId = card ? card.getAttribute("data-listing-id") : null;
+      writePosition();
+    });
+    window.addEventListener("pagehide", writePosition);
+    window.addEventListener("pageshow", function (event) {
+      var entries = window.performance && typeof window.performance.getEntriesByType === "function"
+        ? window.performance.getEntriesByType("navigation")
+        : [];
+      var backForward = event.persisted || (entries[0] && entries[0].type === "back_forward");
+      if (!backForward) return;
+      var saved = readPosition();
+      if (!saved || saved.path !== location.pathname + location.search || Date.now() - Number(saved.savedAt || 0) > 1800000) return;
+      lastListingId = typeof saved.listingId === "string" ? saved.listingId : null;
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          var maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+          window.scrollTo({ top: Math.min(maxTop, Math.max(0, Number(saved.top) || 0)), behavior: "auto" });
+          if (!lastListingId) return;
+          var cards = document.querySelectorAll("[data-search-card][data-listing-id]");
+          for (var i = 0; i < cards.length; i += 1) {
+            if (cards[i].getAttribute("data-listing-id") !== lastListingId || cards[i].hidden) continue;
+            var focusTarget = cards[i].querySelector("a[data-card-thumbnail], h2 a");
+            if (focusTarget) focusTarget.focus({ preventScroll: true });
+            break;
+          }
+        });
+      });
+    });
+  }
+  function initDialogFocusReturn() {
+    var enquiry = document.getElementById("mk-enquiry");
+    if (enquiry) enquiry.addEventListener("close", function () {
+      var target = lastLeadTrigger;
+      lastLeadTrigger = null;
+      if (target && target.isConnected && target.getClientRects().length) {
+        window.requestAnimationFrame(function () { target.focus(); });
+      }
+    });
+    var contactOptions = document.querySelector("[data-mobile-contact-options]");
+    if (contactOptions) contactOptions.addEventListener("close", function () {
+      var target = lastContactOptionsTrigger;
+      lastContactOptionsTrigger = null;
+      if (target && target.isConnected && target.getClientRects().length) {
+        window.requestAnimationFrame(function () { target.focus(); });
+      }
+    });
+  }
   function initPublicMobileNavigation() {
     var mobileMenu = document.querySelector("[data-mobile-menu]");
     if (!mobileMenu) return;
@@ -466,7 +548,10 @@ export const PUBLIC_APP_JS = `(function () {
     var contactOptionsOpen = event.target.closest("[data-mobile-contact-options-open]");
     if (contactOptionsOpen) {
       var contactOptions = document.querySelector("[data-mobile-contact-options]");
-      if (contactOptions && typeof contactOptions.showModal === "function") contactOptions.showModal();
+      if (contactOptions && typeof contactOptions.showModal === "function") {
+        lastContactOptionsTrigger = contactOptionsOpen;
+        contactOptions.showModal();
+      }
       return;
     }
     var contactOptionsClose = event.target.closest("[data-mobile-contact-options-close]");
@@ -502,7 +587,12 @@ export const PUBLIC_APP_JS = `(function () {
     var lead = event.target.closest('button[data-endpoint="/api/leads"]');
     if (lead) {
       var leadOptionsDialog = lead.closest("[data-mobile-contact-options]");
-      if (leadOptionsDialog && typeof leadOptionsDialog.close === "function") leadOptionsDialog.close();
+      lastLeadTrigger = lead;
+      if (leadOptionsDialog && typeof leadOptionsDialog.close === "function") {
+        lastContactOptionsTrigger = null;
+        leadOptionsDialog.close();
+        lastLeadTrigger = document.querySelector("[data-mobile-sticky-primary]") || document.querySelector("[data-mobile-contact-options-open]") || lead;
+      }
       var dialog = document.getElementById("mk-enquiry");
       if (!dialog || typeof dialog.showModal !== "function") return;
       configureEnquiryDialog(dialog, lead);
@@ -540,8 +630,11 @@ export const PUBLIC_APP_JS = `(function () {
         var nextDetail = form.querySelector("[data-enquiry-next] p");
         if (successDetail) successDetail.textContent = nextDetail ? nextDetail.textContent : "";
         form.hidden = true;
-        dialog.querySelector(".ct-done").hidden = false;
+        var success = dialog.querySelector(".ct-done");
+        success.hidden = false;
         form.reset();
+        var successClose = success.querySelector("[data-enquiry-close]");
+        if (successClose) window.requestAnimationFrame(function () { successClose.focus(); });
       } else {
         showSuccess(form);
       }
@@ -551,6 +644,8 @@ export const PUBLIC_APP_JS = `(function () {
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  initSearchScrollRestoration();
+  initDialogFocusReturn();
   initPublicMobileNavigation();
   initSavedSearchContacts();
   initMobileSearchFilters();
