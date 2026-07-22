@@ -1000,6 +1000,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-route-target-options="true"/);
       assert.match(migrationReviewHtmlBody, /data-launch-evidence-disclosure="true"/);
       assert.match(migrationReviewHtmlBody, /data-redirect-tools-disclosure="true"/);
+      assert.match(migrationReviewHtmlBody, /Данните за старите страници са само за справка/);
       assert.match(migrationReviewHtmlBody, /data-seo-tools-disclosure="true"/);
       assert.match(migrationReviewHtmlBody, /data-quality-tools-disclosure="true"/);
       assert.equal(migrationReviewHtmlBody.includes('<details class="adm-route-decision__disclosure" open>'), false);
@@ -1129,6 +1130,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(redirectWorkbook.headers.get("content-type"), "text/csv; charset=utf-8");
       assert.ok(redirectWorkbookCsv.includes(firstRedirect.old_url));
       assert.ok(redirectWorkbookCsv.includes(firstRedirect.target_path));
+      const redirectWorkbookRows = parseCsv(redirectWorkbookCsv);
+      assert.equal(redirectWorkbookRows[0].source_status, "200");
+      assert.ok(redirectWorkbookRows[0].source_title);
+      assert.ok(redirectWorkbookRows[0].review_owner);
 
       const redirectApproval = await redirectApprovalsRoute.POST(
         new Request("https://example.test/api/admin/redirect-approvals", {

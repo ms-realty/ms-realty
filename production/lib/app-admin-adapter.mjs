@@ -887,7 +887,9 @@ function launchInputChecklist(config) {
     generatedAt,
     launchReadiness: launchReadiness(config),
     seoEvidence: currentSeoEvidence(config),
-    redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routes)),
+    redirectWorkbookCsv: renderRedirectApprovalWorkbook(
+      buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routes, loadMigrationRecords())),
+    ),
     deployableRedirects: artifact,
     routeMap: routeMapSummary(routes),
     liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
@@ -1940,8 +1942,11 @@ function importSeoEvidence(input, config) {
 
 function redirectApprovalWorkbook(url, config) {
   const routes = routeMapRows();
+  const reviewRoutes = attachMigrationReviewEvidence(routes, loadMigrationRecords());
   const approvals = readRedirectApprovals(config.redirectApprovalPath);
-  const rows = url.searchParams.get("pending") ? buildPendingRedirectApprovalWorkbook(routes, approvals) : buildRedirectApprovalWorkbook(routes);
+  const rows = url.searchParams.get("pending")
+    ? buildPendingRedirectApprovalWorkbook(reviewRoutes, approvals)
+    : buildRedirectApprovalWorkbook(reviewRoutes);
   return renderRedirectApprovalWorkbook(rows);
 }
 

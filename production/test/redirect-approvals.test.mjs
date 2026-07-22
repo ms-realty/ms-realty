@@ -21,6 +21,8 @@ import {
   validateRedirectApprovalsCsv,
 } from "../lib/redirect-approvals.mjs";
 import { parseCsv } from "../lib/csv.mjs";
+import { loadMigrationRecords } from "../lib/content.mjs";
+import { attachMigrationReviewEvidence } from "../lib/migration-review.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 function loadRouteMap() {
@@ -260,11 +262,21 @@ test("duplicate approval imports keep one deployable redirect per old URL", () =
 });
 
 test("redirect approval workbook includes every legacy URL without approving it", () => {
-  const rows = buildRedirectApprovalWorkbook(loadRouteMap());
+  const rows = buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(loadRouteMap(), loadMigrationRecords()));
   const parsed = parseCsv(renderRedirectApprovalWorkbook(rows));
+  const evidenceRow = parsed.find((row) => row.source_title && row.source_canonical);
 
   assert.equal(rows.length, 457);
   assert.equal(parsed.length, 457);
+  assert.equal(evidenceRow.source_status, "200");
+  assert.match(evidenceRow.source_final_url, /^https:\/\/makler-realty\.(?:com|ru)/);
+  assert.ok(evidenceRow.source_h1);
+  assert.ok(evidenceRow.source_robots_meta);
+  assert.ok(evidenceRow.source_word_count);
+  assert.ok(evidenceRow.review_owner);
+  assert.ok(evidenceRow.action_required);
+  assert.ok(evidenceRow.priority);
+  assert.match(evidenceRow.metadata_gaps, /missingSchema/);
   assert.equal(parsed.every((row) => row.equivalent_content === "false"), true);
   assert.equal(parsed.filter((row) => row.url_type === "listing").every((row) => /^MS-/.test(row.target_listing_id)), true);
   assert.equal(parsed.filter((row) => row.url_type === "listing").every((row) => row.review_status === "pending_same_content_review"), true);
@@ -272,6 +284,24 @@ test("redirect approval workbook includes every legacy URL without approving it"
   assert.match(parsed.find((row) => row.url_type === "listing").same_content_checklist, /same property/);
   assert.equal(parsed.every((row) => row.old_url && row.reviewer === ""), true);
   assert.equal(parsed.filter((row) => row.url_type !== "listing").every((row) => row.decision === "" && row.target_path === ""), true);
+});
+
+test("completed workbook rows import while untouched evidence rows remain pending", () => {
+  const routeMap = loadRouteMap();
+  const rows = buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap, loadMigrationRecords()));
+  const listing = rows.find((row) => row.url_type === "listing" && row.target_locale === "bg");
+  listing.equivalent_content = true;
+  listing.reviewer = "editor_bg";
+  listing.approved_at = "2026-07-04T00:00:00Z";
+  listing.reason = "Human-reviewed same property.";
+
+  const result = validateRedirectApprovalsCsv(routeMap, renderRedirectApprovalWorkbook(rows));
+
+  assert.equal(result.approvals.length, 1);
+  assert.equal(result.approvals[0].old_url, listing.old_url);
+  assert.equal(result.approvals[0].reviewer, "editor_bg");
+  assert.equal(result.decisionSummary.total, 1);
+  assert.equal(result.summary.total, 1);
 });
 
 test("generated deployable redirect file is valid when present", () => {

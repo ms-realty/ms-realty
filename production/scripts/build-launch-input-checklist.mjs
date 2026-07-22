@@ -13,6 +13,8 @@ import {
 } from "../lib/launch-inputs.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { liveServiceProvisioningState } from "../lib/live-service-provisioning.mjs";
+import { loadMigrationRecords } from "../lib/content.mjs";
+import { attachMigrationReviewEvidence } from "../lib/migration-review.mjs";
 import { launchReadinessInputsFromEnv } from "./launch-readiness-env.mjs";
 
 function readJson(filePath) {
@@ -50,7 +52,9 @@ const outPath = writeLaunchInputChecklist(
       deployableRedirects,
     }),
     seoEvidence,
-    redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap.routes)),
+    redirectWorkbookCsv: renderRedirectApprovalWorkbook(
+      buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap.routes, loadMigrationRecords())),
+    ),
     deployableRedirects,
     routeMap,
     liveServiceProvisioning,

@@ -59,9 +59,13 @@ export function attachMigrationReviewEvidence(routes, records) {
     return {
       ...route,
       source_evidence: {
+        status: Number(record.status || 0),
+        final_url: record.final_url || "",
         title: record.title || "",
         h1: record.h1 || "",
         canonical: record.canonical || "",
+        robots_meta: record.robots_meta || "",
+        hreflang: record.hreflang || "",
         word_count: Number(record.word_count || 0),
         image_count: Number(record.image_count || 0),
         internal_link_count: Number(record.internal_link_count || 0),

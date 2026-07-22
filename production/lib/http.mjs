@@ -796,7 +796,9 @@ export function createHttpApp({
       generatedAt: reviewedAt || new Date().toISOString(),
       launchReadiness: currentLaunchReadiness(),
       seoEvidence: currentSeoEvidence(),
-      redirectWorkbookCsv: renderRedirectApprovalWorkbook(buildRedirectApprovalWorkbook(routeMap)),
+      redirectWorkbookCsv: renderRedirectApprovalWorkbook(
+        buildRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap, loadMigrationRecords())),
+      ),
       deployableRedirects: currentDeployedRedirectArtifact(),
       routeMap: {
         summary: summarizeLegacyRouteMap(routeMap),
@@ -1532,9 +1534,10 @@ export function createHttpApp({
 
     if (request.method === "GET" && url.pathname === "/api/admin/redirect-approval-workbook") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const reviewRoutes = attachMigrationReviewEvidence(routeMap, loadMigrationRecords());
       const rows = url.searchParams.get("pending")
-        ? buildPendingRedirectApprovalWorkbook(routeMap, readRedirectApprovals(redirectApprovalPath || undefined))
-        : buildRedirectApprovalWorkbook(routeMap);
+        ? buildPendingRedirectApprovalWorkbook(reviewRoutes, readRedirectApprovals(redirectApprovalPath || undefined))
+        : buildRedirectApprovalWorkbook(reviewRoutes);
       return adminResponse(
         200,
         renderRedirectApprovalWorkbook(rows),

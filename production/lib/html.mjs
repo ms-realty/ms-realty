@@ -568,7 +568,8 @@ function renderAdminMigrationReview(page) {
     page.redirectApprovalImport.pendingWorkbookEndpoint,
   )}">
     <h2>Import reviewed redirect CSV</h2>
-    <p><a href="${escapeHtml(page.redirectApprovalImport.pendingWorkbookEndpoint)}">Download pending workbook</a>, review rows, then paste approved CSV.</p>
+    <p><a href="${escapeHtml(page.redirectApprovalImport.pendingWorkbookEndpoint)}">Download pending workbook</a>.</p>
+    <p>Legacy source columns are read-only evidence. Complete the decision, equivalence confirmation, reviewer, and reason; untouched rows remain pending when imported.</p>
     <form method="post" action="${escapeHtml(page.redirectApprovalImport.endpoint)}">
       <textarea name="csv" rows="5" required></textarea>
       <button type="submit">Import CSV</button>

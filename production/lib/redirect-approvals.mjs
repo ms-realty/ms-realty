@@ -170,9 +170,11 @@ function approvalInputFromRow(row) {
 }
 
 function approvalsFromCsv(routeMap, csvText, approvedAt) {
-  return parseCsv(csvText).map((row) => {
+  return parseCsv(csvText).flatMap((row) => {
     const input = approvalInputFromRow(row);
-    return normalizeApproval(routeByOldUrl(routeMap, input.oldUrl), input, row.approved_at || approvedAt);
+    const route = routeByOldUrl(routeMap, input.oldUrl);
+    if (isUntouchedWorkbookRow(route, row)) return [];
+    return [normalizeApproval(route, input, row.approved_at || approvedAt)];
   });
 }
 
@@ -239,29 +241,60 @@ export function validateRedirectApprovalsCsv(routeMap, csvText, { approvedAt = n
   };
 }
 
+function redirectApprovalWorkbookRow(route) {
+  const mappedListing = route.url_type === "listing" && route.target_path && route.planned_status === 301;
+  const evidence = route.source_evidence || {};
+  return {
+    old_url: route.old_url,
+    url_type: route.url_type,
+    source_domain: route.source_domain,
+    source_status: evidence.status || "",
+    source_final_url: evidence.final_url || "",
+    source_title: evidence.title || "",
+    source_h1: evidence.h1 || "",
+    source_canonical: evidence.canonical || "",
+    source_robots_meta: evidence.robots_meta || "",
+    source_hreflang: evidence.hreflang || "",
+    source_word_count: evidence.word_count ?? "",
+    source_image_count: evidence.image_count ?? "",
+    source_internal_link_count: evidence.internal_link_count ?? "",
+    migration_action: evidence.migration_action || "",
+    review_owner: evidence.review_owner || "",
+    action_required: evidence.action_required || "",
+    priority: evidence.priority || "",
+    metadata_gaps: Array.isArray(evidence.metadata_gaps) ? evidence.metadata_gaps.join(" | ") : "",
+    target_path: route.target_path || "",
+    target_listing_id: mappedListing ? route.target_path.split("/").filter(Boolean).at(-1) : "",
+    target_locale: route.target_locale || "",
+    decision: mappedListing ? "redirect_301" : "",
+    review_status: mappedListing ? "pending_same_content_review" : "pending_terminal_route_review",
+    same_content_checklist: mappedListing
+      ? "Confirm old URL and target listing describe the same property; no homepage or search fallback."
+      : "Choose redirect_301, retain_200, or approved_410. Redirect and retained targets must be published, equivalent public content; no homepage or search fallback.",
+    equivalent_content: false,
+    reviewer: "",
+    approved_at: "",
+    reason: mappedListing
+      ? "Review same-content listing route before setting equivalent_content true."
+      : "Record the human-reviewed terminal route decision and reason.",
+  };
+}
+
+function isUntouchedWorkbookRow(route, row) {
+  if (!route) return false;
+  const template = redirectApprovalWorkbookRow(route);
+  return (
+    !String(row.reviewer || "").trim() &&
+    !String(row.approved_at || "").trim() &&
+    !truthy(row.equivalent_content || row.equivalentContent) &&
+    String(row.decision || "").trim().toLowerCase() === template.decision &&
+    String(row.target_path || "").trim() === template.target_path &&
+    (!String(row.reason || "").trim() || String(row.reason).trim() === template.reason)
+  );
+}
+
 export function buildRedirectApprovalWorkbook(routeMap) {
-  return routeMap.map((route) => {
-    const mappedListing = route.url_type === "listing" && route.target_path && route.planned_status === 301;
-    return {
-      old_url: route.old_url,
-      url_type: route.url_type,
-      source_domain: route.source_domain,
-      target_path: route.target_path || "",
-      target_listing_id: mappedListing ? route.target_path.split("/").filter(Boolean).at(-1) : "",
-      target_locale: route.target_locale || "",
-      decision: mappedListing ? "redirect_301" : "",
-      review_status: mappedListing ? "pending_same_content_review" : "pending_terminal_route_review",
-      same_content_checklist: mappedListing
-        ? "Confirm old URL and target listing describe the same property; no homepage or search fallback."
-        : "Choose redirect_301, retain_200, or approved_410. Redirect and retained targets must be published, equivalent public content; no homepage or search fallback.",
-      equivalent_content: false,
-      reviewer: "",
-      approved_at: "",
-      reason: mappedListing
-        ? "Review same-content listing route before setting equivalent_content true."
-        : "Record the human-reviewed terminal route decision and reason.",
-    };
-  });
+  return routeMap.map(redirectApprovalWorkbookRow);
 }
 
 export function renderRedirectApprovalWorkbook(rows) {
@@ -269,6 +302,21 @@ export function renderRedirectApprovalWorkbook(rows) {
     "old_url",
     "url_type",
     "source_domain",
+    "source_status",
+    "source_final_url",
+    "source_title",
+    "source_h1",
+    "source_canonical",
+    "source_robots_meta",
+    "source_hreflang",
+    "source_word_count",
+    "source_image_count",
+    "source_internal_link_count",
+    "migration_action",
+    "review_owner",
+    "action_required",
+    "priority",
+    "metadata_gaps",
     "target_path",
     "target_listing_id",
     "target_locale",

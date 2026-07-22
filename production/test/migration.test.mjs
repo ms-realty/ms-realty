@@ -131,9 +131,13 @@ test("migration review routes expose crawl evidence without making a terminal de
   assert.equal(route.old_url, records[0].old_url);
   assert.equal(route.review_required, true);
   assert.equal(route.deployable, false);
+  assert.equal(route.source_evidence.status, records[0].status);
+  assert.equal(route.source_evidence.final_url, records[0].final_url);
   assert.equal(route.source_evidence.title, records[0].title);
   assert.equal(route.source_evidence.h1, records[0].h1);
   assert.equal(route.source_evidence.canonical, records[0].canonical);
+  assert.equal(route.source_evidence.robots_meta, records[0].robots_meta);
+  assert.equal(route.source_evidence.hreflang, records[0].hreflang);
   assert.equal(route.source_evidence.word_count, records[0].word_count);
   assert.equal(route.source_evidence.review_owner, "content_editor");
   assert.equal(route.source_evidence.action_required, "map_or_rebuild_content_page");

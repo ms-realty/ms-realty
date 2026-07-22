@@ -8,6 +8,8 @@ import {
   writeRedirectApprovalWorkbook,
   writeDeployableRedirects,
 } from "../lib/redirect-approvals.mjs";
+import { loadMigrationRecords } from "../lib/content.mjs";
+import { attachMigrationReviewEvidence } from "../lib/migration-review.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
 const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
@@ -21,7 +23,7 @@ if (!bgListing || !ruListing) {
   throw new Error("Expected BG and RU listing route rows before redirect export");
 }
 
-const workbook = writeRedirectApprovalWorkbook(routeMap);
+const workbook = writeRedirectApprovalWorkbook(attachMigrationReviewEvidence(routeMap, loadMigrationRecords()));
 let approvals = readRedirectApprovals(approvalLedgerPath);
 if (!approvals.length && fs.existsSync(importPath)) {
   importRedirectApprovalsCsv(routeMap, fs.readFileSync(importPath, "utf8"), {

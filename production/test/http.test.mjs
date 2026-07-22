@@ -1374,7 +1374,11 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(workbook.status, 200);
   assert.equal(workbook.headers["cache-control"], "no-store");
   assert.equal(workbook.headers["content-type"], "text/csv; charset=utf-8");
-  assert.equal(parseCsv(workbook.body).length, 457);
+  const redirectWorkbookRows = parseCsv(workbook.body);
+  assert.equal(redirectWorkbookRows.length, 457);
+  assert.equal(redirectWorkbookRows[0].source_status, "200");
+  assert.ok(redirectWorkbookRows[0].source_title);
+  assert.ok(redirectWorkbookRows[0].review_owner);
   assert.equal(qualityWorkbookUnauthorized.status, 401);
   assert.equal(qualityWorkbook.status, 200);
   assert.equal(qualityWorkbook.headers["content-type"], "text/csv; charset=utf-8");
