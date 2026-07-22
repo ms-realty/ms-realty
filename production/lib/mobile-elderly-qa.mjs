@@ -101,7 +101,10 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "listing_sticky_actions",
-      includes(pages.listing, "data-mobile-sticky-actions=\"true\"") && includes(pages.listing, "data-listing-contact-panel=\"true\""),
+      includes(pages.listing, "data-mobile-sticky-actions=\"true\"") &&
+        includes(pages.listing, "data-mobile-sticky-primary=\"true\"") &&
+        includes(pages.listing, "data-mobile-contact-options=\"true\"") &&
+        includes(pages.listing, "data-listing-contact-panel=\"true\""),
     ),
     check(
       "listing_detail_media_actions",
@@ -111,6 +114,7 @@ export function buildMobileElderlyQaReport({
         includes(pages.listing, "data-listing-content-grid=\"true\"") &&
         includes(pages.listing, "data-listing-contact-panel=\"true\"") &&
         includes(pages.listing, "data-listing-facts=\"true\"") &&
+        includes(pages.listing, "data-mobile-gallery=\"true\"") &&
         includes(pages.listing, "data-photo-carousel=\"true\"") &&
         includes(pages.listing, "data-listing-action=\"print\"") &&
         includes(pages.listing, "data-client-save-listing="),

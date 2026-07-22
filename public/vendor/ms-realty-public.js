@@ -78,7 +78,10 @@
   }
   function isApprovedPanoramaUrl(value) {
     if (typeof value !== "string" || !/^https:\/\//i.test(value)) return false;
-    try { return new URL(value).protocol === "https:"; } catch (error) { return false; }
+    try {
+      var url = new URL(value);
+      return url.protocol === "https:" && !/(^localhost$|\.(test|example|invalid|localhost)$)/i.test(url.hostname);
+    } catch (error) { return false; }
   }
   function loadPhotoSphereStyles() {
     if (document.querySelector("link[data-photo-sphere-viewer-styles]")) return;
@@ -114,6 +117,9 @@
     if (mount && mount.parentNode) mount.parentNode.removeChild(mount);
     section.setAttribute("data-photo-sphere-viewer-state", "fallback");
     section.removeAttribute("aria-busy");
+    var navigationLink = section.id ? document.querySelector('a[href="#' + section.id + '"]') : null;
+    if (navigationLink) navigationLink.hidden = true;
+    section.hidden = true;
   }
   function createPhotoSphereViewer(Viewer, item, index, viewers) {
     var section = item.section;
@@ -164,7 +170,7 @@
       var section = candidates[i];
       var panoramaUrl = section.getAttribute("data-panorama-url") || "";
       if (!isApprovedPanoramaUrl(panoramaUrl)) {
-        section.setAttribute("data-photo-sphere-viewer-state", "fallback");
+        showTourFallback(section);
         continue;
       }
       tours.push({ section: section, panoramaUrl: panoramaUrl });
@@ -305,6 +311,22 @@
     }
   }
   document.addEventListener("click", function (event) {
+    if (event.target && event.target.matches && event.target.matches("[data-mobile-contact-options]")) {
+      event.target.close();
+      return;
+    }
+    var contactOptionsOpen = event.target.closest("[data-mobile-contact-options-open]");
+    if (contactOptionsOpen) {
+      var contactOptions = document.querySelector("[data-mobile-contact-options]");
+      if (contactOptions && typeof contactOptions.showModal === "function") contactOptions.showModal();
+      return;
+    }
+    var contactOptionsClose = event.target.closest("[data-mobile-contact-options-close]");
+    if (contactOptionsClose) {
+      var contactOptionsDialog = contactOptionsClose.closest("[data-mobile-contact-options]");
+      if (contactOptionsDialog && typeof contactOptionsDialog.close === "function") contactOptionsDialog.close();
+      return;
+    }
     var save = event.target.closest("[data-client-save-listing]");
     if (save) {
       event.preventDefault();
@@ -325,6 +347,8 @@
     }
     var lead = event.target.closest('button[data-endpoint="/api/leads"]');
     if (lead) {
+      var leadOptionsDialog = lead.closest("[data-mobile-contact-options]");
+      if (leadOptionsDialog && typeof leadOptionsDialog.close === "function") leadOptionsDialog.close();
       var dialog = document.getElementById("mk-enquiry");
       if (!dialog || typeof dialog.showModal !== "function") return;
       configureEnquiryDialog(dialog, lead);

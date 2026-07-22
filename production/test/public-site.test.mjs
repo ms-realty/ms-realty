@@ -82,6 +82,10 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-lead-source="website_callback_request"/);
   assert.match(html, /data-lead-source="website_viewing_request"/);
   assert.match(html, /data-lead-type="renter"/);
+  assert.match(html, /data-mobile-gallery="true"/);
+  assert.match(html, /data-mobile-sticky-primary="true"/);
+  assert.match(html, /data-mobile-contact-options="true"/);
+  assert.match(html, /data-mobile-contact-options-open="true"/);
   assert.doesNotMatch(html, /\/api\/admin\/(viewings|replies)/);
 });
 
@@ -106,6 +110,10 @@ test("approved broker contact data enables direct listing contact links", () => 
     page.body.actions.direct_contact.channels.find((channel) => channel.id === "whatsapp").href,
     "https://wa.me/359880000000",
   );
+  const html = renderReactPublicBody(page);
+  assert.match(html, /ld-contact-options__direct/);
+  assert.match(html, /href="tel:\+359880000000"/);
+  assert.match(html, /href="https:\/\/wa\.me\/359880000000"/);
 });
 
 test("listing SEO includes approved hreflang and excludes unavailable draft locales", () => {
@@ -282,6 +290,10 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-save-search-disclosure="sr-mobile"/);
   assert.match(html, /form="sr-mobile-filter-form"/);
   assert.match(html, /class="sr-mobile-filters__sheet-foot"/);
+  assert.match(html, /data-card-action="detail"/);
+  assert.match(html, /data-card-action="inquiry"/);
+  assert.match(html, /data-card-action="save"/);
+  assert.match(html, /data-card-spec="reference"/);
 });
 
 test("search applies text and facet filters before paginating cards", () => {

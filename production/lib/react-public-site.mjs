@@ -562,20 +562,25 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       h(
         "div",
         { className: "mk-pcard__specs" },
-        card.bedrooms ? h("span", null, h(Icon, { name: "bed", size: 16 }), ` ${card.bedrooms}`) : null,
-        card.area_sqm ? h("span", null, h(Icon, { name: "ruler", size: 16 }), ` ${card.area_sqm} m²`) : null,
-        h("span", null, h(Icon, { name: "camera", size: 16 }), ` ${card.image_count || 0}`),
-        h("span", { className: "mk-pcard__ref" }, card.id),
+        card.bedrooms ? h("span", { "data-card-spec": "bedrooms" }, h(Icon, { name: "bed", size: 16 }), ` ${card.bedrooms}`) : null,
+        card.area_sqm ? h("span", { "data-card-spec": "area" }, h(Icon, { name: "ruler", size: 16 }), ` ${card.area_sqm} m²`) : null,
+        h("span", { "data-card-spec": "photos" }, h(Icon, { name: "camera", size: 16 }), ` ${card.image_count || 0}`),
+        h("span", { className: "mk-pcard__ref", "data-card-spec": "reference" }, card.id),
       ),
       h(
         "nav",
         { className: "mk-pcard__actions", "aria-label": labels.searchResultActions },
-        h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: card.actions.detail.href }, h("span", null, card.actions.detail.label)),
+        h(
+          "a",
+          { className: "mk-btn mk-btn--secondary mk-btn--sm", href: card.actions.detail.href, "data-card-action": "detail" },
+          h("span", null, card.actions.detail.label),
+        ),
         h(
           "button",
           {
             type: "button",
             className: "mk-btn mk-btn--primary mk-btn--sm",
+            "data-card-action": "inquiry",
             "data-endpoint": card.actions.inquiry.endpoint,
             "data-listing-reference": card.actions.inquiry.payload.listingReference,
             "data-lead-source": card.actions.inquiry.payload.source,
@@ -588,7 +593,13 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
         ),
         h(
           "button",
-          { type: "button", className: "mk-btn mk-btn--subtle mk-btn--sm", "data-client-save-listing": card.actions.save.listing_id },
+          {
+            type: "button",
+            className: "mk-btn mk-btn--subtle mk-btn--sm",
+            "data-card-action": "save",
+            "data-client-save-listing": card.actions.save.listing_id,
+            "aria-label": card.actions.save.label,
+          },
           h(Icon, { name: "heart", size: 16 }),
           h("span", null, card.actions.save.label),
         ),
@@ -1229,7 +1240,7 @@ function ListingBody({ page }) {
     : null;
 
   const toolButtons = (page.body.actions.secondary || []).map((action) => {
-    const icon = LISTING_ACTION_ICONS[action.id] || LISTING_ACTION_ICONS[action.kind] || "link";
+    const icon = action.id === "back_to_results" && page.dir === "rtl" ? "arrow-right" : LISTING_ACTION_ICONS[action.id] || LISTING_ACTION_ICONS[action.kind] || "link";
     const compactOnMobile = ["save", "share_family", "print"].includes(action.id);
     const actionAttrs = {
       "aria-label": action.label,
@@ -1261,6 +1272,29 @@ function ListingBody({ page }) {
     });
 
   const primaryIcons = { inquiry: "message-circle", callback: "phone", request_viewing: "calendar" };
+  const primaryActionList = page.body.actions.primary || [];
+  const stickyActionId = facts.price_on_request ? "inquiry" : "request_viewing";
+  const leadButton = (action, { variant = "secondary", size = "lg", full = true, keySuffix = "" } = {}) =>
+    h(
+      Btn,
+      {
+        key: `${action.id || action.endpoint}${keySuffix}`,
+        variant,
+        size,
+        full,
+        iconStart: primaryIcons[action.id] || "message-circle",
+        "data-endpoint": action.endpoint,
+        "data-lead-source": action.payload?.source,
+        "data-lead-intent": action.id === "request_viewing" ? "viewing" : action.id,
+        "data-lead-title": action.label,
+        "data-lead-submit": action.label,
+        "data-listing-reference": action.payload?.listingReference,
+        "data-lead-type": facts.offer_type === "rent" ? "renter" : "buyer",
+        "data-contact-preference": action.payload?.contact_preference,
+        "data-mobile-sticky-primary": action.id === stickyActionId ? "true" : undefined,
+      },
+      action.label,
+    );
   const primaryActions = h(
     "nav",
     {
@@ -1268,27 +1302,53 @@ function ListingBody({ page }) {
       "aria-label": labels.listingActions,
       "data-mobile-sticky-actions": page.body.actions.sticky_mobile ? "true" : "false",
     },
-    ...(page.body.actions.primary || []).map((action, index) =>
+    h(
+      "span",
+      { className: "ld-mobile-price", "aria-hidden": "true" },
+      h("strong", null, facts.price_on_request ? labels.priceOnRequest : price(facts.price_eur, labels)),
+      h("small", null, localizedListingValue(page.locale, "offer_type", facts.offer_type)),
+    ),
+    ...primaryActionList.map((action, index) => leadButton(action, { variant: index === 0 ? "accent" : "secondary", keySuffix: `-${index}` })),
+    h(
+      "button",
+      {
+        type: "button",
+        className: "ld-mobile-contact-more mk-iconbtn mk-iconbtn--outline mk-iconbtn--lg",
+        "data-mobile-contact-options-open": "true",
+        "aria-label": labels.contactBroker,
+        title: labels.contactBroker,
+      },
+      h(Icon, { name: "message-circle", size: 20 }),
+    ),
+  );
+
+  const mobileContactOptions = h(
+    "dialog",
+    { id: "mk-contact-options", className: "ld-contact-options", "aria-label": labels.contactBroker, "data-mobile-contact-options": "true" },
+    h(
+      "header",
+      { className: "ld-contact-options__head" },
+      h("div", null, h("h2", null, labels.contactBroker), h("p", null, labels.listingActions)),
       h(
-        Btn,
-        {
-          key: (action.id || action.endpoint) + index,
-          variant: index === 0 ? "accent" : "secondary",
-          size: "lg",
-          full: true,
-          iconStart: primaryIcons[action.id] || "message-circle",
-          "data-endpoint": action.endpoint,
-          "data-lead-source": action.payload?.source,
-          "data-lead-intent": action.id === "request_viewing" ? "viewing" : action.id,
-          "data-lead-title": action.label,
-          "data-lead-submit": action.label,
-          "data-listing-reference": action.payload?.listingReference,
-          "data-lead-type": facts.offer_type === "rent" ? "renter" : "buyer",
-          "data-contact-preference": action.payload?.contact_preference,
-        },
-        action.label,
+        "button",
+        { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-mobile-contact-options-close": "true", "aria-label": chrome.copy.close },
+        h(Icon, { name: "x", size: 20 }),
       ),
     ),
+    h(
+      "nav",
+      { className: "ld-contact-options__actions", "aria-label": labels.listingActions },
+      ...primaryActionList.map((action, index) => leadButton(action, { variant: action.id === stickyActionId ? "accent" : "secondary", keySuffix: `-mobile-${index}` })),
+    ),
+    brokerChannels.length
+      ? h(
+          "nav",
+          { className: "ld-contact-options__direct", "aria-label": labels.brokerContact },
+          ...brokerChannels.map((channel) =>
+            h(Btn, { key: `mobile-${channel.label}`, tag: "a", variant: "ghost", size: "sm", iconStart: channelIcon(channel.href), href: channel.href }, channel.label),
+          ),
+        )
+      : null,
   );
 
   const brokerContact = h(
@@ -1373,11 +1433,17 @@ function ListingBody({ page }) {
       ),
       h(
         "div",
-        { className: "ld-gallery" },
+        { className: "ld-gallery", "data-mobile-gallery": "true" },
         h(
           "div",
           { className: `ld-g ld-g--main mk-photo mk-photo--${tone}` },
           gallery[0] ? h("img", publicImageProps(gallery[0], page.body.h1, "eager")) : null,
+          h(
+            "a",
+            { className: "ld-g__count", href: "#listing-gallery", "aria-label": `${page.body.media.gallery_count || gallery.length} ${labels.photos}` },
+            h(Icon, { name: "camera", size: 16 }),
+            h("span", null, `${page.body.media.gallery_count || gallery.length} ${labels.photos}`),
+          ),
         ),
         h("div", { className: "ld-g mk-photo mk-photo--sand" }, gallery[1] ? h("img", publicImageProps(gallery[1], page.body.h1)) : null),
         h(
@@ -1487,6 +1553,7 @@ function ListingBody({ page }) {
         ),
       ),
     ),
+    mobileContactOptions,
   );
   return shell(page, main);
 }

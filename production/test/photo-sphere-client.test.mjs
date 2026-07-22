@@ -27,11 +27,16 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /\[data-photo-sphere-viewer="psv-listing-tour"\]/);
   assert.match(PUBLIC_APP_JS, /data-panorama-url/);
   assert.match(PUBLIC_APP_JS, /function isApprovedPanoramaUrl/);
+  assert.match(PUBLIC_APP_JS, /test\|example\|invalid\|localhost/);
   assert.match(PUBLIC_APP_JS, /keyboard: false/);
   assert.match(PUBLIC_APP_JS, /startKeyboardControl/);
   assert.match(PUBLIC_APP_JS, /data-photo-sphere-viewer-state", "fallback/);
+  assert.match(PUBLIC_APP_JS, /navigationLink\.hidden = true/);
+  assert.match(PUBLIC_APP_JS, /section\.hidden = true/);
   assert.match(PUBLIC_APP_JS, /function initImageFallbacks/);
   assert.match(PUBLIC_APP_JS, /img\[data-fallback-src\]/);
+  assert.match(PUBLIC_APP_JS, /data-mobile-contact-options-open/);
+  assert.match(PUBLIC_APP_JS, /leadOptionsDialog\.close\(\)/);
   assert.match(PUBLIC_APP_JS, /addEventListener\("pagehide"/);
 });
 
