@@ -233,6 +233,8 @@ test("search route is locale-scoped and list-first on mobile", () => {
 
   assert.equal(search.path, "/he/search");
   assert.equal(search.dir, "rtl");
+  assert.equal(search.indexable, false);
+  assert.equal(search.metadata.robots, "noindex,follow");
   assert.equal(search.mobile_policy.list_first_mobile, true);
   assert.equal(search.mobile_policy.map_optional, false);
   assert.deepEqual(search.search.engines, ["typesense", "meilisearch"]);

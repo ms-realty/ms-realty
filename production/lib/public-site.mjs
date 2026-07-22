@@ -1655,11 +1655,14 @@ export function renderSearchPage({
     dir: locale.direction,
     path: `/${locale.code}/${locale.route_segments.search}`,
     canonical: `/${locale.code}/${locale.route_segments.search}`,
-    indexable: resolved.available && !savedView,
+    // Search results are a private, mutable utility surface. Curated location
+    // and listing pages carry indexable inventory; query/filter combinations
+    // must not become thin or duplicate landing pages.
+    indexable: false,
     metadata: {
       title: savedView ? `${labels.savedListings} | MS Realty` : ui.searchTitle,
       description: savedView ? labels.savedEmpty : ui.searchDescription,
-      robots: resolved.available && !savedView ? "index,follow" : "noindex,nofollow",
+      robots: savedView ? "noindex,nofollow" : "noindex,follow",
     },
     mobile_policy: {
       list_first_mobile: true,
