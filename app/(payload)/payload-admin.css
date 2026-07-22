@@ -1,0 +1,23 @@
+/* MS Realty touch and viewport refinements layered over Payload's own theme. */
+button,
+a,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+@media (max-width: 760px), (pointer: coarse) {
+  input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not(.rs__input),
+  textarea,
+  select,
+  .rs__control {
+    min-height: 44px;
+  }
+
+  .btn {
+    min-height: 48px;
+  }
+
+  .template-minimal__wrap {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+}

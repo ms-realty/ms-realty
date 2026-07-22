@@ -1,6 +1,7 @@
 import config from "../../payload.config.js";
 import { handleServerFunctions, metadata, RootLayout } from "@payloadcms/next/layouts";
 import "@payloadcms/next/css";
+import "./payload-admin.css";
 
 const importMap = {};
 

@@ -29,6 +29,12 @@ test("Payload config exposes generated CMS collections behind an admin runtime",
       .find((collection) => collection.slug === "listing_translations")
       .fields.some((field) => field.name === "locale" && field.relationTo === "locales"),
   );
+
+  const payloadLayout = fs.readFileSync("app/(payload)/layout.js", "utf8");
+  const payloadAdminCss = fs.readFileSync("app/(payload)/payload-admin.css", "utf8");
+  assert.match(payloadLayout, /import "\.\/payload-admin\.css"/);
+  assert.match(payloadAdminCss, /min-height: 48px/);
+  assert.match(payloadAdminCss, /safe-area-inset-bottom/);
 });
 
 test("Payload runtime report blocks missing launch env without leaking defaults", async () => {

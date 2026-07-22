@@ -32,6 +32,7 @@ a, button, summary, [role="button"] { touch-action: manipulation; }
 /* Elderly-first touch targets on public + admin form controls
    (mirrors data-min-touch-target="44" contract markers). */
 button, input, select, textarea { min-height: 44px; }
+.mk-iconbtn { min-width: 44px; }
 input, select, textarea { width: 100%; }
 textarea { min-height: 7rem; resize: vertical; }
 
