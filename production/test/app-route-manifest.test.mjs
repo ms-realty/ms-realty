@@ -74,6 +74,15 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal(search.rendered.kind, "search");
   assert.equal(search.rendered.search.query, "sandanski");
   assert.match(search.html, /data-react-public-ui="search"/);
+
+  const saved = renderAppRoute({ pathname: "/he/search", url: "https://example.test/he/search?saved=1" });
+  assert.equal(saved.status, 200);
+  assert.equal(saved.rendered.search.saved_view, true);
+  assert.equal(saved.rendered.indexable, false);
+  assert.equal(saved.rendered.metadata.robots, "noindex,nofollow");
+  assert.equal(saved.rendered.cards.length, saved.rendered.search.total_matches);
+  assert.match(saved.html, /data-saved-listings-view="true"/);
+  assert.match(saved.html, /data-saved-label="נשמר"/);
   assert.match(search.html, /<select name="sort">/);
   assert.match(search.html, /data-active-filter-count="1"/);
   assert.match(search.html, /data-mobile-search-filters="true"/);

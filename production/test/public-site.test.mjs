@@ -248,6 +248,26 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.match(renderReactPublicBody(search), /data-content-language="bg"/);
 });
 
+test("saved listings are a private app-style collection rather than a dead toggle", () => {
+  const saved = renderSearchPage({ registry, listings, localeCode: "ru", savedView: true });
+  const html = renderReactPublicBody(saved);
+
+  assert.equal(saved.search.saved_view, true);
+  assert.equal(saved.indexable, false);
+  assert.equal(saved.metadata.robots, "noindex,nofollow");
+  assert.equal(saved.cards.length, saved.search.total_matches);
+  assert.equal(saved.search.pagination.total_pages, 1);
+  assert.match(saved.metadata.title, /^Избранное \| MS Realty$/);
+  assert.match(html, /data-saved-listings-view="true"/);
+  assert.match(html, /data-saved-listings-grid="true"/);
+  assert.match(html, /data-saved-listings-empty="true"/);
+  assert.match(html, /data-saved-navigation="true"/);
+  assert.match(html, /href="\/ru\/search\?saved=1"/);
+  assert.match(html, /data-saved-label="Сохранено"/);
+  assert.doesNotMatch(html, /data-mobile-search-filters="true"/);
+  assert.doesNotMatch(html, /data-search-pagination="true"/);
+});
+
 test("public UI localizes structured values and excludes operational crawl imagery", () => {
   const ruListing = findListingById(listings, "MS-CRAWL-0114");
   const ruSearch = renderSearchPage({ registry, listings, localeCode: "ru", query: "Парк отеле" });

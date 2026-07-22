@@ -53,6 +53,7 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
   const requestUrl = new URL(url, "http://localhost");
   const translationTasks = currentTranslationTasks(config);
   const searchLocale = searchLocaleFor(registry, pathname);
+  const savedView = requestUrl.searchParams.get("saved") === "1";
   const rendered = searchLocale
     ? searchRuntimeListings(registry, seed, {
         localeCode: searchLocale.code,
@@ -60,6 +61,8 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
         filters: searchFiltersFromParams(requestUrl.searchParams),
         sort: requestUrl.searchParams.get("sort") || "recommended",
         page: searchPageFromParams(requestUrl.searchParams),
+        pageSize: savedView ? null : 12,
+        savedView,
         translationTasks,
       })
     : renderRuntimePath(

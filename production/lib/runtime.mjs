@@ -239,7 +239,7 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
 export function searchRuntimeListings(
   registry,
   seed,
-  { localeCode, query = "", filters = {}, sort = "recommended", page = 1, pageSize = 12, translationTasks = [] },
+  { localeCode, query = "", filters = {}, sort = "recommended", page = 1, pageSize = 12, savedView = false, translationTasks = [] },
 ) {
   return renderSearchPage({
     registry,
@@ -250,6 +250,7 @@ export function searchRuntimeListings(
     sort,
     page,
     pageSize,
+    savedView,
   });
 }
 

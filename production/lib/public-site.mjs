@@ -32,6 +32,10 @@ const ACTION_LABELS = {
     viewing: "Оглед",
     phone: "Телефон",
     save: "Запази",
+    saved: "Запазено",
+    savedListings: "Запазени",
+    savedEmpty: "Все още нямате запазени имоти.",
+    browseListings: "Разгледайте имоти",
     share: "Сподели",
     print: "Печат/PDF",
     results: "Назад към резултатите",
@@ -109,6 +113,10 @@ const ACTION_LABELS = {
     viewing: "Viewing",
     phone: "Phone",
     save: "Save",
+    saved: "Saved",
+    savedListings: "Saved",
+    savedEmpty: "You have not saved any properties yet.",
+    browseListings: "Explore properties",
     share: "Share",
     print: "Print/PDF",
     results: "Back to results",
@@ -186,6 +194,10 @@ const ACTION_LABELS = {
     viewing: "Besichtigung",
     phone: "Telefon",
     save: "Speichern",
+    saved: "Gespeichert",
+    savedListings: "Favoriten",
+    savedEmpty: "Sie haben noch keine Immobilien gespeichert.",
+    browseListings: "Immobilien entdecken",
     share: "Teilen",
     print: "Drucken/PDF",
     results: "Zurück zu den Ergebnissen",
@@ -263,6 +275,10 @@ const ACTION_LABELS = {
     viewing: "Bezichtiging",
     phone: "Telefoon",
     save: "Bewaren",
+    saved: "Bewaard",
+    savedListings: "Bewaard",
+    savedEmpty: "U hebt nog geen objecten bewaard.",
+    browseListings: "Objecten bekijken",
     share: "Delen",
     print: "Print/PDF",
     results: "Terug naar resultaten",
@@ -340,6 +356,10 @@ const ACTION_LABELS = {
     viewing: "Просмотр",
     phone: "Телефон",
     save: "Сохранить",
+    saved: "Сохранено",
+    savedListings: "Избранное",
+    savedEmpty: "В избранном пока нет объектов.",
+    browseListings: "Смотреть объекты",
     share: "Поделиться",
     print: "Печать/PDF",
     results: "Назад к результатам",
@@ -417,6 +437,10 @@ const ACTION_LABELS = {
     viewing: "Ραντεβού προβολής",
     phone: "Τηλέφωνο",
     save: "Αποθήκευση",
+    saved: "Αποθηκεύτηκε",
+    savedListings: "Αποθηκευμένα",
+    savedEmpty: "Δεν έχετε αποθηκευμένα ακίνητα ακόμη.",
+    browseListings: "Δείτε ακίνητα",
     share: "Κοινή χρήση",
     print: "Εκτύπωση/PDF",
     results: "Πίσω στα αποτελέσματα",
@@ -494,6 +518,10 @@ const ACTION_LABELS = {
     viewing: "תיאום סיור",
     phone: "טלפון",
     save: "שמירה",
+    saved: "נשמר",
+    savedListings: "שמורים",
+    savedEmpty: "עדיין לא שמרתם נכסים.",
+    browseListings: "צפייה בנכסים",
     share: "שיתוף",
     print: "הדפסה/PDF",
     results: "חזרה לתוצאות",
@@ -1192,6 +1220,7 @@ function listingCard(registry, listing, locale) {
       },
       save: {
         label: labelsFor(locale.code).save,
+        saved_label: labelsFor(locale.code).saved,
         endpoint: "/api/saved-searches",
         storage_key: "ms-realty:saved-listings",
         listing_id: listing.id,
@@ -1426,6 +1455,7 @@ function listingActions(locale, view, path, labels, brokerContact = null) {
       {
         id: "save",
         label: labels.save,
+        saved_label: labels.saved,
         kind: "client_saved_listing",
         storage_key: "ms-realty:saved-listings",
         listing_id: view.id,
@@ -1565,10 +1595,12 @@ export function renderSearchPage({
   sort = "recommended",
   page = 1,
   pageSize = 12,
+  savedView = false,
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
   const ui = uiCopyFor(locale.code);
+  const labels = labelsFor(locale.code);
   const activeListings = listings.filter(isActiveListing);
   const localeMatches = activeListings.filter((listing) => listing.locale === locale.code);
   const fallbackMatches = activeListings.filter(
@@ -1589,7 +1621,7 @@ export function renderSearchPage({
   const sortedListings = sortListingsForPublicSearch(matchedListings, selectedSort);
   const requestedPage = Number(page);
   const normalizedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
-  const requestedPageSize = pageSize === null ? Math.max(sortedListings.length, 1) : Number(pageSize);
+  const requestedPageSize = savedView || pageSize === null ? Math.max(sortedListings.length, 1) : Number(pageSize);
   const normalizedPageSize = Number.isInteger(requestedPageSize) && requestedPageSize > 0 ? Math.min(requestedPageSize, 1000) : 12;
   const totalPages = Math.max(1, Math.ceil(sortedListings.length / normalizedPageSize));
   const currentPage = Math.min(normalizedPage, totalPages);
@@ -1610,11 +1642,11 @@ export function renderSearchPage({
     dir: locale.direction,
     path: `/${locale.code}/${locale.route_segments.search}`,
     canonical: `/${locale.code}/${locale.route_segments.search}`,
-    indexable: resolved.available,
+    indexable: resolved.available && !savedView,
     metadata: {
-      title: ui.searchTitle,
-      description: ui.searchDescription,
-      robots: resolved.available ? "index,follow" : "noindex,follow",
+      title: savedView ? `${labels.savedListings} | MS Realty` : ui.searchTitle,
+      description: savedView ? labels.savedEmpty : ui.searchDescription,
+      robots: resolved.available && !savedView ? "index,follow" : "noindex,nofollow",
     },
     mobile_policy: {
       list_first_mobile: true,
@@ -1624,8 +1656,9 @@ export function renderSearchPage({
       sticky_contact_actions: true,
       minimum_tap_target_px: 44,
     },
-    chrome: publicChrome(registry, locale, { active: "search" }),
+    chrome: publicChrome(registry, locale, { active: savedView ? "saved" : "search" }),
     search: {
+      saved_view: savedView === true,
       engines: ["typesense", "meilisearch"],
       query,
       sort: selectedSort,

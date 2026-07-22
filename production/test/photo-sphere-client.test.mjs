@@ -36,6 +36,11 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /function initImageFallbacks/);
   assert.match(PUBLIC_APP_JS, /function initPublicMobileNavigation/);
   assert.match(PUBLIC_APP_JS, /initPublicMobileNavigation\(\);/);
+  assert.match(PUBLIC_APP_JS, /data-saved-listings-view/);
+  assert.match(PUBLIC_APP_JS, /data-saved-listings-ready/);
+  assert.match(PUBLIC_APP_JS, /data-saved-navigation-label/);
+  assert.match(PUBLIC_APP_JS, /savedViewFocus\.focus\(\)/);
+  assert.match(PUBLIC_APP_JS, /event\.key === KEY/);
   assert.match(PUBLIC_APP_JS, /img\[data-fallback-src\]/);
   assert.match(PUBLIC_APP_JS, /data-mobile-contact-options-open/);
   assert.match(PUBLIC_APP_JS, /leadOptionsDialog\.close\(\)/);

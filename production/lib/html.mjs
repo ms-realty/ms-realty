@@ -106,7 +106,7 @@ function renderListingCard(card, { actionLabel = "Listing card actions" } = {}) 
       <button type="button" data-endpoint="${escapeHtml(card.actions.inquiry.endpoint)}" data-listing-reference="${escapeHtml(
         card.actions.inquiry.payload.listingReference,
       )}">${escapeHtml(card.actions.inquiry.label)}</button>
-      <button type="button" data-client-save-listing="${escapeHtml(card.actions.save.listing_id)}">${escapeHtml(card.actions.save.label)}</button>
+      <button type="button" data-client-save-listing="${escapeHtml(card.actions.save.listing_id)}" data-save-label="${escapeHtml(card.actions.save.label)}" data-saved-label="${escapeHtml(card.actions.save.saved_label || "Saved")}">${escapeHtml(card.actions.save.label)}</button>
     </nav>
   </article>`;
 }
@@ -153,7 +153,7 @@ function renderListing(page) {
       }
       return `<button type="button" data-listing-action="${escapeHtml(action.id)}" data-client-save-listing="${escapeHtml(
         action.listing_id,
-      )}">${escapeHtml(action.label)}</button>`;
+      )}" data-save-label="${escapeHtml(action.label)}" data-saved-label="${escapeHtml(action.saved_label || "Saved")}">${escapeHtml(action.label)}</button>`;
     })
     .join("");
   const related = (page.body.related_listings || [])

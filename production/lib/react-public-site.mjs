@@ -196,7 +196,17 @@ function SiteHeader({ chrome }) {
 
 function MobileTaskNavigation({ page, chrome }) {
   if (page.kind === "listing") return null;
-  const iconById = { buy: "search", rent: "key", sell: "landmark", contact: "message-circle" };
+  const labels = uiLabels(page);
+  const buy = chrome.nav.find((item) => item.id === "buy");
+  const savedView = page.search?.saved_view === true;
+  const items = [...chrome.nav];
+  items.splice(2, 0, {
+    id: "saved",
+    label: labels.savedListings,
+    href: `${buy?.href || page.path}?saved=1`,
+    active: savedView,
+  });
+  const iconById = { buy: "search", rent: "key", saved: "heart", sell: "landmark", contact: "message-circle" };
   return h(
     "nav",
     {
@@ -204,19 +214,23 @@ function MobileTaskNavigation({ page, chrome }) {
       "aria-label": chrome.copy.menuLabel,
       "data-mobile-task-navigation": "true",
     },
-    ...chrome.nav.map((item) =>
-      h(
+    ...items.map((item) => {
+      const active = item.id === "saved" ? savedView : savedView ? false : item.active;
+      return h(
         "a",
         {
           key: item.id,
           href: item.href,
-          "data-active": item.active ? "true" : undefined,
-          "aria-current": item.active ? "page" : undefined,
+          "data-active": active ? "true" : undefined,
+          "aria-current": active ? "page" : undefined,
+          "data-saved-navigation": item.id === "saved" ? "true" : undefined,
+          "data-saved-navigation-label": item.id === "saved" ? item.label : undefined,
         },
         h(Icon, { name: iconById[item.id] || "circle", size: 20 }),
         h("span", null, item.label),
-      ),
-    ),
+        item.id === "saved" ? h("span", { className: "site-mobile-tabs__badge", "data-saved-count": "true", hidden: true }) : null,
+      );
+    }),
   );
 }
 
@@ -619,6 +633,8 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
             className: "mk-btn mk-btn--subtle mk-btn--sm",
             "data-card-action": "save",
             "data-client-save-listing": card.actions.save.listing_id,
+            "data-save-label": card.actions.save.label,
+            "data-saved-label": card.actions.save.saved_label || labels.saved,
             "aria-label": card.actions.save.label,
           },
           h(Icon, { name: "heart", size: 16 }),
@@ -801,6 +817,7 @@ function searchHref(page, omitFilter, targetPage = 1) {
 function SearchBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
+  const savedView = page.search.saved_view === true;
   const controls = page.search.controls || {};
   const viewModes = controls.view_modes || [];
   const filterOptions = controls.filter_options || {};
@@ -1054,11 +1071,14 @@ function SearchBody({ page }) {
       "data-list-first-mobile": page.mobile_policy?.list_first_mobile ? "true" : "false",
       "data-map-optional": page.mobile_policy?.map_optional ? "true" : "false",
       "data-min-touch-target": page.mobile_policy?.minimum_tap_target_px || 44,
+      "data-saved-listings-view": savedView ? "true" : undefined,
     },
     h(
       "div",
-      { className: "sr-body" },
-      h(
+      { className: `sr-body${savedView ? " sr-body--saved" : ""}` },
+      savedView
+        ? null
+        : h(
         "details",
         { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount },
         h(
@@ -1119,7 +1139,9 @@ function SearchBody({ page }) {
           ),
         ),
       ),
-      h(
+      savedView
+        ? null
+        : h(
         "aside",
         { className: "sr-filters sr-filters--desktop", "aria-label": chrome.copy.filters || labels.activeFilters },
         h("h3", null, chrome.copy.filters || labels.activeFilters),
@@ -1127,14 +1149,27 @@ function SearchBody({ page }) {
       ),
       h(
         "section",
-        { className: "sr-results", "data-search-view": "list" },
+        { className: `sr-results${savedView ? " sr-results--saved" : ""}`, "data-search-view": "list" },
         h(
           "div",
           { className: "sr-results__head" },
-          h("h1", null, page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
-          h("p", { className: "sr-results__count", role: "status", "aria-live": "polite" }, `${page.search.total_matches} ${labels.matches}`),
+          h("h1", null, savedView ? labels.savedListings : page.metadata.title.replace(/\s+\|\s+MS Realty$/u, "")),
+          h(
+            "p",
+            {
+              className: "sr-results__count",
+              role: "status",
+              "aria-live": "polite",
+              "data-saved-listings-count": savedView ? "true" : undefined,
+              "data-saved-count-label": savedView ? labels.savedListings : undefined,
+              hidden: savedView ? true : undefined,
+            },
+            savedView ? "" : `${page.search.total_matches} ${labels.matches}`,
+          ),
         ),
-        h(
+        savedView
+          ? null
+          : h(
           "section",
           {
             className: "sr-active",
@@ -1157,12 +1192,31 @@ function SearchBody({ page }) {
             ),
           ),
         ),
+        savedView
+          ? h(
+          "section",
+          {
+            className: "sr-saved-empty",
+            "data-saved-listings-empty": "true",
+            "aria-live": "polite",
+            hidden: true,
+          },
+          h("span", { className: "sr-saved-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "heart", size: 30 })),
+          h("p", null, labels.savedEmpty),
+          h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: page.path }, labels.browseListings),
+        )
+          : null,
         h(
           "section",
-          { className: "sr-list", "aria-label": labels.searchResults, "data-search-results": "true" },
+          {
+            className: "sr-list",
+            "aria-label": savedView ? labels.savedListings : labels.searchResults,
+            "data-search-results": "true",
+            "data-saved-listings-grid": savedView ? "true" : undefined,
+          },
           ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal" })),
         ),
-        page.search.pagination?.total_pages > 1
+        !savedView && page.search.pagination?.total_pages > 1
           ? h(
               "nav",
               { className: "sr-pagination", "aria-label": labels.page, "data-search-pagination": "true" },
@@ -1305,7 +1359,16 @@ function ListingBody({ page }) {
     }
     return h(
       Btn,
-      { key: action.id, variant: "secondary", size: "sm", iconStart: icon, ...actionAttrs, "data-client-save-listing": action.listing_id },
+      {
+        key: action.id,
+        variant: "secondary",
+        size: "sm",
+        iconStart: icon,
+        ...actionAttrs,
+        "data-client-save-listing": action.listing_id,
+        "data-save-label": action.label,
+        "data-saved-label": action.saved_label || labels.saved,
+      },
       action.label,
     );
   });

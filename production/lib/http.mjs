@@ -993,6 +993,7 @@ export function createHttpApp({
         const filters = searchFiltersFromParams(url.searchParams);
         const sort = url.searchParams.get("sort") || "recommended";
         const page = searchPageFromParams(url.searchParams);
+        const savedView = url.searchParams.get("saved") === "1";
         recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters, sort, page });
         return publicResponse(
           request,
@@ -1003,6 +1004,8 @@ export function createHttpApp({
             filters,
             sort,
             page,
+            pageSize: savedView ? null : 12,
+            savedView,
             translationTasks: readTranslationLedger(translationLedgerPath || undefined),
           }),
         );

@@ -13,7 +13,10 @@
   var PHOTO_SPHERE_VIEWER_CSS_URL = "/vendor/photo-sphere-viewer.css";
   var photoSphereViewerPromise = null;
   function readSaved() {
-    try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (error) { return []; }
+    try {
+      var value = JSON.parse(localStorage.getItem(KEY));
+      return Array.isArray(value) ? value.filter(function (id) { return typeof id === "string" && id; }) : [];
+    } catch (error) { return []; }
   }
   function writeSaved(ids) {
     try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch (error) {}
@@ -26,6 +29,46 @@
       buttons[i].setAttribute("aria-pressed", on ? "true" : "false");
       if (on) buttons[i].setAttribute("data-active", "true");
       else buttons[i].removeAttribute("data-active");
+      var buttonLabel = buttons[i].getAttribute(on ? "data-saved-label" : "data-save-label") || buttons[i].getAttribute("aria-label") || "";
+      if (buttonLabel) {
+        buttons[i].setAttribute("aria-label", buttonLabel);
+        var buttonText = buttons[i].querySelector("span");
+        if (buttonText) buttonText.textContent = buttonLabel;
+        else buttons[i].textContent = buttonLabel;
+      }
+    }
+
+    var savedBadges = document.querySelectorAll("[data-saved-count]");
+    for (var j = 0; j < savedBadges.length; j += 1) {
+      savedBadges[j].textContent = String(saved.length);
+      savedBadges[j].hidden = saved.length === 0;
+    }
+    var savedLinks = document.querySelectorAll("[data-saved-navigation]");
+    for (var k = 0; k < savedLinks.length; k += 1) {
+      var savedLinkLabel = savedLinks[k].getAttribute("data-saved-navigation-label") || "";
+      savedLinks[k].setAttribute("aria-label", saved.length ? savedLinkLabel + " · " + saved.length : savedLinkLabel);
+    }
+
+    var savedView = document.querySelector("[data-saved-listings-view='true']");
+    if (savedView) {
+      var visibleSaved = 0;
+      var savedCards = savedView.querySelectorAll("[data-search-card][data-listing-id]");
+      for (var m = 0; m < savedCards.length; m += 1) {
+        var cardSaved = saved.indexOf(savedCards[m].getAttribute("data-listing-id")) !== -1;
+        savedCards[m].hidden = !cardSaved;
+        savedCards[m].setAttribute("data-saved", cardSaved ? "true" : "false");
+        if (cardSaved) visibleSaved += 1;
+      }
+      var savedGrid = savedView.querySelector("[data-saved-listings-grid]");
+      var savedEmpty = savedView.querySelector("[data-saved-listings-empty]");
+      if (savedGrid) savedGrid.hidden = visibleSaved === 0;
+      if (savedEmpty) savedEmpty.hidden = visibleSaved !== 0;
+      var savedCount = savedView.querySelector("[data-saved-listings-count]");
+      if (savedCount) {
+        savedCount.textContent = String(visibleSaved) + " " + (savedCount.getAttribute("data-saved-count-label") || "");
+        savedCount.hidden = false;
+      }
+      savedView.setAttribute("data-saved-listings-ready", "true");
     }
   }
   function nestFormData(form) {
@@ -437,10 +480,16 @@
       var id = save.getAttribute("data-client-save-listing");
       var ids = readSaved();
       var index = ids.indexOf(id);
+      var removingFromSavedView = index !== -1 && Boolean(save.closest("[data-saved-listings-view='true']"));
       if (index === -1) ids.push(id);
       else ids.splice(index, 1);
       writeSaved(ids);
       markSaved();
+      if (removingFromSavedView) {
+        var savedViewFocus = document.querySelector("[data-saved-listings-view='true'] [data-search-card]:not([hidden]) [data-client-save-listing]")
+          || document.querySelector("[data-saved-listings-view='true'] [data-saved-listings-empty] a");
+        if (savedViewFocus) window.requestAnimationFrame(function () { savedViewFocus.focus(); });
+      }
       return;
     }
     var share = event.target.closest('[data-listing-action^="share"]');
@@ -496,6 +545,9 @@
         showSuccess(form);
       }
     });
+  });
+  window.addEventListener("storage", function (event) {
+    if (event.key === KEY) markSaved();
   });
   markSaved();
   initPublicMobileNavigation();
