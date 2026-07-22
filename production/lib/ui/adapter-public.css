@@ -793,6 +793,8 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     overscroll-behavior-inline: contain;
     scroll-snap-type: inline mandatory;
     scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
   }
   .ld-gallery::-webkit-scrollbar,
   .ld-gallery-full::-webkit-scrollbar { display: none; }
@@ -803,6 +805,7 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     flex: 0 0 100%;
     border-radius: 0;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
   .ld-gallery .ld-g--main { grid-column: auto; grid-row: auto; }
   .ld-g__count {
@@ -811,7 +814,7 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     inset-inline-end: var(--space-3);
     bottom: var(--space-3);
     display: inline-flex;
-    min-height: 34px;
+    min-height: 44px;
     align-items: center;
     gap: 6px;
     padding: 0 var(--space-3);
