@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 14,
-    "passed": 14,
+    "checks": 16,
+    "passed": 16,
     "failed": 0
   },
   "checks": [
@@ -33,7 +33,17 @@
       "evidence": {}
     },
     {
+      "id": "mobile_app_navigation",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
       "id": "listing_sticky_actions",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "intent_specific_lead_forms",
       "status": "pass",
       "evidence": {}
     },

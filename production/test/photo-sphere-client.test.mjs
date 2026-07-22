@@ -55,6 +55,10 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /img\[data-fallback-src\]/);
   assert.match(PUBLIC_APP_JS, /data-mobile-contact-options-open/);
   assert.match(PUBLIC_APP_JS, /leadOptionsDialog\.close\(\)/);
+  assert.match(PUBLIC_APP_JS, /callbackTime\.required = intent === "callback"/);
+  assert.match(PUBLIC_APP_JS, /function useSameOriginHistoryBack/);
+  assert.match(PUBLIC_APP_JS, /previous\.origin !== window\.location\.origin/);
+  assert.match(PUBLIC_APP_JS, /window\.history\.back\(\)/);
   assert.match(PUBLIC_APP_JS, /addEventListener\("pagehide"/);
 });
 

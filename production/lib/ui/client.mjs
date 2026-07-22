@@ -277,6 +277,7 @@ export const PUBLIC_APP_JS = `(function () {
     var channel = form.elements.contact_preference;
     var channelGroup = form.querySelector("[data-enquiry-channel-group]");
     var callbackTimeGroup = form.querySelector("[data-enquiry-callback-time-group]");
+    var callbackTime = form.querySelector("[data-enquiry-callback-time]");
     var viewingFields = form.querySelector("[data-enquiry-viewing-fields]");
     var viewingDate = form.querySelector("[data-enquiry-viewing-date]");
     var viewingTime = form.querySelector("[data-enquiry-viewing-time]");
@@ -292,6 +293,7 @@ export const PUBLIC_APP_JS = `(function () {
     if (channel) channel.value = intent === "inquiry" ? lead.getAttribute("data-contact-preference") || "phone" : "phone";
     if (channelGroup) channelGroup.hidden = intent !== "inquiry";
     if (callbackTimeGroup) callbackTimeGroup.hidden = intent !== "callback";
+    if (callbackTime) callbackTime.required = intent === "callback";
     if (viewingFields) viewingFields.hidden = intent !== "viewing";
     if (viewingDate) viewingDate.required = intent === "viewing";
     if (viewingTime) viewingTime.required = intent === "viewing";
@@ -540,6 +542,17 @@ export const PUBLIC_APP_JS = `(function () {
     }
     syncOpenState();
   }
+  function useSameOriginHistoryBack(link) {
+    if (!link || link.getAttribute("data-history-back") !== "same-origin" || window.history.length < 2 || !document.referrer) return false;
+    try {
+      var previous = new URL(document.referrer);
+      if (previous.origin !== window.location.origin || previous.href === window.location.href) return false;
+      window.history.back();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
   document.addEventListener("click", function (event) {
     if (event.target && event.target.matches && event.target.matches("[data-mobile-contact-options]")) {
       event.target.close();
@@ -558,6 +571,11 @@ export const PUBLIC_APP_JS = `(function () {
     if (contactOptionsClose) {
       var contactOptionsDialog = contactOptionsClose.closest("[data-mobile-contact-options]");
       if (contactOptionsDialog && typeof contactOptionsDialog.close === "function") contactOptionsDialog.close();
+      return;
+    }
+    var backToResults = event.target.closest('[data-listing-action="back_to_results"]');
+    if (backToResults && useSameOriginHistoryBack(backToResults)) {
+      event.preventDefault();
       return;
     }
     var save = event.target.closest("[data-client-save-listing]");

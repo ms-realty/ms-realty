@@ -86,6 +86,7 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-mobile-sticky-primary="true"/);
   assert.match(html, /data-mobile-contact-options="true"/);
   assert.match(html, /data-mobile-contact-options-open="true"/);
+  assert.match(html, /data-listing-action="back_to_results" data-history-back="same-origin"/);
   assert.doesNotMatch(html, /\/api\/admin\/(viewings|replies)/);
 });
 
@@ -304,6 +305,17 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /aria-label="Language: English"/);
   assert.match(html, /data-language-switcher="mobile"/);
   assert.match(html, /data-mobile-task-navigation="true"/);
+  assert.match(html, /data-mobile-task="buy" data-active="true" aria-current="page"/);
+});
+
+test("mobile task navigation follows the buyer's active search journey", () => {
+  const html = renderReactPublicBody(
+    renderSearchPage({ registry, listings, localeCode: "en", filters: { offer_type: "rent" } }),
+  );
+
+  assert.match(html, /data-mobile-task="rent" data-active="true" aria-current="page"/);
+  assert.doesNotMatch(html, /data-mobile-task="buy" data-active="true"/);
+  assert.match(html, /class="sr-mobile-filters__label">For rent<\/strong>/);
 });
 
 test("search result count is announced separately from the page heading", () => {

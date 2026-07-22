@@ -61,7 +61,11 @@ export function buildMobileElderlyQaReport({
     contact: renderReactPage(renderContactPage({ registry, localeCode: "he" })),
     fallback: renderReactPage(renderLanguageFallback({ registry, requestedLocale: "fr" })),
   };
+  const rentSearch = renderReactPage(
+    renderSearchPage({ registry, listings, localeCode: "he", filters: { offer_type: "rent" } }),
+  );
   const approvedTourHtml = renderReactPage(renderListingPage({ registry, listing: tourListing, localeCode: "he" }));
+  const publicAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public.css"), "utf8");
 
   for (const [kind, html] of Object.entries(pages)) {
     assertHtmlPage(html, {
@@ -70,6 +74,7 @@ export function buildMobileElderlyQaReport({
       kind: kind === "fallback" ? "language-fallback" : kind,
     });
   }
+  assertHtmlPage(rentSearch, { lang: "he", dir: "rtl", kind: "search" });
 
   const coverage = websiteLanguageCoverage(registry);
   const checks = [
@@ -103,11 +108,30 @@ export function buildMobileElderlyQaReport({
         includes(pages.search, "data-endpoint=\"/api/leads\""),
     ),
     check(
+      "mobile_app_navigation",
+      includes(pages.home, "data-mobile-task=\"buy\" data-active=\"true\"") &&
+        includes(rentSearch, "data-mobile-task=\"rent\" data-active=\"true\"") &&
+        !includes(rentSearch, "data-mobile-task=\"buy\" data-active=\"true\"") &&
+        includes(pages.search, "data-mobile-filter-sheet=\"true\"") &&
+        includes(publicAdapterCss, ".site-hd { position: sticky; top: 0; z-index: 30; }") &&
+        includes(publicAdapterCss, ".sr-mobile-filters {\n    position: sticky;"),
+    ),
+    check(
       "listing_sticky_actions",
       includes(pages.listing, "data-mobile-sticky-actions=\"true\"") &&
         includes(pages.listing, "data-mobile-sticky-primary=\"true\"") &&
         includes(pages.listing, "data-mobile-contact-options=\"true\"") &&
         includes(pages.listing, "data-listing-contact-panel=\"true\""),
+    ),
+    check(
+      "intent_specific_lead_forms",
+      includes(pages.listing, "data-enquiry-callback-time=\"true\"") &&
+        includes(pages.listing, "data-enquiry-viewing-date=\"true\"") &&
+        includes(pages.listing, "data-enquiry-viewing-time=\"true\"") &&
+        includes(pages.listing, "data-lead-source=\"website_listing_detail\"") &&
+        includes(pages.listing, "data-lead-source=\"website_callback_request\"") &&
+        includes(pages.listing, "data-lead-source=\"website_viewing_request\"") &&
+        includes(pages.listing, "data-history-back=\"same-origin\""),
     ),
     check(
       "listing_detail_media_actions",
@@ -183,7 +207,9 @@ export function assertMobileElderlyQaReport(report) {
   for (const id of [
     "mobile_search_form",
     "mobile_search_actions",
+    "mobile_app_navigation",
     "listing_sticky_actions",
+    "intent_specific_lead_forms",
     "listing_detail_media_actions",
     "approved_360_tour_accessibility",
     "seller_valuation_broker_review",

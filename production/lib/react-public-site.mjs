@@ -199,6 +199,7 @@ function MobileTaskNavigation({ page, chrome }) {
   const labels = uiLabels(page);
   const buy = chrome.nav.find((item) => item.id === "buy");
   const savedView = page.search?.saved_view === true;
+  const rentView = page.kind === "search" && page.search?.filters?.offer_type === "rent" && !savedView;
   const items = [...chrome.nav];
   items.splice(2, 0, {
     id: "saved",
@@ -215,12 +216,22 @@ function MobileTaskNavigation({ page, chrome }) {
       "data-mobile-task-navigation": "true",
     },
     ...items.map((item) => {
-      const active = item.id === "saved" ? savedView : savedView ? false : item.active;
+      const active =
+        item.id === "saved"
+          ? savedView
+          : savedView
+            ? false
+            : item.id === "rent"
+              ? rentView
+              : item.id === "buy"
+                ? !rentView && (item.active || page.kind === "home")
+                : item.active;
       return h(
         "a",
         {
           key: item.id,
           href: item.href,
+          "data-mobile-task": item.id,
           "data-active": active ? "true" : undefined,
           "aria-current": active ? "page" : undefined,
           "data-saved-navigation": item.id === "saved" ? "true" : undefined,
@@ -826,7 +837,14 @@ function SearchBody({ page }) {
   const activeFilterCount = (controls.active_filter_chips || []).length;
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
-  const mobileSearchContext = String(page.search.query || page.search.filters?.location || labels.search).trim();
+  const mobileSearchContext = String(
+    page.search.query ||
+      page.search.filters?.location ||
+      (page.search.filters?.offer_type
+        ? localizedListingValue(page.locale, "offer_type", page.search.filters.offer_type)
+        : "") ||
+      labels.search,
+  ).trim();
   const mobileSearchMeta = `${page.search.total_matches} ${labels.matches} · ${chrome.copy.filters || labels.activeFilters}`;
   const filterSelect = (idPrefix, name, label, values, optionLabel = (value) => value) =>
     h(
@@ -1354,6 +1372,7 @@ function ListingBody({ page }) {
     const actionAttrs = {
       "aria-label": action.label,
       "data-listing-action": action.id,
+      "data-history-back": action.id === "back_to_results" ? "same-origin" : undefined,
       "data-compact-mobile-action": compactOnMobile ? "true" : undefined,
     };
     if (action.kind === "share" || action.kind === "print" || action.kind === "link") {
