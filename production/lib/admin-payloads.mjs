@@ -7,6 +7,7 @@ import { mediaAssetId } from "./media-reviews.mjs";
 import { DEFAULT_BROKER_PROFILES } from "./leads.mjs";
 import { buildLeadBriefs } from "./lead-briefs.mjs";
 import { publicMediaLibrary } from "./media.mjs";
+import { buildListingQualityReport } from "./listing-quality.mjs";
 export { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 import { LISTING_EDIT_FIELDS } from "./listing-edits.mjs";
 
@@ -47,6 +48,9 @@ export function renderAdminListingEditorPayload(
     media: (record.media || []).map((item) => ({ ...item, asset_id: mediaAssetId(item) })),
     ...(reviewedTour ? { tour: reviewedTour } : {}),
   };
+  const qualityReview = buildListingQualityReport({ seed, tourApprovals }).rows.find(
+    (row) => row.listing_id === record.id,
+  ) || null;
   return {
     kind: "admin_listing_editor",
     status: 200,
@@ -63,6 +67,7 @@ export function renderAdminListingEditorPayload(
     },
     workspace: workspaceWithOperator(workspace, operator),
     listing,
+    qualityReview,
     edits: edits.filter((edit) => edit.listing_id === record.id),
     translationTasks: translationTasks.filter((task) => task.object_type === "listing" && task.object_id === record.id),
     editableFields: LISTING_EDIT_FIELDS,

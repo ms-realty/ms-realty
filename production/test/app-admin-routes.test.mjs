@@ -556,6 +556,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(russianEditorHtml, /Содержание из источника/);
       assert.match(russianEditorHtml, /Данные объекта/);
       assert.match(russianEditorHtml, /Коммерческие условия/);
+      assert.match(russianEditorHtml, /data-listing-quality-issues="[1-9][0-9]*"/);
+      assert.match(russianEditorHtml, /data-quality-issue="missing_area"/);
+      assert.match(russianEditorHtml, /data-listing-quality-required-fields="area_sqm"/);
+      assert.match(russianEditorHtml, /Площадь в m²/);
 
       const locales = await localeRoute.GET(new Request("https://example.test/api/admin/locales?locale=bg", { headers: auth }));
       const localesBody = await locales.json();

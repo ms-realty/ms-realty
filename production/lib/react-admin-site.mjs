@@ -709,6 +709,22 @@ function fieldText(copy, field) {
   return copy.fields[field] || String(field || "").replaceAll("_", " ");
 }
 
+function listingQualityIssueText(ui, issue) {
+  const fieldByIssue = {
+    missing_price: "price_eur",
+    missing_area: "area_sqm",
+    missing_bedrooms: "bedrooms",
+    missing_location: "location",
+    missing_description: "description",
+  };
+  if (fieldByIssue[issue]) return fieldText(ui, fieldByIssue[issue]);
+  if (issue === "missing_alt_text") return ui.missingAlt;
+  if (issue === "thin_public_gallery") return ui.publicPhotos;
+  if (issue === "media_review_pending") return ui.reviewGatedMedia;
+  if (issue === "tour_review_pending") return ui.tour360;
+  return statusText(ui, issue);
+}
+
 function adminHref(path, page) {
   const locale = page.workspace?.locale;
   if (!locale || locale === "en") return path;
@@ -3883,6 +3899,7 @@ function ListingEditorBody({ page }) {
   const ui = workbenchCopy(page);
   const facts = page.listing.facts || {};
   const workflow = page.listing.workflow || {};
+  const qualityReview = page.qualityReview;
   const seo = page.listing.seo || {};
   const editorValues = {
     ...facts,
@@ -4209,6 +4226,26 @@ function ListingEditorBody({ page }) {
       h(
         Panel,
         { title: label(copy, "qualityStatus", "Quality"), id: "listing-quality", "aria-label": label(copy, "qualityStatus", "Quality"), "data-quality-panel": "true" },
+        qualityReview
+          ? h(
+              "div",
+              {
+                className: "adm-evidence",
+                "data-listing-quality-issues": qualityReview.issues.length,
+                "data-listing-quality-required-fields": qualityReview.required_editor_fields.join(","),
+              },
+              ...qualityReview.issues.map((issue) =>
+                h(StatusPill, { key: issue, tone: "brick", "data-quality-issue": issue }, listingQualityIssueText(ui, issue)),
+              ),
+            )
+          : h("p", { className: "adm-note", "data-listing-quality-issues": "0" }, `${ui.issues}: 0 · ${ui.reviewRequired}`),
+        qualityReview?.required_editor_fields?.length
+          ? h(
+              "p",
+              { className: "adm-note" },
+              `${ui.reviewRequired}: ${qualityReview.required_editor_fields.map((field) => fieldText(ui, field)).join(", ")}`,
+            )
+          : null,
         h(StatGrid, {
           metrics: [
             [label(copy, "qualityStatus", "CMS status"), statusText(ui, page.listing.cms_status), "file-check", PILL_TONES[page.listing.cms_status] || "ink"],
