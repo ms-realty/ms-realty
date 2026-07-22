@@ -236,7 +236,7 @@ const ADMIN_UI_COPY = {
     },
     values: {
       website_listing_detail: "Запитване от обява", website_seller_valuation: "Заявка за оценка", website_callback_request: "Заявка за обратно обаждане", website_viewing_request: "Заявка за оглед", website_contact_callback: "Заявка за обратно обаждане", broker_phone: "Телефонно обаждане", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Имейл", broker_walk_in: "Посещение в офис", partner_referral: "Партньорска препоръка", lead_response_sla: "SLA за отговор", buyer_renter_pipeline: "Купувачи и наематели", reply_delivery: "Изпращане на отговори", viewing_follow_up: "След оглед", seller_pipeline: "Продавачи", website_requests: "Заявки от сайта", translation_review: "Преглед на преводи", deal_aftercare: "След сделка",
-      email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Друг канал",
+      email: "Имейл", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Друг канал", acknowledgement: "Потвърждение", viewing: "Оглед", callback: "Обратно обаждане", valuation: "Оценка",
     },
     statuses: {
       buyer: "Купувач", foreign_buyer: "Чуждестранен купувач", investor: "Инвеститор", renter: "Наемател", seller: "Продавач", landlord: "Наемодател", partner_referral: "Партньор / препоръка", pending: "В изчакване", ok: "В срок", ready: "Готово", blocked: "Блокирано", unknown: "Неизвестно",
@@ -458,7 +458,7 @@ const ADMIN_UI_COPY = {
     },
     values: {
       website_listing_detail: "Запрос со страницы объекта", website_seller_valuation: "Заявка на оценку", website_callback_request: "Заявка на обратный звонок", website_viewing_request: "Заявка на просмотр", website_contact_callback: "Заявка на обратный звонок", broker_phone: "Телефонный звонок", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Эл. почта", broker_walk_in: "Визит в офис", partner_referral: "Партнерская рекомендация", lead_response_sla: "SLA ответа", buyer_renter_pipeline: "Покупатели и арендаторы", reply_delivery: "Отправка ответов", viewing_follow_up: "После просмотра", seller_pipeline: "Продавцы", website_requests: "Заявки с сайта", translation_review: "Проверка переводов", deal_aftercare: "После сделки",
-      email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Другой канал",
+      email: "Эл. почта", phone: "Телефон", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Другой канал", acknowledgement: "Подтверждение", viewing: "Просмотр", callback: "Обратный звонок", valuation: "Оценка",
     },
     statuses: {
       buyer: "Покупатель", foreign_buyer: "Иностранный покупатель", investor: "Инвестор", renter: "Арендатор", seller: "Продавец", landlord: "Арендодатель", partner_referral: "Партнер / рекомендация", pending: "Ожидание", ok: "В срок", ready: "Готово", blocked: "Заблокировано", unknown: "Неизвестно",
@@ -680,7 +680,7 @@ const ADMIN_UI_COPY = {
     },
     values: {
       website_listing_detail: "Listing inquiry", website_seller_valuation: "Seller valuation request", website_callback_request: "Callback request", website_viewing_request: "Viewing request", website_contact_callback: "Callback request", broker_phone: "Phone call", broker_viber: "Viber", broker_whatsapp: "WhatsApp", broker_email: "Email", broker_walk_in: "Office walk-in", partner_referral: "Partner referral", lead_response_sla: "Response SLA", buyer_renter_pipeline: "Buyers and renters", reply_delivery: "Reply delivery", viewing_follow_up: "Post-viewing", seller_pipeline: "Sellers", website_requests: "Website requests", translation_review: "Translation review", deal_aftercare: "Deal aftercare",
-      email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Other channel",
+      email: "Email", phone: "Phone", whatsapp: "WhatsApp", viber: "Viber", sms: "SMS", other: "Other channel", acknowledgement: "Acknowledgement", viewing: "Viewing", callback: "Callback", valuation: "Valuation",
     },
     statuses: {
       buyer: "Buyer", foreign_buyer: "Foreign buyer", investor: "Investor", renter: "Renter", seller: "Seller", landlord: "Landlord", partner_referral: "Partner / referral", pending: "Pending", ok: "On time", ready: "Ready", blocked: "Blocked", unknown: "Unknown",
@@ -2247,7 +2247,7 @@ function CommunicationThread({ page, thread, copy, ui }) {
   );
 }
 
-function CommunicationTemplateSelect({ templates = [], copy }) {
+function CommunicationTemplateSelect({ templates = [], copy, ui }) {
   if (!templates.length) return null;
   return h(
     "div",
@@ -2270,7 +2270,7 @@ function CommunicationTemplateSelect({ templates = [], copy }) {
               "data-template-locale": template.locale,
               "data-template-channel": template.preferred_channel,
             },
-            `${template.kind.replaceAll("_", " ")} · ${template.locale.toUpperCase()} · ${template.preferred_channel}`,
+            `${valueText(ui, template.kind)} · ${template.locale.toUpperCase()} · ${valueText(ui, template.preferred_channel)}`,
           ),
         ),
       ),
@@ -2798,13 +2798,20 @@ function ManualLeadForm({ page }) {
   );
 }
 
-function LeadBrief({ brief, copy, ui }) {
+function qualificationFieldLabel(field, copy, ui) {
+  if (field === "budget_max_eur") return label(copy, "budgetMax", "Maximum budget (€)");
+  if (field === "timeline") return label(copy, "timeline", "Decision timeline");
+  return fieldText(ui, field);
+}
+
+function LeadBrief({ brief, intake, copy, ui, locale }) {
   if (!brief) return null;
   const tone = brief.priority === "critical" ? "brick" : brief.priority === "urgent" ? "sun" : brief.readiness_band === "ready" ? "success" : "sea";
   const readinessLabel = label(copy, `readiness_${brief.readiness_band}`, brief.readiness_band);
   const actionLabel = label(copy, brief.next_action.code, statusText(ui, brief.next_action.code));
+  const missingFields = (intake?.missing_fields || []).map((field) => qualificationFieldLabel(field, copy, ui));
   return h(
-    "section",
+    "details",
     {
       className: "adm-lead-brief",
       "data-lead-brief": brief.lead_id,
@@ -2813,28 +2820,47 @@ function LeadBrief({ brief, copy, ui }) {
       "data-decision-source": brief.decision_source,
     },
     h(
-      "div",
-      { className: "adm-lead-brief__score" },
-      h("span", null, label(copy, "leadReadiness", "Readiness")),
-      h("strong", null, `${brief.readiness_score}%`),
-      h("progress", { value: brief.readiness_score, max: 100, "aria-label": `${label(copy, "leadReadiness", "Readiness")}: ${brief.readiness_score}%` }),
-      h(StatusPill, { tone }, readinessLabel),
+      "summary",
+      { className: "adm-lead-brief__summary" },
+      h(
+        "span",
+        { className: "adm-lead-brief__next" },
+        h("small", null, label(copy, "nextBestAction", "Next best action")),
+        h("strong", null, actionLabel),
+      ),
+      h(
+        "span",
+        { className: "adm-lead-brief__readiness" },
+        h("strong", null, `${brief.readiness_score}%`),
+        h(StatusPill, { tone }, readinessLabel),
+      ),
     ),
     h(
       "div",
-      { className: "adm-lead-brief__action" },
-      h("span", null, label(copy, "nextBestAction", "Next best action")),
-      h("strong", null, actionLabel),
-      brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at)) : null,
-      brief.match_count ? h("small", null, `${brief.match_count} ${label(copy, "inventoryMatches", "inventory matches")}`) : null,
+      { className: "adm-lead-brief__body" },
+      h(
+        "div",
+        { className: "adm-lead-brief__score" },
+        h("span", null, label(copy, "leadReadiness", "Readiness")),
+        h("strong", null, `${brief.readiness_score}%`),
+        h("progress", { value: brief.readiness_score, max: 100, "aria-label": `${label(copy, "leadReadiness", "Readiness")}: ${brief.readiness_score}%` }),
+        missingFields.length ? h("small", null, `${label(copy, "missingFields", "Missing fields")}: ${missingFields.join(", ")}`) : null,
+      ),
+      h(
+        "div",
+        { className: "adm-lead-brief__action" },
+        h("span", null, label(copy, "qualificationDetails", "Qualification evidence")),
+        brief.next_action.due_at ? h("time", { dateTime: brief.next_action.due_at }, formatAdminDateTime(brief.next_action.due_at, locale)) : null,
+        brief.match_count ? h("small", null, `${brief.match_count} ${label(copy, "inventoryMatches", "matching properties")}`) : null,
+      ),
+      h("small", { className: "adm-lead-brief__guardrail" }, label(copy, "deterministicDecision", "Calculated from workflow evidence; Hermes may only suggest a draft.")),
     ),
-    h("small", { className: "adm-lead-brief__guardrail" }, label(copy, "deterministicDecision", "Calculated from workflow evidence; Hermes may only suggest a draft.")),
   );
 }
 
 function LeadInboxBody({ page }) {
-  const copy = adminCopy(page);
   const ui = workbenchCopy(page);
+  const copy = { ...ui, ...adminCopy(page) };
   const leadSlaById = new Map((page.leadSla?.rows || []).map((row) => [row.lead_id, row]));
   const replyByLeadId = new Map((page.replies || []).map((reply) => [reply.lead_id || reply.leadId, reply]));
   const deliveryByReplyId = new Map((page.replyDeliveryQueue?.states || []).map((row) => [row.reply_id, row]));
@@ -2954,19 +2980,11 @@ function LeadInboxBody({ page }) {
                     h(
                       "div",
                       { className: "adm-lead-identity" },
+                      leadContactActions(lead, ui),
                       h("code", { className: "crm-mono" }, lead.lead_id),
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
                       requestDetails ? h("small", { className: "adm-lead-context", "data-lead-request-details": "true" }, requestDetails) : null,
-                      h(
-                        "div",
-                        { className: "adm-lead-meta", "data-intake-complete": intake.complete ? "true" : "false" },
-                        h(StatusPill, { tone: intake.complete ? "success" : "sun" }, intake.complete ? label(copy, "intakeComplete", "Initial requirements captured") : label(copy, "intakeIncomplete", "Qualification details missing")),
-                        !intake.complete && intake.missing_fields?.length
-                          ? h("small", { className: "adm-lead-context" }, `${label(copy, "missingFields", "Missing fields")}: ${intake.missing_fields.map((field) => statusText(ui, field)).join(", ")}`)
-                          : null,
-                      ),
-                      h(LeadBrief, { brief: briefByLeadId.get(lead.lead_id), copy, ui }),
-                      leadContactActions(lead, ui),
+                      h(LeadBrief, { brief: briefByLeadId.get(lead.lead_id), intake, copy, ui, locale: page.workspace?.locale }),
                       lead.duplicate_status === "possible_duplicate"
                         ? h(
                             "a",
@@ -2975,16 +2993,25 @@ function LeadInboxBody({ page }) {
                             h("span", null, `${label(copy, "possibleDuplicate", "Possible duplicate contact")}: ${lead.possible_duplicate_of}`),
                           )
                         : null,
-                      h(LeadAssignmentControl, { page, lead, copy }),
-                      h(CommunicationThread, { page, thread: communicationByLeadId.get(lead.lead_id), copy, ui }),
-                      h("a", { className: "adm-lead-context", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id }, label(copy, "viewHistory", "History")),
                       h(
-                        "div",
-                        { className: "adm-lead-meta" },
-                        h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type)),
-                        h("span", { className: "adm-lead-meta__source" }, valueText(ui, lead.source)),
-                        h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`),
-                        h("span", { className: "adm-lead-meta__contact" }, valueText(ui, lead.contact_preference)),
+                        "details",
+                        { className: "adm-lead-more" },
+                        h("summary", null, h(Icon, { name: "list", size: 16 }), h("span", null, label(copy, "leadDetails", "Lead details"))),
+                        h(
+                          "div",
+                          { className: "adm-lead-more__body" },
+                          h(LeadAssignmentControl, { page, lead, copy }),
+                          h(CommunicationThread, { page, thread: communicationByLeadId.get(lead.lead_id), copy, ui }),
+                          h("a", { className: "adm-lead-context", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id }, label(copy, "viewHistory", "History")),
+                          h(
+                            "div",
+                            { className: "adm-lead-meta" },
+                            h(StatusPill, { tone: lead.lead_type === "seller" ? "sand" : "sea" }, statusText(ui, lead.lead_type)),
+                            h("span", { className: "adm-lead-meta__source" }, valueText(ui, lead.source)),
+                            h("span", { className: "crm-lang" }, `${lead.original_language} -> ${lead.admin_locale}`),
+                            h("span", { className: "adm-lead-meta__contact" }, valueText(ui, lead.contact_preference)),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -3046,7 +3073,7 @@ function LeadInboxBody({ page }) {
                         h("input", { type: "hidden", name: "leadId", defaultValue: lead.lead_id }),
                         h("input", { type: "hidden", name: "language", defaultValue: lead.original_language }),
                         h("input", { type: "hidden", name: "approved", defaultValue: "true" }),
-                        h(CommunicationTemplateSelect, { templates: page.communicationTemplates?.[lead.lead_id] || [], copy }),
+                        h(CommunicationTemplateSelect, { templates: page.communicationTemplates?.[lead.lead_id] || [], copy, ui }),
                         h(
                           "label",
                           { className: "adm-check", "data-show-original-toggle": "true" },

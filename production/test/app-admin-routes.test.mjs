@@ -373,6 +373,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-communication-event="inbound_request"/);
       assert.match(inboxHtml, /data-communication-template-select="true"/);
       assert.match(inboxHtml, /data-template-locale="he"/);
+      assert.match(inboxHtml, /<details class="adm-lead-brief"/);
+      assert.match(inboxHtml, /<details class="adm-lead-more">/);
+      assert.match(inboxHtml, /Максимальный бюджет \(€\), Срок решения/);
+      assert.match(inboxHtml, /История коммуникации/);
+      assert.match(inboxHtml, /Подтверждение · HE · WhatsApp/);
       assert.match(inboxHtml, /action="\/api\/admin\/leads\/assign"/);
       assert.match(inboxHtml, /name="assignmentConfirmed"/);
       assert.match(inboxHtml, /he -&gt; en/);
