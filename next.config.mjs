@@ -6,6 +6,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default withPayload({
   turbopack: { root },
+  skipTrailingSlashRedirect: true,
   async headers() {
     return [
       {
