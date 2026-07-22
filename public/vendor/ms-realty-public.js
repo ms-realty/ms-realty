@@ -412,6 +412,40 @@
       })(images[i]);
     }
   }
+  function initMobileListingGallery() {
+    var gallery = document.querySelector("[data-mobile-gallery]");
+    var shell = gallery ? gallery.closest(".ld-gallery-shell") : null;
+    var current = shell ? shell.querySelector("[data-mobile-gallery-current]") : null;
+    var slides = gallery ? gallery.querySelectorAll("[data-mobile-gallery-slide]") : [];
+    if (!gallery || !current || slides.length < 2) return;
+    var frame = 0;
+    function updateGalleryPosition() {
+      frame = 0;
+      var galleryBox = gallery.getBoundingClientRect();
+      var galleryCenter = galleryBox.left + galleryBox.width / 2;
+      var activeIndex = 0;
+      var activeDistance = Infinity;
+      for (var i = 0; i < slides.length; i += 1) {
+        var slideBox = slides[i].getBoundingClientRect();
+        var distance = Math.abs(slideBox.left + slideBox.width / 2 - galleryCenter);
+        if (distance < activeDistance) {
+          activeDistance = distance;
+          activeIndex = i;
+        }
+        slides[i].removeAttribute("data-gallery-active");
+      }
+      slides[activeIndex].setAttribute("data-gallery-active", "true");
+      gallery.setAttribute("data-mobile-gallery-index", String(activeIndex + 1));
+      current.textContent = String(activeIndex + 1);
+    }
+    function scheduleGalleryPosition() {
+      if (frame) return;
+      frame = window.requestAnimationFrame(updateGalleryPosition);
+    }
+    gallery.addEventListener("scroll", scheduleGalleryPosition, { passive: true });
+    window.addEventListener("resize", scheduleGalleryPosition);
+    updateGalleryPosition();
+  }
   function initSearchScrollRestoration() {
     var searchRoot = document.querySelector("[data-search-results], [data-saved-listings-view='true']");
     if (!searchRoot) return;
@@ -671,5 +705,6 @@
   initSavedSearchContacts();
   initMobileSearchFilters();
   initImageFallbacks();
+  initMobileListingGallery();
   initPhotoSphereViewers();
 })();
