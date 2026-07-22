@@ -1089,7 +1089,9 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   border-radius: var(--radius-card);
   background: var(--surface);
   box-shadow: var(--shadow-xs);
+  transition: opacity 180ms cubic-bezier(.22, 1, .36, 1), transform 180ms cubic-bezier(.22, 1, .36, 1);
 }
+.adm-route-decision[data-route-decision-state="saved"] { opacity: 0; transform: translateY(-6px); pointer-events: none; }
 .adm-route-decision__header {
   display: flex;
   align-items: flex-start;
@@ -1186,6 +1188,10 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .adm-route-decision__equivalence { min-height: 44px; }
   .adm-route-decision__actions { align-items: stretch; flex-direction: column; }
   .adm-route-decision__actions .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adm-route-decision { transition: none; }
 }
 
 @media (max-width: 440px) {

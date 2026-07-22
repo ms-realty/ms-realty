@@ -4725,7 +4725,20 @@ function MigrationReviewBody({ page }) {
       h(
         Panel,
         {
-          title: `${ui.pendingLegacyDecisions} · ${page.routeMap.pendingPagination.totalRows}/${page.routeMap.reviewRequired}`,
+          title: h(
+            "span",
+            null,
+            `${ui.pendingLegacyDecisions} · `,
+            h("span", { "data-filtered-route-value": "true" }, page.routeMap.pendingPagination.totalRows),
+            "/",
+            h("span", { "data-pending-route-value": "true" }, page.routeMap.reviewRequired),
+          ),
+          action: h(
+            StatusPill,
+            { tone: "success", "data-reviewed-route-progress": "true" },
+            `${ui.reviewedDecisions}: `,
+            h("span", { "data-reviewed-route-value": "true" }, page.routeMap.terminalDecisionsReviewed),
+          ),
           "aria-label": ui.pendingLegacyDecisions,
           "data-pending-route-count": page.routeMap.reviewRequired,
           "data-filtered-route-count": page.routeMap.pendingPagination.totalRows,

@@ -29,4 +29,10 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /equivalent\.required = requiresEquivalentTarget/);
   assert.match(ADMIN_APP_JS, /data-route-decision-target-preview/);
   assert.match(ADMIN_APP_JS, /target\.addEventListener\("input"/);
+  assert.match(ADMIN_APP_JS, /function completeRouteDecision\(form, payload\)/);
+  assert.match(ADMIN_APP_JS, /payload\.terminalDecisionPreview\.length/);
+  assert.match(ADMIN_APP_JS, /data-route-decision-state", "saved"/);
+  assert.match(ADMIN_APP_JS, /summary\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(ADMIN_APP_JS, /prefers-reduced-motion: reduce/);
+  assert.match(ADMIN_APP_JS, /!form\.hasAttribute\("data-route-decision-form"\)/);
 });

@@ -578,6 +578,45 @@
     }
     syncOpenState();
   }
+  function completeRouteDecision(form, payload) {
+    var item = form.closest("[data-pending-route-decision]");
+    var list = item ? item.parentElement : null;
+    var panel = item ? item.closest("[data-pending-route-count]") : null;
+    if (!item || !list || !panel) return false;
+    var pending = Math.max(0, Number(panel.getAttribute("data-pending-route-count") || 0) - 1);
+    var filtered = Math.max(0, Number(panel.getAttribute("data-filtered-route-count") || 0) - 1);
+    var reviewed = payload && Array.isArray(payload.terminalDecisionPreview)
+      ? payload.terminalDecisionPreview.length
+      : Number(panel.getAttribute("data-reviewed-route-count") || 0) + 1;
+    panel.setAttribute("data-pending-route-count", String(pending));
+    panel.setAttribute("data-filtered-route-count", String(filtered));
+    panel.setAttribute("data-reviewed-route-count", String(reviewed));
+    var pendingValue = panel.querySelector("[data-pending-route-value]");
+    var filteredValue = panel.querySelector("[data-filtered-route-value]");
+    var reviewedValue = panel.querySelector("[data-reviewed-route-value]");
+    if (pendingValue) pendingValue.textContent = String(pending);
+    if (filteredValue) filteredValue.textContent = String(filtered);
+    if (reviewedValue) reviewedValue.textContent = String(reviewed);
+    var nextItem = item.nextElementSibling;
+    item.setAttribute("data-route-decision-state", "saved");
+    var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.setTimeout(function () {
+      item.remove();
+      var next = nextItem && nextItem.isConnected ? nextItem : list.querySelector("[data-pending-route-decision]");
+      if (!next) {
+        window.location.reload();
+        return;
+      }
+      var details = next.querySelector(".adm-route-decision__disclosure");
+      var summary = details ? details.querySelector("summary") : null;
+      if (details) details.open = true;
+      if (summary) {
+        summary.focus({ preventScroll: true });
+        summary.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "nearest" });
+      }
+    }, reducedMotion ? 0 : 220);
+    return true;
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -603,9 +642,11 @@
             return payload;
           });
         })
-        .then(function () {
+        .then(function (payload) {
           if (status) { status.textContent = success; status.setAttribute("data-state", "success"); }
-          window.setTimeout(function () { window.location.reload(); }, 150);
+          if (!form.hasAttribute("data-route-decision-form") || !completeRouteDecision(form, payload)) {
+            window.setTimeout(function () { window.location.reload(); }, 150);
+          }
         })
         .catch(function (error) {
           if (status) { status.textContent = error.message || failure; status.setAttribute("data-state", "error"); }
