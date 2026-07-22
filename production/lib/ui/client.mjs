@@ -353,6 +353,68 @@ export const PUBLIC_APP_JS = `(function () {
       })(images[i]);
     }
   }
+  function initPublicMobileNavigation() {
+    var mobileMenu = document.querySelector("[data-mobile-menu]");
+    if (!mobileMenu) return;
+    var summary = mobileMenu.querySelector(":scope > summary");
+    var panel = mobileMenu.querySelector(".site-hd__mobile-panel");
+    var backdrop = mobileMenu.querySelector("[data-mobile-menu-close]");
+    if (!summary || !panel) return;
+    function focusableItems() {
+      var items = panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      var visible = [];
+      for (var i = 0; i < items.length; i += 1) {
+        if (items[i].getClientRects().length) visible.push(items[i]);
+      }
+      return visible;
+    }
+    function syncOpenState() {
+      summary.setAttribute("aria-expanded", mobileMenu.open ? "true" : "false");
+      document.documentElement.classList.toggle("public-mobile-nav-open", mobileMenu.open);
+      if (!mobileMenu.open) return;
+      window.requestAnimationFrame(function () {
+        var target = panel.querySelector('[aria-current="page"]') || focusableItems()[0];
+        if (target) target.focus();
+      });
+    }
+    function closeNavigation(returnFocus) {
+      mobileMenu.open = false;
+      syncOpenState();
+      if (returnFocus) summary.focus();
+    }
+    mobileMenu.addEventListener("toggle", syncOpenState);
+    if (backdrop) backdrop.addEventListener("click", function () { closeNavigation(true); });
+    panel.addEventListener("click", function (event) {
+      if (event.target.closest("a[href]")) closeNavigation(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (!mobileMenu.open) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeNavigation(true);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      var items = focusableItems();
+      if (!items.length) return;
+      var first = items[0];
+      var last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+    var mobileViewport = window.matchMedia("(max-width: 1080px)");
+    if (mobileViewport.addEventListener) {
+      mobileViewport.addEventListener("change", function (event) {
+        if (!event.matches && mobileMenu.open) closeNavigation(false);
+      });
+    }
+    syncOpenState();
+  }
   document.addEventListener("click", function (event) {
     if (event.target && event.target.matches && event.target.matches("[data-mobile-contact-options]")) {
       event.target.close();
@@ -437,6 +499,7 @@ export const PUBLIC_APP_JS = `(function () {
     });
   });
   markSaved();
+  initPublicMobileNavigation();
   initSavedSearchContacts();
   initMobileSearchFilters();
   initImageFallbacks();

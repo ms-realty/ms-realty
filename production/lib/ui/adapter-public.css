@@ -81,7 +81,10 @@
 .site-ft__bar-in nav { flex-wrap: wrap; }
 
 @media (max-width: 1080px) {
+  html.public-mobile-nav-open,
+  html.public-mobile-nav-open body { overflow: hidden; }
   .site-hd { position: relative; z-index: 30; }
+  html.public-mobile-nav-open .site-hd { z-index: 70; }
   .site-hd__in { height: 64px; padding-block: 8px; flex-wrap: nowrap; gap: var(--space-2); }
   .site-hd__nav,
   .site-hd__right { display: none; }
@@ -111,19 +114,36 @@
   }
   .site-hd__mobile > summary::-webkit-details-marker { display: none; }
   .site-hd__mobile > summary:focus-visible { box-shadow: var(--shadow-focus); outline: none; }
+  .site-hd__mobile[open] > summary { background: var(--surface-sunken); }
+  .site-hd__mobile-backdrop {
+    position: fixed;
+    z-index: 39;
+    inset: 64px 0 0;
+    width: 100%;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: var(--overlay);
+    cursor: default;
+  }
   .site-hd__mobile-panel {
-    position: absolute;
+    position: fixed;
     inset-inline-end: 0;
-    top: calc(100% + var(--space-2));
+    inset-block: 64px 0;
     z-index: 40;
     display: grid;
+    align-content: start;
     gap: var(--space-4);
-    width: min(360px, calc(100vw - 2 * var(--gutter)));
-    padding: var(--space-4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-card);
+    width: min(420px, 100vw);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-5) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
+    border: 0;
+    border-inline-start: 1px solid var(--border);
+    border-radius: 0;
     background: var(--surface);
     box-shadow: var(--shadow-lg);
+    animation: site-mobile-nav-in var(--dur-base) var(--ease-out);
   }
   .site-hd__mobile-nav { display: grid; gap: var(--space-1); }
   .site-hd__mobile-nav a {
@@ -156,6 +176,10 @@
   .site-hd__mobile-langs a[aria-current="true"] { border-color: var(--text-strong); color: var(--text-strong); }
   .site-hd__mobile-langs b { font-size: var(--text-xs); }
   .site-hd__mobile-langs span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+@keyframes site-mobile-nav-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @media (max-width: 560px) {
   .site-ft__in { grid-template-columns: 1fr; padding-block: 40px 24px; }

@@ -86,18 +86,39 @@ function LanguageMenu({ languages, label }) {
 
 function SiteHeader({ chrome }) {
   const copy = chrome.copy;
+  const activeLanguage = chrome.languages.find((language) => language.active) || chrome.languages[0];
+  const mobileMenuId = `public-mobile-navigation-${activeLanguage?.code || "en"}`;
   const mobileMenu = h(
     "details",
     { className: "site-hd__mobile", "data-mobile-menu": "true" },
     h(
       "summary",
-      { "aria-label": copy.menuLabel, title: copy.menuLabel },
+      {
+        "aria-label": copy.menuLabel,
+        "aria-controls": mobileMenuId,
+        "aria-expanded": "false",
+        title: copy.menuLabel,
+      },
       h(Icon, { name: "menu", size: 22 }),
       h("span", { className: "site-hd__mobile-label" }, copy.menuLabel),
     ),
+    h("button", {
+      type: "button",
+      className: "site-hd__mobile-backdrop",
+      "data-mobile-menu-close": "true",
+      "aria-label": copy.close,
+      "aria-hidden": "true",
+      tabIndex: -1,
+    }),
     h(
       "div",
-      { className: "site-hd__mobile-panel" },
+      {
+        id: mobileMenuId,
+        className: "site-hd__mobile-panel",
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-label": copy.menuLabel,
+      },
       h(
         "nav",
         { className: "site-hd__mobile-nav", "aria-label": copy.menuLabel },
