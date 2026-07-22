@@ -294,7 +294,8 @@ test("runtime search shows reviewed cards for admin-added approved locales", () 
   const card = search.cards.find((candidate) => candidate.id === "MS-CRAWL-0001");
 
   assert.equal(search.path, "/es/buscar");
-  assert.equal(search.indexable, true);
+  assert.equal(search.indexable, false);
+  assert.equal(search.metadata.robots, "noindex,follow");
   assert.equal(card.path, "/es/propiedades/MS-CRAWL-0001");
   assert.equal(card.translation_display, "reviewed_translation");
   assert.equal(card.translation_indexable, true);
