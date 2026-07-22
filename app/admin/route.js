@@ -2,8 +2,14 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request) {
-  const target = new URL("/admin/today", request.url);
   const locale = new URL(request.url).searchParams.get("locale");
-  if (locale) target.searchParams.set("locale", locale);
-  return Response.redirect(target, 307);
+  const query = new URLSearchParams();
+  if (locale) query.set("locale", locale);
+  const suffix = query.toString();
+  // Keep this relative so a reverse proxy cannot leak the container's
+  // internal host/port into the operator's browser.
+  return new Response(null, {
+    status: 307,
+    headers: { location: `/admin/today${suffix ? `?${suffix}` : ""}` },
+  });
 }

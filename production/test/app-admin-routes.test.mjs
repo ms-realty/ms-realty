@@ -294,7 +294,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const auth = { authorization: "Bearer next-admin-test" };
       const adminRoot = await adminRootRoute.GET(new Request("https://example.test/admin?locale=ru"));
       assert.equal(adminRoot.status, 307);
-      assert.equal(adminRoot.headers.get("location"), "https://example.test/admin/today?locale=ru");
+      assert.equal(adminRoot.headers.get("location"), "/admin/today?locale=ru");
 
       const todayUnauthorized = await todayRoute.GET(new Request("https://example.test/admin/today?locale=ru"));
       assert.equal(todayUnauthorized.status, 401);
