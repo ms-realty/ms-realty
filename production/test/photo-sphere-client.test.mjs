@@ -58,6 +58,7 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /img\[data-fallback-src\]/);
   assert.match(PUBLIC_APP_JS, /function initMobileListingGallery/);
   assert.match(PUBLIC_APP_JS, /data-mobile-gallery-current/);
+  assert.match(PUBLIC_APP_JS, /progress\.setAttribute\("aria-label"/);
   assert.match(PUBLIC_APP_JS, /getBoundingClientRect\(\)/);
   assert.match(PUBLIC_APP_JS, /gallery\.addEventListener\("scroll", scheduleGalleryPosition, \{ passive: true \}\)/);
   assert.match(PUBLIC_APP_JS, /initMobileListingGallery\(\);/);

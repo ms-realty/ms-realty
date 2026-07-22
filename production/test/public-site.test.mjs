@@ -94,20 +94,25 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.doesNotMatch(html, /\/api\/admin\/(viewings|replies)/);
 });
 
-test("mobile listing gallery exposes swipe position without rendering empty slides", () => {
+test("mobile listing gallery exposes every reviewed photo and its swipe position", () => {
   const page = renderListingPage({ registry, listing, localeCode: "ru" });
   const firstImage = page.body.media.gallery[0];
   page.body.media.gallery = [
     firstImage,
     { ...firstImage, url: `${firstImage.url}?preview=2` },
     { ...firstImage, url: `${firstImage.url}?preview=3` },
+    { ...firstImage, url: `${firstImage.url}?preview=4` },
+    { ...firstImage, url: `${firstImage.url}?preview=5` },
   ];
-  page.body.media.gallery_count = 3;
+  page.body.media.gallery_count = 5;
   const html = renderReactPublicBody(page);
 
-  assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 3);
-  assert.match(html, /data-mobile-gallery-progress="true" data-gallery-total="3"/);
-  assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 3/);
+  assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 5);
+  assert.match(html, /data-mobile-gallery-slide="5"/);
+  assert.match(html, /data-mobile-gallery-progress="true" data-gallery-total="5"/);
+  assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 5/);
+  assert.match(html, /aria-roledescription="carousel"/);
+  assert.match(html, /aria-roledescription="slide" aria-label="5 \/ 5"/);
 });
 
 test("approved broker contact data enables direct listing contact links", () => {

@@ -1358,7 +1358,10 @@ function ListingBody({ page }) {
   const gallery = (page.body.media.gallery || []).slice(0, 12);
   const floorPlans = page.body.media.floor_plans || [];
   const videos = page.body.media.videos || [];
-  const galleryPreview = gallery.length ? gallery.slice(0, 3) : [null];
+  // The desktop composition uses the first three images as a visual preview.
+  // On phones the same DOM becomes the primary swipe carousel, so retain every
+  // reviewed photo instead of trapping buyers in a three-image teaser.
+  const gallerySlides = gallery.length ? gallery : [null];
   const channels = page.body.actions.direct_contact.channels || [];
   const brokerChannels = channels.filter((channel) => channel.enabled);
   const tone = toneFor(page.body.facts?.id || page.path);
@@ -1591,35 +1594,46 @@ function ListingBody({ page }) {
         { className: "ld-gallery-shell" },
         h(
           "div",
-          { className: "ld-gallery", "data-mobile-gallery": "true", "data-mobile-gallery-index": "1" },
-          ...galleryPreview.map((image, index) =>
+          {
+            className: "ld-gallery",
+            role: "region",
+            "aria-label": labels.gallery,
+            "aria-roledescription": "carousel",
+            "data-mobile-gallery": "true",
+            "data-mobile-gallery-index": "1",
+          },
+          ...gallerySlides.map((image, index) =>
             h(
               "div",
               {
                 key: image?.url || `gallery-placeholder-${index}`,
-                className: `ld-g${index === 0 ? " ld-g--main" : ""} mk-photo mk-photo--${index === 0 ? tone : index === 1 ? "sand" : "sky"}`,
+                className: `ld-g${index === 0 ? " ld-g--main" : ""}${index > 2 ? " ld-g--desktop-extra" : ""} mk-photo mk-photo--${index === 0 ? tone : index === 1 ? "sand" : "sky"}`,
+                role: "group",
+                "aria-roledescription": "slide",
+                "aria-label": `${index + 1} / ${gallerySlides.length}`,
                 "data-mobile-gallery-slide": String(index + 1),
                 "data-gallery-active": index === 0 ? "true" : undefined,
               },
               image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined)) : null,
-              index > 0 && index === galleryPreview.length - 1
+              gallerySlides.length > 3 && index === 2
                 ? h("a", { className: "ld-g__more", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${labels.photos}`)
                 : null,
             ),
           ),
         ),
-        galleryPreview.length > 1
+        gallerySlides.length > 1
           ? h(
-              "a",
+              "div",
               {
                 className: "ld-g__count",
-                href: "#listing-gallery",
-                "aria-label": `${page.body.media.gallery_count || gallery.length} ${labels.photos}`,
+                role: "status",
+                "aria-live": "polite",
+                "aria-label": `1 / ${gallerySlides.length}`,
                 "data-mobile-gallery-progress": "true",
-                "data-gallery-total": galleryPreview.length,
+                "data-gallery-total": gallerySlides.length,
               },
               h(Icon, { name: "camera", size: 16 }),
-              h("span", null, h("span", { "data-mobile-gallery-current": "true" }, "1"), ` / ${galleryPreview.length}`),
+              h("span", null, h("span", { "data-mobile-gallery-current": "true" }, "1"), ` / ${gallerySlides.length}`),
             )
           : null,
       ),

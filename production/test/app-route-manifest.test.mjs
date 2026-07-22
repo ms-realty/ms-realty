@@ -194,11 +194,10 @@ test("App Router restores a legacy WordPress gallery without serving tiny deriva
   assert.equal(listing.status, 200);
   assert.equal(listing.rendered.body.media.gallery_count, 10);
   assert.equal(listing.rendered.body.media.gallery.every((image) => !/-72x72\./.test(image.url)), true);
-  assert.equal(listing.rendered.body.media.gallery.some((image) => /-72x72\./.test(image.fallback_url || "")), true);
-  assert.match(
-    listing.html,
-    /data-fallback-src="https:\/\/makler-realty\.ru\/wp-content\/uploads\/2013\/11\/191-2-72x72\.jpg"/,
-  );
+  assert.equal(listing.rendered.body.media.gallery.every((image) => !/-72x72\./.test(image.fallback_url || "")), true);
+  assert.doesNotMatch(listing.html, /data-fallback-src="[^"]+-72x72\./);
+  assert.equal((listing.html.match(/data-mobile-gallery-slide=/g) || []).length, 10);
+  assert.match(listing.html, /data-mobile-gallery-progress="true" data-gallery-total="10"/);
 });
 
 test("App Router adapter serves approved sitemap, robots text, and favicon", async () => {

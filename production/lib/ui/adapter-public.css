@@ -626,6 +626,7 @@ main[data-saved-listings-view="true"]:not([data-saved-listings-ready="true"]) [d
 .ld-feats { display: flex; flex-wrap: wrap; gap: 9px; padding: 0; margin: var(--space-2) 0 0; list-style: none; }
 .ld-gallery-shell { position: relative; }
 .ld-g { position: relative; }
+.ld-g--desktop-extra { display: none; }
 .ld-g > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .ld-g__more { text-decoration: none; }
 .ld-g__count,
@@ -887,7 +888,9 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     scroll-snap-align: start;
     scroll-snap-stop: always;
   }
+  .ld-gallery .ld-g--desktop-extra { display: block; }
   .ld-gallery .ld-g--main { grid-column: auto; grid-row: auto; }
+  .ld-gallery .ld-g__more { display: none; }
   .ld-g__count {
     position: absolute;
     z-index: 3;

@@ -416,6 +416,7 @@
     var gallery = document.querySelector("[data-mobile-gallery]");
     var shell = gallery ? gallery.closest(".ld-gallery-shell") : null;
     var current = shell ? shell.querySelector("[data-mobile-gallery-current]") : null;
+    var progress = shell ? shell.querySelector("[data-mobile-gallery-progress]") : null;
     var slides = gallery ? gallery.querySelectorAll("[data-mobile-gallery-slide]") : [];
     if (!gallery || !current || slides.length < 2) return;
     var frame = 0;
@@ -437,6 +438,7 @@
       slides[activeIndex].setAttribute("data-gallery-active", "true");
       gallery.setAttribute("data-mobile-gallery-index", String(activeIndex + 1));
       current.textContent = String(activeIndex + 1);
+      if (progress) progress.setAttribute("aria-label", String(activeIndex + 1) + " / " + String(slides.length));
     }
     function scheduleGalleryPosition() {
       if (frame) return;

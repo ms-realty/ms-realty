@@ -106,7 +106,7 @@ test("large source imagery outranks an inherited 45px homepage thumbnail", () =>
   assert.equal(gallery.gallery.length, 1);
 });
 
-test("WordPress thumbnail derivatives recover the original gallery with a safe fallback", () => {
+test("WordPress thumbnail derivatives recover originals without exposing tiny public fallbacks", () => {
   const media = [
     normalizeMediaAsset(
       { image_url: "https://makler-realty.ru/wp-content/uploads/2013/11/191-2-72x72.jpg", alt: "Living room" },
@@ -124,7 +124,7 @@ test("WordPress thumbnail derivatives recover the original gallery with a safe f
   assert.equal(gallery.review.public_gallery_assets, 2);
   assert.equal(gallery.review.suppressed_public_assets, 0);
   assert.equal(gallery.gallery[0].url, "https://makler-realty.ru/wp-content/uploads/2013/11/191-2.jpg");
-  assert.equal(gallery.gallery[0].fallback_url, "https://makler-realty.ru/wp-content/uploads/2013/11/191-2-72x72.jpg");
+  assert.equal(gallery.gallery[0].fallback_url, undefined);
   assert.equal(media[0].width, null);
   assert.equal(media[0].height, null);
 });

@@ -70,9 +70,14 @@ export function normalizeMediaAsset(row, { width = null, height = null, fallback
 }
 
 function publicAsset(item) {
+  const fallbackUrl = item.fallback_asset_url || "";
   return {
     url: item.asset_url || item.url,
-    fallback_url: item.fallback_asset_url || undefined,
+    // A recovered WordPress original is suitable for the public gallery, but
+    // its tiny crawl thumbnail is not. Keep that derivative on the CMS record
+    // for provenance without letting an image error turn a full-width hero
+    // into a visibly pixelated 72px fallback.
+    fallback_url: fallbackUrl && !isSmallDerivative(fallbackUrl) ? fallbackUrl : undefined,
     alt: item.alt || "Property photo",
     width: item.width,
     height: item.height,
