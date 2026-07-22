@@ -121,7 +121,7 @@ export const PUBLIC_APP_JS = `(function () {
           warn.setAttribute("role", "alert");
           form.insertBefore(warn, form.firstChild);
         }
-        warn.textContent = (I18N.requestFailed || "Request failed") + " (" + (form.getAttribute("action") || "") + ")";
+        warn.textContent = I18N.requestFailed || "Request failed";
         warn.setAttribute("tabindex", "-1");
         warn.focus({ preventScroll: true });
         var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -592,6 +592,10 @@ export const PUBLIC_APP_JS = `(function () {
     }
   }
   document.addEventListener("click", function (event) {
+    if (event.target && event.target.matches && event.target.matches("#mk-enquiry")) {
+      event.target.close();
+      return;
+    }
     if (event.target && event.target.matches && event.target.matches("[data-mobile-contact-options]")) {
       event.target.close();
       return;

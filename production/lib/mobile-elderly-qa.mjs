@@ -64,6 +64,9 @@ export function buildMobileElderlyQaReport({
   const rentSearch = renderReactPage(
     renderSearchPage({ registry, listings, localeCode: "he", filters: { offer_type: "rent" } }),
   );
+  const emptySearch = renderReactPage(
+    renderSearchPage({ registry, listings, localeCode: "he", query: "no-such-listing-987654" }),
+  );
   const approvedTourHtml = renderReactPage(renderListingPage({ registry, listing: tourListing, localeCode: "he" }));
   const publicAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public.css"), "utf8");
 
@@ -118,6 +121,12 @@ export function buildMobileElderlyQaReport({
         includes(pages.search, "data-card-thumbnail=\"true\"") &&
         includes(pages.search, "data-client-save-listing=") &&
         includes(pages.search, "data-endpoint=\"/api/leads\""),
+    ),
+    check(
+      "mobile_search_empty_recovery",
+      includes(emptySearch, "data-search-empty=\"true\"") &&
+        includes(emptySearch, "href=\"/he/search\"") &&
+        !includes(emptySearch, "class=\"sr-list\""),
     ),
     check(
       "mobile_app_navigation",
@@ -219,6 +228,7 @@ export function assertMobileElderlyQaReport(report) {
   for (const id of [
     "mobile_search_form",
     "mobile_search_actions",
+    "mobile_search_empty_recovery",
     "mobile_app_navigation",
     "mobile_safe_area_and_feedback",
     "listing_sticky_actions",

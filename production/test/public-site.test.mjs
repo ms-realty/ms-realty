@@ -362,6 +362,19 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /<img[^>]*loading="lazy"[^>]*decoding="async"/);
 });
 
+test("zero-result searches render a useful mobile recovery state", () => {
+  const page = renderSearchPage({ registry, listings, localeCode: "ru", query: "no-such-listing-987654" });
+  const html = renderReactPublicBody(page);
+
+  assert.equal(page.search.total_matches, 0);
+  assert.equal(page.cards.length, 0);
+  assert.match(html, /data-search-empty="true"/);
+  assert.match(html, /<h2>Результаты поиска<\/h2>/);
+  assert.match(html, /<p>0 совпадений<\/p>/);
+  assert.match(html, /href="\/ru\/search"[^>]*>.*Очистить фильтры/s);
+  assert.doesNotMatch(html, /class="sr-list"/);
+});
+
 test("search applies text and facet filters before paginating cards", () => {
   const petrich = renderSearchPage({ registry, listings, localeCode: "he", query: "Petrich" });
   const petrichLocation = renderSearchPage({ registry, listings, localeCode: "he", filters: { location: "Petrich" } });

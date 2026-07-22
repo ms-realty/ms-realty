@@ -1226,16 +1226,33 @@ function SearchBody({ page }) {
           h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "search", href: page.path }, labels.browseListings),
         )
           : null,
-        h(
-          "section",
-          {
-            className: "sr-list",
-            "aria-label": savedView ? labels.savedListings : labels.searchResults,
-            "data-search-results": "true",
-            "data-saved-listings-grid": savedView ? "true" : undefined,
-          },
-          ...(page.cards || []).map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal", priority: index === 0 })),
-        ),
+        !savedView && !(page.cards || []).length
+          ? h(
+              "section",
+              {
+                className: "sr-empty",
+                "data-search-empty": "true",
+                "aria-label": labels.searchResults,
+              },
+              h("span", { className: "sr-empty__icon", "aria-hidden": "true" }, h(Icon, { name: "search", size: 28 })),
+              h("h2", null, labels.searchResults),
+              h("p", null, `${page.search.total_matches} ${labels.matches}`),
+              h(
+                "div",
+                { className: "sr-empty__actions" },
+                h(Btn, { tag: "a", variant: "primary", size: "md", iconStart: "x", href: page.path }, labels.clearFilters),
+              ),
+            )
+          : h(
+              "section",
+              {
+                className: "sr-list",
+                "aria-label": savedView ? labels.savedListings : labels.searchResults,
+                "data-search-results": "true",
+                "data-saved-listings-grid": savedView ? "true" : undefined,
+              },
+              ...(page.cards || []).map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal", priority: index === 0 })),
+            ),
         !savedView && page.search.pagination?.total_pages > 1
           ? h(
               "nav",
