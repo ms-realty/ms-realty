@@ -1126,6 +1126,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const redirectApprovalPath = tempRedirectApprovals();
   const deployableRedirectOutputPath = tempDeployableRedirects();
   const listingEditLedgerPath = tempListingEdits();
+  const listingQualityReviewPath = tempListingQualityReviewPath();
   const translationLedgerPath = tempTranslations();
   const auditLogPath = tempAuditLog();
   const liveServiceProvisioningReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`)}/mounted-live-service-provisioning-report.json`;
@@ -1145,6 +1146,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     redirectApprovalPath,
     deployableRedirectOutputPath,
     listingEditLedgerPath,
+    listingQualityReviewPath,
     translationLedgerPath,
     auditLogPath,
     liveServiceProvisioningReportPath,
@@ -1406,8 +1408,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.ok(qualityImported.body.reviewImport.pendingReviewSample.length > 0);
   assert.equal(qualityImported.body.report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
   assert.equal(qualityImported.body.report.blockers.includes("listing_quality_review"), true);
-  assert.equal(qualityImported.body.reviewPersisted, false);
-  assert.equal(qualityImported.body.reviewPath, null);
+  assert.equal(qualityImported.body.reviewPersisted, true);
+  assert.equal(qualityImported.body.reviewPath, listingQualityReviewPath);
+  assert.equal(parseCsv(fs.readFileSync(listingQualityReviewPath, "utf8")).length, 1);
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
   assert.deepEqual(readListingEdits(listingEditLedgerPath)[0].patch, { area_sqm: 85 });
   assert.equal(readListingEdits(listingEditLedgerPath)[0].editor, "editor_bg");

@@ -39,6 +39,24 @@ const REQUIRED_REVIEW_SNAPSHOT_FIELDS = [
   "public_gallery_sample",
   "missing_alt_text_assets",
 ];
+const LISTING_QUALITY_REVIEW_HEADERS = [
+  "listing_id",
+  "price_eur",
+  "area_sqm",
+  "bedrooms",
+  "location",
+  "description",
+  "facts_reviewer",
+  "media_reviewer",
+  "review_notes",
+  "editor_path",
+  "review_status",
+  "issues",
+  "required_editor_fields",
+  "public_gallery_assets",
+  "public_gallery_sample",
+  "missing_alt_text_assets",
+];
 
 function filled(value) {
   return value !== null && value !== undefined && String(value).trim() !== "";
@@ -285,24 +303,6 @@ function reviewNoteForRow(row) {
 }
 
 export function renderListingQualityReviewDraft(report) {
-  const headers = [
-    "listing_id",
-    "price_eur",
-    "area_sqm",
-    "bedrooms",
-    "location",
-    "description",
-    "facts_reviewer",
-    "media_reviewer",
-    "review_notes",
-    "editor_path",
-    "review_status",
-    "issues",
-    "required_editor_fields",
-    "public_gallery_assets",
-    "public_gallery_sample",
-    "missing_alt_text_assets",
-  ];
   const rows = report.rows.map((row) => ({
     listing_id: row.listing_id,
     price_eur: row.required_editor_fields.includes("price_eur") ? row.price_eur || "" : "",
@@ -321,7 +321,34 @@ export function renderListingQualityReviewDraft(report) {
     public_gallery_sample: row.public_gallery_sample,
     missing_alt_text_assets: row.missing_alt_text_assets,
   }));
-  return `${[headers.join(","), ...rows.map((row) => headers.map((header) => csvCell(row[header])).join(","))].join("\n")}\n`;
+  return renderListingQualityReviewRows(rows);
+}
+
+function renderListingQualityReviewRows(rows) {
+  return `${[
+    LISTING_QUALITY_REVIEW_HEADERS.join(","),
+    ...rows.map((row) => LISTING_QUALITY_REVIEW_HEADERS.map((header) => csvCell(row[header])).join(",")),
+  ].join("\n")}\n`;
+}
+
+function uniqueListingQualityReviewRows(csvText, label) {
+  if (!String(csvText || "").trim()) return [];
+  const seen = new Set();
+  return parseCsv(csvText).map((row) => {
+    const listingId = String(row.listing_id || row.listingId || "").trim();
+    if (!listingId) throw new Error(`${label} listing quality review requires listing_id`);
+    if (seen.has(listingId)) throw new Error(`Duplicate ${label} listing quality review row: ${listingId}`);
+    seen.add(listingId);
+    return { ...row, listing_id: listingId };
+  });
+}
+
+export function mergeListingQualityReviewCsv(existingCsv, incomingCsv) {
+  const merged = new Map(
+    uniqueListingQualityReviewRows(existingCsv, "persisted").map((row) => [row.listing_id, row]),
+  );
+  for (const row of uniqueListingQualityReviewRows(incomingCsv, "incoming")) merged.set(row.listing_id, row);
+  return renderListingQualityReviewRows([...merged.values()]);
 }
 
 export function buildListingQualityReviewPacket({
@@ -817,7 +844,9 @@ export function writeListingQualityReviewPacket(
 
 export function writeListingQualityReviewCsv(csvText, outPath = DEFAULT_LISTING_QUALITY_REVIEW_INPUT) {
   fs.mkdirSync(path.dirname(outPath), { recursive: true });
-  fs.writeFileSync(outPath, csvText.endsWith("\n") ? csvText : `${csvText}\n`);
+  const tempPath = `${outPath}.${process.pid}.tmp`;
+  fs.writeFileSync(tempPath, csvText.endsWith("\n") ? csvText : `${csvText}\n`);
+  fs.renameSync(tempPath, outPath);
   return outPath;
 }
 

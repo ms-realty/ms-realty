@@ -16,6 +16,7 @@ import {
   buildListingQualityReport,
   buildListingQualityReviewPacket,
   listingQualityImportSummary,
+  mergeListingQualityReviewCsv,
   renderListingQualityReviewDraft,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
@@ -315,6 +316,24 @@ test("listing quality review packet is a complete draft but not launch evidence"
   );
   assert.equal(packet.paths.draft_review_csv === packet.paths.launch_review_csv, false);
   assert.throws(() => validateListingQualityReviewCsv(report, draft, { requireComplete: true }), /facts_reviewer|media_reviewer/);
+});
+
+test("listing quality review batches merge without losing earlier human evidence", () => {
+  const report = buildListingQualityReport({
+    seed: applyListingEdits(loadCmsSeed(), readListingEdits()),
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const first = completeListingQualityReviewCsv({ ...report, rows: report.rows.slice(0, 1) });
+  const second = completeListingQualityReviewCsv({ ...report, rows: report.rows.slice(1, 2) });
+  const merged = mergeListingQualityReviewCsv(first, second);
+  const validation = validateListingQualityReviewCsv(report, merged, { requireSnapshots: true });
+
+  assert.deepEqual(
+    parseCsv(merged).map((row) => row.listing_id),
+    report.rows.slice(0, 2).map((row) => row.listing_id),
+  );
+  assert.equal(validation.summary.review_rows, 2);
+  assert.equal(validation.summary.missing_review_rows, report.rows.length - 2);
 });
 
 test("listing quality review CSV preflight validates reviewer fixes without applying edits", () => {

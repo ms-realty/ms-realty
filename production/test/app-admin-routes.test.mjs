@@ -1235,8 +1235,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.ok(listingQualityImportBody.reviewImport.pendingReviewSample.length > 0);
       assert.equal(listingQualityImportBody.report.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
       assert.equal(listingQualityImportBody.report.blockers.includes("listing_quality_review"), true);
-      assert.equal(listingQualityImportBody.reviewPersisted, false);
-      assert.equal(listingQualityImportBody.reviewPath, null);
+      assert.equal(listingQualityImportBody.reviewPersisted, true);
+      assert.equal(listingQualityImportBody.reviewPath, listingQualityReviewPath);
+      assert.equal(parseCsv(fs.readFileSync(listingQualityReviewPath, "utf8")).length, 1);
       assert.deepEqual(listingQualityImportBody.edits[0].edit.patch, { area_sqm: 85 });
       assert.equal(listingQualityImportBody.edits[0].edit.editor, "editor_bg");
 

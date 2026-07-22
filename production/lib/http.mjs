@@ -166,14 +166,16 @@ import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import {
+  DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
   buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   listingQualityImportSummary,
+  mergeListingQualityReviewCsv,
   renderListingQualityReviewDraft,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
-  writeCompleteListingQualityReviewCsv,
+  writeListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
@@ -1585,19 +1587,14 @@ export function createHttpApp({
         const inputCsv = csvInput(request);
         const report = currentListingQualityReport();
         const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
-        let reviewPath = null;
-        let reviewPersistenceError = "";
-        if (review.summary.missing_review_rows === 0) {
-          try {
-            reviewPath = writeCompleteListingQualityReviewCsv(
-              report,
-              inputCsv,
-              listingQualityReviewPath || undefined,
-            );
-          } catch (error) {
-            reviewPersistenceError = error.message;
-          }
-        }
+        const reviewOutputPath = listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
+        const existingReviewCsv = fs.existsSync(reviewOutputPath) ? fs.readFileSync(reviewOutputPath, "utf8") : "";
+        const mergedReviewCsv = mergeListingQualityReviewCsv(existingReviewCsv, inputCsv);
+        const mergedReview = validateListingQualityReviewCsv(report, mergedReviewCsv, {
+          allowExtraRows: true,
+          allowResolvedSnapshots: true,
+          requireSnapshots: true,
+        });
         const translationTasks = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined));
         const edits = review.reviews
           .filter((row) => Object.keys(row.patch).length || row.media_reviewer)
@@ -1628,6 +1625,13 @@ export function createHttpApp({
               .map((translation) => appendTranslationTask(translation, { filePath: translationLedgerPath || undefined }));
             return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
           });
+        let reviewPath = null;
+        let reviewPersistenceError = "";
+        try {
+          reviewPath = writeListingQualityReviewCsv(mergedReviewCsv, reviewOutputPath);
+        } catch (error) {
+          reviewPersistenceError = error.message;
+        }
         recordAudit({
           action: "listing_quality_imported",
           actor: "listing_quality_editor",
@@ -1637,20 +1641,20 @@ export function createHttpApp({
             imported: review.summary.review_rows,
             edited: edits.length,
             media_review_rows: review.summary.media_review_rows,
-            missing_review_rows: review.summary.missing_review_rows,
+            missing_review_rows: mergedReview.summary.missing_review_rows,
             review_persisted: Boolean(reviewPath),
           },
         });
-        const reviewImport = listingQualityImportSummary(report, review, { reviewPath, reviewPersistenceError });
-        return adminJson(reviewPath ? 201 : 202, {
+        const reviewImport = listingQualityImportSummary(report, mergedReview, { reviewPath, reviewPersistenceError });
+        return adminJson(reviewImport.ready ? 201 : 202, {
           imported: review.summary.review_rows,
           edited: edits.length,
           factsReviewRows: review.summary.facts_review_rows,
           mediaReviewRows: review.summary.media_review_rows,
-          missingReviewRows: review.summary.missing_review_rows,
+          missingReviewRows: mergedReview.summary.missing_review_rows,
           report: currentLaunchReadiness(),
           reviewImport,
-          reviewSummary: review.summary,
+          reviewSummary: mergedReview.summary,
           reviewPersisted: Boolean(reviewPath),
           reviewPath,
           reviewPersistenceError,

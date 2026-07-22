@@ -123,14 +123,16 @@ import {
   readListingPublicationSchedules,
 } from "./listing-publication-schedules.mjs";
 import {
+  DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
   buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   listingQualityImportSummary,
+  mergeListingQualityReviewCsv,
   renderListingQualityReviewDraft,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
-  writeCompleteListingQualityReviewCsv,
+  writeListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry, requiredAdminLocales, requiredPublicLocales, websiteLanguageCoverage, writeLocaleRegistry } from "./locales.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
@@ -1970,19 +1972,14 @@ function listingQualityReviewPacket(config) {
 function importListingQualityRows(inputCsv, config) {
   const report = currentListingQualityReport(config);
   const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
-  let reviewPath = null;
-  let reviewPersistenceError = "";
-  if (review.summary.missing_review_rows === 0) {
-    try {
-      reviewPath = writeCompleteListingQualityReviewCsv(
-        report,
-        inputCsv,
-        config.listingQualityReviewPath || undefined,
-      );
-    } catch (error) {
-      reviewPersistenceError = error.message;
-    }
-  }
+  const reviewOutputPath = config.listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
+  const existingReviewCsv = fs.existsSync(reviewOutputPath) ? fs.readFileSync(reviewOutputPath, "utf8") : "";
+  const mergedReviewCsv = mergeListingQualityReviewCsv(existingReviewCsv, inputCsv);
+  const mergedReview = validateListingQualityReviewCsv(report, mergedReviewCsv, {
+    allowExtraRows: true,
+    allowResolvedSnapshots: true,
+    requireSnapshots: true,
+  });
   const translationTasks = latestTranslationTasks(readTranslationLedger(config.translationLedgerPath));
   const edits = review.reviews
     .filter((row) => Object.keys(row.patch).length || row.media_reviewer)
@@ -2013,6 +2010,13 @@ function importListingQualityRows(inputCsv, config) {
         .map((translation) => appendTranslationTask(translation, { filePath: config.translationLedgerPath }));
       return { edit, staleTranslations: result.staleTranslations, persistedStaleTranslations };
     });
+  let reviewPath = null;
+  let reviewPersistenceError = "";
+  try {
+    reviewPath = writeListingQualityReviewCsv(mergedReviewCsv, reviewOutputPath);
+  } catch (error) {
+    reviewPersistenceError = error.message;
+  }
   recordAudit(
     {
       action: "listing_quality_imported",
@@ -2023,22 +2027,22 @@ function importListingQualityRows(inputCsv, config) {
         imported: review.summary.review_rows,
         edited: edits.length,
         media_review_rows: review.summary.media_review_rows,
-        missing_review_rows: review.summary.missing_review_rows,
+        missing_review_rows: mergedReview.summary.missing_review_rows,
         review_persisted: Boolean(reviewPath),
       },
     },
     config,
   );
-  const reviewImport = listingQualityImportSummary(report, review, { reviewPath, reviewPersistenceError });
+  const reviewImport = listingQualityImportSummary(report, mergedReview, { reviewPath, reviewPersistenceError });
   return {
     imported: review.summary.review_rows,
     edited: edits.length,
     factsReviewRows: review.summary.facts_review_rows,
     mediaReviewRows: review.summary.media_review_rows,
-    missingReviewRows: review.summary.missing_review_rows,
+    missingReviewRows: mergedReview.summary.missing_review_rows,
     report: launchReadiness(config),
     reviewImport,
-    reviewSummary: review.summary,
+    reviewSummary: mergedReview.summary,
     reviewPersisted: Boolean(reviewPath),
     reviewPath,
     reviewPersistenceError,
@@ -2219,7 +2223,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       const result = importListingQualityRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config);
-      return jsonResponse(result.reviewPersisted ? 201 : 202, result);
+      return jsonResponse(result.reviewImport.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
       const reply = appendReply(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
