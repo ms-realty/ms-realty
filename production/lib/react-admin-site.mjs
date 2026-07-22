@@ -62,6 +62,7 @@ const ADMIN_UI_COPY = {
     sourceImages: "снимки",
     sourceLinks: "вътрешни връзки",
     openLegacyPage: "Отвори старата страница",
+    openTargetPage: "Отвори целевата страница",
     reviewOwner: "Отговорник",
     requiredAction: "Нужно действие",
     approvableRedirects: "Пренасочвания за одобрение",
@@ -283,6 +284,7 @@ const ADMIN_UI_COPY = {
     sourceImages: "изображений",
     sourceLinks: "внутренних ссылок",
     openLegacyPage: "Открыть старую страницу",
+    openTargetPage: "Открыть целевую страницу",
     reviewOwner: "Ответственный",
     requiredAction: "Нужное действие",
     approvableRedirects: "Редиректы для одобрения",
@@ -504,6 +506,7 @@ const ADMIN_UI_COPY = {
     sourceImages: "images",
     sourceLinks: "internal links",
     openLegacyPage: "Open legacy page",
+    openTargetPage: "Open target page",
     reviewOwner: "Review owner",
     requiredAction: "Required action",
     approvableRedirects: "Approvable listing redirects",
@@ -4432,8 +4435,22 @@ function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
               defaultValue: route.target_path || "",
               placeholder: "/bg/imoti/...",
               autoComplete: "off",
+              list: "legacy-route-targets",
               "data-route-decision-target": "true",
             }),
+            h(
+              "a",
+              {
+                className: "adm-route-target-preview",
+                href: route.target_path || "#",
+                target: "_blank",
+                rel: "noreferrer",
+                hidden: route.target_path ? undefined : true,
+                "data-route-decision-target-preview": "true",
+              },
+              h(Icon, { name: "external-link", size: 14 }),
+              h("span", null, ui.openTargetPage),
+            ),
           ),
           h(
             "label",
@@ -4625,6 +4642,13 @@ function MigrationReviewBody({ page }) {
               ),
             )
           : h("p", { className: "adm-empty", "data-empty-route-decisions": "true" }, ui.noPendingLegacyDecisions),
+        h(
+          "datalist",
+          { id: "legacy-route-targets", "data-route-target-options": "true" },
+          ...(page.routeMap.targetOptions || []).map((option) =>
+            h("option", { key: option.path, value: option.path, label: `${option.locale.toUpperCase()} · ${statusText(ui, option.type)}` }),
+          ),
+        ),
         h(MigrationRoutePagination, { page }),
       ),
       (page.routeMap.approvableSample || []).length

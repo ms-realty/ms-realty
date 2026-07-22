@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { filterMigrationReviewRoutes } from "../lib/migration-review.mjs";
+import { filterMigrationReviewRoutes, migrationReviewTargetOptions } from "../lib/migration-review.mjs";
 
 test("migration review filters decoded legacy URLs and preserves operator filter options", () => {
   const routes = [
@@ -29,4 +29,22 @@ test("migration review filters decoded legacy URLs and preserves operator filter
   });
   assert.deepEqual(scoped.rows.map((row) => row.old_url), [routes[1].old_url]);
   assert.deepEqual(scoped.filters, { q: "", type: "taxonomy", domain: "makler-realty.ru" });
+});
+
+test("migration review target options expose only published non-home content", () => {
+  const options = migrationReviewTargetOptions({
+    routes: [
+      { path: "/bg/", type: "home", locale: "bg", public_indexable: true },
+      { path: "/bg/tarsene", type: "search", locale: "bg", public_indexable: false },
+      { path: "/bg/imoti/MS-1", type: "listing", locale: "bg", public_indexable: true },
+      { path: "/bg/kontakt/", type: "contact", locale: "bg", public_indexable: true },
+      { path: "/en/guides/buying-process", type: "guide", locale: "en", public_indexable: true },
+      { path: "/en/guides/draft", type: "guide", locale: "en", public_indexable: false },
+    ],
+  });
+
+  assert.deepEqual(options, [
+    { path: "/bg/kontakt", type: "contact", locale: "bg" },
+    { path: "/en/guides/buying-process", type: "guide", locale: "en" },
+  ]);
 });

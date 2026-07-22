@@ -885,6 +885,7 @@ export const ADMIN_APP_JS = `(function () {
   function syncRouteDecisionForm(form) {
     var select = form.querySelector("[data-route-decision-select]");
     var target = form.querySelector("[data-route-decision-target]");
+    var targetPreview = form.querySelector("[data-route-decision-target-preview]");
     var equivalent = form.querySelector("[data-route-decision-equivalence]");
     if (!select) return;
     var decision = select.value;
@@ -892,6 +893,12 @@ export const ADMIN_APP_JS = `(function () {
     if (target) {
       target.disabled = !requiresEquivalentTarget;
       target.required = requiresEquivalentTarget;
+    }
+    if (targetPreview) {
+      var targetPath = target ? target.value.trim() : "";
+      var canPreview = requiresEquivalentTarget && targetPath.indexOf("/") === 0 && targetPath.indexOf("//") !== 0;
+      targetPreview.hidden = !canPreview;
+      if (canPreview) targetPreview.setAttribute("href", targetPath);
     }
     if (equivalent) {
       equivalent.disabled = !requiresEquivalentTarget;
@@ -904,7 +911,9 @@ export const ADMIN_APP_JS = `(function () {
     for (var i = 0; i < forms.length; i += 1) {
       (function (form) {
         var select = form.querySelector("[data-route-decision-select]");
+        var target = form.querySelector("[data-route-decision-target]");
         if (select) select.addEventListener("change", function () { syncRouteDecisionForm(form); });
+        if (target) target.addEventListener("input", function () { syncRouteDecisionForm(form); });
         syncRouteDecisionForm(form);
       })(forms[i]);
     }

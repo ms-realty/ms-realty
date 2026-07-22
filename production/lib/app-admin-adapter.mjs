@@ -147,7 +147,7 @@ import {
 } from "./public-request-outcomes.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
-import { attachMigrationReviewEvidence, filterMigrationReviewRoutes } from "./migration-review.mjs";
+import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
@@ -977,6 +977,7 @@ function migrationReviewPayload(registry, url, config) {
       pendingSample: pendingRoutesWithEvidence,
       filters: reviewSelection.filters,
       filterOptions: reviewSelection.filterOptions,
+      targetOptions: migrationReviewTargetOptions(readJsonData("app-route-manifest.json")),
       pendingPagination: {
         page: routePage,
         pageSize: routePageSize,

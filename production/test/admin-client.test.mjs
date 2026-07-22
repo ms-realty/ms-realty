@@ -27,4 +27,6 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /data-route-decision-select/);
   assert.match(ADMIN_APP_JS, /decision === "redirect_301" \|\| decision === "retain_200"/);
   assert.match(ADMIN_APP_JS, /equivalent\.required = requiresEquivalentTarget/);
+  assert.match(ADMIN_APP_JS, /data-route-decision-target-preview/);
+  assert.match(ADMIN_APP_JS, /target\.addEventListener\("input"/);
 });

@@ -64,7 +64,7 @@ import {
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
-import { attachMigrationReviewEvidence, filterMigrationReviewRoutes } from "./migration-review.mjs";
+import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
   approveTranslationTask,
@@ -268,6 +268,10 @@ function loadMigrationReviewDashboard(filePath = fromRoot("production", "data", 
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
+function loadAppRouteManifest(filePath = fromRoot("production", "data", "app-route-manifest.json")) {
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
 function parseBody(request) {
   const contentType = request.headers?.["content-type"] || request.headers?.["Content-Type"] || "";
   if (contentType.includes("application/x-www-form-urlencoded")) {
@@ -378,6 +382,7 @@ function renderMigrationReviewPayload(registry, url, dashboard, routes, approval
       pendingSample: pendingRoutesWithEvidence,
       filters: reviewSelection.filters,
       filterOptions: reviewSelection.filterOptions,
+      targetOptions: migrationReviewTargetOptions(loadAppRouteManifest()),
       pendingPagination: {
         page: routePage,
         pageSize: routePageSize,

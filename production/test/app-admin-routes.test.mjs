@@ -909,6 +909,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         totalRows: 457,
       });
       assert.equal(migrationReviewBody.routeMap.pendingSample.length, 20);
+      assert.ok(migrationReviewBody.routeMap.targetOptions.some((option) => option.path === "/bg/kontakt"));
+      assert.ok(migrationReviewBody.routeMap.targetOptions.every((option) => !["home", "search", "listing"].includes(option.type)));
       assert.equal(migrationReviewBody.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
       assert.equal(migrationReviewBody.preflightReportsEndpoint, "/api/admin/preflight-reports");
       assert.equal(migrationReviewBody.seoPreflightEndpoint, "/api/admin/seo-preflight");
@@ -976,6 +978,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /map_or_rebuild_content_page/);
       assert.match(migrationReviewHtmlBody, /data-route-decision-form="true"/);
       assert.match(migrationReviewHtmlBody, /name="decision" required data-route-decision-select="true"/);
+      assert.match(migrationReviewHtmlBody, /list="legacy-route-targets" data-route-decision-target="true"/);
+      assert.match(migrationReviewHtmlBody, /data-route-decision-target-preview="true"/);
+      assert.match(migrationReviewHtmlBody, /data-route-target-options="true"/);
+      assert.match(migrationReviewHtmlBody, /value="\/bg\/kontakt" label="BG · contact"/);
       assert.match(migrationReviewHtmlBody, /value="redirect_301"/);
       assert.match(migrationReviewHtmlBody, /value="retain_200"/);
       assert.match(migrationReviewHtmlBody, /value="approved_410"/);

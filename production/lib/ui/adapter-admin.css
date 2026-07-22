@@ -1084,6 +1084,8 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 .adm-route-decision__form input,
 .adm-route-decision__form select,
 .adm-route-decision__form textarea { width: 100%; min-width: 0; }
+.adm-route-target-preview { display: inline-flex; align-items: center; gap: 5px; width: fit-content; color: var(--text-link); font-size: var(--text-xs); font-weight: var(--fw-semibold); }
+.adm-route-target-preview[hidden] { display: none; }
 .adm-route-decision__form :disabled { cursor: not-allowed; opacity: .56; }
 .adm-route-decision__reason { grid-column: 1 / -1; }
 .adm-route-decision__reason textarea { min-height: 4.5rem; resize: vertical; }

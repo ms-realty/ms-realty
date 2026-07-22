@@ -119,6 +119,15 @@ export function filterMigrationReviewRoutes(routes, requestedFilters = {}) {
   };
 }
 
+export function migrationReviewTargetOptions(manifest) {
+  const allowedTypes = new Set(["contact", "guide", "location", "seller"]);
+  const options = (manifest?.routes || [])
+    .filter((route) => route.public_indexable === true && allowedTypes.has(route.type) && route.path?.startsWith("/"))
+    .map((route) => ({ path: route.path.replace(/\/+$/, ""), type: route.type, locale: route.locale }))
+    .sort((a, b) => a.locale.localeCompare(b.locale) || a.type.localeCompare(b.type) || a.path.localeCompare(b.path));
+  return [...new Map(options.map((option) => [option.path, option])).values()];
+}
+
 export function buildMigrationReviewQueue(records, routeMap) {
   const routesByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const rows = records.map((record) => {
