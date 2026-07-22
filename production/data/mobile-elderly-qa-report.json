@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 20,
-    "passed": 20,
+    "checks": 21,
+    "passed": 21,
     "failed": 0
   },
   "checks": [
@@ -14,6 +14,11 @@
     },
     {
       "id": "mobile_safe_area_and_feedback",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "mobile_completion_feedback",
       "status": "pass",
       "evidence": {}
     },

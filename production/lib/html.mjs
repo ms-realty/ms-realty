@@ -833,7 +833,7 @@ function clientScript(page, options = {}) {
     return `<script defer src="/vendor/ms-realty-admin.js?v=${ADMIN_CLIENT_HASH}"></script>`;
   }
   const copy = chromeCopyFor(page.locale || page.lang || "en");
-  return `<script defer src="/vendor/ms-realty-public.js?v=${PUBLIC_CLIENT_HASH}" data-ms-realty-public-client data-request-sent="${escapeHtml(copy.requestSent)}" data-request-failed="${escapeHtml(copy.requestFailed || "")}"></script>`;
+  return `<script defer src="/vendor/ms-realty-public.js?v=${PUBLIC_CLIENT_HASH}" data-ms-realty-public-client data-request-sent="${escapeHtml(copy.requestSent)}" data-request-failed="${escapeHtml(copy.requestFailed || "")}" data-share-copied="${escapeHtml(copy.shareCopied || "")}"></script>`;
 }
 
 export function renderHtmlPage(page, options = {}) {

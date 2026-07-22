@@ -51,6 +51,11 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /entries\[0\]\.type === "back_forward"/);
   assert.match(PUBLIC_APP_JS, /focus\(\{ preventScroll: true \}\)/);
   assert.match(PUBLIC_APP_JS, /function initDialogFocusReturn/);
+  assert.match(PUBLIC_APP_JS, /function showToast/);
+  assert.match(PUBLIC_APP_JS, /function copyShareUrl/);
+  assert.match(PUBLIC_APP_JS, /error\.name !== "AbortError"/);
+  assert.match(PUBLIC_APP_JS, /data-request-success/);
+  assert.match(PUBLIC_APP_JS, /note\.focus\(\)/);
   assert.match(PUBLIC_APP_JS, /submit\.disabled = true/);
   assert.match(PUBLIC_APP_JS, /submit\.setAttribute\("aria-busy", "true"\)/);
   assert.match(PUBLIC_APP_JS, /warn\.focus\(\{ preventScroll: true \}\)/);

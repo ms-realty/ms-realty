@@ -7,11 +7,13 @@
   var I18N = {
     requestSent: publicClientScript ? publicClientScript.getAttribute("data-request-sent") || "" : "",
     requestFailed: publicClientScript ? publicClientScript.getAttribute("data-request-failed") || "" : "",
+    shareCopied: publicClientScript ? publicClientScript.getAttribute("data-share-copied") || "" : "",
   };
   var KEY = "ms-realty:saved-listings";
   var SEARCH_SCROLL_KEY = "ms-realty:search-scroll";
   var lastLeadTrigger = null;
   var lastContactOptionsTrigger = null;
+  var toastTimer = 0;
   var PHOTO_SPHERE_VIEWER_SCRIPT_URL = "/vendor/photo-sphere-viewer.js";
   var PHOTO_SPHERE_VIEWER_CSS_URL = "/vendor/photo-sphere-viewer.css";
   var photoSphereViewerPromise = null;
@@ -89,11 +91,55 @@
     return out;
   }
   function showSuccess(form) {
-    var note = document.createElement("p");
-    note.className = "mk-alert mk-alert--success";
+    var note = document.createElement("section");
+    var icon = document.createElement("span");
+    var message = document.createElement("p");
+    note.className = "mk-card mk-card--elevated ct-success";
     note.setAttribute("role", "status");
-    note.textContent = I18N.requestSent || "Sent.";
+    note.setAttribute("tabindex", "-1");
+    note.setAttribute("data-request-success", "true");
+    icon.className = "ct-success__icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "✓";
+    message.textContent = I18N.requestSent || "Sent.";
+    note.appendChild(icon);
+    note.appendChild(message);
     form.replaceWith(note);
+    note.focus();
+  }
+  function showToast(message) {
+    if (!message) return;
+    var toast = document.querySelector("[data-public-toast]");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.className = "public-toast";
+      toast.setAttribute("data-public-toast", "true");
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      toast.setAttribute("aria-atomic", "true");
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.hidden = false;
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () { toast.hidden = true; }, 2600);
+  }
+  function copyShareUrl(value) {
+    var copied = function () { showToast(I18N.shareCopied || "Link copied."); };
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      navigator.clipboard.writeText(value).then(copied).catch(function () {});
+      return;
+    }
+    var field = document.createElement("textarea");
+    field.value = value;
+    field.setAttribute("readonly", "");
+    field.style.cssText = "position:fixed;opacity:0;pointer-events:none";
+    document.body.appendChild(field);
+    field.select();
+    try {
+      if (document.execCommand("copy")) copied();
+    } catch (error) {}
+    document.body.removeChild(field);
   }
   function submitJson(form, onDone) {
     var submit = form.querySelector('[type="submit"]');
@@ -716,9 +762,16 @@
       return;
     }
     var share = event.target.closest('[data-listing-action^="share"]');
-    if (share && navigator.share) {
+    if (share) {
       event.preventDefault();
-      navigator.share({ title: document.title, url: share.href || location.href }).catch(function () {});
+      var shareUrl = new URL(share.getAttribute("href") || location.href, location.href).href;
+      if (navigator.share) {
+        navigator.share({ title: document.title, url: shareUrl }).catch(function (error) {
+          if (!error || error.name !== "AbortError") copyShareUrl(shareUrl);
+        });
+      } else {
+        copyShareUrl(shareUrl);
+      }
       return;
     }
     var lead = event.target.closest('button[data-endpoint="/api/leads"]');

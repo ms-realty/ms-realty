@@ -16,6 +16,47 @@
   white-space: nowrap !important;
   border: 0 !important;
 }
+.public-toast {
+  position: fixed;
+  z-index: 90;
+  left: 50%;
+  bottom: max(var(--space-5), env(safe-area-inset-bottom));
+  display: flex;
+  min-height: 44px;
+  max-width: min(90vw, 360px);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--ink-900);
+  color: var(--text-on-dark);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  text-align: center;
+  transform: translateX(-50%);
+}
+.public-toast[hidden] { display: none; }
+.ct-success {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  text-align: center;
+}
+.ct-success__icon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--success-50);
+  color: var(--success-600);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-bold);
+}
+.ct-success p { max-width: 36ch; color: var(--text-body); }
 .site-hd__logo { display: inline-flex; min-height: 44px; align-items: center; flex: none; }
 .site-hd__logo img { height: 40px; width: auto; }
 .site-hd__nav a { cursor: pointer; white-space: nowrap; }
@@ -213,6 +254,7 @@
    listing detail where the property action dock is the primary task. ---- */
 .site-mobile-tabs { display: none; }
 @media (max-width: 760px) {
+  .public-toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
   .site-mobile-tabs {
     position: fixed;
     z-index: 35;

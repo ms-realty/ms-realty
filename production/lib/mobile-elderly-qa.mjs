@@ -117,6 +117,16 @@ export function buildMobileElderlyQaReport({
         includes(DESIGN_CSS, "prefers-reduced-motion:reduce"),
     ),
     check(
+      "mobile_completion_feedback",
+      includes(pages.listing, "data-share-copied=\"") &&
+        includes(PUBLIC_APP_JS, "function showToast(message)") &&
+        includes(PUBLIC_APP_JS, "function copyShareUrl(value)") &&
+        includes(PUBLIC_APP_JS, 'note.setAttribute("data-request-success", "true")') &&
+        includes(PUBLIC_APP_JS, "note.focus()") &&
+        includes(publicAdapterCss, ".public-toast[hidden] { display: none; }") &&
+        includes(publicAdapterCss, "env(safe-area-inset-bottom)"),
+    ),
+    check(
       "hebrew_rtl_public_pages",
       ["home", "listing", "search", "seller", "contact"].every((key) => includes(pages[key], "<html lang=\"he\" dir=\"rtl\">")),
     ),
@@ -267,6 +277,7 @@ export function assertMobileElderlyQaReport(report) {
     "mobile_search_empty_recovery",
     "mobile_app_navigation",
     "mobile_safe_area_and_feedback",
+    "mobile_completion_feedback",
     "listing_sticky_actions",
     "intent_specific_lead_forms",
     "listing_detail_media_actions",

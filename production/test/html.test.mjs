@@ -123,6 +123,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.doesNotMatch(searchHtml, /data-hermes-(assistant|mode|chat-form|chat-output)|\/api\/hermes\/chat/);
   assert.match(searchHtml, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
   assert.match(searchHtml, /data-ms-realty-public-client/);
+  assert.match(searchHtml, /data-share-copied="הקישור הועתק\."/);
   assert.match(searchHtml, /data-request-failed="לא ניתן היה לשלוח את הפנייה\. נסו שוב\."/);
   assert.doesNotMatch(searchHtml, /window\.MS_REALTY_I18N/);
   assert.match(filteredSearchHtml, /data-filter-chip="offer_type"/);
