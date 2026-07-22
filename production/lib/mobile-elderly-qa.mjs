@@ -14,6 +14,7 @@ import {
   renderSearchPage,
   renderSellerPage,
 } from "./public-site.mjs";
+import { DESIGN_CSS } from "./ui/design-assets.mjs";
 
 export const DEFAULT_MOBILE_ELDERLY_QA_OUTPUT = fromRoot("production", "data", "mobile-elderly-qa-report.json");
 
@@ -74,7 +75,9 @@ export function buildMobileElderlyQaReport({
   const checks = [
     check(
       "viewport_and_touch_targets",
-      Object.values(pages).every((html) => includes(html, "name=\"viewport\"") && includes(html, "min-height:44px")),
+      Object.values(pages).every(
+        (html) => includes(html, "name=\"viewport\"") && includes(html, "data-ms-realty-design-system=\"external\""),
+      ) && includes(DESIGN_CSS, "min-height:44px"),
     ),
     check(
       "hebrew_rtl_public_pages",

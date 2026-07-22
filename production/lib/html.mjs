@@ -1,7 +1,7 @@
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { chromeCopyFor } from "./public-site.mjs";
-import { ADMIN_CLIENT_HASH, DESIGN_CSS, DS_HASH, FONTS_URL, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
+import { ADMIN_CLIENT_HASH, DS_HASH, FONTS_URL, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => {
@@ -18,7 +18,7 @@ function designSystemStyle() {
     '<link rel="preconnect" href="https://fonts.googleapis.com">',
     '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
     `<link rel="stylesheet" href="${FONTS_URL}">`,
-    `<style data-ms-realty-design-system="inline" data-ds-hash="${DS_HASH}">${DESIGN_CSS}</style>`,
+    `<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">`,
   ].join("\n");
 }
 

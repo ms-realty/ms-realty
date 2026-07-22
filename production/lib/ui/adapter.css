@@ -21,6 +21,14 @@
 }
 .skip-link:focus-visible { top: var(--space-3); }
 
+/* Keep same-origin mobile navigation visually continuous while respecting the
+   existing reduced-motion duration tokens. Unsupported browsers ignore this. */
+@view-transition { navigation: auto; }
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: var(--dur-base); }
+
+a, button, summary, [role="button"] { touch-action: manipulation; }
+
 /* Elderly-first touch targets on public + admin form controls
    (mirrors data-min-touch-target="44" contract markers). */
 button, input, select, textarea { min-height: 44px; }
