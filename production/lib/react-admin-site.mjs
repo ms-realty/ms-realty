@@ -975,17 +975,30 @@ function MobileNavigation({ page }) {
   const ui = workbenchCopy(page);
   const menuLabel = ui.workspaceNavigation;
   const visibleGroups = adminNavigationGroups(page);
+  const menuId = `admin-mobile-navigation-${page.workspace?.locale || "en"}`;
   return h(
     "details",
     { className: "adm-mobile-nav", "data-admin-mobile-nav": "true" },
     h(
       "summary",
-      { className: "adm-mobile-nav__summary", "aria-label": menuLabel, title: menuLabel },
+      {
+        className: "adm-mobile-nav__summary",
+        "aria-label": menuLabel,
+        "aria-controls": menuId,
+        "aria-expanded": "false",
+        title: menuLabel,
+      },
       h(Icon, { name: "menu", size: 20 }),
     ),
     h(
       "div",
-      { className: "adm-mobile-nav__panel" },
+      {
+        id: menuId,
+        className: "adm-mobile-nav__panel",
+        role: "dialog",
+        "aria-modal": "true",
+        "aria-label": menuLabel,
+      },
       h(
         "nav",
         { className: "adm-mobile-nav__links", "aria-label": menuLabel },

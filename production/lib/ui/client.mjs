@@ -960,6 +960,66 @@ export const ADMIN_APP_JS = `(function () {
       })(forms[i]);
     }
   }
+  function initAdminMobileNavigation() {
+    var mobileNav = document.querySelector("[data-admin-mobile-nav]");
+    if (!mobileNav) return;
+    var summary = mobileNav.querySelector(".adm-mobile-nav__summary");
+    var panel = mobileNav.querySelector(".adm-mobile-nav__panel");
+    if (!summary || !panel) return;
+    function focusableItems() {
+      var items = panel.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      var visible = [];
+      for (var i = 0; i < items.length; i += 1) {
+        if (items[i].getClientRects().length) visible.push(items[i]);
+      }
+      return visible;
+    }
+    function syncOpenState() {
+      summary.setAttribute("aria-expanded", mobileNav.open ? "true" : "false");
+      document.documentElement.classList.toggle("admin-mobile-nav-open", mobileNav.open);
+      if (!mobileNav.open) return;
+      window.requestAnimationFrame(function () {
+        var target = panel.querySelector('[aria-current="page"]') || focusableItems()[0];
+        if (target) target.focus();
+      });
+    }
+    function closeNavigation(returnFocus) {
+      mobileNav.open = false;
+      syncOpenState();
+      if (returnFocus) summary.focus();
+    }
+    mobileNav.addEventListener("toggle", syncOpenState);
+    panel.addEventListener("click", function (event) {
+      if (event.target.closest("a[href]")) closeNavigation(false);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (!mobileNav.open) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeNavigation(true);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      var items = focusableItems();
+      if (!items.length) return;
+      var first = items[0];
+      var last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+    var mobileViewport = window.matchMedia("(max-width: 760px)");
+    if (mobileViewport.addEventListener) {
+      mobileViewport.addEventListener("change", function (event) {
+        if (!event.matches && mobileNav.open) closeNavigation(false);
+      });
+    }
+    syncOpenState();
+  }
   function initAdminMutationForms() {
     document.addEventListener("submit", function (event) {
       var form = event.target;
@@ -999,6 +1059,7 @@ export const ADMIN_APP_JS = `(function () {
     });
   }
   initLeadQueueFilters();
+  initAdminMobileNavigation();
   initLeadPipelineFilters();
   initListingBulkForms();
   initRouteDecisionForms();

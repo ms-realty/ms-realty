@@ -350,6 +350,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /data-inbox-layout="action-queue"/);
       assert.match(inboxHtml, /data-task-led="true"/);
       assert.match(inboxHtml, /data-admin-mobile-nav="true"/);
+      assert.match(inboxHtml, /aria-controls="admin-mobile-navigation-ru" aria-expanded="false"/);
+      assert.match(inboxHtml, /role="dialog" aria-modal="true" aria-label="Навигация по рабочему пространству"/);
       assert.match(inboxHtml, /aria-label="Навигация по рабочему пространству"/);
       assert.match(inboxHtml, /class="adm-mobile-nav__link adm-mobile-nav__link--on" href="\/admin\/leads\?locale=ru" aria-current="page"/);
       assert.match(inboxHtml, /class="adm-mobile-nav__link" href="\/admin\/viewings\?locale=ru"/);
