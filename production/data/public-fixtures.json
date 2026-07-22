@@ -2127,11 +2127,11 @@
     "dir": "rtl",
     "path": "/he/search",
     "canonical": "/he/search",
-    "indexable": true,
+    "indexable": false,
     "metadata": {
       "title": "חיפוש נכסים | MS Realty",
       "description": "חפשו נכסים מאושרים של MS Realty.",
-      "robots": "index,follow"
+      "robots": "noindex,follow"
     },
     "mobile_policy": {
       "list_first_mobile": true,
