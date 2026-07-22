@@ -52,6 +52,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -247,112 +248,96 @@
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
@@ -722,6 +707,7 @@
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
+        "shareCopied": "Link copied.",
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
@@ -917,112 +903,96 @@
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
@@ -1397,6 +1367,7 @@
         "copyright": "Все права защищены.",
         "requestSent": "Запрос отправлен. Брокер свяжется с вами.",
         "requestFailed": "Не удалось отправить запрос. Попробуйте ещё раз.",
+        "shareCopied": "Ссылка скопирована.",
         "close": "Закрыть",
         "callBroker": "Позвонить брокеру",
         "languageLabel": "Язык",
@@ -1585,63 +1556,54 @@
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-2.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-2-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-3.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-3-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-4.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-4-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-5.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-5-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-6.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-6-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-7.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-7-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-8.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-8-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-9.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-9-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин. Недвижимость в Сандански.",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-сандански-парк-отель-пирин.jpg",
-            "fallback_url": "https://makler-realty.ru/wp-content/uploads/2013/11/191-сандански-парк-отель-пирин-72x72.jpg",
             "alt": "Продажа квартир в Парк Отеле Пирин",
             "width": null,
             "height": null
@@ -2032,6 +1994,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -2585,6 +2548,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -2783,6 +2747,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -2949,6 +2914,7 @@
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
+        "shareCopied": "Link copied.",
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
@@ -3147,6 +3113,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -3365,6 +3332,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -3560,112 +3528,96 @@
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-1-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-2-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-13-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-12-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-9-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-10-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-11-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-14-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-15-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-16-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-3-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-4-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-5-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-6-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-7-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
           },
           {
             "url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8.jpg",
-            "fallback_url": "https://makler-realty.com/wp-content/uploads/2024/12/815-8-72x72.jpg",
             "alt": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!",
             "width": null,
             "height": null
@@ -4033,6 +3985,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -4941,6 +4894,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
@@ -5064,6 +5018,7 @@
         "copyright": "All rights reserved.",
         "requestSent": "Your inquiry was sent. A broker will contact you.",
         "requestFailed": "The request could not be sent. Please try again.",
+        "shareCopied": "Link copied.",
         "close": "Close",
         "callBroker": "Call a broker",
         "languageLabel": "Language",
@@ -5214,6 +5169,7 @@
         "copyright": "כל הזכויות שמורות.",
         "requestSent": "הפנייה נשלחה. מתווך ייצור אתכם קשר.",
         "requestFailed": "לא ניתן היה לשלוח את הפנייה. נסו שוב.",
+        "shareCopied": "הקישור הועתק.",
         "close": "סגירה",
         "callBroker": "התקשרו למתווך",
         "languageLabel": "שפה",
