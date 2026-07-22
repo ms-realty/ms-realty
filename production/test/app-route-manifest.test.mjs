@@ -2,8 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
+import path from "node:path";
 import { assertAppRouteFiles, assertAppRouteManifest, buildAppRouteManifest } from "../lib/app-route-manifest.mjs";
-import { appRouterConfigFromEnv, renderAppFavicon, renderAppRobots, renderAppRoute, renderAppSitemap } from "../lib/app-router-adapter.mjs";
+import {
+  appRouterConfigFromEnv,
+  renderAppFavicon,
+  renderAppRobots,
+  renderAppRoute,
+  renderAppRouteResponse,
+  renderAppSitemap,
+} from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -228,4 +236,39 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   assert.equal((await sitemapRoute.GET()).headers.get("content-type"), "application/xml; charset=utf-8");
   assert.equal((await robotsRoute.GET()).headers.get("content-type"), "text/plain; charset=utf-8");
   assert.equal((await faviconRoute.GET()).headers.get("content-type"), "image/svg+xml; charset=utf-8");
+});
+
+test("App Router serves reviewed legacy URLs as direct domain-aware redirects", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-app-redirect-"));
+  const deployableRedirectOutputPath = path.join(directory, "deployable-redirects.json");
+  fs.writeFileSync(
+    deployableRedirectOutputPath,
+    `${JSON.stringify({
+      decisions: [
+        {
+          old_url: "https://makler-realty.com/listing/reviewed-legacy/",
+          status: 301,
+          target_path: "/bg/imoti/MS-CRAWL-0001",
+        },
+      ],
+    })}\n`,
+  );
+  const config = { ...appRouterConfigFromEnv(), deployableRedirectOutputPath };
+
+  const response = renderAppRouteResponse({
+    pathname: "/listing/reviewed-legacy/",
+    url: "http://app:3000/listing/reviewed-legacy/",
+    host: "makler-realty.com:443",
+    config,
+  });
+  const wrongDomain = renderAppRouteResponse({
+    pathname: "/listing/reviewed-legacy/",
+    url: "http://app:3000/listing/reviewed-legacy/",
+    host: "example.test",
+    config,
+  });
+
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get("location"), "/bg/imoti/MS-CRAWL-0001");
+  assert.equal(wrongDomain.status, 404);
 });

@@ -10,6 +10,7 @@ import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from 
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
+import { DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT, loadLegacyRouteDecisions } from "./redirect-approvals.mjs";
 
 const PUBLIC_CACHE = "public, max-age=300, s-maxage=3600";
 const HTML = "text/html; charset=utf-8";
@@ -17,12 +18,25 @@ const HTML = "text/html; charset=utf-8";
 export function appRouterConfigFromEnv(env = process.env) {
   return {
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+    deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
   };
+}
+
+function legacyDecisionFor({ pathname, url, host, config }) {
+  const requestedHost = String(host || "")
+    .split(",")[0]
+    .trim()
+    .replace(/:\d+$/, "")
+    .toLowerCase();
+  if (!requestedHost) return null;
+  const requestUrl = new URL(url, "http://localhost");
+  const oldUrl = `https://${requestedHost}${pathname}${requestUrl.search}`;
+  return loadLegacyRouteDecisions(config.deployableRedirectOutputPath).find((row) => row.old_url === oldUrl) || null;
 }
 
 function searchLocaleFor(registry, pathname) {
@@ -88,7 +102,20 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
   };
 }
 
-export function renderAppRouteResponse({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
+export function renderAppRouteResponse({ pathname, url = pathname, host = "", config = appRouterConfigFromEnv() } = {}) {
+  const legacyDecision = legacyDecisionFor({ pathname, url, host, config });
+  if (legacyDecision?.status === 301) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: legacyDecision.target_path, "cache-control": PUBLIC_CACHE },
+    });
+  }
+  if (legacyDecision?.status === 410) {
+    return new Response("Gone", { status: 410, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE } });
+  }
+  if (legacyDecision?.status === 200) {
+    pathname = legacyDecision.target_path;
+  }
   const result = renderAppRoute({ pathname, url, config });
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
