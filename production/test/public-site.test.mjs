@@ -172,6 +172,8 @@ test("reviewed listing facts, privacy, verification, and SEO reach the public li
   assert.match(html, /data-location-precision="approximate"/);
   assert.match(html, /data-listing-verification="availability"/);
   assert.match(html, /приблизителна локация/);
+  assert.match(html, /ld-g--main[^>]*><img[^>]*loading="eager"/);
+  assert.match(html, /ld-g--main[^>]*><img[^>]*fetchPriority="high"/);
 });
 
 test("unreviewed source-language SEO never replaces public metadata", () => {
@@ -323,6 +325,9 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-card-action="inquiry"/);
   assert.match(html, /data-card-action="save"/);
   assert.match(html, /data-card-spec="reference"/);
+  assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*loading="eager"/);
+  assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*fetchPriority="high"/);
+  assert.match(html, /<img[^>]*loading="lazy"[^>]*decoding="async"/);
 });
 
 test("search applies text and facet filters before paginating cards", () => {

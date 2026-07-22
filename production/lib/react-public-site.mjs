@@ -516,16 +516,18 @@ function cardBadge(card, labels, localeCode) {
   return null;
 }
 
-function publicImageProps(image, fallbackAlt, loading = "lazy") {
+function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority) {
   return {
     src: image.url,
     alt: image.alt || fallbackAlt,
     loading,
+    decoding: "async",
+    fetchPriority,
     "data-fallback-src": image.fallback_url || undefined,
   };
 }
 
-function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs }) {
+function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orientation = "vertical", rootAttrs, priority = false }) {
   const badge = cardBadge(card, labels, localeCode);
   const tone = toneFor(card.id);
   const mediaChildren = [
@@ -563,7 +565,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
           "aria-label": card.title,
           lang: card.content_locale || undefined,
         },
-        h("img", publicImageProps(card.thumbnail, card.title)),
+        h("img", publicImageProps(card.thumbnail, card.title, priority ? "eager" : "lazy", priority ? "high" : undefined)),
         ...mediaChildren,
       )
     : h(
@@ -690,7 +692,7 @@ function HomeBody({ page }) {
       h(
         "div",
         { className: "hp-hero__bg", "data-hero-media": heroImage?.url ? "approved" : "fallback" },
-        heroImage?.url ? h("img", { src: heroImage.url, alt: heroImage.alt || page.body.h1, fetchPriority: "high" }) : null,
+        heroImage?.url ? h("img", { src: heroImage.url, alt: heroImage.alt || page.body.h1, loading: "eager", decoding: "async", fetchPriority: "high" }) : null,
       ),
       h(
         "div",
@@ -741,7 +743,7 @@ function HomeBody({ page }) {
                   className: "hp-resort",
                   "data-location-media": location.image?.url ? "approved" : "fallback",
                 },
-                location.image?.url ? h("img", { src: location.image.url, alt: location.image.alt || location.location, loading: "lazy" }) : null,
+                location.image?.url ? h("img", { src: location.image.url, alt: location.image.alt || location.location, loading: "lazy", decoding: "async" }) : null,
                 location.listing_count ? h("span", { className: "hp-resort__c" }, location.listing_count) : null,
                 h("div", { className: "hp-resort__t" }, h("h3", null, location.location)),
               ),
@@ -1214,7 +1216,7 @@ function SearchBody({ page }) {
             "data-search-results": "true",
             "data-saved-listings-grid": savedView ? "true" : undefined,
           },
-          ...(page.cards || []).map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal" })),
+          ...(page.cards || []).map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, orientation: "horizontal", priority: index === 0 })),
         ),
         !savedView && page.search.pagination?.total_pages > 1
           ? h(
@@ -1265,7 +1267,7 @@ function LocationBody({ page }) {
         ? h(
             "div",
             { className: "hp-grid", "aria-label": labels.locationListings, "data-location-listings": "true" },
-            ...cards.map((card) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale })),
+            ...cards.map((card, index) => h(SearchCard, { key: card.id, card, labels, localeCode: page.locale, priority: index === 0 })),
           )
         : h(
             "section",
@@ -1553,7 +1555,7 @@ function ListingBody({ page }) {
         h(
           "div",
           { className: `ld-g ld-g--main mk-photo mk-photo--${tone}` },
-          gallery[0] ? h("img", publicImageProps(gallery[0], page.body.h1, "eager")) : null,
+          gallery[0] ? h("img", publicImageProps(gallery[0], page.body.h1, "eager", "high")) : null,
           h(
             "a",
             { className: "ld-g__count", href: "#listing-gallery", "aria-label": `${page.body.media.gallery_count || gallery.length} ${labels.photos}` },
