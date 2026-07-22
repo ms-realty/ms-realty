@@ -64,7 +64,7 @@ import {
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
-import { attachMigrationReviewEvidence } from "./migration-review.mjs";
+import { attachMigrationReviewEvidence, filterMigrationReviewRoutes } from "./migration-review.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import {
   approveTranslationTask,
@@ -339,12 +339,19 @@ function renderMigrationReviewPayload(registry, url, dashboard, routes, approval
   const decidedOldUrls = new Set(decisions.map((decision) => decision.old_url));
   const sourceReviewRequired = routes.filter((route) => route.review_required);
   const reviewRequired = sourceReviewRequired.filter((route) => !decidedOldUrls.has(route.old_url));
+  const reviewSelection = filterMigrationReviewRoutes(
+    attachMigrationReviewEvidence(reviewRequired, loadMigrationRecords()),
+    {
+      q: url.searchParams.get("q"),
+      type: url.searchParams.get("routeType"),
+      domain: url.searchParams.get("routeDomain"),
+    },
+  );
   const routePageSize = 20;
-  const routePages = Math.max(1, Math.ceil(reviewRequired.length / routePageSize));
+  const routePages = Math.max(1, Math.ceil(reviewSelection.rows.length / routePageSize));
   const requestedRoutePage = Number.parseInt(url.searchParams.get("routePage") || "1", 10);
   const routePage = Math.min(Math.max(Number.isFinite(requestedRoutePage) ? requestedRoutePage : 1, 1), routePages);
-  const pendingRoutes = reviewRequired.slice((routePage - 1) * routePageSize, routePage * routePageSize);
-  const pendingRoutesWithEvidence = attachMigrationReviewEvidence(pendingRoutes, loadMigrationRecords());
+  const pendingRoutesWithEvidence = reviewSelection.rows.slice((routePage - 1) * routePageSize, routePage * routePageSize);
   const mappedListings = routes.filter((route) => route.url_type === "listing" && route.target_path);
   return {
     kind: "admin_migration_review",
@@ -369,11 +376,13 @@ function renderMigrationReviewPayload(registry, url, dashboard, routes, approval
       mappedListings: mappedListings.length,
       terminalDecisionsReviewed: decisions.length,
       pendingSample: pendingRoutesWithEvidence,
+      filters: reviewSelection.filters,
+      filterOptions: reviewSelection.filterOptions,
       pendingPagination: {
         page: routePage,
         pageSize: routePageSize,
         totalPages: routePages,
-        totalRows: reviewRequired.length,
+        totalRows: reviewSelection.rows.length,
       },
       approvableSample: mappedListings
         .filter((route) => route.review_required && route.planned_status === 301 && !decidedOldUrls.has(route.old_url))

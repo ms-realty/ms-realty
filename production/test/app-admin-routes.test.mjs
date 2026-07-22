@@ -980,6 +980,36 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-seo-import-endpoint="\/api\/admin\/seo-evidence\/import"/);
       assert.match(migrationReviewHtmlBody, /data-launch-readiness-export-endpoint="\/api\/admin\/launch-readiness\/export"/);
 
+      const filteredMigrationReview = await migrationReviewRoute.GET(
+        new Request(
+          "https://example.test/api/admin/migration/review?routeType=taxonomy&routeDomain=makler-realty.ru",
+          { headers: auth },
+        ),
+      );
+      const filteredMigrationReviewBody = await filteredMigrationReview.json();
+      assert.equal(filteredMigrationReview.status, 200);
+      assert.deepEqual(filteredMigrationReviewBody.routeMap.filters, {
+        q: "",
+        type: "taxonomy",
+        domain: "makler-realty.ru",
+      });
+      assert.ok(filteredMigrationReviewBody.routeMap.pendingPagination.totalRows > 0);
+      assert.ok(filteredMigrationReviewBody.routeMap.pendingPagination.totalRows < migrationReviewBody.routeMap.reviewRequired);
+      assert.ok(filteredMigrationReviewBody.routeMap.pendingSample.every((row) => row.url_type === "taxonomy"));
+      assert.ok(filteredMigrationReviewBody.routeMap.pendingSample.every((row) => row.source_domain === "makler-realty.ru"));
+
+      const filteredMigrationReviewHtml = await migrationReviewHtmlRoute.GET(
+        new Request(
+          "https://example.test/admin/migration/review?routeType=taxonomy&routeDomain=makler-realty.ru",
+          { headers: auth },
+        ),
+      );
+      const filteredMigrationReviewHtmlBody = await filteredMigrationReviewHtml.text();
+      assert.match(filteredMigrationReviewHtmlBody, /data-route-filters="true"/);
+      assert.match(filteredMigrationReviewHtmlBody, /data-filtered-route-count="[1-9][0-9]*"/);
+      assert.match(filteredMigrationReviewHtmlBody, /routeType=taxonomy/);
+      assert.match(filteredMigrationReviewHtmlBody, /routeDomain=makler-realty.ru/);
+
       const seoEvidence = await seoEvidenceRoute.GET(new Request("https://example.test/api/admin/seo-evidence", { headers: auth }));
       const seoEvidenceBody = await seoEvidence.json();
       assert.equal(seoEvidence.status, 200);

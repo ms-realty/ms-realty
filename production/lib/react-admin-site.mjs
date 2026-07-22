@@ -4229,8 +4229,19 @@ function ListingEditorBody({ page }) {
 function migrationRoutePageHref(page, targetPage) {
   const url = new URL("/admin/migration/review", "http://ms-realty.local");
   if (page.workspace?.locale && page.workspace.locale !== "en") url.searchParams.set("locale", page.workspace.locale);
+  if (page.routeMap?.filters?.q) url.searchParams.set("q", page.routeMap.filters.q);
+  if (page.routeMap?.filters?.type) url.searchParams.set("routeType", page.routeMap.filters.type);
+  if (page.routeMap?.filters?.domain) url.searchParams.set("routeDomain", page.routeMap.filters.domain);
   url.searchParams.set("routePage", String(targetPage));
   return `${url.pathname}${url.search}`;
+}
+
+function readableLegacyUrl(value) {
+  try {
+    return decodeURI(value);
+  } catch {
+    return value;
+  }
 }
 
 function MigrationRoutePagination({ page }) {
@@ -4264,7 +4275,7 @@ function MigrationRoutePagination({ page }) {
   );
 }
 
-function PendingLegacyRouteDecision({ page, route, ui }) {
+function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
   const operatorId = currentOperatorId(page, "seo_editor");
   const evidence = route.source_evidence || {};
   return h(
@@ -4277,14 +4288,14 @@ function PendingLegacyRouteDecision({ page, route, ui }) {
     },
     h(
       "details",
-      { className: "adm-route-decision__disclosure" },
+      { className: "adm-route-decision__disclosure", open: defaultOpen ? true : undefined },
       h(
         "summary",
         { className: "adm-route-decision__header" },
         h(
           "span",
           { className: "adm-route-decision__summary" },
-          h("code", { className: "crm-mono" }, route.old_url),
+          h("code", { className: "crm-mono", title: route.old_url }, readableLegacyUrl(route.old_url)),
           evidence.title ? h("small", null, evidence.title) : null,
         ),
         h(
@@ -4522,18 +4533,58 @@ function MigrationReviewBody({ page }) {
       h(
         Panel,
         {
-          title: ui.pendingLegacyDecisions,
+          title: `${ui.pendingLegacyDecisions} · ${page.routeMap.pendingPagination.totalRows}/${page.routeMap.reviewRequired}`,
           "aria-label": ui.pendingLegacyDecisions,
           "data-pending-route-count": page.routeMap.reviewRequired,
+          "data-filtered-route-count": page.routeMap.pendingPagination.totalRows,
           "data-reviewed-route-count": page.routeMap.terminalDecisionsReviewed,
         },
         h("p", { className: "adm-note" }, ui.pendingLegacyHint),
+        h(
+          "form",
+          { method: "get", action: "/admin/migration/review", className: "adm-filterbar", role: "search", "data-route-filters": "true" },
+          filterLocaleInput(page),
+          h(
+            "label",
+            null,
+            label(copy, "search", "Search"),
+            h("input", { type: "search", name: "q", defaultValue: page.routeMap.filters?.q || "", autoComplete: "off" }),
+          ),
+          h(
+            "label",
+            null,
+            ui.routeType,
+            h(
+              "select",
+              { name: "routeType" },
+              h("option", { value: "" }, label(copy, "all", "All")),
+              ...(page.routeMap.filterOptions?.types || []).map((value) =>
+                h("option", { key: value, value, selected: page.routeMap.filters?.type === value }, statusText(ui, value)),
+              ),
+            ),
+          ),
+          h(
+            "label",
+            null,
+            label(copy, "source", "Source"),
+            h(
+              "select",
+              { name: "routeDomain" },
+              h("option", { value: "" }, label(copy, "all", "All")),
+              ...(page.routeMap.filterOptions?.domains || []).map((value) =>
+                h("option", { key: value, value, selected: page.routeMap.filters?.domain === value }, value),
+              ),
+            ),
+          ),
+          h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--md" }, h(Icon, { name: "filter", size: 16 }), label(copy, "filter", "Filter")),
+          h("a", { className: "mk-btn mk-btn--ghost mk-btn--md", href: adminHref("/admin/migration/review", page) }, label(copy, "resetFilters", "Reset filters")),
+        ),
         (page.routeMap.pendingSample || []).length
           ? h(
               "ol",
               { className: "adm-route-decisions" },
-              ...(page.routeMap.pendingSample || []).map((route) =>
-                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui }),
+              ...(page.routeMap.pendingSample || []).map((route, index) =>
+                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui, defaultOpen: index === 0 }),
               ),
             )
           : h("p", { className: "adm-empty", "data-empty-route-decisions": "true" }, ui.noPendingLegacyDecisions),

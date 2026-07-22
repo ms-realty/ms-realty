@@ -75,6 +75,50 @@ export function attachMigrationReviewEvidence(routes, records) {
   });
 }
 
+function readableLegacyUrl(value) {
+  try {
+    return decodeURI(value);
+  } catch {
+    return value;
+  }
+}
+
+function normalizedFilter(value, maxLength = 300) {
+  return String(value || "").trim().slice(0, maxLength);
+}
+
+export function filterMigrationReviewRoutes(routes, requestedFilters = {}) {
+  const filters = {
+    q: normalizedFilter(requestedFilters.q),
+    type: normalizedFilter(requestedFilters.type, 40),
+    domain: normalizedFilter(requestedFilters.domain, 160),
+  };
+  const query = filters.q.toLocaleLowerCase();
+  const rows = routes
+    .filter((route) => !filters.type || route.url_type === filters.type)
+    .filter((route) => !filters.domain || route.source_domain === filters.domain)
+    .filter((route) => {
+      if (!query) return true;
+      const evidence = route.source_evidence || {};
+      return [
+        route.old_url,
+        readableLegacyUrl(route.old_url),
+        route.target_path,
+        evidence.title,
+        evidence.h1,
+        evidence.canonical,
+      ].some((value) => String(value || "").toLocaleLowerCase().includes(query));
+    });
+  return {
+    rows,
+    filters,
+    filterOptions: {
+      types: [...new Set(routes.map((route) => route.url_type).filter(Boolean))].sort(),
+      domains: [...new Set(routes.map((route) => route.source_domain).filter(Boolean))].sort(),
+    },
+  };
+}
+
 export function buildMigrationReviewQueue(records, routeMap) {
   const routesByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const rows = records.map((record) => {
