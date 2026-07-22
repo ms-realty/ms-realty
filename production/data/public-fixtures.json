@@ -29,8 +29,8 @@
     "locale": "he",
     "lang": "he",
     "dir": "rtl",
-    "path": "/he/",
-    "canonical": "/he/",
+    "path": "/he",
+    "canonical": "/he",
     "indexable": true,
     "metadata": {
       "title": "חיפוש נכסים MS Realty",
@@ -40,35 +40,35 @@
     "hreflang": [
       {
         "hreflang": "bg",
-        "href": "/bg/"
+        "href": "/bg"
       },
       {
         "hreflang": "en",
-        "href": "/en/"
+        "href": "/en"
       },
       {
         "hreflang": "de",
-        "href": "/de/"
+        "href": "/de"
       },
       {
         "hreflang": "nl",
-        "href": "/nl/"
+        "href": "/nl"
       },
       {
         "hreflang": "ru",
-        "href": "/ru/"
+        "href": "/ru"
       },
       {
         "hreflang": "el",
-        "href": "/el/"
+        "href": "/el"
       },
       {
         "hreflang": "he",
-        "href": "/he/"
+        "href": "/he"
       },
       {
         "hreflang": "x-default",
-        "href": "/bg/"
+        "href": "/bg"
       }
     ],
     "chrome": {
@@ -93,7 +93,7 @@
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "home": {
-        "href": "/he/",
+        "href": "/he",
         "label": "MS Realty"
       },
       "nav": [
@@ -126,49 +126,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg/",
+          "href": "/bg",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el/",
+          "href": "/el",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he/",
+          "href": "/he",
           "active": true,
           "dir": "rtl"
         }
@@ -626,7 +626,7 @@
         "offices": "Сандански · Банско · Свети Влас"
       },
       "home": {
-        "href": "/bg/",
+        "href": "/bg",
         "label": "MS Realty"
       },
       "nav": [
@@ -666,28 +666,28 @@
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
@@ -987,7 +987,7 @@
         "offices": "Σαντάνσκι · Μπάνσκο · Σβετί Βλας"
       },
       "home": {
-        "href": "/el/",
+        "href": "/el",
         "label": "MS Realty"
       },
       "nav": [
@@ -1027,28 +1027,28 @@
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
@@ -1348,7 +1348,7 @@
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "home": {
-        "href": "/he/",
+        "href": "/he",
         "label": "MS Realty"
       },
       "nav": [
@@ -1388,28 +1388,28 @@
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
@@ -1692,7 +1692,7 @@
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
       "home": {
-        "href": "/en/",
+        "href": "/en",
         "label": "MS Realty"
       },
       "nav": [
@@ -1725,49 +1725,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg/",
+          "href": "/bg",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": true,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el/",
+          "href": "/el",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he/",
+          "href": "/he",
           "active": false,
           "dir": "rtl"
         }
@@ -2016,7 +2016,7 @@
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
       "home": {
-        "href": "/en/",
+        "href": "/en",
         "label": "MS Realty"
       },
       "nav": [
@@ -2049,49 +2049,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg/",
+          "href": "/bg",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": true,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el/",
+          "href": "/el",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he/",
+          "href": "/he",
           "active": false,
           "dir": "rtl"
         }
@@ -2167,7 +2167,7 @@
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "home": {
-        "href": "/he/",
+        "href": "/he",
         "label": "MS Realty"
       },
       "nav": [
@@ -2200,49 +2200,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg/",
+          "href": "/bg",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el/",
+          "href": "/el",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he/",
+          "href": "/he",
           "active": true,
           "dir": "rtl"
         }
@@ -3073,7 +3073,7 @@
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "home": {
-        "href": "/he/",
+        "href": "/he",
         "label": "MS Realty"
       },
       "nav": [
@@ -3113,21 +3113,21 @@
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
@@ -3299,7 +3299,7 @@
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "home": {
-        "href": "/he/",
+        "href": "/he",
         "label": "MS Realty"
       },
       "nav": [
@@ -3498,7 +3498,7 @@
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "home": {
-        "href": "/he/",
+        "href": "/he",
         "label": "MS Realty"
       },
       "nav": [
@@ -3665,7 +3665,7 @@
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
       "home": {
-        "href": "/en/",
+        "href": "/en",
         "label": "MS Realty"
       },
       "nav": [
@@ -3698,49 +3698,49 @@
         {
           "code": "bg",
           "label": "Български",
-          "href": "/bg/",
+          "href": "/bg",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "en",
           "label": "English",
-          "href": "/en/",
+          "href": "/en",
           "active": true,
           "dir": "ltr"
         },
         {
           "code": "de",
           "label": "Deutsch",
-          "href": "/de/",
+          "href": "/de",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "nl",
           "label": "Nederlands",
-          "href": "/nl/",
+          "href": "/nl",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "ru",
           "label": "Русский",
-          "href": "/ru/",
+          "href": "/ru",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "el",
           "label": "Ελληνικά",
-          "href": "/el/",
+          "href": "/el",
           "active": false,
           "dir": "ltr"
         },
         {
           "code": "he",
           "label": "עברית",
-          "href": "/he/",
+          "href": "/he",
           "active": false,
           "dir": "rtl"
         }
