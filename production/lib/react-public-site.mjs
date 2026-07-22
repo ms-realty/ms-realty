@@ -786,6 +786,8 @@ function SearchBody({ page }) {
   const activeFilterCount = (controls.active_filter_chips || []).length;
   const savedSearchFilters = controls.save_search?.payload?.filters || {};
   const hasSavedSearchCriteria = Boolean(String(page.search.query || "").trim() || Object.keys(savedSearchFilters).length);
+  const mobileSearchContext = String(page.search.query || page.search.filters?.location || labels.search).trim();
+  const mobileSearchMeta = `${page.search.total_matches} ${labels.matches} · ${chrome.copy.filters || labels.activeFilters}`;
   const filterSelect = (idPrefix, name, label, values, optionLabel = (value) => value) =>
     h(
       "div",
@@ -1045,9 +1047,19 @@ function SearchBody({ page }) {
             "aria-controls": mobileFilterPanelId,
             "aria-expanded": "false",
           },
-          h(Icon, { name: "sliders-horizontal", size: 18 }),
-          h("span", { className: "sr-mobile-filters__label" }, chrome.copy.filters || labels.activeFilters),
-          activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
+          h(Icon, { name: "search", size: 18 }),
+          h(
+            "span",
+            { className: "sr-mobile-filters__copy" },
+            h("strong", { className: "sr-mobile-filters__label" }, mobileSearchContext),
+            h("small", null, mobileSearchMeta),
+          ),
+          h(
+            "span",
+            { className: "sr-mobile-filters__control", "aria-hidden": "true" },
+            h(Icon, { name: "sliders-horizontal", size: 18 }),
+            activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
+          ),
         ),
         h("button", {
           type: "button",

@@ -288,6 +288,8 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-mobile-filter-sheet="true"/);
   assert.match(html, /data-mobile-filter-sheet="true" role="dialog" aria-modal="true" aria-labelledby="mobile-search-filters-title-en"/);
   assert.match(html, /aria-controls="mobile-search-filters-panel-en" aria-expanded="false"/);
+  assert.match(html, /class="sr-mobile-filters__copy"><strong class="sr-mobile-filters__label">Search/);
+  assert.match(html, /class="sr-mobile-filters__control" aria-hidden="true"/);
   assert.match(html, /data-mobile-filter-close="true"/);
   assert.match(html, /data-save-search-disclosure="sr-mobile"/);
   assert.match(html, /form="sr-mobile-filter-form"/);
