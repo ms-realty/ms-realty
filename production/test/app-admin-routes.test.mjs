@@ -306,6 +306,8 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(todayHtml, /data-react-admin-ui="today"/);
       assert.match(todayHtml, /data-priority-leads="true"/);
       assert.match(todayHtml, /data-priority-lead="next-admin-lead-test"/);
+      assert.match(todayHtml, /adm-task-list__reference/);
+      assert.match(todayHtml, /Открыть и ответить/);
       assert.match(todayHtml, /href="\/admin\/leads\?locale=ru#lead-next-admin-lead-test"/);
       assert.match(todayHtml, /href="\/admin\/viewings\?locale=ru"/);
       assert.match(todayHtml, /href="\/admin\/activity\?locale=ru"/);

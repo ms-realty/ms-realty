@@ -1161,16 +1161,16 @@ function TodayBody({ page }) {
                   h(
                     "div",
                     { className: "adm-task-list__body" },
-                    h("code", { className: "crm-mono" }, lead.lead_id),
-                    h("strong", null, [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source)),
                     leadContactActions(lead, ui),
+                    h("strong", null, [lead.listing_reference, lead.property?.location].filter(Boolean).join(" · ") || valueText(ui, lead.source)),
                     requestDetailsText(lead) ? h("small", { className: "adm-lead-context" }, requestDetailsText(lead)) : null,
+                    h("code", { className: "crm-mono adm-task-list__reference" }, lead.lead_id),
                   ),
                   h(
                     "div",
                     { className: "adm-task-list__actions" },
                     h(StatusPill, { tone: queueTone(status) }, statusText(ui, status)),
-                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}` }, label(copy, "reply", "Reply")),
+                    h("a", { className: "mk-btn mk-btn--primary mk-btn--sm", href: `${inboxHref}#lead-${encodeURIComponent(lead.lead_id)}` }, label(copy, "openAndReply", "Open and reply")),
                   ),
                 );
               }),
