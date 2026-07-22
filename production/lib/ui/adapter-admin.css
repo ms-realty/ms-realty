@@ -1055,6 +1055,22 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 .adm-archive-disclosure > summary::-webkit-details-marker { display: none; }
 .adm-archive-disclosure > summary::after { content: "+"; margin-inline-start: auto; color: var(--text-muted); font-size: var(--text-xl); }
 .adm-archive-disclosure[open] > summary::after { content: "−"; }
+.adm-workbench-disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: var(--space-3) var(--space-5);
+  color: var(--text-link);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-semibold);
+  list-style: none;
+}
+.adm-workbench-disclosure > summary::-webkit-details-marker { display: none; }
+.adm-workbench-disclosure > summary .mk-icon { transition: transform 180ms ease; }
+.adm-workbench-disclosure[open] > summary .mk-icon { transform: rotate(90deg); }
+.adm-workbench-disclosure__body { border-top: 1px solid var(--border); }
 .adm-approve-form { display: grid; gap: 6px; min-width: 240px; }
 .adm-route-decisions {
   display: grid;

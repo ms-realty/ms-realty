@@ -945,7 +945,8 @@ function migrationReviewPayload(registry, url, config) {
       domain: url.searchParams.get("routeDomain"),
     },
   );
-  const routePageSize = 20;
+  // Match the HTTP workbench's short, phone-friendly human review batches.
+  const routePageSize = 10;
   const routePages = Math.max(1, Math.ceil(reviewSelection.rows.length / routePageSize));
   const requestedRoutePage = Number.parseInt(url.searchParams.get("routePage") || "1", 10);
   const routePage = Math.min(Math.max(Number.isFinite(requestedRoutePage) ? requestedRoutePage : 1, 1), routePages);

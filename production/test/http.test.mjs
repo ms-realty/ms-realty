@@ -1081,8 +1081,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.adminMigrationReview.body.routeMap.mappedListings, 165);
   assert.deepEqual(smoke.adminMigrationReview.body.routeMap.pendingPagination, {
     page: 1,
-    pageSize: 20,
-    totalPages: 15,
+    pageSize: 10,
+    totalPages: 30,
     totalRows: 292,
   });
   assert.equal(smoke.adminMigrationReview.body.routeMap.pendingSample[0].source_evidence.title, "Недвижими имоти в Сандански | MS Realty");

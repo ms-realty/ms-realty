@@ -50,6 +50,10 @@ const ADMIN_UI_COPY = {
     payloadCollections: "Payload колекции",
     listingQuality: "Качество на обявите",
     exportLaunchReadiness: "Изтегли готовността",
+    openLaunchEvidence: "Отвори файловете за пускане",
+    openCsvTools: "Отвори CSV инструментите",
+    openSeoImport: "Отвори SEO импорта",
+    openQualityQueue: "Отвори опашката за качество",
     reviewedDecisions: "Прегледани решения",
     pendingLegacyDecisions: "Чакащи решения за стари URL адреси",
     pendingLegacyHint: "Всеки стар URL трябва да има отделно човешко решение. Целите трябва да са публикувани, еквивалентни страници — никога начална страница или общо търсене.",
@@ -273,6 +277,10 @@ const ADMIN_UI_COPY = {
     payloadCollections: "Коллекции Payload",
     listingQuality: "Качество объектов",
     exportLaunchReadiness: "Скачать готовность",
+    openLaunchEvidence: "Открыть файлы запуска",
+    openCsvTools: "Открыть инструменты CSV",
+    openSeoImport: "Открыть импорт SEO",
+    openQualityQueue: "Открыть очередь качества",
     reviewedDecisions: "Проверенные решения",
     pendingLegacyDecisions: "Ожидающие решения по старым URL",
     pendingLegacyHint: "Для каждого старого URL нужно отдельное решение человека. Целью может быть только опубликованная эквивалентная страница — не главная и не общий поиск.",
@@ -496,6 +504,10 @@ const ADMIN_UI_COPY = {
     payloadCollections: "Payload collection configs",
     listingQuality: "Listing quality",
     exportLaunchReadiness: "Export launch readiness",
+    openLaunchEvidence: "Open launch files",
+    openCsvTools: "Open CSV tools",
+    openSeoImport: "Open SEO import",
+    openQualityQueue: "Open quality queue",
     reviewedDecisions: "Reviewed decisions",
     pendingLegacyDecisions: "Pending legacy URL decisions",
     pendingLegacyHint: "Every legacy URL needs a separate human decision. Targets must be published equivalent pages—never a homepage or generic search fallback.",
@@ -824,6 +836,20 @@ function Panel({ title, action, children, ...attrs }) {
     { className: "crm-panel", ...attrs },
     title ? h("div", { className: "crm-panel__hd" }, h("h2", null, title), action || null) : null,
     children,
+  );
+}
+
+function WorkbenchDisclosure({ summary, children, ...attrs }) {
+  return h(
+    "details",
+    { className: "adm-workbench-disclosure", ...attrs },
+    h(
+      "summary",
+      null,
+      h(Icon, { name: "chevron-right", size: 17 }),
+      h("span", null, summary),
+    ),
+    h("div", { className: "adm-workbench-disclosure__body" }, children),
   );
 }
 
@@ -4630,6 +4656,9 @@ function MigrationReviewBody({ page }) {
         Panel,
         { title: label(copy, "launchEvidence", "Launch evidence") },
         h(
+          WorkbenchDisclosure,
+          { summary: ui.openLaunchEvidence, "data-launch-evidence-disclosure": "true" },
+        h(
           "nav",
           { className: "adm-evidence", "aria-label": label(copy, "launchEvidence", "Launch evidence") },
           ...evidenceLinks.map(([href, text]) =>
@@ -4640,6 +4669,7 @@ function MigrationReviewBody({ page }) {
           "form",
           { method: "post", action: page.launchReadinessExportEndpoint, className: "adm-inline-form" },
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "download", size: 16 }), h("span", null, ui.exportLaunchReadiness)),
+        ),
         ),
       ),
       h(
@@ -4695,8 +4725,8 @@ function MigrationReviewBody({ page }) {
           ? h(
               "ol",
               { className: "adm-route-decisions" },
-              ...(page.routeMap.pendingSample || []).map((route, index) =>
-                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui, defaultOpen: index === 0 }),
+              ...(page.routeMap.pendingSample || []).map((route) =>
+                h(PendingLegacyRouteDecision, { key: route.old_url, page, route, ui }),
               ),
             )
           : h("p", { className: "adm-empty", "data-empty-route-decisions": "true" }, ui.noPendingLegacyDecisions),
@@ -4761,6 +4791,9 @@ function MigrationReviewBody({ page }) {
           "data-pending-redirect-workbook-endpoint": page.redirectApprovalImport.pendingWorkbookEndpoint,
         },
         h(
+          WorkbenchDisclosure,
+          { summary: ui.openCsvTools, "data-redirect-tools-disclosure": "true" },
+        h(
           "p",
           { className: "adm-note" },
           h("a", { href: page.redirectApprovalImport.pendingWorkbookEndpoint }, ui.downloadPendingWorkbook),
@@ -4776,6 +4809,7 @@ function MigrationReviewBody({ page }) {
           { method: "post", action: page.redirectApprovalImport.exportEndpoint, className: "adm-inline-form" },
           h("button", { type: "submit", className: "mk-btn mk-btn--secondary mk-btn--sm" }, h(Icon, { name: "download", size: 16 }), h("span", null, ui.exportRedirects)),
         ),
+        ),
       ),
       h(
         Panel,
@@ -4785,6 +4819,12 @@ function MigrationReviewBody({ page }) {
           "data-seo-import-endpoint": page.seoEvidence.importEndpoint,
           "data-seo-template-endpoint": page.seoEvidence.templateEndpoint,
         },
+        h(
+          WorkbenchDisclosure,
+          {
+            summary: `${ui.openSeoImport} · ${page.seoEvidence.missingRequiredSources.length}`,
+            "data-seo-tools-disclosure": "true",
+          },
         h("p", { className: "adm-note" }, `${ui.missingRequiredSources}: ${page.seoEvidence.missingRequiredSources.join(", ") || "-"}`),
         h(
           "ul",
@@ -4818,6 +4858,7 @@ function MigrationReviewBody({ page }) {
           h("textarea", { name: "csv", rows: "5", required: true }),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.importSeoCsv)),
         ),
+        ),
       ),
       h(
         Panel,
@@ -4829,6 +4870,12 @@ function MigrationReviewBody({ page }) {
           "data-quality-import-endpoint": page.listingQualityImportEndpoint,
           "data-quality-affected-listings": page.listingQuality?.summary?.affected_listings || 0,
         },
+        h(
+          WorkbenchDisclosure,
+          {
+            summary: `${ui.openQualityQueue} · ${page.listingQuality?.summary?.affected_listings || 0}`,
+            "data-quality-tools-disclosure": "true",
+          },
         h(
           "nav",
           { className: "adm-evidence" },
@@ -4881,6 +4928,7 @@ function MigrationReviewBody({ page }) {
               ),
             ),
           ),
+        ),
         ),
       ),
       h(

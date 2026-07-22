@@ -914,11 +914,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.routeMap.terminalDecisionsReviewed, 0);
       assert.deepEqual(migrationReviewBody.routeMap.pendingPagination, {
         page: 1,
-        pageSize: 20,
-        totalPages: 23,
+        pageSize: 10,
+        totalPages: 46,
         totalRows: 457,
       });
-      assert.equal(migrationReviewBody.routeMap.pendingSample.length, 20);
+      assert.equal(migrationReviewBody.routeMap.pendingSample.length, 10);
       assert.ok(migrationReviewBody.routeMap.targetOptions.some((option) => option.path === "/bg/kontakt"));
       assert.ok(migrationReviewBody.routeMap.targetOptions.every((option) => !["home", "search", "listing"].includes(option.type)));
       assert.equal(migrationReviewBody.launchInputChecklistEndpoint, "/api/admin/launch-input-checklist");
@@ -991,6 +991,11 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /list="legacy-route-targets" data-route-decision-target="true"/);
       assert.match(migrationReviewHtmlBody, /data-route-decision-target-preview="true"/);
       assert.match(migrationReviewHtmlBody, /data-route-target-options="true"/);
+      assert.match(migrationReviewHtmlBody, /data-launch-evidence-disclosure="true"/);
+      assert.match(migrationReviewHtmlBody, /data-redirect-tools-disclosure="true"/);
+      assert.match(migrationReviewHtmlBody, /data-seo-tools-disclosure="true"/);
+      assert.match(migrationReviewHtmlBody, /data-quality-tools-disclosure="true"/);
+      assert.equal(migrationReviewHtmlBody.includes('<details class="adm-route-decision__disclosure" open>'), false);
       assert.match(migrationReviewHtmlBody, /value="\/bg\/kontakt" label="BG · contact"/);
       assert.match(migrationReviewHtmlBody, /value="redirect_301"/);
       assert.match(migrationReviewHtmlBody, /value="retain_200"/);

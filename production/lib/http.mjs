@@ -351,7 +351,10 @@ function renderMigrationReviewPayload(registry, url, dashboard, routes, approval
       domain: url.searchParams.get("routeDomain"),
     },
   );
-  const routePageSize = 20;
+  // Keep human review batches deliberately small. Ten decisions are enough for
+  // a focused operator session on a phone without turning the launch queue into
+  // an endless wall of forms.
+  const routePageSize = 10;
   const routePages = Math.max(1, Math.ceil(reviewSelection.rows.length / routePageSize));
   const requestedRoutePage = Number.parseInt(url.searchParams.get("routePage") || "1", 10);
   const routePage = Math.min(Math.max(Number.isFinite(requestedRoutePage) ? requestedRoutePage : 1, 1), routePages);
