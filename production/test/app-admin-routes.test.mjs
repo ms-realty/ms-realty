@@ -366,6 +366,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(inboxHtml, /https:\/\/wa\.me\/359880000001/);
       assert.match(inboxHtml, /action="\/api\/admin\/replies\/draft"/);
       assert.match(inboxHtml, /data-hermes-draft-request="true"/);
+      assert.match(inboxHtml, /data-reply-draft-unavailable="Hermes не настроен в этой среде\./);
       assert.match(inboxHtml, /data-reply-approval-required="true"/);
       assert.match(inboxHtml, /data-hermes-reply-draft="broker_review_required"/);
       assert.match(inboxHtml, /name="hermesDraftText"/);

@@ -10,6 +10,8 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /"content-type": "application\/json"/);
   assert.match(ADMIN_APP_JS, /result\.broker_approval_required !== true/);
   assert.match(ADMIN_APP_JS, /result\.can_send_without_approval === true/);
+  assert.match(ADMIN_APP_JS, /data-reply-draft-unavailable/);
+  assert.match(ADMIN_APP_JS, /HERMES_CHAT_COMPLETIONS_URL\|HERMES_API_KEY/);
   assert.match(ADMIN_APP_JS, /result\.status !== "queued_for_manual_send"/);
   assert.match(ADMIN_APP_JS, /leadRow\.setAttribute\("data-lead-replied", "false"\)/);
   assert.match(ADMIN_APP_JS, /leadRow\.setAttribute\("data-reply-queue-status", "queued"\)/);

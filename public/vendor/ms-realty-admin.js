@@ -363,6 +363,7 @@
       var failure = isDraft
         ? form.getAttribute("data-reply-draft-failure") || "Could not prepare a broker draft."
         : form.getAttribute("data-reply-queue-failure") || "Could not queue the reviewed reply.";
+      var unavailable = form.getAttribute("data-reply-draft-unavailable") || failure;
       if (submit) submit.disabled = true;
       form.setAttribute("aria-busy", "true");
       setReplyStatus(form, saving, "saving");
@@ -394,8 +395,11 @@
           setReplyStatus(form, success, "success");
           window.setTimeout(function () { window.location.reload(); }, 150);
         })
-        .catch(function () {
-          setReplyStatus(form, failure, "error");
+        .catch(function (error) {
+          var message = isDraft && /HERMES_CHAT_COMPLETIONS_URL|HERMES_API_KEY/.test(String(error && error.message || ""))
+            ? unavailable
+            : failure;
+          setReplyStatus(form, message, "error");
         })
         .then(function () {
           form.removeAttribute("aria-busy");
