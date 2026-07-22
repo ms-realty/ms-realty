@@ -27,7 +27,7 @@
   "routes": [
     {
       "type": "home",
-      "path": "/bg/",
+      "path": "/bg",
       "locale": "bg",
       "lang": "bg",
       "dir": "ltr",
@@ -3023,7 +3023,7 @@
     },
     {
       "type": "home",
-      "path": "/de/",
+      "path": "/de",
       "locale": "de",
       "lang": "de",
       "dir": "ltr",
@@ -3119,7 +3119,7 @@
     },
     {
       "type": "home",
-      "path": "/el/",
+      "path": "/el",
       "locale": "el",
       "lang": "el",
       "dir": "ltr",
@@ -3265,7 +3265,7 @@
     },
     {
       "type": "home",
-      "path": "/en/",
+      "path": "/en",
       "locale": "en",
       "lang": "en",
       "dir": "ltr",
@@ -3411,7 +3411,7 @@
     },
     {
       "type": "home",
-      "path": "/he/",
+      "path": "/he",
       "locale": "he",
       "lang": "he",
       "dir": "rtl",
@@ -3557,7 +3557,7 @@
     },
     {
       "type": "home",
-      "path": "/nl/",
+      "path": "/nl",
       "locale": "nl",
       "lang": "nl",
       "dir": "ltr",
@@ -3653,7 +3653,7 @@
     },
     {
       "type": "home",
-      "path": "/ru/",
+      "path": "/ru",
       "locale": "ru",
       "lang": "ru",
       "dir": "ltr",

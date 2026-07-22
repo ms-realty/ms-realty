@@ -453,7 +453,7 @@ test("home page exposes search, seller, location, and featured listing paths", (
   const he = renderHomePage({ registry, listings, localeCode: "he" });
 
   assert.equal(he.status, 200);
-  assert.equal(he.path, "/he/");
+  assert.equal(he.path, "/he");
   assert.equal(he.dir, "rtl");
   assert.equal(he.indexable, true);
   assert.equal(he.body.search.path, "/he/search");

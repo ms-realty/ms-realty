@@ -23,273 +23,273 @@
     {
       "type": "home",
       "locale": "bg",
-      "loc": "/bg/",
+      "loc": "/bg",
       "hreflang": [
         {
           "hreflang": "bg",
-          "href": "/bg/"
+          "href": "/bg"
         },
         {
           "hreflang": "en",
-          "href": "/en/"
+          "href": "/en"
         },
         {
           "hreflang": "de",
-          "href": "/de/"
+          "href": "/de"
         },
         {
           "hreflang": "nl",
-          "href": "/nl/"
+          "href": "/nl"
         },
         {
           "hreflang": "ru",
-          "href": "/ru/"
+          "href": "/ru"
         },
         {
           "hreflang": "el",
-          "href": "/el/"
+          "href": "/el"
         },
         {
           "hreflang": "he",
-          "href": "/he/"
+          "href": "/he"
         },
         {
           "hreflang": "x-default",
-          "href": "/bg/"
+          "href": "/bg"
         }
       ]
     },
     {
       "type": "home",
       "locale": "en",
-      "loc": "/en/",
+      "loc": "/en",
       "hreflang": [
         {
           "hreflang": "bg",
-          "href": "/bg/"
+          "href": "/bg"
         },
         {
           "hreflang": "en",
-          "href": "/en/"
+          "href": "/en"
         },
         {
           "hreflang": "de",
-          "href": "/de/"
+          "href": "/de"
         },
         {
           "hreflang": "nl",
-          "href": "/nl/"
+          "href": "/nl"
         },
         {
           "hreflang": "ru",
-          "href": "/ru/"
+          "href": "/ru"
         },
         {
           "hreflang": "el",
-          "href": "/el/"
+          "href": "/el"
         },
         {
           "hreflang": "he",
-          "href": "/he/"
+          "href": "/he"
         },
         {
           "hreflang": "x-default",
-          "href": "/bg/"
+          "href": "/bg"
         }
       ]
     },
     {
       "type": "home",
       "locale": "de",
-      "loc": "/de/",
+      "loc": "/de",
       "hreflang": [
         {
           "hreflang": "bg",
-          "href": "/bg/"
+          "href": "/bg"
         },
         {
           "hreflang": "en",
-          "href": "/en/"
+          "href": "/en"
         },
         {
           "hreflang": "de",
-          "href": "/de/"
+          "href": "/de"
         },
         {
           "hreflang": "nl",
-          "href": "/nl/"
+          "href": "/nl"
         },
         {
           "hreflang": "ru",
-          "href": "/ru/"
+          "href": "/ru"
         },
         {
           "hreflang": "el",
-          "href": "/el/"
+          "href": "/el"
         },
         {
           "hreflang": "he",
-          "href": "/he/"
+          "href": "/he"
         },
         {
           "hreflang": "x-default",
-          "href": "/bg/"
+          "href": "/bg"
         }
       ]
     },
     {
       "type": "home",
       "locale": "nl",
-      "loc": "/nl/",
+      "loc": "/nl",
       "hreflang": [
         {
           "hreflang": "bg",
-          "href": "/bg/"
+          "href": "/bg"
         },
         {
           "hreflang": "en",
-          "href": "/en/"
+          "href": "/en"
         },
         {
           "hreflang": "de",
-          "href": "/de/"
+          "href": "/de"
         },
         {
           "hreflang": "nl",
-          "href": "/nl/"
+          "href": "/nl"
         },
         {
           "hreflang": "ru",
-          "href": "/ru/"
+          "href": "/ru"
         },
         {
           "hreflang": "el",
-          "href": "/el/"
+          "href": "/el"
         },
         {
           "hreflang": "he",
-          "href": "/he/"
+          "href": "/he"
         },
         {
           "hreflang": "x-default",
-          "href": "/bg/"
+          "href": "/bg"
         }
       ]
     },
     {
       "type": "home",
       "locale": "ru",
-      "loc": "/ru/",
+      "loc": "/ru",
       "hreflang": [
         {
           "hreflang": "bg",
-          "href": "/bg/"
+          "href": "/bg"
         },
         {
           "hreflang": "en",
-          "href": "/en/"
+          "href": "/en"
         },
         {
           "hreflang": "de",
-          "href": "/de/"
+          "href": "/de"
         },
         {
           "hreflang": "nl",
-          "href": "/nl/"
+          "href": "/nl"
         },
         {
           "hreflang": "ru",
-          "href": "/ru/"
+          "href": "/ru"
         },
         {
           "hreflang": "el",
-          "href": "/el/"
+          "href": "/el"
         },
         {
           "hreflang": "he",
-          "href": "/he/"
+          "href": "/he"
         },
         {
           "hreflang": "x-default",
-          "href": "/bg/"
+          "href": "/bg"
         }
       ]
     },
     {
       "type": "home",
       "locale": "el",
-      "loc": "/el/",
+      "loc": "/el",
       "hreflang": [
         {
           "hreflang": "bg",
-          "href": "/bg/"
+          "href": "/bg"
         },
         {
           "hreflang": "en",
-          "href": "/en/"
+          "href": "/en"
         },
         {
           "hreflang": "de",
-          "href": "/de/"
+          "href": "/de"
         },
         {
           "hreflang": "nl",
-          "href": "/nl/"
+          "href": "/nl"
         },
         {
           "hreflang": "ru",
-          "href": "/ru/"
+          "href": "/ru"
         },
         {
           "hreflang": "el",
-          "href": "/el/"
+          "href": "/el"
         },
         {
           "hreflang": "he",
-          "href": "/he/"
+          "href": "/he"
         },
         {
           "hreflang": "x-default",
-          "href": "/bg/"
+          "href": "/bg"
         }
       ]
     },
     {
       "type": "home",
       "locale": "he",
-      "loc": "/he/",
+      "loc": "/he",
       "hreflang": [
         {
           "hreflang": "bg",
-          "href": "/bg/"
+          "href": "/bg"
         },
         {
           "hreflang": "en",
-          "href": "/en/"
+          "href": "/en"
         },
         {
           "hreflang": "de",
-          "href": "/de/"
+          "href": "/de"
         },
         {
           "hreflang": "nl",
-          "href": "/nl/"
+          "href": "/nl"
         },
         {
           "hreflang": "ru",
-          "href": "/ru/"
+          "href": "/ru"
         },
         {
           "hreflang": "el",
-          "href": "/el/"
+          "href": "/el"
         },
         {
           "hreflang": "he",
-          "href": "/he/"
+          "href": "/he"
         },
         {
           "hreflang": "x-default",
-          "href": "/bg/"
+          "href": "/bg"
         }
       ]
     },

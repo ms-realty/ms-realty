@@ -43,7 +43,7 @@ test("locale registry supports dynamic approved website languages and admin lang
 test("locale routes and hreflang only include human-approved translations", () => {
   assert.equal(listingPath(registry, "el", "ms-987"), "/el/akinita/ms-987");
   assert.equal(listingPath(registry, "he", "ms-987"), "/he/properties/ms-987");
-  assert.equal(homePath(registry, "he"), "/he/");
+  assert.equal(homePath(registry, "he"), "/he");
   assert.equal(locationPath(registry, "he", "Sandanski"), "/he/locations/sandanski");
   assert.equal(sellerPath(registry, "he"), "/he/sell");
   assert.equal(contactPath(registry, "he"), "/he/contact");

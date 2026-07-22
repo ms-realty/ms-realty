@@ -113,7 +113,7 @@ export function assertAppRouteManifest(manifest) {
   if (manifest.summary.utility_routes !== 7) throw new Error("App route manifest must include one search route per public locale");
   if (manifest.routes.some((route) => route.locale === "fr")) throw new Error("App route manifest must not include draft French routes");
   for (const route of manifest.routes) {
-    if (!route.path.startsWith(`/${route.locale}/`) && route.path !== `/${route.locale}/`) {
+    if (!route.path.startsWith(`/${route.locale}/`) && route.path !== `/${route.locale}`) {
       throw new Error(`Route path must be locale-prefixed: ${route.path}`);
     }
     if (!route.app_module || !route.renderer || !route.lang || !route.dir) {
@@ -123,7 +123,7 @@ export function assertAppRouteManifest(manifest) {
       throw new Error("Search utility routes must stay out of the sitemap and use no-store");
     }
   }
-  const hebrewHome = manifest.routes.find((route) => route.path === "/he/");
+  const hebrewHome = manifest.routes.find((route) => route.path === "/he");
   if (hebrewHome?.dir !== "rtl") throw new Error("Hebrew app route must carry RTL direction");
   return true;
 }

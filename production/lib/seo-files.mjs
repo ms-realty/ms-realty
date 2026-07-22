@@ -95,7 +95,7 @@ export function renderRobotsTxt({ origin = DEFAULT_PUBLIC_ORIGIN } = {}) {
 }
 
 export function assertSeoFiles({ sitemapXml, robotsTxt }) {
-  if (!sitemapXml.includes("/he/</loc>")) throw new Error("Sitemap XML must include approved Hebrew homepage");
+  if (!sitemapXml.includes("/he</loc>")) throw new Error("Sitemap XML must include approved Hebrew homepage");
   if (!sitemapXml.includes("/he/properties/MS-CRAWL-0001")) throw new Error("Sitemap XML must include approved Hebrew route");
   if (!sitemapXml.includes("/he/locations/sandanski")) throw new Error("Sitemap XML must include approved Hebrew location route");
   if (!sitemapXml.includes("/he/sell")) throw new Error("Sitemap XML must include Hebrew seller route");

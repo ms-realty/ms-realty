@@ -20,7 +20,7 @@ export function contactPath(registry, localeCode) {
 
 export function homePath(registry, localeCode) {
   const locale = getLocale(registry, localeCode);
-  return `/${locale.code}/`;
+  return `/${locale.code}`;
 }
 
 export function locationSlug(location) {

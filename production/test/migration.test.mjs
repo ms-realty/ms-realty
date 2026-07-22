@@ -176,7 +176,7 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.summary.byLocale.el, 5);
   assert.equal(data.summary.byLocale.he, 5);
   assert.equal(data.summary.byLocale.fr, undefined);
-  assert.equal(data.entries.some((entry) => entry.loc === "/he/" && entry.type === "home"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/he" && entry.type === "home"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/locations/sandanski" && entry.type === "location"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/sell" && entry.type === "seller"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/he/contact" && entry.type === "contact"), true);

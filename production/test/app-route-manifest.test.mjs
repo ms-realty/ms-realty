@@ -14,7 +14,7 @@ test("App Router manifest maps sitemap entries plus no-store search routes", () 
     registry,
     sitemap: {
       entries: [
-        { type: "home", locale: "he", loc: "/he/", hreflang: [{ hreflang: "he", href: "/he/" }] },
+        { type: "home", locale: "he", loc: "/he", hreflang: [{ hreflang: "he", href: "/he" }] },
         {
           type: "listing",
           locale: "he",
@@ -35,7 +35,7 @@ test("App Router manifest maps sitemap entries plus no-store search routes", () 
   assert.equal(assertAppRouteManifest(manifest), true);
   assert.equal(manifest.summary.sitemap_indexable_routes, 3);
   assert.equal(manifest.summary.utility_routes, 7);
-  assert.equal(manifest.routes.find((route) => route.path === "/he/").dir, "rtl");
+  assert.equal(manifest.routes.find((route) => route.path === "/he").dir, "rtl");
   assert.equal(manifest.routes.find((route) => route.path === "/he/properties/MS-CRAWL-0001").params.listingId, "MS-CRAWL-0001");
   assert.equal(manifest.routes.find((route) => route.path === "/en/guides/foreign-buyers").renderer, "renderGuidePage");
   assert.equal(manifest.routes.find((route) => route.path === "/en/guides/foreign-buyers").params.guidePath, "guides/foreign-buyers");
@@ -205,7 +205,7 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
   assert.equal(sitemap.sitemap.summary.entries, 195);
-  assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he\/<\/loc>/);
+  assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he<\/loc>/);
   assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);
   assert.doesNotMatch(sitemap.body, /\/el\/akinita\/MS-CRAWL-0001/);

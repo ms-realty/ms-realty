@@ -232,7 +232,7 @@ if (
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
   appRouteManifest.summary.by_type.guide !== 2 ||
-  appRouteManifest.routes.find((route) => route.path === "/he/")?.dir !== "rtl"
+  appRouteManifest.routes.find((route) => route.path === "/he")?.dir !== "rtl"
 ) {
   throw new Error("App Router manifest must map sitemap routes plus no-store search routes");
 }
@@ -240,7 +240,7 @@ if (
 const sitemapXml = fs.readFileSync(fromRoot("production", "data", "sitemap.xml"), "utf8");
 const robotsTxt = fs.readFileSync(fromRoot("production", "data", "robots.txt"), "utf8");
 if (
-  !sitemapXml.includes("/he/</loc>") ||
+  !sitemapXml.includes("/he</loc>") ||
   !sitemapXml.includes("/he/properties/MS-CRAWL-0001") ||
   !sitemapXml.includes("/he/locations/sandanski") ||
   !sitemapXml.includes("/he/sell") ||
