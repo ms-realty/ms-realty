@@ -413,6 +413,8 @@ a.mk-btn:hover { text-decoration: none; }
 .sr-body--saved { grid-template-columns: minmax(0, 1fr); max-width: var(--container-lg); }
 .sr-results--saved .sr-results__head { margin-bottom: var(--space-5); }
 main[data-saved-listings-view="true"]:not([data-saved-listings-ready="true"]) [data-saved-listings-grid] { display: none; }
+[data-saved-listings-grid][hidden],
+[data-saved-listings-grid] [data-search-card][hidden] { display: none !important; }
 .sr-saved-empty {
   display: grid;
   min-height: min(420px, calc(100svh - 240px));
