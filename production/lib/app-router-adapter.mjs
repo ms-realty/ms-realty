@@ -117,6 +117,12 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
     pathname = legacyDecision.target_path;
   }
   const result = renderAppRoute({ pathname, url, config });
+  if (result.status === 200 && pathname.length > 1 && pathname.endsWith("/")) {
+    return new Response(null, {
+      status: 308,
+      headers: { location: `${pathname.replace(/\/+$/, "")}${new URL(url, "http://localhost").search}`, "cache-control": PUBLIC_CACHE },
+    });
+  }
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
 

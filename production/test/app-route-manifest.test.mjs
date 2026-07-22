@@ -267,8 +267,16 @@ test("App Router serves reviewed legacy URLs as direct domain-aware redirects", 
     host: "example.test",
     config,
   });
+  const canonicalHome = renderAppRouteResponse({
+    pathname: "/he/",
+    url: "http://app:3000/he/?from=legacy-link",
+    host: "makler-realty.com",
+    config,
+  });
 
   assert.equal(response.status, 301);
   assert.equal(response.headers.get("location"), "/bg/imoti/MS-CRAWL-0001");
   assert.equal(wrongDomain.status, 404);
+  assert.equal(canonicalHome.status, 308);
+  assert.equal(canonicalHome.headers.get("location"), "/he?from=legacy-link");
 });
