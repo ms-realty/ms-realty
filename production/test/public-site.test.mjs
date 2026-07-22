@@ -279,8 +279,10 @@ test("public UI localizes structured values and excludes operational crawl image
   assert.equal(ruSearch.metadata.title, "Поиск недвижимости | MS Realty");
   assert.equal(ruSearch.search.controls.view_modes.find((mode) => mode.id === "list").label, "Список");
   assert.equal(card.actions.detail.label, "Подробнее");
+  assert.equal(card.location, "Сандански");
   assert.equal(card.property_type_label, "Апартаменты");
   assert.equal(card.offer_type_label, "Продажа");
+  assert.equal(ruPage.body.facts.location, "Сандански");
   assert.equal(card.thumbnail, null);
   assert.equal(card.image_count, ruPage.body.media.gallery_count);
   assert.equal(card.legacy_image_count, ruListing.image_count);
@@ -335,8 +337,8 @@ test("search applies text and facet filters before paginating cards", () => {
   });
 
   assert.ok(petrich.search.total_matches > 0);
-  assert.ok(petrich.cards.some((card) => card.location === "Petrich"));
-  assert.ok(petrichLocation.cards.every((card) => card.location === "Petrich"));
+  assert.ok(petrich.cards.some((card) => card.location === "פטריץ׳"));
+  assert.ok(petrichLocation.cards.every((card) => card.location === "פטריץ׳"));
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_type, "apartment");
@@ -396,6 +398,7 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.equal(he.body.seller.path, "/he/sell");
   assert.equal(he.body.contact.path, "/he/contact");
   assert.equal(he.body.locations.some((location) => location.path === "/he/locations/sandanski"), true);
+  assert.equal(he.body.locations.some((location) => location.location === "סנדנסקי"), true);
   assert.ok(he.body.hero.image?.url.includes("/wp-content/uploads/"));
   assert.ok(he.body.locations.some((location) => location.image?.url.includes("/wp-content/uploads/")));
   assert.ok(he.cards.length > 0);
@@ -416,8 +419,8 @@ test("location page exposes only indexable locale inventory", () => {
   assert.equal(he.cards[0].translation_indexable, true);
   assert.match(he.cards[0].thumbnail.url, /\/wp-content\/uploads\//);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
-  assert.equal(he.body.h1, "נכסים ב-Sandanski");
-  assert.equal(he.metadata.title, "נכסים ב-Sandanski | MS Realty");
+  assert.equal(he.body.h1, "נכסים ב-סנדנסקי");
+  assert.equal(he.metadata.title, "נכסים ב-סנדנסקי | MS Realty");
   assert.match(he.metadata.description, /נכסים שנבדקו/);
   assert.equal(missing.status, 404);
   assert.equal(missing.indexable, false);

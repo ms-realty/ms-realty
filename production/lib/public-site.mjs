@@ -723,6 +723,13 @@ function humanizeIdentifier(value) {
   return String(value || "").replaceAll("_", " ");
 }
 
+const LOCATION_NAMES = {
+  bg: { Sandanski: "Сандански", Petrich: "Петрич", Hotovo: "Хотово", Bansko: "Банско", "Sveti Vlas": "Свети Влас" },
+  ru: { Sandanski: "Сандански", Petrich: "Петрич", Hotovo: "Хотово", Bansko: "Банско", "Sveti Vlas": "Свети-Влас" },
+  el: { Sandanski: "Σαντάνσκι", Petrich: "Πετρίτσι", Hotovo: "Χότοβο", Bansko: "Μπάνσκο", "Sveti Vlas": "Σβέτι Βλας" },
+  he: { Sandanski: "סנדנסקי", Petrich: "פטריץ׳", Hotovo: "חוטובו", Bansko: "בנסקו", "Sveti Vlas": "סבטי ולאס" },
+};
+
 export function uiCopyFor(localeCode) {
   return UI_COPY[localeCode] || UI_COPY.en;
 }
@@ -734,8 +741,13 @@ export function localizedListingValue(localeCode, key, value) {
   return humanizeIdentifier(value);
 }
 
+export function localizedLocationValue(localeCode, value) {
+  return LOCATION_NAMES[localeCode]?.[value] || String(value || "");
+}
+
 export function localizedSearchFilterValue(localeCode, key, value) {
   if (key === "property_type" || key === "offer_type") return localizedListingValue(localeCode, key, value);
+  if (key === "location") return localizedLocationValue(localeCode, value);
   return humanizeIdentifier(value);
 }
 
@@ -1088,11 +1100,12 @@ function localizedCopy(localeCode, view) {
       description: view.description && view.description !== view.title ? view.description : sourceTitle,
     };
   }
-  const title = template.title(view);
+  const localizedView = { ...view, location: localizedLocationValue(localeCode, view.location) };
+  const title = template.title(localizedView);
   return {
     title,
     h1: title,
-    description: template.description(view),
+    description: template.description(localizedView),
   };
 }
 
@@ -1188,7 +1201,7 @@ function listingCard(registry, listing, locale) {
     translation_human_approved: state.translation?.human_approved === true,
     source_locale: listing.locale,
     content_locale: copyLocale,
-    location: view.location,
+    location: localizedLocationValue(locale.code, view.location),
     property_type: view.property_type,
     property_type_label: localizedListingValue(locale.code, "property_type", view.property_type),
     offer_type: view.offer_type,
@@ -1534,7 +1547,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       description: copy.description,
       facts: {
         id: view.id,
-        location: view.location,
+        location: localizedLocationValue(locale.code, view.location),
         property_type: view.property_type,
         offer_type: view.offer_type,
         bedrooms: view.bedrooms,
@@ -1718,7 +1731,7 @@ export function renderHomePage({ registry, localeCode, listings }) {
       const page = renderLocationPage({ registry, localeCode: locale.code, location, listings });
       return page.indexable
         ? {
-            location,
+            location: localizedLocationValue(locale.code, location),
             path: page.path,
             listing_count: page.body.listing_count,
             image: primaryCardMedia(page.cards, { preferResidential: true }),
@@ -1927,7 +1940,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   });
   const path = locationPath(registry, locale.code, location);
   const indexable = resolved.available && matchedListings.length > 0;
-  const copy = locationPageCopy(locale.code, location);
+  const copy = locationPageCopy(locale.code, localizedLocationValue(locale.code, location));
   const locales = publicIndexableLocales(registry)
     .filter((candidate) =>
       listings.some((listing) => {
