@@ -38,7 +38,7 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /navigationLink\.hidden = true/);
   assert.match(PUBLIC_APP_JS, /section\.hidden = true/);
   assert.match(PUBLIC_APP_JS, /function initImageFallbacks/);
-  assert.match(PUBLIC_APP_JS, /\.mk-photo > img, img\[data-fallback-src\]/);
+  assert.match(PUBLIC_APP_JS, /main\[data-react-public-ui\] img, img\[data-fallback-src\]/);
   assert.match(PUBLIC_APP_JS, /data-image-state", "unavailable/);
   assert.match(PUBLIC_APP_JS, /function initMobileFilterPreview/);
   assert.match(PUBLIC_APP_JS, /window\.setTimeout\(preview, 320\)/);
@@ -55,6 +55,7 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /function copyShareUrl/);
   assert.match(PUBLIC_APP_JS, /error\.name !== "AbortError"/);
   assert.match(PUBLIC_APP_JS, /data-request-success/);
+  assert.match(PUBLIC_APP_JS, /form\.getAttribute\("data-success-message"\)/);
   assert.match(PUBLIC_APP_JS, /note\.focus\(\)/);
   assert.match(PUBLIC_APP_JS, /submit\.disabled = true/);
   assert.match(PUBLIC_APP_JS, /submit\.setAttribute\("aria-busy", "true"\)/);

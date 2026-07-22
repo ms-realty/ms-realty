@@ -102,7 +102,7 @@ export const PUBLIC_APP_JS = `(function () {
     icon.className = "ct-success__icon";
     icon.setAttribute("aria-hidden", "true");
     icon.textContent = "✓";
-    message.textContent = I18N.requestSent || "Sent.";
+    message.textContent = form.getAttribute("data-success-message") || I18N.requestSent || "Sent.";
     note.appendChild(icon);
     note.appendChild(message);
     form.replaceWith(note);
@@ -516,7 +516,7 @@ export const PUBLIC_APP_JS = `(function () {
     });
   }
   function initImageFallbacks() {
-    var images = document.querySelectorAll(".mk-photo > img, img[data-fallback-src]");
+    var images = document.querySelectorAll("main[data-react-public-ui] img, img[data-fallback-src]");
     function recoverImage(image) {
       var fallback = image.getAttribute("data-fallback-src");
       if (fallback && image.getAttribute("src") !== fallback) {

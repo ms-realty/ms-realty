@@ -224,7 +224,7 @@ function MobileTaskNavigation({ page, chrome }) {
             : item.id === "rent"
               ? rentView
               : item.id === "buy"
-                ? !rentView && (item.active || page.kind === "home")
+                ? !rentView && (item.active || page.kind === "home" || page.kind === "location")
                 : item.active;
       return h(
         "a",
@@ -1000,6 +1000,7 @@ function SearchBody({ page }) {
         action: controls.save_search?.endpoint || "/api/saved-searches",
         "data-save-search-endpoint": controls.save_search?.endpoint || "/api/saved-searches",
         "data-save-search-form": idPrefix,
+        "data-success-message": labels.saveSearchSuccess,
       },
       h("input", { type: "hidden", name: "locale", defaultValue: page.locale }),
       h("input", { type: "hidden", name: "query", defaultValue: page.search.query || "" }),

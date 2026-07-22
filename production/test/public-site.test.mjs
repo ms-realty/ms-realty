@@ -358,6 +358,7 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /class="sr-mobile-filters__control" aria-hidden="true"/);
   assert.match(html, /data-mobile-filter-close="true"/);
   assert.match(html, /data-save-search-disclosure="sr-mobile"/);
+  assert.match(html, /data-success-message="Search saved\. We will alert you when new properties match\."/);
   assert.match(html, /form="sr-mobile-filter-form"/);
   assert.match(html, /class="sr-mobile-filters__sheet-foot/);
   assert.match(html, /data-mobile-filter-preview-status="true"/);
@@ -470,6 +471,7 @@ test("home page exposes search, seller, location, and featured listing paths", (
 test("location page exposes only indexable locale inventory", () => {
   const he = renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" });
   const missing = renderLocationPage({ registry, listings, localeCode: "he", location: "Petrich" });
+  const html = renderReactPublicBody(he);
 
   assert.equal(he.status, 200);
   assert.equal(he.path, "/he/locations/sandanski");
@@ -483,6 +485,7 @@ test("location page exposes only indexable locale inventory", () => {
   assert.equal(he.body.h1, "נכסים ב-סנדנסקי");
   assert.equal(he.metadata.title, "נכסים ב-סנדנסקי | MS Realty");
   assert.match(he.metadata.description, /נכסים שנבדקו/);
+  assert.match(html, /data-mobile-task="buy" data-active="true" aria-current="page"/);
   assert.equal(missing.status, 404);
   assert.equal(missing.indexable, false);
   assert.equal(missing.metadata.robots, "noindex,follow");
