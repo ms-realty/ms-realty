@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T20:01:04.782Z",
+  "generated_at": "2026-07-22T20:27:19.882Z",
   "ready": false,
   "status": "blocked",
   "summary": {
@@ -104,7 +104,7 @@
     "agent_runtime": {
       "kind": "hermes_agent_runtime",
       "evidence_scope": "live",
-      "generated_at": "2026-07-22T20:01:04.782Z",
+      "generated_at": "2026-07-22T20:27:19.882Z",
       "ready": false,
       "status": "blocked",
       "endpoint": null,
