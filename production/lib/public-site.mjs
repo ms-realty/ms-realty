@@ -1200,6 +1200,38 @@ function listingCard(registry, listing, locale) {
   };
 }
 
+function relatedListingCards(registry, listings, locale, currentListing) {
+  const current = listingToPublicViewModel(currentListing);
+  const fallbackLocale = locale.fallback_locale || registry.source_locale;
+
+  return listings
+    .filter((candidate) => candidate.id !== currentListing.id && isActiveListing(candidate))
+    .map((candidate, index) => {
+      const card = listingCard(registry, candidate, locale);
+      const languageRank =
+        card.content_locale === locale.code
+          ? card.translation_indexable
+            ? 0
+            : 1
+          : card.content_locale === fallbackLocale
+            ? 2
+            : 3;
+      const offerRank = card.offer_type === current.offer_type ? 0 : 1;
+      const propertyTypeRank = card.property_type === current.property_type ? 0 : 1;
+
+      return { card, index, languageRank, offerRank, propertyTypeRank };
+    })
+    .sort(
+      (left, right) =>
+        left.languageRank - right.languageRank ||
+        left.offerRank - right.offerRank ||
+        left.propertyTypeRank - right.propertyTypeRank ||
+        left.index - right.index,
+    )
+    .slice(0, 3)
+    .map(({ card }) => card);
+}
+
 function indexableListingForLocale(registry, listing, locale) {
   return searchTranslationState(registry, listing, locale).indexable;
 }
@@ -1513,10 +1545,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
         seller_valuation: labels.valuation,
       },
       actions: listingActions(locale, view, path, labels, brokerContact),
-      related_listings: relatedListings
-        .filter((candidate) => candidate.id !== listing.id && isActiveListing(candidate))
-        .slice(0, 3)
-        .map((candidate) => listingCard(registry, candidate, locale)),
+      related_listings: relatedListingCards(registry, relatedListings, locale, listing),
       source: {
         old_url: view.source_url,
         source_domain: view.source_domain,

@@ -213,6 +213,15 @@ test("every source-fallback search card resolves to a noindex listing page", () 
   assert.equal(listing.body.content_locale, fallbackCard.content_locale);
 });
 
+test("runtime prioritizes same-language related listings before source fallbacks", () => {
+  const listing = renderRuntimePath(registry, seed, "/ru/properties/MS-CRAWL-0114");
+
+  assert.equal(listing.body.related_listings.length, 3);
+  assert.ok(listing.body.related_listings.every((card) => card.content_locale === "ru"));
+  assert.ok(listing.body.related_listings.every((card) => card.source_locale === "ru"));
+  assert.ok(listing.body.related_listings.every((card) => card.translation_indexable));
+});
+
 test("runtime keeps sold listing pages live while removing them from active inventory", () => {
   const soldSeed = applyListingEdits(seed, [
     {
