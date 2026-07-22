@@ -2,13 +2,18 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 16,
-    "passed": 16,
+    "checks": 17,
+    "passed": 17,
     "failed": 0
   },
   "checks": [
     {
       "id": "viewport_and_touch_targets",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "mobile_safe_area_and_feedback",
       "status": "pass",
       "evidence": {}
     },

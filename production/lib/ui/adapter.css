@@ -27,7 +27,28 @@
 ::view-transition-old(root),
 ::view-transition-new(root) { animation-duration: var(--dur-base); }
 
-a, button, summary, [role="button"] { touch-action: manipulation; }
+a, button, summary, [role="button"] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* Public async forms already expose aria-busy; this gives touch users an
+   equally immediate visual response without replacing the localized label. */
+.mk-btn[data-loading] { cursor: progress; opacity: 0.86; }
+.mk-btn[data-loading]::after {
+  content: "";
+  width: 1em;
+  height: 1em;
+  flex: none;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: var(--radius-full);
+  animation: adapter-button-loading var(--dur-slow) linear infinite;
+}
+@keyframes adapter-button-loading { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .mk-btn[data-loading]::after { animation: none; }
+}
 
 /* Elderly-first touch targets on public + admin form controls
    (mirrors data-min-touch-target="44" contract markers). */

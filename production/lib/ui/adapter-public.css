@@ -83,9 +83,16 @@
 @media (max-width: 1080px) {
   html.public-mobile-nav-open,
   html.public-mobile-nav-open body { overflow: hidden; }
-  .site-hd { position: sticky; top: 0; z-index: 30; }
+  .site-hd { position: sticky; top: 0; z-index: 30; padding-top: env(safe-area-inset-top); }
   html.public-mobile-nav-open .site-hd { z-index: 70; }
-  .site-hd__in { height: 64px; padding-block: 8px; flex-wrap: nowrap; gap: var(--space-2); }
+  .site-hd__in {
+    height: 64px;
+    padding-block: 8px;
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+    flex-wrap: nowrap;
+    gap: var(--space-2);
+  }
   .site-hd__nav,
   .site-hd__right { display: none; }
   .site-hd__mobile-call {
@@ -118,7 +125,7 @@
   .site-hd__mobile-backdrop {
     position: fixed;
     z-index: 39;
-    inset: 64px 0 0;
+    inset: calc(64px + env(safe-area-inset-top)) 0 0;
     width: 100%;
     height: auto;
     padding: 0;
@@ -129,16 +136,19 @@
   .site-hd__mobile-panel {
     position: fixed;
     inset-inline-end: 0;
-    inset-block: 64px 0;
+    inset-block: calc(64px + env(safe-area-inset-top)) 0;
     z-index: 40;
     display: grid;
     align-content: start;
     gap: var(--space-4);
     width: min(420px, 100vw);
-    height: calc(100dvh - 64px);
+    height: calc(100dvh - 64px - env(safe-area-inset-top));
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: var(--space-5) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
+    padding-top: var(--space-5);
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+    padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
     border: 0;
     border-inline-start: 1px solid var(--border);
     border-radius: 0;
@@ -530,7 +540,7 @@ main[data-saved-listings-view="true"]:not([data-saved-listings-ready="true"]) [d
   html.mobile-sheet-open body { overflow: hidden; }
   .sr-mobile-filters {
     position: sticky;
-    top: 76px;
+    top: calc(76px + env(safe-area-inset-top));
     z-index: 24;
     overflow: visible;
     border-radius: var(--radius-lg);
@@ -578,7 +588,10 @@ main[data-saved-listings-view="true"]:not([data-saved-listings-ready="true"]) [d
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 0 var(--space-5) var(--space-5);
+    padding-top: 0;
+    padding-right: max(var(--space-5), env(safe-area-inset-right));
+    padding-bottom: var(--space-5);
+    padding-left: max(var(--space-5), env(safe-area-inset-left));
   }
   .sr-mobile-filters__sheet-body .sr-filter-actions { display: none; }
   .sr-mobile-filters__sheet-foot {
@@ -586,7 +599,10 @@ main[data-saved-listings-view="true"]:not([data-saved-listings-ready="true"]) [d
     grid-template-columns: auto minmax(0, 1fr);
     gap: var(--space-2);
     align-items: center;
-    padding: var(--space-3) var(--space-5) calc(var(--space-3) + env(safe-area-inset-bottom));
+    padding-top: var(--space-3);
+    padding-right: max(var(--space-5), env(safe-area-inset-right));
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    padding-left: max(var(--space-5), env(safe-area-inset-left));
     border-top: 1px solid var(--border);
     background: var(--surface);
     box-shadow: 0 -6px 16px rgba(22, 19, 14, 0.06);
@@ -964,7 +980,12 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
   dialog.mk-enquiry[open] { animation: mk-sheet-in var(--dur-base) var(--ease-out); }
-  dialog.mk-enquiry .ct-form { padding: var(--space-5) var(--space-5) calc(var(--space-5) + env(safe-area-inset-bottom)); }
+  dialog.mk-enquiry .ct-form {
+    padding-top: var(--space-5);
+    padding-right: max(var(--space-5), env(safe-area-inset-right));
+    padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom));
+    padding-left: max(var(--space-5), env(safe-area-inset-left));
+  }
   .ld-contact-options {
     inset: auto 0 0;
     width: 100%;
@@ -974,6 +995,15 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
   }
   .ld-contact-options[open] { animation: mk-sheet-in var(--dur-base) var(--ease-out); }
   .ld-contact-options__actions { padding-bottom: calc(var(--space-5) + env(safe-area-inset-bottom)); }
+  .ld-contact-options__head,
+  .ld-contact-options__actions {
+    padding-right: max(var(--space-5), env(safe-area-inset-right));
+    padding-left: max(var(--space-5), env(safe-area-inset-left));
+  }
+  .ld-contact-options__direct {
+    margin-right: max(var(--space-5), env(safe-area-inset-right));
+    margin-left: max(var(--space-5), env(safe-area-inset-left));
+  }
   .ld-aside__btns[data-mobile-sticky-actions="true"] {
     position: fixed;
     z-index: 35;
@@ -983,7 +1013,10 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     gap: var(--space-3);
     bottom: 0;
     align-items: center;
-    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+    padding-top: var(--space-3);
+    padding-right: max(var(--space-4), env(safe-area-inset-right));
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
+    padding-left: max(var(--space-4), env(safe-area-inset-left));
     border: 0;
     border-top: 1px solid var(--border);
     border-radius: 0;

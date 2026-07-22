@@ -67,6 +67,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   const fallbackHtml = renderHtmlPage(renderLanguageFallback({ registry, requestedLocale: "fr" }));
 
   assert.equal(assertHtmlPage(homeHtml, { lang: "he", dir: "rtl", kind: "home" }), true);
+  assert.match(homeHtml, /content="width=device-width, initial-scale=1, viewport-fit=cover"/);
   assert.match(homeHtml, /data-ms-realty-design-system="external"/);
   assert.match(homeHtml, /href="\/vendor\/ms-realty\.css\?v=[a-f0-9]{12}"/);
   assert.match(homeHtml, /role="search"/);

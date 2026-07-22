@@ -52,7 +52,7 @@ function meta(page) {
     : "";
   return [
     "<meta charset=\"utf-8\">",
-    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">",
     designSystemStyle(),
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,

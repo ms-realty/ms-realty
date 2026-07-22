@@ -81,8 +81,20 @@ export function buildMobileElderlyQaReport({
     check(
       "viewport_and_touch_targets",
       Object.values(pages).every(
-        (html) => includes(html, "name=\"viewport\"") && includes(html, "data-ms-realty-design-system=\"external\""),
-      ) && includes(DESIGN_CSS, "min-height:44px"),
+        (html) =>
+          includes(html, "content=\"width=device-width, initial-scale=1, viewport-fit=cover\"") &&
+          includes(html, "data-ms-realty-design-system=\"external\""),
+      ) &&
+        includes(DESIGN_CSS, "min-height:44px") &&
+        includes(DESIGN_CSS, "-webkit-tap-highlight-color:color-mix"),
+    ),
+    check(
+      "mobile_safe_area_and_feedback",
+      includes(publicAdapterCss, "padding-top: env(safe-area-inset-top)") &&
+        includes(publicAdapterCss, "top: calc(76px + env(safe-area-inset-top))") &&
+        includes(publicAdapterCss, "env(safe-area-inset-bottom)") &&
+        includes(DESIGN_CSS, ".mk-btn[data-loading]") &&
+        includes(DESIGN_CSS, "prefers-reduced-motion:reduce"),
     ),
     check(
       "hebrew_rtl_public_pages",
@@ -113,7 +125,7 @@ export function buildMobileElderlyQaReport({
         includes(rentSearch, "data-mobile-task=\"rent\" data-active=\"true\"") &&
         !includes(rentSearch, "data-mobile-task=\"buy\" data-active=\"true\"") &&
         includes(pages.search, "data-mobile-filter-sheet=\"true\"") &&
-        includes(publicAdapterCss, ".site-hd { position: sticky; top: 0; z-index: 30; }") &&
+        includes(publicAdapterCss, ".site-hd { position: sticky; top: 0; z-index: 30;") &&
         includes(publicAdapterCss, ".sr-mobile-filters {\n    position: sticky;"),
     ),
     check(
@@ -208,6 +220,7 @@ export function assertMobileElderlyQaReport(report) {
     "mobile_search_form",
     "mobile_search_actions",
     "mobile_app_navigation",
+    "mobile_safe_area_and_feedback",
     "listing_sticky_actions",
     "intent_specific_lead_forms",
     "listing_detail_media_actions",

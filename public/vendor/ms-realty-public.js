@@ -121,6 +121,10 @@
           form.insertBefore(warn, form.firstChild);
         }
         warn.textContent = (I18N.requestFailed || "Request failed") + " (" + (form.getAttribute("action") || "") + ")";
+        warn.setAttribute("tabindex", "-1");
+        warn.focus({ preventScroll: true });
+        var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        warn.scrollIntoView({ block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
       })
       .then(function () {
         if (submit) {
