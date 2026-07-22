@@ -2981,7 +2981,6 @@ function LeadInboxBody({ page }) {
                       "div",
                       { className: "adm-lead-identity" },
                       leadContactActions(lead, ui),
-                      h("code", { className: "crm-mono" }, lead.lead_id),
                       leadContext ? h("small", { className: "adm-lead-context", "data-lead-context": "true" }, leadContext) : null,
                       requestDetails ? h("small", { className: "adm-lead-context", "data-lead-request-details": "true" }, requestDetails) : null,
                       h(LeadBrief, { brief: briefByLeadId.get(lead.lead_id), intake, copy, ui, locale: page.workspace?.locale }),
@@ -3000,6 +2999,12 @@ function LeadInboxBody({ page }) {
                         h(
                           "div",
                           { className: "adm-lead-more__body" },
+                          h(
+                            "div",
+                            { className: "adm-lead-reference" },
+                            h("small", null, label(copy, "leadReference", "Internal lead reference")),
+                            h("code", { className: "crm-mono" }, lead.lead_id),
+                          ),
                           h(LeadAssignmentControl, { page, lead, copy }),
                           h(CommunicationThread, { page, thread: communicationByLeadId.get(lead.lead_id), copy, ui }),
                           h("a", { className: "adm-lead-context", href: adminHref(`/admin/activity?leadId=${encodeURIComponent(lead.lead_id)}`, page), "data-lead-history": lead.lead_id }, label(copy, "viewHistory", "History")),

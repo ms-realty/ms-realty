@@ -601,6 +601,9 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 .adm-lead-more > summary::after { content: "+"; margin-inline-start: auto; color: var(--text-muted); font-size: var(--text-lg); }
 .adm-lead-more[open] > summary::after { content: "−"; }
 .adm-lead-more__body { display: grid; gap: var(--space-2); padding-bottom: var(--space-2); }
+.adm-lead-reference { display: grid; gap: var(--space-1); min-width: 0; padding: var(--space-2) 0; }
+.adm-lead-reference small { color: var(--text-muted); font-size: var(--text-xs); }
+.adm-lead-reference code { width: max-content; max-width: 100%; overflow-wrap: anywhere; }
 @media (max-width: 760px) {
   .adm-lead-brief__summary { grid-template-columns: minmax(0, 1fr) auto; }
   .adm-lead-brief__summary::after { grid-column: 2; grid-row: 1; justify-self: end; }
@@ -1149,6 +1152,13 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .adm-route-decision__equivalence { min-height: 44px; }
   .adm-route-decision__actions { align-items: stretch; flex-direction: column; }
   .adm-route-decision__actions .mk-btn { width: 100%; min-height: 44px; justify-content: center; }
+}
+
+@media (max-width: 440px) {
+  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] { grid-template-columns: 1fr; }
+  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="sla"],
+  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="escalation_due"],
+  main[data-react-admin-ui="lead-inbox"] .crm-tbl tr[data-lead-row] td[data-lead-column="reply"] { grid-column: 1; }
 }
 
 /* Alerts sit on the canvas, not in a panel */
