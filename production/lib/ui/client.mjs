@@ -276,23 +276,65 @@ export const PUBLIC_APP_JS = `(function () {
     var sheet = document.querySelector("[data-mobile-search-filters]");
     if (!sheet) return;
     var summary = sheet.querySelector("summary");
+    var panel = sheet.querySelector("[data-mobile-filter-sheet]");
+    var wasOpen = Boolean(sheet.open);
+    var focusableSelector = "a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex='-1'])";
+    function focusableControls() {
+      if (!panel) return [];
+      return Array.prototype.filter.call(panel.querySelectorAll(focusableSelector), function (element) {
+        return !element.hidden && element.getAttribute("aria-hidden") !== "true" && element.getClientRects().length > 0;
+      });
+    }
+    function closeSheet() {
+      sheet.open = false;
+      syncSheetState();
+      if (summary) summary.focus();
+    }
     function syncSheetState() {
-      document.documentElement.classList.toggle("mobile-sheet-open", Boolean(sheet.open));
+      var isOpen = Boolean(sheet.open);
+      document.documentElement.classList.toggle("mobile-sheet-open", isOpen);
+      if (summary) summary.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      if (isOpen && !wasOpen) {
+        window.requestAnimationFrame(function () {
+          var controls = focusableControls();
+          if (controls[0]) controls[0].focus();
+          else if (panel) {
+            panel.setAttribute("tabindex", "-1");
+            panel.focus();
+          }
+        });
+      }
+      wasOpen = isOpen;
     }
     sheet.addEventListener("toggle", syncSheetState);
     sheet.addEventListener("click", function (event) {
       var close = event.target.closest("[data-mobile-filter-close]");
       if (!close) return;
       event.preventDefault();
-      sheet.open = false;
-      syncSheetState();
-      if (summary) summary.focus();
+      closeSheet();
     });
     document.addEventListener("keydown", function (event) {
-      if (event.key !== "Escape" || !sheet.open) return;
-      sheet.open = false;
-      syncSheetState();
-      if (summary) summary.focus();
+      if (!sheet.open) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSheet();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      var controls = focusableControls();
+      if (!controls.length) return;
+      var first = controls[0];
+      var last = controls[controls.length - 1];
+      if (!panel.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     });
     syncSheetState();
   }

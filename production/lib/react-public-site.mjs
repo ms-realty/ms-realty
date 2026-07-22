@@ -1019,6 +1019,8 @@ function SearchBody({ page }) {
       h("div", { className: "sr-save-disclosure__body" }, saveSearchForm(idPrefix)),
     );
   const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchDisclosure(idPrefix)];
+  const mobileFilterTitleId = `mobile-search-filters-title-${page.locale}`;
+  const mobileFilterPanelId = `mobile-search-filters-panel-${page.locale}`;
   const main = h(
     "main",
     {
@@ -1038,19 +1040,37 @@ function SearchBody({ page }) {
         { className: "sr-mobile-filters", "data-mobile-search-filters": "true", "data-mobile-filter-count": activeFilterCount },
         h(
           "summary",
-          { className: "sr-mobile-filters__summary" },
+          {
+            className: "sr-mobile-filters__summary",
+            "aria-controls": mobileFilterPanelId,
+            "aria-expanded": "false",
+          },
           h(Icon, { name: "sliders-horizontal", size: 18 }),
           h("span", { className: "sr-mobile-filters__label" }, chrome.copy.filters || labels.activeFilters),
           activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
         ),
-        h("button", { type: "button", className: "sr-mobile-filters__backdrop", "data-mobile-filter-close": "true", "aria-label": chrome.copy.close }),
+        h("button", {
+          type: "button",
+          className: "sr-mobile-filters__backdrop",
+          "data-mobile-filter-close": "true",
+          "aria-label": chrome.copy.close,
+          "aria-hidden": "true",
+          tabIndex: -1,
+        }),
         h(
           "div",
-          { className: "sr-mobile-filters__panel", "data-mobile-filter-sheet": "true" },
+          {
+            id: mobileFilterPanelId,
+            className: "sr-mobile-filters__panel",
+            "data-mobile-filter-sheet": "true",
+            role: "dialog",
+            "aria-modal": "true",
+            "aria-labelledby": mobileFilterTitleId,
+          },
           h(
             "header",
             { className: "sr-mobile-filters__sheet-head" },
-            h("h2", null, chrome.copy.filters || labels.activeFilters),
+            h("h2", { id: mobileFilterTitleId }, chrome.copy.filters || labels.activeFilters),
             h(
               "button",
               { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-mobile-filter-close": "true", "aria-label": chrome.copy.close },

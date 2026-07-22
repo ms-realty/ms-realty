@@ -286,6 +286,8 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /class="sr-results__count" role="status" aria-live="polite">\d+ matches<\/p>/);
   assert.doesNotMatch(html, /<h1>Property search \| MS Realty<small>/);
   assert.match(html, /data-mobile-filter-sheet="true"/);
+  assert.match(html, /data-mobile-filter-sheet="true" role="dialog" aria-modal="true" aria-labelledby="mobile-search-filters-title-en"/);
+  assert.match(html, /aria-controls="mobile-search-filters-panel-en" aria-expanded="false"/);
   assert.match(html, /data-mobile-filter-close="true"/);
   assert.match(html, /data-save-search-disclosure="sr-mobile"/);
   assert.match(html, /form="sr-mobile-filter-form"/);
