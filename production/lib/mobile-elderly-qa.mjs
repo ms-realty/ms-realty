@@ -248,7 +248,8 @@ export function buildMobileElderlyQaReport({
         includes(galleryListingHtml, `data-mobile-gallery-slide=\"${gallerySlideCount}\"`) &&
         !/data-fallback-src="[^"]+-72x72\./.test(galleryListingHtml) &&
         includes(publicAdapterCss, ".ld-g--desktop-extra { display: none; }") &&
-        includes(publicAdapterCss, ".ld-gallery .ld-g--desktop-extra { display: block; }"),
+        includes(publicAdapterCss, ".ld-gallery .ld-g--desktop-extra { display: block; }") &&
+        includes(publicAdapterCss, ".ld-gallery-full {\n    display: none;\n  }"),
       { listing_id: galleryListing.id, reviewed_slides: gallerySlideCount, fixture: "recovered_wordpress_originals" },
     ),
     check(

@@ -1137,24 +1137,7 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
   .ld-sec { margin-bottom: var(--space-7); }
   dl[data-listing-facts="true"] { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--space-4); }
   .ld-gallery-full {
-    display: flex;
-    margin-inline: calc(-1 * var(--gutter));
-    padding-inline: var(--gutter);
-    gap: var(--space-3);
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scroll-padding-inline: var(--gutter);
-    scroll-snap-type: inline mandatory;
-    scrollbar-width: none;
-  }
-  .ld-gallery-full img,
-  .ld-gallery-full img:first-child {
-    width: calc(100vw - 2 * var(--gutter));
-    height: auto;
-    aspect-ratio: 4 / 3;
-    flex: 0 0 calc(100vw - 2 * var(--gutter));
-    grid-column: auto;
-    scroll-snap-align: start;
+    display: none;
   }
   dialog.mk-enquiry {
     inset: auto 0 0;

@@ -97,22 +97,19 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
 test("mobile listing gallery exposes every reviewed photo and its swipe position", () => {
   const page = renderListingPage({ registry, listing, localeCode: "ru" });
   const firstImage = page.body.media.gallery[0];
-  page.body.media.gallery = [
-    firstImage,
-    { ...firstImage, url: `${firstImage.url}?preview=2` },
-    { ...firstImage, url: `${firstImage.url}?preview=3` },
-    { ...firstImage, url: `${firstImage.url}?preview=4` },
-    { ...firstImage, url: `${firstImage.url}?preview=5` },
-  ];
-  page.body.media.gallery_count = 5;
+  page.body.media.gallery = Array.from({ length: 14 }, (_, index) => ({
+    ...firstImage,
+    url: `${firstImage.url}?preview=${index + 1}`,
+  }));
+  page.body.media.gallery_count = 14;
   const html = renderReactPublicBody(page);
 
-  assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 5);
-  assert.match(html, /data-mobile-gallery-slide="5"/);
-  assert.match(html, /data-mobile-gallery-progress="true" data-gallery-total="5"/);
-  assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 5/);
+  assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 14);
+  assert.match(html, /data-mobile-gallery-slide="14"/);
+  assert.match(html, /data-mobile-gallery-progress="true" data-gallery-total="14"/);
+  assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 14/);
   assert.match(html, /role="region" aria-label="Галерея"/);
-  assert.match(html, /role="group" aria-label="5 \/ 5:/);
+  assert.match(html, /role="group" aria-label="14 \/ 14:/);
 });
 
 test("approved broker contact data enables direct listing contact links", () => {

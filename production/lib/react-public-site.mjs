@@ -1468,7 +1468,7 @@ function ListingBody({ page }) {
   const chrome = page.chrome;
   const facts = page.body.facts || {};
   const tour = page.body.media.tour || {};
-  const gallery = (page.body.media.gallery || []).slice(0, 12);
+  const gallery = page.body.media.gallery || [];
   const floorPlans = page.body.media.floor_plans || [];
   const videos = page.body.media.videos || [];
   // The desktop composition uses the first three images as a visual preview.

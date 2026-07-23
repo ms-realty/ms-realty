@@ -48,6 +48,9 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /initPublicMobileNavigation\(\);/);
   assert.match(PUBLIC_APP_JS, /function initSearchScrollRestoration/);
   assert.match(PUBLIC_APP_JS, /sessionStorage\.setItem\(SEARCH_SCROLL_KEY/);
+  assert.match(PUBLIC_APP_JS, /sessionStorage\.setItem\(SEARCH_RETURN_KEY/);
+  assert.match(PUBLIC_APP_JS, /pendingPath === currentPath/);
+  assert.match(PUBLIC_APP_JS, /restorePosition\(false\)/);
   assert.match(PUBLIC_APP_JS, /entries\[0\]\.type === "back_forward"/);
   assert.match(PUBLIC_APP_JS, /focus\(\{ preventScroll: true \}\)/);
   assert.match(PUBLIC_APP_JS, /function initDialogFocusReturn/);

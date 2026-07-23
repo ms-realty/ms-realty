@@ -11,6 +11,7 @@
   };
   var KEY = "ms-realty:saved-listings";
   var SEARCH_SCROLL_KEY = "ms-realty:search-scroll";
+  var SEARCH_RETURN_KEY = "ms-realty:search-return";
   var lastLeadTrigger = null;
   var lastContactOptionsTrigger = null;
   var toastTimer = 0;
@@ -574,6 +575,7 @@
     var searchRoot = document.querySelector("[data-search-results], [data-saved-listings-view='true']");
     if (!searchRoot) return;
     var lastListingId = null;
+    var restored = false;
     function writePosition() {
       try {
         sessionStorage.setItem(SEARCH_SCROLL_KEY, JSON.stringify({
@@ -590,6 +592,41 @@
         return value && typeof value === "object" ? value : null;
       } catch (error) { return null; }
     }
+    function pendingReturnPath() {
+      try { return sessionStorage.getItem(SEARCH_RETURN_KEY) || ""; }
+      catch (error) { return ""; }
+    }
+    function restorePosition(force) {
+      if (restored) return;
+      var currentPath = location.pathname + location.search;
+      var pendingPath = pendingReturnPath();
+      if (!force && pendingPath !== currentPath) return;
+      var saved = readPosition();
+      if (!saved || saved.path !== currentPath || Date.now() - Number(saved.savedAt || 0) > 1800000) return;
+      restored = true;
+      lastListingId = typeof saved.listingId === "string" ? saved.listingId : null;
+      try {
+        if (pendingPath === currentPath) sessionStorage.removeItem(SEARCH_RETURN_KEY);
+      } catch (error) {}
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          if (lastListingId) {
+            var cards = document.querySelectorAll("[data-search-card][data-listing-id]");
+            for (var i = 0; i < cards.length; i += 1) {
+              if (cards[i].getAttribute("data-listing-id") !== lastListingId || cards[i].hidden) continue;
+              var focusTarget = cards[i].querySelector("a[data-card-thumbnail], h2 a");
+              if (focusTarget) focusTarget.focus({ preventScroll: true });
+              break;
+            }
+          }
+          // Some WebViews ignore focus({ preventScroll: true }). Apply the
+          // recorded result position after focus so the buyer lands exactly
+          // where they left the list.
+          var maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+          window.scrollTo({ top: Math.min(maxTop, Math.max(0, Number(saved.top) || 0)), behavior: "auto" });
+        });
+      });
+    }
     document.addEventListener("click", function (event) {
       var link = event.target.closest("[data-search-card] a[href]");
       if (!link) return;
@@ -603,25 +640,9 @@
         ? window.performance.getEntriesByType("navigation")
         : [];
       var backForward = event.persisted || (entries[0] && entries[0].type === "back_forward");
-      if (!backForward) return;
-      var saved = readPosition();
-      if (!saved || saved.path !== location.pathname + location.search || Date.now() - Number(saved.savedAt || 0) > 1800000) return;
-      lastListingId = typeof saved.listingId === "string" ? saved.listingId : null;
-      window.requestAnimationFrame(function () {
-        window.requestAnimationFrame(function () {
-          var maxTop = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-          window.scrollTo({ top: Math.min(maxTop, Math.max(0, Number(saved.top) || 0)), behavior: "auto" });
-          if (!lastListingId) return;
-          var cards = document.querySelectorAll("[data-search-card][data-listing-id]");
-          for (var i = 0; i < cards.length; i += 1) {
-            if (cards[i].getAttribute("data-listing-id") !== lastListingId || cards[i].hidden) continue;
-            var focusTarget = cards[i].querySelector("a[data-card-thumbnail], h2 a");
-            if (focusTarget) focusTarget.focus({ preventScroll: true });
-            break;
-          }
-        });
-      });
+      restorePosition(Boolean(backForward));
     });
+    restorePosition(false);
   }
   function initDialogFocusReturn() {
     var enquiry = document.getElementById("mk-enquiry");
@@ -708,6 +729,10 @@
     try {
       var previous = new URL(document.referrer);
       if (previous.origin !== window.location.origin || previous.href === window.location.href) return false;
+      var fallback = new URL(link.getAttribute("href") || "", window.location.href);
+      if (previous.pathname === fallback.pathname) {
+        try { sessionStorage.setItem(SEARCH_RETURN_KEY, previous.pathname + previous.search); } catch (error) {}
+      }
       window.history.back();
       return true;
     } catch (error) {
