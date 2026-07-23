@@ -496,7 +496,7 @@ listing-status workflow that keeps sold pages live while removing them from acti
 CMS slug-history workflow that creates path-only automatic 301s to canonical listing routes,
 Payload-compatible collection config export, versioned database migrations, and locally proven real Payload/Postgres runtime,
 redacted live-service provisioning report for Typesense/Meilisearch/Hermes readiness,
-complete draft listing-quality review packet for the remaining human gallery checks,
+native one-listing-at-a-time quality sign-off plus the complete draft review packet for bulk human checks,
 listing-publication workflow that proves sitemap paths and internal-link suggestions,
 mobile/elderly QA report, a Next production runtime, and a private checksummed local backup/restore
 path with an automatic pre-restore rollback snapshot.

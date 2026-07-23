@@ -125,12 +125,14 @@ import {
 } from "./listing-publication-schedules.mjs";
 import {
   DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
+  buildListingQualityReviewQueue,
   buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   listingQualityImportSummary,
   mergeListingQualityReviewCsv,
   renderListingQualityReviewDraft,
+  renderListingQualityReviewSubmission,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
   writeListingQualityReviewCsv,
@@ -409,6 +411,13 @@ function csvInput(request, body) {
   return body || "";
 }
 
+function listingQualityReviewInput(request, body) {
+  if ((request.headers.get("content-type") || "").includes("application/json")) {
+    return { csv: renderListingQualityReviewSubmission(parseJsonBody(body)), source: "listing_quality_workbench" };
+  }
+  return { csv: csvInput(request, body), source: "listing_quality_csv" };
+}
+
 function redirectApprovalInput(input) {
   return {
     ...input,
@@ -499,6 +508,14 @@ function currentListingQualityReport(config, options = {}) {
     tourApprovals: readTourApprovals(config.tourApprovalLedgerPath),
     ...options,
   });
+}
+
+function currentListingQualityReviewQueue(config, options = {}) {
+  const report = currentListingQualityReport(config, options);
+  const reviewPath = config.listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
+  const reviewCsv = fs.existsSync(reviewPath) ? fs.readFileSync(reviewPath, "utf8") : "";
+  const reviewQueue = buildListingQualityReviewQueue(report, { reviewCsv, limit: 20 });
+  return { ...report, rows: reviewQueue.rows, review_queue: reviewQueue };
 }
 
 function auditRecordedAt(config) {
@@ -1008,7 +1025,7 @@ function migrationReviewPayload(registry, url, config) {
       workbookPath: "production/data/redirect-approval-workbook.csv",
     },
     seoEvidence: seoEvidencePayload(currentSeoEvidence(config)),
-    listingQuality: currentListingQualityReport(config, { generatedAt: config.reviewedAt, limit: 20 }),
+    listingQuality: currentListingQualityReviewQueue(config, { generatedAt: config.reviewedAt }),
     listingQualityWorkbookEndpoint: "/api/admin/listing-quality-workbook",
     listingQualityReviewDraftEndpoint: "/api/admin/listing-quality-review-draft",
     listingQualityImportEndpoint: "/api/admin/listing-quality/import",
@@ -1973,7 +1990,7 @@ function listingQualityReviewPacket(config) {
   });
 }
 
-function importListingQualityRows(inputCsv, config) {
+function importListingQualityRows(inputCsv, config, source = "listing_quality_csv") {
   const report = currentListingQualityReport(config);
   const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
   const reviewOutputPath = config.listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
@@ -2003,7 +2020,7 @@ function importListingQualityRows(inputCsv, config) {
       const edit = appendListingEdit(
         {
           ...result.edit,
-          review_source: "listing_quality_csv",
+          review_source: source,
           media_reviewer: row.media_reviewer || undefined,
           review_notes: row.review_notes || undefined,
         },
@@ -2026,8 +2043,9 @@ function importListingQualityRows(inputCsv, config) {
       action: "listing_quality_imported",
       actor: "listing_quality_editor",
       objectType: "listing_quality_review",
-      objectId: `listing-quality-${review.summary.review_rows}`,
+      objectId: review.reviews.length === 1 ? review.reviews[0].listing_id : `listing-quality-${review.summary.review_rows}`,
       metadata: {
+        source,
         imported: review.summary.review_rows,
         edited: edits.length,
         media_review_rows: review.summary.media_review_rows,
@@ -2226,7 +2244,8 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.missingRequiredSources.length ? 202 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
-      const result = importListingQualityRows(csvInput(request, await readRequestBody(request, config.maxBodyBytes)), config);
+      const input = listingQualityReviewInput(request, await readRequestBody(request, config.maxBodyBytes));
+      const result = importListingQualityRows(input.csv, config, input.source);
       return jsonResponse(result.reviewImport.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {

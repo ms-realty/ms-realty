@@ -263,7 +263,7 @@ Useful operator endpoints:
 - `GET /admin/pipeline?locale=bg|ru|en` and `GET /api/admin/pipeline` return the buyer/renter operating queue, derived from attributed qualification outcomes plus actual viewing and closed-deal ledgers.
 - `POST /api/admin/lead-pipeline/outcome` records qualification, offer/application, due-diligence/contract/lease, loss/reopen, and internal-note transitions. The authenticated principal replaces any actor supplied by the browser.
 - `POST /api/admin/public-requests/outcome` records an attributed contacted, complete, close, reopen, or note transition and appends a privacy-safe audit row. Completed and closed saved searches are suppressed from future alert reports.
-- `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench.
+- `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench. Brokers can sign off one listing at a time through the same validated, append-safe evidence path used by the bulk CSV import.
 - `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest; launch readiness still blocks until the Payload runtime dependency and config exist.
 
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.

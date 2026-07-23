@@ -116,6 +116,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.",
   ],
   listing_quality_review: [
+    "Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.",
     "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
     "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.",
   ],

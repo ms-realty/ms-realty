@@ -1236,6 +1236,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/listing-quality-review-draft",
     headers: { authorization: "Bearer local-admin-smoke" },
   });
+  const inlineQualityReview = parseCsv(completeListingQualityReviewCsv(qualityReviewDraft.body, 1))[0];
   const qualityImportUnauthorized = await dispatchHttp(app, {
     method: "POST",
     url: "/api/admin/listing-quality/import",
@@ -1247,9 +1248,9 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     url: "/api/admin/listing-quality/import",
     headers: {
       authorization: "Bearer local-admin-smoke",
-      "content-type": "text/csv",
+      "content-type": "application/json",
     },
-    body: completeListingQualityReviewCsv(qualityReviewDraft.body, 1),
+    body: inlineQualityReview,
   });
   const launchChecklistUnauthorized = await dispatchHttp(app, {
     url: "/api/admin/launch-input-checklist",
@@ -1424,6 +1425,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(readListingEdits(listingEditLedgerPath).length, 1);
   assert.deepEqual(readListingEdits(listingEditLedgerPath)[0].patch, { area_sqm: 85 });
   assert.equal(readListingEdits(listingEditLedgerPath)[0].editor, "editor_bg");
+  assert.equal(readListingEdits(listingEditLedgerPath)[0].review_source, "listing_quality_workbench");
   assert.equal(launchChecklistUnauthorized.status, 401);
   assert.equal(launchChecklist.status, 200);
   assert.equal(launchChecklist.headers["content-type"], "text/markdown; charset=utf-8");
@@ -1599,8 +1601,14 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     true,
   );
   assert.equal(reviewHtml.body.includes('data-quality-listing="true"'), true);
+  assert.equal(reviewHtml.body.includes('data-listing-quality-review-form="true"'), true);
   const auditRows = readAuditLog(auditLogPath);
   assert.equal(assertAuditLog(auditRows), true);
+  assert.equal(auditRows.find((row) => row.action === "listing_quality_imported").object_id, inlineQualityReview.listing_id);
+  assert.equal(
+    auditRows.find((row) => row.action === "listing_quality_imported").metadata.source,
+    "listing_quality_workbench",
+  );
   assert.deepEqual(actionCounts(auditRows), {
     redirect_approval_created: 2,
     listing_quality_imported: 1,

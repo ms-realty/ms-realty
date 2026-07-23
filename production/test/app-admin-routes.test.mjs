@@ -1844,6 +1844,55 @@ test("Next admin listing-quality import persists complete launch review CSV", as
   );
 });
 
+test("Next admin listing-quality workbench saves one audited review and advances the queue", async () => {
+  const listingQualityReviewPath = `${tempDir("app-admin-inline-listing-quality")}/listing-quality.csv`;
+  const listingEditLedgerPath = tempDefaultListingEdits();
+  const auditLogPath = tempJsonl("app-admin-inline-listing-quality-audit");
+  const auth = { authorization: "Bearer next-admin-test" };
+  await withEnv(
+    {
+      MS_REALTY_ADMIN_TOKEN: "next-admin-test",
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
+      MS_REALTY_LISTING_QUALITY_REVIEW_PATH: listingQualityReviewPath,
+      MS_REALTY_TRANSLATION_LEDGER_PATH: tempJsonl("app-admin-inline-listing-quality-translations"),
+    },
+    async () => {
+      const listingQualityImportRoute = await import("../../app/api/admin/listing-quality/import/route.js");
+      const listingQualityReviewDraftRoute = await import("../../app/api/admin/listing-quality-review-draft/route.js");
+      const migrationReviewHtmlRoute = await import("../../app/admin/migration/review/route.js");
+      const draft = await listingQualityReviewDraftRoute.GET(
+        new Request("https://example.test/api/admin/listing-quality-review-draft", { headers: auth }),
+      );
+      const review = parseCsv(completeListingQualityReviewCsv(await draft.text(), 1))[0];
+
+      const imported = await listingQualityImportRoute.POST(
+        new Request("https://example.test/api/admin/listing-quality/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify(review),
+        }),
+      );
+      const importedBody = await imported.json();
+      const page = await migrationReviewHtmlRoute.GET(
+        new Request("https://example.test/admin/migration/review?locale=en", { headers: auth }),
+      );
+      const html = await page.text();
+      const audit = readAuditLog(auditLogPath).find((row) => row.action === "listing_quality_imported");
+
+      assert.equal(imported.status, 202);
+      assert.equal(importedBody.imported, 1);
+      assert.equal(importedBody.reviewPersisted, true);
+      assert.equal(importedBody.edits[0].edit.review_source, "listing_quality_workbench");
+      assert.equal(audit.object_id, review.listing_id);
+      assert.equal(audit.metadata.source, "listing_quality_workbench");
+      assert.match(html, /data-listing-quality-review-form="true"/);
+      assert.match(html, /data-quality-pending-listings="164"/);
+      assert.equal(html.includes(`data-quality-listing-id="${review.listing_id}"`), false);
+    },
+  );
+});
+
 test("Next admin listing-quality import persists complete review for mounted listing edits", async () => {
   const listingQualityReviewPath = `${tempDir("app-admin-mounted-listing-quality")}/listing-quality.csv`;
   const listingEditLedgerPath = tempDefaultListingEdits();

@@ -115,6 +115,15 @@ const ADMIN_UI_COPY = {
     downloadQualityWorkbook: "Изтегли таблицата за качество",
     downloadQualityDraft: "Изтегли черновата за проверка",
     importQualityCsv: "Импортирай CSV за качество",
+    reviewListing: "Прегледай обявата",
+    factsReviewer: "Проверил данните",
+    mediaReviewer: "Проверил медиите",
+    reviewNotes: "Бележки и източник на проверката",
+    reviewNotesHint: "Опишете как данните и медиите са проверени.",
+    saveListingReview: "Запази проверката",
+    listingReviewSaving: "Записване на проверката…",
+    listingReviewSaved: "Проверката е записана.",
+    listingReviewFailed: "Проверката не беше записана.",
     issue: "Проблем",
     issues: "Проблеми",
     listing: "Обява",
@@ -360,6 +369,15 @@ const ADMIN_UI_COPY = {
     downloadQualityWorkbook: "Скачать таблицу качества",
     downloadQualityDraft: "Скачать черновик проверки",
     importQualityCsv: "Импортировать CSV качества",
+    reviewListing: "Проверить объект",
+    factsReviewer: "Проверил данные",
+    mediaReviewer: "Проверил медиа",
+    reviewNotes: "Заметки и источник проверки",
+    reviewNotesHint: "Опишите, как были проверены данные и медиа.",
+    saveListingReview: "Сохранить проверку",
+    listingReviewSaving: "Сохраняем проверку…",
+    listingReviewSaved: "Проверка сохранена.",
+    listingReviewFailed: "Не удалось сохранить проверку.",
     issue: "Проблема",
     issues: "Проблемы",
     listing: "Объект",
@@ -605,6 +623,15 @@ const ADMIN_UI_COPY = {
     downloadQualityWorkbook: "Download listing quality workbook",
     downloadQualityDraft: "Download listing quality review draft",
     importQualityCsv: "Import listing quality CSV",
+    reviewListing: "Review listing",
+    factsReviewer: "Facts reviewer",
+    mediaReviewer: "Media reviewer",
+    reviewNotes: "Review notes and source",
+    reviewNotesHint: "Describe how the listing facts and media were verified.",
+    saveListingReview: "Save review",
+    listingReviewSaving: "Saving listing review…",
+    listingReviewSaved: "Listing review recorded.",
+    listingReviewFailed: "Could not record the listing review.",
     issue: "Issue",
     issues: "Issues",
     listing: "Listing",
@@ -4640,6 +4667,130 @@ function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
   );
 }
 
+const LISTING_FACT_REVIEW_FIELDS = new Set(["price_eur", "area_sqm", "bedrooms", "location", "description"]);
+const LISTING_MEDIA_REVIEW_FIELDS = new Set(["media_review", "media_alt_text", "public_gallery", "tour_review"]);
+
+function ListingQualityReviewDecision({ page, row, ui }) {
+  const copy = adminCopy(page);
+  const operatorId = currentOperatorId(page, "listing_quality_editor");
+  const factFields = row.required_editor_fields.filter((field) => LISTING_FACT_REVIEW_FIELDS.has(field));
+  const mediaFields = row.required_editor_fields.filter((field) => LISTING_MEDIA_REVIEW_FIELDS.has(field));
+  const snapshots = {
+    listing_id: row.listing_id,
+    editor_path: row.editor_path,
+    review_status: row.review_status,
+    issues: row.issues,
+    required_editor_fields: row.required_editor_fields,
+    public_gallery_assets: row.public_gallery_assets,
+    public_gallery_sample: row.public_gallery_sample,
+    missing_alt_text_assets: row.missing_alt_text_assets,
+  };
+  return h(
+    "li",
+    { className: "adm-route-decision", "data-quality-listing": "true", "data-quality-listing-id": row.listing_id },
+    h(
+      "details",
+      { className: "adm-route-decision__disclosure" },
+      h(
+        "summary",
+        { className: "adm-route-decision__header" },
+        h(
+          "span",
+          { className: "adm-route-decision__summary" },
+          h("code", { className: "crm-mono" }, row.listing_id),
+          h("small", null, row.title),
+        ),
+        h(
+          "span",
+          { className: "adm-route-decision__meta" },
+          h(StatusPill, { tone: "sun" }, row.source_locale.toUpperCase()),
+          h("span", null, `${row.issues.length} ${ui.issues.toLocaleLowerCase()}`),
+        ),
+      ),
+      h(
+        "section",
+        { className: "adm-route-evidence", "aria-label": ui.reviewListing },
+        h(
+          "dl",
+          { className: "adm-route-evidence__facts" },
+          h("div", null, h("dt", null, ui.location), h("dd", null, row.location || statusText(ui, "missing"))),
+          h("div", null, h("dt", null, ui.publicPhotos), h("dd", null, row.public_gallery_assets)),
+          h("div", null, h("dt", null, ui.missingAlt), h("dd", null, row.missing_alt_text_assets)),
+          h(
+            "div",
+            null,
+            h("dt", null, ui.issues),
+            h("dd", null, row.issues.map((issue) => listingQualityIssueText(ui, issue)).join(", ")),
+          ),
+        ),
+        h(
+          "a",
+          { className: "mk-btn mk-btn--subtle mk-btn--sm adm-route-evidence__open", href: adminHref(row.editor_path, page) },
+          h(Icon, { name: "pencil", size: 16 }),
+          h("span", null, label(copy, "editListing", "Edit listing")),
+        ),
+      ),
+      h(
+        "form",
+        {
+          method: "post",
+          action: page.listingQualityImportEndpoint,
+          className: "adm-route-decision__form",
+          "data-listing-quality-review-form": "true",
+          "data-admin-mutation-form": "true",
+          "data-admin-mutation-saving": ui.listingReviewSaving,
+          "data-admin-mutation-success": ui.listingReviewSaved,
+          "data-admin-mutation-failure": ui.listingReviewFailed,
+        },
+        ...Object.entries(snapshots).map(([name, value]) =>
+          h("input", { key: name, type: "hidden", name, value: Array.isArray(value) ? value.join("|") : value }),
+        ),
+        ...factFields.map((field) =>
+          h(
+            "label",
+            { key: field, className: field === "description" ? "adm-route-decision__reason" : undefined },
+            fieldText(ui, field),
+            field === "description"
+              ? h("textarea", { name: field, rows: 3, defaultValue: row[field] || "", required: true })
+              : h("input", {
+                  name: field,
+                  type: ["price_eur", "area_sqm", "bedrooms"].includes(field) ? "number" : "text",
+                  min: ["price_eur", "area_sqm"].includes(field) ? "0.01" : field === "bedrooms" ? "0" : undefined,
+                  step: field === "bedrooms" ? "1" : ["price_eur", "area_sqm"].includes(field) ? "0.01" : undefined,
+                  inputMode: field === "bedrooms" ? "numeric" : ["price_eur", "area_sqm"].includes(field) ? "decimal" : undefined,
+                  defaultValue: row[field] ?? "",
+                  required: true,
+                }),
+          ),
+        ),
+        factFields.length
+          ? h("label", null, ui.factsReviewer, h("input", { name: "facts_reviewer", defaultValue: operatorId, required: true, autoComplete: "name" }))
+          : null,
+        mediaFields.length
+          ? h("label", null, ui.mediaReviewer, h("input", { name: "media_reviewer", defaultValue: operatorId, required: true, autoComplete: "name" }))
+          : null,
+        h(
+          "label",
+          { className: "adm-route-decision__reason" },
+          ui.reviewNotes,
+          h("textarea", { name: "review_notes", rows: 3, required: true, placeholder: ui.reviewNotesHint }),
+        ),
+        h(
+          "div",
+          { className: "adm-route-decision__actions" },
+          h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h(
+            "button",
+            { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+            h(Icon, { name: "circle-check", size: 16 }),
+            h("span", null, ui.saveListingReview),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function MigrationReviewBody({ page }) {
   const copy = adminCopy(page);
   const ui = workbenchCopy(page);
@@ -4950,11 +5101,13 @@ function MigrationReviewBody({ page }) {
           "data-quality-review-draft-endpoint": page.listingQualityReviewDraftEndpoint,
           "data-quality-import-endpoint": page.listingQualityImportEndpoint,
           "data-quality-affected-listings": page.listingQuality?.summary?.affected_listings || 0,
+          "data-quality-reviewed-listings": page.listingQuality?.review_queue?.summary?.review_rows || 0,
+          "data-quality-pending-listings": page.listingQuality?.review_queue?.summary?.pending_review_rows || 0,
         },
         h(
           WorkbenchDisclosure,
           {
-            summary: `${ui.openQualityQueue} · ${page.listingQuality?.summary?.affected_listings || 0}`,
+            summary: `${ui.openQualityQueue} · ${page.listingQuality?.review_queue?.summary?.pending_review_rows ?? page.listingQuality?.summary?.affected_listings ?? 0}`,
             "data-quality-tools-disclosure": "true",
           },
         h(
@@ -4969,47 +5122,18 @@ function MigrationReviewBody({ page }) {
           h("textarea", { name: "csv", rows: "5", required: true }),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.importQualityCsv)),
         ),
-        h("p", { className: "adm-note" }, `${ui.issues}: ${JSON.stringify(page.listingQuality?.summary?.issue_counts || {})}`),
-        h(
-          "div",
-          { className: "adm-scroll-x" },
-          h(
-            "table",
-            { className: "crm-tbl" },
-            h(
-              "thead",
-              null,
-              h(
-                "tr",
-                null,
-                h("th", null, ui.listing),
-                h("th", null, ui.locale),
-                h("th", null, ui.location),
-                h("th", null, ui.issues),
-                h("th", null, ui.publicPhotos),
-                h("th", null, ui.missingAlt),
-                h("th", null, ui.reviewGatedMedia),
+        page.listingQuality?.review_queue?.error
+          ? h("p", { className: "adm-inline-alert", role: "alert" }, page.listingQuality.review_queue.error)
+          : null,
+        (page.listingQuality?.rows || []).length
+          ? h(
+              "ol",
+              { className: "adm-route-decisions", "data-listing-quality-review-queue": "true" },
+              ...page.listingQuality.rows.map((row) =>
+                h(ListingQualityReviewDecision, { key: row.listing_id, page, row, ui }),
               ),
-            ),
-            h(
-              "tbody",
-              null,
-              ...(page.listingQuality?.rows || []).map((row) =>
-                h(
-                  "tr",
-                  { key: row.listing_id, "data-quality-listing": "true" },
-                  h("td", null, h("a", { className: "crm-tbl__primary", href: row.editor_path }, row.listing_id)),
-                  h("td", null, h("span", { className: "crm-lang" }, row.source_locale)),
-                  h("td", { className: "crm-tbl__muted" }, row.location || statusText(ui, "missing")),
-                  h("td", null, row.issues.join(", ")),
-                  h("td", { className: "adm-num" }, row.public_gallery_assets),
-                  h("td", { className: "adm-num" }, row.missing_alt_text_assets),
-                  h("td", { className: "adm-num" }, row.review_gated_assets),
-                ),
-              ),
-            ),
-          ),
-        ),
+            )
+          : h("p", { className: "adm-empty", "data-empty-listing-quality-review": "true" }, ui.noReportData),
         ),
       ),
       h(

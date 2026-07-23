@@ -446,6 +446,7 @@
         ]
       },
       "next_actions": [
+        "Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.",
         "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
         "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight."
       ]
@@ -587,7 +588,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-23T00:59:28.811Z",
+              "generated_at": "2026-07-23T00:32:23.154Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,

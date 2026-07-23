@@ -12,12 +12,14 @@ import {
   assertListingQualityPreflightReport,
   assertListingQualityReviewPacket,
   assertListingQualityReport,
+  buildListingQualityReviewQueue,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   buildListingQualityReviewPacket,
   listingQualityImportSummary,
   mergeListingQualityReviewCsv,
   renderListingQualityReviewDraft,
+  renderListingQualityReviewSubmission,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
   writeListingQualityReviewPacket,
@@ -489,6 +491,25 @@ test("listing quality review CSV preflight validates reviewer fixes without appl
       ),
     /draft instructions/,
   );
+});
+
+test("listing quality workbench submission reuses the validated review queue", () => {
+  const report = buildListingQualityReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const row = report.rows[0];
+  const review = parseCsv(completeListingQualityReviewCsv({ ...report, rows: [row] }))[0];
+  review.review_notes = "Verified legacy source, listing facts, and media evidence.\nSecond human-review note.";
+
+  const csv = renderListingQualityReviewSubmission(review);
+  const validation = validateListingQualityReviewCsv(report, csv, { requireSnapshots: true });
+  const queue = buildListingQualityReviewQueue(report, { reviewCsv: csv, limit: 10 });
+
+  assert.equal(parseCsv(csv).length, 1);
+  assert.equal(validation.reviews[0].listing_id, row.listing_id);
+  assert.equal(queue.status, "in_progress");
+  assert.equal(queue.summary.review_rows, 1);
+  assert.equal(queue.summary.pending_review_rows, report.rows.length - 1);
+  assert.equal(queue.rows.length, 10);
+  assert.ok(queue.rows.every((candidate) => candidate.listing_id !== row.listing_id));
 });
 
 test("listing quality review CSV can ignore rows outside the current report for readiness", () => {

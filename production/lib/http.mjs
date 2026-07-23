@@ -168,12 +168,14 @@ import { loadCmsCollections } from "./cms-seed.mjs";
 import { loadPayloadCollections } from "./payload-collections.mjs";
 import {
   DEFAULT_LISTING_QUALITY_REVIEW_INPUT,
+  buildListingQualityReviewQueue,
   buildListingQualityReviewPacket,
   buildListingQualityPreflightReport,
   buildListingQualityReport,
   listingQualityImportSummary,
   mergeListingQualityReviewCsv,
   renderListingQualityReviewDraft,
+  renderListingQualityReviewSubmission,
   renderListingQualityWorkbook,
   validateListingQualityReviewCsv,
   writeListingQualityReviewCsv,
@@ -303,6 +305,13 @@ function csvInput(request) {
   const contentType = request.headers?.["content-type"] || request.headers?.["Content-Type"] || "";
   if (contentType.includes("application/x-www-form-urlencoded")) return parseBody(request).csv || "";
   return request.body || "";
+}
+
+function listingQualityReviewInput(request) {
+  if ((request.headers?.["content-type"] || request.headers?.["Content-Type"] || "").includes("application/json")) {
+    return { csv: renderListingQualityReviewSubmission(parseJsonBody(request)), source: "listing_quality_workbench" };
+  }
+  return { csv: csvInput(request), source: "listing_quality_csv" };
 }
 
 function seoExportInput(request, url) {
@@ -521,6 +530,13 @@ export function createHttpApp({
       tourApprovals: readTourApprovals(tourApprovalLedgerPath || undefined),
       ...options,
     });
+  const currentListingQualityReviewQueue = (options = {}) => {
+    const report = currentListingQualityReport(options);
+    const reviewPath = listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
+    const reviewCsv = fs.existsSync(reviewPath) ? fs.readFileSync(reviewPath, "utf8") : "";
+    const reviewQueue = buildListingQualityReviewQueue(report, { reviewCsv, limit: 20 });
+    return { ...report, rows: reviewQueue.rows, review_queue: reviewQueue };
+  };
   const currentViewingData = () => {
     const viewings = readViewings(viewingLedgerPath || undefined);
     return {
@@ -1213,7 +1229,7 @@ export function createHttpApp({
         routeMap,
         readRedirectApprovals(redirectApprovalPath || undefined),
         currentSeoEvidence(),
-        currentListingQualityReport({ generatedAt: listingQualityGeneratedAt, limit: 20 }),
+        currentListingQualityReviewQueue({ generatedAt: listingQualityGeneratedAt }),
         currentLaunchReadiness(),
       );
       return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1229,7 +1245,7 @@ export function createHttpApp({
         routeMap,
         approvals,
         currentSeoEvidence(),
-        currentListingQualityReport({ generatedAt: listingQualityGeneratedAt, limit: 20 }),
+        currentListingQualityReviewQueue({ generatedAt: listingQualityGeneratedAt }),
         currentLaunchReadiness(),
       );
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1588,7 +1604,8 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const inputCsv = csvInput(request);
+        const input = listingQualityReviewInput(request);
+        const inputCsv = input.csv;
         const report = currentListingQualityReport();
         const review = validateListingQualityReviewCsv(report, inputCsv, { requireSnapshots: true });
         const reviewOutputPath = listingQualityReviewPath || DEFAULT_LISTING_QUALITY_REVIEW_INPUT;
@@ -1618,7 +1635,7 @@ export function createHttpApp({
             const edit = appendListingEdit(
               {
                 ...result.edit,
-                review_source: "listing_quality_csv",
+                review_source: input.source,
                 media_reviewer: row.media_reviewer || undefined,
                 review_notes: row.review_notes || undefined,
               },
@@ -1640,8 +1657,9 @@ export function createHttpApp({
           action: "listing_quality_imported",
           actor: "listing_quality_editor",
           objectType: "listing_quality_review",
-          objectId: `listing-quality-${review.summary.review_rows}`,
+          objectId: review.reviews.length === 1 ? review.reviews[0].listing_id : `listing-quality-${review.summary.review_rows}`,
           metadata: {
+            source: input.source,
             imported: review.summary.review_rows,
             edited: edits.length,
             media_review_rows: review.summary.media_review_rows,

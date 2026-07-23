@@ -331,6 +331,10 @@ function renderListingQualityReviewRows(rows) {
   ].join("\n")}\n`;
 }
 
+export function renderListingQualityReviewSubmission(input) {
+  return renderListingQualityReviewRows([input]);
+}
+
 function uniqueListingQualityReviewRows(csvText, label) {
   if (!String(csvText || "").trim()) return [];
   const seen = new Set();
@@ -604,6 +608,36 @@ export function validateListingQualityReviewCsv(
       facts_review_rows: reviews.filter((row) => row.fact_issues > 0).length,
       media_review_rows: reviews.filter((row) => row.media_issues > 0).length,
     },
+  };
+}
+
+export function buildListingQualityReviewQueue(report, { reviewCsv = "", limit = 20 } = {}) {
+  let validation = null;
+  let error = "";
+  if (String(reviewCsv).trim()) {
+    try {
+      validation = validateListingQualityReviewCsv(report, reviewCsv, {
+        allowExtraRows: true,
+        allowResolvedSnapshots: true,
+        requireSnapshots: true,
+      });
+    } catch (cause) {
+      error = cause.message;
+    }
+  }
+  const reviewed = new Set((validation?.reviews || []).map((row) => row.listing_id));
+  const pending = report.rows.filter((row) => !reviewed.has(row.listing_id));
+  const pageSize = Number.isInteger(limit) && limit > 0 ? limit : pending.length;
+  return {
+    status: error ? "invalid_review" : pending.length ? (reviewed.size ? "in_progress" : "not_started") : "ready",
+    error,
+    summary: {
+      expected_review_rows: report.rows.length,
+      review_rows: reviewed.size,
+      pending_review_rows: pending.length,
+      visible_review_rows: Math.min(pageSize, pending.length),
+    },
+    rows: pending.slice(0, pageSize),
   };
 }
 

@@ -11,6 +11,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - redirect_reviews: Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import.
 - external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
 - external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
+- listing_quality_review: Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.
 - listing_quality_review: Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.
 - listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.
 - live_services: Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.
