@@ -3,7 +3,7 @@
 Generated: 2026-07-05T00:00:00Z
 
 Status: blocked
-Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, payload_runtime
+Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime
 
 ## Blocked Gate Actions
 
@@ -15,6 +15,8 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - listing_quality_review: Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.
 - live_services: Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.
 - live_services: Import or mount the three live service reports, then run npm run live:preflight before launch.
+- monitoring_rollback: Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.
+- monitoring_rollback: Confirm rollback steps cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
 - payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
 

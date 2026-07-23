@@ -126,7 +126,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Fix any failing route status evidence before launch readiness is rebuilt.",
   ],
   monitoring_rollback: [
-    "Import privacy-safe monitoring evidence through the launch input checklist.",
+    "Import Search Console, Yandex Webmaster, and backlink evidence for post-launch monitoring.",
     "Confirm rollback steps cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.",
   ],
   production_app_layer: [
@@ -790,8 +790,12 @@ function assertPassMonitoringRollbackEvidence(report) {
   const monitoring = gateById(report, "monitoring_rollback");
   if (monitoring?.status !== "pass") return;
   const sources = new Set(monitoring.evidence?.monitoring_sources || []);
+  const sourceStatuses = monitoring.evidence?.monitoring_source_statuses || {};
   for (const source of ["privacy_events", "search_console", "yandex_webmaster", "backlinks"]) {
     if (!sources.has(source)) throw new Error("Launch readiness monitoring rollback requires source evidence");
+    if (sourceStatuses[source] !== "imported") {
+      throw new Error("Launch readiness monitoring rollback requires imported source evidence");
+    }
   }
   if (
     monitoring.evidence?.privacy_events_status !== "imported" ||
@@ -1156,7 +1160,7 @@ export function buildLaunchReadinessReport({
     "Republish previous sitemap and robots files if indexable route coverage regresses.",
     "Use migration review queue owners to triage failed old URLs before broad redirects.",
   ];
-  const monitoringReady = monitoringPlan.every((item) => item.source && item.status);
+  const monitoringReady = monitoringPlan.every((item) => item.status === "imported");
   const rollbackReady = rollbackPlan.length >= 3;
   const expectedSitemapEntries =
     sitemap.summary.home_pages +
@@ -1252,6 +1256,7 @@ export function buildLaunchReadinessReport({
       monitoringReady && rollbackReady ? "pass" : "blocked",
       {
         monitoring_sources: monitoringPlan.map((item) => item.source),
+        monitoring_source_statuses: Object.fromEntries(monitoringPlan.map((item) => [item.source, item.status])),
         privacy_events_status: monitoringPlan.find((item) => item.source === "privacy_events")?.status,
         rollback_steps: rollbackPlan.length,
       },

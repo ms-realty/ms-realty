@@ -613,7 +613,14 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
-  assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
+  assert.deepEqual(report.blockers, [
+    "redirect_reviews",
+    "external_seo_exports",
+    "listing_quality_review",
+    "live_services",
+    "monitoring_rollback",
+    "payload_runtime",
+  ]);
   const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
   assert.equal(redirectGate.status, "blocked");
   assert.deepEqual(redirectGate.evidence, {
@@ -669,12 +676,19 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.match(liveGate.next_actions.join(" "), /npm run live:preflight/);
   assert.equal(report.live_services.every((item) => item.status === "missing_report"), true);
   assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
-  for (const id of ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]) {
+  for (const id of [
+    "redirect_reviews",
+    "external_seo_exports",
+    "listing_quality_review",
+    "live_services",
+    "monitoring_rollback",
+    "payload_runtime",
+  ]) {
     const blockedGate = report.gates.find((gate) => gate.id === id);
     assert.ok(blockedGate.next_actions.length > 0);
   }
   assert.ok(report.gates.find((gate) => gate.id === "redirect_reviews").next_actions.length > 0);
-  assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "pass");
+  assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
   assert.deepEqual(report.warnings.find((warning) => warning.id === "listing_quality.thin_public_gallery"), {
     id: "listing_quality.thin_public_gallery",
     count: 18,
@@ -684,7 +698,14 @@ test("launch readiness stays blocked until production launch blockers are cleare
   const publicPayload = publicLaunchReadinessPayload(report);
   assert.deepEqual(
     publicPayload.blocked_gates.map((gate) => gate.id),
-    ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"],
+    [
+      "redirect_reviews",
+      "external_seo_exports",
+      "listing_quality_review",
+      "live_services",
+      "monitoring_rollback",
+      "payload_runtime",
+    ],
   );
   assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Typesense\/Meilisearch/);
   assert.equal("next_actions" in publicPayload.blocked_gates.find((gate) => gate.id === "live_services"), false);
@@ -1216,11 +1237,14 @@ test("launch readiness validator rejects weak production app layer pass evidence
 });
 
 test("launch readiness validator rejects weak monitoring rollback pass evidence", () => {
-  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildLaunchReadinessReport({
+    generatedAt: "2026-07-05T00:00:00Z",
+    seoEvidence: readySeoEvidenceFixture(),
+  });
   const monitoringGate = report.gates.find((gate) => gate.id === "monitoring_rollback");
-  monitoringGate.evidence.privacy_events_status = "missing";
+  monitoringGate.evidence.monitoring_source_statuses.search_console = "missing_export";
 
-  assert.throws(() => assertLaunchReadinessReport(report), /privacy monitoring and rollback evidence/);
+  assert.throws(() => assertLaunchReadinessReport(report), /imported source evidence/);
 });
 
 test("launch readiness validator rejects weak listing quality pass evidence", () => {
@@ -1355,7 +1379,14 @@ test("launch readiness build honors output path override", () => {
   assert.ok(result.stdout.includes(`Wrote launch readiness report to ${outputPath}`));
   const report = JSON.parse(fs.readFileSync(outputPath, "utf8"));
   assert.equal(assertLaunchReadinessReport(report), true);
-  assert.deepEqual(report.blockers, ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "payload_runtime"]);
+  assert.deepEqual(report.blockers, [
+    "redirect_reviews",
+    "external_seo_exports",
+    "listing_quality_review",
+    "live_services",
+    "monitoring_rollback",
+    "payload_runtime",
+  ]);
 });
 
 test("local readiness materializer promotes only fresh local Payload proof and preserves external blockers", async () => {
@@ -1392,7 +1423,14 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   assert.equal(result.outPath, outputPath);
   assert.equal(assertLaunchReadinessReport(result.report), true);
   assert.equal(result.report.launch_ready, false);
-  assert.deepEqual(result.report.blockers, ["redirect_reviews", "external_seo_exports", "listing_quality_review", "live_services", "local_preview_only"]);
+  assert.deepEqual(result.report.blockers, [
+    "redirect_reviews",
+    "external_seo_exports",
+    "listing_quality_review",
+    "live_services",
+    "monitoring_rollback",
+    "local_preview_only",
+  ]);
   assert.equal(result.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
   assert.equal(result.report.gates.find((gate) => gate.id === "local_preview_only").status, "blocked");
   assert.deepEqual(
@@ -1434,7 +1472,10 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, listing_quality_review, live_services, payload_runtime/);
+  assert.match(
+    result.stderr,
+    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime/,
+  );
   assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
   assert.match(result.stderr, /typesense_meilisearch_sync: missing_report .*search-engine-sync-report\.json/);
@@ -1469,7 +1510,10 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(withReviewPath.status, 0);
-  assert.match(withReviewPath.stderr, /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, live_services, payload_runtime/);
+  assert.match(
+    withReviewPath.stderr,
+    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, live_services, monitoring_rollback, payload_runtime/,
+  );
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
 
