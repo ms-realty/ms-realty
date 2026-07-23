@@ -203,7 +203,8 @@ export function buildMobileElderlyQaReport({
         (englishHome.match(/data-mobile-footer-group=/g) || []).length === 3 &&
         includes(publicAdapterCss, ".site-ft__desktop-links { display: none; }") &&
         includes(publicAdapterCss, ".site-ft__mobile-group > summary") &&
-        includes(publicAdapterCss, "min-height: 52px;"),
+        includes(publicAdapterCss, "min-height: 52px;") &&
+        includes(publicAdapterCss, ".site-ft__bar-in nav a { min-width: 44px; justify-content: center; }"),
     ),
     check(
       "narrow_mobile_search_action",
