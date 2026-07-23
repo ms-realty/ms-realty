@@ -868,6 +868,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "production_recovery",
   ]);
   assert.equal(smoke.ready.status, 503);
   assert.equal(smoke.ready.body.status, "blocked");
@@ -880,6 +881,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
       "live_services",
       "monitoring_rollback",
       "payload_runtime",
+      "production_recovery",
     ],
   );
   assert.equal(smoke.ready.headers["cache-control"], "no-store");
@@ -2021,7 +2023,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(reviewHtml.body.includes('data-seo-template-endpoint="/api/admin/seo-evidence/template"'), true);
   assert.equal(launchUnauthorized.status, 401);
   assert.equal(launch.status, 200);
-  assert.deepEqual(launch.body.blockers, ["redirect_reviews", "listing_quality_review", "live_services", "payload_runtime"]);
+  assert.deepEqual(launch.body.blockers, [
+    "redirect_reviews",
+    "listing_quality_review",
+    "live_services",
+    "payload_runtime",
+    "production_recovery",
+  ]);
   assert.equal(launch.body.gates.find((gate) => gate.id === "external_seo_exports").status, "pass");
   assert.equal(launch.body.gates.find((gate) => gate.id === "listing_quality_review").status, "blocked");
   assert.equal(launch.body.gates.find((gate) => gate.id === "live_services").status, "blocked");
@@ -2034,6 +2042,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
     "listing_quality_review",
     "live_services",
     "payload_runtime",
+    "production_recovery",
   ]);
   assert.equal(liveTemplateUnauthorized.status, 401);
   assert.equal(liveTemplate.status, 200);
@@ -2086,7 +2095,7 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(hermesWorkerReportPath), true);
   assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
-  assert.deepEqual(launchAfterLive.body.blockers, ["redirect_reviews", "listing_quality_review"]);
+  assert.deepEqual(launchAfterLive.body.blockers, ["redirect_reviews", "listing_quality_review", "production_recovery"]);
   assert.equal(launchAfterLive.body.status, "blocked");
 });
 

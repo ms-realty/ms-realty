@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "example": true,
+  "generated_at": "2026-07-23T01:00:00.000Z",
+  "environment": "production",
+  "ready": false,
+  "policy": {
+    "provider": "replace-with-backup-provider",
+    "offsite": true,
+    "encrypted_at_rest": true,
+    "encrypted_in_transit": true,
+    "retention_days": 30,
+    "rpo_hours": 24,
+    "rto_hours": 8
+  },
+  "backup": {
+    "backup_id": "replace-with-provider-backup-id",
+    "completed_at": "2026-07-22T23:00:00.000Z",
+    "checksum_verified": true,
+    "components": [
+      "payload_postgres",
+      "runtime_data",
+      "runtime_evidence"
+    ]
+  },
+  "restore_drill": {
+    "drill_id": "replace-with-restore-drill-id",
+    "source_backup_id": "replace-with-provider-backup-id",
+    "completed_at": "2026-07-22T23:15:00.000Z",
+    "target": "isolated",
+    "status": "pass",
+    "checksum_verified": true,
+    "rollback_procedure_verified": true,
+    "components_verified": [
+      "payload_postgres",
+      "runtime_data",
+      "runtime_evidence"
+    ],
+    "operator": "replace-with-operator"
+  },
+  "approval": {
+    "status": "approved",
+    "reviewer": "replace-with-reviewer",
+    "approved_at": "2026-07-22T23:30:00.000Z"
+  }
+}

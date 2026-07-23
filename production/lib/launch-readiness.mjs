@@ -21,6 +21,7 @@ import {
   assertProductionDatabaseHost,
   DEFAULT_PAYLOAD_RUNTIME_REPORT,
 } from "./payload-runtime.mjs";
+import { assertProductionRecoveryReport, productionRecoveryState } from "./production-recovery.mjs";
 import {
   REQUIRED_EXPORTS,
   assertSeoEvidence,
@@ -91,6 +92,7 @@ const REQUIRED_LAUNCH_GATE_IDS = [
   "monitoring_rollback",
   "production_app_layer",
   "payload_runtime",
+  "production_recovery",
 ];
 const BLOCKED_GATE_NEXT_ACTIONS = {
   crawl_inventory: [
@@ -136,6 +138,10 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   payload_runtime: [
     "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
     "Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.",
+  ],
+  production_recovery: [
+    "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
+    "Fill production/data/production-recovery-report.json from the example, then run npm run launch:preflight.",
   ],
 };
 
@@ -806,6 +812,11 @@ function assertPassMonitoringRollbackEvidence(report) {
   }
 }
 
+function assertPassProductionRecoveryEvidence(report) {
+  const recovery = gateById(report, "production_recovery");
+  if (recovery?.status === "pass") assertProductionRecoveryReport(recovery.evidence?.report);
+}
+
 function warningsFrom(structuredData, listingQuality) {
   const warnings = {
     ...Object.fromEntries(
@@ -1113,6 +1124,7 @@ export function buildLaunchReadinessReport({
   liveServiceProvisioning = liveServiceProvisioningState(),
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(),
+  productionRecovery = productionRecoveryState(),
 } = {}) {
   assertSeoEvidence(seoEvidence);
   const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);
@@ -1148,6 +1160,7 @@ export function buildLaunchReadinessReport({
   const liveServicesReady = liveServices.every((item) => item.status === "pass") && liveServiceProvisioning.status === "pass";
   const appLayerReady = appState.production_server_entrypoint && appState.start_script === "node production/server.mjs";
   const payloadRuntimeReady = payloadRuntime.status === "pass";
+  const productionRecoveryReady = productionRecovery.status === "pass";
   const monitoringPlan = [
     { source: "privacy_events", status: seoEvidence.summary.sources.privacy_events.status },
     { source: "search_console", status: seoEvidence.summary.sources.search_console.status },
@@ -1276,6 +1289,14 @@ export function buildLaunchReadinessReport({
         ? "Payload runtime report proves config, routes, env, and database reachability."
         : "Payload runtime report must pass before final production readiness.",
     ),
+    gate(
+      "production_recovery",
+      productionRecoveryReady ? "pass" : "blocked",
+      productionRecovery,
+      productionRecoveryReady
+        ? "Encrypted off-site backup and isolated restore evidence passed."
+        : "Encrypted off-site backup and isolated production restore evidence are required before launch.",
+    ),
   ];
 
   const blockers = blockersFrom(gates);
@@ -1319,6 +1340,7 @@ export function assertLaunchReadinessReport(report) {
   assertPassRuntimeEvidence(report);
   assertPassAppLayerEvidence(report);
   assertPassMonitoringRollbackEvidence(report);
+  assertPassProductionRecoveryEvidence(report);
   if (report.launch_ready && !report.monitoring_plan.some((item) => item.source === "privacy_events" && item.status === "imported")) {
     throw new Error("Launch readiness must include privacy analytics monitoring");
   }

@@ -421,6 +421,49 @@ const readyPayloadRuntime = {
     },
   ],
 };
+const readyProductionRecovery = {
+  status: "pass",
+  path: "production/data/production-recovery-report.json",
+  report: {
+    schema_version: 1,
+    generated_at: "2026-07-05T00:00:00.000Z",
+    environment: "production",
+    ready: true,
+    policy: {
+      provider: "eu-backup-provider",
+      offsite: true,
+      encrypted_at_rest: true,
+      encrypted_in_transit: true,
+      retention_days: 30,
+      rpo_hours: 24,
+      rto_hours: 8,
+    },
+    backup: {
+      backup_id: "backup-20260704-001",
+      completed_at: "2026-07-04T23:00:00.000Z",
+      checksum_verified: true,
+      components: ["payload_postgres", "runtime_data", "runtime_evidence"],
+    },
+    restore_drill: {
+      drill_id: "drill-20260704-001",
+      source_backup_id: "backup-20260704-001",
+      completed_at: "2026-07-04T23:15:00.000Z",
+      target: "isolated",
+      status: "pass",
+      checksum_verified: true,
+      rollback_procedure_verified: true,
+      components_verified: ["payload_postgres", "runtime_data", "runtime_evidence"],
+      operator: "operations_manager",
+    },
+    approval: { status: "approved", reviewer: "agency_owner", approved_at: "2026-07-04T23:30:00.000Z" },
+  },
+};
+
+function writeProductionRecoveryFixture(dir) {
+  const reportPath = `${dir}/production-recovery-report.json`;
+  writeJson(reportPath, readyProductionRecovery.report);
+  return reportPath;
+}
 
 function writeLiveReportFixtures(dir) {
   const syncReportPath = `${dir}/search-engine-sync-report.json`;
@@ -620,6 +663,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "production_recovery",
   ]);
   const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
   assert.equal(redirectGate.status, "blocked");
@@ -683,6 +727,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "production_recovery",
   ]) {
     const blockedGate = report.gates.find((gate) => gate.id === id);
     assert.ok(blockedGate.next_actions.length > 0);
@@ -705,6 +750,7 @@ test("launch readiness stays blocked until production launch blockers are cleare
       "live_services",
       "monitoring_rollback",
       "payload_runtime",
+      "production_recovery",
     ],
   );
   assert.match(publicPayload.blocked_gates.find((gate) => gate.id === "live_services").message, /Typesense\/Meilisearch/);
@@ -730,6 +776,7 @@ test("launch readiness validator accepts ready state after required gates are cl
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
 
   assert.equal(assertLaunchReadinessReport(report), true);
@@ -813,6 +860,7 @@ test("launch readiness rejects hand-cleared external SEO blockers", () => {
         liveServices: readyLiveServices,
         appState: readyAppState,
         payloadRuntime: readyPayloadRuntime,
+        productionRecovery: readyProductionRecovery,
       }),
     /SEO evidence missing required sources must match source evidence/,
   );
@@ -834,6 +882,7 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
   seoGate.evidence.sources.search_console.signal_rows = 0;
@@ -899,6 +948,10 @@ test("launch readiness validator requires every production gate", () => {
     () => assertLaunchReadinessReport({ ...report, gates: report.gates.filter((gate) => gate.id !== "live_services") }),
     /missing required gate live_services/,
   );
+  assert.throws(
+    () => assertLaunchReadinessReport({ ...report, gates: report.gates.filter((gate) => gate.id !== "production_recovery") }),
+    /missing required gate production_recovery/,
+  );
 });
 
 test("launch readiness validator rejects weak runtime smoke pass evidence", () => {
@@ -917,6 +970,7 @@ test("launch readiness validator rejects weak runtime smoke pass evidence", () =
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   const smokeGate = report.gates.find((gate) => gate.id === "runtime_smoke");
   smokeGate.evidence.node_server_port_observed = false;
@@ -954,6 +1008,7 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   const weakPayloadCredentials = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1059,6 +1114,7 @@ test("launch readiness validator rejects weak live service pass summaries", () =
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
 
   assert.throws(() => assertLaunchReadinessReport(report), /search sync summary evidence/);
@@ -1083,6 +1139,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   const weakHermesProvider = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1098,6 +1155,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   const weakHermesAudit = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1111,6 +1169,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   const weakSyncOperation = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1135,6 +1194,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   const wrongSyncPath = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1164,6 +1224,7 @@ test("launch readiness validator rejects weak live service operation evidence", 
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
 
   assert.throws(() => assertLaunchReadinessReport(withoutQueryOperation), /search query operation evidence/);
@@ -1193,6 +1254,7 @@ test("launch readiness validator rejects weak live provisioning pass evidence", 
     },
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
 
   assert.throws(() => assertLaunchReadinessReport(report), /provisioning check meilisearch_health/);
@@ -1220,6 +1282,7 @@ test("launch readiness blocks live services until provisioning passes", () => {
     },
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
 
   const liveGate = report.gates.find((gate) => gate.id === "live_services");
@@ -1266,6 +1329,7 @@ test("launch readiness validator rejects weak listing quality pass evidence", ()
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
 
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
@@ -1311,6 +1375,7 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
@@ -1339,6 +1404,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   assert.equal(homepageReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(homepageReport.blockers, ["redirect_reviews"]);
@@ -1355,6 +1421,7 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     liveServiceProvisioning: readyLiveServiceProvisioning,
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
+    productionRecovery: readyProductionRecovery,
   });
   assert.equal(duplicateReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(duplicateReport.blockers, ["redirect_reviews"]);
@@ -1386,6 +1453,7 @@ test("launch readiness build honors output path override", () => {
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "production_recovery",
   ]);
 });
 
@@ -1429,6 +1497,7 @@ test("local readiness materializer promotes only fresh local Payload proof and p
     "listing_quality_review",
     "live_services",
     "monitoring_rollback",
+    "production_recovery",
     "local_preview_only",
   ]);
   assert.equal(result.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
@@ -1474,7 +1543,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(result.status, 0);
   assert.match(
     result.stderr,
-    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime/,
+    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
   assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
@@ -1512,7 +1581,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   assert.notEqual(withReviewPath.status, 0);
   assert.match(
     withReviewPath.stderr,
-    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, live_services, monitoring_rollback, payload_runtime/,
+    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
@@ -1522,6 +1591,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   const liveDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-live-reports-`);
   const livePaths = writeLiveReportFixtures(liveDir);
   const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir);
+  const productionRecoveryPath = writeProductionRecoveryFixture(liveDir);
   const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
@@ -1533,6 +1603,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
+      MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
     },
   });
 
@@ -1562,6 +1633,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
+      MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
     },
   });
   assert.notEqual(readyFromSeoOutput.status, 0);
@@ -1590,6 +1662,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   const liveDir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-live-`);
   const livePaths = writeLiveReportFixtures(liveDir);
   const liveProvisioningPath = await writeLiveProvisioningFixture(liveDir);
+  const productionRecoveryPath = writeProductionRecoveryFixture(liveDir);
   const checklistPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-input-checklist-`)}/launch-inputs.md`;
   const ready = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-input-checklist.mjs")], {
     cwd: fromRoot(),
@@ -1602,6 +1675,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
       MS_REALTY_SEARCH_QUERY_REPORT_PATH: livePaths.queryReportPath,
       MS_REALTY_HERMES_WORKER_REPORT_PATH: livePaths.hermesReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveProvisioningPath,
+      MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryPath,
       MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH: checklistPath,
     },
   });
@@ -2046,6 +2120,8 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   assert.match(markdown, /listing_quality_review: Download \/api\/admin\/listing-quality-review-packet/);
   assert.match(markdown, /live_services: Run npm run live:provisioning:preflight/);
   assert.match(markdown, /payload_runtime: Run npm run payload:runtime/);
+  assert.match(markdown, /production_recovery: Complete an encrypted off-site backup/);
+  assert.match(markdown, /MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH/);
   assert.match(markdown, /redirect_reviews: Review every unresolved legacy URL/);
   assert.match(markdown, /Terminal route decisions: 165\/457 \(200: 0, 301: 165, 410: 0\)/);
   assert.match(markdown, /Remaining terminal route decisions: 292/);

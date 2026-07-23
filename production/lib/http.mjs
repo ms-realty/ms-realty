@@ -161,6 +161,7 @@ import {
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
+import { productionRecoveryState } from "./production-recovery.mjs";
 import { buildOperationsReport, renderOperationsReportCsv } from "./operations-report.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
@@ -476,6 +477,7 @@ export function createHttpApp({
   hermesWorkerReportPath = null,
   liveServiceProvisioningReportPath = null,
   payloadRuntimeReportPath = null,
+  productionRecoveryReportPath = null,
   seoEvidenceInputDir = null,
   seoEvidenceOutputPath = null,
   localeRegistryPath = null,
@@ -791,6 +793,7 @@ export function createHttpApp({
       }),
       liveServiceProvisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
       payloadRuntime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
+      productionRecovery: productionRecoveryState(productionRecoveryReportPath || undefined),
     });
   };
   const currentLaunchInputChecklist = () =>
@@ -842,6 +845,7 @@ export function createHttpApp({
         }),
         live_service_provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
         payload_runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
+        production_recovery: productionRecoveryState(productionRecoveryReportPath || undefined),
       },
     };
   };
@@ -2653,6 +2657,7 @@ export function assertHttpSmoke(smoke) {
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "production_recovery",
   ];
   if (
     smoke.health?.status !== 200 ||

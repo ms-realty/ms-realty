@@ -3,7 +3,7 @@
 Generated: 2026-07-05T00:00:00Z
 
 Status: blocked
-Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime
+Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
 
 ## Blocked Gate Actions
 
@@ -19,6 +19,8 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - monitoring_rollback: Confirm rollback steps cover disable, revert, cache purge, sitemap resubmit, and lead intake fallback.
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
 - payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
+- production_recovery: Complete an encrypted off-site backup and isolated restore drill using production data stores.
+- production_recovery: Fill production/data/production-recovery-report.json from the example, then run npm run launch:preflight.
 
 ## Redirect Reviews
 
@@ -115,6 +117,17 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Production/CLI path overrides: `MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH`, `MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH`.
 - Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
+
+## Production Recovery
+
+- Current gate: blocked
+- Current evidence: missing_report (/Users/ivan/Code/MS-Realty/production/data/production-recovery-report.json)
+- Private report: `production/data/production-recovery-report.json` (ignored)
+- Report example: `production/data/production-recovery-report.json.example`
+- Path override: `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH`
+- Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
+- Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
+- Launch rule: the tested local `docker:backup` path is not production disaster-recovery evidence.
 
 ## Content Quality Warnings
 

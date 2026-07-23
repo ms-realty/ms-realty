@@ -175,6 +175,8 @@ export function renderLaunchInputChecklist({
   const listingReviewEvidence = listingQualityGate?.evidence || {};
   const seoGate = launchReadiness.gates.find((gate) => gate.id === "external_seo_exports");
   const seoGateEvidence = seoGate?.evidence || {};
+  const recoveryGate = launchReadiness.gates.find((gate) => gate.id === "production_recovery");
+  const recoveryEvidence = recoveryGate?.evidence || {};
 
   return `# Launch Input Checklist
 
@@ -272,6 +274,17 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Production/CLI path overrides: \`MS_REALTY_PAYLOAD_RUNTIME_ENV_EXAMPLE_PATH\`, \`MS_REALTY_PAYLOAD_RUNTIME_COMPOSE_PATH\`, \`MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH\`.
 - Real Payload runtime reports stay local and ignored; examples do not count as launch evidence.
 - Launch rule: the interim admin workbenches do not count as the final Payload CMS runtime.
+
+## Production Recovery
+
+- Current gate: ${recoveryGate?.status || "unknown"}
+- Current evidence: ${recoveryEvidence.status || "unknown"}${recoveryEvidence.path ? ` (${recoveryEvidence.path})` : ""}${recoveryEvidence.error ? ` — ${recoveryEvidence.error}` : ""}
+- Private report: \`production/data/production-recovery-report.json\` (ignored)
+- Report example: \`production/data/production-recovery-report.json.example\`
+- Path override: \`MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH\`
+- Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
+- Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.
+- Launch rule: the tested local \`docker:backup\` path is not production disaster-recovery evidence.
 
 ## Content Quality Warnings
 

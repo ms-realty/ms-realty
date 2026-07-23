@@ -508,6 +508,10 @@ reports, plus production Payload secrets/database/operator setup and encrypted o
 evidence. Only the 165 mapped listing redirects are covered by the reviewed deployable 301 export; the
 remaining legacy URLs must not be treated as complete.
 
+The authoritative launch report now enforces that recovery evidence as `production_recovery`: a local
+Docker snapshot cannot pass it, and the private report must prove encrypted off-site coverage plus a
+successful isolated restore drill of the cited backup with a named operator and separate reviewer approval.
+
 ---
 
 ## 17. Cost (planning ranges, not a quote)

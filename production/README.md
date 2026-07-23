@@ -225,6 +225,9 @@ npm run docker:restore -- .local-backups/backup-<timestamp>-<id> --confirm-repla
 
 This is tested local recovery machinery, not proof of an encrypted off-site production
 backup policy, retention schedule, or successful production disaster-recovery drill.
+Production launch stays blocked until a named operator and reviewer supply a valid private
+`production/data/production-recovery-report.json` using the committed `.json.example` contract;
+`MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH` may mount that evidence outside the repository.
 
 After `docker:up` or `docker:seed`, the app atomically materializes schema-valid runtime reports
 that are no older than 15 minutes into `/runtime-evidence/local-launch-readiness.json`. It preserves

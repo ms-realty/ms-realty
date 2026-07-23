@@ -98,6 +98,7 @@ export function assertServerSmoke(smoke) {
     "live_services",
     "monitoring_rollback",
     "payload_runtime",
+    "production_recovery",
   ];
   if (
     smoke.health?.status !== 200 ||

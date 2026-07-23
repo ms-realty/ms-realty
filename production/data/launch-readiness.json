@@ -8,7 +8,8 @@
     "listing_quality_review",
     "live_services",
     "monitoring_rollback",
-    "payload_runtime"
+    "payload_runtime",
+    "production_recovery"
   ],
   "warnings": [
     {
@@ -586,7 +587,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-23T00:32:23.154Z",
+              "generated_at": "2026-07-23T00:59:28.811Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,
@@ -755,6 +756,19 @@
       "next_actions": [
         "Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.",
         "Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight."
+      ]
+    },
+    {
+      "id": "production_recovery",
+      "status": "blocked",
+      "message": "Encrypted off-site backup and isolated production restore evidence are required before launch.",
+      "evidence": {
+        "status": "missing_report",
+        "path": "/Users/ivan/Code/MS-Realty/production/data/production-recovery-report.json"
+      },
+      "next_actions": [
+        "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
+        "Fill production/data/production-recovery-report.json from the example, then run npm run launch:preflight."
       ]
     }
   ],

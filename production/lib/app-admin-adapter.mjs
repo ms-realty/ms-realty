@@ -65,6 +65,7 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
+import { productionRecoveryState } from "./production-recovery.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
@@ -252,6 +253,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     hermesWorkerReportPath: env.MS_REALTY_HERMES_WORKER_REPORT_PATH,
     liveServiceProvisioningReportPath: env.MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH,
     payloadRuntimeReportPath: env.MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH,
+    productionRecoveryReportPath: env.MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH,
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
@@ -878,6 +880,7 @@ function launchReadiness(config) {
     }),
     liveServiceProvisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
     payloadRuntime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+    productionRecovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
   });
 }
 
@@ -930,6 +933,7 @@ function preflightReports(config) {
       }),
       live_service_provisioning: liveServiceProvisioningState(config.liveServiceProvisioningReportPath || undefined),
       payload_runtime: payloadRuntimeState(config.payloadRuntimeReportPath || undefined),
+      production_recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
     },
   };
 }
