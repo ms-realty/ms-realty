@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 21,
-    "passed": 21,
+    "checks": 24,
+    "passed": 24,
     "failed": 0
   },
   "checks": [
@@ -54,6 +54,27 @@
     },
     {
       "id": "mobile_app_navigation",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "approved_buyer_guide_discovery",
+      "status": "pass",
+      "evidence": {
+        "guide_paths": [
+          "/en/guides/foreign-buyers",
+          "/en/guides/buying-process"
+        ],
+        "source": "approved_cms_content"
+      }
+    },
+    {
+      "id": "compact_mobile_footer",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "narrow_mobile_search_action",
       "status": "pass",
       "evidence": {}
     },

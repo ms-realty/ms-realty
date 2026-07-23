@@ -570,6 +570,10 @@ test("approved CMS guide page renders reviewed foreign-buyer facts", () => {
   assert.equal(guide.indexable, true);
   assert.equal(guide.chrome.resources.links.find((item) => item.href === path).active, true);
   assert.match(guide.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
+  const html = renderReactPublicBody(guide);
+  assert.match(html, /data-guide-trust="approved"/);
+  assert.match(html, /data-primary-guide-section="true" aria-label="Foreign buyers and Bulgarian land ownership"/);
+  assert.doesNotMatch(html, /<h2>Foreign buyers and Bulgarian land ownership<\/h2>/);
 });
 
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {

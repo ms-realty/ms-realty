@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { findListingById, loadListings } from "./content.mjs";
+import { approvedContentDocumentsForPath, readApprovedCmsContent } from "./approved-content.mjs";
 import { assertHtmlPage, renderHtmlPage } from "./html.mjs";
 import { loadLocaleRegistry, websiteLanguageCoverage } from "./locales.mjs";
 import { normalizeMediaAsset } from "./media.mjs";
@@ -12,6 +13,7 @@ import {
   renderHomePage,
   renderLanguageFallback,
   renderListingPage,
+  renderGuidePage,
   renderSearchPage,
   renderSellerPage,
 } from "./public-site.mjs";
@@ -76,6 +78,16 @@ export function buildMobileElderlyQaReport({
     contact: renderReactPage(renderContactPage({ registry, localeCode: "he" })),
     fallback: renderReactPage(renderLanguageFallback({ registry, requestedLocale: "fr" })),
   };
+  const guidePath = "/en/guides/foreign-buyers";
+  const englishHome = renderReactPage(renderHomePage({ registry, listings, localeCode: "en" }));
+  const buyerGuide = renderReactPage(
+    renderGuidePage({
+      registry,
+      localeCode: "en",
+      path: guidePath,
+      documents: approvedContentDocumentsForPath(readApprovedCmsContent(), guidePath),
+    }),
+  );
   const rentSearch = renderReactPage(
     renderSearchPage({ registry, listings, localeCode: "he", filters: { offer_type: "rent" } }),
   );
@@ -95,6 +107,8 @@ export function buildMobileElderlyQaReport({
     });
   }
   assertHtmlPage(rentSearch, { lang: "he", dir: "rtl", kind: "search" });
+  assertHtmlPage(englishHome, { lang: "en", dir: "ltr", kind: "home" });
+  assertHtmlPage(buyerGuide, { lang: "en", dir: "ltr", kind: "guide" });
 
   const coverage = websiteLanguageCoverage(registry);
   const checks = [
@@ -171,6 +185,31 @@ export function buildMobileElderlyQaReport({
         includes(pages.search, "data-mobile-filter-sheet=\"true\"") &&
         includes(publicAdapterCss, ".site-hd { position: sticky; top: 0; z-index: 30;") &&
         includes(publicAdapterCss, ".sr-mobile-filters {\n    position: sticky;"),
+    ),
+    check(
+      "approved_buyer_guide_discovery",
+      includes(englishHome, "data-home-guides=\"true\"") &&
+        includes(englishHome, "href=\"/en/guides/foreign-buyers\"") &&
+        includes(englishHome, "href=\"/en/guides/buying-process\"") &&
+        includes(buyerGuide, "data-guide-trust=\"approved\"") &&
+        includes(buyerGuide, "data-primary-guide-section=\"true\"") &&
+        !includes(buyerGuide, "<h2>Foreign buyers and Bulgarian land ownership</h2>"),
+      { guide_paths: ["/en/guides/foreign-buyers", "/en/guides/buying-process"], source: "approved_cms_content" },
+    ),
+    check(
+      "compact_mobile_footer",
+      includes(englishHome, "data-mobile-footer-navigation=\"true\"") &&
+        (englishHome.match(/data-mobile-footer-group=/g) || []).length === 3 &&
+        includes(publicAdapterCss, ".site-ft__desktop-links { display: none; }") &&
+        includes(publicAdapterCss, ".site-ft__mobile-group > summary") &&
+        includes(publicAdapterCss, "min-height: 52px;"),
+    ),
+    check(
+      "narrow_mobile_search_action",
+      includes(englishHome, "class=\"mk-search__go\" type=\"submit\" aria-label=\"Search\" title=\"Search\"") &&
+        includes(publicAdapterCss, "@media (max-width: 360px)") &&
+        includes(publicAdapterCss, ".hp-hero__search .mk-search__go { width: 52px; padding-inline: 0; }") &&
+        includes(publicAdapterCss, ".hp-hero__search .mk-search__go span { display: none; }"),
     ),
     check(
       "listing_sticky_actions",
@@ -276,6 +315,9 @@ export function assertMobileElderlyQaReport(report) {
     "mobile_search_live_preview",
     "mobile_search_empty_recovery",
     "mobile_app_navigation",
+    "approved_buyer_guide_discovery",
+    "compact_mobile_footer",
+    "narrow_mobile_search_action",
     "mobile_safe_area_and_feedback",
     "mobile_completion_feedback",
     "listing_sticky_actions",

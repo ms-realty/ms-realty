@@ -2058,6 +2058,7 @@ function LanguageFallbackBody({ page }) {
 
 function GuideBody({ page }) {
   const labels = uiLabels(page);
+  const sections = page.body.sections || [];
   const main = h(
     "main",
     {
@@ -2068,15 +2069,28 @@ function GuideBody({ page }) {
       "data-min-touch-target": "44",
       className: "pg-narrow",
     },
-    h("header", { className: "ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
-    ...(page.body.sections || []).map((section) =>
-      h(
-        "section",
-        { key: section.id, id: section.id, className: "mk-card mk-card--pad-lg guide-sec", "data-reviewer": section.reviewer },
-        h("h2", null, section.title),
-        h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 15 }), fact))),
-      ),
+    h(
+      "header",
+      { className: "ct-page__head guide-head" },
+      h(Badge, { variant: "neutral", icon: "shield-check", "data-guide-trust": "approved" }, labels.approvedSource),
+      h("h1", null, page.body.h1),
     ),
+    ...sections.map((section) => {
+      const primary = section.title === page.body.h1;
+      return h(
+        "section",
+        {
+          key: section.id,
+          id: section.id,
+          className: `mk-card mk-card--pad-lg guide-sec${primary ? " guide-sec--primary" : ""}`,
+          "data-reviewer": section.reviewer,
+          "data-primary-guide-section": primary ? "true" : undefined,
+          "aria-label": primary ? section.title : undefined,
+        },
+        primary ? null : h("h2", null, section.title),
+        h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 15 }), fact))),
+      );
+    }),
     h(
       "nav",
       { className: "pg-actions", "aria-label": labels.guideActions },
