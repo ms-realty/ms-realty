@@ -87,6 +87,7 @@ function LanguageMenu({ languages, label }) {
 function SiteHeader({ chrome }) {
   const copy = chrome.copy;
   const activeLanguage = chrome.languages.find((language) => language.active) || chrome.languages[0];
+  const resources = chrome.resources?.links || [];
   const mobileMenuId = `public-mobile-navigation-${activeLanguage?.code || "en"}`;
   const mobileMenu = h(
     "details",
@@ -130,6 +131,25 @@ function SiteHeader({ chrome }) {
           ),
         ),
       ),
+      resources.length
+        ? h(
+            "div",
+            { className: "site-hd__mobile-resources", "data-mobile-secondary-navigation": "true" },
+            h("p", { className: "site-hd__mobile-section-label" }, chrome.resources.label),
+            h(
+              "nav",
+              { className: "site-hd__mobile-nav site-hd__mobile-nav--resources", "aria-label": chrome.resources.label },
+              ...resources.map((item) =>
+                h(
+                  "a",
+                  { key: item.id, href: item.href, "aria-current": item.active ? "page" : undefined },
+                  h(Icon, { name: "file-check", size: 18 }),
+                  h("span", null, item.label),
+                ),
+              ),
+            ),
+          )
+        : null,
       h(
         "nav",
         { className: "site-hd__mobile-langs", "aria-label": copy.languageLabel, "data-language-switcher": "mobile" },
@@ -248,7 +268,23 @@ function MobileTaskNavigation({ page, chrome }) {
 function SiteFooter({ chrome, labels }) {
   const copy = chrome.copy;
   const locations = chrome.footer.locations || [];
+  const resources = chrome.resources?.links || [];
   const buy = chrome.nav.find((item) => item.id === "buy");
+  const exploreLinks = [...chrome.nav, ...resources];
+  const locationLinks = locations.length
+    ? locations.map((location) => ({ id: location.href, href: location.href, label: location.label }))
+    : [{ id: "search", href: buy?.href || chrome.home.href, label: chrome.footer.searchLabel }];
+  const contactLinks = [
+    { id: "contact", href: chrome.nav.find((item) => item.id === "contact")?.href || chrome.home.href, label: copy.navContact },
+    { id: "seller", href: chrome.nav.find((item) => item.id === "sell")?.href || chrome.home.href, label: labels.sellerValuation },
+    { id: "phone", href: chrome.contact.phone_href, label: chrome.contact.phone_label },
+    { id: "email", href: `mailto:${chrome.contact.email}`, label: chrome.contact.email },
+  ];
+  const mobileGroups = [
+    { id: "explore", label: copy.explore, links: exploreLinks },
+    { id: "locations", label: chrome.footer.locationsLabel, links: locationLinks },
+    { id: "contact", label: copy.getInTouch, links: contactLinks },
+  ];
   return h(
     "footer",
     { className: "site-ft" },
@@ -257,7 +293,7 @@ function SiteFooter({ chrome, labels }) {
       { className: "site-ft__in" },
       h(
         "div",
-        null,
+        { className: "site-ft__brand" },
         h(
           "a",
           { href: chrome.home.href, "aria-label": chrome.home.label, className: "site-ft__logo" },
@@ -274,33 +310,52 @@ function SiteFooter({ chrome, labels }) {
       ),
       h(
         "div",
-        null,
+        { className: "site-ft__desktop-links" },
         h("h4", null, copy.explore),
-        h("ul", null, ...chrome.nav.map((item) => h("li", { key: item.id }, h("a", { href: item.href }, item.label)))),
-      ),
-      h(
-        "div",
-        null,
-        h("h4", null, chrome.footer.locationsLabel),
         h(
           "ul",
           null,
-          ...(locations.length
-            ? locations.map((location) => h("li", { key: location.href }, h("a", { href: location.href }, location.label)))
-            : [h("li", { key: "search" }, h("a", { href: buy?.href || chrome.home.href }, chrome.footer.searchLabel))]),
+          ...exploreLinks.map((item) =>
+            h("li", { key: item.id }, h("a", { href: item.href, "aria-current": item.active ? "page" : undefined }, item.label)),
+          ),
         ),
       ),
       h(
         "div",
-        null,
+        { className: "site-ft__desktop-links" },
+        h("h4", null, chrome.footer.locationsLabel),
+        h(
+          "ul",
+          null,
+          ...locationLinks.map((item) => h("li", { key: item.id }, h("a", { href: item.href }, item.label))),
+        ),
+      ),
+      h(
+        "div",
+        { className: "site-ft__desktop-links" },
         h("h4", null, copy.getInTouch),
         h(
           "ul",
           null,
-          h("li", null, h("a", { href: chrome.nav.find((item) => item.id === "contact")?.href || chrome.home.href }, copy.navContact)),
-          h("li", null, h("a", { href: chrome.nav.find((item) => item.id === "sell")?.href || chrome.home.href }, labels.sellerValuation)),
-          h("li", null, h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
-          h("li", null, h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
+          ...contactLinks.map((item) => h("li", { key: item.id }, h("a", { href: item.href }, item.label))),
+        ),
+      ),
+      h(
+        "div",
+        { className: "site-ft__mobile-groups", "data-mobile-footer-navigation": "true" },
+        ...mobileGroups.map((group) =>
+          h(
+            "details",
+            { key: group.id, className: "site-ft__mobile-group", "data-mobile-footer-group": group.id },
+            h("summary", null, h("span", null, group.label), h(Icon, { name: "chevron-down", size: 18 })),
+            h(
+              "ul",
+              null,
+              ...group.links.map((item) =>
+                h("li", { key: item.id }, h("a", { href: item.href, "aria-current": item.active ? "page" : undefined }, item.label)),
+              ),
+            ),
+          ),
         ),
       ),
     ),
@@ -694,6 +749,7 @@ function HomeBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
   const heroImage = page.body.hero?.image;
+  const guides = page.body.guides?.links || [];
   const main = h(
     "main",
     { id: "main", "data-kind": "home", "data-react-public-ui": "home" },
@@ -732,7 +788,12 @@ function HomeBody({ page }) {
                 h("input", { id: "home-search-q", name: "q", type: "search", autoComplete: "off", placeholder: labels.location }),
               ),
             ),
-            h("button", { className: "mk-search__go", type: "submit" }, h(Icon, { name: "search", size: 20, strokeWidth: 2.25 }), h("span", null, labels.search)),
+            h(
+              "button",
+              { className: "mk-search__go", type: "submit", "aria-label": labels.search, title: labels.search },
+              h(Icon, { name: "search", size: 20, strokeWidth: 2.25 }),
+              h("span", null, labels.search),
+            ),
           ),
         ),
       ),
@@ -762,6 +823,37 @@ function HomeBody({ page }) {
           ),
         )
       : h("nav", { "aria-label": labels.locations, "data-home-locations": "true", hidden: true }),
+    guides.length
+      ? h(
+          "section",
+          { className: "hp-sec hp-guides", "data-home-guides": "true", "data-approved-source": "cms" },
+          h("div", { className: "hp-sec__head" }, h("div", null, h("h2", null, page.body.guides.label))),
+          h(
+            "nav",
+            { className: "hp-guides__rail", "aria-label": page.body.guides.label },
+            ...guides.map((guide) =>
+              h(
+                "a",
+                {
+                  key: guide.id,
+                  href: guide.href,
+                  className: "hp-guide",
+                  "data-guide-reviewer": guide.reviewer,
+                },
+                h(
+                  "div",
+                  { className: "hp-guide__meta" },
+                  h("span", { className: "hp-guide__icon" }, h(Icon, { name: "file-check", size: 21 })),
+                  h(Badge, { variant: "neutral", icon: "shield-check" }, labels.approvedSource),
+                  h(Icon, { name: "arrow-right", size: 18, className: "hp-guide__arrow" }),
+                ),
+                h("h3", null, guide.label),
+                h("p", null, guide.summary),
+              ),
+            ),
+          ),
+        )
+      : null,
     h(
       "section",
       { className: "hp-sec", style: "padding-top:0", "aria-label": labels.featuredListings, "data-featured-listings": "true" },

@@ -333,6 +333,11 @@ test("public chrome gives the icon-only mobile menu an explicit accessible name"
   assert.match(html, /data-language-switcher="mobile"/);
   assert.match(html, /data-mobile-task-navigation="true"/);
   assert.match(html, /data-mobile-task="buy" data-active="true" aria-current="page"/);
+  assert.equal((html.match(/data-mobile-task="/g) || []).length, 5);
+  assert.match(html, /data-mobile-secondary-navigation="true"/);
+  assert.match(html, /aria-label="Buyer guides"/);
+  assert.match(html, /class="mk-search__go" type="submit" aria-label="Search" title="Search"/);
+  assert.equal((html.match(/data-mobile-footer-group="/g) || []).length, 3);
 });
 
 test("mobile task navigation follows the buyer's active search journey", () => {
@@ -466,6 +471,24 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.ok(he.cards.length > 0);
   assert.equal(he.cards.every((card) => card.thumbnail?.url.includes("/wp-content/uploads/")), true);
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
+  assert.equal(he.body.guides, null);
+});
+
+test("English home makes every approved buyer guide discoverable without expanding the mobile task dock", () => {
+  const en = renderHomePage({ registry, listings, localeCode: "en" });
+  const html = renderReactPublicBody(en);
+
+  assert.equal(en.body.guides.label, "Buyer guides");
+  assert.deepEqual(
+    en.body.guides.links.map((guide) => guide.href).sort(),
+    ["/en/guides/buying-process", "/en/guides/foreign-buyers"],
+  );
+  assert.ok(en.body.guides.links.every((guide) => guide.reviewer === "editor_bg"));
+  assert.match(html, /data-home-guides="true" data-approved-source="cms"/);
+  assert.match(html, /href="\/en\/guides\/buying-process"/);
+  assert.match(html, /href="\/en\/guides\/foreign-buyers"/);
+  assert.match(html, /Foreign buyers and Bulgarian land ownership/);
+  assert.equal((html.match(/data-mobile-task="/g) || []).length, 5);
 });
 
 test("location page exposes only indexable locale inventory", () => {
@@ -545,6 +568,7 @@ test("approved CMS guide page renders reviewed foreign-buyer facts", () => {
   assert.equal(guide.status, 200);
   assert.equal(guide.path, path);
   assert.equal(guide.indexable, true);
+  assert.equal(guide.chrome.resources.links.find((item) => item.href === path).active, true);
   assert.match(guide.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
 });
 

@@ -20,9 +20,12 @@ import {
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
+import { approvedContentGuideGroups, readApprovedCmsContent } from "./approved-content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
+
+const APPROVED_GUIDE_GROUPS = approvedContentGuideGroups(readApprovedCmsContent());
 
 const ACTION_LABELS = {
   bg: {
@@ -928,6 +931,7 @@ const CHROME_COPY = {
     navRent: "Rent",
     navSell: "Sell",
     navContact: "Contact",
+    buyerGuides: "Buyer guides",
     explore: "Explore",
     getInTouch: "Get in touch",
     tagline:
@@ -1062,10 +1066,11 @@ export function chromeCopyFor(localeCode) {
   return CHROME_COPY[localeCode] || CHROME_COPY.en;
 }
 
-function publicChrome(registry, locale, { hreflang = [], active = null, locations = [] } = {}) {
+function publicChrome(registry, locale, { hreflang = [], active = null, locations = [], currentPath = null } = {}) {
   const copy = chromeCopyFor(locale.code);
   const labels = labelsFor(locale.code);
   const searchBase = `/${locale.code}/${locale.route_segments.search}`;
+  const guideLinks = approvedGuideLinksFor(locale.code, currentPath);
   const alternates = new Map(
     (hreflang || []).filter((link) => link.hreflang !== "x-default").map((link) => [link.hreflang, link.href]),
   );
@@ -1086,6 +1091,12 @@ function publicChrome(registry, locale, { hreflang = [], active = null, location
       dir: entry.direction || "ltr",
     })),
     contact: { ...BRAND_CONTACT, offices: copy.offices },
+    resources: guideLinks.length
+      ? {
+          label: copy.buyerGuides || copy.explore,
+          links: guideLinks,
+        }
+      : null,
     footer: {
       locations: locations.slice(0, 5).map((entry) => ({ href: entry.path, label: entry.location })),
       locationsLabel: labels.locations,
@@ -1128,6 +1139,20 @@ function guideDescription(documents) {
     .flatMap((doc) => doc.facts || [])
     .join(" ")
     .slice(0, 240);
+}
+
+function approvedGuideLinksFor(localeCode, currentPath = null) {
+  return APPROVED_GUIDE_GROUPS.filter((group) => group.documents[0]?.locale === localeCode).map(({ path, documents }) => {
+    const first = documents[0];
+    return {
+      id: first.id,
+      href: path,
+      label: first.title,
+      summary: first.facts[0],
+      reviewer: first.reviewer,
+      active: path === currentPath,
+    };
+  });
 }
 
 function guideSchema({ path, locale, documents }) {
@@ -1756,6 +1781,11 @@ export function renderHomePage({ registry, localeCode, listings }) {
         : null;
     })
     .filter(Boolean);
+  const chrome = publicChrome(registry, locale, {
+    hreflang: resolved.available ? hreflangForHome(registry) : [],
+    active: "home",
+    locations,
+  });
 
   return {
     kind: "home",
@@ -1773,11 +1803,7 @@ export function renderHomePage({ registry, localeCode, listings }) {
       robots: resolved.available ? "index,follow" : "noindex,follow",
     },
     hreflang: resolved.available ? hreflangForHome(registry) : [],
-    chrome: publicChrome(registry, locale, {
-      hreflang: resolved.available ? hreflangForHome(registry) : [],
-      active: "home",
-      locations,
-    }),
+    chrome,
     body: {
       h1: copy.h1,
       intro: copy.description,
@@ -1800,6 +1826,7 @@ export function renderHomePage({ registry, localeCode, listings }) {
         path: contactPath(registry, locale.code),
         label: labelsFor(locale.code).callback,
       },
+      guides: chrome.resources,
       locations,
     },
     cards: search.cards.slice(0, 6),
@@ -1887,7 +1914,7 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
           { hreflang: "x-default", href: path },
         ]
       : [],
-    chrome: publicChrome(registry, locale, { active: null }),
+    chrome: publicChrome(registry, locale, { active: "guide", currentPath: path }),
     schema: indexable ? guideSchema({ path, locale, documents: docs }) : null,
     body: {
       h1: first.title,
