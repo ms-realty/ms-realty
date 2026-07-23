@@ -148,6 +148,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
@@ -701,6 +702,7 @@
         "navRent": "Rent",
         "navSell": "Sell",
         "navContact": "Contact",
+        "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
         "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
@@ -802,6 +804,27 @@
         "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
         "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "resources": {
+        "label": "Buyer guides",
+        "links": [
+          {
+            "id": "foreign-buyers-bg-land-ownership",
+            "href": "/en/guides/foreign-buyers",
+            "label": "Foreign buyers and Bulgarian land ownership",
+            "summary": "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+            "reviewer": "editor_bg",
+            "active": false
+          },
+          {
+            "id": "buyer-due-diligence-liens",
+            "href": "/en/guides/buying-process",
+            "label": "Title and encumbrance checks",
+            "summary": "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
+            "reviewer": "editor_bg",
+            "active": false
+          }
+        ]
       },
       "footer": {
         "locations": [],
@@ -1463,6 +1486,7 @@
         "email": "office@makler-realty.com",
         "offices": "Сандански · Банско · Свети-Влас"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "Локации",
@@ -2090,6 +2114,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [
           {
@@ -2128,6 +2153,7 @@
         "path": "/he/contact",
         "label": "שיחה חוזרת"
       },
+      "guides": null,
       "locations": [
         {
           "location": "סנדנסקי",
@@ -2644,6 +2670,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
@@ -2843,6 +2870,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
@@ -2908,6 +2936,7 @@
         "navRent": "Rent",
         "navSell": "Sell",
         "navContact": "Contact",
+        "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
         "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
@@ -3009,6 +3038,27 @@
         "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
         "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "resources": {
+        "label": "Buyer guides",
+        "links": [
+          {
+            "id": "foreign-buyers-bg-land-ownership",
+            "href": "/en/guides/foreign-buyers",
+            "label": "Foreign buyers and Bulgarian land ownership",
+            "summary": "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+            "reviewer": "editor_bg",
+            "active": true
+          },
+          {
+            "id": "buyer-due-diligence-liens",
+            "href": "/en/guides/buying-process",
+            "label": "Title and encumbrance checks",
+            "summary": "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
+            "reviewer": "editor_bg",
+            "active": false
+          }
+        ]
       },
       "footer": {
         "locations": [],
@@ -3209,6 +3259,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
@@ -3428,6 +3479,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
@@ -4081,6 +4133,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
@@ -4990,6 +5043,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
@@ -5012,6 +5066,7 @@
         "navRent": "Rent",
         "navSell": "Sell",
         "navContact": "Contact",
+        "buyerGuides": "Buyer guides",
         "explore": "Explore",
         "getInTouch": "Get in touch",
         "tagline": "Properties for sale and rent in Sandanski and the Pirin mountains, along the Black Sea coast, and in neighbouring Greece — with local offices and brokers who speak your language.",
@@ -5113,6 +5168,27 @@
         "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
         "offices": "Sandanski · Bansko · Sveti Vlas"
+      },
+      "resources": {
+        "label": "Buyer guides",
+        "links": [
+          {
+            "id": "foreign-buyers-bg-land-ownership",
+            "href": "/en/guides/foreign-buyers",
+            "label": "Foreign buyers and Bulgarian land ownership",
+            "summary": "Non-EU buyers cannot own Bulgarian land directly in their own name.",
+            "reviewer": "editor_bg",
+            "active": false
+          },
+          {
+            "id": "buyer-due-diligence-liens",
+            "href": "/en/guides/buying-process",
+            "label": "Title and encumbrance checks",
+            "summary": "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
+            "reviewer": "editor_bg",
+            "active": false
+          }
+        ]
       },
       "footer": {
         "locations": [],
@@ -5265,6 +5341,7 @@
         "email": "office@makler-realty.com",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
+      "resources": null,
       "footer": {
         "locations": [],
         "locationsLabel": "אזורים",
