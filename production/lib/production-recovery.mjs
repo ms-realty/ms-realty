@@ -1,7 +1,13 @@
 import fs from "node:fs";
+import path from "node:path";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_PRODUCTION_RECOVERY_REPORT = fromRoot("production", "data", "production-recovery-report.json");
+export const DEFAULT_PRODUCTION_RECOVERY_REPORT_EXAMPLE = fromRoot(
+  "production",
+  "data",
+  "production-recovery-report.json.example",
+);
 
 const REQUIRED_COMPONENTS = ["payload_postgres", "runtime_data", "runtime_evidence"];
 const SECRET_FIELD_PATTERN = /(authorization|password|secret|token|api(?:access)?key|accesskey|privatekey)/i;
@@ -105,4 +111,15 @@ export function productionRecoveryState(reportPath = DEFAULT_PRODUCTION_RECOVERY
   } catch (error) {
     return { status: "invalid_report", path: reportPath, error: error.message };
   }
+}
+
+export function readProductionRecoveryTemplate(reportPath = DEFAULT_PRODUCTION_RECOVERY_REPORT_EXAMPLE) {
+  return fs.readFileSync(reportPath, "utf8");
+}
+
+export function writeProductionRecoveryReport(report, outPath = DEFAULT_PRODUCTION_RECOVERY_REPORT) {
+  assertProductionRecoveryReport(report);
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
+  fs.writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);
+  return outPath;
 }

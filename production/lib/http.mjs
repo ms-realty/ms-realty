@@ -161,7 +161,11 @@ import {
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
 import { payloadRuntimeImportSummary, writePayloadRuntimeReport } from "./payload-runtime.mjs";
 import { payloadRuntimeBootstrapPayload } from "./payload-runtime-bootstrap.mjs";
-import { productionRecoveryState } from "./production-recovery.mjs";
+import {
+  productionRecoveryState,
+  readProductionRecoveryTemplate,
+  writeProductionRecoveryReport,
+} from "./production-recovery.mjs";
 import { buildOperationsReport, renderOperationsReportCsv } from "./operations-report.mjs";
 import { renderLaunchInputChecklist } from "./launch-inputs.mjs";
 import { loadCmsCollections } from "./cms-seed.mjs";
@@ -327,8 +331,18 @@ function liveServiceReportInput(request, url) {
   const input = parseBody(request);
   return {
     source: input.source || url.searchParams.get("source"),
-    report: input.report || input,
+    report: reportJsonInput(input),
   };
+}
+
+function reportJsonInput(input) {
+  const report = input && typeof input === "object" && !Array.isArray(input) && Object.hasOwn(input, "report") ? input.report : input;
+  if (typeof report !== "string") return report;
+  try {
+    return JSON.parse(report);
+  } catch {
+    throw new Error("Report must be valid JSON");
+  }
 }
 
 function reviewedReplyInput(request) {
@@ -432,8 +446,14 @@ function renderMigrationReviewPayload(registry, url, dashboard, routes, approval
     liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     liveServiceProvisioningImportEndpoint: "/api/admin/live-service-provisioning/import",
+    liveServiceReportTemplateEndpoint: "/api/admin/live-service-report-template",
+    liveServiceReportImportEndpoint: "/api/admin/live-service-reports/import",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     payloadRuntimeBootstrapEndpoint: "/api/admin/payload-runtime-bootstrap",
+    payloadRuntimeImportEndpoint: "/api/admin/payload-runtime/import",
+    productionRecoveryEndpoint: "/api/admin/production-recovery",
+    productionRecoveryTemplateEndpoint: "/api/admin/production-recovery-template",
+    productionRecoveryImportEndpoint: "/api/admin/production-recovery/import",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     listingQualityEndpoint: "/api/admin/listing-quality",
@@ -1314,7 +1334,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-provisioning/import") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const report = parseJsonBody(request);
+        const report = reportJsonInput(parseJsonBody(request));
         const outPath = writeLiveServiceProvisioningReport(report, liveServiceProvisioningReportPath || undefined);
         const provisioning = liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined);
         recordAudit({
@@ -1345,6 +1365,21 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime-bootstrap") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       return adminJson(200, payloadRuntimeBootstrapPayload());
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/production-recovery") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, {
+        kind: "admin_production_recovery",
+        recovery: productionRecoveryState(productionRecoveryReportPath || undefined),
+      });
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/production-recovery-template") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminResponse(200, readProductionRecoveryTemplate(), "application/json; charset=utf-8", {
+        "content-disposition": 'attachment; filename="production-recovery-report.json.example"',
+      });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
@@ -1395,7 +1430,7 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const report = parseJsonBody(request);
+        const report = reportJsonInput(parseJsonBody(request));
         const outPath = writePayloadRuntimeReport(report, payloadRuntimeReportPath || undefined);
         const runtime = payloadRuntimeImportSummary(report);
         recordAudit({
@@ -1413,6 +1448,31 @@ export function createHttpApp({
           },
         });
         return adminJson(report.ready ? 201 : 202, { imported: { outPath, summary: report.summary }, report: currentLaunchReadiness(), runtime });
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/production-recovery/import") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const report = reportJsonInput(parseJsonBody(request));
+        const outPath = writeProductionRecoveryReport(report, productionRecoveryReportPath || undefined);
+        const recovery = productionRecoveryState(productionRecoveryReportPath || undefined);
+        recordAudit({
+          action: "production_recovery_report_imported",
+          actor: "operations",
+          objectType: "production_recovery_report",
+          objectId: report.backup.backup_id,
+          metadata: {
+            backup_id: report.backup.backup_id,
+            drill_id: report.restore_drill.drill_id,
+            out_path: outPath,
+            provider: report.policy.provider,
+            status: recovery.status,
+          },
+        });
+        return adminJson(201, { imported: { outPath }, recovery, report: currentLaunchReadiness() });
       } catch (error) {
         return adminJson(400, { kind: "bad_request", message: error.message });
       }

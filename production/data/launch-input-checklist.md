@@ -21,7 +21,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - payload_runtime: Use /api/admin/payload-runtime-bootstrap to provision the private env and Postgres runtime.
 - payload_runtime: Run npm run payload:runtime, import the redacted report through /api/admin/payload-runtime/import, then run npm run payload:preflight.
 - production_recovery: Complete an encrypted off-site backup and isolated restore drill using production data stores.
-- production_recovery: Fill production/data/production-recovery-report.json from the example, then run npm run launch:preflight.
+- production_recovery: Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import.
 
 ## Redirect Reviews
 
@@ -125,6 +125,9 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Current evidence: missing_report (/Users/ivan/Code/MS-Realty/production/data/production-recovery-report.json)
 - Private report: `production/data/production-recovery-report.json` (ignored)
 - Report example: `production/data/production-recovery-report.json.example`
+- Admin template endpoint: `GET /api/admin/production-recovery-template`
+- Admin status endpoint: `GET /api/admin/production-recovery`
+- Admin import endpoint: `POST /api/admin/production-recovery/import` accepts only validated, redacted production evidence.
 - Path override: `MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH`
 - Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.

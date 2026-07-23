@@ -511,6 +511,8 @@ remaining legacy URLs must not be treated as complete.
 The authoritative launch report now enforces that recovery evidence as `production_recovery`: a local
 Docker snapshot cannot pass it, and the private report must prove encrypted off-site coverage plus a
 successful isolated restore drill of the cited backup with a named operator and separate reviewer approval.
+The admin launch workbench exposes a safe example, current status, and a validated audited import path;
+it does not create that external evidence or clear the gate without the real operator-supplied report.
 
 ---
 

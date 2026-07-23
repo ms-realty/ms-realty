@@ -59,6 +59,46 @@ function actionCounts(rows) {
   }, {});
 }
 
+function validProductionRecoveryReport() {
+  return {
+    schema_version: 1,
+    generated_at: "2026-07-22T23:40:00.000Z",
+    environment: "production",
+    ready: true,
+    policy: {
+      provider: "eu-backup-provider",
+      offsite: true,
+      encrypted_at_rest: true,
+      encrypted_in_transit: true,
+      retention_days: 30,
+      rpo_hours: 24,
+      rto_hours: 8,
+    },
+    backup: {
+      backup_id: "backup-20260722-001",
+      completed_at: "2026-07-22T23:00:00.000Z",
+      checksum_verified: true,
+      components: ["payload_postgres", "runtime_data", "runtime_evidence"],
+    },
+    restore_drill: {
+      drill_id: "restore-20260722-001",
+      source_backup_id: "backup-20260722-001",
+      completed_at: "2026-07-22T23:15:00.000Z",
+      target: "isolated",
+      status: "pass",
+      checksum_verified: true,
+      rollback_procedure_verified: true,
+      components_verified: ["payload_postgres", "runtime_data", "runtime_evidence"],
+      operator: "operations_manager",
+    },
+    approval: {
+      status: "approved",
+      reviewer: "agency_owner",
+      approved_at: "2026-07-22T23:30:00.000Z",
+    },
+  };
+}
+
 function completeListingQualityReviewCsv(workbookCsv, limit = null) {
   const headers = [
     "listing_id",
@@ -143,6 +183,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
     fs.readFileSync("production/data/live-service-provisioning-report.json", "utf8"),
   );
   const payloadRuntimeReportPath = `${seoEvidenceInputDir}/payload-runtime-report.json`;
+  const productionRecoveryReportPath = `${seoEvidenceInputDir}/production-recovery-report.json`;
   const listingQualityReviewPath = `${seoEvidenceInputDir}/listing-quality.csv`;
   const listingEditLedgerPath = tempDefaultListingEdits();
   const auditLogPath = tempJsonl("app-admin-audit");
@@ -172,6 +213,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       MS_REALTY_HERMES_WORKER_REPORT_PATH: hermesWorkerReportPath,
       MS_REALTY_LIVE_SERVICE_PROVISIONING_REPORT_PATH: liveServiceProvisioningReportPath,
       MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimeReportPath,
+      MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH: productionRecoveryReportPath,
       MS_REALTY_RECEIVED_AT: "2026-07-04T00:00:00Z",
       MS_REALTY_LOCALE_REGISTRY_PATH: tempJson("app-admin-locales", fs.readFileSync("locales/registry.json", "utf8")),
       MS_REALTY_LISTING_EDIT_LEDGER_PATH: listingEditLedgerPath,
@@ -205,6 +247,9 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const liveServiceReportTemplateRoute = await import("../../app/api/admin/live-service-report-template/route.js");
       const liveServiceReportImportRoute = await import("../../app/api/admin/live-service-reports/import/route.js");
       const payloadRuntimeImportRoute = await import("../../app/api/admin/payload-runtime/import/route.js");
+      const productionRecoveryRoute = await import("../../app/api/admin/production-recovery/route.js");
+      const productionRecoveryTemplateRoute = await import("../../app/api/admin/production-recovery-template/route.js");
+      const productionRecoveryImportRoute = await import("../../app/api/admin/production-recovery/import/route.js");
       const launchReadinessExportRoute = await import("../../app/api/admin/launch-readiness/export/route.js");
       const launchReadinessRoute = await import("../../app/api/admin/launch-readiness/route.js");
       const preflightReportsRoute = await import("../../app/api/admin/preflight-reports/route.js");
@@ -906,6 +951,58 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(payloadImportBody.report.gates.find((gate) => gate.id === "payload_runtime").status, "pass");
       assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
 
+      const productionRecoveryUnauthorized = await productionRecoveryRoute.GET(
+        new Request("https://example.test/api/admin/production-recovery"),
+      );
+      const productionRecovery = await productionRecoveryRoute.GET(
+        new Request("https://example.test/api/admin/production-recovery", { headers: auth }),
+      );
+      const productionRecoveryBody = await productionRecovery.json();
+      assert.equal(productionRecoveryUnauthorized.status, 401);
+      assert.equal(productionRecovery.status, 200);
+      assert.equal(productionRecoveryBody.kind, "admin_production_recovery");
+      assert.equal(productionRecoveryBody.recovery.status, "missing_report");
+
+      const productionRecoveryTemplate = await productionRecoveryTemplateRoute.GET(
+        new Request("https://example.test/api/admin/production-recovery-template", { headers: auth }),
+      );
+      const productionRecoveryTemplateBody = await productionRecoveryTemplate.json();
+      assert.equal(productionRecoveryTemplate.status, 200);
+      assert.equal(
+        productionRecoveryTemplate.headers.get("content-disposition"),
+        'attachment; filename="production-recovery-report.json.example"',
+      );
+      assert.equal(productionRecoveryTemplateBody.example, true);
+
+      const invalidProductionRecoveryImport = await productionRecoveryImportRoute.POST(
+        new Request("https://example.test/api/admin/production-recovery/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({ report: "not-json" }),
+        }),
+      );
+      const invalidProductionRecoveryImportBody = await invalidProductionRecoveryImport.json();
+      assert.equal(invalidProductionRecoveryImport.status, 400);
+      assert.match(invalidProductionRecoveryImportBody.message, /valid JSON/);
+      assert.equal(fs.existsSync(productionRecoveryReportPath), false);
+
+      const productionRecoveryImport = await productionRecoveryImportRoute.POST(
+        new Request("https://example.test/api/admin/production-recovery/import", {
+          method: "POST",
+          headers: { ...auth, "content-type": "application/json" },
+          body: JSON.stringify({ report: JSON.stringify(validProductionRecoveryReport()) }),
+        }),
+      );
+      const productionRecoveryImportBody = await productionRecoveryImport.json();
+      assert.equal(productionRecoveryImport.status, 201, JSON.stringify(productionRecoveryImportBody));
+      assert.equal(productionRecoveryImportBody.imported.outPath, productionRecoveryReportPath);
+      assert.equal(productionRecoveryImportBody.recovery.status, "pass");
+      assert.equal(
+        productionRecoveryImportBody.report.gates.find((gate) => gate.id === "production_recovery").status,
+        "pass",
+      );
+      assert.equal(fs.existsSync(productionRecoveryReportPath), true);
+
       const migrationReviewUnauthorized = await migrationReviewRoute.GET(
         new Request("https://example.test/api/admin/migration/review?locale=bg"),
       );
@@ -940,8 +1037,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(migrationReviewBody.liveServicesEndpoint, "/api/admin/live-services");
       assert.equal(migrationReviewBody.liveServiceProvisioningEndpoint, "/api/admin/live-service-provisioning");
       assert.equal(migrationReviewBody.liveServiceProvisioningImportEndpoint, "/api/admin/live-service-provisioning/import");
+      assert.equal(migrationReviewBody.liveServiceReportTemplateEndpoint, "/api/admin/live-service-report-template");
+      assert.equal(migrationReviewBody.liveServiceReportImportEndpoint, "/api/admin/live-service-reports/import");
       assert.equal(migrationReviewBody.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
       assert.equal(migrationReviewBody.payloadRuntimeBootstrapEndpoint, "/api/admin/payload-runtime-bootstrap");
+      assert.equal(migrationReviewBody.payloadRuntimeImportEndpoint, "/api/admin/payload-runtime/import");
+      assert.equal(migrationReviewBody.productionRecoveryEndpoint, "/api/admin/production-recovery");
+      assert.equal(migrationReviewBody.productionRecoveryTemplateEndpoint, "/api/admin/production-recovery-template");
+      assert.equal(migrationReviewBody.productionRecoveryImportEndpoint, "/api/admin/production-recovery/import");
       assert.equal(migrationReviewBody.cmsCollectionsEndpoint, "/api/admin/cms-collections");
       assert.equal(migrationReviewBody.payloadCollectionsEndpoint, "/api/admin/payload-collections");
       assert.equal(migrationReviewBody.listingQualityEndpoint, "/api/admin/listing-quality");
@@ -982,9 +1085,23 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         ),
         true,
       );
+      assert.equal(
+        migrationReviewHtmlBody.includes('data-live-service-report-import-endpoint="/api/admin/live-service-reports/import"'),
+        true,
+      );
       assert.equal(migrationReviewHtmlBody.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
       assert.equal(
         migrationReviewHtmlBody.includes('data-payload-runtime-bootstrap-endpoint="/api/admin/payload-runtime-bootstrap"'),
+        true,
+      );
+      assert.equal(migrationReviewHtmlBody.includes('data-payload-runtime-import-endpoint="/api/admin/payload-runtime/import"'), true);
+      assert.equal(migrationReviewHtmlBody.includes('data-production-recovery-endpoint="/api/admin/production-recovery"'), true);
+      assert.equal(
+        migrationReviewHtmlBody.includes('data-production-recovery-template-endpoint="/api/admin/production-recovery-template"'),
+        true,
+      );
+      assert.equal(
+        migrationReviewHtmlBody.includes('data-production-recovery-import-endpoint="/api/admin/production-recovery/import"'),
         true,
       );
       assert.equal(migrationReviewHtmlBody.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
@@ -1008,6 +1125,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.match(migrationReviewHtmlBody, /data-route-decision-target-preview="true"/);
       assert.match(migrationReviewHtmlBody, /data-route-target-options="true"/);
       assert.match(migrationReviewHtmlBody, /data-launch-evidence-disclosure="true"/);
+      assert.match(migrationReviewHtmlBody, /data-admin-runtime-evidence-form="live-service-provisioning"/);
+      assert.match(migrationReviewHtmlBody, /data-admin-runtime-evidence-form="live-service-reports"/);
+      assert.match(migrationReviewHtmlBody, /data-admin-runtime-evidence-form="payload-runtime"/);
+      assert.match(migrationReviewHtmlBody, /data-admin-runtime-evidence-form="production-recovery"/);
       assert.match(migrationReviewHtmlBody, /data-redirect-tools-disclosure="true"/);
       assert.match(migrationReviewHtmlBody, /Данните за старите страници са само за справка/);
       assert.match(migrationReviewHtmlBody, /data-seo-tools-disclosure="true"/);
@@ -1759,6 +1880,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
         live_service_provisioning_report_imported: 1,
         live_service_report_imported: 1,
         payload_runtime_report_imported: 2,
+        production_recovery_report_imported: 1,
         seo_evidence_imported: 1,
         launch_readiness_exported: 1,
         redirect_approval_created: 1,

@@ -65,7 +65,11 @@ import {
   writeLiveServiceReport,
 } from "./launch-readiness.mjs";
 import { liveServiceProvisioningState, writeLiveServiceProvisioningReport } from "./live-service-provisioning.mjs";
-import { productionRecoveryState } from "./production-recovery.mjs";
+import {
+  productionRecoveryState,
+  readProductionRecoveryTemplate,
+  writeProductionRecoveryReport,
+} from "./production-recovery.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH, appendLead, readLeadLedger } from "./lead-ledger.mjs";
 import { DEFAULT_LEAD_CONTACT_VAULT_PATH, appendLeadContact, withLeadContacts } from "./lead-contact-vault.mjs";
 import { normalizeBrokerLeadInput } from "./leads.mjs";
@@ -444,7 +448,17 @@ function seoExportInput(request, url, body) {
 
 function liveServiceReportInput(request, url, body) {
   const input = parseBody(request, body);
-  return { source: input.source || url.searchParams.get("source"), report: input.report || input };
+  return { source: input.source || url.searchParams.get("source"), report: reportJsonInput(input) };
+}
+
+function reportJsonInput(input) {
+  const report = input && typeof input === "object" && !Array.isArray(input) && Object.hasOwn(input, "report") ? input.report : input;
+  if (typeof report !== "string") return report;
+  try {
+    return JSON.parse(report);
+  } catch {
+    throw new Error("Report must be valid JSON");
+  }
 }
 
 function reviewedReplyInput(input) {
@@ -1038,8 +1052,14 @@ function migrationReviewPayload(registry, url, config) {
     liveServicesEndpoint: "/api/admin/live-services",
     liveServiceProvisioningEndpoint: "/api/admin/live-service-provisioning",
     liveServiceProvisioningImportEndpoint: "/api/admin/live-service-provisioning/import",
+    liveServiceReportTemplateEndpoint: "/api/admin/live-service-report-template",
+    liveServiceReportImportEndpoint: "/api/admin/live-service-reports/import",
     payloadRuntimeEndpoint: "/api/admin/payload-runtime",
     payloadRuntimeBootstrapEndpoint: "/api/admin/payload-runtime-bootstrap",
+    payloadRuntimeImportEndpoint: "/api/admin/payload-runtime/import",
+    productionRecoveryEndpoint: "/api/admin/production-recovery",
+    productionRecoveryTemplateEndpoint: "/api/admin/production-recovery-template",
+    productionRecoveryImportEndpoint: "/api/admin/production-recovery/import",
     cmsCollectionsEndpoint: "/api/admin/cms-collections",
     payloadCollectionsEndpoint: "/api/admin/payload-collections",
     listingQualityEndpoint: "/api/admin/listing-quality",
@@ -1945,6 +1965,28 @@ function importLiveServiceProvisioningReport(report, config) {
   return { imported: { outPath, summary: report.summary }, provisioning, report: launchReadiness(config) };
 }
 
+function importProductionRecoveryReport(report, config) {
+  const outPath = writeProductionRecoveryReport(report, config.productionRecoveryReportPath || undefined);
+  const recovery = productionRecoveryState(config.productionRecoveryReportPath || undefined);
+  recordAudit(
+    {
+      action: "production_recovery_report_imported",
+      actor: "operations",
+      objectType: "production_recovery_report",
+      objectId: report.backup.backup_id,
+      metadata: {
+        backup_id: report.backup.backup_id,
+        drill_id: report.restore_drill.drill_id,
+        out_path: outPath,
+        provider: report.policy.provider,
+        status: recovery.status,
+      },
+    },
+    config,
+  );
+  return { imported: { outPath }, recovery, report: launchReadiness(config) };
+}
+
 function importSeoEvidence(input, config) {
   const result = importAppSeoEvidenceRows(input, config);
   recordAudit(
@@ -2169,7 +2211,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       });
     }
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-provisioning/import") {
-      const report = parseJsonBody(await readRequestBody(request, config.maxBodyBytes));
+      const report = reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)));
       return jsonResponse(report.ready ? 201 : 202, importLiveServiceProvisioningReport(report, config));
     }
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {
@@ -2180,6 +2222,15 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     }
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime-bootstrap") {
       return jsonResponse(200, payloadRuntimeBootstrapPayload());
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/production-recovery") {
+      return jsonResponse(200, {
+        kind: "admin_production_recovery",
+        recovery: productionRecoveryState(config.productionRecoveryReportPath || undefined),
+      });
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/production-recovery-template") {
+      return downloadJsonResponse(readProductionRecoveryTemplate(), "production-recovery-report.json.example");
     }
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
       const template = readLiveServiceReportTemplate(url.searchParams.get("source"));
@@ -2236,8 +2287,17 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.livePreflight.ready ? 201 : 202, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
-      const report = parseJsonBody(await readRequestBody(request, config.maxBodyBytes));
+      const report = reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)));
       return jsonResponse(report.ready ? 201 : 202, importPayloadRuntimeReport(report, config));
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/production-recovery/import") {
+      return jsonResponse(
+        201,
+        importProductionRecoveryReport(
+          reportJsonInput(parseJsonBody(await readRequestBody(request, config.maxBodyBytes))),
+          config,
+        ),
+      );
     }
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
       const result = importSeoEvidence(seoExportInput(request, url, await readRequestBody(request, config.maxBodyBytes)), config);

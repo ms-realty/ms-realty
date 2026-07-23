@@ -58,6 +58,46 @@ function healthyHermesAgentFetch(url) {
   return { ok: true, status: 200 };
 }
 
+function validProductionRecoveryReport() {
+  return {
+    schema_version: 1,
+    generated_at: "2026-07-22T23:40:00.000Z",
+    environment: "production",
+    ready: true,
+    policy: {
+      provider: "eu-backup-provider",
+      offsite: true,
+      encrypted_at_rest: true,
+      encrypted_in_transit: true,
+      retention_days: 30,
+      rpo_hours: 24,
+      rto_hours: 8,
+    },
+    backup: {
+      backup_id: "backup-20260722-001",
+      completed_at: "2026-07-22T23:00:00.000Z",
+      checksum_verified: true,
+      components: ["payload_postgres", "runtime_data", "runtime_evidence"],
+    },
+    restore_drill: {
+      drill_id: "restore-20260722-001",
+      source_backup_id: "backup-20260722-001",
+      completed_at: "2026-07-22T23:15:00.000Z",
+      target: "isolated",
+      status: "pass",
+      checksum_verified: true,
+      rollback_procedure_verified: true,
+      components_verified: ["payload_postgres", "runtime_data", "runtime_evidence"],
+      operator: "operations_manager",
+    },
+    approval: {
+      status: "approved",
+      reviewer: "agency_owner",
+      approved_at: "2026-07-22T23:30:00.000Z",
+    },
+  };
+}
+
 function tempLedger() {
   const file = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-`)}/leads.jsonl`;
   resetLeadLedger(file);
@@ -1544,8 +1584,14 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(review.body.liveServicesEndpoint, "/api/admin/live-services");
   assert.equal(review.body.liveServiceProvisioningEndpoint, "/api/admin/live-service-provisioning");
   assert.equal(review.body.liveServiceProvisioningImportEndpoint, "/api/admin/live-service-provisioning/import");
+  assert.equal(review.body.liveServiceReportTemplateEndpoint, "/api/admin/live-service-report-template");
+  assert.equal(review.body.liveServiceReportImportEndpoint, "/api/admin/live-service-reports/import");
   assert.equal(review.body.payloadRuntimeEndpoint, "/api/admin/payload-runtime");
   assert.equal(review.body.payloadRuntimeBootstrapEndpoint, "/api/admin/payload-runtime-bootstrap");
+  assert.equal(review.body.payloadRuntimeImportEndpoint, "/api/admin/payload-runtime/import");
+  assert.equal(review.body.productionRecoveryEndpoint, "/api/admin/production-recovery");
+  assert.equal(review.body.productionRecoveryTemplateEndpoint, "/api/admin/production-recovery-template");
+  assert.equal(review.body.productionRecoveryImportEndpoint, "/api/admin/production-recovery/import");
   assert.equal(review.body.cmsCollectionsEndpoint, "/api/admin/cms-collections");
   assert.equal(review.body.payloadCollectionsEndpoint, "/api/admin/payload-collections");
   assert.equal(review.body.listingQualityEndpoint, "/api/admin/listing-quality");
@@ -1588,8 +1634,15 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     reviewHtml.body.includes('data-live-service-provisioning-import-endpoint="/api/admin/live-service-provisioning/import"'),
     true,
   );
+  assert.equal(reviewHtml.body.includes('data-live-service-report-import-endpoint="/api/admin/live-service-reports/import"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-runtime-endpoint="/api/admin/payload-runtime"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-runtime-bootstrap-endpoint="/api/admin/payload-runtime-bootstrap"'), true);
+  assert.equal(reviewHtml.body.includes('data-payload-runtime-import-endpoint="/api/admin/payload-runtime/import"'), true);
+  assert.equal(reviewHtml.body.includes('data-production-recovery-endpoint="/api/admin/production-recovery"'), true);
+  assert.equal(
+    reviewHtml.body.includes('data-production-recovery-import-endpoint="/api/admin/production-recovery/import"'),
+    true,
+  );
   assert.equal(reviewHtml.body.includes('data-cms-collections-endpoint="/api/admin/cms-collections"'), true);
   assert.equal(reviewHtml.body.includes('data-payload-collections-endpoint="/api/admin/payload-collections"'), true);
   assert.equal(reviewHtml.body.includes('data-listing-quality-endpoint="/api/admin/listing-quality"'), true);
@@ -1602,6 +1655,10 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   );
   assert.equal(reviewHtml.body.includes('data-quality-listing="true"'), true);
   assert.equal(reviewHtml.body.includes('data-listing-quality-review-form="true"'), true);
+  assert.equal(reviewHtml.body.includes('data-admin-runtime-evidence-form="live-service-provisioning"'), true);
+  assert.equal(reviewHtml.body.includes('data-admin-runtime-evidence-form="live-service-reports"'), true);
+  assert.equal(reviewHtml.body.includes('data-admin-runtime-evidence-form="payload-runtime"'), true);
+  assert.equal(reviewHtml.body.includes('data-admin-runtime-evidence-form="production-recovery"'), true);
   const auditRows = readAuditLog(auditLogPath);
   assert.equal(assertAuditLog(auditRows), true);
   assert.equal(auditRows.find((row) => row.action === "listing_quality_imported").object_id, inlineQualityReview.listing_id);
@@ -2568,6 +2625,61 @@ test("HTTP public delivery requests fail closed when private contact storage is 
   assert.equal(languageRequest.status, 400);
   assert.match(savedSearch.body.message, /delivery storage is not configured/);
   assert.match(languageRequest.body.message, /delivery storage is not configured/);
+});
+
+test("HTTP admin validates and audits production recovery evidence intake", async () => {
+  const directory = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-http-production-recovery-`);
+  const productionRecoveryReportPath = `${directory}/private/production-recovery-report.json`;
+  const auditLogPath = tempAuditLog();
+  const app = createHttpApp({
+    auditLogPath,
+    productionRecoveryReportPath,
+    reviewedAt: "2026-07-23T00:00:00.000Z",
+  });
+  const auth = { authorization: "Bearer local-admin-smoke" };
+
+  const unauthorized = await dispatchHttp(app, { url: "/api/admin/production-recovery" });
+  const before = await dispatchHttp(app, { url: "/api/admin/production-recovery", headers: auth });
+  const template = await dispatchHttp(app, { url: "/api/admin/production-recovery-template", headers: auth });
+  const invalid = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/production-recovery/import",
+    headers: auth,
+    body: { report: "not-json" },
+  });
+  const imported = await dispatchHttp(app, {
+    method: "POST",
+    url: "/api/admin/production-recovery/import",
+    headers: auth,
+    body: { report: JSON.stringify(validProductionRecoveryReport()) },
+  });
+  const reviewHtml = await dispatchHttp(app, {
+    url: "/admin/migration/review?locale=en",
+    headers: auth,
+  });
+
+  assert.equal(unauthorized.status, 401);
+  assert.equal(before.status, 200);
+  assert.equal(before.body.kind, "admin_production_recovery");
+  assert.equal(before.body.recovery.status, "missing_report");
+  assert.equal(template.status, 200);
+  assert.equal(template.headers["content-disposition"], 'attachment; filename="production-recovery-report.json.example"');
+  assert.equal(JSON.parse(template.body).example, true);
+  assert.equal(invalid.status, 400);
+  assert.match(invalid.body.message, /valid JSON/);
+  assert.equal(imported.status, 201);
+  assert.equal(imported.body.imported.outPath, productionRecoveryReportPath);
+  assert.equal(imported.body.recovery.status, "pass");
+  assert.equal(imported.body.report.gates.find((gate) => gate.id === "production_recovery").status, "pass");
+  assert.equal(fs.existsSync(productionRecoveryReportPath), true);
+  assert.equal(reviewHtml.body.includes('data-production-recovery-import-endpoint="/api/admin/production-recovery/import"'), true);
+  assert.equal(reviewHtml.body.includes('data-admin-runtime-evidence-form="production-recovery"'), true);
+
+  const audit = readAuditLog(auditLogPath).find((row) => row.action === "production_recovery_report_imported");
+  assert.equal(assertAuditLog(readAuditLog(auditLogPath)), true);
+  assert.equal(audit.object_id, "backup-20260722-001");
+  assert.equal(audit.metadata.drill_id, "restore-20260722-001");
+  assert.equal(audit.metadata.status, "pass");
 });
 
 test("generated HTTP smoke file is valid when present", () => {

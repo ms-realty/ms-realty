@@ -281,6 +281,9 @@ ${payloadCheckLines(payloadEvidence).join("\n")}
 - Current evidence: ${recoveryEvidence.status || "unknown"}${recoveryEvidence.path ? ` (${recoveryEvidence.path})` : ""}${recoveryEvidence.error ? ` — ${recoveryEvidence.error}` : ""}
 - Private report: \`production/data/production-recovery-report.json\` (ignored)
 - Report example: \`production/data/production-recovery-report.json.example\`
+- Admin template endpoint: \`GET /api/admin/production-recovery-template\`
+- Admin status endpoint: \`GET /api/admin/production-recovery\`
+- Admin import endpoint: \`POST /api/admin/production-recovery/import\` accepts only validated, redacted production evidence.
 - Path override: \`MS_REALTY_PRODUCTION_RECOVERY_REPORT_PATH\`
 - Required scope: encrypted-at-rest and encrypted-in-transit off-site backups covering Payload/Postgres, CRM/CMS runtime data, and runtime evidence.
 - Required drill: successful isolated restore of the cited backup with checksums, rollback procedure verification, named operator, and separate named reviewer approval.

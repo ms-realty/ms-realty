@@ -458,13 +458,30 @@ a.mk-btn:hover { text-decoration: none; }
 [data-client-save-listing][data-active="true"] .mk-icon { fill: currentColor; transform: scale(1.06); }
 
 @media (max-width: 760px) {
+  .hp-resorts {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(78vw, 300px);
+    gap: var(--space-3);
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 0 var(--gutter) var(--space-2);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: var(--gutter);
+    scroll-snap-type: inline mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hp-resorts::-webkit-scrollbar { display: none; }
+  .hp-resort { scroll-snap-align: start; scroll-snap-stop: always; }
+  .hp-resort:hover { transform: none; }
   .hp-grid,
   .ld-similar__grid { grid-template-columns: 1fr; gap: var(--space-7); }
   .hp-sec { padding-block: var(--space-8); }
   .hp-sec__head { margin-bottom: var(--space-5); }
   .hp-sec__head h2 { font-size: var(--text-2xl); }
   .hp-hero { min-height: min(620px, calc(100svh - 64px)); }
-  .hp-hero h1 { max-width: 13ch; font-size: var(--display-sm); line-height: var(--lh-tight); }
+  .hp-hero h1 { max-width: min(13ch, 100%); font-size: var(--display-sm); line-height: var(--lh-tight); overflow-wrap: anywhere; }
   .hp-hero p { max-width: 32ch; font-size: var(--text-md); }
   .hp-guides__rail {
     grid-template-columns: none;
@@ -482,6 +499,7 @@ a.mk-btn:hover { text-decoration: none; }
   }
   .hp-guides__rail::-webkit-scrollbar { display: none; }
   .hp-guide { min-height: 184px; padding: var(--space-4); scroll-snap-align: start; }
+  .hp-guide h3 { max-width: 100%; overflow-wrap: anywhere; }
   .hp-guide:hover { transform: none; }
 
   .mk-pcard {
@@ -818,6 +836,7 @@ dl[data-listing-facts="true"] {
   padding: var(--space-5);
 }
 dl[data-listing-facts="true"] dt { font-size: var(--text-2xs); }
+dl[data-listing-facts="true"] > * { min-width: 0; overflow-wrap: anywhere; }
 .ld-gallery-full { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-6); }
 .ld-gallery-full img { width: 100%; height: 180px; object-fit: cover; border-radius: var(--radius-image); background: var(--surface-sunken); }
 .ld-gallery-full img:first-child { grid-column: span 2; height: 300px; }
@@ -1180,7 +1199,7 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     z-index: 35;
     inset-inline: 0;
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(132px, 1.2fr) 52px;
+    grid-template-columns: minmax(100px, 1fr) minmax(104px, 1.1fr) 52px;
     gap: var(--space-3);
     bottom: 0;
     align-items: center;

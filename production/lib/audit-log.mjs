@@ -28,6 +28,7 @@ const ADMIN_ACTIONS = new Set([
   "live_service_report_imported",
   "locale_created",
   "payload_runtime_report_imported",
+  "production_recovery_report_imported",
   "public_request_outcome_recorded",
   "redirect_approval_created",
   "redirect_approvals_imported",

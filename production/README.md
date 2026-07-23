@@ -257,13 +257,14 @@ Useful operator endpoints:
 - `GET /api/admin/launch-readiness` returns the launch gate report.
 - `GET /api/admin/launch-input-checklist` returns the remaining operator inputs as Markdown.
 - `GET /api/admin/live-service-report-template` and `POST /api/admin/live-service-reports/import` handle validated live report files.
+- `GET /api/admin/production-recovery-template`, `GET /api/admin/production-recovery`, and `POST /api/admin/production-recovery/import` provide a validated, audited recovery-evidence intake without committing the private report.
 - `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
 - `GET /api/admin/payload-collections` returns Payload-compatible collection configs generated from that manifest.
 - `GET /admin/requests?locale=bg|ru|en` and `GET /api/admin/requests` return the broker queue for saved-search alerts and language requests. Private contact values are decrypted only for this authenticated, `no-store` response.
 - `GET /admin/pipeline?locale=bg|ru|en` and `GET /api/admin/pipeline` return the buyer/renter operating queue, derived from attributed qualification outcomes plus actual viewing and closed-deal ledgers.
 - `POST /api/admin/lead-pipeline/outcome` records qualification, offer/application, due-diligence/contract/lease, loss/reopen, and internal-note transitions. The authenticated principal replaces any actor supplied by the browser.
 - `POST /api/admin/public-requests/outcome` records an attributed contacted, complete, close, reopen, or note transition and appends a privacy-safe audit row. Completed and closed saved searches are suppressed from future alert reports.
-- `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, and listing-quality review workbench. Brokers can sign off one listing at a time through the same validated, append-safe evidence path used by the bulk CSV import.
+- `GET /api/admin/migration/review?locale=bg|ru|en` returns the redirect, SEO, listing-quality, and runtime-evidence workbench. Brokers can sign off one listing at a time, while authorized operators import redacted live-search, Hermes, Payload, provisioning, and recovery reports through validated and audited endpoints.
 - `production/data/payload-collections.json` exports Payload-compatible collection configs generated from the CMS manifest; launch readiness still blocks until the Payload runtime dependency and config exist.
 
 Admin routes accept `local-admin-smoke` only outside `NODE_ENV=production`.

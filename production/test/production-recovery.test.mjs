@@ -6,6 +6,8 @@ import path from "node:path";
 import {
   assertProductionRecoveryReport,
   productionRecoveryState,
+  readProductionRecoveryTemplate,
+  writeProductionRecoveryReport,
 } from "../lib/production-recovery.mjs";
 
 function report() {
@@ -101,4 +103,19 @@ test("production recovery state accepts only a real private report", (t) => {
   assert.equal(productionRecoveryState(reportPath).status, "pass");
   assert.equal(productionRecoveryState(examplePath).status, "example_report");
   assert.equal(productionRecoveryState(path.join(directory, "missing.json")).status, "missing_report");
+});
+
+test("production recovery import validates before persisting and exposes the safe template", (t) => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-production-recovery-import-"));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const reportPath = path.join(directory, "private", "production-recovery-report.json");
+
+  assert.throws(
+    () => writeProductionRecoveryReport({ ...report(), ready: false }, reportPath),
+    /ready production evidence/,
+  );
+  assert.equal(fs.existsSync(reportPath), false);
+  assert.equal(writeProductionRecoveryReport(report(), reportPath), reportPath);
+  assert.equal(productionRecoveryState(reportPath).status, "pass");
+  assert.equal(JSON.parse(readProductionRecoveryTemplate()).example, true);
 });

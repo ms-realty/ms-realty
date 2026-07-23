@@ -48,6 +48,19 @@ const ADMIN_UI_COPY = {
     liveProvisioning: "Настройка на услуги",
     payloadRuntime: "Payload среда",
     payloadBootstrap: "Payload начална настройка",
+    productionRecovery: "Възстановяване на продукцията",
+    runtimeEvidenceImports: "Импорт на доказателства от работеща среда",
+    runtimeEvidenceHint: "Поставете само редактиран JSON отчет от реалната среда. Секрети не се приемат.",
+    liveServiceReports: "Отчети за търсене и Hermes",
+    redactedJsonReport: "Редактиран JSON отчет",
+    reportSource: "Тип отчет",
+    openStatus: "Отвори състоянието",
+    downloadTemplate: "Изтегли шаблон",
+    importReport: "Импортирай отчет",
+    reportSaving: "Проверка и импорт…",
+    reportSaved: "Отчетът е импортиран.",
+    reportFailed: "Отчетът не можа да бъде импортиран.",
+    csvContents: "CSV данни",
     cmsContracts: "CMS договори",
     payloadCollections: "Payload колекции",
     listingQuality: "Качество на обявите",
@@ -302,6 +315,19 @@ const ADMIN_UI_COPY = {
     liveProvisioning: "Настройка сервисов",
     payloadRuntime: "Среда Payload",
     payloadBootstrap: "Начальная настройка Payload",
+    productionRecovery: "Восстановление production-среды",
+    runtimeEvidenceImports: "Импорт доказательств рабочей среды",
+    runtimeEvidenceHint: "Вставьте только очищенный JSON-отчет из реальной среды. Секреты не принимаются.",
+    liveServiceReports: "Отчеты поиска и Hermes",
+    redactedJsonReport: "Очищенный JSON-отчет",
+    reportSource: "Тип отчета",
+    openStatus: "Открыть состояние",
+    downloadTemplate: "Скачать шаблон",
+    importReport: "Импортировать отчет",
+    reportSaving: "Проверка и импорт…",
+    reportSaved: "Отчет импортирован.",
+    reportFailed: "Не удалось импортировать отчет.",
+    csvContents: "Содержимое CSV",
     cmsContracts: "Контракты CMS",
     payloadCollections: "Коллекции Payload",
     listingQuality: "Качество объектов",
@@ -556,6 +582,19 @@ const ADMIN_UI_COPY = {
     liveProvisioning: "Live service provisioning",
     payloadRuntime: "Payload runtime",
     payloadBootstrap: "Payload runtime bootstrap",
+    productionRecovery: "Production recovery",
+    runtimeEvidenceImports: "Import runtime evidence",
+    runtimeEvidenceHint: "Paste only a redacted JSON report captured from the real environment. Secrets are rejected.",
+    liveServiceReports: "Search and Hermes reports",
+    redactedJsonReport: "Redacted JSON report",
+    reportSource: "Report type",
+    openStatus: "Open status",
+    downloadTemplate: "Download template",
+    importReport: "Import report",
+    reportSaving: "Validating and importing…",
+    reportSaved: "Report imported.",
+    reportFailed: "Report could not be imported.",
+    csvContents: "CSV contents",
     cmsContracts: "CMS collection contracts",
     payloadCollections: "Payload collection configs",
     listingQuality: "Listing quality",
@@ -4491,6 +4530,96 @@ function MigrationRoutePagination({ page }) {
   );
 }
 
+function RuntimeEvidenceImport({ action, kind, statusHref, summary, templateLinks = [], sourceOptions = [], ui }) {
+  return h(
+    "details",
+    { className: "adm-runtime-evidence", "data-admin-runtime-evidence": kind },
+    h(
+      "summary",
+      null,
+      h(Icon, { name: "upload", size: 17 }),
+      h("span", null, summary),
+      h(Icon, { name: "chevron-down", size: 16, className: "adm-runtime-evidence__chevron" }),
+    ),
+    h(
+      "div",
+      { className: "adm-runtime-evidence__body" },
+      h("p", { className: "adm-runtime-evidence__hint" }, ui.runtimeEvidenceHint),
+      h(
+        "div",
+        { className: "adm-runtime-evidence__links" },
+        statusHref
+          ? h(
+              "a",
+              { className: "mk-btn mk-btn--subtle mk-btn--sm", href: statusHref },
+              h(Icon, { name: "external-link", size: 16 }),
+              h("span", null, ui.openStatus),
+            )
+          : null,
+        ...templateLinks.map(([href, text]) =>
+          h(
+            "a",
+            { key: href, className: "mk-btn mk-btn--subtle mk-btn--sm", href },
+            h(Icon, { name: "download", size: 16 }),
+            h("span", null, text || ui.downloadTemplate),
+          ),
+        ),
+      ),
+      h(
+        "form",
+        {
+          method: "post",
+          action,
+          className: "adm-runtime-evidence__form",
+          "data-admin-mutation-form": "true",
+          "data-admin-runtime-evidence-form": kind,
+          "data-admin-mutation-saving": ui.reportSaving,
+          "data-admin-mutation-success": ui.reportSaved,
+          "data-admin-mutation-failure": ui.reportFailed,
+        },
+        sourceOptions.length
+          ? h(
+              "label",
+              null,
+              ui.reportSource,
+              h(
+                "select",
+                { name: "source", required: true },
+                ...sourceOptions.map(([value, text]) => h("option", { key: value, value }, text)),
+              ),
+            )
+          : null,
+        h(
+          "label",
+          null,
+          ui.redactedJsonReport,
+          h("textarea", {
+            name: "report",
+            rows: 8,
+            required: true,
+            spellCheck: "false",
+            autoCapitalize: "none",
+            autoCorrect: "off",
+            autoComplete: "off",
+            placeholder: "{\n  \"schema_version\": 1\n}",
+          }),
+        ),
+        h(
+          "div",
+          { className: "adm-runtime-evidence__actions" },
+          h("p", { role: "status", "aria-live": "polite", "data-admin-mutation-status": "true" }),
+          h(
+            "button",
+            { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" },
+            h(Icon, { name: "upload", size: 16 }),
+            h("span", null, ui.importReport),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function PendingLegacyRouteDecision({ page, route, ui, defaultOpen = false }) {
   const operatorId = currentOperatorId(page, "seo_editor");
   const evidence = route.source_evidence || {};
@@ -4811,6 +4940,11 @@ function MigrationReviewBody({ page }) {
     0,
   );
   const title = label(copy, "migrationReview", "Migration review");
+  const liveReportSources = [
+    ["typesense_meilisearch_sync", "Typesense / Meilisearch sync"],
+    ["typesense_meilisearch_query", "Typesense / Meilisearch query"],
+    ["hermes_draft_worker", "Hermes draft worker"],
+  ];
   const evidenceLinks = [
     [page.launchReadinessEndpoint, ui.launchReadiness],
     [page.launchInputChecklistEndpoint, ui.launchInputChecklist],
@@ -4820,6 +4954,7 @@ function MigrationReviewBody({ page }) {
     [page.liveServiceProvisioningEndpoint, ui.liveProvisioning],
     [page.payloadRuntimeEndpoint, ui.payloadRuntime],
     [page.payloadRuntimeBootstrapEndpoint, ui.payloadBootstrap],
+    [page.productionRecoveryEndpoint, ui.productionRecovery],
     [page.cmsCollectionsEndpoint, ui.cmsContracts],
     [page.payloadCollectionsEndpoint, ui.payloadCollections],
     [page.listingQualityEndpoint, ui.listingQuality],
@@ -4844,8 +4979,14 @@ function MigrationReviewBody({ page }) {
       "data-live-services-endpoint": page.liveServicesEndpoint,
       "data-live-service-provisioning-endpoint": page.liveServiceProvisioningEndpoint,
       "data-live-service-provisioning-import-endpoint": page.liveServiceProvisioningImportEndpoint,
+      "data-live-service-report-template-endpoint": page.liveServiceReportTemplateEndpoint,
+      "data-live-service-report-import-endpoint": page.liveServiceReportImportEndpoint,
       "data-payload-runtime-endpoint": page.payloadRuntimeEndpoint,
       "data-payload-runtime-bootstrap-endpoint": page.payloadRuntimeBootstrapEndpoint,
+      "data-payload-runtime-import-endpoint": page.payloadRuntimeImportEndpoint,
+      "data-production-recovery-endpoint": page.productionRecoveryEndpoint,
+      "data-production-recovery-template-endpoint": page.productionRecoveryTemplateEndpoint,
+      "data-production-recovery-import-endpoint": page.productionRecoveryImportEndpoint,
       "data-cms-collections-endpoint": page.cmsCollectionsEndpoint,
       "data-payload-collections-endpoint": page.payloadCollectionsEndpoint,
       "data-listing-quality-endpoint": page.listingQualityEndpoint,
@@ -4887,6 +5028,46 @@ function MigrationReviewBody({ page }) {
           "form",
           { method: "post", action: page.launchReadinessExportEndpoint, className: "adm-inline-form" },
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "download", size: 16 }), h("span", null, ui.exportLaunchReadiness)),
+        ),
+        h(
+          "section",
+          { className: "adm-runtime-evidence-list", "aria-label": ui.runtimeEvidenceImports },
+          h("h3", null, ui.runtimeEvidenceImports),
+          h(RuntimeEvidenceImport, {
+            action: page.liveServiceProvisioningImportEndpoint,
+            kind: "live-service-provisioning",
+            statusHref: page.liveServiceProvisioningEndpoint,
+            summary: ui.liveProvisioning,
+            ui,
+          }),
+          h(RuntimeEvidenceImport, {
+            action: page.liveServiceReportImportEndpoint,
+            kind: "live-service-reports",
+            statusHref: page.liveServicesEndpoint,
+            summary: ui.liveServiceReports,
+            sourceOptions: liveReportSources,
+            templateLinks: liveReportSources.map(([source, text]) => [
+              `${page.liveServiceReportTemplateEndpoint}?source=${encodeURIComponent(source)}`,
+              text,
+            ]),
+            ui,
+          }),
+          h(RuntimeEvidenceImport, {
+            action: page.payloadRuntimeImportEndpoint,
+            kind: "payload-runtime",
+            statusHref: page.payloadRuntimeEndpoint,
+            summary: ui.payloadRuntime,
+            templateLinks: [[page.payloadRuntimeBootstrapEndpoint, ui.payloadBootstrap]],
+            ui,
+          }),
+          h(RuntimeEvidenceImport, {
+            action: page.productionRecoveryImportEndpoint,
+            kind: "production-recovery",
+            statusHref: page.productionRecoveryEndpoint,
+            summary: ui.productionRecovery,
+            templateLinks: [[page.productionRecoveryTemplateEndpoint, ui.downloadTemplate]],
+            ui,
+          }),
         ),
         ),
       ),
@@ -5033,7 +5214,7 @@ function MigrationReviewBody({ page }) {
         h(
           "form",
           { method: "post", action: page.redirectApprovalImport.endpoint, className: "adm-csv-form" },
-          h("textarea", { name: "csv", rows: "5", required: true }),
+          h("label", null, ui.csvContents, h("textarea", { name: "csv", rows: "5", required: true })),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.importCsv)),
         ),
         h(
@@ -5087,7 +5268,7 @@ function MigrationReviewBody({ page }) {
               h("option", { value: "backlinks" }, "Backlinks"),
             ),
           ),
-          h("textarea", { name: "csv", rows: "5", required: true }),
+          h("label", null, ui.csvContents, h("textarea", { name: "csv", rows: "5", required: true })),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.importSeoCsv)),
         ),
         ),
@@ -5119,7 +5300,7 @@ function MigrationReviewBody({ page }) {
         h(
           "form",
           { method: "post", action: page.listingQualityImportEndpoint, className: "adm-csv-form" },
-          h("textarea", { name: "csv", rows: "5", required: true }),
+          h("label", null, ui.csvContents, h("textarea", { name: "csv", rows: "5", required: true })),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, h(Icon, { name: "upload", size: 16 }), h("span", null, ui.importQualityCsv)),
         ),
         page.listingQuality?.review_queue?.error

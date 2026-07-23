@@ -142,7 +142,7 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
   ],
   production_recovery: [
     "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
-    "Fill production/data/production-recovery-report.json from the example, then run npm run launch:preflight.",
+    "Download /api/admin/production-recovery-template, complete it with real evidence, and import it through /api/admin/production-recovery/import.",
   ],
 };
 
