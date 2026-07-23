@@ -37,4 +37,7 @@ test("admin reply client submits broker-only drafts and reviewed replies as JSON
   assert.match(ADMIN_APP_JS, /summary\.focus\(\{ preventScroll: true \}\)/);
   assert.match(ADMIN_APP_JS, /prefers-reduced-motion: reduce/);
   assert.match(ADMIN_APP_JS, /!form\.hasAttribute\("data-route-decision-form"\)/);
+  assert.match(ADMIN_APP_JS, /function initListingEditorTabs\(\)/);
+  assert.match(ADMIN_APP_JS, /setAttribute\("aria-current", "location"\)/);
+  assert.match(ADMIN_APP_JS, /window\.addEventListener\("scroll", scheduleSync/);
 });

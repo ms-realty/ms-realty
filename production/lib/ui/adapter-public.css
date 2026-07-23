@@ -135,7 +135,12 @@
 
 @media (max-width: 1080px) {
   html.public-mobile-nav-open,
-  html.public-mobile-nav-open body { overflow: hidden; }
+  html.public-mobile-nav-open body,
+  html.public-dialog-open,
+  html.public-dialog-open body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   .site-hd { position: sticky; top: 0; z-index: 30; padding-top: env(safe-area-inset-top); }
   html.public-mobile-nav-open .site-hd { z-index: 70; }
   .site-hd__in {
@@ -1167,6 +1172,8 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     max-height: min(92dvh, 760px);
     margin: 0;
     overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
   dialog.mk-enquiry[open] { animation: mk-sheet-in var(--dur-base) var(--ease-out); }
@@ -1181,6 +1188,10 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     width: 100%;
     max-width: none;
     margin: 0;
+    max-height: 92dvh;
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
   .ld-contact-options[open] { animation: mk-sheet-in var(--dur-base) var(--ease-out); }

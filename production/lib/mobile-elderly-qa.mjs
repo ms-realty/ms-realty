@@ -18,7 +18,7 @@ import {
   renderSellerPage,
 } from "./public-site.mjs";
 import { DESIGN_CSS } from "./ui/design-assets.mjs";
-import { PUBLIC_APP_JS } from "./ui/client.mjs";
+import { ADMIN_APP_JS, PUBLIC_APP_JS } from "./ui/client.mjs";
 
 export const DEFAULT_MOBILE_ELDERLY_QA_OUTPUT = fromRoot("production", "data", "mobile-elderly-qa-report.json");
 
@@ -128,6 +128,10 @@ export function buildMobileElderlyQaReport({
       includes(publicAdapterCss, "padding-top: env(safe-area-inset-top)") &&
         includes(publicAdapterCss, "top: calc(76px + env(safe-area-inset-top))") &&
         includes(publicAdapterCss, "env(safe-area-inset-bottom)") &&
+        includes(publicAdapterCss, "html.public-dialog-open") &&
+        includes(publicAdapterCss, "overscroll-behavior: contain") &&
+        includes(PUBLIC_APP_JS, "function syncPublicDialogState()") &&
+        includes(PUBLIC_APP_JS, 'contactOptions.querySelector(\'[data-mobile-sticky-primary="true"]\')') &&
         includes(DESIGN_CSS, ".mk-btn[data-loading]") &&
         includes(DESIGN_CSS, "prefers-reduced-motion:reduce"),
     ),
@@ -212,7 +216,10 @@ export function buildMobileElderlyQaReport({
       includes(
         adminAdapterCss,
         ".adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; min-height: 44px; }",
-      ),
+      ) &&
+        includes(adminAdapterCss, '.adm-editor-tabs .mk-tab[aria-current="location"]') &&
+        includes(adminAdapterCss, "#listing-seo") &&
+        includes(ADMIN_APP_JS, "function initListingEditorTabs()"),
     ),
     check(
       "narrow_mobile_search_action",

@@ -582,6 +582,55 @@
     }
     syncOpenState();
   }
+  function initListingEditorTabs() {
+    var nav = document.querySelector("[data-editor-tabs]");
+    if (!nav) return;
+    var tabNodes = nav.querySelectorAll("[data-editor-tab][href^='#']");
+    var entries = [];
+    for (var i = 0; i < tabNodes.length; i += 1) {
+      var href = tabNodes[i].getAttribute("href") || "";
+      var sectionId = href.slice(1);
+      var section = sectionId ? document.getElementById(sectionId) : null;
+      if (section) entries.push({ tab: tabNodes[i], section: section });
+    }
+    if (!entries.length) return;
+    var frame = 0;
+    function setActive(sectionId) {
+      for (var j = 0; j < entries.length; j += 1) {
+        var active = entries[j].section.id === sectionId;
+        entries[j].tab.toggleAttribute("data-active", active);
+        if (active) entries[j].tab.setAttribute("aria-current", "location");
+        else entries[j].tab.removeAttribute("aria-current");
+      }
+    }
+    function syncFromScroll() {
+      frame = 0;
+      var anchorLine = nav.getBoundingClientRect().bottom + 24;
+      var activeSection = entries[0].section;
+      var activeTop = -Infinity;
+      for (var j = 0; j < entries.length; j += 1) {
+        var sectionTop = entries[j].section.getBoundingClientRect().top;
+        if (sectionTop <= anchorLine && sectionTop > activeTop) {
+          activeSection = entries[j].section;
+          activeTop = sectionTop;
+        }
+      }
+      setActive(activeSection.id);
+    }
+    function scheduleSync() {
+      if (!frame) frame = window.requestAnimationFrame(syncFromScroll);
+    }
+    nav.addEventListener("click", function (event) {
+      var tab = event.target.closest("[data-editor-tab][href^='#']");
+      if (tab) setActive((tab.getAttribute("href") || "").slice(1));
+    });
+    window.addEventListener("scroll", scheduleSync, { passive: true });
+    window.addEventListener("resize", scheduleSync);
+    window.addEventListener("hashchange", scheduleSync);
+    var initialId = window.location.hash ? window.location.hash.slice(1) : entries[0].section.id;
+    setActive(document.getElementById(initialId) ? initialId : entries[0].section.id);
+    scheduleSync();
+  }
   function completeRouteDecision(form, payload) {
     var item = form.closest("[data-pending-route-decision]");
     var list = item ? item.parentElement : null;
@@ -663,6 +712,7 @@
   }
   initLeadQueueFilters();
   initAdminMobileNavigation();
+  initListingEditorTabs();
   initLeadPipelineFilters();
   initListingBulkForms();
   initRouteDecisionForms();

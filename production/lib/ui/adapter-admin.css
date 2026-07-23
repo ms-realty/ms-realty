@@ -455,9 +455,14 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
 .adm-form__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
 .adm-editor-tabs { scroll-margin-top: 124px; }
 .adm-editor-tabs .mk-tab { text-decoration: none; display: inline-flex; align-items: center; gap: 7px; }
+.adm-editor-tabs .mk-tab[aria-current="location"] {
+  border-bottom-color: var(--ink-800);
+  color: var(--text-strong);
+}
 #listing-facts,
 #listing-translations,
 #listing-media,
+#listing-seo,
 #listing-quality { scroll-margin-top: 124px; }
 
 .adm-media-manager { display: grid; gap: var(--space-4); padding: 0 var(--space-5) var(--space-5); }

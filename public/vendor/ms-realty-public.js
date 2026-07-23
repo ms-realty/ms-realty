@@ -646,21 +646,30 @@
   }
   function initDialogFocusReturn() {
     var enquiry = document.getElementById("mk-enquiry");
+    var contactOptions = document.querySelector("[data-mobile-contact-options]");
     if (enquiry) enquiry.addEventListener("close", function () {
+      syncPublicDialogState();
       var target = lastLeadTrigger;
       lastLeadTrigger = null;
       if (target && target.isConnected && target.getClientRects().length) {
         window.requestAnimationFrame(function () { target.focus(); });
       }
     });
-    var contactOptions = document.querySelector("[data-mobile-contact-options]");
     if (contactOptions) contactOptions.addEventListener("close", function () {
+      syncPublicDialogState();
       var target = lastContactOptionsTrigger;
       lastContactOptionsTrigger = null;
       if (target && target.isConnected && target.getClientRects().length) {
         window.requestAnimationFrame(function () { target.focus(); });
       }
     });
+    syncPublicDialogState();
+  }
+  function syncPublicDialogState() {
+    var enquiry = document.getElementById("mk-enquiry");
+    var contactOptions = document.querySelector("[data-mobile-contact-options]");
+    var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open));
+    document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
   }
   function initPublicMobileNavigation() {
     var mobileMenu = document.querySelector("[data-mobile-menu]");
@@ -754,6 +763,12 @@
       if (contactOptions && typeof contactOptions.showModal === "function") {
         lastContactOptionsTrigger = contactOptionsOpen;
         contactOptions.showModal();
+        syncPublicDialogState();
+        window.requestAnimationFrame(function () {
+          var preferredAction = contactOptions.querySelector('[data-mobile-sticky-primary="true"]')
+            || contactOptions.querySelector('button[data-endpoint="/api/leads"]');
+          if (preferredAction) preferredAction.focus();
+        });
       }
       return;
     }
@@ -812,6 +827,7 @@
       if (!dialog || typeof dialog.showModal !== "function") return;
       configureEnquiryDialog(dialog, lead);
       dialog.showModal();
+      syncPublicDialogState();
       window.requestAnimationFrame(function () {
         var firstField = dialog.querySelector('input[name="contact.name"]');
         if (firstField) firstField.focus();
