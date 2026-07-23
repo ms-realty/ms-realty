@@ -2,8 +2,8 @@
   "generated_at": "2026-07-05T00:00:00Z",
   "status": "pass",
   "summary": {
-    "checks": 24,
-    "passed": 24,
+    "checks": 25,
+    "passed": 25,
     "failed": 0
   },
   "checks": [
@@ -70,6 +70,11 @@
     },
     {
       "id": "compact_mobile_footer",
+      "status": "pass",
+      "evidence": {}
+    },
+    {
+      "id": "admin_mobile_editor_targets",
       "status": "pass",
       "evidence": {}
     },

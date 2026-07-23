@@ -813,7 +813,7 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
     box-shadow: 0 1px 0 var(--border);
   }
   .adm-editor-tabs.mk-tabs--underline { gap: 0; }
-  .adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; }
+  .adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; min-height: 44px; }
   .adm-editor-tab__label { display: none; }
   .adm-form__actions {
     position: sticky;
@@ -1024,7 +1024,7 @@ tr[data-reply-queue-status] .adm-reply { display: none; }
   .crm-top__sub { display: none; }
   .crm-scroll { padding: var(--space-4); }
   .adm-editor-tabs.mk-tabs--underline { gap: 0; }
-  .adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; }
+  .adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; min-height: 44px; }
   .adm-editor-tab__label { display: none; }
 }
 

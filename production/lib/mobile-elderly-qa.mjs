@@ -98,6 +98,7 @@ export function buildMobileElderlyQaReport({
   const galleryListingHtml = renderReactPage(renderListingPage({ registry, listing: galleryQaListing, localeCode: "ru" }));
   const gallerySlideCount = (galleryListingHtml.match(/data-mobile-gallery-slide=/g) || []).length;
   const publicAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-public.css"), "utf8");
+  const adminAdapterCss = fs.readFileSync(fromRoot("production", "lib", "ui", "adapter-admin.css"), "utf8");
 
   for (const [kind, html] of Object.entries(pages)) {
     assertHtmlPage(html, {
@@ -205,6 +206,13 @@ export function buildMobileElderlyQaReport({
         includes(publicAdapterCss, ".site-ft__mobile-group > summary") &&
         includes(publicAdapterCss, "min-height: 52px;") &&
         includes(publicAdapterCss, ".site-ft__bar-in nav a { min-width: 44px; justify-content: center; }"),
+    ),
+    check(
+      "admin_mobile_editor_targets",
+      includes(
+        adminAdapterCss,
+        ".adm-editor-tabs .mk-tab { flex: 1 1 0; justify-content: center; min-width: 44px; min-height: 44px; }",
+      ),
     ),
     check(
       "narrow_mobile_search_action",
@@ -320,6 +328,7 @@ export function assertMobileElderlyQaReport(report) {
     "mobile_app_navigation",
     "approved_buyer_guide_discovery",
     "compact_mobile_footer",
+    "admin_mobile_editor_targets",
     "narrow_mobile_search_action",
     "mobile_safe_area_and_feedback",
     "mobile_completion_feedback",
