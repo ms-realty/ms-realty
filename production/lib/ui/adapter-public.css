@@ -961,6 +961,7 @@ main.ct-page.pg-narrow { max-width: var(--container-md); }
   margin-top: var(--space-5);
 }
 .sr-pagination > :last-child { justify-self: end; }
+.sr-pagination .mk-btn { min-width: 44px; min-height: 44px; }
 .sr-pagination__status {
   color: var(--text-muted);
   font-size: var(--text-sm);

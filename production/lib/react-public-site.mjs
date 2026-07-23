@@ -582,6 +582,10 @@ function cardBadge(card, labels, localeCode) {
   return null;
 }
 
+function photoCountLabel(count, labels) {
+  return Number(count) === 1 ? labels.photo || labels.photos : labels.photos;
+}
+
 function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority) {
   return {
     src: image.url,
@@ -618,7 +622,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
       "span",
       { key: "count", className: "mk-pcard__count", "data-card-media-count": card.image_count },
       h(Icon, { name: "camera", size: 13 }),
-      ` ${card.image_count || 0} ${labels.photos}`,
+      ` ${card.image_count || 0} ${photoCountLabel(card.image_count || 0, labels)}`,
     ),
   ];
   const media = card.thumbnail?.url
@@ -1371,11 +1375,11 @@ function SearchBody({ page }) {
               "nav",
               { className: "sr-pagination", "aria-label": labels.page, "data-search-pagination": "true" },
               page.search.pagination.has_previous
-                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: searchHref(page, null, page.search.pagination.page - 1), rel: "prev" }, h(Icon, { name: page.dir === "rtl" ? "arrow-right" : "arrow-left", size: 16 }), h("span", null, labels.previous))
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: searchHref(page, null, page.search.pagination.page - 1), rel: "prev", "aria-label": `${labels.previous} · ${labels.page} ${page.search.pagination.page - 1}`, title: labels.previous }, h(Icon, { name: page.dir === "rtl" ? "arrow-right" : "arrow-left", size: 16 }), h("span", null, labels.previous))
                 : h("span"),
               h("span", { className: "sr-pagination__status", "aria-current": "page" }, `${labels.page} ${page.search.pagination.page} / ${page.search.pagination.total_pages}`),
               page.search.pagination.has_next
-                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: searchHref(page, null, page.search.pagination.page + 1), rel: "next" }, h("span", null, labels.next), h(Icon, { name: page.dir === "rtl" ? "arrow-left" : "arrow-right", size: 16 }))
+                ? h("a", { className: "mk-btn mk-btn--secondary mk-btn--sm", href: searchHref(page, null, page.search.pagination.page + 1), rel: "next", "aria-label": `${labels.next} · ${labels.page} ${page.search.pagination.page + 1}`, title: labels.next }, h("span", null, labels.next), h(Icon, { name: page.dir === "rtl" ? "arrow-left" : "arrow-right", size: 16 }))
                 : h("span"),
             )
           : null,
@@ -1727,7 +1731,7 @@ function ListingBody({ page }) {
               },
               image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined)) : null,
               gallerySlides.length > 3 && index === 2
-                ? h("a", { className: "ld-g__more", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${labels.photos}`)
+                ? h("a", { className: "ld-g__more", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${photoCountLabel(page.body.media.gallery_count || gallery.length, labels)}`)
                 : null,
             ),
           ),

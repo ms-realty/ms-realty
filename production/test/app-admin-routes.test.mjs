@@ -529,6 +529,14 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       assert.equal(listingManagerJsonBody.listings[0].id, "MS-CRAWL-0001");
       assert.ok(listingManagerJsonBody.listings[0].translation_review_required > 0);
 
+      const singularListingManager = await listingManagerRoute.GET(
+        new Request("https://example.test/admin/listings?q=MS-CRAWL-0006", { headers: auth }),
+      );
+      const singularListingManagerHtml = await singularListingManager.text();
+      assert.match(singularListingManagerHtml, />1 issue<\/span>/);
+      assert.match(singularListingManagerHtml, />1 public photo<\/small>/);
+      assert.doesNotMatch(singularListingManagerHtml, />1 issues<\/span>|>1 public photos<\/small>/);
+
       const translationQueue = await translationQueueRoute.GET(
         new Request("https://example.test/admin/translations?locale=ru&targetLocale=en&q=MS-CRAWL-0001", { headers: auth }),
       );

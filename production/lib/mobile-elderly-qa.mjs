@@ -161,7 +161,8 @@ export function buildMobileElderlyQaReport({
         includes(pages.search, "data-search-card=\"true\"") &&
         includes(pages.search, "data-card-thumbnail=\"true\"") &&
         includes(pages.search, "data-client-save-listing=") &&
-        includes(pages.search, "data-endpoint=\"/api/leads\""),
+        includes(pages.search, "data-endpoint=\"/api/leads\"") &&
+        includes(publicAdapterCss, ".sr-pagination .mk-btn { min-width: 44px; min-height: 44px; }"),
     ),
     check(
       "mobile_search_live_preview",

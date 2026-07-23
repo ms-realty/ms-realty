@@ -427,6 +427,8 @@ test("search paginates without duplicating cards and applies reviewed area facet
     localeCode: "he",
     filters: { area_min: "100", area_max: "120" },
   });
+  const englishFirstHtml = renderReactPublicBody(renderSearchPage({ registry, listings: withAreas, localeCode: "en", page: 1 }));
+  const englishSecondHtml = renderReactPublicBody(renderSearchPage({ registry, listings: withAreas, localeCode: "en", page: 2 }));
 
   assert.equal(second.search.pagination.page, 2);
   assert.equal(second.search.pagination.has_previous, true);
@@ -437,6 +439,18 @@ test("search paginates without duplicating cards and applies reviewed area facet
     area.search.controls.active_filter_chips.map((chip) => chip.key),
     ["area_min", "area_max"],
   );
+  assert.match(englishFirstHtml, /rel="next" aria-label="Next · Page 2" title="Next"/);
+  assert.match(englishSecondHtml, /rel="prev" aria-label="Previous · Page 1" title="Previous"/);
+});
+
+test("property-card photo counts use reviewed singular and plural labels", () => {
+  const onePhotoListing = findListingById(listings, "MS-CRAWL-0006");
+  const englishHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "en" }));
+  const bulgarianHtml = renderReactPublicBody(renderSearchPage({ registry, listings: [onePhotoListing], localeCode: "bg" }));
+
+  assert.match(englishHtml, /> 1 photo<\/span>/);
+  assert.doesNotMatch(englishHtml, /> 1 photos<\/span>/);
+  assert.match(bulgarianHtml, /> 1 снимка<\/span>/);
 });
 
 test("search price sorting is real and unavailable prices stay after priced listings", () => {
