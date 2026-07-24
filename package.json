@@ -54,6 +54,9 @@
     "hermes:worker": "node production/scripts/run-hermes-draft-worker.mjs",
     "hermes:worker:smoke": "node production/scripts/build-hermes-draft-worker-smoke.mjs",
     "lead:sla": "node production/scripts/build-lead-sla-report.mjs",
+    "leadledger:sqlite:import": "node production/scripts/run-lead-ledger-sqlite.mjs import",
+    "leadledger:sqlite:export": "node production/scripts/run-lead-ledger-sqlite.mjs export",
+    "leadledger:sqlite:status": "node production/scripts/run-lead-ledger-sqlite.mjs status",
     "lead:matching": "node production/scripts/build-lead-matching-report.mjs",
     "saved-search:alerts": "node production/scripts/build-saved-search-alert-report.mjs",
     "seo:evidence": "node production/scripts/build-seo-evidence.mjs",
@@ -77,7 +80,7 @@
     "check": "npm run test && npm run validate && npm run next:build"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.13"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.85.2",
