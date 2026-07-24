@@ -16,11 +16,6 @@ jobs:
     timeout-minutes: 30
     env:
       CI: "true"
-      NODE_ENV: production
-      PAYLOAD_SECRET: ci-build-secret-not-a-real-secret-0123456789
-      DATABASE_URL: postgresql://localhost:5432/ms_realty_ci
-      MS_REALTY_ADMIN_TOKEN: ci-admin-token-not-a-real-secret-0123456789
-      MS_REALTY_LEAD_CONTACT_KEY: ci-lead-contact-key-not-a-real-secret-0123
     steps:
       - uses: actions/checkout@v4
 
@@ -32,5 +27,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Full check (tests + validation + next build)
-        run: npm run check
+      # No NODE_ENV/tokens here: the test suite relies on the local
+      # non-production admin-token fallback and fixture defaults.
+      - name: Tests and validation
+        run: npm test && npm run validate
+
+      # next build sets NODE_ENV=production itself; Payload config wants
+      # these present at build time. Dummy non-secret values, build-only.
+      - name: Next.js production build
+        run: npm run next:build
+        env:
+          PAYLOAD_SECRET: ci-build-secret-not-a-real-secret-0123456789
+          DATABASE_URL: postgresql://localhost:5432/ms_realty_ci
