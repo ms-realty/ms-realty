@@ -19,3 +19,6 @@ production/data/lead-contact-vault.jsonl
 production/data/public-contact-vault.jsonl
 production/data/payload-runtime-report.json
 production/data/production-recovery-report.json
+
+# Local working notes
+deep-end-notes.txt
