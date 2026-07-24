@@ -29,6 +29,9 @@ jobs:
 
       # No NODE_ENV/tokens here: the test suite relies on the local
       # non-production admin-token fallback and fixture defaults.
+      - name: Generate runtime reports (gitignored, tests expect them)
+        run: npm run payload:runtime
+
       - name: Tests and validation
         run: npm test && npm run validate
 
