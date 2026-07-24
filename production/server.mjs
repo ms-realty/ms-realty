@@ -4,6 +4,7 @@ import { DEFAULT_AUDIT_LOG_PATH } from "./lib/audit-log.mjs";
 import { DEFAULT_ACCOUNT_LEDGER_PATH } from "./lib/account-ledger.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./lib/broker-contacts.mjs";
 import { createHttpApp } from "./lib/http.mjs";
+import { rateLimitConfigFromEnv } from "./lib/rate-limit.mjs";
 import { DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH } from "./lib/language-requests.mjs";
 import { DEFAULT_LEAD_LEDGER_PATH } from "./lib/lead-ledger.mjs";
 import { DEFAULT_LEAD_ASSIGNMENT_LEDGER_PATH } from "./lib/lead-assignments.mjs";
@@ -57,6 +58,7 @@ export function productionServerConfig(env = process.env) {
     host: hostFrom(env.MS_REALTY_HOST || env.HOST),
     port: portFrom(env.MS_REALTY_PORT || env.PORT),
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
+    rateLimit: rateLimitConfigFromEnv(env),
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     auditLogPath: env.MS_REALTY_AUDIT_LOG_PATH || DEFAULT_AUDIT_LOG_PATH,
@@ -120,6 +122,7 @@ export function productionServerConfig(env = process.env) {
 
 export function createProductionHttpApp(config = productionServerConfig()) {
   return createHttpApp({
+    rateLimit: config.rateLimit,
     eventLedgerPath: config.eventLedgerPath,
     consentLedgerPath: config.consentLedgerPath,
     auditLogPath: config.auditLogPath,

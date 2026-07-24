@@ -15,7 +15,9 @@ import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews }
 import { loadLocaleRegistry } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, appendPublicContact } from "./public-contact-vault.mjs";
-import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead } from "./runtime.mjs";
+import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead, DEFAULT_CMS_SEED_PATH } from "./runtime.mjs";
+import { readThroughCached } from "./file-cache.mjs";
+import { clientIpFromHeaders, createRateLimiter, rateLimitConfigFromEnv } from "./rate-limit.mjs";
 import {
   DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   appendSavedSearch,
@@ -41,6 +43,7 @@ const SECURITY_HEADERS = {
 };
 const PRIVATE_HEADERS = { "cache-control": "no-store" };
 const LAUNCH_READINESS_PATH = fromRoot("production", "data", "launch-readiness.json");
+const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
 
 function bytesFrom(value) {
   const raw = value === undefined || value === "" ? String(10 * 1024 * 1024) : String(value);
@@ -53,6 +56,8 @@ function bytesFrom(value) {
 export function appApiConfigFromEnv(env = process.env) {
   return {
     maxBodyBytes: bytesFrom(env.MS_REALTY_MAX_BODY_BYTES),
+    cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
+    rateLimit: rateLimitConfigFromEnv(env),
     consentLedgerPath: env.MS_REALTY_CONSENT_LEDGER_PATH || DEFAULT_CONSENT_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
     languageRequestPath: env.MS_REALTY_LANGUAGE_REQUEST_LEDGER_PATH || DEFAULT_LANGUAGE_REQUEST_LEDGER_PATH,
@@ -159,10 +164,37 @@ function readLaunchReadiness(filePath = LAUNCH_READINESS_PATH) {
 }
 
 function currentSeed(config) {
+  const seedPath = config.cmsSeedPath || DEFAULT_CMS_SEED_PATH;
+  const seed = readThroughCached(seedPath, () => loadCmsSeed(seedPath));
   return applyMediaReviews(
-    applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
-    readMediaReviews(config.mediaReviewLedgerPath),
+    applyListingEdits(
+      seed,
+      readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
+    ),
+    readThroughCached(config.mediaReviewLedgerPath, () => readMediaReviews(config.mediaReviewLedgerPath)),
   );
+}
+
+function currentRegistry(config) {
+  const filePath = config.localeRegistryPath || DEFAULT_LOCALE_REGISTRY_PATH;
+  return readThroughCached(filePath, () => loadLocaleRegistry(filePath));
+}
+
+function currentTranslationTasks(config) {
+  const filePath = config.translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH;
+  return readThroughCached(filePath, () => readTranslationLedger(filePath));
+}
+
+// Public (unauthenticated) write endpoints protected by the rate limiter.
+const PUBLIC_WRITE_PATHS = new Set(["/api/leads", "/api/events", "/api/language-requests", "/api/saved-searches"]);
+
+let sharedPublicWriteLimiter = null;
+
+function publicWriteLimiterFor(config) {
+  const settings = "rateLimit" in config ? config.rateLimit : rateLimitConfigFromEnv(process.env);
+  if (!settings) return null;
+  if (!sharedPublicWriteLimiter) sharedPublicWriteLimiter = createRateLimiter(settings);
+  return sharedPublicWriteLimiter;
 }
 
 function recordEvent(input, config) {
@@ -227,7 +259,7 @@ async function routeSearch(requestUrl, registry, seed, config) {
   const filters = searchFiltersFromParams(requestUrl.searchParams);
   const sort = requestUrl.searchParams.get("sort") || "recommended";
   const page = searchPageFromParams(requestUrl.searchParams);
-  const translationTasks = readTranslationLedger(config.translationLedgerPath);
+  const translationTasks = currentTranslationTasks(config);
   const localResult = searchRuntimeListings(registry, seed, {
     localeCode,
     query,
@@ -367,7 +399,7 @@ function routeSavedSearch(request, body, registry, seed, config) {
       query: input.query || "",
       filters,
       pageSize: null,
-      translationTasks: readTranslationLedger(config.translationLedgerPath),
+      translationTasks: currentTranslationTasks(config),
     });
     const priceSnapshot = Object.fromEntries(
       search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
@@ -409,6 +441,18 @@ function routeSavedSearch(request, body, registry, seed, config) {
 export async function renderAppApiResponse(request, { config = appApiConfigFromEnv() } = {}) {
   try {
     const url = new URL(request.url, "http://localhost");
+    const limiter = publicWriteLimiterFor(config);
+    if (limiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
+      const verdict = limiter.allow(`${clientIpFromHeaders(request.headers)}:${url.pathname}`);
+      if (!verdict.allowed) {
+        return webResponse(
+          json(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, {
+            "retry-after": String(verdict.retryAfterSec),
+            "cache-control": "no-store",
+          }),
+        );
+      }
+    }
     const body = await readRequestBody(request, config.maxBodyBytes);
 
     if (request.method === "GET" && url.pathname === "/api/health") {
@@ -436,13 +480,13 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     }
 
     if (request.method === "GET" && url.pathname === "/api/search") {
-      const registry = loadLocaleRegistry(config.localeRegistryPath);
+      const registry = currentRegistry(config);
       const seed = currentSeed(config);
       return webResponse(await routeSearch(url, registry, seed, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {
-      const registry = loadLocaleRegistry(config.localeRegistryPath);
+      const registry = currentRegistry(config);
       const seed = currentSeed(config);
       return webResponse(routeLead(request, body, registry, seed, config));
     }
@@ -452,12 +496,12 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
     }
 
     if (request.method === "POST" && url.pathname === "/api/language-requests") {
-      const registry = loadLocaleRegistry(config.localeRegistryPath);
+      const registry = currentRegistry(config);
       return webResponse(routeLanguageRequest(request, body, registry, config));
     }
 
     if (request.method === "POST" && url.pathname === "/api/saved-searches") {
-      const registry = loadLocaleRegistry(config.localeRegistryPath);
+      const registry = currentRegistry(config);
       const seed = currentSeed(config);
       return webResponse(routeSavedSearch(request, body, registry, seed, config));
     }

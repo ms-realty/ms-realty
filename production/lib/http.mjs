@@ -1,5 +1,12 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
+import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./broker-contacts.mjs";
+import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
+import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
+import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
+import { readThroughCached } from "./file-cache.mjs";
+import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
+import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
   adminHomePath,
   bindAuthenticatedOperator,
@@ -196,10 +203,14 @@ const SECURITY_HEADERS = {
 };
 const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
+// Public (unauthenticated) write endpoints protected by the rate limiter.
+const PUBLIC_WRITE_PATHS = new Set(["/api/leads", "/api/events", "/api/language-requests", "/api/saved-searches"]);
+
 function response(status, body, contentType, headers = {}) {
+  const csp = contentType.startsWith("text/html") ? { "content-security-policy": CONTENT_SECURITY_POLICY } : {};
   return {
     status,
-    headers: { ...SECURITY_HEADERS, "content-type": contentType, ...headers },
+    headers: { ...SECURITY_HEADERS, ...csp, "content-type": contentType, ...headers },
     body,
   };
 }
@@ -528,14 +539,31 @@ export function createHttpApp({
   listingQualityGeneratedAt,
   leadSlaGeneratedAt,
   hermesReplyProvider = null,
+  rateLimit = null,
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
+  const activeLegacyDecisionByUrl = new Map(activeLegacyDecisions.map((row) => [row.old_url, row]));
+  const publicWriteLimiter = rateLimit ? createRateLimiter(rateLimit) : null;
   const currentSeed = () =>
     applyMediaReviews(
       applyListingEdits(seed, readListingEdits(listingEditLedgerPath || undefined)),
       readMediaReviews(mediaReviewLedgerPath || undefined),
     );
+  const currentTranslationTasks = () =>
+    readThroughCached(translationLedgerPath || DEFAULT_TRANSLATION_LEDGER_PATH, () =>
+      readTranslationLedger(translationLedgerPath || undefined),
+    );
+  const currentBrokerContacts = () =>
+    readThroughCached(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH, () =>
+      readBrokerContacts(brokerContactLedgerPath || DEFAULT_BROKER_CONTACT_LEDGER_PATH),
+    );
+  const currentTourApprovals = () =>
+    readThroughCached(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH, () =>
+      readTourApprovals(tourApprovalLedgerPath || DEFAULT_TOUR_APPROVAL_LEDGER_PATH),
+    );
+  const currentSlugHistory = () =>
+    readThroughCached(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH, () => readSlugHistory(slugHistoryPath || DEFAULT_SLUG_HISTORY_PATH));
   const currentLeads = () =>
     applyLeadAssignments(
       withLeadContacts(readLeadLedger(leadLedgerPath || undefined), {
@@ -547,7 +575,7 @@ export function createHttpApp({
   const currentListingQualityReport = (options = {}) =>
     buildListingQualityReport({
       seed: currentSeed(),
-      tourApprovals: readTourApprovals(tourApprovalLedgerPath || undefined),
+      tourApprovals: currentTourApprovals(),
       ...options,
     });
   const currentListingQualityReviewQueue = (options = {}) => {
@@ -644,7 +672,7 @@ export function createHttpApp({
         leads.map((lead) => [lead.lead_id, communicationTemplatesForLead(lead)]),
       ),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
-      translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+      translationTasks: latestTranslationTasks(currentTranslationTasks()),
       listingEdits: readListingEdits(listingEditLedgerPath || undefined),
       leadSlaGeneratedAt,
       operatorId,
@@ -653,7 +681,7 @@ export function createHttpApp({
       publicRequestQueue: currentPublicRequestQueue(),
       ...currentSellerPipelineData(),
       deals: readDeals(dealLedgerPath || undefined),
-      brokerContacts: readBrokerContacts(brokerContactLedgerPath || undefined),
+      brokerContacts: currentBrokerContacts(),
     });
   };
   const currentContactPayload = (requestedLocale, operatorId = null) => {
@@ -700,7 +728,7 @@ export function createHttpApp({
       savedSearches: readSavedSearches(savedSearchLedgerPath || undefined),
       languageRequests: readLanguageRequests(languageRequestPath || undefined),
       publicRequestOutcomes: readPublicRequestOutcomes(publicRequestOutcomeLedgerPath || undefined),
-      translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+      translationTasks: currentTranslationTasks(),
       seed: reportSeed,
       searchAnalytics: buildSearchAnalyticsReport({
         registry: activeRegistry,
@@ -760,7 +788,7 @@ export function createHttpApp({
   const currentListingManagerPayload = (url, operatorId = null) =>
     renderAdminListingManagerPayload(activeRegistry, url.searchParams.get("locale") || "en", {
       seed: currentSeed(),
-      translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+      translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       status: url.searchParams.get("status") || "",
       sourceLocale: url.searchParams.get("sourceLocale") || "",
@@ -775,7 +803,7 @@ export function createHttpApp({
   const currentTranslationQueuePayload = (url, operatorId = null) =>
     renderAdminTranslationQueuePayload(activeRegistry, url.searchParams.get("locale") || "en", {
       seed: currentSeed(),
-      translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+      translationTasks: latestTranslationTasks(currentTranslationTasks()),
       query: url.searchParams.get("q") || "",
       targetLocale: url.searchParams.get("targetLocale") || "",
       taskType: url.searchParams.get("taskType") || "",
@@ -907,13 +935,22 @@ export function createHttpApp({
     const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;
     if (requiredCapability && !canAdminAccess(principal, requiredCapability)) return adminForbidden(requiredCapability);
     const recordAudit = (input, recordedAt) => writeAudit(withAuthenticatedAuditActor(input, principal), recordedAt);
+    if (publicWriteLimiter && request.method === "POST" && PUBLIC_WRITE_PATHS.has(url.pathname)) {
+      const verdict = publicWriteLimiter.allow(`${clientIpFromHeaders(request.headers)}:${url.pathname}`);
+      if (!verdict.allowed) {
+        return response(429, { kind: "rate_limited", retry_after: verdict.retryAfterSec }, "application/json; charset=utf-8", {
+          "retry-after": String(verdict.retryAfterSec),
+          "cache-control": "no-store",
+        });
+      }
+    }
     const host =
       request.headers?.["x-forwarded-host"] ||
       request.headers?.["X-Forwarded-Host"] ||
       request.headers?.host ||
       request.headers?.Host;
     const legacyUrl = request.url.startsWith("http") ? url.href : host ? `https://${host}${url.pathname}${url.search}` : "";
-    const legacyDecision = request.method === "GET" ? activeLegacyDecisions.find((row) => row.old_url === legacyUrl) : null;
+    const legacyDecision = request.method === "GET" ? activeLegacyDecisionByUrl.get(legacyUrl) || null : null;
 
     if (legacyDecision?.status === 301) {
       return response(
@@ -931,9 +968,9 @@ export function createHttpApp({
         activeRegistry,
         currentSeed(),
         legacyDecision.target_path,
-        readTranslationLedger(translationLedgerPath || undefined),
-        readBrokerContacts(brokerContactLedgerPath || undefined),
-        readTourApprovals(tourApprovalLedgerPath || undefined),
+        currentTranslationTasks(),
+        currentBrokerContacts(),
+        currentTourApprovals(),
       );
       if ((retained.status || 200) >= 400) {
         return response(503, { kind: "legacy_retain_unavailable", old_url: legacyDecision.old_url }, "application/json; charset=utf-8", {
@@ -944,7 +981,7 @@ export function createHttpApp({
     }
 
     const slugRedirect =
-      request.method === "GET" ? slugRedirectForPath(readSlugHistory(slugHistoryPath || undefined), url.pathname) : null;
+      request.method === "GET" ? slugRedirectForPath(currentSlugHistory(), url.pathname) : null;
     if (slugRedirect) {
       return response(
         301,
@@ -957,7 +994,7 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       return response(
         200,
-        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), readTranslationLedger(translationLedgerPath || undefined))),
+        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), currentTranslationTasks())),
         "application/xml; charset=utf-8",
       );
     }
@@ -1021,7 +1058,7 @@ export function createHttpApp({
         filters,
         sort,
         page,
-        translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+        translationTasks: currentTranslationTasks(),
       });
       recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort, page });
       return json(200, result);
@@ -1050,7 +1087,7 @@ export function createHttpApp({
             page,
             pageSize: savedView ? null : 12,
             savedView,
-            translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+            translationTasks: currentTranslationTasks(),
           }),
         );
       }
@@ -1228,8 +1265,8 @@ export function createHttpApp({
               currentSeed(),
               url.searchParams.get("listingId"),
               readListingEdits(listingEditLedgerPath || undefined),
-              latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
-              readTourApprovals(tourApprovalLedgerPath || undefined),
+              latestTranslationTasks(currentTranslationTasks()),
+              currentTourApprovals(),
               principal,
             ),
           ),
@@ -1676,7 +1713,7 @@ export function createHttpApp({
           allowResolvedSnapshots: true,
           requireSnapshots: true,
         });
-        const translationTasks = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined));
+        const translationTasks = latestTranslationTasks(currentTranslationTasks());
         const edits = review.reviews
           .filter((row) => Object.keys(row.patch).length || row.media_reviewer)
           .map((row) => {
@@ -1804,7 +1841,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
-        const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
+        const task = latestTranslationTasks(currentTranslationTasks()).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
         const approved = appendTranslationTask(approveTranslationTask(activeRegistry, task, input.reviewer, input.approvedAt), {
           filePath: translationLedgerPath || undefined,
@@ -1827,7 +1864,7 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
-        const task = latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)).find((row) => row.id === input.taskId);
+        const task = latestTranslationTasks(currentTranslationTasks()).find((row) => row.id === input.taskId);
         if (!task) throw new Error("Known translation task is required");
         const published = publishApprovedTranslation(activeRegistry, task);
         const persisted = appendTranslationTask(published, { filePath: translationLedgerPath || undefined });
@@ -1850,7 +1887,7 @@ export function createHttpApp({
       try {
         let input = bindAuthenticatedOperator(listingEditInput(request), principal, ["editor"]);
         if (input.mediaReviewer) input = bindAuthenticatedOperator(input, principal, ["mediaReviewer"]);
-        const result = createListingEdit(currentSeed(), input, latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)), editedAt);
+        const result = createListingEdit(currentSeed(), input, latestTranslationTasks(currentTranslationTasks()), editedAt);
         const edit = appendListingEdit(result.edit, { filePath: listingEditLedgerPath || undefined });
         const persistedStaleTranslations = edit.idempotent
           ? []
@@ -1909,7 +1946,7 @@ export function createHttpApp({
         const batch = createBulkListingStatusEdits(
           currentSeed(),
           input,
-          latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+          latestTranslationTasks(currentTranslationTasks()),
           editedAt,
         );
         const changes = batch.changes.map((result) => {
@@ -2025,7 +2062,7 @@ export function createHttpApp({
         const result = executeDueListingPublicationSchedules({
           seed: currentSeed(),
           schedules: readListingPublicationSchedules(listingPublicationSchedulePath || undefined),
-          translationTasks: latestTranslationTasks(readTranslationLedger(translationLedgerPath || undefined)),
+          translationTasks: latestTranslationTasks(currentTranslationTasks()),
           executor: principal?.id,
           now: listingPublicationAt || editedAt || new Date().toISOString(),
           scheduleFilePath: listingPublicationSchedulePath || undefined,
@@ -2665,7 +2702,7 @@ export function createHttpApp({
           query: input.query || "",
           filters,
           pageSize: null,
-          translationTasks: readTranslationLedger(translationLedgerPath || undefined),
+          translationTasks: currentTranslationTasks(),
         });
         const priceSnapshot = Object.fromEntries(
           search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
@@ -2707,9 +2744,9 @@ export function createHttpApp({
       activeRegistry,
       currentSeed(),
       url.pathname,
-      readTranslationLedger(translationLedgerPath || undefined),
-      readBrokerContacts(brokerContactLedgerPath || undefined),
-      readTourApprovals(tourApprovalLedgerPath || undefined),
+      currentTranslationTasks(),
+      currentBrokerContacts(),
+      currentTourApprovals(),
     );
     if (rendered.status === 200) {
       recordEvent({

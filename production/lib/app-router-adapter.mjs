@@ -11,6 +11,12 @@ import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mj
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
 import { DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT, loadLegacyRouteDecisions } from "./redirect-approvals.mjs";
+import { fileSignature, readThroughCached } from "./file-cache.mjs";
+import { fromRoot } from "./paths.mjs";
+import { DEFAULT_CMS_SEED_PATH } from "./runtime.mjs";
+import { CSP_HEADER } from "./security-headers.mjs";
+
+const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
 
 const PUBLIC_CACHE = "public, max-age=300, s-maxage=3600";
 const HTML = "text/html; charset=utf-8";
@@ -18,6 +24,7 @@ const HTML = "text/html; charset=utf-8";
 export function appRouterConfigFromEnv(env = process.env) {
   return {
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
+    cmsSeedPath: env.MS_REALTY_CMS_SEED_PATH || DEFAULT_CMS_SEED_PATH,
     deployableRedirectOutputPath: env.MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH || DEFAULT_DEPLOYABLE_REDIRECTS_OUTPUT,
     listingEditLedgerPath: env.MS_REALTY_LISTING_EDIT_LEDGER_PATH || DEFAULT_LISTING_EDIT_LEDGER_PATH,
     mediaReviewLedgerPath: env.MS_REALTY_MEDIA_REVIEW_LEDGER_PATH || DEFAULT_MEDIA_REVIEW_LEDGER_PATH,
@@ -25,6 +32,18 @@ export function appRouterConfigFromEnv(env = process.env) {
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
   };
+}
+
+let legacyDecisionIndex = { key: null, byOldUrl: new Map() };
+
+function legacyDecisionByOldUrl(config) {
+  const filePath = config.deployableRedirectOutputPath;
+  const key = fileSignature(filePath);
+  if (key !== null && legacyDecisionIndex.key === key) return legacyDecisionIndex.byOldUrl;
+  const rows = readThroughCached(filePath, () => loadLegacyRouteDecisions(filePath));
+  const byOldUrl = new Map(rows.map((row) => [row.old_url, row]));
+  if (key !== null) legacyDecisionIndex = { key, byOldUrl };
+  return byOldUrl;
 }
 
 function legacyDecisionFor({ pathname, url, host, config }) {
@@ -36,7 +55,7 @@ function legacyDecisionFor({ pathname, url, host, config }) {
   if (!requestedHost) return null;
   const requestUrl = new URL(url, "http://localhost");
   const oldUrl = `https://${requestedHost}${pathname}${requestUrl.search}`;
-  return loadLegacyRouteDecisions(config.deployableRedirectOutputPath).find((row) => row.old_url === oldUrl) || null;
+  return legacyDecisionByOldUrl(config).get(oldUrl) || null;
 }
 
 function searchLocaleFor(registry, pathname) {
@@ -45,18 +64,23 @@ function searchLocaleFor(registry, pathname) {
 }
 
 function currentRegistry(config) {
-  return loadLocaleRegistry(config.localeRegistryPath);
+  const filePath = config.localeRegistryPath || DEFAULT_LOCALE_REGISTRY_PATH;
+  return readThroughCached(filePath, () => loadLocaleRegistry(filePath));
 }
 
 function currentSeed(config) {
+  const seed = readThroughCached(config.cmsSeedPath, () => loadCmsSeed(config.cmsSeedPath));
   return applyMediaReviews(
-    applyListingEdits(loadCmsSeed(), readListingEdits(config.listingEditLedgerPath)),
-    readMediaReviews(config.mediaReviewLedgerPath),
+    applyListingEdits(
+      seed,
+      readThroughCached(config.listingEditLedgerPath, () => readListingEdits(config.listingEditLedgerPath)),
+    ),
+    readThroughCached(config.mediaReviewLedgerPath, () => readMediaReviews(config.mediaReviewLedgerPath)),
   );
 }
 
 function currentTranslationTasks(config) {
-  return readTranslationLedger(config.translationLedgerPath);
+  return readThroughCached(config.translationLedgerPath, () => readTranslationLedger(config.translationLedgerPath));
 }
 
 export function renderAppRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
@@ -84,8 +108,8 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
         seed,
         pathname,
         translationTasks,
-        readBrokerContacts(config.brokerContactLedgerPath),
-        readTourApprovals(config.tourApprovalLedgerPath),
+        readThroughCached(config.brokerContactLedgerPath, () => readBrokerContacts(config.brokerContactLedgerPath)),
+        readThroughCached(config.tourApprovalLedgerPath, () => readTourApprovals(config.tourApprovalLedgerPath)),
       );
   const print = requestUrl.searchParams.get("print") === "1";
   const reactBody = print ? "" : renderReactPublicBody(rendered);
@@ -95,6 +119,7 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
     status: rendered.status || 200,
     headers: {
       "content-type": HTML,
+      ...CSP_HEADER,
       "cache-control": rendered.kind === "search" ? "no-store" : PUBLIC_CACHE,
     },
     rendered,

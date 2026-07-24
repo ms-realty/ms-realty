@@ -1,5 +1,36 @@
 import http from "node:http";
+import zlib from "node:zlib";
 import { createHttpApp } from "./http.mjs";
+
+const COMPRESSIBLE_CONTENT_TYPE = /^(text\/|application\/(json|xml)|image\/svg)/;
+const MIN_COMPRESS_BYTES = 1024;
+
+function negotiatedEncoding(requestHeaders) {
+  const accept = String(requestHeaders?.["accept-encoding"] || "");
+  if (/\bbr\b/.test(accept)) return "br";
+  if (/\bgzip\b/.test(accept)) return "gzip";
+  return null;
+}
+
+function compressBody(encoding, body) {
+  return new Promise((resolve, reject) => {
+    const compress = encoding === "br" ? zlib.brotliCompress : zlib.gzip;
+    compress(body, (error, buffer) => (error ? reject(error) : resolve(buffer)));
+  });
+}
+
+function logRequest(req, status, startedAt) {
+  if (process.env.MS_REALTY_ACCESS_LOG === "0") return;
+  let pathname = String(req.url || "");
+  try {
+    pathname = new URL(req.url, "http://localhost").pathname;
+  } catch {
+    // keep raw url
+  }
+  process.stdout.write(
+    `${JSON.stringify({ kind: "http_request", method: req.method, path: pathname, status, ms: Math.round(performance.now() - startedAt) })}\n`,
+  );
+}
 
 const DEFAULT_MAX_BODY_BYTES = 10 * 1024 * 1024;
 const ERROR_HEADERS = {
@@ -28,6 +59,8 @@ async function readBody(req, maxBodyBytes = DEFAULT_MAX_BODY_BYTES) {
 
 export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT_MAX_BODY_BYTES } = {}) {
   return http.createServer(async (req, res) => {
+    const startedAt = performance.now();
+    let status = 500;
     try {
       const response = await app({
         method: req.method,
@@ -35,12 +68,28 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
         headers: req.headers,
         body: await readBody(req, maxBodyBytes),
       });
-      res.writeHead(response.status, response.headers);
-      res.end(typeof response.body === "string" ? response.body : JSON.stringify(response.body));
+      status = response.status;
+      const headers = { ...response.headers };
+      let payload = typeof response.body === "string" ? response.body : JSON.stringify(response.body);
+      const byteLength = Buffer.byteLength(payload);
+      const encoding =
+        byteLength >= MIN_COMPRESS_BYTES && COMPRESSIBLE_CONTENT_TYPE.test(String(headers["content-type"] || "")) && !headers["content-encoding"]
+          ? negotiatedEncoding(req.headers)
+          : null;
+      if (encoding) {
+        payload = await compressBody(encoding, payload);
+        headers["content-encoding"] = encoding;
+        headers.vary = headers.vary ? `${headers.vary}, accept-encoding` : "accept-encoding";
+        headers["content-length"] = String(payload.length);
+      }
+      res.writeHead(response.status, headers);
+      res.end(payload);
     } catch (error) {
-      const status = error.status || 500;
+      status = error.status || 500;
       res.writeHead(status, ERROR_HEADERS);
       res.end(JSON.stringify({ kind: status === 413 ? "request_too_large" : "server_error" }));
+    } finally {
+      logRequest(req, status, startedAt);
     }
   });
 }
