@@ -1,25 +1,23 @@
-import fs from "node:fs";
-import path from "node:path";
 import { appendAuditLog, createAuditLogEntry, DEFAULT_AUDIT_LOG_PATH } from "./audit-log.mjs";
 import { replyPrompt, validateHermesReplyDraft } from "./hermes.mjs";
 import { assertHermesChatCompletionsEndpoint, hermesProviderConfigFromEnv } from "./hermes-provider-provisioning.mjs";
 import { fromRoot } from "./paths.mjs";
+import { createLedgerStore } from "./sqlite-ledger.mjs";
 
 export const DEFAULT_REPLY_OUTBOX_PATH = fromRoot("production", "data", "reply-outbox.jsonl");
 
+const store = createLedgerStore({
+  name: "reply_outbox",
+  columns: ["id", "lead_id", "listing_reference", "original_language", "reply_language", "reviewer", "reviewed_at", "status"],
+  indexes: ["lead_id", "reviewed_at"],
+});
+
 export function resetReplyOutbox(filePath = DEFAULT_REPLY_OUTBOX_PATH) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, "");
+  store.resetLedger(filePath);
 }
 
 export function readReplyOutbox(filePath = DEFAULT_REPLY_OUTBOX_PATH) {
-  if (!fs.existsSync(filePath)) return [];
-  return fs
-    .readFileSync(filePath, "utf8")
-    .trim()
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
+  return store.readRows(filePath);
 }
 
 function optionalText(value, { max = 4000 } = {}) {
@@ -214,8 +212,7 @@ export function appendReviewedReply(
     return { ...existing, idempotent: true };
   }
 
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
+  store.appendRow(filePath, row);
   return { ...row, idempotent: false };
 }
 

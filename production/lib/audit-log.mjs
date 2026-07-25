@@ -1,8 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
 import { fromRoot } from "./paths.mjs";
+import { createLedgerStore } from "./sqlite-ledger.mjs";
 
 export const DEFAULT_AUDIT_LOG_PATH = fromRoot("production", "data", "audit-log.jsonl");
+
+const store = createLedgerStore({
+  name: "audit_log",
+  columns: ["recorded_at", "actor", "action", "object_type", "object_id", "locale", "status"],
+  indexes: ["actor", "action"],
+});
 
 const ADMIN_ACTIONS = new Set([
   "account_created",
@@ -59,8 +64,7 @@ function boundedMetadata(metadata = {}) {
 }
 
 export function resetAuditLog(filePath = DEFAULT_AUDIT_LOG_PATH) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, "");
+  store.resetLedger(filePath);
 }
 
 export function createAuditLogEntry(input, recordedAt = new Date().toISOString()) {
@@ -84,19 +88,12 @@ export function createAuditLogEntry(input, recordedAt = new Date().toISOString()
 }
 
 export function appendAuditLog(entry, { filePath = DEFAULT_AUDIT_LOG_PATH } = {}) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(entry)}\n`);
+  store.appendRow(filePath, entry);
   return entry;
 }
 
 export function readAuditLog(filePath = DEFAULT_AUDIT_LOG_PATH) {
-  if (!fs.existsSync(filePath)) return [];
-  return fs
-    .readFileSync(filePath, "utf8")
-    .trim()
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
+  return store.readRows(filePath);
 }
 
 export function assertAuditLog(rows) {

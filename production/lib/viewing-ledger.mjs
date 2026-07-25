@@ -1,23 +1,21 @@
-import fs from "node:fs";
-import path from "node:path";
 import { assertLeadCanBookViewing } from "./lead-pipeline-outcomes.mjs";
 import { fromRoot } from "./paths.mjs";
+import { createLedgerStore } from "./sqlite-ledger.mjs";
 
 export const DEFAULT_VIEWING_LEDGER_PATH = fromRoot("production", "data", "viewings.jsonl");
 
+const store = createLedgerStore({
+  name: "viewings",
+  columns: ["id", "lead_id", "listing_reference", "broker", "starts_at", "booked_at", "channel", "status"],
+  indexes: ["lead_id", "starts_at"],
+});
+
 export function resetViewingLedger(filePath = DEFAULT_VIEWING_LEDGER_PATH) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, "");
+  store.resetLedger(filePath);
 }
 
 export function readViewings(filePath = DEFAULT_VIEWING_LEDGER_PATH) {
-  if (!fs.existsSync(filePath)) return [];
-  return fs
-    .readFileSync(filePath, "utf8")
-    .trim()
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
+  return store.readRows(filePath);
 }
 
 export function appendViewing(context, input, { filePath = DEFAULT_VIEWING_LEDGER_PATH, bookedAt = new Date().toISOString() } = {}) {
@@ -90,8 +88,7 @@ export function appendViewing(context, input, { filePath = DEFAULT_VIEWING_LEDGE
     },
   };
 
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(row)}\n`);
+  store.appendRow(filePath, row);
   return { ...row, idempotent: false };
 }
 

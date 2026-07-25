@@ -1,8 +1,13 @@
-import fs from "node:fs";
-import path from "node:path";
 import { fromRoot } from "./paths.mjs";
+import { createLedgerStore } from "./sqlite-ledger.mjs";
 
 export const DEFAULT_EVENT_LEDGER_PATH = fromRoot("production", "data", "events.jsonl");
+
+const store = createLedgerStore({
+  name: "events",
+  columns: ["recorded_at", "type", "path", "locale", "listing_reference", "action"],
+  indexes: ["type", "recorded_at"],
+});
 
 const EVENT_TYPES = new Set(["page_view", "search", "lead_submitted", "cta_click"]);
 const FORBIDDEN_KEYS = new Set(["contact", "message", "email", "phone", "name"]);
@@ -28,18 +33,11 @@ function safeFilters(filters = {}) {
 }
 
 export function resetEventLedger(filePath = DEFAULT_EVENT_LEDGER_PATH) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, "");
+  store.resetLedger(filePath);
 }
 
 export function readEventLedger(filePath = DEFAULT_EVENT_LEDGER_PATH) {
-  if (!fs.existsSync(filePath)) return [];
-  return fs
-    .readFileSync(filePath, "utf8")
-    .trim()
-    .split("\n")
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
+  return store.readRows(filePath);
 }
 
 export function createEvent(input, recordedAt = new Date().toISOString()) {
@@ -64,8 +62,7 @@ export function createEvent(input, recordedAt = new Date().toISOString()) {
 }
 
 export function appendEvent(event, { filePath = DEFAULT_EVENT_LEDGER_PATH } = {}) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.appendFileSync(filePath, `${JSON.stringify(event)}\n`);
+  store.appendRow(filePath, event);
   return event;
 }
 
