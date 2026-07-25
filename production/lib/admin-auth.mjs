@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
+import { SESSION_COOKIE, parseCookies, readSession } from "./admin-sessions.mjs";
 
 const LOCAL_ADMIN_TOKEN = "local-admin-smoke";
 const CREDENTIALS_ENV = "MS_REALTY_ADMIN_CREDENTIALS_JSON";
@@ -200,7 +201,25 @@ export function adminBearerToken(env = process.env) {
   return token ? `Bearer ${token}` : "";
 }
 
-export function resolveAdminPrincipal(auth, env = process.env) {
+// A signed session cookie beats every token path: it is the only source that
+// names a real human who typed a password. Bearer tokens stay for automation
+// (CI smoke, operator scripts) and for the transitional shared-token setup.
+export function resolveAdminPrincipal(auth, env = process.env, cookieHeader = "") {
+  const session = readSession(parseCookies(cookieHeader)[SESSION_COOKIE], { env });
+  if (session) {
+    try {
+      return {
+        id: operatorId(session.id, "session operator"),
+        source: "operator_session",
+        can_mutate: true,
+        roles: normalizedRoles(session.roles, "session roles"),
+        session_id: session.sid,
+      };
+    } catch {
+      return null; // a session carrying an unknown role is not trusted
+    }
+  }
+
   let credentials;
   try {
     credentials = adminCredentials(env);

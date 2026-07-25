@@ -1,17 +1,16 @@
 {
-  admin off
-  auto_https off
+	admin off
+	auto_https off
 }
 
 :8080 {
-  encode zstd gzip
+	encode zstd gzip
 
-  route {
-    @operator path /admin/* /api/admin/*
-    reverse_proxy @operator app:3000 {
-      header_up Authorization "Bearer {$MS_REALTY_ADMIN_TOKEN}"
-    }
-
-    reverse_proxy app:3000
-  }
+	# The edge no longer injects an admin credential. It used to attach
+	# `Authorization: Bearer $MS_REALTY_ADMIN_TOKEN` to every /admin/* request,
+	# which made anyone who could reach this port a full admin and recorded
+	# every action against one shared operator. Operators now sign in at
+	# /admin/login and carry their own session cookie, so the edge is a plain
+	# reverse proxy again.
+	reverse_proxy app:3000
 }

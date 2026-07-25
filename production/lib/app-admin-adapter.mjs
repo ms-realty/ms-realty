@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import {
+  adminHomePath,
   bindAuthenticatedOperator,
   canAdminAccess,
   canAdminMutate,
@@ -46,6 +47,8 @@ import {
 } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
 import { eraseContactSubject } from "./contact-erasure.mjs";
+import { authenticateOperator, clearedSessionCookie, issueSession, sessionCookie } from "./admin-sessions.mjs";
+import { renderAdminLoginPage } from "./admin-login.mjs";
 import { CSP_HEADER, securityHeaders } from "./security-headers.mjs";
 import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { loadMigrationRecords } from "./content.mjs";
@@ -2095,6 +2098,43 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
   };
 }
 
+// Login and logout are the only admin routes reachable without a principal —
+// they are how one is obtained. The cross-origin guard still applies to the
+// POST, so the form cannot be driven from another site.
+async function renderAdminAuthRoute(request, url, config) {
+  if (request.method === "GET" && url.pathname === "/admin/login") {
+    return new Response(renderAdminLoginPage({ next: url.searchParams.get("next") || "" }), {
+      status: 200,
+      headers: PRIVATE_HTML_HEADERS,
+    });
+  }
+  if (request.method === "POST" && url.pathname === "/admin/login") {
+    const body = await readRequestBody(request, config.maxBodyBytes);
+    const input = parseBody(request, body);
+    const operator = authenticateOperator(input.operator, input.password);
+    if (!operator) {
+      // One message for a wrong id and a wrong password: naming which was
+      // wrong would confirm that an operator id exists.
+      return new Response(renderAdminLoginPage({ next: input.next || "", error: true }), {
+        status: 401,
+        headers: PRIVATE_HTML_HEADERS,
+      });
+    }
+    const target = String(input.next || "").startsWith("/admin") ? String(input.next) : adminHomePath(operator);
+    return new Response(null, {
+      status: 303,
+      headers: { ...PRIVATE_JSON_HEADERS, location: target, "set-cookie": sessionCookie(issueSession(operator)) },
+    });
+  }
+  if (request.method === "POST" && url.pathname === "/admin/logout") {
+    return new Response(null, {
+      status: 303,
+      headers: { ...PRIVATE_JSON_HEADERS, location: "/admin/login", "set-cookie": clearedSessionCookie() },
+    });
+  }
+  return null;
+}
+
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
   const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
   if (crossOrigin) {
@@ -2103,8 +2143,21 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       headers: PRIVATE_JSON_HEADERS,
     });
   }
-  const principal = resolveAdminPrincipal(request.headers.get("authorization") || "");
-  if (!principal) return adminUnauthorized();
+  const authUrl = new URL(request.url, "http://localhost");
+  const authRoute = await renderAdminAuthRoute(request, authUrl, config);
+  if (authRoute) return authRoute;
+
+  const principal = resolveAdminPrincipal(
+    request.headers.get("authorization") || "",
+    process.env,
+    request.headers.get("cookie") || "",
+  );
+  // A browser asking for a page gets the login form; an API client gets 401.
+  if (!principal) {
+    return (request.headers.get("accept") || "").includes("text/html")
+      ? new Response(null, { status: 303, headers: { ...PRIVATE_JSON_HEADERS, location: `/admin/login?next=${encodeURIComponent(authUrl.pathname)}` } })
+      : adminUnauthorized();
+  }
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
   config = { ...config, adminPrincipal: principal };
   try {

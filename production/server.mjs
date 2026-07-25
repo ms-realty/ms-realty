@@ -181,11 +181,15 @@ export function createProductionServer(config = productionServerConfig()) {
 // Fail closed: `npm start` sets no NODE_ENV, so without this a deployed server
 // would accept the public smoke token as a full-mutation admin credential.
 export function assertAdminCredentialsConfigured(env = process.env) {
+  // Named operator sessions are the preferred credential; the bearer paths
+  // remain for automation and the transitional shared-token setup.
+  if (String(env.MS_REALTY_ADMIN_OPERATORS_JSON || "").trim() && String(env.MS_REALTY_SESSION_SECRET || "").trim()) return;
   if (String(env.MS_REALTY_ADMIN_CREDENTIALS_JSON || "").trim()) return;
   if (String(env.MS_REALTY_ADMIN_TOKEN || "").trim()) return;
   if (env.MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN === "1" && env.NODE_ENV !== "production") return;
   throw new Error(
-    "Refusing to start: set MS_REALTY_ADMIN_CREDENTIALS_JSON (per-operator tokens) or MS_REALTY_ADMIN_TOKEN. " +
+    "Refusing to start: set MS_REALTY_ADMIN_OPERATORS_JSON + MS_REALTY_SESSION_SECRET (named operator logins), " +
+      "or MS_REALTY_ADMIN_CREDENTIALS_JSON / MS_REALTY_ADMIN_TOKEN for automation. " +
       "For a local throwaway preview only, set MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN=1.",
   );
 }

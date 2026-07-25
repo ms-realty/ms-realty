@@ -8,8 +8,11 @@ x-app-environment: &app-environment
   PAYLOAD_SECRET: ${PAYLOAD_SECRET:?PAYLOAD_SECRET is required}
   DATABASE_URL: postgresql://ms_realty_payload:${MS_REALTY_POSTGRES_PASSWORD:?MS_REALTY_POSTGRES_PASSWORD is required}@postgres:5432/ms_realty_payload
   MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: "1"
-  MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN:?MS_REALTY_ADMIN_TOKEN is required}
-  MS_REALTY_ADMIN_ACTOR: local_preview
+  # Named operator logins. MS_REALTY_ADMIN_TOKEN stays optional and is only for
+  # automation (smoke scripts, CI) — it is no longer how humans get in.
+  MS_REALTY_SESSION_SECRET: ${MS_REALTY_SESSION_SECRET:?MS_REALTY_SESSION_SECRET is required}
+  MS_REALTY_ADMIN_OPERATORS_JSON: ${MS_REALTY_ADMIN_OPERATORS_JSON:?MS_REALTY_ADMIN_OPERATORS_JSON is required}
+  MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN:-}
   # Every request reaches the app through the Caddy edge here, so the
   # forwarded client IP can be trusted for rate limiting.
   MS_REALTY_TRUST_PROXY: "1"
@@ -237,8 +240,6 @@ services:
     depends_on:
       app:
         condition: service_healthy
-    environment:
-      MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN}
     ports:
       - "127.0.0.1:${MS_REALTY_APP_PORT:-3200}:8080"
     volumes:

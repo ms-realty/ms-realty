@@ -530,7 +530,17 @@ phase is outsourced, budget senior full-stack + fractional SEO for the migration
 
 ## 18. Non-negotiables & explicit non-goals
 
-**Operator authentication (current state).** The deployed topology authenticates at the edge: Caddy attaches the admin bearer to `/admin/*`, so *anyone who reaches the edge is an admin* and every action is attributed to one shared operator id. The per-operator credential registry (`MS_REALTY_ADMIN_CREDENTIALS_JSON`) and the role/capability model exist and are enforced, but nothing in the deployment issues per-person credentials yet. Cross-origin writes are blocked (`request-guard.mjs`), the public smoke token is opt-in only, and Payload ships an auth-enabled `admins` collection with the same four roles — wiring real sessions to it is the remaining work.
+**Operator authentication.** Brokers sign in at `/admin/login` with their own
+account and carry an HMAC-signed, HttpOnly session cookie; every mutation and
+audit entry names that operator. Passwords are scrypt hashes in
+`MS_REALTY_ADMIN_OPERATORS_JSON`, sessions are signed with
+`MS_REALTY_SESSION_SECRET` (both required for the server to start), and roles
+come from the operator record through the existing capability model. The edge
+no longer injects a credential. Bearer tokens remain for automation only
+(`MS_REALTY_ADMIN_TOKEN`, `MS_REALTY_ADMIN_CREDENTIALS_JSON`), and the built-in
+smoke token needs an explicit opt-in that production refuses. Session issuing
+lives in the Next runtime; the bare Node adapter accepts a session cookie but
+does not issue one, since it exists for smoke tests.
 
 **Non-negotiables:** crawl parity before visual polish · existing indexable URLs resolve as equivalent
 `200` or reviewed one-hop `301` · no bulk homepage redirects · `.ru` first-class Russian unless a
