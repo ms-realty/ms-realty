@@ -45,6 +45,9 @@ import {
   readAccountLedger,
 } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
+import { eraseContactSubject } from "./contact-erasure.mjs";
+import { CSP_HEADER, securityHeaders } from "./security-headers.mjs";
+import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
@@ -203,13 +206,15 @@ import {
   readViewingFollowUps,
 } from "./viewing-follow-ups.mjs";
 
-const SECURITY_HEADERS = {
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "strict-origin-when-cross-origin",
-  "x-frame-options": "DENY",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+const SECURITY_HEADERS = securityHeaders();
+// The admin shell renders through this adapter in the deployed runtime, so the
+// CSP has to be attached here too — not only in the bare Node server.
+const PRIVATE_HTML_HEADERS = {
+  ...SECURITY_HEADERS,
+  ...CSP_HEADER,
+  "content-type": "text/html; charset=utf-8",
+  "cache-control": "no-store",
 };
-const PRIVATE_HTML_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_JSON_HEADERS = {
   ...SECURITY_HEADERS,
   "content-type": "application/json; charset=utf-8",
@@ -844,36 +849,12 @@ function deployableRedirectArtifact(config = {}) {
   return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ sourcePath, "utf8"));
 }
 
-function deployableRedirects(config = {}) {
-  return deployableRedirectArtifact(config).redirects || [];
-}
-
 function routeMapSummary(routes) {
   return { summary: summarizeLegacyRouteMap(routes), routes };
 }
 
 function currentLegacyRouteDecisions(config) {
   return buildLegacyRouteDecisions(routeMapRows(), readRedirectApprovals(config.redirectApprovalPath));
-}
-
-function currentDeployableArtifact(config) {
-  const decisions = currentLegacyRouteDecisions(config);
-  const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
-    old_url: decision.old_url,
-    target_path: decision.target_path,
-    status: 301,
-    source_domain: decision.source_domain,
-    target_locale: decision.target_locale,
-    url_type: decision.url_type,
-    reviewer: decision.reviewer,
-    approved_at: decision.approved_at,
-  }));
-  return {
-    summary: summarizeDeployableRedirects(redirects),
-    decision_summary: summarizeLegacyRouteDecisions(decisions),
-    redirects,
-    decisions,
-  };
 }
 
 function deployableRedirectsForLaunch(config) {
@@ -2115,6 +2096,13 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
 }
 
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
+  const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
+  if (crossOrigin) {
+    return new Response(JSON.stringify({ kind: "cross_origin_write_blocked", reason: crossOrigin }), {
+      status: 403,
+      headers: PRIVATE_JSON_HEADERS,
+    });
+  }
   const principal = resolveAdminPrincipal(request.headers.get("authorization") || "");
   if (!principal) return adminUnauthorized();
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
@@ -2343,6 +2331,27 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
       const result = appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/contacts/erase") {
+      const input = bindAuthenticatedOperator(
+        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        config.adminPrincipal,
+      );
+      const result = eraseContactSubject(input, {
+        leadContactVaultPath: config.leadContactVaultPath,
+        publicContactVaultPath: config.publicContactVaultPath,
+      });
+      recordAudit(
+        {
+          action: "contact_erased",
+          actor: result.actor,
+          objectType: `${result.subject_type}_contact`,
+          objectId: result.subject_id,
+          metadata: { reason: result.reason, erased_rows: result.erased_rows },
+        },
+        config,
+      );
+      return jsonResponse(200, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));

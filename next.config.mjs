@@ -7,6 +7,17 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 export default withPayload({
   turbopack: { root },
   skipTrailingSlashRedirect: true,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    // q=70 is emitted by the public-site srcset; 75 is the Next default.
+    qualities: [70, 75],
+    // Legacy upload originals are stable URLs — cache optimizer output long.
+    minimumCacheTTL: 2678400,
+    remotePatterns: [
+      { protocol: "https", hostname: "makler-realty.com" },
+      { protocol: "https", hostname: "makler-realty.ru" },
+    ],
+  },
   async headers() {
     return [
       {

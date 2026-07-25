@@ -736,7 +736,7 @@ const UI_COPY = {
   },
 };
 
-function humanizeIdentifier(value) {
+export function humanizeIdentifier(value) {
   return String(value || "").replaceAll("_", " ");
 }
 
@@ -1114,10 +1114,6 @@ function publicChrome(registry, locale, { hreflang = [], active = null, location
 
 export function labelsFor(localeCode) {
   return ACTION_LABELS[localeCode] || ACTION_LABELS.en;
-}
-
-function descriptionFor(listing) {
-  return listing.description || listing.h1 || listing.title || `MS Realty listing ${listing.id}`;
 }
 
 function localizedCopy(localeCode, view) {

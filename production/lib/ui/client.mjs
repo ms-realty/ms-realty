@@ -156,10 +156,28 @@ export const PUBLIC_APP_JS = `(function () {
       body: JSON.stringify(nestFormData(form)),
     })
       .then(function (response) {
-        if (!response.ok) throw new Error(String(response.status));
-        onDone();
+        if (response.ok) return onDone();
+        // A 4xx says the visitor can fix something; the generic "try again"
+        // copy sends them into a loop that fails identically every time. Read
+        // the server's reason and show it. 5xx and network drops stay generic,
+        // because retrying really is the right advice there.
+        return response
+          .json()
+          .catch(function () {
+            return {};
+          })
+          .then(function (payload) {
+            var error = new Error(String(response.status));
+            error.status = response.status;
+            // Rate limiting carries no message and "try again" is the right
+            // advice there, so only a described 4xx overrides the copy.
+            if (response.status >= 400 && response.status < 500 && payload && payload.message) {
+              error.reason = String(payload.message);
+            }
+            throw error;
+          });
       })
-      .catch(function () {
+      .catch(function (error) {
         var warn = form.querySelector("[data-enquiry-error]");
         if (!warn) {
           warn = document.createElement("p");
@@ -168,7 +186,7 @@ export const PUBLIC_APP_JS = `(function () {
           warn.setAttribute("role", "alert");
           form.insertBefore(warn, form.firstChild);
         }
-        warn.textContent = I18N.requestFailed || "Request failed";
+        warn.textContent = (error && error.reason) || I18N.requestFailed || "Request failed";
         warn.setAttribute("tabindex", "-1");
         warn.focus({ preventScroll: true });
         var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -305,10 +323,15 @@ export const PUBLIC_APP_JS = `(function () {
     var label = form.querySelector("[data-enquiry-phone-label]");
     if (!contact) return;
     var value = intent === "inquiry" && channel ? channel.value : "phone";
-    if (value !== "phone" && value !== "whatsapp" && value !== "viber") value = "phone";
+    // Callback and viewing requests still need a phone by contract; only a
+    // plain inquiry may be answered by email.
+    if (value !== "phone" && value !== "whatsapp" && value !== "viber" && value !== "email") value = "phone";
     var option = channel && channel.options[channel.selectedIndex];
     var text = intent === "inquiry" && option ? option.textContent : label && label.getAttribute("data-enquiry-default-label");
     contact.name = "contact." + value;
+    contact.type = value === "email" ? "email" : "tel";
+    contact.setAttribute("autocomplete", value === "email" ? "email" : "tel");
+    contact.setAttribute("inputmode", value === "email" ? "email" : "tel");
     contact.required = true;
     contact.setAttribute("data-enquiry-validation", intent === "inquiry" ? "reachable_channel" : "phone");
     if (label && label.firstChild) label.firstChild.nodeValue = text || "";

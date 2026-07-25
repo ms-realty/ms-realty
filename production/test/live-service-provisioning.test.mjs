@@ -11,7 +11,7 @@ import {
 } from "../lib/live-service-provisioning.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
-function healthyFetch(url, options = {}) {
+function healthyFetch(url, _options = {}) {
   if (String(url).endsWith("/v1/capabilities")) {
     return {
       ok: true,

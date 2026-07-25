@@ -178,7 +178,20 @@ export function createProductionServer(config = productionServerConfig()) {
   return createNodeServer(createProductionHttpApp(config), { maxBodyBytes: config.maxBodyBytes });
 }
 
+// Fail closed: `npm start` sets no NODE_ENV, so without this a deployed server
+// would accept the public smoke token as a full-mutation admin credential.
+export function assertAdminCredentialsConfigured(env = process.env) {
+  if (String(env.MS_REALTY_ADMIN_CREDENTIALS_JSON || "").trim()) return;
+  if (String(env.MS_REALTY_ADMIN_TOKEN || "").trim()) return;
+  if (env.MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN === "1" && env.NODE_ENV !== "production") return;
+  throw new Error(
+    "Refusing to start: set MS_REALTY_ADMIN_CREDENTIALS_JSON (per-operator tokens) or MS_REALTY_ADMIN_TOKEN. " +
+      "For a local throwaway preview only, set MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN=1.",
+  );
+}
+
 export async function startProductionServer(config = productionServerConfig()) {
+  assertAdminCredentialsConfigured();
   const server = createProductionServer(config);
   const address = await listen(server, config.port, config.host);
   console.log(JSON.stringify({ kind: "ms_realty_server", status: "listening", address }));

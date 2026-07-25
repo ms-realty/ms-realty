@@ -522,6 +522,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
       assert.equal(smoke.health.body.status, "ok");
       assert.deepEqual(smoke.health.body.blockers, [
         "redirect_reviews",
+        "locale_content_parity",
+        "media_migration",
         "external_seo_exports",
         "listing_quality_review",
         "live_services",
@@ -535,6 +537,8 @@ test("Node server serves live listing, search, lead, and viewing endpoints", asy
         smoke.ready.body.blocked_gates.map((gate) => gate.id),
         [
           "redirect_reviews",
+          "locale_content_parity",
+          "media_migration",
           "external_seo_exports",
           "listing_quality_review",
           "live_services",

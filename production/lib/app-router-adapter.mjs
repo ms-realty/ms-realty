@@ -1,12 +1,25 @@
+import fs from "node:fs";
+import path from "node:path";
 import { renderHtmlPage } from "./html.mjs";
-import { renderReactPublicBody } from "./react-public-site.mjs";
-import { loadLocaleRegistry } from "./locales.mjs";
-import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
+import { LEGACY_MEDIA_HOSTS, mirrorKeyFor, mirrorPathFor } from "./media-migration.mjs";
+import { enableNextImageOptimizer, renderReactPublicBody } from "./react-public-site.mjs";
+
+// This adapter only runs inside the Next.js runtime, where the built-in
+// /_next/image optimizer exists. The bare Node server keeps plain URLs.
+enableNextImageOptimizer();
+import { loadLocaleRegistry, negotiateRootLocale } from "./locales.mjs";
+import { canonicalCasePath, loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
 import { searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
-import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
+import {
+  DEFAULT_PUBLIC_ORIGIN,
+  buildRuntimeLocalizedSitemap,
+  publicOriginForHost,
+  renderRobotsTxt,
+  renderSitemapXml,
+} from "./seo-files.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
@@ -83,8 +96,27 @@ function currentTranslationTasks(config) {
   return readThroughCached(config.translationLedgerPath, () => readTranslationLedger(config.translationLedgerPath));
 }
 
-export function renderAppRoute({ pathname, url = pathname, config = appRouterConfigFromEnv() } = {}) {
+// Negotiates the bare domain root to a locale home. `.ru` is a first-class
+// Russian site, so it defaults to RU regardless of Accept-Language; everything
+// else falls back to the registry source locale (BG).
+export function rootRedirectTarget({ host = "", acceptLanguage = "", config = appRouterConfigFromEnv() } = {}) {
+  return `/${negotiateRootLocale(currentRegistry(config), { host, acceptLanguage })}`;
+}
+
+export function renderRootRedirectResponse({ host = "", acceptLanguage = "", config = appRouterConfigFromEnv() } = {}) {
+  return new Response(null, {
+    status: 307,
+    headers: {
+      location: rootRedirectTarget({ host, acceptLanguage, config }),
+      vary: "accept-language",
+      "cache-control": "no-store",
+    },
+  });
+}
+
+export function renderAppRoute({ pathname, url = pathname, host = "", config = appRouterConfigFromEnv() } = {}) {
   if (!pathname) throw new Error("App route pathname is required");
+  const origin = publicOriginForHost(host);
 
   const registry = currentRegistry(config);
   const seed = currentSeed(config);
@@ -113,7 +145,7 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
       );
   const print = requestUrl.searchParams.get("print") === "1";
   const reactBody = print ? "" : renderReactPublicBody(rendered);
-  const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print });
+  const html = renderHtmlPage(rendered, { bodyHtml: reactBody, print, origin });
 
   return {
     status: rendered.status || 200,
@@ -141,7 +173,19 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
   if (legacyDecision?.status === 200) {
     pathname = legacyDecision.target_path;
   }
-  const result = renderAppRoute({ pathname, url, config });
+  const canonicalCase = canonicalCasePath(
+    currentRegistry(config),
+    currentSeed(config),
+    pathname,
+    currentTranslationTasks(config),
+  );
+  if (canonicalCase) {
+    return new Response(null, {
+      status: 301,
+      headers: { location: `${canonicalCase}${new URL(url, "http://localhost").search}`, "cache-control": PUBLIC_CACHE },
+    });
+  }
+  const result = renderAppRoute({ pathname, url, host, config });
   if (result.status === 200 && pathname.length > 1 && pathname.endsWith("/")) {
     return new Response(null, {
       status: 308,
@@ -151,21 +195,21 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
   return new Response(result.html, { status: result.status, headers: result.headers });
 }
 
-export function renderAppSitemap({ config = appRouterConfigFromEnv() } = {}) {
+export function renderAppSitemap({ host = "", config = appRouterConfigFromEnv() } = {}) {
   const sitemap = buildRuntimeLocalizedSitemap(currentRegistry(config), currentSeed(config), currentTranslationTasks(config));
   return {
     status: 200,
     headers: { "content-type": "application/xml; charset=utf-8", "cache-control": PUBLIC_CACHE },
     sitemap,
-    body: renderSitemapXml(sitemap),
+    body: renderSitemapXml(sitemap, { origin: publicOriginForHost(host) || DEFAULT_PUBLIC_ORIGIN }),
   };
 }
 
-export function renderAppRobots() {
+export function renderAppRobots({ host = "" } = {}) {
   return {
     status: 200,
     headers: { "content-type": "text/plain; charset=utf-8", "cache-control": PUBLIC_CACHE },
-    body: renderRobotsTxt(),
+    body: renderRobotsTxt({ origin: publicOriginForHost(host) || DEFAULT_PUBLIC_ORIGIN }),
   };
 }
 
@@ -177,17 +221,59 @@ export function renderAppFavicon() {
   };
 }
 
-export function renderAppSitemapResponse({ config = appRouterConfigFromEnv() } = {}) {
-  const result = renderAppSitemap({ config });
+export function renderAppSitemapResponse({ host = "", config = appRouterConfigFromEnv() } = {}) {
+  const result = renderAppSitemap({ host, config });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }
 
-export function renderAppRobotsResponse() {
-  const result = renderAppRobots();
+export function renderAppRobotsResponse({ host = "" } = {}) {
+  const result = renderAppRobots({ host });
   return new Response(result.body, { status: result.status, headers: result.headers });
 }
 
 export function renderAppFaviconResponse() {
   const result = renderAppFavicon();
   return new Response(result.body, { status: result.status, headers: result.headers });
+}
+
+const MEDIA_CONTENT_TYPES = {
+  ".avif": "image/avif",
+  ".gif": "image/gif",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".mp4": "video/mp4",
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".webm": "video/webm",
+  ".webp": "image/webp",
+};
+
+// Serves a mirrored legacy upload at its original path. Falls through to 404
+// when the asset has not been mirrored yet, so a partial mirror degrades to the
+// current behaviour instead of serving a wrong file.
+export function renderLegacyUploadResponse({ pathname, host = "" } = {}) {
+  const requestHostName = String(host || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase()
+    .replace(/:\d+$/, "")
+    .replace(/^www\./, "");
+  const mirrorHost = LEGACY_MEDIA_HOSTS.has(requestHostName) ? requestHostName : "makler-realty.com";
+  const key = mirrorKeyFor(`https://${mirrorHost}${pathname}`);
+  const filePath = key ? mirrorPathFor(key, { mirrorDir: process.env.MS_REALTY_MEDIA_MIRROR_DIR || undefined }) : null;
+  if (!filePath || !fs.existsSync(filePath)) {
+    return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });
+  }
+  const body = fs.readFileSync(filePath);
+  return new Response(body, {
+    status: 200,
+    headers: {
+      "content-type": MEDIA_CONTENT_TYPES[path.extname(filePath).toLowerCase()] || "application/octet-stream",
+      "content-length": String(body.byteLength),
+      // Legacy upload originals are immutable: the filename encodes the upload.
+      "cache-control": "public, max-age=31536000, immutable",
+      "x-content-type-options": "nosniff",
+    },
+  });
 }

@@ -71,6 +71,8 @@ const ADMIN_UI_COPY = {
     openQualityQueue: "Отвори опашката за качество",
     launchGates: {
       redirect_reviews: "преглед на старите URL адреси",
+      locale_content_parity: "покритие на езиците",
+      media_migration: "пренасяне на снимките",
       external_seo_exports: "външни SEO данни",
       listing_quality_review: "преглед на качеството",
       live_services: "работещи услуги",
@@ -338,6 +340,8 @@ const ADMIN_UI_COPY = {
     openQualityQueue: "Открыть очередь качества",
     launchGates: {
       redirect_reviews: "проверка старых URL",
+      locale_content_parity: "покрытие языков",
+      media_migration: "перенос изображений",
       external_seo_exports: "внешние SEO-данные",
       listing_quality_review: "проверка качества объектов",
       live_services: "рабочие сервисы",
@@ -605,6 +609,8 @@ const ADMIN_UI_COPY = {
     openQualityQueue: "Open quality queue",
     launchGates: {
       redirect_reviews: "legacy URL review",
+      locale_content_parity: "locale content coverage",
+      media_migration: "media migration",
       external_seo_exports: "external SEO evidence",
       listing_quality_review: "listing quality review",
       live_services: "live services",

@@ -224,7 +224,9 @@ export function buildMobileElderlyQaReport({
     check(
       "narrow_mobile_search_action",
       includes(englishHome, "class=\"mk-search__go\" type=\"submit\" aria-label=\"Search\" title=\"Search\"") &&
-        includes(publicAdapterCss, "@media (max-width: 360px)") &&
+        // 430px, not 360: at 375/390/393/414 the labelled button squeezed the
+        // location input below its width at 320px.
+        includes(publicAdapterCss, "@media (max-width: 430px)") &&
         includes(publicAdapterCss, ".hp-hero__search .mk-search__go { width: 52px; padding-inline: 0; }") &&
         includes(publicAdapterCss, ".hp-hero__search .mk-search__go span { display: none; }"),
     ),

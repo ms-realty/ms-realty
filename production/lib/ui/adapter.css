@@ -57,9 +57,13 @@ button, input, select, textarea { min-height: 44px; }
 input, select, textarea { width: 100%; }
 textarea { min-height: 7rem; resize: vertical; }
 
-/* Bare form fields (non mk-field markup) inherit the DS input look. */
-main input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(.mk-input__field):not(.mk-searchbar__input),
-main select:not(.mk-select__field),
+/* Bare form fields (non mk-field markup) inherit the DS input look.
+   Fields inside a kit search bar are excluded: they sit in a container that
+   already carries the border and shadow, so inheriting the input chrome drew a
+   second bezel inside the first. The five :not() clauses make this rule (0,5,2),
+   which silently outranked the scoped .hp-hero__search override at (0,2,1). */
+main input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(.mk-input__field):not(.mk-searchbar__input):not(.mk-search__field *),
+main select:not(.mk-select__field):not(.mk-search__field *),
 main textarea:not(.mk-textarea__field) {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-input);

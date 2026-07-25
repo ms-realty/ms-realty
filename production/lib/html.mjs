@@ -14,18 +14,32 @@ function escapeHtml(value) {
 }
 
 function designSystemStyle() {
+  // Self-hosted fonts need no third-party preconnect — and must not emit one,
+  // since the point of self-hosting is that no visitor IP reaches Google.
+  const selfHosted = FONTS_URL.startsWith("/");
   return [
-    '<link rel="preconnect" href="https://fonts.googleapis.com">',
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+    ...(selfHosted
+      ? []
+      : ['<link rel="preconnect" href="https://fonts.googleapis.com">', '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>']),
     `<link rel="stylesheet" href="${FONTS_URL}">`,
     `<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">`,
   ].join("\n");
 }
 
-function openGraph(page) {
+// canonical, hreflang, and og:url must be absolute: Google ignores relative
+// hreflang entirely, and a relative canonical makes .com and .ru each
+// self-canonicalise the same content. `origin` comes from the request Host.
+export function absoluteHref(origin, value) {
+  const href = String(value || "/");
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("//")) return href;
+  if (!origin) return href;
+  return `${String(origin).replace(/\/+$/, "")}${href.startsWith("/") ? href : `/${href}`}`;
+}
+
+function openGraph(page, origin) {
   const title = page.metadata?.og_title || page.metadata?.title || "MS Realty";
   const description = page.metadata?.og_description || page.metadata?.description || "";
-  const url = page.canonical || page.path || "/";
+  const url = absoluteHref(origin, page.canonical || page.path || "/");
   const image = page.body?.media?.gallery?.find((item) => item.url)?.url || null;
   return [
     ["og:type", page.kind === "listing" ? "article" : "website"],
@@ -40,11 +54,34 @@ function openGraph(page) {
     .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`);
 }
 
-function meta(page) {
+// A single-location agency needs RealEstateAgent/LocalBusiness markup for local
+// search. Listing pages already carry RealEstateListing; this covers the org
+// itself on the home page.
+function organizationSchema(page, origin) {
+  if (page.kind !== "home") return "";
+  const contact = page.chrome?.contact || {};
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: "MS Realty",
+    url: absoluteHref(origin, page.canonical || page.path || "/"),
+    address: { "@type": "PostalAddress", addressLocality: "Sandanski", addressCountry: "BG" },
+    areaServed: String(contact.offices || "Sandanski")
+      .split("·")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  };
+  if (contact.phone_label) schema.telephone = contact.phone_label;
+  if (contact.email) schema.email = contact.email;
+  return `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, "\\u003c")}</script>`;
+}
+
+function meta(page, origin) {
   const links = [
-    `<link rel="canonical" href="${escapeHtml(page.canonical || page.path || "/")}">`,
+    `<link rel="canonical" href="${escapeHtml(absoluteHref(origin, page.canonical || page.path || "/"))}">`,
     ...(page.hreflang || []).map(
-      (link) => `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(link.href)}">`,
+      (link) =>
+        `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(absoluteHref(origin, link.href))}">`,
     ),
   ];
   const schema = page.schema
@@ -57,9 +94,10 @@ function meta(page) {
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,
     `<meta name="robots" content="${escapeHtml(page.metadata?.robots || (page.indexable ? "index,follow" : "noindex,follow"))}">`,
-    ...openGraph(page),
+    ...openGraph(page, origin),
     ...links,
     schema,
+    organizationSchema(page, origin),
   ]
     .filter(Boolean)
     .join("\n");
@@ -841,7 +879,7 @@ export function renderHtmlPage(page, options = {}) {
   return `<!doctype html>
 <html lang="${escapeHtml(page.lang || page.locale || "en")}" dir="${escapeHtml(page.dir || "ltr")}">
 <head>
-${meta(page)}
+${meta(page, options.origin || "")}
 </head>
 <body>
 ${body}

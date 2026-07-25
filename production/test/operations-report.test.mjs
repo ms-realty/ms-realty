@@ -116,7 +116,7 @@ test("operations report derives privacy-safe source, response, pipeline, invento
   assert.equal(report.task_health.rows.find((row) => row.queue === "translation_review").overdue, 1);
   assert.equal(report.search.zero_result_events, 1);
   assert.equal(JSON.stringify(report).includes("reviewed_reply"), false);
-  assert.doesNotMatch(JSON.stringify(report), /\"(?:contact|email|message|phone|whatsapp)\":/);
+  assert.doesNotMatch(JSON.stringify(report), /"(?:contact|email|message|phone|whatsapp)":/);
 
   const csv = renderOperationsReportCsv(report);
   assert.match(csv, /^source,leads,replies_sent,response_rate_pct,/);

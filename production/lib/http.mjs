@@ -6,7 +6,8 @@ import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
-import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
+import { CONTENT_SECURITY_POLICY, securityHeaders } from "./security-headers.mjs";
+import { crossOriginWriteRejection, readHeader, requestHost } from "./request-guard.mjs";
 import {
   adminHomePath,
   bindAuthenticatedOperator,
@@ -38,6 +39,7 @@ import { loadMigrationRecords } from "./content.mjs";
 import {
   addLocaleToRegistry,
   loadLocaleRegistry,
+  negotiateRootLocale,
   requiredAdminLocales,
   requiredPublicLocales,
   websiteLanguageCoverage,
@@ -69,10 +71,16 @@ import {
   readReplyDeliveryOutcomes,
 } from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
-import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { canonicalCasePath, loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
-import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
+import {
+  DEFAULT_PUBLIC_ORIGIN,
+  buildRuntimeLocalizedSitemap,
+  publicOriginForHost,
+  renderRobotsTxt,
+  renderSitemapXml,
+} from "./seo-files.mjs";
 import {
   approveTranslationTask,
   createCrmInboxItem,
@@ -195,12 +203,7 @@ import { fromRoot } from "./paths.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 
-const SECURITY_HEADERS = {
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "strict-origin-when-cross-origin",
-  "x-frame-options": "DENY",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
-};
+const SECURITY_HEADERS = securityHeaders();
 const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
@@ -245,11 +248,16 @@ function wantsPrint(url, rendered) {
 }
 
 function publicResponse(request, url, rendered) {
+  const origin = publicOriginForHost(requestHost(request.headers));
   if (wantsPrint(url, rendered)) {
-    return response(rendered.status || 200, renderHtmlPage(rendered, { print: true }), "text/html; charset=utf-8");
+    return response(rendered.status || 200, renderHtmlPage(rendered, { print: true, origin }), "text/html; charset=utf-8");
   }
   if (wantsHtml(request, url)) {
-    return response(rendered.status || 200, renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered) }), "text/html; charset=utf-8");
+    return response(
+      rendered.status || 200,
+      renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered), origin }),
+      "text/html; charset=utf-8",
+    );
   }
   return json(rendered.status || 200, rendered);
 }
@@ -817,8 +825,6 @@ export function createHttpApp({
       events: readEventLedger(eventLedgerPath || undefined),
       generatedAt: reviewedAt || new Date().toISOString(),
     });
-  const currentLegacyRouteDecisions = () =>
-    buildLegacyRouteDecisions(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
   const currentDeployedRedirectArtifact = () => {
     const decisions = activeLegacyDecisions;
     const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
@@ -928,6 +934,10 @@ export function createHttpApp({
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
+    const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
+    if (crossOrigin) {
+      return response(403, { kind: "cross_origin_write_blocked", reason: crossOrigin }, "application/json; charset=utf-8", PRIVATE_HEADERS);
+    }
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
     if (adminRequest && !principal) return adminUnauthorized();
@@ -980,6 +990,31 @@ export function createHttpApp({
       return publicResponse(request, url, retained);
     }
 
+    if (request.method === "GET" && url.pathname === "/") {
+      const rootLocaleTarget = `/${negotiateRootLocale(activeRegistry, { host, acceptLanguage: readHeader(request.headers, "accept-language") })}`;
+      return response(
+        307,
+        { kind: "root_locale_redirect", location: rootLocaleTarget },
+        "application/json; charset=utf-8",
+        {
+          location: rootLocaleTarget,
+          vary: "accept-language",
+          "cache-control": "no-store",
+        },
+      );
+    }
+
+    const canonicalCase =
+      request.method === "GET" ? canonicalCasePath(activeRegistry, currentSeed(), url.pathname, currentTranslationTasks()) : null;
+    if (canonicalCase) {
+      return response(
+        301,
+        { kind: "canonical_case_redirect", location: `${canonicalCase}${url.search}` },
+        "application/json; charset=utf-8",
+        { location: `${canonicalCase}${url.search}` },
+      );
+    }
+
     const slugRedirect =
       request.method === "GET" ? slugRedirectForPath(currentSlugHistory(), url.pathname) : null;
     if (slugRedirect) {
@@ -994,13 +1029,19 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       return response(
         200,
-        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), currentTranslationTasks())),
+        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), currentTranslationTasks()), {
+          origin: publicOriginForHost(requestHost(request.headers)) || DEFAULT_PUBLIC_ORIGIN,
+        }),
         "application/xml; charset=utf-8",
       );
     }
 
     if (request.method === "GET" && url.pathname === "/robots.txt") {
-      return response(200, renderRobotsTxt(), "text/plain; charset=utf-8");
+      return response(
+        200,
+        renderRobotsTxt({ origin: publicOriginForHost(requestHost(request.headers)) || DEFAULT_PUBLIC_ORIGIN }),
+        "text/plain; charset=utf-8",
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/favicon.ico") {
@@ -2608,10 +2649,21 @@ export function createHttpApp({
       try {
         const input = parseBody(request);
         const lead = submitRuntimeLead(activeRegistry, currentSeed(), input);
+        // Ledger first: a replayed submit must not create a second contact-vault
+        // row, consent record, SLA timer, or seller pipeline item.
+        const ledger = leadLedgerPath
+          ? appendLead(lead, {
+              filePath: leadLedgerPath,
+              receivedAt,
+              idempotencyKey: input.idempotencyKey || input.idempotency_key || null,
+            })
+          : null;
+        if (ledger?.idempotent_replay) {
+          return privateResponse(200, { ...lead, ledger, idempotent_replay: true }, "application/json; charset=utf-8");
+        }
         const contactVault = leadContactVaultPath
           ? appendLeadContact(lead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt })
           : null;
-        const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         const consent = recordConsent({
           consentType: "inquiry_follow_up",
           source: lead.lead?.source,
@@ -2767,6 +2819,8 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 export function assertHttpSmoke(smoke) {
   const expectedBlockers = [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",

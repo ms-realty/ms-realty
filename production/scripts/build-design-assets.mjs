@@ -16,7 +16,7 @@
 //   node_modules/lucide-static/icons/*.svg             (icon vectors, build-time only)
 
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ADMIN_APP_JS, PUBLIC_APP_JS } from "../lib/ui/client.mjs";
@@ -81,6 +81,14 @@ function jsxFilesUnder(dir) {
 }
 
 function fontsUrl() {
+  // Prefer the self-hosted stylesheet when it has been generated: shipping
+  // fonts.googleapis.com leaks every EU visitor's IP to Google on page load
+  // (a GDPR problem for the DE/NL locales) and blocks first render.
+  const selfHosted = path.join(ROOT, "public", "vendor", "fonts", "fonts.css");
+  if (existsSync(selfHosted)) {
+    const hash = createHash("sha256").update(read(selfHosted)).digest("hex").slice(0, 12);
+    return `/vendor/fonts/fonts.css?v=${hash}`;
+  }
   const source = read(path.join(DS, "tokens", "fonts.css"));
   const match = source.match(/@import\s+url\(['"]([^'"]+)['"]\)/);
   if (!match) throw new Error("tokens/fonts.css must contain the webfont @import url");

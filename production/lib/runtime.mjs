@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import { approvedContentDocumentsForPath, readApprovedCmsContent } from "./approved-content.mjs";
 import { latestApprovedBrokerContact } from "./broker-contacts.mjs";
-import { approvedTranslationRecordsForListing } from "./content.mjs";
 import { createCrmInboxItem } from "./admin-workflows.mjs";
 import { normalizePublicLeadInput } from "./leads.mjs";
 import { applyListingEdits } from "./listing-edits.mjs";
@@ -116,8 +115,90 @@ function runtimeListings(seed, translationTasks = []) {
   }));
 }
 
+// Path -> listing index, memoised per (registry, seed, translationTasks) object
+// identity. Without it every request rescans all listings and re-folds the whole
+// translation ledger for each one — O(listings x ledger) per page view.
+const listingPathIndexCache = new WeakMap();
+
+function buildListingPathIndex(registry, seed, translationTasks) {
+  const byPath = new Map();
+  const canonicalByLowercase = new Map();
+  const remember = (path, entry) => {
+    if (!path || byPath.has(path)) return;
+    byPath.set(path, entry);
+    const lower = path.toLowerCase();
+    if (!canonicalByLowercase.has(lower)) canonicalByLowercase.set(lower, path);
+  };
+
+  for (const record of listingRecords(seed)) {
+    const translations = mergeRuntimeTranslations(record, translationTasks);
+    for (const locale of registry.locales) {
+      if (!locale.public_enabled || !locale.indexable) continue;
+      try {
+        remember(listingPath(registry, locale.code, record.id), { record, localeCode: locale.code });
+      } catch {
+        /* locale without a listing route segment */
+      }
+    }
+    for (const translation of translations) {
+      const localeCode = translationLocale(translation);
+      if (!localeCode) continue;
+      try {
+        remember(listingPath(registry, localeCode, record.id), { record, localeCode });
+      } catch {
+        /* unknown locale in the ledger */
+      }
+    }
+    if (record.routing?.target_path) {
+      remember(record.routing.target_path, { record, localeCode: record.routing.target_locale });
+    }
+  }
+  return { byPath, canonicalByLowercase };
+}
+
+function listingPathIndex(registry, seed, translationTasks) {
+  let bySeed = listingPathIndexCache.get(registry);
+  if (!bySeed) {
+    bySeed = new WeakMap();
+    listingPathIndexCache.set(registry, bySeed);
+  }
+  let byTasks = bySeed.get(seed);
+  if (!byTasks) {
+    byTasks = new WeakMap();
+    bySeed.set(seed, byTasks);
+  }
+  const key = Array.isArray(translationTasks) ? translationTasks : [];
+  let index = byTasks.get(key);
+  if (!index) {
+    index = buildListingPathIndex(registry, seed, key);
+    byTasks.set(key, index);
+  }
+  return index;
+}
+
+// Uppercase listing IDs make /bg/imoti/MS-CRAWL-0001 and /bg/imoti/ms-crawl-0001
+// distinct URLs; the lowercase form used to 404. Redirect to the canonical case
+// instead of serving both (which would duplicate content).
+export function canonicalCasePath(registry, seed, pathname, translationTasks = []) {
+  const normalized = String(pathname || "").replace(/\/$/, "");
+  if (!normalized) return null;
+  const { byPath, canonicalByLowercase } = listingPathIndex(registry, seed, translationTasks);
+  if (byPath.has(normalized)) return null;
+  const canonical = canonicalByLowercase.get(normalized.toLowerCase());
+  return canonical && canonical !== normalized ? canonical : null;
+}
+
 export function resolveRuntimePath(registry, seed, pathname, translationTasks = [], tourApprovals = []) {
   const normalized = pathname.replace(/\/$/, "");
+  const indexed = listingPathIndex(registry, seed, translationTasks).byPath.get(normalized);
+  if (indexed) {
+    return {
+      type: "listing",
+      record: indexed.record,
+      listing: listingFromCmsRecord(indexed.record, latestTourForListing(tourApprovals, indexed.record.id)),
+      localeCode: indexed.localeCode,
+    };
+  }
   for (const record of listingRecords(seed)) {
     const translations = mergeRuntimeTranslations(record, translationTasks);
     const fallbackLocale = registry.locales.find((locale) => {

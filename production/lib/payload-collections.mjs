@@ -38,6 +38,7 @@ const GROUP_FIELDS = {
 };
 
 function cleanField(field) {
+  // records/source are destructured purely to exclude them from ...rest.
   const { required_when: requiredWhen, records, source, ...rest } = field;
   const payloadField = {
     ...rest,

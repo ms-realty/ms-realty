@@ -36,6 +36,9 @@ import {
   validateLegacyRouteDecisionArtifact,
 } from "./redirect-approvals.mjs";
 import { fromRoot } from "./paths.mjs";
+import { loadLocaleRegistry } from "./locales.mjs";
+import { loadCmsSeed } from "./runtime.mjs";
+import { mediaMirrorState } from "./media-migration.mjs";
 
 export const DEFAULT_LAUNCH_READINESS_OUTPUT = fromRoot("production", "data", "launch-readiness.json");
 export const DEFAULT_LIVE_SERVICE_PREFLIGHT_REPORT = fromRoot("production", "data", "live-service-preflight-report.json");
@@ -87,6 +90,8 @@ const REQUIRED_LAUNCH_GATE_IDS = [
   "structured_data",
   "external_seo_exports",
   "listing_quality_review",
+  "locale_content_parity",
+  "media_migration",
   "runtime_smoke",
   "live_services",
   "monitoring_rollback",
@@ -119,6 +124,14 @@ const BLOCKED_GATE_NEXT_ACTIONS = {
     "Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.",
     "Download /api/admin/listing-quality-review-packet or /api/admin/listing-quality-review-draft.",
     "Import a complete human-reviewed CSV through /api/admin/listing-quality/import, then run npm run listing:preflight.",
+  ],
+  locale_content_parity: [
+    "Every indexable public locale needs at least one approved listing translation, or the locale must be set indexable: false in locales/registry.json until it has content.",
+    "Port the legacy /en/, /de/, and /nl/ translations, or run the Hermes draft queue and approve them in /admin/translations.",
+  ],
+  media_migration: [
+    "Run node production/scripts/run-media-mirror.mjs to copy every legacy /wp-content/uploads asset onto owned storage.",
+    "Legacy image URLs stop resolving the moment DNS moves; the mirror serves them at their original paths.",
   ],
   live_services: [
     "Run npm run live:provisioning:preflight, then npm run live:capture against real Typesense, Meilisearch, and Hermes services.",
@@ -1126,6 +1139,10 @@ export function buildLaunchReadinessReport({
   appState = packageState(),
   payloadRuntime = payloadRuntimeState(),
   productionRecovery = productionRecoveryState(),
+  localeRegistry = loadLocaleRegistry(),
+  cmsSeed = loadCmsSeed(),
+  localeContentParity = localeContentParityState(localeRegistry, cmsSeed),
+  mediaMirror = mediaMirrorState(cmsSeed),
 } = {}) {
   assertSeoEvidence(seoEvidence);
   const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);
@@ -1221,6 +1238,22 @@ export function buildLaunchReadinessReport({
         : "Every legacy URL needs a deliberate retained route, reviewed one-hop redirect, or approved 410; homepage and search fallbacks are prohibited.",
     ),
     gate("localized_sitemap", localizedSitemapReady ? "pass" : "blocked", sitemap.summary),
+    gate(
+      "locale_content_parity",
+      localeContentParity.ready ? "pass" : "blocked",
+      localeContentParity,
+      localeContentParity.ready
+        ? "Every indexable locale has approved listing content."
+        : "An indexable locale with no approved listing translation publishes empty hreflang shells and loses the language coverage the legacy site had.",
+    ),
+    gate(
+      "media_migration",
+      mediaMirror.ready ? "pass" : "blocked",
+      mediaMirror,
+      mediaMirror.ready
+        ? "Every legacy upload is mirrored onto owned storage."
+        : "Listing media is still hotlinked from the legacy WordPress origins and will 404 the moment DNS moves.",
+    ),
     gate(
       "structured_data",
       structuredData.summary.failing_entries === 0 ? "pass" : "blocked",
@@ -1543,4 +1576,41 @@ export function materializeLocalLaunchReadiness({
   };
   assertLaunchReadinessReport(report);
   return { outPath: writeJsonAtomically(report, outPath), report };
+}
+
+// A locale marked public_enabled + indexable with zero approved listing
+// translations publishes hreflang entries and locale routes that lead to empty
+// or foreign-language shells. The legacy site shipped live /en/, /de/, and
+// /nl/ trees, so this is also the "never ship fewer languages than today"
+// check that the migration risk register asks for.
+const PUBLIC_TRANSLATION_STATES = new Set(["approved", "published"]);
+
+export function localeContentParityState(registry, seed) {
+  const listings = (seed.records || []).filter((record) => record.collection === "listings");
+  const approvedByLocale = new Map();
+  for (const record of listings) {
+    for (const translation of record.translations || []) {
+      const locale = translation.locale || translation.target_locale;
+      if (!locale || !PUBLIC_TRANSLATION_STATES.has(translation.status)) continue;
+      approvedByLocale.set(locale, (approvedByLocale.get(locale) || 0) + 1);
+    }
+  }
+
+  const locales = registry.locales
+    .filter((locale) => locale.public_enabled && locale.indexable)
+    .map((locale) => ({
+      code: locale.code,
+      approved_listings: approvedByLocale.get(locale.code) || 0,
+    }))
+    .sort((left, right) => left.code.localeCompare(right.code));
+
+  const empty = locales.filter((locale) => locale.approved_listings === 0).map((locale) => locale.code);
+  return {
+    status: empty.length ? "blocked" : "ready",
+    ready: empty.length === 0 && locales.length > 0,
+    indexable_locales: locales.length,
+    total_listings: listings.length,
+    approved_listings_by_locale: Object.fromEntries(locales.map((locale) => [locale.code, locale.approved_listings])),
+    indexable_locales_without_content: empty,
+  };
 }

@@ -372,7 +372,11 @@
 /* ---- Buttons as links: neutralize global anchor underline ---- */
 a.mk-btn:hover { text-decoration: none; }
 .mk-btn { min-height: 44px; }
-.mk-btn--sm { min-height: 40px; }
+/* 44px is the product's own stated minimum (PRODUCT.md, SOURCE_OF_TRUTH §15),
+   and --sm is what the conversion controls use: the header call-a-broker CTA
+   and every property-card action. 40px failed that gate on all 20 public
+   pages. */
+.mk-btn--sm { min-height: 44px; }
 
 /* ---- Hero search: production form inside the kit search bar ---- */
 .hp-hero__bg { overflow: hidden; background: var(--surface-inverse); }
@@ -383,11 +387,16 @@ a.mk-btn:hover { text-decoration: none; }
   border: none;
   background: transparent;
   padding: 0;
-  min-height: 0;
+  /* Borderless, but still the primary control on the site: it has to carry its
+     own 44px target rather than borrow height from the generic form padding. */
+  min-height: 44px;
   box-shadow: none;
 }
 .hp-hero__search .mk-search__field input:focus-visible { box-shadow: none; }
-.hp-hero__search .mk-search__go { flex: none; min-height: 44px; }
+/* The kit pins .mk-search__go to a fixed 58px, which defeats the
+   align-items:stretch above: the button sat 16.7px above the input's optical
+   centre. height:auto lets it stretch to the segment it sits beside. */
+.hp-hero__search .mk-search__go { flex: none; height: auto; min-height: 44px; align-self: stretch; }
 .hp-resort { isolation: isolate; background: var(--surface-inverse); text-decoration: none; }
 .hp-resort > img { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; }
 .hp-resort::before { content: ""; position: absolute; inset: 0; z-index: 1; background: var(--overlay); }
@@ -442,7 +451,10 @@ a.mk-btn:hover { text-decoration: none; }
 @media (max-width: 900px) {
   .hp-sell__in { flex-direction: column; align-items: flex-start; gap: var(--space-5); }
 }
-@media (max-width: 360px) {
+/* The icon-only search button used to start at 360px, so on every common
+   phone (375, 390, 393, 414) the labelled button took 124px and squeezed the
+   location input down to 110px — narrower than it was at 320px. */
+@media (max-width: 430px) {
   .hp-hero__search .mk-search__go { width: 52px; padding-inline: 0; }
   .hp-hero__search .mk-search__go span { display: none; }
 }
@@ -1246,3 +1258,84 @@ dialog.mk-enquiry [data-enquiry-error] { margin-bottom: var(--space-2); }
     to { transform: translateY(0); opacity: 1; }
   }
 }
+
+/* The filter panel titles moved from h3/h2 to <p>: as headings they rendered
+   before the page h1 and broke heading order (WCAG 1.3.1). Both panels are
+   already named for assistive tech (aria-label / aria-labelledby), so these
+   rules just preserve the original look. */
+.sr-filters__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+  margin: 0 0 var(--space-3);
+}
+.sr-mobile-filters__title {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--text-strong);
+  margin: 0;
+}
+
+/* ---- Target size and row alignment (layout audit 2026-07-25) ----
+   Every rule here was written against a measured failure from a headless
+   sweep of all 20 public routes at 1280px and 375px, not against a hunch. */
+
+/* Header nav links measured 41px; the product's floor is 44. */
+.site-hd__nav a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* The footer logo link was a 30px-tall hit area. Keep the mark's size, give
+   the anchor the full target. */
+.site-ft__logo {
+  align-items: center;
+  min-height: 44px;
+}
+
+/* 42px — two short of the floor, and it is the first control a keyboard user
+   ever reaches. */
+.skip-link { min-height: 44px; display: flex; align-items: center; }
+
+/* Bare checkboxes render ~13x18. Scale the control and let its label carry the
+   rest of the target so the whole row is clickable. */
+/* Kit rules size these at 18px with class-level specificity, so the override
+   has to be scoped to match. The label carries the rest of the target, which is
+   what makes the whole consent row tappable. */
+main input[type="checkbox"],
+main input[type="radio"] {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  flex: 0 0 auto;
+  accent-color: var(--accent);
+}
+main label:has(input[type="checkbox"]),
+main label:has(input[type="radio"]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  cursor: pointer;
+}
+
+/* Footer links rendered at 23px. Tap-to-call and the language switcher are
+   first-class conversion paths on phones (SOURCE_OF_TRUTH §18), so they cannot
+   sit below the target floor. */
+.site-ft a,
+.ct-office__meta a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+/* A short label (e.g. "עברית") still has to meet the target on its narrow
+   axis, so the language switcher gets a width floor too. */
+.site-ft__bar-in nav a { min-width: 44px; justify-content: center; }
+
+/* Fields of unequal natural height (a select beside a textarea) were centred,
+   so their labels sat on different baselines. Top-align the row instead. */
+.ct-form__row { align-items: start; }

@@ -1,17 +1,21 @@
 {
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
-    "search_events": 8,
+    "search_events": 78,
     "zero_result_events": 0,
     "filtered_search_events": 1,
     "locales": [
       {
+        "key": "bg",
+        "count": 66
+      },
+      {
         "key": "en",
-        "count": 4
+        "count": 6
       },
       {
         "key": "he",
-        "count": 3
+        "count": 5
       },
       {
         "key": "el",
@@ -92,6 +96,566 @@
       "filters": {},
       "filter_key": "none",
       "result_count": 109
+    },
+    {
+      "path": "/bg/tarsene",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/en/search",
+      "locale": "en",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/he/search",
+      "locale": "he",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg/tarsene",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/he/search",
+      "locale": "he",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg/tarsene",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg/tarsene",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/api/search",
+      "locale": "en",
+      "query": "Sandanski",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 109
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg/tarsene",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
     }
   ]
 }

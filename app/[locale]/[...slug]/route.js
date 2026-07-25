@@ -1,6 +1,7 @@
 import { renderAppRouteResponse } from "../../_ms-realty/render.js";
 
-export const revalidate = 300;
+// See app/[locale]/route.js: per-host canonical/hreflang forbids the route cache.
+export const dynamic = "force-dynamic";
 
 export async function GET(request) {
   return renderAppRouteResponse({

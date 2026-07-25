@@ -65,7 +65,9 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
       const response = await app({
         method: req.method,
         url: req.url,
-        headers: req.headers,
+        // The socket address is the only client identity that cannot be
+        // spoofed; the rate limiter prefers it unless a proxy is trusted.
+        headers: { ...req.headers, "x-ms-realty-socket-address": req.socket?.remoteAddress || "" },
         body: await readBody(req, maxBodyBytes),
       });
       status = response.status;
@@ -142,6 +144,8 @@ export async function textFetch(baseUrl, path, options = {}) {
 export function assertServerSmoke(smoke) {
   const expectedBlockers = [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",

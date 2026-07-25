@@ -10,6 +10,9 @@ x-app-environment: &app-environment
   MS_REALTY_ALLOW_PRIVATE_DATABASE_HOST: "1"
   MS_REALTY_ADMIN_TOKEN: ${MS_REALTY_ADMIN_TOKEN:?MS_REALTY_ADMIN_TOKEN is required}
   MS_REALTY_ADMIN_ACTOR: local_preview
+  # Every request reaches the app through the Caddy edge here, so the
+  # forwarded client IP can be trusted for rate limiting.
+  MS_REALTY_TRUST_PROXY: "1"
   MS_REALTY_LEAD_CONTACT_KEY: ${MS_REALTY_LEAD_CONTACT_KEY:?MS_REALTY_LEAD_CONTACT_KEY is required}
   TYPESENSE_URL: http://typesense:8108
   TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?TYPESENSE_API_KEY is required}
