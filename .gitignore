@@ -33,3 +33,4 @@ production/data/media-mirror/
 production/data/media-mirror-manifest.json
 production/data/*.corrupt.jsonl
 .playwright-mcp/
+.wrangler/

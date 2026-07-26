@@ -1288,22 +1288,26 @@ function relatedListingCards(registry, listings, locale, currentListing) {
   const current = listingToPublicViewModel(currentListing);
   const fallbackLocale = locale.fallback_locale || registry.source_locale;
 
+  // Rank first, build cards last. This used to build a full card — including
+  // the media library — for every listing in the same location (159 cards and
+  // 4,827 media assets for Sandanski) and then slice(0, 3). The rank keys all
+  // come from the cheap view model and the translation state, so only the three
+  // survivors need a card.
   return listings
     .filter((candidate) => candidate.id !== currentListing.id && isActiveListing(candidate))
     .map((candidate, index) => {
-      const card = listingCard(registry, candidate, locale);
+      const view = listingToPublicViewModel(candidate);
+      const state = searchTranslationState(registry, candidate, locale);
+      const contentLocale = state.indexable ? locale.code : view.source_locale || registry.source_locale;
       const languageRank =
-        card.content_locale === locale.code
-          ? card.translation_indexable
-            ? 0
-            : 1
-          : card.content_locale === fallbackLocale
-            ? 2
-            : 3;
-      const offerRank = card.offer_type === current.offer_type ? 0 : 1;
-      const propertyTypeRank = card.property_type === current.property_type ? 0 : 1;
-
-      return { card, index, languageRank, offerRank, propertyTypeRank };
+        contentLocale === locale.code ? (state.indexable ? 0 : 1) : contentLocale === fallbackLocale ? 2 : 3;
+      return {
+        candidate,
+        index,
+        languageRank,
+        offerRank: view.offer_type === current.offer_type ? 0 : 1,
+        propertyTypeRank: view.property_type === current.property_type ? 0 : 1,
+      };
     })
     .sort(
       (left, right) =>
@@ -1313,7 +1317,7 @@ function relatedListingCards(registry, listings, locale, currentListing) {
         left.index - right.index,
     )
     .slice(0, 3)
-    .map(({ card }) => card);
+    .map(({ candidate }) => listingCard(registry, candidate, locale));
 }
 
 function indexableListingForLocale(registry, listing, locale) {
@@ -1338,13 +1342,28 @@ function norm(value) {
 }
 
 function transliterateCyrillic(value) {
-  return [...norm(value)].map((character) => CYRILLIC_TO_LATIN[character] || character).join("");
+  // `value` is already normalised by every caller; re-normalising here meant
+  // running NFKD over every listing description twice per request.
+  return [...value].map((character) => CYRILLIC_TO_LATIN[character] || character).join("");
 }
 
+// Listing text is immutable between seed rebuilds, but searchVariants used to
+// re-run NFKD normalisation and a per-character transliteration pass over every
+// description on every request — ~9ms of the ~10ms search render for 165
+// listings. The inputs repeat exactly, so memoising on the source string is
+// enough; the cap keeps a pathological query from growing this unbounded.
+const SEARCH_VARIANT_CACHE_LIMIT = 4096;
+const searchVariantCache = new Map();
+
 function searchVariants(value) {
-  const source = norm(value);
-  const transliterated = transliterateCyrillic(source);
-  return [...new Set([source, transliterated].filter(Boolean))];
+  const key = String(value ?? "");
+  const cached = searchVariantCache.get(key);
+  if (cached) return cached;
+  const source = norm(key);
+  const variants = [...new Set([source, transliterateCyrillic(source)].filter(Boolean))];
+  if (searchVariantCache.size >= SEARCH_VARIANT_CACHE_LIMIT) searchVariantCache.clear();
+  searchVariantCache.set(key, variants);
+  return variants;
 }
 
 function queryTokens(query) {

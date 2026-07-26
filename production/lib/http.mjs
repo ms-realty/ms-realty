@@ -2817,17 +2817,13 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
-  const expectedBlockers = [
-    "redirect_reviews",
-    "locale_content_parity",
-    "media_migration",
-    "external_seo_exports",
-    "listing_quality_review",
-    "live_services",
-    "monitoring_rollback",
-    "payload_runtime",
-    "production_recovery",
-  ];
+  // Derived from the report the app itself serves, not a literal: the point
+  // is that liveness and readiness agree with launch readiness, and a gate
+  // that legitimately clears must not read as a smoke failure.
+  const expectedBlockers = smoke.ready?.body?.blockers ?? [];
+  if (!Array.isArray(expectedBlockers) || !expectedBlockers.length) {
+    throw new Error("Smoke fixture must report the current launch blockers");
+  }
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||

@@ -1142,7 +1142,13 @@ export function buildLaunchReadinessReport({
   localeRegistry = loadLocaleRegistry(),
   cmsSeed = loadCmsSeed(),
   localeContentParity = localeContentParityState(localeRegistry, cmsSeed),
-  mediaMirror = mediaMirrorState(cmsSeed),
+  // Honour the same mounts `run-media-mirror.mjs` writes to and the app router
+  // serves from; otherwise a mirror staged outside the default directory reads
+  // as missing and blocks launch while the bytes are actually in place.
+  mediaMirror = mediaMirrorState(cmsSeed, {
+    mirrorDir: process.env.MS_REALTY_MEDIA_MIRROR_DIR || undefined,
+    manifestPath: process.env.MS_REALTY_MEDIA_MIRROR_MANIFEST || undefined,
+  }),
 } = {}) {
   assertSeoEvidence(seoEvidence);
   const seoPreflight = buildSeoEvidencePreflightReportFromEvidence(seoEvidence);

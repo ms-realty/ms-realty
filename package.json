@@ -18,7 +18,7 @@
     "docker:logs": "node production/scripts/local-production.mjs logs",
     "docker:down": "node production/scripts/local-production.mjs down",
     "docker:reset": "node production/scripts/local-production.mjs reset",
-    "test": "MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN=1 node --test production/test/*.test.mjs",
+    "test": "MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN=1 MS_REALTY_MEDIA_MIRROR_DIR=production/data/media-mirror-absent MS_REALTY_MEDIA_MIRROR_MANIFEST=production/data/media-mirror-absent/manifest.json node --test production/test/*.test.mjs",
     "search:validate": "python3 search/validate_search_imports.py",
     "search:sync": "node production/scripts/run-search-engine-sync.mjs",
     "search:sync:smoke": "node production/scripts/build-search-engine-sync-smoke.mjs",
@@ -107,9 +107,10 @@
     "postcss": "^8.5.18"
   },
   "devDependencies": {
+    "@cloudflare/containers": "^0.3.7",
+    "@eslint/js": "^9.20.0",
     "esbuild": "0.25.12",
-    "lucide-static": "^1.24.0",
     "eslint": "^9.20.0",
-    "@eslint/js": "^9.20.0"
+    "lucide-static": "^1.24.0"
   }
 }

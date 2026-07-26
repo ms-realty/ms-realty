@@ -16,6 +16,8 @@ export default [
       "migration/artifacts/**",
       "makler-realty-design-system/**",
       "prototypes/**",
+      // Wrangler's build scratch: bundled Worker output, not source.
+      ".wrangler/**",
       "app.js",
     ],
   },
