@@ -69,6 +69,16 @@ export default [
     },
   },
   {
+    // The Worker runs on workerd, not Node: no process, but Web Crypto and the
+    // fetch primitives are ambient globals. Without this block eslint flags
+    // `crypto` as undefined — a false positive that would otherwise train us to
+    // ignore no-undef exactly where a real typo becomes a 500 at the edge.
+    files: ["workers/**"],
+    languageOptions: {
+      globals: { crypto: "readonly", caches: "readonly", addEventListener: "readonly", atob: "readonly", btoa: "readonly" },
+    },
+  },
+  {
     // Tests run sequentially and set process.env around awaits on purpose;
     // require-atomic-updates only produces false positives there. It stays on
     // for library code, where a dropped await really does lose a ledger write.

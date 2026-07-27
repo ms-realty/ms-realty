@@ -16,3 +16,14 @@ production/data/search-engine-sync-report.json
 production/data/search-engine-query-report.json
 production/data/hermes-draft-worker-report.json
 production/data/payload-runtime-report.json
+
+# Mirrored legacy media (453MB). Baking it in made every deploy re-push data
+# that changes monthly; it is served from R2 instead. Regenerate locally with
+# `npm run media:mirror`.
+production/data/media-mirror
+.wrangler
+.playwright-mcp
+
+# Worker script + config run at the edge, never inside the container.
+workers/
+wrangler.jsonc
