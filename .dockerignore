@@ -27,3 +27,8 @@ production/data/media-mirror
 # Worker script + config run at the edge, never inside the container.
 workers/
 wrangler.jsonc
+
+# Machine-local operator state: the backend switch belongs to the machine the
+# operator runs on, never to the image. CLI backends fail closed in production
+# anyway; baking the file in would just make /admin/hermes show a dev backend.
+production/data/hermes-backend.json
