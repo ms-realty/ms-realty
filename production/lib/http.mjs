@@ -4,6 +4,8 @@ import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./broker-contacts.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
+import { hermesBackendStatus, setHermesBackend } from "./hermes-backend.mjs";
+import { renderAdminHermesPage } from "./admin-hermes-page.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY, securityHeaders } from "./security-headers.mjs";
@@ -1140,6 +1142,38 @@ export function createHttpApp({
       const payload = currentAdminLeadPayload(requestedLocale, principal);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
+    }
+
+    // Hermes generation backend: which engine drafts listing translations
+    // (cloud OpenRouter vs the operator's desktop CLI subscriptions). GET is
+    // administration:read, POST administration:write via the capability
+    // fallback; switching is audit-logged inside setHermesBackend.
+    if (request.method === "GET" && ["/api/admin/hermes/backend", "/admin/hermes"].includes(url.pathname)) {
+      const status = hermesBackendStatus();
+      if (url.pathname === "/admin/hermes" || wantsHtml(request, url)) {
+        const switched = url.searchParams.get("switched") === "1";
+        return adminResponse(200, renderAdminHermesPage({ status, switched }), "text/html; charset=utf-8");
+      }
+      return adminJson(200, status);
+    }
+
+    if (request.method === "POST" && ["/api/admin/hermes/backend", "/admin/hermes"].includes(url.pathname)) {
+      const isForm = String(readHeader(request.headers, "content-type") || "").includes("application/x-www-form-urlencoded");
+      try {
+        const backend = isForm
+          ? String(new URLSearchParams(request.body || "").get("backend") || "")
+          : String(parseJsonBody(request).backend || "");
+        setHermesBackend(backend, { actor: principal.id, auditLogPath: auditLogPath || undefined });
+        if (isForm) {
+          return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/hermes?switched=1", "cache-control": "no-store" });
+        }
+        return adminJson(200, hermesBackendStatus());
+      } catch (error) {
+        if (isForm) {
+          return adminResponse(200, renderAdminHermesPage({ status: hermesBackendStatus(), error: error.message }), "text/html; charset=utf-8");
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
     }
 
     if (request.method === "GET" && url.pathname === "/admin/leads") {

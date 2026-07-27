@@ -40,7 +40,8 @@ function openGraph(page, origin) {
   const title = page.metadata?.og_title || page.metadata?.title || "MS Realty";
   const description = page.metadata?.og_description || page.metadata?.description || "";
   const url = absoluteHref(origin, page.canonical || page.path || "/");
-  const image = page.body?.media?.gallery?.find((item) => item.url)?.url || null;
+  const cover = page.body?.media?.gallery?.find((item) => item.url) || null;
+  const image = cover?.url || null;
   return [
     ["og:type", page.kind === "listing" ? "article" : "website"],
     ["og:site_name", "MS Realty"],
@@ -49,9 +50,70 @@ function openGraph(page, origin) {
     ["og:url", url],
     ["og:locale", page.lang || page.locale || "en"],
     image ? ["og:image", image] : null,
+    // Screen readers announce shared-link previews from this, and Google
+    // Images uses it as a relevance signal on the shared URL.
+    image && cover?.alt ? ["og:image:alt", cover.alt] : null,
   ]
     .filter(Boolean)
-    .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`);
+    .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`)
+    .concat(
+      // X/Twitter reads og:* for text but picks the card LAYOUT from its own
+      // namespace; without twitter:card a listing share renders as a bare link.
+      [
+        `<meta name="twitter:card" content="${image ? "summary_large_image" : "summary"}">`,
+        ...(image ? [`<meta name="twitter:image" content="${escapeHtml(image)}">`] : []),
+      ],
+    );
+}
+
+function jsonLdScript(schema) {
+  return `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, "\\u003c")}</script>`;
+}
+
+// Mirrors the visible Home -> Search -> listing crumb trail, which is exactly
+// what Google requires of BreadcrumbList markup: never mark up a trail the
+// visitor cannot see.
+function breadcrumbSchema(page, origin) {
+  if (page.kind !== "listing" || !page.chrome?.home) return "";
+  const search = page.chrome.nav?.[0] || null;
+  const items = [
+    { name: page.chrome.home.label, item: absoluteHref(origin, page.chrome.home.href) },
+    search ? { name: search.label, item: absoluteHref(origin, search.href) } : null,
+    { name: page.body?.facts?.location || page.body?.h1 || page.metadata?.title || "Listing" },
+  ].filter(Boolean);
+  return jsonLdScript({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((entry, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: entry.name,
+      ...(entry.item ? { item: entry.item } : {}),
+    })),
+  });
+}
+
+// WebSite + SearchAction is what makes Google offer the sitelinks search box
+// under the brand result; ?q= is the real public search parameter.
+function websiteSchema(page, origin) {
+  if (page.kind !== "home") return "";
+  const search = page.chrome?.nav?.[0] || null;
+  return jsonLdScript({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "MS Realty",
+    url: absoluteHref(origin, page.canonical || page.path || "/"),
+    inLanguage: page.lang || page.locale || "en",
+    ...(search
+      ? {
+          potentialAction: {
+            "@type": "SearchAction",
+            target: `${absoluteHref(origin, search.href)}?q={search_term_string}`,
+            "query-input": "required name=search_term_string",
+          },
+        }
+      : {}),
+  });
 }
 
 // A single-location agency needs RealEstateAgent/LocalBusiness markup for local
@@ -73,7 +135,7 @@ function organizationSchema(page, origin) {
   };
   if (contact.phone_label) schema.telephone = contact.phone_label;
   if (contact.email) schema.email = contact.email;
-  return `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, "\\u003c")}</script>`;
+  return jsonLdScript(schema);
 }
 
 function meta(page, origin) {
@@ -84,9 +146,7 @@ function meta(page, origin) {
         `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(absoluteHref(origin, link.href))}">`,
     ),
   ];
-  const schema = page.schema
-    ? `<script type="application/ld+json">${JSON.stringify(page.schema).replace(/</g, "\\u003c")}</script>`
-    : "";
+  const schema = page.schema ? jsonLdScript(page.schema) : "";
   return [
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">",
@@ -97,6 +157,8 @@ function meta(page, origin) {
     ...openGraph(page, origin),
     ...links,
     schema,
+    breadcrumbSchema(page, origin),
+    websiteSchema(page, origin),
     organizationSchema(page, origin),
   ]
     .filter(Boolean)

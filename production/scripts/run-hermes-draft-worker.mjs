@@ -1,15 +1,23 @@
+import { runHermesDraftWorker, writeHermesDraftWorkerReport } from "../lib/hermes-draft-worker.mjs";
 import {
-  openAiCompatibleHermesProvider,
-  runHermesDraftWorker,
-  writeHermesDraftWorkerReport,
-} from "../lib/hermes-draft-worker.mjs";
+  hermesProviderForBackend,
+  hermesProviderMetadataForBackend,
+  readHermesBackend,
+} from "../lib/hermes-backend.mjs";
 
 const limit = Number(process.env.HERMES_DRAFT_LIMIT || 25);
 
 try {
   const runAt = new Date().toISOString();
+  // The backend switch (npm run hermes:backend) decides who generates:
+  // openrouter spends per token, claude-cli/codex-cli ride the operator's
+  // desktop subscriptions. CLI backends fail closed in production.
+  const backend = readHermesBackend().backend;
+  console.log(`Hermes backend: ${backend}`);
+  const providerMetadata = hermesProviderMetadataForBackend(backend);
   const report = await runHermesDraftWorker({
-    provider: openAiCompatibleHermesProvider(),
+    provider: hermesProviderForBackend(backend),
+    ...(providerMetadata ? { providerMetadata } : {}),
     filePath: process.env.MS_REALTY_TRANSLATION_LEDGER_PATH || undefined,
     auditPath: process.env.MS_REALTY_HERMES_AUDIT_PATH || undefined,
     auditLogPath: process.env.MS_REALTY_AUDIT_LOG_PATH || undefined,

@@ -14,6 +14,7 @@ production/data/search-engine-sync-report.json
 production/data/search-engine-query-report.json
 production/data/hermes-draft-worker-report.json
 production/data/hermes-agent-runtime-report.json
+production/data/hermes-backend.json
 production/data/audit-log.jsonl
 production/data/lead-contact-vault.jsonl
 production/data/public-contact-vault.jsonl

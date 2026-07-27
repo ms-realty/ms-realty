@@ -49,6 +49,8 @@ import { buildContactRecords } from "./contact-records.mjs";
 import { eraseContactSubject } from "./contact-erasure.mjs";
 import { authenticateOperator, clearedSessionCookie, issueSession, sessionCookie } from "./admin-sessions.mjs";
 import { renderAdminLoginPage } from "./admin-login.mjs";
+import { renderAdminHermesPage } from "./admin-hermes-page.mjs";
+import { hermesBackendStatus, setHermesBackend } from "./hermes-backend.mjs";
 import { CSP_HEADER, securityHeaders } from "./security-headers.mjs";
 import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { loadMigrationRecords } from "./content.mjs";
@@ -2167,6 +2169,39 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
+    // Hermes generation backend switch — same semantics as the bare-node
+    // runtime in http.mjs: administration:read/write via the capability
+    // fallback, audit-logged inside setHermesBackend, plain HTML page (login
+    // pattern) so the pinned React-shell fixtures stay untouched.
+    if (request.method === "GET" && url.pathname === "/admin/hermes") {
+      const switched = url.searchParams.get("switched") === "1";
+      return new Response(renderAdminHermesPage({ status: hermesBackendStatus(), switched }), {
+        status: 200,
+        headers: PRIVATE_HTML_HEADERS,
+      });
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/hermes/backend") {
+      return jsonResponse(200, hermesBackendStatus());
+    }
+    if (request.method === "POST" && ["/admin/hermes", "/api/admin/hermes/backend"].includes(url.pathname)) {
+      const body = await readRequestBody(request, config.maxBodyBytes);
+      const input = parseBody(request, body);
+      try {
+        setHermesBackend(String(input.backend || ""), { actor: config.adminPrincipal.id, auditLogPath: config.auditLogPath });
+        if (url.pathname === "/admin/hermes") {
+          return new Response(null, { status: 303, headers: { ...PRIVATE_JSON_HEADERS, location: "/admin/hermes?switched=1" } });
+        }
+        return jsonResponse(200, hermesBackendStatus());
+      } catch (error) {
+        if (url.pathname === "/admin/hermes") {
+          return new Response(renderAdminHermesPage({ status: hermesBackendStatus(), error: error.message }), {
+            status: 200,
+            headers: PRIVATE_HTML_HEADERS,
+          });
+        }
+        return jsonResponse(400, { kind: "bad_request", message: error.message });
+      }
+    }
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(contactsPayload(registry, url, config));

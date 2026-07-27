@@ -430,7 +430,7 @@ test("live Hermes draft worker CLI fails closed when provider env is missing", (
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "run-hermes-draft-worker.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, HERMES_CHAT_COMPLETIONS_URL: "", HERMES_API_KEY: "" },
+    env: { ...process.env, HERMES_CHAT_COMPLETIONS_URL: "", HERMES_API_KEY: "", HERMES_BACKEND_FILE: "/nonexistent/hermes-backend.json" },
   });
 
   assert.notEqual(result.status, 0);
@@ -446,6 +446,9 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
     const auditLogPath = `${dir}/audit-log.jsonl`;
     const result = await runScript("run-hermes-draft-worker.mjs", {
       ...process.env,
+      // Hermetic: never inherit this machine's backend switch (a dev box on
+      // claude-cli would otherwise call the real desktop CLI from the test).
+      HERMES_BACKEND_FILE: `${dir}/hermes-backend.json`,
       HERMES_CHAT_COMPLETIONS_URL: endpoint,
       HERMES_API_KEY: "test-key",
       HERMES_DRAFT_LIMIT: "1",
