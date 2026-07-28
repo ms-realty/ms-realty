@@ -16,12 +16,14 @@ RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 
 FROM dependencies AS build
 ENV NODE_ENV=production
-# payload.config.js fails closed on these in production. The build only needs
-# them to import the config; nothing connects to a database here.
-ENV PAYLOAD_SECRET=build-only-secret-not-used-at-runtime-0123456789 \
-    DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build_only
 COPY . .
-RUN npm run next:build
+# payload.config.js fails closed on these in production. The build only needs
+# them to import the config; nothing connects to a database here. They are
+# dummies, but scoping them to this one RUN keeps them out of image layers
+# and silences Docker's SecretsUsedInArgOrEnv warning.
+RUN PAYLOAD_SECRET=build-only-secret-not-used-at-runtime-0123456789 \
+    DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build_only \
+    npm run next:build
 
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \

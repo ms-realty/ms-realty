@@ -59,7 +59,15 @@ async function serveMedia(request, env, url) {
       : [`makler-realty.com${url.pathname}`, `makler-realty.ru${url.pathname}`];
 
   for (const key of candidates) {
-    const object = await env.MEDIA.get(decodeURIComponent(key));
+    // The runtime rejects malformed percent-encoding before we run, but a
+    // decode failure here must degrade to "not found", never to a 500.
+    let decoded;
+    try {
+      decoded = decodeURIComponent(key);
+    } catch {
+      continue;
+    }
+    const object = await env.MEDIA.get(decoded);
     if (!object) continue;
     const headers = new Headers();
     object.writeHttpMetadata(headers);
@@ -105,6 +113,13 @@ async function secretMatches(presented, expected) {
   return diff === 0;
 }
 
+// Uploads may only land under the two legacy-host media trees. Even with the
+// secret, the endpoint cannot plant objects at arbitrary keys — a leaked
+// credential defaces images, it does not gain a free file host.
+const INGEST_KEY_PREFIXES = ["makler-realty.com/wp-content/", "makler-realty.ru/wp-content/"];
+// Largest mirrored file is 9.8MB; the cap bounds Worker memory, not R2.
+const MAX_INGEST_BYTES = 32 * 1024 * 1024;
+
 async function ingestMedia(request, env, url) {
   const expected = env.MEDIA_INGEST_SECRET;
   if (!expected) return new Response("Not found", { status: 404 });
@@ -115,11 +130,22 @@ async function ingestMedia(request, env, url) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const key = decodeURIComponent(url.pathname.slice(INGEST_PREFIX.length));
-  if (!isSafeKey(key)) return new Response("Bad key", { status: 400 });
+  const declared = Number(request.headers.get("content-length") || 0);
+  if (declared > MAX_INGEST_BYTES) return new Response("Too large", { status: 413 });
+
+  let key;
+  try {
+    key = decodeURIComponent(url.pathname.slice(INGEST_PREFIX.length));
+  } catch {
+    return new Response("Bad key", { status: 400 });
+  }
+  if (!isSafeKey(key) || !INGEST_KEY_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+    return new Response("Bad key", { status: 400 });
+  }
 
   const body = await request.arrayBuffer();
   if (!body.byteLength) return new Response("Empty body", { status: 400 });
+  if (body.byteLength > MAX_INGEST_BYTES) return new Response("Too large", { status: 413 });
   await env.MEDIA.put(key, body, {
     httpMetadata: { contentType: request.headers.get("content-type") ?? "application/octet-stream" },
   });
@@ -134,6 +160,14 @@ export default {
     const url = new URL(request.url);
     if (url.pathname.startsWith(INGEST_PREFIX)) return ingestMedia(request, env, url);
     if (url.pathname.startsWith(MEDIA_PREFIX)) {
+      // Media paths are static bytes: only GET/HEAD mean anything here, and a
+      // DELETE must not wake the container or pretend to have deleted a file.
+      if (request.method !== "GET" && request.method !== "HEAD") {
+        return new Response("Method not allowed", {
+          status: 405,
+          headers: { allow: "GET, HEAD", "content-type": "text/plain; charset=utf-8" },
+        });
+      }
       const media = await serveMedia(request, env, url);
       if (media) return media;
       return new Response("Not found", { status: 404, headers: { "content-type": "text/plain; charset=utf-8" } });

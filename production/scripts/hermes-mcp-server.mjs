@@ -149,9 +149,10 @@ function toolTask(args) {
 function toolValidateDraft(args) {
   const taskId = String(args?.task_id || "").trim();
   if (!taskId) throw new Error("task_id is required");
-  // High limit so the row is findable even deep in the queue; the builder
-  // just slices, so this costs one coverage pass either way.
-  const dispatch = freshDispatch(500);
+  // The whole queue, not a window: with 658 eligible tasks a 500-row slice
+  // would strand tasks handed out near the tail. The builder just slices, so
+  // this costs one coverage pass either way.
+  const dispatch = freshDispatch(Number.MAX_SAFE_INTEGER);
   const row = dispatch.rows.find((candidate) => candidate.id === taskId);
   if (!row) throw new Error(`Unknown or already-drafted task: ${taskId}. Call hermes_task for the current queue.`);
 
