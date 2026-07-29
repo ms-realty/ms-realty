@@ -196,11 +196,12 @@ export function loadMigrationContentEvidence(records, { evidenceDir = null, sour
   if (!evidenceDir) return unavailableStore(expectedByUrl, "not_configured");
 
   try {
-    const directory = path.resolve(evidenceDir);
-    if (!fs.statSync(directory).isDirectory()) throw new Error("Content evidence directory is not a directory");
-    const manifest = readJson(path.join(directory, MANIFEST_FILE));
-    const contentPath = path.join(directory, CONTENT_FILE);
-    const skippedPath = path.join(directory, SKIPPED_FILE);
+    // Evidence is an operator-mounted runtime directory, not a deploy-time project dependency.
+    const directory = path.resolve(/* turbopackIgnore: true */ evidenceDir);
+    if (!fs.statSync(/* turbopackIgnore: true */ directory).isDirectory()) throw new Error("Content evidence directory is not a directory");
+    const manifest = readJson(path.join(/* turbopackIgnore: true */ directory, MANIFEST_FILE));
+    const contentPath = path.join(/* turbopackIgnore: true */ directory, CONTENT_FILE);
+    const skippedPath = path.join(/* turbopackIgnore: true */ directory, SKIPPED_FILE);
     const contentText = fs.readFileSync(contentPath, "utf8");
     const skippedText = fs.readFileSync(skippedPath, "utf8");
     const contents = readJsonLines(contentPath);
