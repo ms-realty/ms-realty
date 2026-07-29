@@ -33,14 +33,14 @@
     },
     {
       "listing_id": "MS-CRAWL-0001",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0001-price-on-request",
-      "edited_at": "2026-07-05T02:20:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0001",
+      "edited_at": "2026-07-29T13:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_on_request"
+        "description"
       ],
-      "source_hash_after": "313a88b269040633c2e297e842b0b8ce5feb15ea92c56826595ad423cb0139df",
-      "stale_translation_count": 2,
+      "source_hash_after": "a3017ffd0dfd874ec41934e62f5c8429dd7c275c0fd50919c3aff10f7180333d",
+      "stale_translation_count": 3,
       "stale_locales": [
         "el",
         "he"
@@ -136,13 +136,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0006",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0006-live-quality-20260705b",
-      "edited_at": "2026-07-05T01:20:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0006",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_eur"
+        "description"
       ],
-      "source_hash_after": "c88d2144ce09d30d691d07880d60b7fc787d16c665d4fa13a99abe9cf0ea1ea6",
+      "source_hash_after": "80015f245dd6a8917823f0c215fac2523ec98e4dd122136a4ad773601a904b18",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -276,13 +276,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0013",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0013-multi-unit-20260705",
-      "edited_at": "2026-07-05T01:45:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0013",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
-        "property_type"
+        "description"
       ],
-      "source_hash_after": "b84b4d9b30deedc42cdb18dd6210b0a3d99a77cdc57a97376fd71a77d77f67e5",
+      "source_hash_after": "88070b0cb83d5d389fd95936b43ffbba7ebfb845b5f42d69f47e35986c62d9cf",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "normal",
@@ -496,13 +496,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0024",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0024-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0024",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
-      "source_hash_after": "64de65332a69de27a2aa78e42891f8c6ecdf6429654da214e1facbc2f0d8afaa",
+      "source_hash_after": "5184e04f5cf62d4c759423013ea5a416cf5bfcd89bd7758707013bd10e986b9e",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -1200,13 +1200,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0059",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0059-live-price-20260705",
-      "edited_at": "2026-07-05T00:07:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0059",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_eur"
+        "description"
       ],
-      "source_hash_after": "f9c9c09ea77fa4dfcb9179bbd173209546e941403d247a17ad2841685460e006",
+      "source_hash_after": "3e774f77493edc4c2cc058aec305505427008bde972eb532032376760393c97f",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -1400,13 +1400,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0069",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0069-live-description-20260705",
-      "edited_at": "2026-07-05T00:10:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0069",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
         "description"
       ],
-      "source_hash_after": "b996c79156d75d1d3cf1180bf9a1aa11e142013fa3e97da5c491d8044c97d58a",
+      "source_hash_after": "a7476944e2d19574cad7fcef7ebc46d401a9493f299d414367bf58ba3cc4e556",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "low",
@@ -1440,14 +1440,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0071",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0071-source-location-price",
-      "edited_at": "2026-07-05T00:06:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0071",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
-        "location",
-        "price_eur"
+        "description"
       ],
-      "source_hash_after": "005771dc2b421a06fc6eec79419dfe4eb77fd0d4adcb4b9dadf4f9fdb2b47648",
+      "source_hash_after": "91492040b94b283c66cb7fc963dfb4f504567834d043c84c02c777d6d16b0e10",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -1622,13 +1621,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0081",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0081-live-price-20260705",
-      "edited_at": "2026-07-05T00:07:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0081",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "bg",
       "changed_fields": [
-        "price_eur"
+        "description"
       ],
-      "source_hash_after": "02964a0d4efef0b068e808892504cf95c55f9ba30aa9d0286e8590bea8df4bf0",
+      "source_hash_after": "64e1ef5113ace626640de55ba2810e5e194953fe1cc3453249da722c59669209",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -2466,13 +2465,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0123",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0123-live-price-bedroom-20260705",
-      "edited_at": "2026-07-05T01:00:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0123",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "ru",
       "changed_fields": [
-        "price_eur"
+        "description"
       ],
-      "source_hash_after": "8cee873e2ef1383ab674025e278d26c6c0592cb9ae24d0b98ee0bcfb585b5627",
+      "source_hash_after": "ac27c2bd12a434bfa3835bb06fe0144502544c95f544771854973efbc533ee53",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",
@@ -3029,13 +3028,13 @@
     },
     {
       "listing_id": "MS-CRAWL-0151",
-      "latest_edit_id": "listing-edit-MS-CRAWL-0151-live-price-bedroom-20260705",
-      "edited_at": "2026-07-05T01:00:00Z",
+      "latest_edit_id": "listing-content-MS-CRAWL-0151",
+      "edited_at": "2026-07-29T14:00:00Z",
       "source_locale": "ru",
       "changed_fields": [
-        "price_eur"
+        "description"
       ],
-      "source_hash_after": "e5820676c1de4a2e6b7cdcb822cd5aa2380b70aae8438d8c7b230ead48fa11f7",
+      "source_hash_after": "73090530d1f734d6365be8d510c092dc6ae49df7fa2cd34f5ee4d28d48d743e8",
       "stale_translation_count": 0,
       "stale_locales": [],
       "priority": "high",

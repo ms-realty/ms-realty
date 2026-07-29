@@ -724,6 +724,22 @@
             "summary": "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
             "reviewer": "editor_bg",
             "active": false
+          },
+          {
+            "id": "hotovo-locality-official-context",
+            "href": "/bg/guides/hotovo-obstinski-kontekst",
+            "label": "Хотово: официален контекст за населеното място",
+            "summary": "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин.",
+            "reviewer": "editor_bg",
+            "active": false
+          },
+          {
+            "id": "petrich-municipality-official-context",
+            "href": "/bg/guides/petrich-obstinski-kontekst",
+            "label": "Петрич: официален контекст за общината",
+            "summary": "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин.",
+            "reviewer": "editor_bg",
+            "active": false
           }
         ]
       },

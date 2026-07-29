@@ -7,10 +7,10 @@
     "location_pages": 6,
     "seller_pages": 7,
     "contact_pages": 7,
-    "guide_pages": 3,
-    "entries": 196,
+    "guide_pages": 5,
+    "entries": 198,
     "byLocale": {
-      "bg": 120,
+      "bg": 122,
       "en": 5,
       "de": 3,
       "nl": 3,
@@ -3302,6 +3302,38 @@
         {
           "hreflang": "x-default",
           "href": "/bg/guides/proverka-na-imot-sandanski"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "bg",
+      "loc": "/bg/guides/hotovo-obstinski-kontekst",
+      "guide_id": "hotovo-locality-official-context",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/guides/hotovo-obstinski-kontekst"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/guides/hotovo-obstinski-kontekst"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "bg",
+      "loc": "/bg/guides/petrich-obstinski-kontekst",
+      "guide_id": "petrich-municipality-official-context",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/guides/petrich-obstinski-kontekst"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/guides/petrich-obstinski-kontekst"
         }
       ]
     }

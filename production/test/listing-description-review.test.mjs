@@ -95,16 +95,28 @@ function writeVerifiedEvidenceArtifact() {
 test("description review queue preserves ledger provenance and keeps captured source text out", () => {
   const review = buildListingDescriptionReview({ generatedAt: "2026-07-29T12:39:33+00:00" });
   const repaired = review.rows.find((row) => row.listing_id === "MS-CRAWL-0001");
-  const conflict = review.rows.find((row) => row.listing_id === "MS-CRAWL-0006");
+  const conflict = review.rows.find((row) => row.listing_id === "MS-CRAWL-0070");
   const unavailable = review.rows.find((row) => row.listing_id === "MS-CRAWL-0008");
   const sourceReviewed = review.rows.find((row) => row.listing_id === "MS-CRAWL-0002");
+  const restoredListingIds = [
+    "MS-CRAWL-0006",
+    "MS-CRAWL-0013",
+    "MS-CRAWL-0024",
+    "MS-CRAWL-0059",
+    "MS-CRAWL-0069",
+    "MS-CRAWL-0071",
+    "MS-CRAWL-0081",
+    "MS-CRAWL-0123",
+    "MS-CRAWL-0151",
+  ];
   const serialized = JSON.stringify(review);
 
   assert.equal(assertListingDescriptionReview(review), true);
   assert.equal(review.summary.listings, 165);
-  assert.equal(review.summary.ledger_description_edits, 123);
-  assert.equal(review.summary.source_reviewed_ledger_descriptions, 123);
-  assert.equal(review.summary.evidence_conflicts, 8);
+  assert.equal(review.summary.ledger_description_edits, 130);
+  assert.equal(review.summary.source_reviewed_ledger_descriptions, 130);
+  assert.equal(review.summary.evidence_conflicts, 5);
+  assert.equal(review.summary.by_priority.P1, 10);
   assert.equal(review.source_evidence.validation_state, "ready");
   assert.equal(review.source_evidence.capture_count, 418);
   assert.equal(review.source_evidence.skip_count, 39);
@@ -118,6 +130,21 @@ test("description review queue preserves ledger provenance and keeps captured so
   assert.equal(unavailable.status, "fresh_source_unavailable");
   assert.equal(unavailable.fresh_capture.status, 404);
   assert.equal(sourceReviewed.provenance.classification, "ledger_source_reviewed");
+  for (const listingId of restoredListingIds) {
+    const row = review.rows.find((candidate) => candidate.listing_id === listingId);
+    assert.equal(row.provenance.classification, "ledger_source_reviewed");
+    assert.equal(row.provenance.description_edit_id, `listing-content-${listingId}`);
+    assert.equal(row.provenance.review_source, "legacy_wordpress_content_capture");
+    assert.equal(row.fresh_capture.state, "captured");
+  }
+  assert.match(
+    review.rows.find((row) => row.listing_id === "MS-CRAWL-0006").public_description,
+    /^Производствено\/складово помещение в промишлената зона на Сандански/,
+  );
+  assert.match(
+    review.rows.find((row) => row.listing_id === "MS-CRAWL-0123").public_description,
+    /^Одноэтажное производственное здание площадью 417 кв\.м\./,
+  );
   assert.equal(Object.hasOwn(sourceReviewed.fresh_capture, "extracted_body_text"), false);
   assert.equal(serialized.includes("extracted_body_text"), false);
   assert.equal(serialized.includes("Комплекса се намира на магистрала София"), false);

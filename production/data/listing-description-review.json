@@ -15,25 +15,25 @@
   "summary": {
     "listings": 165,
     "rows": 165,
-    "ledger_description_edits": 123,
-    "source_reviewed_ledger_descriptions": 123,
+    "ledger_description_edits": 130,
+    "source_reviewed_ledger_descriptions": 130,
     "fresh_captured_listings": 160,
     "fresh_source_unavailable": 5,
-    "evidence_conflicts": 8,
+    "evidence_conflicts": 5,
     "by_priority": {
-      "P1": 13,
-      "P2": 40,
-      "P3": 112
+      "P1": 10,
+      "P2": 39,
+      "P3": 116
     },
     "by_status": {
       "fresh_source_unavailable": 5,
-      "evidence_conflict": 8,
-      "needs_editor_review": 40,
-      "preserve_provenance": 112
+      "evidence_conflict": 5,
+      "needs_editor_review": 39,
+      "preserve_provenance": 116
     },
     "by_provenance": {
-      "ledger_source_reviewed": 123,
-      "source_imported_metadata": 42
+      "ledger_source_reviewed": 130,
+      "source_imported_metadata": 35
     }
   },
   "rows": [
@@ -76,51 +76,6 @@
         "final_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/",
         "reason": "fetch_failed",
         "detail": "HTTP 404"
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0006",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "source_url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
-      "target_path": "/bg/imoti/MS-CRAWL-0006",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Industrieel gebouw te huur in Sandanski",
-      "public_description_characters": 39,
-      "seo_action": "retain",
-      "priority": "P1",
-      "status": "evidence_conflict",
-      "evidence_flags": [
-        "fresh_capture_description_conflict",
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0116",
-        "baseline_status": 200,
-        "baseline_word_count": 582,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 244,
-        "text_sha256": "936aa45992f23a06be10fcc75ee3df5cf39e33fcf14f4efd90345e8b64059a15",
-        "response_sha256": "aa5143e5b2ec95eaedcf03708876d10edc62effc0ad00f56fe012a6bd9d8e2f2",
-        "description_token_recall": 0
       }
     },
     {
@@ -427,51 +382,6 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0123",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/",
-      "target_path": "/ru/properties/MS-CRAWL-0123",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продается производственное здание oколо г. Петрич, новое здание, подходит для бизнеса, хороший подъезд к зданию, отличное расположение",
-      "public_description_characters": 134,
-      "seo_action": "retain",
-      "priority": "P1",
-      "status": "evidence_conflict",
-      "evidence_flags": [
-        "fresh_capture_description_conflict",
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0386",
-        "baseline_status": 200,
-        "baseline_word_count": 446,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 93,
-        "text_sha256": "02d6bca8283e8fcd0475d6f4cea4a160b05336aa710f7dc3262457b71275c98b",
-        "response_sha256": "e667e914f217867b7c5265837414826e9d225a6a6d0b5aef5257dcfd0c09b189",
-        "description_token_recall": 0.4706
-      }
-    },
-    {
       "listing_id": "MS-CRAWL-0141",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
@@ -517,51 +427,6 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0151",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "target_path": "/ru/properties/MS-CRAWL-0151",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продается теплица в городе Сандански. Теплица полностью оборудованна и готова к использованию. Готовое решение бизнеса в Сандански.",
-      "public_description_characters": 131,
-      "seo_action": "retain",
-      "priority": "P1",
-      "status": "evidence_conflict",
-      "evidence_flags": [
-        "fresh_capture_description_conflict",
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0414",
-        "baseline_status": 200,
-        "baseline_word_count": 432,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 79,
-        "text_sha256": "c9de01f74eabcf18ab314a987cd18d7b7dc0f5604058bfab3334ed3694ac9da7",
-        "response_sha256": "fb81c92845de64ed1c8a8b4ec62120bc2df9a180d15aaa363bb0c88dc691179d",
-        "description_token_recall": 0.3529
-      }
-    },
-    {
       "listing_id": "MS-CRAWL-0165",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
@@ -601,50 +466,6 @@
         "final_url": "https://makler-realty.ru/listing/uchastok-strumiani/",
         "reason": "fetch_failed",
         "detail": "HTTP 404"
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0013",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "source_url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
-      "target_path": "/bg/imoti/MS-CRAWL-0013",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продава се къща в с. Хотово с обща площ 160 кв.м. и парцел 440 кв.м. Подходяща за ремонт, ваканционен дом или инвестиция.",
-      "public_description_characters": 121,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0123",
-        "baseline_status": 200,
-        "baseline_word_count": 538,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 200,
-        "text_sha256": "ccf6b52bcf22c8e14de455c515b736acc6b919ab5791fc6b8ede895fabe6f3c9",
-        "response_sha256": "945bd683dc4b1e0e4b79c089b4fe96161f62c663d608b9f7f35fc3498c82e953",
-        "description_token_recall": 0.9583
       }
     },
     {
@@ -698,8 +519,8 @@
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%81%d0%be%d0%bb%d1%83%d0%bd/",
       "target_path": "/bg/imoti/MS-CRAWL-0024",
       "cms_status": "source_imported_review_required",
-      "public_description": "Апартамента се намира в центъра на гр.Солун. Намира се на 4ти жилищен етаж и се състои от хол с кухня, спалня и WC.",
-      "public_description_characters": 115,
+      "public_description": "Апартамент в центъра на Солун, на четвърти жилищен етаж. Жилището е с площ 45 кв.м. и се състои от хол с кухня, спалня и WC.",
+      "public_description_characters": 124,
       "seo_action": "retain",
       "priority": "P2",
       "status": "needs_editor_review",
@@ -708,11 +529,11 @@
       ],
       "provenance": {
         "classification": "ledger_source_reviewed",
-        "description_edit_id": "listing-edit-MS-CRAWL-0024-live-description-20260705",
-        "edited_at": "2026-07-05T00:10:00Z",
-        "review_source": "live_listing_detail",
-        "source_hash_before": "a7377b0e0c2858ac8946f4189c47bb43eeaba26906ccca2557c7548c1ece538f",
-        "source_hash_after": "64de65332a69de27a2aa78e42891f8c6ecdf6429654da214e1facbc2f0d8afaa"
+        "description_edit_id": "listing-content-MS-CRAWL-0024",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "e37aaa72a500f833e06a39c45eec5e05edd3685cc3b7931999211162eff9e1fe",
+        "source_hash_after": "5184e04f5cf62d4c759423013ea5a416cf5bfcd89bd7758707013bd10e986b9e"
       },
       "migration": {
         "record_id": "url-0134",
@@ -732,7 +553,7 @@
         "content_word_count": 55,
         "text_sha256": "b2abbddb0c8b247b875b4ae00722f8d220cf9296a88c341b199ac24e065ec8b3",
         "response_sha256": "163acd41de122d800ac6fcd477f7a7521e5b9675c22325cd869928868cbc06d3",
-        "description_token_recall": 1
+        "description_token_recall": 0.7692
       }
     },
     {
@@ -742,8 +563,8 @@
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be/",
       "target_path": "/bg/imoti/MS-CRAWL-0059",
       "cms_status": "source_imported_review_required",
-      "public_description": "Продава се парцел в с. Хотово, община Сандански. Обща площ 762 кв.м., равен терен, подходящ за къща или вила.",
-      "public_description_characters": 109,
+      "public_description": "Парцел в с. Хотово, община Сандански, състоящ се от два съседни имота с обща площ 762 кв.м. — 478 кв.м. и 284 кв.м. Теренът е равен.",
+      "public_description_characters": 132,
       "seo_action": "retain",
       "priority": "P2",
       "status": "needs_editor_review",
@@ -751,12 +572,12 @@
         "short_description"
       ],
       "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0059",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "ce2366cc2688ee0c7f9d29bab7b36a24cd3c54eb0a6156603d2bf282fa104b87",
+        "source_hash_after": "3e774f77493edc4c2cc058aec305505427008bde972eb532032376760393c97f"
       },
       "migration": {
         "record_id": "url-0169",
@@ -776,7 +597,7 @@
         "content_word_count": 278,
         "text_sha256": "0d75437eabb3e81de38eb01fde0cfae17e61abf3860a731771b003e92d016da3",
         "response_sha256": "ff580bfb1b1a5aab830c74c1687a839303d2c8c4ca27292a6d3934b84c044524",
-        "description_token_recall": 1
+        "description_token_recall": 0.9286
       }
     },
     {
@@ -786,8 +607,8 @@
       "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-8%d0%b4%d0%ba%d0%b0-%d0%b7%d0%b5%d0%bc%d1%8f-%d0%b2-%d0%b7%d0%b5%d0%bc%d0%bb%d0%b8%d1%89%d0%b5%d1%82%d0%be-%d0%bd%d0%b0-%d1%81-%d0%bb%d0%b5%d1%88%d0%bd%d0%b8/",
       "target_path": "/bg/imoti/MS-CRAWL-0069",
       "cms_status": "source_imported_review_required",
-      "public_description": "Земята се намира в землището на с.Лешница Статут на земята: Нива Категория 6-та",
-      "public_description_characters": 79,
+      "public_description": "Земеделска земя в землището на с. Лешница с площ 8 000 кв.м. Имотът е със статут на нива, категория 6.",
+      "public_description_characters": 102,
       "seo_action": "retain",
       "priority": "P2",
       "status": "needs_editor_review",
@@ -796,11 +617,11 @@
       ],
       "provenance": {
         "classification": "ledger_source_reviewed",
-        "description_edit_id": "listing-edit-MS-CRAWL-0069-live-description-20260705",
-        "edited_at": "2026-07-05T00:10:00Z",
-        "review_source": "live_listing_detail",
-        "source_hash_before": "9bbe444a24096e745dbef3db103811b542690eebad345e153532f459393e0e70",
-        "source_hash_after": "b996c79156d75d1d3cf1180bf9a1aa11e142013fa3e97da5c491d8044c97d58a"
+        "description_edit_id": "listing-content-MS-CRAWL-0069",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "626a0342fa6dc8ef5e13c6366799927b0524fc452bbdceff387bb5aa101a8e4d",
+        "source_hash_after": "a7476944e2d19574cad7fcef7ebc46d401a9493f299d414367bf58ba3cc4e556"
       },
       "migration": {
         "record_id": "url-0179",
@@ -820,51 +641,7 @@
         "content_word_count": 47,
         "text_sha256": "d0fdff8e017d80bcb362b20a75076a86a7134e519fdc644b4109ed2f5aec6fc2",
         "response_sha256": "9074e20a54c92558317409dd1c07078b75cf44161a08cf13847ac249c024ee1b",
-        "description_token_recall": 1
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0071",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
-      "target_path": "/bg/imoti/MS-CRAWL-0071",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продажба на 38дка земя в близост до минерална вода",
-      "public_description_characters": 50,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0181",
-        "baseline_status": 200,
-        "baseline_word_count": 402,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 63,
-        "text_sha256": "ff54209d56cecb885f647a2602fd7b5f4d0eb093e7197523cc6a6c05644c5e32",
-        "response_sha256": "9a1c369c0f467589d31af90f2df518ab26d6925006d79c2b546b4460d1c9654d",
-        "description_token_recall": 1
+        "description_token_recall": 0.6667
       }
     },
     {
@@ -953,50 +730,6 @@
         "text_sha256": "05832ec250dfcd1b0a26a6bf97eafbd4dbc32c58b153eefb6b20b6224f79e23e",
         "response_sha256": "5ac35c9765067c4c48c7def7ca72c406b98139fe9fe34af9b0ff8eb5447420bf",
         "description_token_recall": 0.84
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0081",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
-      "target_path": "/bg/imoti/MS-CRAWL-0081",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Участок в поселке Струмяни. Продажа участка под строительство в поселке Струмяни. Недвижими имоти в Сандански.",
-      "public_description_characters": 110,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0191",
-        "baseline_status": 200,
-        "baseline_word_count": 437,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 99,
-        "text_sha256": "9d9ad328b2b09840a9fc42c7fcdd731243ad34810a8cd90b6ece9343c7d6329d",
-        "response_sha256": "6d185c3cfc5ab73300bd25294ae8ae1ff1e5b67033f51ffbcb58582107904efb",
-        "description_token_recall": 0.5333
       }
     },
     {
@@ -1393,6 +1126,50 @@
         "text_sha256": "15bafa1ef32e8527449cf90166a19b69d08828b74ef5e49d9894c40ed6c679a0",
         "response_sha256": "bae250153e8d31af5fcd0db60f58100d2406d36d922865cb579d823f77682c68",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0123",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/",
+      "target_path": "/ru/properties/MS-CRAWL-0123",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Одноэтажное производственное здание площадью 417 кв.м. расположено на участке 2 205 кв.м. в одном из сёл общины Петрич, на главной асфальтированной дороге.",
+      "public_description_characters": 155,
+      "seo_action": "retain",
+      "priority": "P2",
+      "status": "needs_editor_review",
+      "evidence_flags": [
+        "short_description"
+      ],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0123",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "d4358da2ebc80582ad99a3a87467f2f42525732d5c8e2b5f25adccfc15195a3a",
+        "source_hash_after": "ac27c2bd12a434bfa3835bb06fe0144502544c95f544771854973efbc533ee53"
+      },
+      "migration": {
+        "record_id": "url-0386",
+        "baseline_status": 200,
+        "baseline_word_count": 446,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b5-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d0%b5/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 93,
+        "text_sha256": "02d6bca8283e8fcd0475d6f4cea4a160b05336aa710f7dc3262457b71275c98b",
+        "response_sha256": "e667e914f217867b7c5265837414826e9d225a6a6d0b5aef5257dcfd0c09b189",
+        "description_token_recall": 0.75
       }
     },
     {
@@ -1965,6 +1742,50 @@
         "text_sha256": "92904779c263031540a8d9045f84b02adbdc0054eafae466048ff1514191e2dd",
         "response_sha256": "d2b1dd9858d436b4b9346dd15f05b58f1e5b67381adcf1b5edb2163295d49542",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0151",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "target_path": "/ru/properties/MS-CRAWL-0151",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Теплица площадью 1 100 кв.м. расположена в Сандански, рядом с асфальтированной дорогой и рекой Струма.",
+      "public_description_characters": 102,
+      "seo_action": "retain",
+      "priority": "P2",
+      "status": "needs_editor_review",
+      "evidence_flags": [
+        "short_description"
+      ],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0151",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "d8fbcd970b5ff15d6c9960c07cc6aa3c693fe7fc2f3db18289190d6efd1a5aec",
+        "source_hash_after": "73090530d1f734d6365be8d510c092dc6ae49df7fa2cd34f5ee4d28d48d743e8"
+      },
+      "migration": {
+        "record_id": "url-0414",
+        "baseline_status": 200,
+        "baseline_word_count": 432,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d1%82%d0%b5%d0%bf%d0%bb%d0%b8%d1%86%d0%b0-%d0%b2-%d0%b3%d0%be%d1%80%d0%be%d0%b4%d0%b5-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 79,
+        "text_sha256": "c9de01f74eabcf18ab314a987cd18d7b7dc0f5604058bfab3334ed3694ac9da7",
+        "response_sha256": "fb81c92845de64ed1c8a8b4ec62120bc2df9a180d15aaa363bb0c88dc691179d",
+        "description_token_recall": 0.875
       }
     },
     {
@@ -2574,6 +2395,48 @@
       }
     },
     {
+      "listing_id": "MS-CRAWL-0006",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "source_url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
+      "target_path": "/bg/imoti/MS-CRAWL-0006",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Производствено/складово помещение в промишлената зона на Сандански, с площ 1 700 кв.м. Помещението включва работна зала, офиси, складове и санитарни възли; разполага с таван над 4 м, естествена светлина, трифазен ток, вода и канализация. Намира се в ограден парцел със самостоятелен вход и достъп за товарни автомобили.",
+      "public_description_characters": 319,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0006",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "30e492293ca5c7f054b25374d14926448d210c252ec599a17951a8fa03cb3e29",
+        "source_hash_after": "80015f245dd6a8917823f0c215fac2523ec98e4dd122136a4ad773601a904b18"
+      },
+      "migration": {
+        "record_id": "url-0116",
+        "baseline_status": 200,
+        "baseline_word_count": 582,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.com/listing/%d0%b0%d1%80%d0%b5%d0%bd%d0%b4%d0%b0-%d0%bf%d1%80%d0%be%d0%bc%d1%8b%d1%88%d0%bb%d0%b5%d0%bd%d0%bd%d0%be%d0%b3%d0%be-%d0%bf%d0%be%d0%bc%d0%b5%d1%89%d0%b5%d0%bd%d0%b8%d1%8f-%d0%b2-%d1%81%d0%b0%d0%bd/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 244,
+        "text_sha256": "936aa45992f23a06be10fcc75ee3df5cf39e33fcf14f4efd90345e8b64059a15",
+        "response_sha256": "aa5143e5b2ec95eaedcf03708876d10edc62effc0ad00f56fe012a6bd9d8e2f2",
+        "description_token_recall": 0.7959
+      }
+    },
+    {
       "listing_id": "MS-CRAWL-0007",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -2781,6 +2644,48 @@
         "text_sha256": "a3c194047fcfd858c9b31ee14b2cb970fbe82a9eac2eb5cb60760b5dc8d32fbd",
         "response_sha256": "27e24c84a82ec1f8609ecad4585c0b8573381e591c0d43c14de03b6ab85c71d6",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0013",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "source_url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
+      "target_path": "/bg/imoti/MS-CRAWL-0013",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Стара къща в с. Хотово, подходяща за ремонт, реконструкция, ваканционен дом или инвестиция. Имотът включва две къщи, залепени на калкан, всяка със застроена площ 80 кв.м., или общо 160 кв.м., върху два съседни парцела с обща площ 440 кв.м. Сградите са на два етажа с гредоредна конструкция, а теренът е равен и с удобен достъп.",
+      "public_description_characters": 327,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0013",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "5d009d3dbf84b8dd6b9b3abedd59c5db736c45d583ba9c12c2041982d28321a7",
+        "source_hash_after": "88070b0cb83d5d389fd95936b43ffbba7ebfb845b5f42d69f47e35986c62d9cf"
+      },
+      "migration": {
+        "record_id": "url-0123",
+        "baseline_status": 200,
+        "baseline_word_count": 538,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.com/listing/%d0%ba%d1%8a%d1%89%d0%b0-%d0%b7%d0%b0-%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%b2-%d1%81-%d1%85%d0%be%d1%82%d0%be%d0%b2%d0%be-%d0%b8%d0%bc%d0%be%d1%82-%d1%81-%d0%bf%d0%b0%d1%80/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 200,
+        "text_sha256": "ccf6b52bcf22c8e14de455c515b736acc6b919ab5791fc6b8ede895fabe6f3c9",
+        "response_sha256": "945bd683dc4b1e0e4b79c089b4fe96161f62c663d608b9f7f35fc3498c82e953",
+        "description_token_recall": 0.9483
       }
     },
     {
@@ -4926,6 +4831,48 @@
       }
     },
     {
+      "listing_id": "MS-CRAWL-0071",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
+      "target_path": "/bg/imoti/MS-CRAWL-0071",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Земя с площ 38 016 кв.м. (около 38 дка) в землището на с. Хотово. Имотът е до главния път между Сандански и Мелник и в непосредствена близост до минералната баня в с. Хотово.",
+      "public_description_characters": 174,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0071",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "716641778c0f5a4a2379c2fead65d76a10a36821dbfa573847ccc0f24e103822",
+        "source_hash_after": "91492040b94b283c66cb7fc963dfb4f504567834d043c84c02c777d6d16b0e10"
+      },
+      "migration": {
+        "record_id": "url-0181",
+        "baseline_status": 200,
+        "baseline_word_count": 402,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 63,
+        "text_sha256": "ff54209d56cecb885f647a2602fd7b5f4d0eb093e7197523cc6a6c05644c5e32",
+        "response_sha256": "9a1c369c0f467589d31af90f2df518ab26d6925006d79c2b546b4460d1c9654d",
+        "description_token_recall": 0.6471
+      }
+    },
+    {
       "listing_id": "MS-CRAWL-0072",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -5175,6 +5122,48 @@
         "text_sha256": "34eab99f5df67c1520af5a4ebb64128870801f6b72c0a42aba9848afbec9dd44",
         "response_sha256": "664744ef8ba6c63e90e4d9dfd52472229281b2c118ca966cf435a28893903256",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0081",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "source_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
+      "target_path": "/bg/imoti/MS-CRAWL-0081",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Парцел в с. Струмяни — общински център на около 10 км от Сандански, разположен на главния път E79. Имотът е в края на селото, с гледка, а всички комуникации са на около 100 м.",
+      "public_description_characters": 175,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0081",
+        "edited_at": "2026-07-29T14:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "846a0bfb8e5c243876d772ea5e029c3e50e9ed13b17020ede85374b82c16104d",
+        "source_hash_after": "64e1ef5113ace626640de55ba2810e5e194953fe1cc3453249da722c59669209"
+      },
+      "migration": {
+        "record_id": "url-0191",
+        "baseline_status": 200,
+        "baseline_word_count": 437,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.com/listing/%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b2-%d0%bf%d0%be%d1%81%d0%b5%d0%bb%d0%ba%d0%b5-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 99,
+        "text_sha256": "9d9ad328b2b09840a9fc42c7fcdd731243ad34810a8cd90b6ece9343c7d6329d",
+        "response_sha256": "6d185c3cfc5ab73300bd25294ae8ae1ff1e5b67033f51ffbcb58582107904efb",
+        "description_token_recall": 0.7576
       }
     },
     {

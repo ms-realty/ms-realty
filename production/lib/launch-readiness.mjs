@@ -442,7 +442,7 @@ function assertPassLocalizedSitemapEvidence(report) {
     evidence.location_pages < 6 ||
     evidence.seller_pages !== 7 ||
     evidence.contact_pages !== 7 ||
-    evidence.guide_pages !== 3 ||
+    evidence.guide_pages !== 5 ||
     evidence.entries !== entries
   ) {
     throw new Error("Launch readiness localized sitemap requires complete approved route evidence");
@@ -1189,7 +1189,7 @@ export function buildLaunchReadinessReport({
     sitemap.summary.location_pages >= 6 &&
     sitemap.summary.seller_pages === 7 &&
     sitemap.summary.contact_pages === 7 &&
-    sitemap.summary.guide_pages === 3 &&
+    sitemap.summary.guide_pages === 5 &&
     sitemap.summary.entries === expectedSitemapEntries;
 
   const gates = [

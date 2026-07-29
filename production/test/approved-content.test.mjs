@@ -40,7 +40,17 @@ test("new factual guides require current source evidence, a matching hash, and h
     approvedContentDocumentsForLocation(content, "Sandanski", "bg").map((document) => document.id),
     ["sandanski-property-official-sources"],
   );
+  assert.deepEqual(
+    approvedContentDocumentsForLocation(content, "Hotovo", "bg").map((document) => document.id),
+    ["hotovo-locality-official-context"],
+  );
+  assert.deepEqual(
+    approvedContentDocumentsForLocation(content, "Petrich", "bg").map((document) => document.id),
+    ["petrich-municipality-official-context"],
+  );
   assert.deepEqual(approvedContentDocumentsForLocation(content, "Sandanski", "ru"), []);
+  assert.deepEqual(approvedContentDocumentsForLocation(content, "Hotovo", "ru"), []);
+  assert.deepEqual(approvedContentDocumentsForLocation(content, "Petrich", "ru"), []);
   assert.equal(isPublishableGuide({ ...guide, source_hash: "stale" }), false);
   assert.equal(isPublishableGuide({ ...guide, location: "Petrich" }), false);
   const unapprovedTranslation = {

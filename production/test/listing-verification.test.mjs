@@ -54,6 +54,43 @@ test("listing verification report creates broker tasks from latest listing edits
   assert.equal(report.rows.find((row) => row.listing_id === "MS-CRAWL-0116").verification_task.owner, "broker_ru");
 });
 
+test("later legacy description restorations retain the immediately preceding factual verification priority", () => {
+  const report = buildListingVerificationReport({
+    seed: loadCmsSeed(),
+    edits: [
+      {
+        id: "price-edit",
+        listing_id: "MS-CRAWL-0001",
+        edited_at: "2026-07-04T00:00:00Z",
+        source_locale: "bg",
+        patch: { price_eur: 123000 },
+        source_hash_after: "price-hash",
+        stale_translation_count: 0,
+        stale_locales: [],
+      },
+      {
+        id: "description-edit",
+        listing_id: "MS-CRAWL-0001",
+        edited_at: "2026-07-05T00:00:00Z",
+        source_locale: "bg",
+        patch: { description: "Reviewed source description." },
+        review_source: "legacy_wordpress_content_capture",
+        source_hash_after: "description-hash",
+        stale_translation_count: 0,
+        stale_locales: [],
+      },
+    ],
+    generatedAt: "2026-07-05T00:00:00Z",
+  });
+  const row = report.rows[0];
+
+  assert.equal(row.latest_edit_id, "description-edit");
+  assert.deepEqual(row.changed_fields, ["description"]);
+  assert.equal(row.source_hash_after, "description-hash");
+  assert.equal(row.priority, "high");
+  assert.equal(row.verification_task.due_at, "2026-07-06T00:00:00.000Z");
+});
+
 test("listing verification build honors mounted edit ledger and output path", () => {
   const dir = fs.mkdtempSync(`${os.tmpdir()}/ms-realty-listing-verification-`);
   const editPath = `${dir}/listing-edits.jsonl`;

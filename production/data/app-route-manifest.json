@@ -1,13 +1,13 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
-  "source_sitemap_entries": 196,
+  "source_sitemap_entries": 198,
   "summary": {
-    "routes": 203,
-    "sitemap_indexable_routes": 196,
+    "routes": 205,
+    "sitemap_indexable_routes": 198,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
-      "guide": 3,
+      "guide": 5,
       "listing": 166,
       "contact": 7,
       "location": 6,
@@ -15,7 +15,7 @@
       "search": 7
     },
     "by_locale": {
-      "bg": 121,
+      "bg": 123,
       "de": 4,
       "el": 4,
       "en": 6,
@@ -48,6 +48,56 @@
         "locale": "bg"
       },
       "hreflang_count": 8
+    },
+    {
+      "type": "guide",
+      "path": "/bg/guides/hotovo-obstinski-kontekst",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderGuidePage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "bg",
+        "guidePath": "guides/hotovo-obstinski-kontekst"
+      },
+      "hreflang_count": 2
+    },
+    {
+      "type": "guide",
+      "path": "/bg/guides/petrich-obstinski-kontekst",
+      "locale": "bg",
+      "lang": "bg",
+      "dir": "ltr",
+      "route_segments": {
+        "listing": "imoti",
+        "search": "tarsene",
+        "location": "lokacii",
+        "seller": "prodai",
+        "contact": "kontakt"
+      },
+      "app_module": "app/[locale]/[...slug]/route",
+      "renderer": "renderGuidePage",
+      "dynamic": true,
+      "sitemap_indexable": true,
+      "public_indexable": true,
+      "cache": "public, max-age=300, s-maxage=3600",
+      "params": {
+        "locale": "bg",
+        "guidePath": "guides/petrich-obstinski-kontekst"
+      },
+      "hreflang_count": 2
     },
     {
       "type": "guide",

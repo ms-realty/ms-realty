@@ -100,10 +100,10 @@
         "location_pages": 6,
         "seller_pages": 7,
         "contact_pages": 7,
-        "guide_pages": 3,
-        "entries": 196,
+        "guide_pages": 5,
+        "entries": 198,
         "byLocale": {
-          "bg": 120,
+          "bg": 122,
           "en": 5,
           "de": 3,
           "nl": 3,
@@ -120,7 +120,7 @@
       "evidence": {
         "generated_at": "2026-07-05T00:00:00Z",
         "listing_entries": 166,
-        "guide_entries": 3,
+        "guide_entries": 5,
         "failing_entries": 0,
         "entries_with_offer": 135,
         "warnings": {
@@ -132,7 +132,7 @@
           "media_review_pending": 0
         },
         "by_locale": {
-          "bg": 114,
+          "bg": 116,
           "he": 1,
           "ru": 52,
           "en": 2

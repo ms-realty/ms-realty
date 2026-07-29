@@ -1064,4 +1064,14 @@
     <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/guides/proverka-na-imot-sandanski" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/guides/proverka-na-imot-sandanski" />
   </url>
+  <url>
+    <loc>https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/guides/hotovo-obstinski-kontekst" />
+  </url>
+  <url>
+    <loc>https://makler-realty.com/bg/guides/petrich-obstinski-kontekst</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/guides/petrich-obstinski-kontekst" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/guides/petrich-obstinski-kontekst" />
+  </url>
 </urlset>

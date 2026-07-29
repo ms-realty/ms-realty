@@ -92,7 +92,7 @@ export function buildStructuredDataReport({
 
 export function assertStructuredDataReport(report) {
   if (report.summary.listing_entries !== 166) throw new Error("Structured data report must cover 166 listing sitemap entries");
-  if (report.summary.guide_entries !== 3) throw new Error("Structured data report must cover 3 approved guide sitemap entries");
+  if (report.summary.guide_entries !== 5) throw new Error("Structured data report must cover 5 approved guide sitemap entries");
   if (report.summary.failing_entries !== 0) throw new Error("Structured data report must have zero failing public schemas");
   if (report.rows.some((row) => row.indexable !== true)) throw new Error("Structured data report must only cover indexable rows");
   return true;

@@ -528,10 +528,11 @@ test("location page exposes only indexable locale inventory", () => {
   assert.match(missingHtml, /href="\/he\/search"/);
 });
 
-test("Sandanski exposes only its approved Bulgarian location context", () => {
+test("Bulgarian locations expose only their approved source-bound context", () => {
   const bg = renderLocationPage({ registry, listings, localeCode: "bg", location: "Sandanski" });
   const ru = renderLocationPage({ registry, listings, localeCode: "ru", location: "Sandanski" });
   const hotovo = renderLocationPage({ registry, listings, localeCode: "bg", location: "Hotovo" });
+  const petrich = renderLocationPage({ registry, listings, localeCode: "bg", location: "Petrich" });
   const html = renderReactPublicBody(bg);
 
   assert.deepEqual(bg.body.context, {
@@ -540,7 +541,16 @@ test("Sandanski exposes only its approved Bulgarian location context", () => {
     summary: "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
   });
   assert.equal("context" in ru.body, false);
-  assert.equal("context" in hotovo.body, false);
+  assert.deepEqual(hotovo.body.context, {
+    href: "/bg/guides/hotovo-obstinski-kontekst",
+    title: "Хотово: официален контекст за населеното място",
+    summary: "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин.",
+  });
+  assert.deepEqual(petrich.body.context, {
+    href: "/bg/guides/petrich-obstinski-kontekst",
+    title: "Петрич: официален контекст за общината",
+    summary: "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин.",
+  });
   assert.match(html, /data-location-context="true"/);
   assert.match(html, /href="\/bg\/guides\/proverka-na-imot-sandanski"/);
   assert.doesNotMatch(renderReactPublicBody(ru), /data-location-context="true"/);

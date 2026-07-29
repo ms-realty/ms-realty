@@ -203,7 +203,7 @@ if (
   sitemap.summary.location_pages < 6 ||
   sitemap.summary.seller_pages !== 7 ||
   sitemap.summary.contact_pages !== 7 ||
-  sitemap.summary.guide_pages !== 3
+  sitemap.summary.guide_pages !== 5
 ) {
   throw new Error("Localized sitemap must include approved home, listing, location, seller, contact, and guide pages");
 }
@@ -228,10 +228,10 @@ const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data
 assertAppRouteManifest(appRouteManifest);
 assertAppRouteFiles(appRouteManifest);
 if (
-  appRouteManifest.summary.routes !== 203 ||
+  appRouteManifest.summary.routes !== 205 ||
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
-  appRouteManifest.summary.by_type.guide !== 3 ||
+  appRouteManifest.summary.by_type.guide !== 5 ||
   appRouteManifest.routes.find((route) => route.path === "/he")?.dir !== "rtl"
 ) {
   throw new Error("App Router manifest must map sitemap routes plus no-store search routes");
@@ -1102,7 +1102,7 @@ for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
 const structuredData = JSON.parse(fs.readFileSync(fromRoot("production", "data", "structured-data-report.json"), "utf8"));
 if (
   structuredData.summary.listing_entries !== 166 ||
-  structuredData.summary.guide_entries !== 3 ||
+  structuredData.summary.guide_entries !== 5 ||
   structuredData.summary.failing_entries !== 0
 ) {
   throw new Error("Structured data report must cover all indexable listing and guide entries without schema failures");
