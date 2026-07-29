@@ -37,6 +37,8 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(fixtureListing.tour.provider, "photo-sphere-viewer");
   assert.equal(fixtureListing.tour.is_public, false);
   assert.ok(fixtureListing.tour.fallback_gallery.length > 0);
+  assert.equal(fixtureListing.migration.source_seo.meta_description, migrationRecords.find((record) => record.old_url === fixtureListing.source_url).source_seo.meta_description);
+  assert.equal(fixtureListing.migration.source_seo.open_graph, migrationRecords.find((record) => record.old_url === fixtureListing.source_url).source_seo.open_graph);
   assert.ok(ruListing.routing.target_path.startsWith("/ru/"));
 });
 

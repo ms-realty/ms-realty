@@ -66,6 +66,8 @@ export function attachMigrationReviewEvidence(routes, records) {
         canonical: record.canonical || "",
         robots_meta: record.robots_meta || "",
         hreflang: record.hreflang || "",
+        meta_description: record.source_seo?.meta_description || "",
+        open_graph: record.source_seo?.open_graph || "",
         word_count: Number(record.word_count || 0),
         image_count: Number(record.image_count || 0),
         internal_link_count: Number(record.internal_link_count || 0),
@@ -110,6 +112,7 @@ export function filterMigrationReviewRoutes(routes, requestedFilters = {}) {
         route.target_path,
         evidence.title,
         evidence.h1,
+        evidence.meta_description,
         evidence.canonical,
       ].some((value) => String(value || "").toLocaleLowerCase().includes(query));
     });

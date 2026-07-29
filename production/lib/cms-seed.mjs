@@ -91,6 +91,10 @@ export function buildCmsSeed(registry, { listings, migrationRecords, routeMap, m
             record_id: migration.id,
             review_state: migration.review_state,
             metadata_gaps: migration.metadata_gaps,
+            source_seo: {
+              meta_description: migration.source_seo?.meta_description || "",
+              open_graph: migration.source_seo?.open_graph || "",
+            },
           }
         : null,
       routing: route

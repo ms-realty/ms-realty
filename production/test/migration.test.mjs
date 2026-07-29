@@ -44,6 +44,8 @@ test("migration records expose metadata gaps for launch review", () => {
   const summary = summarizeMigrationRecords(records);
   assert.ok(summary.byReviewState.metadata_review > 0);
   assert.ok(records.some((record) => record.metadata_gaps.missingDescription));
+  assert.ok(records.every((record) => typeof record.source_seo?.meta_description === "string"));
+  assert.ok(records.every((record) => typeof record.source_seo?.open_graph === "string"));
   assert.ok(records.every((record) => record.migration_action === "preserve_same_url"));
 });
 
@@ -138,6 +140,8 @@ test("migration review routes expose crawl evidence without making a terminal de
   assert.equal(route.source_evidence.canonical, records[0].canonical);
   assert.equal(route.source_evidence.robots_meta, records[0].robots_meta);
   assert.equal(route.source_evidence.hreflang, records[0].hreflang);
+  assert.equal(route.source_evidence.meta_description, records[0].source_seo.meta_description);
+  assert.equal(route.source_evidence.open_graph, records[0].source_seo.open_graph);
   assert.equal(route.source_evidence.word_count, records[0].word_count);
   assert.equal(route.source_evidence.review_owner, "content_editor");
   assert.equal(route.source_evidence.action_required, "map_or_rebuild_content_page");
