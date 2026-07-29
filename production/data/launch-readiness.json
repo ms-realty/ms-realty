@@ -159,7 +159,7 @@
         ],
         "privacy_events": {
           "source": "privacy_events",
-          "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
+          "input_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/events.jsonl",
           "status": "imported",
           "row_count": 65,
           "matched_rows": 29,
@@ -167,7 +167,7 @@
         },
         "analytics_export": {
           "source": "analytics_export",
-          "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/analytics.csv",
+          "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/analytics.csv",
           "status": "missing_export",
           "row_count": 0,
           "matched_rows": 0,
@@ -181,7 +181,7 @@
         "sources": {
           "search_console": {
             "source": "search_console",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/search-console.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/search-console.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -194,7 +194,7 @@
           },
           "yandex_webmaster": {
             "source": "yandex_webmaster",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/yandex-webmaster.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/yandex-webmaster.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -207,7 +207,7 @@
           },
           "backlinks": {
             "source": "backlinks",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/backlinks.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/backlinks.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -220,7 +220,7 @@
           },
           "analytics_export": {
             "source": "analytics_export",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/analytics.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/analytics.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -233,7 +233,7 @@
           },
           "privacy_events": {
             "source": "privacy_events",
-            "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/events.jsonl",
             "status": "imported",
             "row_count": 65,
             "matched_rows": 29,
@@ -587,7 +587,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-25T08:37:50.444Z",
+              "generated_at": "2026-07-29T19:31:33.321Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,
@@ -683,11 +683,74 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "missing_report",
+        "status": "blocked_report",
         "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/payload-runtime-report.json",
+        "summary": {
+          "admin_route": "/payload-admin",
+          "checks": 9,
+          "database": {
+            "status": "missing_env"
+          },
+          "missing_env": [
+            "PAYLOAD_SECRET",
+            "DATABASE_URL"
+          ],
+          "placeholder_env": [],
+          "weak_env": [],
+          "route_files": 4
+        },
+        "checks": [
+          {
+            "id": "payload_secret",
+            "status": "missing_env",
+            "env": "PAYLOAD_SECRET"
+          },
+          {
+            "id": "database_url",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          },
+          {
+            "id": "route:app/(payload)/payload-admin/[[...segments]]/page.js",
+            "status": "pass",
+            "file": "app/(payload)/payload-admin/[[...segments]]/page.js"
+          },
+          {
+            "id": "route:app/(payload)/api/[...slug]/route.js",
+            "status": "pass",
+            "file": "app/(payload)/api/[...slug]/route.js"
+          },
+          {
+            "id": "route:app/(payload)/graphql/route.js",
+            "status": "pass",
+            "file": "app/(payload)/graphql/route.js"
+          },
+          {
+            "id": "route:app/(payload)/graphql-playground/route.js",
+            "status": "pass",
+            "file": "app/(payload)/graphql-playground/route.js"
+          },
+          {
+            "id": "payload_config_import",
+            "status": "pass",
+            "admin_route": "/payload-admin",
+            "collections": 6
+          },
+          {
+            "id": "database_network_scope",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          },
+          {
+            "id": "database_tcp",
+            "status": "missing_env",
+            "env": "DATABASE_URL"
+          }
+        ],
         "next_actions": [
           "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime, then npm run payload:preflight."
+          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
+          "Run npm run payload:preflight before launch:preflight."
         ]
       },
       "next_actions": [

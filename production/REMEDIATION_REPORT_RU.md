@@ -28,6 +28,10 @@
 | 13 | Полный test suite ожидал старое описание и не отправлял новое обязательное подтверждение тура. | Smoke fixtures приведены к источнику правды и новому approval contract. | e652d50; полный suite снова проходит. |
 | 14 | next build затягивал migration evidence runtime paths в server trace и выдавал warning, раздувая deployment trace. | Runtime-mounted evidence paths исключены из build tracing, при этом testable runtime behaviour сохранено. | 839f3ac; next:build проходит без этого warning. |
 | 15 | В архитектурном документе сохранялся старый fallback через OpenRouter, противоречащий текущей policy. | OpenRouter и внешние model aggregators исключены; при недоступности private Hermes optional drafting fail-closed, deterministic workflows остаются доступны. | Текущий документальный checkpoint; SOURCE_OF_TRUTH.md §11. |
+| 16 | Кнопка «Сохранить объект» показывала успех даже при отказе localStorage: ошибка записи подавлялась, а UI обновлялся без read-back. | writeSaved возвращает успех только после безопасной записи и точного read-back; при ошибке остаётся фактическое состояние и показывается toast. | public-client-saved-listing.test.mjs; normal и forced-failure browser path. |
+| 17 | Skip link менял #main, но main не был focusable; после Enter клавиатурный пользователь возвращался к началу документа. | Все public main landmarks получили tabindex=-1; click handler сохраняет нативную fragment-навигацию и переносит focus с preventScroll. | Client regression test; реальный Tab → Enter на 360px: #main, active element MAIN#main. |
+| 18 | После усиления tour approval два executable smoke fixture продолжали посылать старый request без reviewConfirmed, поэтому полный release validation ломался на HTTP/Node smoke. | Оба fixture явно моделируют подтверждённый human review; endpoint по-прежнему отклоняет неполные запросы. | npm run http:build, npm run server:smoke, полный npm run validate. |
+| 19 | Mobile filter live preview на каждое изменение загружал целую HTML search page и парсил DOM только ради числа совпадений. | Preview использует уже существующий /api/search, передаёт locale из form action и читает только search.total_matches из JSON. | client/QA regression tests; локальный fixture: 20 654 B JSON против 143 840 B HTML при одинаковых 71 matches. |
 
 ## Что именно добавлено для «районов» и почему
 
@@ -38,19 +42,31 @@
 добавить только после supplied/reviewed таблицы listing_id → district и проверки
 координат; map-first UI до этого не включается намеренно.
 
+Полное сравнение с Imot, ImotiBG, Airbnb, Booking.com и релевантными open-source
+проектами, включая сознательно неиспользованные лицензии и следующий приоритет работ,
+зафиксировано в [COMPETITIVE_RESEARCH_RU.md](COMPETITIVE_RESEARCH_RU.md).
+
 ## Проверка этого цикла
 
-- Полный Node test suite: **514 passed, 0 failed**.
-- После устранения tracing issue: npm run next:build завершён успешно; прежний warning
-  про неожиданный файл в NFT list устранён.
+- Полный Node test suite: **517 passed, 0 failed**.
+- Полный npm run validate проходит: generated contracts, HTTP/Node smoke, mobile/elderly
+  QA и launch-evidence reports строятся без code failure. Его external blockers остаются
+  именно external blockers, а не замалчиваются.
+- npm run next:build завершён успешно; прежний warning про неожиданный файл в NFT list
+  устранён.
 - Измерение server trace после исправления: project references снижены с **36 682** до
   **1 969**, total traced entries — с **73 912** до **14 665**. Это уменьшает deployment
   packaging overhead; это не заявление о LCP/transfer-size без live измерения.
 - MCP regression suite проверяет anonymous/public разграничение, роли, origin rejection,
   подтверждения, невозможность публикации и attribution в audit log.
-- Выполнена локальная 360px проверка gallery/tour fallback без console/network errors;
-  отдельный end-to-end аудит всех форм и сценариев продолжается как независимая проверка
-  до production handoff.
+- Реальный Chromium audit на **360 × 800**: seller valuation и listing viewing отправляют
+  изолированные POST /api/leads с **201**, показывают success state и переносят focus на
+  корректный элемент; viewing сохраняет intent=viewing, source и listing reference.
+- На той же ширине проверены normal и forced-storage-failure ветки saved listing,
+  gallery/tour fallback и keyboard skip link. Mobile action controls в viewing path имеют
+  высоту **52 px**.
+- Тестовые журналы использовали временный localhost и после проверки перемещены в корзину;
+  рабочие lead/contact данные не затронуты.
 
 ## Не считаются исправленными: внешние production gates
 
@@ -73,9 +89,7 @@ production/data/launch-readiness.json текущий launch status остаёт�
 
 ## Следующий безопасный порядок
 
-1. Закрыть повторно найденные дефекты из финального browser journey audit и повторить
-   затронутые тесты.
-2. Развернуть staging с production-like identity и выполнить персональный MCP smoke test
+1. Развернуть staging с production-like identity и выполнить персональный MCP smoke test
    для broker/editor/translator.
-3. Собрать внешние launch evidence, пройти npm run launch:preflight и только после этого
+2. Собрать внешние launch evidence, пройти npm run launch:preflight и только после этого
    считать сайт готовым к production.

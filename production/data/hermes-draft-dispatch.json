@@ -26,14 +26,14 @@
       "requires_human_approval": true,
       "can_publish": false,
       "can_mark_indexable": false,
-      "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
-      "draft_hash": "038b77ab9fdfca00c966a818501bf4ac877d6d42cb16f4847283eefb12457474",
+      "source_hash": "8b3385b46a5fa3f9ce6278b246c1b39bb4ea75d73e071188e896389f539ec6c1",
+      "draft_hash": "1a65717df6a8ad9f6cb76fd01bf5afac0a4da5b198a3476313f48c377174bcc4",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=el",
       "prompt": {
         "role": "translation_draft",
         "sourceLocale": "bg",
         "targetLocale": "el",
-        "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\nUpdated approved source description.",
+        "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
         "propertyFacts": {
           "id": "MS-CRAWL-0001",
           "location": "Sandanski",
@@ -72,7 +72,7 @@
         "object_type": "listing",
         "object_id": "MS-CRAWL-0001",
         "source_locale": "bg",
-        "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
+        "source_hash": "8b3385b46a5fa3f9ce6278b246c1b39bb4ea75d73e071188e896389f539ec6c1",
         "approved_legal_content": false
       },
       "citations": [
@@ -107,7 +107,7 @@
       "can_publish": false,
       "can_mark_indexable": false,
       "source_hash": "fb8a31da230b00f16014b285eb764b623b95e98e10b8a2c2f2945ebd558162c6",
-      "draft_hash": "e0d0b1e10a44034945937b22cd5e94ffaf387e452cd91c00db91bceb5c048053",
+      "draft_hash": "a255ac67d919b9a206740e82aae8a630f5d0fecf1dbc0f99e4b62ad685fbb7ad",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-3000&locale=de",
       "prompt": {
         "role": "translation_draft",
@@ -116,7 +116,7 @@
         "sourceText": "Продажба на парцел в Струмяни - 3000 кв.м - Недвижими имоти в Сандански\nПарцела се намира в едно от най-големите и предпочитани села в югозападна България – Струмяни. Струмяни е село със статут на общински център. Намира се на около 10 км от Сандански, на главен път Е 79. Селото е с отлично развита инфраструктура. Имота се намира на края на селото, благодарение на което изгледа от парцела е много добър. В парцела има питейна вода. Тока и канализацията е на 10 метра от имота. Парцела е ограден с метална мрежа. Има засадени плодови и иглолистни дръвчета. Асфалтовия път стига почти до самия парцел.",
         "propertyFacts": {
           "id": "MS-3000",
-          "location": "Sandanski",
+          "location": "Strumyani",
           "property_type": "land",
           "offer_type": "sale",
           "price_eur": 38000
@@ -187,14 +187,14 @@
       "requires_human_approval": true,
       "can_publish": false,
       "can_mark_indexable": false,
-      "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
-      "draft_hash": "93fab17e00de692fd82e6c303c2552ff63952c309887bfaff0e53a5309671e2f",
+      "source_hash": "8b3385b46a5fa3f9ce6278b246c1b39bb4ea75d73e071188e896389f539ec6c1",
+      "draft_hash": "b4f49d1166e74c84fa674e228a6e4ed9a22c6ba3cfd2165ef2ee1cf2e49bbcc1",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=de",
       "prompt": {
         "role": "translation_draft",
         "sourceLocale": "bg",
         "targetLocale": "de",
-        "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\nUpdated approved source description.",
+        "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
         "propertyFacts": {
           "id": "MS-CRAWL-0001",
           "location": "Sandanski",
@@ -233,7 +233,7 @@
         "object_type": "listing",
         "object_id": "MS-CRAWL-0001",
         "source_locale": "bg",
-        "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
+        "source_hash": "8b3385b46a5fa3f9ce6278b246c1b39bb4ea75d73e071188e896389f539ec6c1",
         "approved_legal_content": false
       },
       "citations": [
@@ -589,14 +589,14 @@
       "requires_human_approval": true,
       "can_publish": false,
       "can_mark_indexable": false,
-      "source_hash": "96f8cea846bb41853f401ce4bb363fde221c7bb4c05102473df0d48d5ebbca56",
-      "draft_hash": "510d02fa0724c360c52cdaacbde00235e34a9ca4e27c9b73b2ed6dd3aa1606da",
+      "source_hash": "cd512bc3d2bcbaf4f27c79668511e5954f3b5969a347001019ce5422fe4f16f1",
+      "draft_hash": "9bb135644dcd2cf542c0bd6aaabb35e3e1bda1804ec4ffd1b8d8c5b50d6da8f3",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0006&locale=de",
       "prompt": {
         "role": "translation_draft",
         "sourceLocale": "bg",
         "targetLocale": "de",
-        "sourceText": "Industrieel gebouw te huur in Sandanski\nIndustrieel gebouw te huur in Sandanski",
+        "sourceText": "Industrieel gebouw te huur in Sandanski\nПроизводствено/складово помещение в промишлената зона на Сандански, с площ 1 700 кв.м. Помещението включва работна зала, офиси, складове и санитарни възли; разполага с таван над 4 м, естествена светлина, трифазен ток, вода и канализация. Намира се в ограден парцел със самостоятелен вход и достъп за товарни автомобили.",
         "propertyFacts": {
           "id": "MS-CRAWL-0006",
           "location": "Sandanski",
@@ -636,7 +636,7 @@
         "object_type": "listing",
         "object_id": "MS-CRAWL-0006",
         "source_locale": "bg",
-        "source_hash": "96f8cea846bb41853f401ce4bb363fde221c7bb4c05102473df0d48d5ebbca56",
+        "source_hash": "cd512bc3d2bcbaf4f27c79668511e5954f3b5969a347001019ce5422fe4f16f1",
         "approved_legal_content": false
       },
       "citations": [
@@ -1155,14 +1155,14 @@
       "requires_human_approval": true,
       "can_publish": false,
       "can_mark_indexable": false,
-      "source_hash": "204a2d5337caaa2961622177b7d8a7c36e16ab4dbee3cd23de1b474afa149309",
-      "draft_hash": "18d7dd49274b7cd20862629f9fc14c55fe130608fb29889d3f16c3c5e9d52e1a",
+      "source_hash": "1847326958045ea678a3be77f52f834ac607c76602e378082c2cd922ff313f88",
+      "draft_hash": "435bd2cbd890164d5827e36cba27f0246b51c771045f78033592a769750398d7",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0013&locale=de",
       "prompt": {
         "role": "translation_draft",
         "sourceLocale": "bg",
         "targetLocale": "de",
-        "sourceText": "Къща за продажба в с. Хотово | Парцел 440 кв.м. | Отличен инвестиционен потенциал\nПродава се къща в с. Хотово с обща площ 160 кв.м. и парцел 440 кв.м. Подходяща за ремонт, ваканционен дом или инвестиция.",
+        "sourceText": "Къща за продажба в с. Хотово | Парцел 440 кв.м. | Отличен инвестиционен потенциал\nСтара къща в с. Хотово, подходяща за ремонт, реконструкция, ваканционен дом или инвестиция. Имотът включва две къщи, залепени на калкан, всяка със застроена площ 80 кв.м., или общо 160 кв.м., върху два съседни парцела с обща площ 440 кв.м. Сградите са на два етажа с гредоредна конструкция, а теренът е равен и с удобен достъп.",
         "propertyFacts": {
           "id": "MS-CRAWL-0013",
           "location": "Hotovo",
@@ -1202,7 +1202,7 @@
         "object_type": "listing",
         "object_id": "MS-CRAWL-0013",
         "source_locale": "bg",
-        "source_hash": "204a2d5337caaa2961622177b7d8a7c36e16ab4dbee3cd23de1b474afa149309",
+        "source_hash": "1847326958045ea678a3be77f52f834ac607c76602e378082c2cd922ff313f88",
         "approved_legal_content": false
       },
       "citations": [
@@ -1318,7 +1318,7 @@
       "can_publish": false,
       "can_mark_indexable": false,
       "source_hash": "fcbdf038f91a8175f9ac7ad06477fb1c9884854597fdd2620bbe36c093ee9790",
-      "draft_hash": "850dec87877d6061cd8e5c2da53a838fa5f2fa8882f3474affe9ba406f1bb85a",
+      "draft_hash": "50988f9a53803f42b770b1fa4ba8e4239a48a8ce73e2037b341c2ff9560ad352",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0015&locale=de",
       "prompt": {
         "role": "translation_draft",
@@ -1327,7 +1327,7 @@
         "sourceText": "Нова къща под наем в с.Микрево - Недвижими имоти в Сандански\nПредлагаме под наем уютна и напълно реновирана къща, разположена в с. Микрево, община Сандански спокойно и предпочитано място за живеене, съчетаващо чист въздух и красива природа. Имотът е със застроена площ от 55 кв.м. и разполага с два жилищни етажа, както и мазе. Към къщата принадлежи равен и поддържан парцел с площ от 350 кв.м., подходящ за отдих или градинарство. Разпределението е функционално и удобно: На първия етаж ще откриете кухня с излаз към тераса, спалня, както и баня с тоалетна. На втория етаж са разположени светъл хол с изход към тераса и още една спалня. Къщата е след основен ремонт и се отдава напълно обзаведена с нови мебели. Оборудвана е с всички необходими електроуреди за едно комфортно ежедневие. Отоплението е решено с климатици във всяка стая, което осигурява удобство през всички сезони. Имотът е отличен избор както за постоянно живеене, така и за хора, търсещи",
         "propertyFacts": {
           "id": "MS-CRAWL-0015",
-          "location": "Sandanski",
+          "location": "Mikrevo",
           "property_type": "house",
           "offer_type": "rent"
         },
@@ -1398,7 +1398,7 @@
       "can_publish": false,
       "can_mark_indexable": false,
       "source_hash": "13123946473eb9d6b42f10ecfc77a2b8e89512df12dee2e903c98a3b0af48bfd",
-      "draft_hash": "05675dcc545a6456e61742baca89e67607225f49066632153d521b60592f3e90",
+      "draft_hash": "45fd3fa3dc37c0ee70674ab65c92cdd900ca4e8917c20cb869f340d374f7716f",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0016&locale=de",
       "prompt": {
         "role": "translation_draft",
@@ -1407,7 +1407,7 @@
         "sourceText": "Новостроящи се къщи в с.Джигурово - Недвижими имоти в Сандански\nПредлагаме на вашето внимание новостроящ се проект от три еднакви еднофамилни жилищни сгради – А,Б и В. Къщите са със застроена площ от 83 кв.м., и обща площ 174,1 кв.м. построени върху парцел от 1460кв.м. Има възможност за отделяне на индивидуални парцели към всяка една от къщите. Предвидено е ниско свободно застрояване при показатели за застрояване както следва: Пл – до 60% и Кинт – до 1.2 Електроснабдяването, канализацията и водоснабдяването на имота са рализирани чрез сградни отклонения от изградените мрежи на техническата инфраструктура на с. Джигурово Описание на сградите: Сградите са еднотипни двуетажни еднофамилни с носеща конструкция от стоманобетон и външни фасадни стени – щендерна конструкция Vidiwall HI и термосистема . Покрива е дървена конструкция с керемиди. Дограмата е PVC стъклопакет . Фасадното оформяне е с три цвята силикат-силиконова мазилка . Функционалното",
         "propertyFacts": {
           "id": "MS-CRAWL-0016",
-          "location": "Sandanski",
+          "location": "Dzhigurovo",
           "property_type": "house",
           "offer_type": "sale",
           "price_eur": 125000
@@ -1964,14 +1964,14 @@
       "requires_human_approval": true,
       "can_publish": false,
       "can_mark_indexable": false,
-      "source_hash": "43a3e7d6ee1acd777fa390dcdb5f570372eed35682d59039b83a6f5f3772c89e",
-      "draft_hash": "60b652b496ab5475c4b8f417602848e27e92f6e4ea8888da75e063e710e7e3ba",
+      "source_hash": "12d5bde404c70f514fa1d58626be3622cb08d37ab3e05170af2b69635f084dfb",
+      "draft_hash": "87fc4d5fdf1ab970d6ad3e192338637dea31c5030ed07fd2b02eb23a9394a600",
       "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0023&locale=de",
       "prompt": {
         "role": "translation_draft",
         "sourceLocale": "bg",
         "targetLocale": "de",
-        "sourceText": "нова къща сандански\nПрекрасна къща в близост до СПА курорт Сандански. Жилищна площ 172 кв.м., гараж 22 кв.м., парцел 626 кв.м. Мебелирана. Беседка, барбекю, басеин",
+        "sourceText": "нова къща сандански\nКъща в село на около 12 км от Сандански, с удобен достъп от магистралата София–Кулата. Разположена е на две нива по 74 кв. м: приземният етаж включва три стаи и баня с тоалетна, а първият — дневна с кухня, две спални и две бани с тоалетни. Към имота има парцел от 547 кв. м.",
         "propertyFacts": {
           "id": "MS-CRAWL-0023",
           "location": "Sandanski",
@@ -2011,7 +2011,7 @@
         "object_type": "listing",
         "object_id": "MS-CRAWL-0023",
         "source_locale": "bg",
-        "source_hash": "43a3e7d6ee1acd777fa390dcdb5f570372eed35682d59039b83a6f5f3772c89e",
+        "source_hash": "12d5bde404c70f514fa1d58626be3622cb08d37ab3e05170af2b69635f084dfb",
         "approved_legal_content": false
       },
       "citations": [

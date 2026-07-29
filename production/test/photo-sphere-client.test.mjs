@@ -43,6 +43,12 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /data-image-state", "unavailable/);
   assert.match(PUBLIC_APP_JS, /function initMobileFilterPreview/);
   assert.match(PUBLIC_APP_JS, /window\.setTimeout\(preview, 320\)/);
+  assert.match(PUBLIC_APP_JS, /new URL\("\/api\/search", window\.location\.href\)/);
+  assert.match(PUBLIC_APP_JS, /params\.set\("locale", locale\)/);
+  assert.match(PUBLIC_APP_JS, /return response\.json\(\)/);
+  assert.match(PUBLIC_APP_JS, /payload && payload\.search && payload\.search\.total_matches/);
+  assert.doesNotMatch(PUBLIC_APP_JS, /accept: "text\/html"/);
+  assert.doesNotMatch(PUBLIC_APP_JS, /new DOMParser\(\)/);
   assert.match(PUBLIC_APP_JS, /x-ms-realty-preview": "search-count/);
   assert.match(PUBLIC_APP_JS, /initMobileFilterPreview\(\);/);
   assert.match(PUBLIC_APP_JS, /function initPublicMobileNavigation/);
@@ -71,6 +77,9 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /data-saved-navigation-label/);
   assert.match(PUBLIC_APP_JS, /savedViewFocus\.focus\(\)/);
   assert.match(PUBLIC_APP_JS, /event\.key === KEY/);
+  assert.match(PUBLIC_APP_JS, /function savedListsMatch\(left, right\)/);
+  assert.match(PUBLIC_APP_JS, /localStorage\.setItem\(KEY, JSON\.stringify\(ids\)\);\s*return savedListsMatch\(readSaved\(\), ids\);/);
+  assert.match(PUBLIC_APP_JS, /if \(!writeSaved\(ids\)\) \{\s*markSaved\(\);\s*showToast\(I18N\.requestFailed/);
   assert.match(PUBLIC_APP_JS, /img\[data-fallback-src\]/);
   assert.match(PUBLIC_APP_JS, /function initMobileListingGallery/);
   assert.match(PUBLIC_APP_JS, /data-mobile-gallery-current/);

@@ -33,7 +33,7 @@
       "query": "Sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/he/search",
@@ -41,7 +41,7 @@
       "query": "Sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/api/search",
@@ -59,7 +59,7 @@
       "query": "Sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/en/search",
@@ -83,7 +83,7 @@
       "query": "sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/en/search",
@@ -91,7 +91,7 @@
       "query": "sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     }
   ]
 }

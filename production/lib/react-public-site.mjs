@@ -756,7 +756,7 @@ function HomeBody({ page }) {
   const guides = page.body.guides?.links || [];
   const main = h(
     "main",
-    { id: "main", "data-kind": "home", "data-react-public-ui": "home" },
+    { id: "main", tabIndex: -1, "data-kind": "home", "data-react-public-ui": "home" },
     h(
       "section",
       { className: "hp-hero" },
@@ -1190,6 +1190,7 @@ function SearchBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "search",
       "data-react-public-ui": "search",
       "data-total-matches": page.search.total_matches,
@@ -1410,6 +1411,7 @@ function LocationBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "location",
       "data-react-public-ui": "location",
       "data-location": page.body.location,
@@ -1653,6 +1655,7 @@ function ListingBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "listing",
       "data-react-public-ui": "listing",
       "data-review-status": page.body.actions.direct_contact.review_status,
@@ -1923,6 +1926,7 @@ function SellerBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "seller",
       "data-react-public-ui": "seller",
       "data-phone-first": "true",
@@ -2016,7 +2020,7 @@ function ContactBody({ page }) {
   const callback = page.body.callback;
   const main = h(
     "main",
-    { id: "main", "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
+    { id: "main", tabIndex: -1, "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
     h("div", { className: "ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
     h(
       "div",
@@ -2086,6 +2090,7 @@ function LanguageFallbackBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "language-fallback",
       "data-react-public-ui": "language-fallback",
       "data-public-translation-available": page.public_translation_available ? "true" : "false",
@@ -2120,6 +2125,7 @@ function GuideBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "guide",
       "data-react-public-ui": "guide",
       "data-approved-source": "cms",

@@ -175,7 +175,11 @@ export function buildMobileElderlyQaReport({
         includes(pages.search, "data-mobile-filter-preview-status=\"true\"") &&
         includes(PUBLIC_APP_JS, "function initMobileFilterPreview()") &&
         includes(PUBLIC_APP_JS, "window.setTimeout(preview, 320)") &&
-        includes(PUBLIC_APP_JS, "controller.abort()"),
+        includes(PUBLIC_APP_JS, "controller.abort()") &&
+        includes(PUBLIC_APP_JS, "new URL(\"/api/search\", window.location.href)") &&
+        includes(PUBLIC_APP_JS, "return response.json()") &&
+        includes(PUBLIC_APP_JS, "payload && payload.search && payload.search.total_matches") &&
+        !includes(PUBLIC_APP_JS, "new DOMParser()"),
     ),
     check(
       "mobile_search_empty_recovery",

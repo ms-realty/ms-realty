@@ -99,7 +99,10 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 - Runtime report: `production/data/payload-runtime-report.json` (real output stays local and ignored)
 - Runtime report example: `production/data/payload-runtime-report.json.example`
 - Current check evidence:
-- no Payload runtime check rows available
+- payload_secret: missing_env (env PAYLOAD_SECRET)
+- database_url: missing_env (env DATABASE_URL)
+- database_network_scope: missing_env (env DATABASE_URL)
+- database_tcp: missing_env (env DATABASE_URL)
 - Runtime env example: `production/data/payload-runtime.env.example`
 - Local Postgres compose file: `production/docker-compose.payload.yml`
 - Collection export: `production/data/payload-collections.json`

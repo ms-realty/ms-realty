@@ -24,8 +24,18 @@
       return Array.isArray(value) ? value.filter(function (id) { return typeof id === "string" && id; }) : [];
     } catch (error) { return []; }
   }
+  function savedListsMatch(left, right) {
+    if (left.length !== right.length) return false;
+    for (var i = 0; i < left.length; i += 1) {
+      if (left[i] !== right[i]) return false;
+    }
+    return true;
+  }
   function writeSaved(ids) {
-    try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch (error) {}
+    try {
+      localStorage.setItem(KEY, JSON.stringify(ids));
+      return savedListsMatch(readSaved(), ids);
+    } catch (error) { return false; }
   }
   function markSaved() {
     var saved = readSaved();
@@ -459,7 +469,7 @@
     var form = document.getElementById("sr-mobile-filter-form");
     var submit = document.querySelector("[data-mobile-filter-submit]");
     var status = document.querySelector("[data-mobile-filter-preview-status]");
-    if (!form || !submit || typeof window.fetch !== "function" || typeof window.DOMParser !== "function") return;
+    if (!form || !submit || typeof window.fetch !== "function") return;
     var timer = 0;
     var controller = null;
     var requestNumber = 0;
@@ -481,27 +491,28 @@
       var currentRequest = requestNumber;
       if (controller) controller.abort();
       controller = typeof AbortController === "function" ? new AbortController() : null;
-      var url = new URL(form.getAttribute("action") || window.location.pathname, window.location.href);
+      var pageUrl = new URL(form.getAttribute("action") || window.location.pathname, window.location.href);
+      var apiUrl = new URL("/api/search", window.location.href);
+      var locale = pageUrl.pathname.split("/")[1] || "bg";
       var params = new URLSearchParams();
       new FormData(form).forEach(function (value, key) {
         if (String(value) !== "") params.set(key, String(value));
       });
-      url.search = params.toString();
+      params.set("locale", locale);
+      apiUrl.search = params.toString();
       setBusy(true);
-      fetch(url.toString(), {
+      fetch(apiUrl.toString(), {
         credentials: "same-origin",
-        headers: { accept: "text/html", "x-ms-realty-preview": "search-count" },
+        headers: { accept: "application/json", "x-ms-realty-preview": "search-count" },
         signal: controller ? controller.signal : undefined,
       })
         .then(function (response) {
           if (!response.ok) throw new Error(String(response.status));
-          return response.text();
+          return response.json();
         })
-        .then(function (html) {
+        .then(function (payload) {
           if (currentRequest !== requestNumber) return;
-          var parsed = new DOMParser().parseFromString(html, "text/html");
-          var root = parsed.querySelector('main[data-kind="search"][data-total-matches]');
-          var total = root ? Number(root.getAttribute("data-total-matches")) : NaN;
+          var total = Number(payload && payload.search && payload.search.total_matches);
           if (Number.isFinite(total) && total >= 0) updateCount(total);
         })
         .catch(function (error) {
@@ -795,6 +806,13 @@
       event.target.close();
       return;
     }
+    var skipLink = event.target && event.target.closest ? event.target.closest('a[href="#main"]') : null;
+    if (skipLink) {
+      var main = document.getElementById("main");
+      if (main && typeof main.focus === "function") {
+        window.requestAnimationFrame(function () { main.focus({ preventScroll: true }); });
+      }
+    }
     var contactOptionsOpen = event.target.closest("[data-mobile-contact-options-open]");
     if (contactOptionsOpen) {
       var contactOptions = document.querySelector("[data-mobile-contact-options]");
@@ -830,7 +848,11 @@
       var removingFromSavedView = index !== -1 && Boolean(save.closest("[data-saved-listings-view='true']"));
       if (index === -1) ids.push(id);
       else ids.splice(index, 1);
-      writeSaved(ids);
+      if (!writeSaved(ids)) {
+        markSaved();
+        showToast(I18N.requestFailed || "Could not save this property.");
+        return;
+      }
       markSaved();
       if (removingFromSavedView) {
         var savedViewFocus = document.querySelector("[data-saved-listings-view='true'] [data-search-card]:not([hidden]) [data-client-save-listing]")
