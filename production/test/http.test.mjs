@@ -1180,7 +1180,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const translationLedgerPath = tempTranslations();
   const auditLogPath = tempAuditLog();
   const liveServiceProvisioningReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`)}/mounted-live-service-provisioning-report.json`;
+  const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-`)}/mounted-payload-runtime-report.json`;
   fs.copyFileSync(fromRoot("production", "data", "live-service-provisioning-report.json"), liveServiceProvisioningReportPath);
+  fs.writeFileSync(
+    payloadRuntimeReportPath,
+    `${JSON.stringify(await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" }), null, 2)}\n`,
+  );
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -1200,6 +1205,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     translationLedgerPath,
     auditLogPath,
     liveServiceProvisioningReportPath,
+    payloadRuntimeReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
     editedAt: "2026-07-05T00:03:00Z",
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
