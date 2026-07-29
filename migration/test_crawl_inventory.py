@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import socket
@@ -113,6 +114,27 @@ class CrawlerIPv4OpenerTests(unittest.TestCase):
             connection.connect()
 
         context.wrap_socket.assert_called_once_with(raw_socket, server_hostname="crawler.test")
+
+
+class CrawlerContentCaptureTests(unittest.TestCase):
+    def test_page_parser_prefers_primary_content_and_hashes_preserved_text(self) -> None:
+        parser = crawl_inventory.PageParser("https://example.test/article")
+        parser.feed(
+            "<html><body><nav>Navigation text</nav>"
+            "<div class='post_content_default'><h1>Article heading</h1>"
+            "<p>Keep this paragraph.</p><script>ignoreThis()</script>"
+            "<p>And this detail.</p></div><footer>Footer text</footer></body></html>"
+        )
+
+        record = parser.record()
+
+        self.assertEqual(record["content_scope"], "class:post_content_default")
+        self.assertEqual(record["content_text"], "Article heading Keep this paragraph. And this detail.")
+        self.assertEqual(record["content_word_count"], 8)
+        self.assertEqual(
+            record["content_sha256"],
+            hashlib.sha256(record["content_text"].encode("utf-8")).hexdigest(),
+        )
 
 
 if __name__ == "__main__":
