@@ -487,9 +487,11 @@ test("home page exposes search, seller, location, and featured listing paths", (
 
 test("English home makes every approved buyer guide discoverable without expanding the mobile task dock", () => {
   const en = renderHomePage({ registry, listings, localeCode: "en" });
+  const bg = renderHomePage({ registry, listings, localeCode: "bg" });
   const html = renderReactPublicBody(en);
 
   assert.equal(en.body.guides.label, "Buyer guides");
+  assert.equal(bg.body.guides.label, "Ръководства за купувачи");
   assert.deepEqual(
     en.body.guides.links.map((guide) => guide.href).sort(),
     ["/en/guides/buying-process", "/en/guides/foreign-buyers"],
@@ -540,17 +542,29 @@ test("Bulgarian locations expose only their approved source-bound context", () =
     title: "Сандански: официални източници при проверка на имот",
     summary: "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
   });
+  assert.equal(
+    bg.metadata.description,
+    "Проверени обяви на MS Realty в Сандански и официални източници за кадастър, Имотен регистър и удостоверения.",
+  );
   assert.equal("context" in ru.body, false);
   assert.deepEqual(hotovo.body.context, {
     href: "/bg/guides/hotovo-obstinski-kontekst",
     title: "Хотово: официален контекст за населеното място",
     summary: "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин.",
   });
+  assert.equal(
+    hotovo.metadata.description,
+    "Проверени обяви на MS Realty в Хотово. Община Сандански посочва, че селото е в западното подножие на Среден Пирин.",
+  );
   assert.deepEqual(petrich.body.context, {
     href: "/bg/guides/petrich-obstinski-kontekst",
     title: "Петрич: официален контекст за общината",
     summary: "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин.",
   });
+  assert.equal(
+    petrich.metadata.description,
+    "Проверени обяви на MS Realty в Петрич. Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина.",
+  );
   assert.match(html, /data-location-context="true"/);
   assert.match(html, /href="\/bg\/guides\/proverka-na-imot-sandanski"/);
   assert.doesNotMatch(renderReactPublicBody(ru), /data-location-context="true"/);
@@ -576,6 +590,7 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
 test("contact callback page is locale-prefixed and posts generic CRM leads", () => {
   const he = renderContactPage({ registry, localeCode: "he" });
   const el = renderContactPage({ registry, localeCode: "el" });
+  const bg = renderContactPage({ registry, localeCode: "bg" });
   const fr = renderContactPage({ registry, localeCode: "fr" });
 
   assert.equal(he.status, 200);
@@ -591,6 +606,10 @@ test("contact callback page is locale-prefixed and posts generic CRM leads", () 
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
   assert.equal(el.path, "/el/epikoinonia");
   assert.equal(el.body.callback.label, "Επανάκληση");
+  assert.equal(
+    bg.body.intro,
+    "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty. За обратно обаждане посочете име, телефон и предпочитано време.",
+  );
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
 });

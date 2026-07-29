@@ -880,7 +880,7 @@ const CONTACT_COPY = {
   bg: {
     title: "Свържете се с MS Realty",
     h1: "Свържете се с брокер",
-    description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty.",
+    description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty. За обратно обаждане посочете име, телефон и предпочитано време.",
   },
   en: {
     title: "Contact MS Realty",
@@ -922,6 +922,7 @@ const CHROME_COPY = {
     navRent: "Под наем",
     navSell: "Продайте",
     navContact: "Контакти",
+    buyerGuides: "Ръководства за купувачи",
     explore: "Разгледайте",
     getInTouch: "Свържете се",
     tagline:
@@ -1948,10 +1949,15 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
 }
 
 function locationPageCopy(localeCode, location) {
+  const bgDescriptions = {
+    Сандански: "Проверени обяви на MS Realty в Сандански и официални източници за кадастър, Имотен регистър и удостоверения.",
+    Хотово: "Проверени обяви на MS Realty в Хотово. Община Сандански посочва, че селото е в западното подножие на Среден Пирин.",
+    Петрич: "Проверени обяви на MS Realty в Петрич. Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина.",
+  };
   const copy = {
     bg: {
       title: `Имоти в ${location} | MS Realty`,
-      description: `Проверени обяви на MS Realty за имоти в ${location}.`,
+      description: bgDescriptions[location] || `Проверени обяви на MS Realty за имоти в ${location}.`,
       heading: `Имоти в ${location}`,
     },
     en: {
