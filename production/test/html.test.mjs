@@ -41,7 +41,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));
   const runtimeListingHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"));
-  const listingPrintHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }), { print: true });
+  const listingPrintPage = renderListingPage({ registry, listing, localeCode: "he" });
+  const listingPrintHtml = renderHtmlPage(listingPrintPage, { print: true });
+  const runtimeListingPrintHtml = renderHtmlPage(renderRuntimePath(registry, seed, "/he/properties/MS-CRAWL-0001"), { print: true });
   const approvedListingHtml = renderHtmlPage(
     renderListingPage({
       registry,
@@ -55,6 +57,21 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
         approved: true,
       }),
     }),
+  );
+  const approvedListingPrintHtml = renderHtmlPage(
+    renderListingPage({
+      registry,
+      listing,
+      localeCode: "he",
+      brokerContact: createBrokerContact({
+        listingId: listing.id,
+        broker: "broker_ru",
+        phone: "+359880000000",
+        reviewer: "owner",
+        approved: true,
+      }),
+    }),
+    { print: true },
   );
   const searchHtml = renderHtmlPage(renderSearchPage({ registry, listings, localeCode: "he", query: "Sandanski" }));
   const filteredSearchHtml = renderHtmlPage(
@@ -96,8 +113,17 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.doesNotMatch(listingHtml, /tel:\+359880000000/);
   assert.equal(assertHtmlPage(listingPrintHtml, { lang: "he", dir: "rtl", kind: "listing-print" }), true);
   assert.match(listingPrintHtml, /data-print-status="browser-pdf-ready"/);
+  assert.match(listingPrintHtml, /data-print-document="property-brochure"/);
+  assert.match(listingPrintHtml, /data-print-trigger="true"/);
+  assert.match(listingPrintHtml, /@page \{ size: A4; margin: 12mm; \}/);
+  assert.match(listingPrintHtml, /data-print-facts="true"/);
+  assert.match(listingPrintHtml, /ms-print-document__hero-media/);
+  assert.match(runtimeListingPrintHtml, /data-print-gallery="true"/);
+  assert.equal(listingPrintHtml.includes(listingPrintPage.body.source.old_url), false);
   assert.doesNotMatch(listingPrintHtml, /tel:\+359880000000/);
   assert.match(approvedListingHtml, /tel:\+359880000000/);
+  assert.match(approvedListingPrintHtml, /טלפון: \+359880000000/);
+  assert.doesNotMatch(approvedListingPrintHtml, />(?:tel:|viber:)/);
   assert.equal(assertHtmlPage(searchHtml, { lang: "he", dir: "rtl", kind: "search" }), true);
   assert.match(searchHtml, /property="og:type" content="website"/);
   assert.match(searchHtml, /data-total-matches=/);

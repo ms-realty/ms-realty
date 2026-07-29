@@ -1,6 +1,6 @@
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
-import { chromeCopyFor } from "./public-site.mjs";
+import { chromeCopyFor, labelsFor, localizedListingValue, uiCopyFor } from "./public-site.mjs";
 import { ADMIN_CLIENT_HASH, DS_HASH, FONTS_URL, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
 
 function escapeHtml(value) {
@@ -221,36 +221,148 @@ function renderListing(page) {
 </main>`;
 }
 
+function printContactLabel(channel, labels) {
+  const href = String(channel.href || "");
+  if (href.startsWith("tel:")) return `${labels.phone}: ${href.slice("tel:".length)}`;
+  if (href.startsWith("mailto:")) return href.slice("mailto:".length);
+  try {
+    const target = new URL(href);
+    const number = target.searchParams.get("number") || target.searchParams.get("phone") || (target.hostname === "wa.me" ? target.pathname.slice(1) : "");
+    if (number) return `${channel.label}: ${number.startsWith("+") ? number : `+${number}`}`;
+  } catch {
+    // Keep the approved channel label if its URL is not a standard URL.
+  }
+  return channel.label;
+}
+
 function renderListingPrint(page) {
-  const gallery = (page.body.media.gallery || [])
-    .slice(0, 4)
-    .map((image) => `<img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt || page.body.h1)}">`)
+  const labels = labelsFor(page.locale || page.lang || "en");
+  const ui = uiCopyFor(page.locale || page.lang || "en");
+  const facts = page.body.facts || {};
+  const images = (page.body.media.gallery || []).slice(0, 4);
+  const [heroImage, ...galleryImages] = images;
+  const price = Number(facts.price_eur);
+  const priceLabel = facts.price_on_request || !Number.isFinite(price) || price <= 1 ? labels.priceOnRequest : `EUR ${price.toLocaleString("en-US")}`;
+  const printableFacts = ["property_type", "offer_type", "bedrooms", "area_sqm", "floor", "land_area_sqm", "condition", "location_precision"]
+    .map((key) => [key, facts[key]])
+    .filter(([, value]) => value !== null && value !== undefined && value !== "")
+    .map(([key, value]) => {
+      const formatted =
+        key === "property_type" || key === "offer_type"
+          ? localizedListingValue(page.locale, key, value)
+          : key === "area_sqm" || key === "land_area_sqm"
+            ? `${value} m²`
+            : key === "floor" && facts.total_floors !== null && facts.total_floors !== undefined && facts.total_floors !== ""
+              ? `${value}/${facts.total_floors}`
+              : key === "location_precision"
+                ? ui.locationPrecisions?.[value] || value
+                : value;
+      const label = key === "area_sqm" ? labels.area : labels.factLabels?.[key] || key.replaceAll("_", " ");
+      return `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(formatted)}</dd></div>`;
+    })
     .join("");
-  const direct = page.body.actions.direct_contact.channels
-    .map((channel) =>
-      channel.enabled
-        ? `<a href="${escapeHtml(channel.href)}">${escapeHtml(channel.label)}</a>`
-        : `<span aria-disabled="true">${escapeHtml(channel.label)}</span>`,
+  const description = String(page.body.description || page.metadata?.description || "")
+    .split(/\n{2,}/)
+    .filter(Boolean)
+    .map((paragraph) => `<p>${escapeHtml(paragraph.trim())}</p>`)
+    .join("");
+  const hero = heroImage
+    ? `<figure class="ms-print-document__hero-media"><img src="${escapeHtml(heroImage.url)}" alt="${escapeHtml(
+        heroImage.alt || page.body.h1,
+      )}"></figure>`
+    : "";
+  const gallery = galleryImages
+    .map(
+      (image) => `<figure><img src="${escapeHtml(image.url)}" alt="${escapeHtml(image.alt || page.body.h1)}"></figure>`,
     )
     .join("");
+  const direct = page.body.actions.direct_contact.channels
+    .filter((channel) => channel.enabled)
+    .map((channel) => `<a href="${escapeHtml(channel.href)}">${escapeHtml(printContactLabel(channel, labels))}</a>`)
+    .join("");
+  const footer = direct
+    ? `<footer class="ms-print-document__footer"><nav class="ms-print-document__contact" aria-label="${escapeHtml(
+        labels.contactBroker,
+      )}" data-broker-contact-actions="true">${direct}</nav></footer>`
+    : "";
   return `
 <style>
+@page { size: A4; margin: 12mm; }
+.ms-print-document { box-sizing: border-box; color: #192018; font: 16px/1.5 Inter, Arial, sans-serif; max-width: 960px; margin: 32px auto; padding: 32px; background: #fff; }
+.ms-print-document *, .ms-print-document *::before, .ms-print-document *::after { box-sizing: inherit; }
+.ms-print-document__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 28px; }
+.ms-print-document__toolbar a { color: #355b38; font-weight: 800; text-decoration: none; }
+.ms-print-document__toolbar button { border: 0; border-radius: 999px; padding: 12px 18px; background: #355b38; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+.ms-print-document__header, .ms-print-document__footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-color: #d8dfd1; }
+.ms-print-document__header { padding-bottom: 16px; border-bottom: 1px solid #d8dfd1; }
+.ms-print-document__brand { color: #355b38; font-size: 20px; font-weight: 900; letter-spacing: .02em; text-decoration: none; }
+.ms-print-document__reference { color: #536052; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
+.ms-print-document__hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(240px, .9fr); gap: 24px; align-items: start; padding: 28px 0; }
+.ms-print-document__eyebrow { margin: 0 0 8px; color: #7d6b4c; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.ms-print-document h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.12; }
+.ms-print-document__location { margin: 14px 0 0; color: #536052; font-size: 17px; }
+.ms-print-document__price { margin: 20px 0 0; color: #355b38; font-size: 28px; font-weight: 900; }
+.ms-print-document figure { margin: 0; }
+.ms-print-document img { display: block; width: 100%; height: 100%; border-radius: 12px; object-fit: cover; }
+.ms-print-document__hero-media { aspect-ratio: 4 / 3; min-height: 210px; overflow: hidden; background: #edf1ea; }
+.ms-print-document__section { padding-top: 24px; border-top: 1px solid #d8dfd1; }
+.ms-print-document__section h2 { margin: 0 0 14px; font-size: 20px; }
+.ms-print-document__description p { margin: 0 0 12px; }
+.ms-print-document__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.ms-print-document__facts > div { min-width: 0; padding: 12px 14px; border-radius: 10px; background: #f4f7f1; }
+.ms-print-document__facts dt { color: #667262; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.ms-print-document__facts dd { margin: 4px 0 0; font-weight: 800; overflow-wrap: anywhere; }
+.ms-print-document__gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ms-print-document__gallery figure { aspect-ratio: 4 / 3; overflow: hidden; background: #edf1ea; }
+.ms-print-document__footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #d8dfd1; color: #536052; font-size: 12px; }
+.ms-print-document__footer a { color: inherit; overflow-wrap: anywhere; }
+.ms-print-document__contact { display: flex; flex-wrap: wrap; gap: 10px; }
+.ms-print-document__contact a { color: #355b38; font-weight: 800; }
+@media screen and (max-width: 640px) {
+  body { background: #f4f3ef; }
+  .ms-print-document { margin: 0; padding: 20px; }
+  .ms-print-document__hero { grid-template-columns: 1fr; }
+  .ms-print-document__facts { grid-template-columns: 1fr; }
+  .ms-print-document__gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media print {
-  a[href]::after { content: " (" attr(href) ")"; font-size: 10pt; }
-  nav, section, dl { break-inside: avoid; }
-  img { max-width: 48%; height: auto; }
+  html, body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ms-print-document { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; }
+  .ms-print-document__toolbar { display: none; }
+  .ms-print-document__hero, .ms-print-document__section, .ms-print-document__footer { break-inside: avoid; }
+  .ms-print-document__hero { grid-template-columns: minmax(0, 1.1fr) minmax(170px, .9fr); gap: 18px; padding: 18px 0; }
+  .ms-print-document h1 { font-size: 25pt; }
+  .ms-print-document__price { font-size: 18pt; }
+  .ms-print-document__section { padding-top: 16px; }
+  .ms-print-document__facts > div { padding: 8px 10px; }
+  .ms-print-document__gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .ms-print-document a[href]::after { content: none; }
 }
 </style>
-<main data-kind="listing-print" data-print-status="browser-pdf-ready" data-review-status="${escapeHtml(
+<main class="ms-print-document" data-kind="listing-print" data-print-document="property-brochure" data-print-status="browser-pdf-ready" data-review-status="${escapeHtml(
     page.body.actions.direct_contact.review_status,
   )}">
-  <h1>${escapeHtml(page.body.h1)}</h1>
-  <p>${escapeHtml(page.metadata.description)}</p>
-  <dl>${renderFacts(page.body.facts)}</dl>
-  <section aria-label="Listing photos">${gallery}</section>
-  <nav aria-label="Broker contact" data-broker-contact-actions="true">${direct}</nav>
-  <p><a href="${escapeHtml(page.canonical)}">${escapeHtml(page.canonical)}</a></p>
-  <p>${escapeHtml(page.body.source.source_domain)} ${escapeHtml(page.body.source.old_url)}</p>
+  <nav class="ms-print-document__toolbar" aria-label="${escapeHtml(labels.print)}">
+    <a href="${escapeHtml(page.canonical)}">MS Realty</a>
+    <button type="button" data-print-trigger="true" onclick="window.print()">${escapeHtml(labels.print)}</button>
+  </nav>
+  <header class="ms-print-document__header">
+    <a class="ms-print-document__brand" href="${escapeHtml(page.canonical)}">MS Realty</a>
+    <span class="ms-print-document__reference">${escapeHtml(facts.id || "")}</span>
+  </header>
+  <section class="ms-print-document__hero" aria-label="${escapeHtml(labels.listingSummary)}">
+    <div>
+      <p class="ms-print-document__eyebrow">${escapeHtml(facts.location || "")}</p>
+      <h1>${escapeHtml(page.body.h1)}</h1>
+      <p class="ms-print-document__location">${escapeHtml(ui.locationPrecisions?.[facts.location_precision] || "")}</p>
+      <p class="ms-print-document__price">${escapeHtml(priceLabel)}</p>
+    </div>
+    ${hero}
+  </section>
+  ${description ? `<section class="ms-print-document__section ms-print-document__description"><h2>${escapeHtml(labels.propertyDetails)}</h2>${description}</section>` : ""}
+  ${printableFacts ? `<section class="ms-print-document__section"><h2>${escapeHtml(labels.listingMediaFacts)}</h2><dl class="ms-print-document__facts" data-print-facts="true">${printableFacts}</dl></section>` : ""}
+  ${gallery ? `<section class="ms-print-document__section"><h2>${escapeHtml(labels.gallery)}</h2><div class="ms-print-document__gallery" data-print-gallery="true">${gallery}</div></section>` : ""}
+  ${footer}
 </main>`;
 }
 
