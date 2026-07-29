@@ -111,6 +111,9 @@ test("mobile listing gallery exposes every reviewed photo and its swipe position
   assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 14/);
   assert.match(html, /data-mobile-gallery-prev="true"/);
   assert.match(html, /data-mobile-gallery-next="true"/);
+  assert.match(html, /aria-label="Назад фото"/);
+  assert.match(html, /aria-label="Далее фото"/);
+  assert.doesNotMatch(html, /undefined/);
   assert.match(html, /tabindex="0"/);
   assert.match(html, /role="region" aria-label="Галерея"/);
   assert.match(html, /role="group" aria-label="14 \/ 14:/);
