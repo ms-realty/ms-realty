@@ -1703,7 +1703,8 @@ function appendDealClose(input, config) {
 }
 
 function appendBrokerContactApproval(input, config) {
-  const contact = appendBrokerContact(createBrokerContact(input, { reviewedAt: config.reviewedAt }), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const contact = appendBrokerContact(createBrokerContact(attributed, { reviewedAt: config.reviewedAt }), {
     filePath: config.brokerContactLedgerPath,
   });
   recordAudit(
@@ -1720,7 +1721,8 @@ function appendBrokerContactApproval(input, config) {
 }
 
 function appendTourApprovalRow(input, config) {
-  const tour = appendTourApproval(createTourApproval(currentSeed(config), input, config.reviewedAt), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const tour = appendTourApproval(createTourApproval(currentSeed(config), attributed, config.reviewedAt), {
     filePath: config.tourApprovalLedgerPath,
   });
   recordAudit(

@@ -2590,7 +2590,8 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const contact = createBrokerContact(parseJsonBody(request), { reviewedAt });
+        const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["reviewer"]);
+        const contact = createBrokerContact(input, { reviewedAt });
         const persisted = appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined });
         recordAudit({
           action: "broker_contact_approved",
@@ -2608,7 +2609,8 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
-        const tour = appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
+        const tour = appendTourApproval(createTourApproval(seed, input, reviewedAt), {
           filePath: tourApprovalLedgerPath || undefined,
         });
         recordAudit({

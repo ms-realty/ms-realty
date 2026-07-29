@@ -146,6 +146,7 @@ test("runtime overlays approved 360 tour before public listing render", () => {
           panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
           accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
           reviewer: "media_editor",
+          reviewConfirmed: true,
         },
         "2026-07-05T00:00:00Z",
       ),
