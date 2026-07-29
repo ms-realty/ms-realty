@@ -3,7 +3,7 @@ import { z } from "zod";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "./app-admin-adapter.mjs";
 import { appApiConfigFromEnv, renderAppApiResponse } from "./app-api-adapter.mjs";
 import { canAdminAccess, canAdminMutate, resolveAdminPrincipal } from "./admin-auth.mjs";
-import { applyListingEdits, readListingEdits } from "./listing-edits.mjs";
+import { applyListingEdits, LISTING_STATUSES, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
 import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime.mjs";
@@ -22,6 +22,21 @@ const SECURITY_HEADERS = {
 const LOCALE = z.string().trim().regex(/^[a-z]{2}(?:-[A-Z]{2})?$/).max(10);
 const LISTING_ID = z.string().trim().regex(/^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$/).max(80);
 const TEXT = (max) => z.string().trim().max(max);
+const CONTENT_TEXT = (max) => TEXT(max).min(1);
+const LISTING_STATUS = z.enum(LISTING_STATUSES);
+const LISTING_CONTENT_FIELDS = ["title", "h1", "description", "seo_title", "seo_description", "seo_og_title", "seo_og_description"];
+const LISTING_CONTENT_PATCH = z
+  .object({
+    title: CONTENT_TEXT(240).optional(),
+    h1: CONTENT_TEXT(240).optional(),
+    description: CONTENT_TEXT(20000).optional(),
+    seo_title: CONTENT_TEXT(240).optional(),
+    seo_description: CONTENT_TEXT(320).optional(),
+    seo_og_title: CONTENT_TEXT(240).optional(),
+    seo_og_description: CONTENT_TEXT(320).optional(),
+  })
+  .strict()
+  .refine((patch) => Object.keys(patch).length > 0, "Listing content patch must include at least one allowed field");
 
 function configuredOrigins(value) {
   const origins = new Set(DEFAULT_ALLOWED_ORIGINS);
@@ -194,6 +209,7 @@ function publicToolDefinitions(server, config) {
           locale: LOCALE.default("bg"),
           query: TEXT(180).default(""),
           location: TEXT(120).optional(),
+          municipality: TEXT(120).optional(),
           property_type: TEXT(80).optional(),
           offer_type: TEXT(32).optional(),
           status: TEXT(32).optional(),
@@ -296,6 +312,151 @@ function authenticatedToolDefinitions(server, config, principal, authHeader) {
           listing_inventory: report.listing_inventory,
           search: report.search,
         });
+      },
+    );
+  }
+
+  if (canAdminAccess(principal, "content:read")) {
+    server.registerTool(
+      "get_listing_content_queue",
+      {
+        description: "Read a bounded listing-content review queue and summary. It excludes customer data and cannot approve or publish content.",
+        inputSchema: z
+          .object({
+            locale: LOCALE.default("en"),
+            query: TEXT(160).optional(),
+            status: LISTING_STATUS.optional(),
+            source_locale: LOCALE.optional(),
+            page: z.number().int().min(1).max(100).default(1),
+          })
+          .strict(),
+        annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true },
+      },
+      async ({ locale, query, status, source_locale: sourceLocale, page }) => {
+        try {
+          const params = new URLSearchParams({ locale, page: String(page) });
+          if (query) params.set("q", query);
+          if (status) params.set("status", status);
+          if (sourceLocale) params.set("sourceLocale", sourceLocale);
+          const { response, payload } = await adminJson(config, authHeader, `/api/admin/listings?${params}`);
+          if (!response.ok || !Array.isArray(payload?.listings)) return errorResult("The listing content queue is unavailable.");
+          return textResult({
+            summary: {
+              total_listings: payload.summary?.total || 0,
+              visible_listings: payload.summary?.visible || 0,
+              review_required: payload.summary?.reviewRequired || 0,
+              translation_review_required: payload.summary?.translationReviewRequired || 0,
+            },
+            filters: {
+              query: payload.filters?.q || "",
+              status: payload.filters?.status || "",
+              source_locale: payload.filters?.sourceLocale || "",
+            },
+            pagination: {
+              page: payload.pagination?.page || 1,
+              page_size: payload.pagination?.pageSize || 0,
+              total_rows: payload.pagination?.totalRows || 0,
+              total_pages: payload.pagination?.totalPages || 0,
+            },
+            listings: payload.listings.slice(0, 25).map((listing) => ({
+              listing_id: listing.id,
+              title: listing.title,
+              location: listing.location,
+              source_locale: listing.source_locale,
+              listing_status: listing.listing_status,
+              cms_status: listing.cms_status,
+              price_eur: listing.price_eur ?? null,
+              price_on_request: listing.price_on_request === true,
+              public_gallery_assets: listing.public_gallery_assets || 0,
+              metadata_gaps: listing.metadata_gaps || 0,
+              review_required: listing.review_required === true,
+              translation_review_required: listing.translation_review_required || 0,
+              editor_path: listing.editor_path,
+            })),
+          });
+        } catch {
+          return errorResult("The listing content queue is unavailable.");
+        }
+      },
+    );
+  }
+
+  if (canAdminMutate(principal) && canAdminAccess(principal, "content:write")) {
+    server.registerTool(
+      "edit_listing_content",
+      {
+        description:
+          "Save an allowlisted listing text edit. It cannot change publication approval, indexability, listing status, translations, or customer data.",
+        inputSchema: z
+          .object({
+            listing_id: LISTING_ID,
+            patch: LISTING_CONTENT_PATCH,
+            confirmation: z.literal("EDIT_LISTING_CONTENT"),
+          })
+          .strict(),
+        annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+      },
+      async ({ listing_id: listingId, patch }) => {
+        try {
+          const { response, payload } = await adminJson(config, authHeader, "/api/admin/listings/edit", {
+            method: "POST",
+            body: { listingId, patch },
+          });
+          const edit = payload?.edit;
+          if (!response.ok || !edit || edit.listing_id !== listingId) return errorResult("The listing content was not saved.");
+          return textResult({
+            listing_id: edit.listing_id,
+            changed_fields: Object.keys(edit.patch || {}).filter((field) => LISTING_CONTENT_FIELDS.includes(field)),
+            source_locale: edit.source_locale,
+            stale_translation_count: edit.stale_translation_count || 0,
+            stale_locales: Array.isArray(edit.stale_locales) ? edit.stale_locales : [],
+            idempotent: edit.idempotent === true,
+            publication_approval_changed: false,
+            next_step: "A qualified human must separately review any publication or translation decision.",
+          });
+        } catch {
+          return errorResult("The listing content was not saved.");
+        }
+      },
+    );
+
+    server.registerTool(
+      "bulk_update_listing_status",
+      {
+        description:
+          "Explicitly update the status of selected listings. It cannot approve publication, execute schedules, publish translations, or contact customers.",
+        inputSchema: z
+          .object({
+            listing_ids: z.array(LISTING_ID).min(1).max(100),
+            target_status: LISTING_STATUS,
+            confirmation: z.literal("BULK_UPDATE_LISTING_STATUS"),
+          })
+          .strict(),
+        annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false },
+      },
+      async ({ listing_ids: listingIds, target_status: targetStatus }) => {
+        try {
+          const { response, payload } = await adminJson(config, authHeader, "/api/admin/listings/status", {
+            method: "POST",
+            body: { listingIds, targetStatus },
+          });
+          if (!response.ok || payload?.kind !== "bulk_listing_status_update") {
+            return errorResult("The listing status update was not saved.");
+          }
+          return textResult({
+            target_status: payload.targetStatus,
+            requested: payload.requested || 0,
+            updated: payload.updated || 0,
+            idempotent: payload.idempotent || 0,
+            unchanged: payload.unchanged || 0,
+            changed_listing_ids: (payload.edits || []).map((edit) => edit.listing_id),
+            unchanged_listing_ids: Array.isArray(payload.unchangedListingIds) ? payload.unchangedListingIds : [],
+            stale_translation_count: Array.isArray(payload.staleTranslations) ? payload.staleTranslations.length : 0,
+            publication_approval_changed: false,
+          });
+        } catch {
+          return errorResult("The listing status update was not saved.");
+        }
       },
     );
   }
