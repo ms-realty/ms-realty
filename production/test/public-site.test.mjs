@@ -84,6 +84,7 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-lead-type="renter"/);
   assert.match(html, /data-mobile-gallery="true"/);
   assert.match(html, /data-mobile-gallery-index="1"/);
+  assert.match(html, /data-mobile-gallery-label="Галерея"/);
   assert.match(html, /data-mobile-gallery-slide="1" data-gallery-active="true"/);
   assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 1);
   assert.doesNotMatch(html, /data-mobile-gallery-progress="true"/);
@@ -108,8 +109,29 @@ test("mobile listing gallery exposes every reviewed photo and its swipe position
   assert.match(html, /data-mobile-gallery-slide="14"/);
   assert.match(html, /data-mobile-gallery-progress="true" data-gallery-total="14"/);
   assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 14/);
+  assert.match(html, /data-mobile-gallery-prev="true"/);
+  assert.match(html, /data-mobile-gallery-next="true"/);
+  assert.match(html, /tabindex="0"/);
   assert.match(html, /role="region" aria-label="Галерея"/);
   assert.match(html, /role="group" aria-label="14 \/ 14:/);
+});
+
+test("approved 360 tours retain a public gallery fallback when the viewer cannot load", () => {
+  const page = renderListingPage({ registry, listing, localeCode: "en" });
+  page.body.media.tour = {
+    available: true,
+    mount_target: "psv-listing-tour",
+    provider: "photo-sphere-viewer",
+    panorama_url: "https://cdn.example.org/panorama.jpg",
+    accessibility_caption: "A 360-degree view of the property.",
+    fallback_gallery: [page.body.media.gallery[0]],
+  };
+  const html = renderReactPublicBody(page);
+
+  assert.match(html, /id="listing-tour"/);
+  assert.match(html, /data-photo-sphere-fallback="true"/);
+  assert.match(html, /href="#listing-gallery"/);
+  assert.match(html, /ld-tour__fallback/);
 });
 
 test("approved broker contact data enables direct listing contact links", () => {

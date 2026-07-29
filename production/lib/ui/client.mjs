@@ -223,7 +223,14 @@ export const PUBLIC_APP_JS = `(function () {
     if (mount && mount.parentNode) mount.parentNode.removeChild(mount);
     section.setAttribute("data-photo-sphere-viewer-state", "fallback");
     section.removeAttribute("aria-busy");
+    var fallback = section.querySelector("[data-photo-sphere-fallback]");
     var navigationLink = section.id ? document.querySelector('a[href="#' + section.id + '"]') : null;
+    if (fallback) {
+      fallback.hidden = false;
+      if (navigationLink) navigationLink.hidden = false;
+      section.hidden = false;
+      return;
+    }
     if (navigationLink) navigationLink.hidden = true;
     section.hidden = true;
   }
@@ -541,14 +548,22 @@ export const PUBLIC_APP_JS = `(function () {
     var shell = gallery ? gallery.closest(".ld-gallery-shell") : null;
     var current = shell ? shell.querySelector("[data-mobile-gallery-current]") : null;
     var progress = shell ? shell.querySelector("[data-mobile-gallery-progress]") : null;
+    var previous = shell ? shell.querySelector("[data-mobile-gallery-prev]") : null;
+    var next = shell ? shell.querySelector("[data-mobile-gallery-next]") : null;
     var slides = gallery ? gallery.querySelectorAll("[data-mobile-gallery-slide]") : [];
     if (!gallery || !current || slides.length < 2) return;
     var frame = 0;
+    var activeIndex = 0;
+    function scrollToGalleryIndex(index) {
+      var nextIndex = Math.max(0, Math.min(slides.length - 1, index));
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      slides[nextIndex].scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest", inline: "start" });
+    }
     function updateGalleryPosition() {
       frame = 0;
       var galleryBox = gallery.getBoundingClientRect();
       var galleryCenter = galleryBox.left + galleryBox.width / 2;
-      var activeIndex = 0;
+      activeIndex = 0;
       var activeDistance = Infinity;
       for (var i = 0; i < slides.length; i += 1) {
         var slideBox = slides[i].getBoundingClientRect();
@@ -561,14 +576,37 @@ export const PUBLIC_APP_JS = `(function () {
       }
       slides[activeIndex].setAttribute("data-gallery-active", "true");
       gallery.setAttribute("data-mobile-gallery-index", String(activeIndex + 1));
+      gallery.setAttribute("aria-label", gallery.getAttribute("data-mobile-gallery-label") + ", " + String(activeIndex + 1) + " / " + String(slides.length));
       current.textContent = String(activeIndex + 1);
       if (progress) progress.setAttribute("aria-label", String(activeIndex + 1) + " / " + String(slides.length));
+      if (previous) previous.disabled = activeIndex === 0;
+      if (next) next.disabled = activeIndex === slides.length - 1;
     }
     function scheduleGalleryPosition() {
       if (frame) return;
       frame = window.requestAnimationFrame(updateGalleryPosition);
     }
     gallery.addEventListener("scroll", scheduleGalleryPosition, { passive: true });
+    gallery.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        scrollToGalleryIndex(activeIndex - 1);
+      }
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        scrollToGalleryIndex(activeIndex + 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        scrollToGalleryIndex(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        scrollToGalleryIndex(slides.length - 1);
+      }
+    });
+    if (previous) previous.addEventListener("click", function () { scrollToGalleryIndex(activeIndex - 1); });
+    if (next) next.addEventListener("click", function () { scrollToGalleryIndex(activeIndex + 1); });
     window.addEventListener("resize", scheduleGalleryPosition);
     updateGalleryPosition();
   }

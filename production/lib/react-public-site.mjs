@@ -1724,8 +1724,10 @@ function ListingBody({ page }) {
             className: "ld-gallery",
             role: "region",
             "aria-label": labels.gallery,
+            "data-mobile-gallery-label": labels.gallery,
             "data-mobile-gallery": "true",
             "data-mobile-gallery-index": "1",
+      tabIndex: gallerySlides.length > 1 ? 0 : undefined,
           },
           ...gallerySlides.map((image, index) =>
             h(
@@ -1758,6 +1760,32 @@ function ListingBody({ page }) {
               },
               h(Icon, { name: "camera", size: 16 }),
               h("span", null, h("span", { "data-mobile-gallery-current": "true" }, "1"), ` / ${gallerySlides.length}`),
+            )
+          : null,
+        gallerySlides.length > 1
+          ? h(
+              "div",
+              { className: "ld-g__controls", "aria-label": labels.gallery },
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "mk-btn mk-btn--secondary mk-btn--sm",
+                  "data-mobile-gallery-prev": "true",
+                  "aria-label": `${labels.previousPage} ${labels.photo || labels.photos}`,
+                },
+                h(Icon, { name: page.dir === "rtl" ? "chevron-right" : "chevron-left", size: 18 }),
+              ),
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "mk-btn mk-btn--secondary mk-btn--sm",
+                  "data-mobile-gallery-next": "true",
+                  "aria-label": `${labels.nextPage} ${labels.photo || labels.photos}`,
+                },
+                h(Icon, { name: page.dir === "rtl" ? "chevron-left" : "chevron-right", size: 18 }),
+              ),
             )
           : null,
       ),
@@ -1830,6 +1858,14 @@ function ListingBody({ page }) {
                   "data-panorama-url": tour.panorama_url,
                 },
                 h("p", null, tour.accessibility_caption),
+                h(
+                  "div",
+                  { className: "ld-tour__fallback", hidden: true, "data-photo-sphere-fallback": "true", role: "status" },
+                  tour.fallback_gallery?.[0]
+                    ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") })
+                    : null,
+                  h("a", { className: "mk-btn mk-btn--secondary mk-btn--md", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
+                ),
               )
             : null,
         ),
