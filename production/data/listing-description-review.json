@@ -15,25 +15,25 @@
   "summary": {
     "listings": 165,
     "rows": 165,
-    "ledger_description_edits": 130,
-    "source_reviewed_ledger_descriptions": 130,
+    "ledger_description_edits": 140,
+    "source_reviewed_ledger_descriptions": 140,
     "fresh_captured_listings": 160,
     "fresh_source_unavailable": 5,
     "evidence_conflicts": 5,
     "by_priority": {
       "P1": 10,
-      "P2": 39,
-      "P3": 116
+      "P2": 31,
+      "P3": 124
     },
     "by_status": {
       "fresh_source_unavailable": 5,
       "evidence_conflict": 5,
-      "needs_editor_review": 39,
-      "preserve_provenance": 116
+      "needs_editor_review": 31,
+      "preserve_provenance": 124
     },
     "by_provenance": {
-      "ledger_source_reviewed": 130,
-      "source_imported_metadata": 35
+      "ledger_source_reviewed": 140,
+      "source_imported_metadata": 25
     }
   },
   "rows": [
@@ -469,50 +469,6 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0023",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "target_path": "/bg/imoti/MS-CRAWL-0023",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Прекрасна къща в близост до СПА курорт Сандански. Жилищна площ 172 кв.м., гараж 22 кв.м., парцел 626 кв.м. Мебелирана. Беседка, барбекю, басеин",
-      "public_description_characters": 143,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0133",
-        "baseline_status": 200,
-        "baseline_word_count": 489,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 150,
-        "text_sha256": "76eca489c00a66684b79bbb7e56f1b9d64a77d6a773d883e45406f0b705f7f83",
-        "response_sha256": "cf3629f696cfb282a9c5962aa207e0b04a7b54099d52f9feced907376a557579",
-        "description_token_recall": 0.6
-      }
-    },
-    {
       "listing_id": "MS-CRAWL-0024",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -686,50 +642,6 @@
         "text_sha256": "d0ee0f17bc654bc41469be1e1a93ab80f111d6ea4071f09c4bfd87f6f79abac3",
         "response_sha256": "10750d4f198a2a3c8a5d79df8812008563a93f021b296fe1522bd8393e98ef90",
         "description_token_recall": 0.7917
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0080",
-      "source_locale": "bg",
-      "source_domain": "makler-realty.com",
-      "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
-      "target_path": "/bg/imoti/MS-CRAWL-0080",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Отдава се обзаведен тристаен апартамент под наем в с. Поленица, близо до Сандански. 120 кв.м, две спални, три тераси, панорамна гледка и паркомясто. 450Евро",
-      "public_description_characters": 156,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0190",
-        "baseline_status": 200,
-        "baseline_word_count": 579,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 241,
-        "text_sha256": "05832ec250dfcd1b0a26a6bf97eafbd4dbc32c58b153eefb6b20b6224f79e23e",
-        "response_sha256": "5ac35c9765067c4c48c7def7ca72c406b98139fe9fe34af9b0ff8eb5447420bf",
-        "description_token_recall": 0.84
       }
     },
     {
@@ -997,50 +909,6 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0116",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "target_path": "/ru/properties/MS-CRAWL-0116",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продажа земли 20 740 м2 вместе с построенными на участке зданиями общей застроенной площадью 720 м2 - новая цена 75 000 Евро",
-      "public_description_characters": 124,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0379",
-        "baseline_status": 200,
-        "baseline_word_count": 508,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 154,
-        "text_sha256": "6e1986e96438e6f4b9284d68baa166023feb7c13f5fdbcc79585ba770effa35e",
-        "response_sha256": "120e9dda61b25275182762a69324c3d60d91a27964d1cb33ab26bd0f4010a1fe",
-        "description_token_recall": 0.5238
-      }
-    },
-    {
       "listing_id": "MS-CRAWL-0119",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
@@ -1082,50 +950,6 @@
         "text_sha256": "a01d6861770d04f5580bf578009668fcf90d7015787194134b80bdece836fc15",
         "response_sha256": "ac4e2a2a35a943adb1b01193c8c5455a8b14ac94b5bbecf89139e592f896cfa8",
         "description_token_recall": 0.8
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0120",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-      "target_path": "/ru/properties/MS-CRAWL-0120",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продажа отеля с рестораном в г.Сандански. Коммерческая недвижимость в Сандански",
-      "public_description_characters": 79,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0383",
-        "baseline_status": 200,
-        "baseline_word_count": 555,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 202,
-        "text_sha256": "15bafa1ef32e8527449cf90166a19b69d08828b74ef5e49d9894c40ed6c679a0",
-        "response_sha256": "bae250153e8d31af5fcd0db60f58100d2406d36d922865cb579d823f77682c68",
-        "description_token_recall": 1
       }
     },
     {
@@ -1173,58 +997,14 @@
       }
     },
     {
-      "listing_id": "MS-CRAWL-0124",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/",
-      "target_path": "/ru/properties/MS-CRAWL-0124",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продается элитный дом в Сандански,",
-      "public_description_characters": 34,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0387",
-        "baseline_status": 200,
-        "baseline_word_count": 614,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 261,
-        "text_sha256": "eba24bffab274982ad8b64a9264534e7eda74396adeab6d165a915ee75f2b513",
-        "response_sha256": "14507fd824cf3e02e7b3981c172c2da5eb7513ea28f482f143dfb094fe2447b5",
-        "description_token_recall": 1
-      }
-    },
-    {
       "listing_id": "MS-CRAWL-0127",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b3%d0%be-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%ba%d0%b0-%d1%80%d1%8f%d0%b4%d0%be%d0%bc-%d1%81-%d0%bc%d0%b8%d0%bd-%d0%b2/",
       "target_path": "/ru/properties/MS-CRAWL-0127",
       "cms_status": "source_imported_review_required",
-      "public_description": "Продажа большого участка рядом с горячей минеральной водой. Участок находится на дороге между г.Сандански и Мельник.",
-      "public_description_characters": 116,
+      "public_description": "Участок площадью около 3,8 га в поселке Хотово, в непосредственной близости от минеральной бани и в нескольких минутах от главной трассы Сандански—Мелник.",
+      "public_description_characters": 154,
       "seo_action": "retain",
       "priority": "P2",
       "status": "needs_editor_review",
@@ -1232,12 +1012,12 @@
         "short_description"
       ],
       "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0127",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "1ea3011a3e48a1781efd93930c72c1f2f19c9be9efe7aba5b3ba74215de59fce",
+        "source_hash_after": "9215cc7e4115f87b2c97ea099ed8b09fb5502e81e73e57c17eab4ecaba98eacf"
       },
       "migration": {
         "record_id": "url-0390",
@@ -1257,7 +1037,7 @@
         "content_word_count": 64,
         "text_sha256": "b8697de130eab936e2fc9114b45e4a29388b24112ef69156390ebb612cba7b2d",
         "response_sha256": "feb0b645951eea0e75350911d7449dc4fc175582bc3a6c51aea0608063dcdd69",
-        "description_token_recall": 0.7059
+        "description_token_recall": 0.7083
       }
     },
     {
@@ -1267,8 +1047,8 @@
       "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%bd%d0%b8%d0%ba-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d0%bc%d0%b5%d1%80%d0%bb%d0%be/",
       "target_path": "/ru/properties/MS-CRAWL-0128",
       "cms_status": "source_imported_review_required",
-      "public_description": "Продажа виноградника рядом с Сандански. Сорт Мерло. Общая площадь 10 000 кв.м. 2 600 корней.",
-      "public_description_characters": 92,
+      "public_description": "Виноградник площадью 1 гектар рядом с Сандански. Указаны 2 600 лоз сорта Мерло на проволочной конструкции и капельное орошение.",
+      "public_description_characters": 127,
       "seo_action": "retain",
       "priority": "P2",
       "status": "needs_editor_review",
@@ -1276,12 +1056,12 @@
         "short_description"
       ],
       "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0128",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "2d46a65f58b7ecb1dbfe4f4399feeedb252bc0c71a6397531bc6c8016604d99c",
+        "source_hash_after": "45aed5f93e3edfea9dbfb51fa760e4a790ea7b2d14b11d9e141c7dc359772d21"
       },
       "migration": {
         "record_id": "url-0391",
@@ -1301,95 +1081,7 @@
         "content_word_count": 62,
         "text_sha256": "9242bcd93bdd1be28401d76ff09a4e6f21c8041b7ef616a9f96a08e82f14303c",
         "response_sha256": "c4a68b9a2eed578817aef002ad5a10b5b6bfb14a26f71cd92908d87a9b4fe180",
-        "description_token_recall": 0.6875
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0129",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
-      "target_path": "/ru/properties/MS-CRAWL-0129",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Новый дом в 15 км от СПА курорта Сандански и 3 км от города музея Мелник Общая площадь дома 180 м2, участок 90 м2. Цена 79 900 Евро",
-      "public_description_characters": 131,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0392",
-        "baseline_status": 200,
-        "baseline_word_count": 507,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 154,
-        "text_sha256": "b00d6db901ff97f38d6bd1f29e62aae89df1ac87d6f46d143e278bcbaec854fb",
-        "response_sha256": "00cbe71dcf40ac020918ca5b010409d8bfe567379222814bdb34d3e41e1eb2e1",
-        "description_token_recall": 0.6429
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0130",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/",
-      "target_path": "/ru/properties/MS-CRAWL-0130",
-      "cms_status": "source_imported_review_required",
-      "public_description": "Продажа дома в Сандански",
-      "public_description_characters": 24,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0393",
-        "baseline_status": 200,
-        "baseline_word_count": 495,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 142,
-        "text_sha256": "90faf67368611ae7861563069b6e69480e0fed0d7438d6ca67acfbd169169140",
-        "response_sha256": "e6e5aa7f66ef3e126004efdb0d913270286ef47217d237744a480847314ac226",
-        "description_token_recall": 1
+        "description_token_recall": 0.6316
       }
     },
     {
@@ -1478,50 +1170,6 @@
         "text_sha256": "b4f7a645658ac80eda13c64857387d3e62af373471370f8f2fd37fdacd88b504",
         "response_sha256": "0206a065de72855b937833614d141d118e2b01bf84894ac777b4c4498fbe6275",
         "description_token_recall": 0.8333
-      }
-    },
-    {
-      "listing_id": "MS-CRAWL-0139",
-      "source_locale": "ru",
-      "source_domain": "makler-realty.ru",
-      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/",
-      "target_path": "/ru/properties/MS-CRAWL-0139",
-      "cms_status": "source_imported_review_required",
-      "public_description": "продажа производственной базы около Сандански",
-      "public_description_characters": 45,
-      "seo_action": "retain",
-      "priority": "P2",
-      "status": "needs_editor_review",
-      "evidence_flags": [
-        "short_description"
-      ],
-      "provenance": {
-        "classification": "source_imported_metadata",
-        "description_edit_id": null,
-        "edited_at": null,
-        "review_source": null,
-        "source_hash_before": null,
-        "source_hash_after": null
-      },
-      "migration": {
-        "record_id": "url-0402",
-        "baseline_status": 200,
-        "baseline_word_count": 505,
-        "source_meta_description_present": true,
-        "source_open_graph_present": true
-      },
-      "fresh_capture": {
-        "artifact_id": "20260729-legacy-content-review",
-        "state": "captured",
-        "captured_at_utc": "2026-07-29T12:39:33+00:00",
-        "status": 200,
-        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/",
-        "extractor": "html-primary-content-v1",
-        "content_scope": "class:post_content",
-        "content_word_count": 152,
-        "text_sha256": "315da64dc69ee7ce412b8c5aec4d86183602ba4210de0d3e3c91145250937449",
-        "response_sha256": "55cf0c99e7d54daf9d2dc1789cad914fc90210a055b6e52a6c808b80d4a03d53",
-        "description_token_recall": 1
       }
     },
     {
@@ -3064,6 +2712,48 @@
         "text_sha256": "779b2bf0aa834215bc5525a0d14ec2f9b37869fef8cc383be2cc6d45ba1b8201",
         "response_sha256": "4ce0bd6b3d7813ffccc7e13e0b5b0d425de916c638fcd5373b5006da0308bb9f",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0023",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "source_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "target_path": "/bg/imoti/MS-CRAWL-0023",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Къща в село на около 12 км от Сандански, с удобен достъп от магистралата София–Кулата. Разположена е на две нива по 74 кв. м: приземният етаж включва три стаи и баня с тоалетна, а първият — дневна с кухня, две спални и две бани с тоалетни. Към имота има парцел от 547 кв. м.",
+      "public_description_characters": 274,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0023",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "3f2df2291bb647c40b3e04092c4ae71a048dcf32d7d6d7f6ceaa3e6a42fdfa9b",
+        "source_hash_after": "38ab1e96098045f8b42fa95a39ed1e8efcda709df33b7f7a83caac85e5da7547"
+      },
+      "migration": {
+        "record_id": "url-0133",
+        "baseline_status": 200,
+        "baseline_word_count": 489,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.com/listing/%d0%bf%d1%80%d0%b5%d0%ba%d1%80%d0%b0%d1%81%d0%bd%d0%b0-%d0%ba%d1%8a%d1%89%d0%b0-%d0%b2-%d0%b1%d0%bb%d0%b8%d0%b7%d0%be%d1%81%d1%82-%d0%b4%d0%be-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 150,
+        "text_sha256": "76eca489c00a66684b79bbb7e56f1b9d64a77d6a773d883e45406f0b705f7f83",
+        "response_sha256": "cf3629f696cfb282a9c5962aa207e0b04a7b54099d52f9feced907376a557579",
+        "description_token_recall": 0.7407
       }
     },
     {
@@ -5125,6 +4815,48 @@
       }
     },
     {
+      "listing_id": "MS-CRAWL-0080",
+      "source_locale": "bg",
+      "source_domain": "makler-realty.com",
+      "source_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
+      "target_path": "/bg/imoti/MS-CRAWL-0080",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Тристаен апартамент в с. Поленица край Сандански с площ 120 кв. м. Състои се от две самостоятелни спални, дневна с кухня и трапезария, баня с тоалетна и три големи тераси с директен излаз от помещенията. Апартаментът е с южно и източно изложение, слънчев бойлер и място за паркиране.",
+      "public_description_characters": 283,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0080",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "6875d5a91efb7095d3ad7373a685edff88ba65bebb378ae50875fd9f701425cc",
+        "source_hash_after": "00a19dcc708654ccd1d36ff2d2626a31f58c92f062da1d9894a27b6eaebdf630"
+      },
+      "migration": {
+        "record_id": "url-0190",
+        "baseline_status": 200,
+        "baseline_word_count": 579,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.com/listing/%d1%82%d1%80%d0%b8%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%bf%d0%be%d0%b4-%d0%bd%d0%b0%d0%b5%d0%bc-%d1%81-%d0%bf%d0%be%d0%bb%d0%b5%d0%bd%d0%b8/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 241,
+        "text_sha256": "05832ec250dfcd1b0a26a6bf97eafbd4dbc32c58b153eefb6b20b6224f79e23e",
+        "response_sha256": "5ac35c9765067c4c48c7def7ca72c406b98139fe9fe34af9b0ff8eb5447420bf",
+        "description_token_recall": 0.9167
+      }
+    },
+    {
       "listing_id": "MS-CRAWL-0081",
       "source_locale": "bg",
       "source_domain": "makler-realty.com",
@@ -6175,6 +5907,48 @@
       }
     },
     {
+      "listing_id": "MS-CRAWL-0116",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "target_path": "/ru/properties/MS-CRAWL-0116",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Участок площадью 20 740 кв. м в селе Палат, муниципалитет Струмяни, расположен вдоль асфальтированной дороги с выездом около 200 м. На участке находятся административное здание, два жилых дома и складские строения.",
+      "public_description_characters": 214,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0116",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "490c737dd2c01689af0ea029289ad25e9ecc11ad0a535eea26aef12779b324e8",
+        "source_hash_after": "797f06a011eb1bca7aeaf4781e4ba7e4fe4a1181b61ab74fe5f1e7dd055a6b00"
+      },
+      "migration": {
+        "record_id": "url-0379",
+        "baseline_status": 200,
+        "baseline_word_count": 508,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d0%b1%d0%be%d0%bb%d1%8c%d1%88%d0%be%d0%b9-%d1%83%d1%87%d0%b0%d1%81%d1%82%d0%be%d0%ba-%d0%b7%d0%b4%d0%b0%d0%bd%d0%b8%d1%8f-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 154,
+        "text_sha256": "6e1986e96438e6f4b9284d68baa166023feb7c13f5fdbcc79585ba770effa35e",
+        "response_sha256": "120e9dda61b25275182762a69324c3d60d91a27964d1cb33ab26bd0f4010a1fe",
+        "description_token_recall": 0.6129
+      }
+    },
+    {
       "listing_id": "MS-CRAWL-0117",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
@@ -6256,6 +6030,48 @@
         "text_sha256": "4649449b666e9de6731dca3065f43f6cdc48e675926e1f71f524ffea4548246d",
         "response_sha256": "5540ef63a81dee020d7257bea0e16e6f61f43df6ceab7c88a2810e037ce4529f",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0120",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+      "target_path": "/ru/properties/MS-CRAWL-0120",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Дом для гостей с рестораном на территории г. Сандански, пятиэтажный, с застроенной площадью 650 кв. м и дворовым участком 450 кв. м. На нулевом этаже — ресторан с кухней, склад и открытое барбекю общей площадью 230 кв. м; на первом — зал для конференций, душевая с туалетом. На остальных этажах — номера и двухкомнатный апартамент; при каждом номере — самостоятельная терраса и санузел.",
+      "public_description_characters": 386,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0120",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "d49b67e6f6be0626570827ad30e05867f17f32a51d4eb1c9d471f766bb40f903",
+        "source_hash_after": "c41ebeefde074d4e4b5ec571fb802ac0e2c4d1c83aa9947bf4059d97e72f2b4d"
+      },
+      "migration": {
+        "record_id": "url-0383",
+        "baseline_status": 200,
+        "baseline_word_count": 555,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d0%be%d1%82%d0%b5%d0%bb%d1%8c-%d1%81-%d1%80%d0%b5%d1%81%d1%82%d0%be%d1%80%d0%b0%d0%bd%d0%be%d0%bc-%d0%b2-%d0%b3-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 202,
+        "text_sha256": "15bafa1ef32e8527449cf90166a19b69d08828b74ef5e49d9894c40ed6c679a0",
+        "response_sha256": "bae250153e8d31af5fcd0db60f58100d2406d36d922865cb579d823f77682c68",
+        "description_token_recall": 0.7288
       }
     },
     {
@@ -6343,6 +6159,48 @@
       }
     },
     {
+      "listing_id": "MS-CRAWL-0124",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/",
+      "target_path": "/ru/properties/MS-CRAWL-0124",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Дом в селе Поленица на холме над рекой Гушевица, в 5 минутах езды от центра Сандански. Общая площадь 138,70 кв. м; предусмотрены 2 уровня, 2 спальни, 2 санузла, 2 балкона и парковочное место. Первый уровень — гостиная, кухня и столовая, ванная комната, открытая терраса; второй — две спальни, ванная комната и терраса.",
+      "public_description_characters": 318,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0124",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "0f336e1831b1bae0c7c46660ef65b13062887ac155bc64568b5fa398e142ade2",
+        "source_hash_after": "2e1d0164d0a31ebb7d52729c74220e7b871cdd656a95477510a49fcf03ae0cf3"
+      },
+      "migration": {
+        "record_id": "url-0387",
+        "baseline_status": 200,
+        "baseline_word_count": 614,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b5%d1%82%d1%81%d1%8f-%d1%8d%d0%bb%d0%b8%d1%82%d0%bd%d1%8b%d0%b9-%d0%b4%d0%be%d0%bc-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-%d1%80%d1%8f%d0%b4/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 261,
+        "text_sha256": "eba24bffab274982ad8b64a9264534e7eda74396adeab6d165a915ee75f2b513",
+        "response_sha256": "14507fd824cf3e02e7b3981c172c2da5eb7513ea28f482f143dfb094fe2447b5",
+        "description_token_recall": 0.7647
+      }
+    },
+    {
       "listing_id": "MS-CRAWL-0125",
       "source_locale": "ru",
       "source_domain": "makler-realty.ru",
@@ -6424,6 +6282,90 @@
         "text_sha256": "1c8c55eb11657a0f747caa43c14d0a68b529a85df34c40937d05bef528ee47ac",
         "response_sha256": "21062aea1cf26ba42120c4b68d169415e613e13dd1ee5767f2ecd78ef833c9db",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0129",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
+      "target_path": "/ru/properties/MS-CRAWL-0129",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Дом в селе Виногради, примерно в 15 км от Сандански и в 3 км от Мельника. Это отреставрированное старинное здание площадью 90 кв. м на участке 350 кв. м; в жилой части — коридор, две спальни, гостиная с кухней, ванная с туалетом и терраса. На первом этаже расположен большой подвал.",
+      "public_description_characters": 282,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0129",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "850443f21f5c626f4a8cbaee6f4fb281c9e0d3b78eb46f69fc59455d575988eb",
+        "source_hash_after": "f29473a9bbe74846c42577e2acf31aba6f191cbe9287a67b2a8bd935479d7525"
+      },
+      "migration": {
+        "record_id": "url-0392",
+        "baseline_status": 200,
+        "baseline_word_count": 507,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d0%b2%d0%b8%d0%bd%d0%be%d0%b3%d1%80%d0%b0%d0%b4%d0%b8-%d0%bc%d0%b5%d0%bb%d0%bd%d0%b8%d0%ba/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 154,
+        "text_sha256": "b00d6db901ff97f38d6bd1f29e62aae89df1ac87d6f46d143e278bcbaec854fb",
+        "response_sha256": "00cbe71dcf40ac020918ca5b010409d8bfe567379222814bdb34d3e41e1eb2e1",
+        "description_token_recall": 0.7347
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0130",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/",
+      "target_path": "/ru/properties/MS-CRAWL-0130",
+      "cms_status": "source_imported_review_required",
+      "public_description": "На участке расположены два двухэтажных дома с большими подвалами. В каждом доме на первом этаже есть гостиная с кухней, спальня и две ванные комнаты; на втором — три спальни, две ванные комнаты и терраса. Домовладение находится рядом с вековым лесом и рекой Санданска-Бистрица.",
+      "public_description_characters": 277,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0130",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "c09c80c3d5523390181d14b143d5a8f9815bd18e78e012247cf5c08210ce88ce",
+        "source_hash_after": "ee2a55320ac0b1bd6221cc31c7718322dbb0b4d807cbdb260798092b172d9b62"
+      },
+      "migration": {
+        "record_id": "url-0393",
+        "baseline_status": 200,
+        "baseline_word_count": 495,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%b4%d0%be%d0%bc%d0%b0-%d0%b2-%d1%81%d0%b0%d0%bd%d0%b4%d0%b0%d0%bd%d1%81%d0%ba%d0%b8-4/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 142,
+        "text_sha256": "90faf67368611ae7861563069b6e69480e0fed0d7438d6ca67acfbd169169140",
+        "response_sha256": "e6e5aa7f66ef3e126004efdb0d913270286ef47217d237744a480847314ac226",
+        "description_token_recall": 0.6512
       }
     },
     {
@@ -6676,6 +6618,48 @@
         "text_sha256": "bd89b9a50057e0e586cca21342d870ab7db5d623b2806aacd3c492ee7264e43e",
         "response_sha256": "a8104868a9d8d8d5482f7db32703c0e9e697c3c5e0107407b41cbe549fe61fc9",
         "description_token_recall": 1
+      }
+    },
+    {
+      "listing_id": "MS-CRAWL-0139",
+      "source_locale": "ru",
+      "source_domain": "makler-realty.ru",
+      "source_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/",
+      "target_path": "/ru/properties/MS-CRAWL-0139",
+      "cms_status": "source_imported_review_required",
+      "public_description": "Производственная база в крупном селе муниципалитета Сандански расположена на участке площадью 7 000 кв. м. В составе — склад с котельной, два производственных цеха с внутренними офисными надстройками, подстанция и отдельное складское строение.",
+      "public_description_characters": 243,
+      "seo_action": "retain",
+      "priority": "P3",
+      "status": "preserve_provenance",
+      "evidence_flags": [],
+      "provenance": {
+        "classification": "ledger_source_reviewed",
+        "description_edit_id": "listing-content-MS-CRAWL-0139",
+        "edited_at": "2026-07-29T15:00:00Z",
+        "review_source": "legacy_wordpress_content_capture",
+        "source_hash_before": "6e7439dd23e744ea8e2cb06a7e7bbbf1a5e2fcd71fafc6a51a276a20bc1b4539",
+        "source_hash_after": "827ebd5921354a080948a961fc42eb7cc92796138ed6f768c4123d392a5bdc7f"
+      },
+      "migration": {
+        "record_id": "url-0402",
+        "baseline_status": 200,
+        "baseline_word_count": 505,
+        "source_meta_description_present": true,
+        "source_open_graph_present": true
+      },
+      "fresh_capture": {
+        "artifact_id": "20260729-legacy-content-review",
+        "state": "captured",
+        "captured_at_utc": "2026-07-29T12:39:33+00:00",
+        "status": 200,
+        "final_url": "https://makler-realty.ru/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b0-%d0%bf%d1%80%d0%be%d0%b8%d0%b7%d0%b2%d0%be%d0%b4%d1%81%d1%82%d0%b2%d0%b5%d0%bd%d0%bd%d0%be%d0%b9-%d0%b1%d0%b0%d0%b7%d1%8b-%d0%be%d0%ba%d0%be%d0%bb%d0%be/",
+        "extractor": "html-primary-content-v1",
+        "content_scope": "class:post_content",
+        "content_word_count": 152,
+        "text_sha256": "315da64dc69ee7ce412b8c5aec4d86183602ba4210de0d3e3c91145250937449",
+        "response_sha256": "55cf0c99e7d54daf9d2dc1789cad914fc90210a055b6e52a6c808b80d4a03d53",
+        "description_token_recall": 0.5
       }
     },
     {

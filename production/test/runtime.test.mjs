@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
-import { applyListingEdits } from "../lib/listing-edits.mjs";
+import { applyListingEdits, readListingEdits } from "../lib/listing-edits.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
@@ -79,6 +79,29 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(missing.status, 404);
   assert.equal(sourceLanguageRepair.metadata.title, "Дава под наем промишлена сграда в Сандански");
   assert.equal(sourceLanguageRepair.body.description, "Дава под наем промишлена сграда в Сандански");
+});
+
+test("runtime renders every second-batch source-reviewed listing description", () => {
+  const reviewedSeed = applyListingEdits(seed, readListingEdits());
+  const routes = {
+    "MS-CRAWL-0023": "/bg/imoti/MS-CRAWL-0023",
+    "MS-CRAWL-0080": "/bg/imoti/MS-CRAWL-0080",
+    "MS-CRAWL-0116": "/ru/properties/MS-CRAWL-0116",
+    "MS-CRAWL-0120": "/ru/properties/MS-CRAWL-0120",
+    "MS-CRAWL-0124": "/ru/properties/MS-CRAWL-0124",
+    "MS-CRAWL-0127": "/ru/properties/MS-CRAWL-0127",
+    "MS-CRAWL-0128": "/ru/properties/MS-CRAWL-0128",
+    "MS-CRAWL-0129": "/ru/properties/MS-CRAWL-0129",
+    "MS-CRAWL-0130": "/ru/properties/MS-CRAWL-0130",
+    "MS-CRAWL-0139": "/ru/properties/MS-CRAWL-0139",
+  };
+
+  for (const [listingId, route] of Object.entries(routes)) {
+    const record = reviewedSeed.records.find((candidate) => candidate.id === listingId);
+    const page = renderRuntimePath(registry, reviewedSeed, route);
+    assert.equal(page.status, 200, listingId);
+    assert.equal(page.body.description, record.facts.description, listingId);
+  }
 });
 
 test("runtime home uses a source-backed curated hero instead of crawler annotation media", () => {

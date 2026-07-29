@@ -99,13 +99,23 @@ test("description review queue preserves ledger provenance and keeps captured so
   const unavailable = review.rows.find((row) => row.listing_id === "MS-CRAWL-0008");
   const sourceReviewed = review.rows.find((row) => row.listing_id === "MS-CRAWL-0002");
   const restoredListingIds = [
+    "MS-CRAWL-0023",
     "MS-CRAWL-0006",
     "MS-CRAWL-0013",
     "MS-CRAWL-0024",
     "MS-CRAWL-0059",
     "MS-CRAWL-0069",
     "MS-CRAWL-0071",
+    "MS-CRAWL-0080",
     "MS-CRAWL-0081",
+    "MS-CRAWL-0116",
+    "MS-CRAWL-0120",
+    "MS-CRAWL-0124",
+    "MS-CRAWL-0127",
+    "MS-CRAWL-0128",
+    "MS-CRAWL-0129",
+    "MS-CRAWL-0130",
+    "MS-CRAWL-0139",
     "MS-CRAWL-0123",
     "MS-CRAWL-0151",
   ];
@@ -113,8 +123,8 @@ test("description review queue preserves ledger provenance and keeps captured so
 
   assert.equal(assertListingDescriptionReview(review), true);
   assert.equal(review.summary.listings, 165);
-  assert.equal(review.summary.ledger_description_edits, 130);
-  assert.equal(review.summary.source_reviewed_ledger_descriptions, 130);
+  assert.equal(review.summary.ledger_description_edits, 140);
+  assert.equal(review.summary.source_reviewed_ledger_descriptions, 140);
   assert.equal(review.summary.evidence_conflicts, 5);
   assert.equal(review.summary.by_priority.P1, 10);
   assert.equal(review.source_evidence.validation_state, "ready");
