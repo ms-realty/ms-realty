@@ -34,7 +34,7 @@ test("new factual guides require current source evidence, a matching hash, and h
   assert.equal(buyingProcess.source_hash, guideSourceHash(buyingProcess));
   assert.deepEqual(
     buyingProcess.sources.map((source) => source.url),
-    ["https://portal.registryagency.bg/en/page/29"],
+    ["https://portal.registryagency.bg/en/home-pr"],
   );
   assert.deepEqual(
     approvedContentDocumentsForLocation(content, "Sandanski", "bg").map((document) => document.id),

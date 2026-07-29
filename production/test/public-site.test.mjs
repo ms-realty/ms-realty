@@ -655,7 +655,7 @@ test("buying-process guide retains its Registry Agency citation", () => {
   assert.equal(guide.status, 200);
   assert.equal(guide.body.sections[0].sources.length, 1);
   assert.match(html, /data-guide-sources="true"/);
-  assert.match(html, /https:\/\/portal\.registryagency\.bg\/en\/page\/29/);
+  assert.match(html, /https:\/\/portal\.registryagency\.bg\/en\/home-pr/);
   assert.match(html, /Official sources/);
 });
 

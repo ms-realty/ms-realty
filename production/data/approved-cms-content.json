@@ -53,7 +53,7 @@
       "reviewer": "editor_bg",
       "approved_at": "2026-07-06T00:00:00Z",
       "legacy_migration": true,
-      "source_hash": "717a4c9d516282753ad2c3c8ab16a024c458b8930e6ded10338989a045927ade",
+      "source_hash": "de5204863e5dba0db97692c9f7173a08b956ad321da49f2cec5335229d60e98a",
       "title": "Title and encumbrance checks",
       "path": "/en/guides/buying-process",
       "keywords": ["title", "lien", "liens", "mortgage", "encumbrance", "deposit", "due diligence"],
@@ -66,8 +66,8 @@
         {
           "id": "registry-property-register",
           "publisher": "Registry Agency of the Republic of Bulgaria",
-          "label": "Property Register certificates",
-          "url": "https://portal.registryagency.bg/en/page/29",
+          "label": "Property Registry services",
+          "url": "https://portal.registryagency.bg/en/home-pr",
           "checked_at": "2026-07-29",
           "claim_ids": [
             "property-register",
