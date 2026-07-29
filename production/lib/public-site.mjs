@@ -1147,10 +1147,9 @@ function localizedCopy(localeCode, view) {
 }
 
 function guideDescription(documents) {
-  return documents
-    .flatMap((doc) => doc.facts || [])
-    .join(" ")
-    .slice(0, 240);
+  const facts = documents.flatMap((doc) => doc.facts || []);
+  const description = facts.join(" ");
+  return documents.length === 1 && description.length > 240 ? facts[0] : description.slice(0, 240);
 }
 
 function approvedGuideLinksFor(localeCode, currentPath = null) {

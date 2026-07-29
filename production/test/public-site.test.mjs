@@ -628,6 +628,10 @@ test("source-bound Bulgarian guide renders official citations without a machine 
   assert.equal(guide.status, 200);
   assert.equal(guide.indexable, true);
   assert.equal(guide.body.sections[0].sources.length, 3);
+  assert.equal(
+    guide.metadata.description,
+    "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
+  );
   assert.match(html, /data-guide-sources="true"/);
   assert.match(html, /https:\/\/kais\.cadastre\.bg\//);
   assert.match(html, /Официални източници/);
