@@ -58,6 +58,7 @@ const ACTION_LABELS = {
     photo: "снимка",
     photos: "снимки",
     location: "Локация",
+    municipality: "Община",
     propertyType: "Тип",
     area: "Площ (m²)",
     areaMin: "Мин. площ (m²)",
@@ -141,6 +142,7 @@ const ACTION_LABELS = {
     photo: "photo",
     photos: "photos",
     location: "Location",
+    municipality: "Municipality",
     propertyType: "Type",
     area: "Area (m²)",
     areaMin: "Min. area (m²)",
@@ -224,6 +226,7 @@ const ACTION_LABELS = {
     photo: "Foto",
     photos: "Fotos",
     location: "Ort",
+    municipality: "Gemeinde",
     propertyType: "Typ",
     area: "Fläche (m²)",
     areaMin: "Mindestfläche (m²)",
@@ -307,6 +310,7 @@ const ACTION_LABELS = {
     photo: "foto",
     photos: "foto's",
     location: "Locatie",
+    municipality: "Gemeente",
     propertyType: "Type",
     area: "Oppervlakte (m²)",
     areaMin: "Min. oppervlakte (m²)",
@@ -390,6 +394,7 @@ const ACTION_LABELS = {
     photo: "фото",
     photos: "фото",
     location: "Локация",
+    municipality: "Муниципалитет",
     propertyType: "Тип",
     area: "Площадь (м²)",
     areaMin: "Мин. площадь (м²)",
@@ -473,6 +478,7 @@ const ACTION_LABELS = {
     photo: "φωτογραφία",
     photos: "φωτογραφίες",
     location: "Τοποθεσία",
+    municipality: "Δήμος",
     propertyType: "Τύπος",
     area: "Εμβαδόν (m²)",
     areaMin: "Ελάχ. εμβαδόν (m²)",
@@ -556,6 +562,7 @@ const ACTION_LABELS = {
     photo: "תמונה",
     photos: "תמונות",
     location: "מיקום",
+    municipality: "רשות מקומית",
     propertyType: "סוג",
     area: "שטח (מ״ר)",
     areaMin: "שטח מינימלי (מ״ר)",
@@ -775,7 +782,7 @@ function localizedLocationForView(localeCode, view) {
 
 export function localizedSearchFilterValue(localeCode, key, value) {
   if (key === "property_type" || key === "offer_type") return localizedListingValue(localeCode, key, value);
-  if (key === "location") return localizedLocationValue(localeCode, value);
+  if (key === "location" || key === "municipality") return localizedLocationValue(localeCode, value);
   return humanizeIdentifier(value);
 }
 
@@ -1400,6 +1407,12 @@ function matchesSearch(view, query, filters = {}) {
   const text = searchableText(view);
   if (!queryTokens(query).every((variants) => variants.some((token) => text.includes(token)))) return false;
   if (filters.location && !includesSearchValue([view.location, view.location_native, view.country_code].join(" "), filters.location)) return false;
+  if (
+    filters.municipality &&
+    (view.country_code !== "BG" || view.location_review_status !== "confirmed_settlement" || norm(view.municipality) !== norm(filters.municipality))
+  ) {
+    return false;
+  }
   if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
   if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
   if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;
@@ -1687,6 +1700,14 @@ export function renderSearchPage({
   const filterViews = searchableListings.map((listing) => listingToPublicViewModel(listing));
   const filterOptions = {
     locations: [...new Set(filterViews.map((listing) => listing.location).filter(Boolean))].sort(),
+    municipalities: [
+      ...new Set(
+        filterViews
+          .filter((listing) => listing.country_code === "BG" && listing.location_review_status === "confirmed_settlement")
+          .map((listing) => listing.municipality)
+          .filter(Boolean),
+      ),
+    ].sort((left, right) => localizedLocationValue(locale.code, left).localeCompare(localizedLocationValue(locale.code, right))),
     property_types: [...new Set(filterViews.map((listing) => listing.property_type).filter(Boolean))].sort(),
     offer_types: [...new Set(filterViews.map((listing) => listing.offer_type).filter(Boolean))].sort(),
     bedrooms: [...new Set(filterViews.map((listing) => listing.bedrooms).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
@@ -1706,7 +1727,7 @@ export function renderSearchPage({
   const cards = sortedListings
     .slice(offset, offset + normalizedPageSize)
     .map((listing) => listingCard(registry, listing, locale));
-  const activeFilterChips = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
+  const activeFilterChips = ["location", "municipality", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
     .map((key) => ({ key, value: filters[key] || "", active: Boolean(filters[key]) }))
     .filter((chip) => chip.active);
 

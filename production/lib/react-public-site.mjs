@@ -899,6 +899,7 @@ function HomeBody({ page }) {
 
 const SEARCH_FILTER_QUERY_KEYS = [
   "location",
+  "municipality",
   "property_type",
   "offer_type",
   "price_min",
@@ -982,6 +983,13 @@ function SearchBody({ page }) {
           { id: `${idPrefix}-location-options` },
           ...(filterOptions.locations || []).map((location) => h("option", { key: location, value: location })),
         ),
+      ),
+      filterSelect(
+        idPrefix,
+        "municipality",
+        labels.municipality || "Municipality",
+        filterOptions.municipalities || [],
+        (value) => localizedSearchFilterValue(page.locale, "municipality", value),
       ),
       filterSelect(
         idPrefix,

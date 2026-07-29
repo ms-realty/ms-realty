@@ -435,6 +435,27 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_type", value: "apartment", active: true }]);
 });
 
+test("municipality search exposes only reviewed Bulgarian municipality scope", () => {
+  const sandanski = renderSearchPage({ registry, listings, localeCode: "ru", filters: { municipality: "Sandanski" }, pageSize: null });
+  const html = renderReactPublicBody(sandanski);
+  const sourceById = new Map(listings.map((candidate) => [candidate.id, candidate]));
+
+  assert.ok(sandanski.search.controls.filter_options.municipalities.includes("Sandanski"));
+  assert.ok(sandanski.search.controls.filter_options.municipalities.includes("Petrich"));
+  assert.equal(sandanski.search.controls.filter_options.municipalities.includes("Thessaloniki"), false);
+  assert.ok(sandanski.cards.length > 0);
+  assert.ok(
+    sandanski.cards.every((card) => {
+      const source = sourceById.get(card.id);
+      return source?.country_code === "BG" && source?.location_review_status === "confirmed_settlement" && source?.municipality === "Sandanski";
+    }),
+  );
+  assert.equal(sandanski.cards.some((card) => card.id === "MS-CRAWL-0021"), false);
+  assert.deepEqual(sandanski.search.controls.active_filter_chips, [{ key: "municipality", value: "Sandanski", active: true }]);
+  assert.match(html, /name="municipality"/);
+  assert.match(html, />Муниципалитет<\/label>/);
+});
+
 test("search matches Cyrillic listings across Latin and Cyrillic keyboard input", () => {
   const latinRussianTitle = renderSearchPage({ registry, listings, localeCode: "ru", query: "apartamenty" });
   const cyrillicLatinLocation = renderSearchPage({ registry, listings, localeCode: "ru", query: "Сандански" });

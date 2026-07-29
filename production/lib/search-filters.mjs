@@ -1,5 +1,6 @@
 export const SEARCH_FILTER_FIELDS = [
   "location",
+  "municipality",
   "property_type",
   "offer_type",
   "status",
