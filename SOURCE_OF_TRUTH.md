@@ -274,7 +274,7 @@ of a private model provider. Hermes is chosen because it lets the assistant be:
 |---|---|---|
 | **Default (self-hosted)** | `NousResearch/Hermes-4-14B` (Qwen3-14B base) — FP8 build `Hermes-4-14B-FP8` | Apache-2.0-friendly base, strong multilingual (BG/RU/DE/NL/EL/HE), runs on one modest GPU; hybrid reasoning, function calling, JSON/structured outputs |
 | **Quality step-up** | `Hermes-4.3-36B` (Nov 2025) or `Hermes-4-70B` (Llama-3.1 base) | When a task needs more capability; GGUF/FP8 builds keep serving cheap |
-| **Zero-ops fallback** | Hosted Nous Hermes via **OpenRouter** | Same prompts/format; **non-sensitive tasks only**; a config switch |
+| **Unavailable-mode fallback** | No external inference fallback | Deterministic CRM/CMS workflows remain available; non-essential Hermes drafting reports unavailable until the private endpoint recovers |
 
 Serving: a private **vLLM** or another OpenAI-compatible endpoint sits behind the official Hermes Agent
 gateway; the application connects only to the Agent's authenticated `/v1/chat/completions` API. The
@@ -321,9 +321,10 @@ draft and its audit entry; a human broker/editor must approve every visible, ind
 Hermes has no public capability and never sends customer messages. AI never publishes listings,
 translations, valuations, legal/tax answers, or listing changes without human approval. Hermes
 translation drafts cannot publish or mark pages indexable. Legal/tax/process drafts must cite approved
-CMS content. Internal users must see that a draft came from Hermes. **Sensitive owner/buyer inference
-goes only through the self-hosted Hermes Agent to a private EU model endpoint;** hosted OpenRouter is
-forbidden for that data and is allowed only for explicitly non-sensitive tasks. Every Hermes call is
+CMS content. Internal users must see that a draft came from Hermes. **Owner/buyer inference goes only
+through the self-hosted Hermes Agent to a private EU model endpoint; OpenRouter and other external
+model aggregators are not permitted for MS Realty.** If the private endpoint is unavailable,
+deterministic workflows continue and the optional draft operation fails closed. Every Hermes call is
 logged in the AuditLog (model, prompt version, tool calls, tokens, sensitive-vs-not).
 
 ---
