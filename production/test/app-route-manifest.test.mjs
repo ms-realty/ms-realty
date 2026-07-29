@@ -165,6 +165,15 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(location.html, /data-location-listings="true"/);
   assert.match(location.html, /data-card-thumbnail="true"/);
 
+  const fallbackLocation = renderAppRoute({
+    pathname: "/en/locations/sandanski",
+    url: "https://example.test/en/locations/sandanski",
+  });
+  assert.equal(fallbackLocation.status, 200);
+  assert.equal(fallbackLocation.rendered.indexable, false);
+  assert.equal(fallbackLocation.rendered.cards.length > 0, true);
+  assert.match(fallbackLocation.html, /<meta name="robots" content="noindex,follow">/);
+
   const seller = renderAppRoute({ pathname: "/he/sell", url: "https://example.test/he/sell" });
   assert.equal(seller.status, 200);
   assert.equal(seller.rendered.kind, "seller");

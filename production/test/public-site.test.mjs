@@ -501,12 +501,14 @@ test("English home makes every approved buyer guide discoverable without expandi
   assert.match(html, /href="\/en\/guides\/buying-process"/);
   assert.match(html, /href="\/en\/guides\/foreign-buyers"/);
   assert.match(html, /Foreign buyers and Bulgarian land ownership/);
+  assert.equal(en.body.locations.some((location) => location.path === "/en/locations/sandanski"), true);
   assert.equal((html.match(/data-mobile-task="/g) || []).length, 5);
 });
 
-test("location page exposes only indexable locale inventory", () => {
+test("location page keeps reviewed inventory indexable and serves source fallback without a soft 404", () => {
   const he = renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" });
-  const missing = renderLocationPage({ registry, listings, localeCode: "he", location: "Petrich" });
+  const fallback = renderLocationPage({ registry, listings, localeCode: "he", location: "Petrich" });
+  const englishFallback = renderLocationPage({ registry, listings, localeCode: "en", location: "Sandanski" });
   const html = renderReactPublicBody(he);
 
   assert.equal(he.status, 200);
@@ -522,12 +524,15 @@ test("location page exposes only indexable locale inventory", () => {
   assert.equal(he.metadata.title, "נכסים ב-סנדנסקי | MS Realty");
   assert.match(he.metadata.description, /נכסים שנבדקו/);
   assert.match(html, /data-mobile-task="buy" data-active="true" aria-current="page"/);
-  assert.equal(missing.status, 404);
-  assert.equal(missing.indexable, false);
-  assert.equal(missing.metadata.robots, "noindex,follow");
-  const missingHtml = renderReactPublicBody(missing);
-  assert.match(missingHtml, /data-location-empty="true"/);
-  assert.match(missingHtml, /href="\/he\/search"/);
+  assert.equal(fallback.status, 200);
+  assert.equal(fallback.indexable, false);
+  assert.equal(fallback.cards.length > 0, true);
+  assert.equal(fallback.cards.every((card) => card.translation_indexable === false), true);
+  assert.equal(fallback.metadata.robots, "noindex,follow");
+  assert.equal(englishFallback.status, 200);
+  assert.equal(englishFallback.indexable, false);
+  assert.equal(englishFallback.cards.length > 0, true);
+  assert.equal(englishFallback.metadata.robots, "noindex,follow");
 });
 
 test("Bulgarian locations expose only their approved source-bound context", () => {

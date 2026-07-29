@@ -73,7 +73,10 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(renderRuntimePath(registry, seed, "/en/guides/proverka-na-imot-sandanski").status, 404);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").kind, "location");
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length, 1);
-  assert.equal(renderRuntimePath(registry, seed, "/he/locations/petrich").status, 404);
+  const petrichFallback = renderRuntimePath(registry, seed, "/he/locations/petrich");
+  assert.equal(petrichFallback.status, 200);
+  assert.equal(petrichFallback.indexable, false);
+  assert.equal(petrichFallback.cards.length > 0, true);
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);

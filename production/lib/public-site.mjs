@@ -1783,7 +1783,7 @@ export function renderHomePage({ registry, localeCode, listings }) {
   const locations = locationNamesFromListings(listings)
     .map((location) => {
       const page = renderLocationPage({ registry, localeCode: locale.code, location, listings });
-      return page.indexable
+      return page.status === 200
         ? {
             location: localizedLocationValue(locale.code, location),
             path: page.path,
@@ -1997,12 +1997,23 @@ function locationPageCopy(localeCode, location) {
 export function renderLocationPage({ registry, localeCode, location, listings }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
-  const matchedListings = listings.filter((listing) => {
+  const localizedMatches = listings.filter((listing) => {
     const view = listingToPublicViewModel(listing);
     return norm(view.location) === norm(location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, locale);
   });
+  const fallbackLocale = locale.fallback_locale || registry.source_locale;
+  const fallbackMatches = listings.filter((listing) => {
+    const view = listingToPublicViewModel(listing);
+    return (
+      norm(view.location) === norm(location) &&
+      isActiveListing(listing) &&
+      (listing.locale === fallbackLocale || listing.locale === registry.source_locale)
+    );
+  });
+  const matchedListings = localizedMatches.length ? localizedMatches : fallbackMatches;
   const path = locationPath(registry, locale.code, location);
-  const indexable = resolved.available && matchedListings.length > 0;
+  const indexable = resolved.available && localizedMatches.length > 0;
+  const hasInventory = matchedListings.length > 0;
   const copy = locationPageCopy(locale.code, localizedLocationValue(locale.code, location));
   const contextGuide = indexable
     ? approvedContentDocumentsForLocation(readApprovedCmsContent(), location, locale.code)[0]
@@ -2025,7 +2036,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
 
   return {
     kind: "location",
-    status: indexable ? 200 : 404,
+    status: hasInventory ? 200 : 404,
     requested_locale: localeCode,
     locale: locale.code,
     lang: locale.code,
