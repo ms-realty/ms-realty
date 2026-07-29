@@ -57,12 +57,28 @@ test("generated App Router manifest is valid when present", () => {
   if (!fs.existsSync(file)) return;
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertAppRouteManifest(manifest), true);
-  assert.equal(manifest.summary.routes, 205);
-  assert.equal(manifest.summary.sitemap_indexable_routes, 198);
+  assert.equal(manifest.summary.routes, 203);
+  assert.equal(manifest.summary.sitemap_indexable_routes, 196);
   assert.equal(manifest.summary.by_type.search, 7);
   assert.equal(manifest.summary.by_type.guide, 3);
   assert.equal(manifest.routes.some((route) => route.path.startsWith("/fr/")), false);
   assert.equal(assertAppRouteFiles(manifest), true);
+});
+
+test("every manifest page renders a complete public content contract", () => {
+  const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
+
+  for (const route of manifest.routes) {
+    const page = renderAppRoute({ pathname: route.path, url: `https://audit.test${route.path}` });
+    const label = `${route.type} ${route.path}`;
+    assert.equal(page.status, 200, `${label} must render`);
+    assert.equal(page.rendered.kind, route.type, `${label} must use its declared renderer`);
+    assert.equal(page.rendered.indexable, route.public_indexable, `${label} must match its sitemap indexability`);
+    assert.match(page.html, /<title>\s*[^<\s]/, `${label} must have a title`);
+    assert.match(page.html, /<meta name="description" content="[^"\s]/, `${label} must have a description`);
+    assert.match(page.html, /<h1(?:\s[^>]*)?>\s*[^<\s]/, `${label} must have an H1`);
+    assert.match(page.html, new RegExp(`data-react-public-ui="${route.type}"`), `${label} must render its public shell`);
+  }
 });
 
 test("App Router adapter renders home, search, listing, and RTL HTML", () => {
@@ -102,6 +118,11 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
   assert.match(search.html, /data-ms-realty-public-client/);
   assert.doesNotMatch(search.html, /function submitHermesChat/);
+
+  const bgListing = renderAppRoute({ pathname: "/bg/imoti/MS-CRAWL-0001", url: "https://example.test/bg/imoti/MS-CRAWL-0001" });
+  assert.equal(bgListing.status, 200);
+  assert.match(bgListing.html, /Комплекс за дългосрочен наем/);
+  assert.doesNotMatch(bgListing.html, /Updated approved source description\./);
 
   const listing = renderAppRoute({ pathname: "/he/properties/MS-CRAWL-0001", url: "https://example.test/he/properties/MS-CRAWL-0001" });
   assert.equal(listing.status, 200);

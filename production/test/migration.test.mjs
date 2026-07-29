@@ -161,7 +161,7 @@ test("generated localized sitemap file is approved-translation gated when presen
   const data = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(data.summary.listings, 165);
   assert.equal(data.summary.home_pages, 7);
-  assert.equal(data.summary.listing_entries, 167);
+  assert.equal(data.summary.listing_entries, 166);
   assert.equal(data.summary.location_pages >= 6, true);
   assert.equal(data.summary.seller_pages, 7);
   assert.equal(data.summary.contact_pages, 7);
@@ -177,7 +177,7 @@ test("generated localized sitemap file is approved-translation gated when presen
   );
   assert.equal(data.summary.byLocale.bg >= 118, true);
   assert.equal(data.summary.byLocale.ru, 57);
-  assert.equal(data.summary.byLocale.el, 5);
+  assert.equal(data.summary.byLocale.el, 3);
   assert.equal(data.summary.byLocale.he, 5);
   assert.equal(data.summary.byLocale.fr, undefined);
   assert.equal(data.entries.some((entry) => entry.loc === "/he" && entry.type === "home"), true);
@@ -187,4 +187,6 @@ test("generated localized sitemap file is approved-translation gated when presen
   assert.equal(data.entries.some((entry) => entry.loc === "/en/guides/foreign-buyers" && entry.type === "guide"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/en/guides/buying-process" && entry.type === "guide"), true);
   assert.equal(data.entries.some((entry) => entry.loc === "/bg/guides/proverka-na-imot-sandanski" && entry.type === "guide"), true);
+  assert.equal(data.entries.some((entry) => entry.loc === "/el/akinita/MS-CRAWL-0001"), false);
+  assert.equal(data.entries.some((entry) => entry.loc === "/el/topothesies/sandanski"), false);
 });

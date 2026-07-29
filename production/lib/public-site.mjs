@@ -20,7 +20,12 @@ import {
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
-import { approvedContentGuideGroups, isPublishableGuide, readApprovedCmsContent } from "./approved-content.mjs";
+import {
+  approvedContentDocumentsForLocation,
+  approvedContentGuideGroups,
+  isPublishableGuide,
+  readApprovedCmsContent,
+} from "./approved-content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
@@ -1994,6 +1999,16 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   const path = locationPath(registry, locale.code, location);
   const indexable = resolved.available && matchedListings.length > 0;
   const copy = locationPageCopy(locale.code, localizedLocationValue(locale.code, location));
+  const contextGuide = indexable
+    ? approvedContentDocumentsForLocation(readApprovedCmsContent(), location, locale.code)[0]
+    : null;
+  const context = contextGuide?.facts?.[0]
+    ? {
+        href: contextGuide.path,
+        title: contextGuide.title,
+        summary: contextGuide.facts[0],
+      }
+    : null;
   const locales = publicIndexableLocales(registry)
     .filter((candidate) =>
       listings.some((listing) => {
@@ -2024,6 +2039,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
       h1: copy.heading,
       location,
       listing_count: matchedListings.length,
+      ...(context ? { context } : {}),
     },
     cards: matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale)),
   };

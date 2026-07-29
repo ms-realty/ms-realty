@@ -1396,6 +1396,7 @@ function SearchBody({ page }) {
 function LocationBody({ page }) {
   const labels = uiLabels(page);
   const cards = page.cards || [];
+  const context = page.body.context;
   const searchPath = page.chrome?.nav?.find((item) => item.id === "buy")?.href || `/${page.locale}/search`;
   const main = h(
     "main",
@@ -1415,6 +1416,14 @@ function LocationBody({ page }) {
         { className: "hp-sec__head" },
         h("div", null, h("h1", null, page.body.h1), h("p", null, `${page.body.listing_count} ${labels.reviewedListings}`)),
       ),
+      context
+        ? h(
+            "aside",
+            { className: "mk-card mk-card--pad-md", "data-location-context": "true" },
+            h("p", null, context.summary),
+            h("a", { href: context.href }, context.title),
+          )
+        : null,
       cards.length
         ? h(
             "div",

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  approvedContentDocumentsForLocation,
   approvedContentDocumentsForPath,
   approvedContentGuideGroups,
   approvedContentMatches,
@@ -24,11 +25,24 @@ test("approved CMS content exposes reviewed foreign-buyer process facts", () => 
 test("new factual guides require current source evidence, a matching hash, and human approval", () => {
   const content = readApprovedCmsContent();
   const guide = approvedContentDocumentsForPath(content, "/bg/guides/proverka-na-imot-sandanski")[0];
+  const buyingProcess = approvedContentDocumentsForPath(content, "/en/guides/buying-process")[0];
 
   assert.equal(isPublishableGuide(guide), true);
   assert.equal(guide.source_hash, guideSourceHash(guide));
   assert.equal(guide.sources.every((source) => source.url.startsWith("https://")), true);
+  assert.equal(isPublishableGuide(buyingProcess), true);
+  assert.equal(buyingProcess.source_hash, guideSourceHash(buyingProcess));
+  assert.deepEqual(
+    buyingProcess.sources.map((source) => source.url),
+    ["https://portal.registryagency.bg/en/page/29"],
+  );
+  assert.deepEqual(
+    approvedContentDocumentsForLocation(content, "Sandanski", "bg").map((document) => document.id),
+    ["sandanski-property-official-sources"],
+  );
+  assert.deepEqual(approvedContentDocumentsForLocation(content, "Sandanski", "ru"), []);
   assert.equal(isPublishableGuide({ ...guide, source_hash: "stale" }), false);
+  assert.equal(isPublishableGuide({ ...guide, location: "Petrich" }), false);
   const unapprovedTranslation = {
     ...guide,
     locale: "en",

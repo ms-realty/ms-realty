@@ -14,7 +14,7 @@
   "warnings": [
     {
       "id": "structured_data.missing_area",
-      "count": 167
+      "count": 166
     },
     {
       "id": "structured_data.missing_public_images",
@@ -96,19 +96,19 @@
       "evidence": {
         "listings": 165,
         "home_pages": 7,
-        "listing_entries": 167,
-        "location_pages": 7,
+        "listing_entries": 166,
+        "location_pages": 6,
         "seller_pages": 7,
         "contact_pages": 7,
-        "guide_pages": 2,
-        "entries": 197,
+        "guide_pages": 3,
+        "entries": 196,
         "byLocale": {
-          "bg": 119,
+          "bg": 120,
           "en": 5,
           "de": 3,
           "nl": 3,
           "ru": 57,
-          "el": 5,
+          "el": 3,
           "he": 5
         }
       }
@@ -119,21 +119,20 @@
       "message": "Schema can pass while content warnings remain separate.",
       "evidence": {
         "generated_at": "2026-07-05T00:00:00Z",
-        "listing_entries": 167,
-        "guide_entries": 2,
+        "listing_entries": 166,
+        "guide_entries": 3,
         "failing_entries": 0,
         "entries_with_offer": 135,
         "warnings": {
           "missing_location": 0,
           "missing_price": 0,
-          "missing_area": 167,
+          "missing_area": 166,
           "missing_bedrooms": 0,
           "missing_public_images": 4,
           "media_review_pending": 0
         },
         "by_locale": {
-          "bg": 113,
-          "el": 1,
+          "bg": 114,
           "he": 1,
           "ru": 52,
           "en": 2
@@ -258,7 +257,7 @@
       "message": "Human listing quality review CSV is required before launch.",
       "evidence": {
         "status": "missing_review",
-        "path": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv",
+        "path": "/Users/ivan/Code/MS-Realty-content-audit/migration/reviews/listing-quality.csv",
         "summary": {
           "expected_review_rows": 165,
           "review_rows": 0,
@@ -470,22 +469,22 @@
           {
             "source": "typesense_meilisearch_sync",
             "status": "missing_report",
-            "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json"
+            "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json"
           },
           {
             "source": "typesense_meilisearch_query",
             "status": "missing_report",
-            "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json"
+            "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json"
           },
           {
             "source": "hermes_draft_worker",
             "status": "missing_report",
-            "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
+            "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json"
           }
         ],
         "provisioning": {
           "status": "blocked_report",
-          "path": "/Users/ivan/Code/MS-Realty/production/data/live-service-provisioning-report.json",
+          "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/live-service-provisioning-report.json",
           "summary": {
             "checks": 9,
             "missing_env": [
@@ -684,74 +683,11 @@
       "status": "blocked",
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
-        "status": "blocked_report",
-        "path": "/Users/ivan/Code/MS-Realty/production/data/payload-runtime-report.json",
-        "summary": {
-          "admin_route": "/payload-admin",
-          "checks": 9,
-          "database": {
-            "status": "missing_env"
-          },
-          "missing_env": [
-            "PAYLOAD_SECRET",
-            "DATABASE_URL"
-          ],
-          "placeholder_env": [],
-          "weak_env": [],
-          "route_files": 4
-        },
-        "checks": [
-          {
-            "id": "payload_secret",
-            "status": "missing_env",
-            "env": "PAYLOAD_SECRET"
-          },
-          {
-            "id": "database_url",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "route:app/(payload)/payload-admin/[[...segments]]/page.js",
-            "status": "pass",
-            "file": "app/(payload)/payload-admin/[[...segments]]/page.js"
-          },
-          {
-            "id": "route:app/(payload)/api/[...slug]/route.js",
-            "status": "pass",
-            "file": "app/(payload)/api/[...slug]/route.js"
-          },
-          {
-            "id": "route:app/(payload)/graphql/route.js",
-            "status": "pass",
-            "file": "app/(payload)/graphql/route.js"
-          },
-          {
-            "id": "route:app/(payload)/graphql-playground/route.js",
-            "status": "pass",
-            "file": "app/(payload)/graphql-playground/route.js"
-          },
-          {
-            "id": "payload_config_import",
-            "status": "pass",
-            "admin_route": "/payload-admin",
-            "collections": 6
-          },
-          {
-            "id": "database_network_scope",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          },
-          {
-            "id": "database_tcp",
-            "status": "missing_env",
-            "env": "DATABASE_URL"
-          }
-        ],
+        "status": "missing_report",
+        "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/payload-runtime-report.json",
         "next_actions": [
           "Run npm run payload:bootstrap and configure a private env with PAYLOAD_SECRET and DATABASE_URL.",
-          "Run npm run payload:runtime to verify Payload config, routes, and database reachability.",
-          "Run npm run payload:preflight before launch:preflight."
+          "Run npm run payload:runtime, then npm run payload:preflight."
         ]
       },
       "next_actions": [
@@ -765,7 +701,7 @@
       "message": "Encrypted off-site backup and isolated production restore evidence are required before launch.",
       "evidence": {
         "status": "missing_report",
-        "path": "/Users/ivan/Code/MS-Realty/production/data/production-recovery-report.json"
+        "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/production-recovery-report.json"
       },
       "next_actions": [
         "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
@@ -777,17 +713,17 @@
     {
       "source": "typesense_meilisearch_sync",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json"
     },
     {
       "source": "typesense_meilisearch_query",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json"
     },
     {
       "source": "hermes_draft_worker",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json"
     }
   ],
   "monitoring_plan": [

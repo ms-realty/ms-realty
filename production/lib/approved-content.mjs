@@ -13,6 +13,7 @@ function guideHashPayload(doc) {
     guide_key: doc.guide_key || "",
     locale: doc.locale || "",
     source_locale: doc.source_locale || "",
+    ...(doc.location ? { location: doc.location } : {}),
     source_document_id: doc.source_document_id || "",
     legacy_migration: doc.legacy_migration === true,
     title: doc.title || "",
@@ -71,6 +72,12 @@ function normalizePath(pathname) {
 export function approvedContentDocumentsForPath(content, pathname) {
   const normalized = normalizePath(pathname);
   return (content.documents || []).filter((doc) => isApprovedContentDocument(doc) && normalizePath(doc.path) === normalized);
+}
+
+export function approvedContentDocumentsForLocation(content, location, localeCode) {
+  return (content.documents || []).filter(
+    (doc) => isPublishableGuide(doc) && doc.location === location && doc.locale === localeCode,
+  );
 }
 
 export function approvedContentGuideGroups(content) {

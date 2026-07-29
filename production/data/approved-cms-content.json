@@ -53,13 +53,27 @@
       "reviewer": "editor_bg",
       "approved_at": "2026-07-06T00:00:00Z",
       "legacy_migration": true,
-      "source_hash": "699e0f59593aa44a472e5201dc24eaa53f83fae9cdc0550cc4d8e505aa6b4d00",
+      "source_hash": "717a4c9d516282753ad2c3c8ab16a024c458b8930e6ded10338989a045927ade",
       "title": "Title and encumbrance checks",
       "path": "/en/guides/buying-process",
       "keywords": ["title", "lien", "liens", "mortgage", "encumbrance", "deposit", "due diligence"],
       "facts": [
         "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
         "MS Realty treats title and encumbrance checks as part of the buying process before a buyer relies on the deal."
+      ],
+      "sources_label": "Official sources",
+      "sources": [
+        {
+          "id": "registry-property-register",
+          "publisher": "Registry Agency of the Republic of Bulgaria",
+          "label": "Property Register certificates",
+          "url": "https://portal.registryagency.bg/en/page/29",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "property-register",
+            "property-certificate"
+          ]
+        }
       ]
     },
     {
@@ -68,11 +82,12 @@
       "guide_key": "sandanski-property-official-sources",
       "locale": "bg",
       "source_locale": "bg",
+      "location": "Sandanski",
       "status": "approved",
       "human_approved": true,
       "reviewer": "editor_bg",
       "approved_at": "2026-07-29T00:00:00Z",
-      "source_hash": "7b5ea6144f8e7551f0f017fd4beb4559c8c24efe68b9c0c17109d135626fef5c",
+      "source_hash": "43b6e9abb5893cb848beb2f59bfd49dbb1b8552fb55b2d669645f4f10b7fb848",
       "title": "Сандански: официални източници при проверка на имот",
       "path": "/bg/guides/proverka-na-imot-sandanski",
       "keywords": ["Сандански", "имотен регистър", "кадастър", "KAIS", "удостоверение за тежести"],

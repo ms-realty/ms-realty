@@ -1,23 +1,23 @@
 {
   "generated_at": "2026-07-06T00:00:00Z",
-  "source_sitemap_entries": 198,
+  "source_sitemap_entries": 196,
   "summary": {
-    "routes": 205,
-    "sitemap_indexable_routes": 198,
+    "routes": 203,
+    "sitemap_indexable_routes": 196,
     "utility_routes": 7,
     "by_type": {
       "home": 7,
       "guide": 3,
-      "listing": 167,
+      "listing": 166,
       "contact": 7,
-      "location": 7,
+      "location": 6,
       "seller": 7,
       "search": 7
     },
     "by_locale": {
       "bg": 121,
       "de": 4,
-      "el": 6,
+      "el": 4,
       "en": 6,
       "he": 6,
       "nl": 4,
@@ -122,7 +122,7 @@
         "locale": "bg",
         "listingId": "MS-CRAWL-0001"
       },
-      "hreflang_count": 4
+      "hreflang_count": 3
     },
     {
       "type": "listing",
@@ -2996,7 +2996,7 @@
         "locale": "bg",
         "location": "sandanski"
       },
-      "hreflang_count": 5
+      "hreflang_count": 4
     },
     {
       "type": "seller",
@@ -3167,31 +3167,6 @@
       "hreflang_count": 8
     },
     {
-      "type": "listing",
-      "path": "/el/akinita/MS-CRAWL-0001",
-      "locale": "el",
-      "lang": "el",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "akinita",
-        "search": "anazitisi",
-        "location": "topothesies",
-        "seller": "polisi",
-        "contact": "epikoinonia"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderListingPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "el",
-        "listingId": "MS-CRAWL-0001"
-      },
-      "hreflang_count": 4
-    },
-    {
       "type": "search",
       "path": "/el/anazitisi",
       "locale": "el",
@@ -3262,31 +3237,6 @@
         "locale": "el"
       },
       "hreflang_count": 8
-    },
-    {
-      "type": "location",
-      "path": "/el/topothesies/sandanski",
-      "locale": "el",
-      "lang": "el",
-      "dir": "ltr",
-      "route_segments": {
-        "listing": "akinita",
-        "search": "anazitisi",
-        "location": "topothesies",
-        "seller": "polisi",
-        "contact": "epikoinonia"
-      },
-      "app_module": "app/[locale]/[...slug]/route",
-      "renderer": "renderLocationPage",
-      "dynamic": true,
-      "sitemap_indexable": true,
-      "public_indexable": true,
-      "cache": "public, max-age=300, s-maxage=3600",
-      "params": {
-        "locale": "el",
-        "location": "sandanski"
-      },
-      "hreflang_count": 5
     },
     {
       "type": "home",
@@ -3505,7 +3455,7 @@
         "locale": "he",
         "location": "sandanski"
       },
-      "hreflang_count": 5
+      "hreflang_count": 4
     },
     {
       "type": "listing",
@@ -3530,7 +3480,7 @@
         "locale": "he",
         "listingId": "MS-CRAWL-0001"
       },
-      "hreflang_count": 4
+      "hreflang_count": 3
     },
     {
       "type": "search",
@@ -3772,7 +3722,7 @@
         "locale": "ru",
         "location": "sandanski"
       },
-      "hreflang_count": 5
+      "hreflang_count": 4
     },
     {
       "type": "listing",

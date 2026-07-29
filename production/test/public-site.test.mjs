@@ -528,6 +528,24 @@ test("location page exposes only indexable locale inventory", () => {
   assert.match(missingHtml, /href="\/he\/search"/);
 });
 
+test("Sandanski exposes only its approved Bulgarian location context", () => {
+  const bg = renderLocationPage({ registry, listings, localeCode: "bg", location: "Sandanski" });
+  const ru = renderLocationPage({ registry, listings, localeCode: "ru", location: "Sandanski" });
+  const hotovo = renderLocationPage({ registry, listings, localeCode: "bg", location: "Hotovo" });
+  const html = renderReactPublicBody(bg);
+
+  assert.deepEqual(bg.body.context, {
+    href: "/bg/guides/proverka-na-imot-sandanski",
+    title: "Сандански: официални източници при проверка на имот",
+    summary: "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
+  });
+  assert.equal("context" in ru.body, false);
+  assert.equal("context" in hotovo.body, false);
+  assert.match(html, /data-location-context="true"/);
+  assert.match(html, /href="\/bg\/guides\/proverka-na-imot-sandanski"/);
+  assert.doesNotMatch(renderReactPublicBody(ru), /data-location-context="true"/);
+});
+
 test("seller valuation page is locale-prefixed and posts seller leads", () => {
   const he = renderSellerPage({ registry, localeCode: "he" });
   const fr = renderSellerPage({ registry, localeCode: "fr" });
@@ -612,6 +630,23 @@ test("source-bound Bulgarian guide renders official citations without a machine 
     }).status,
     404,
   );
+});
+
+test("buying-process guide retains its Registry Agency citation", () => {
+  const path = "/en/guides/buying-process";
+  const guide = renderGuidePage({
+    registry,
+    localeCode: "en",
+    path,
+    documents: approvedContentDocumentsForPath(readApprovedCmsContent(), path),
+  });
+  const html = renderReactPublicBody(guide);
+
+  assert.equal(guide.status, 200);
+  assert.equal(guide.body.sections[0].sources.length, 1);
+  assert.match(html, /data-guide-sources="true"/);
+  assert.match(html, /https:\/\/portal\.registryagency\.bg\/en\/page\/29/);
+  assert.match(html, /Official sources/);
 });
 
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {
