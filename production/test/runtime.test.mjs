@@ -29,6 +29,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
   const sourceLanguageRepair = renderRuntimePath(registry, seed, "/bg/imoti/MS-CRAWL-0006");
+  const sourceLanguageRecord = seed.records.find((record) => record.id === "MS-CRAWL-0006");
 
   assert.equal(he.status, 200);
   assert.equal(he.dir, "rtl");
@@ -81,7 +82,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
   assert.equal(sourceLanguageRepair.metadata.title, "Дава под наем промишлена сграда в Сандански");
-  assert.equal(sourceLanguageRepair.body.description, "Дава под наем промишлена сграда в Сандански");
+  assert.equal(sourceLanguageRepair.body.description, sourceLanguageRecord.facts.description);
 });
 
 test("runtime renders every second-batch source-reviewed listing description", () => {

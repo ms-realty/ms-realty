@@ -73,6 +73,15 @@ test("runtime sitemap keeps sold listings but not sold-only location pages", () 
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/he/locations/sold-only-runtime-city"), false);
 });
 
+test("runtime sitemap exposes only official reviewed location scopes", () => {
+  const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), loadCmsSeed());
+
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/sandanski"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/petrich"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/bansko"), false);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/logari"), false);
+});
+
 test("runtime sitemap excludes stale translation routes", () => {
   const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), loadCmsSeed(), readTranslationLedger());
 

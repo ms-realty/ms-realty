@@ -402,7 +402,8 @@ test("search applies text and facet filters before paginating cards", () => {
 
   assert.ok(petrich.search.total_matches > 0);
   assert.ok(petrich.cards.some((card) => card.location === "פטריץ׳"));
-  assert.ok(petrichLocation.cards.every((card) => card.location === "פטריץ׳"));
+  assert.ok(petrichLocation.cards.some((card) => card.location === "פטריץ׳"));
+  assert.ok(petrichLocation.cards.every((card) => ["פטריץ׳", "Petrich Municipality"].includes(card.location)));
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_type, "apartment");
@@ -533,6 +534,20 @@ test("location page keeps reviewed inventory indexable and serves source fallbac
   assert.equal(englishFallback.indexable, false);
   assert.equal(englishFallback.cards.length > 0, true);
   assert.equal(englishFallback.metadata.robots, "noindex,follow");
+});
+
+test("reviewed settlement search is exact and curated location pages exclude held or foreign inventory", () => {
+  const polenitsa = findListingById(listings, "MS-CRAWL-0033");
+  const greek = findListingById(listings, "MS-CRAWL-0072");
+  const held = findListingById(listings, "MS-CRAWL-0143");
+  const search = renderSearchPage({ registry, listings, localeCode: "bg", filters: { location: "Поленица" }, pageSize: null });
+  const sandanski = renderLocationPage({ registry, listings: [polenitsa, greek, held], localeCode: "bg", location: "Sandanski" });
+
+  assert.ok(search.cards.some((card) => card.id === "MS-CRAWL-0033"));
+  assert.ok(search.cards.every((card) => card.location === "Поленица"));
+  assert.equal(sandanski.status, 200);
+  assert.equal(sandanski.body.listing_count, 1);
+  assert.deepEqual(sandanski.cards.map((card) => card.id), ["MS-CRAWL-0033"]);
 });
 
 test("Bulgarian locations expose only their approved source-bound context", () => {

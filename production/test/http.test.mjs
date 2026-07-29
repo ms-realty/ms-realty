@@ -2236,7 +2236,7 @@ test("HTTP launch readiness stays tied to the deployed redirect artifact until e
   assert.equal(redirectGate.evidence.unresolved_legacy_urls, 292);
 });
 
-test("HTTP sitemap honors mounted listing edit ledger", async () => {
+test("HTTP sitemap does not turn an editor location label into a new landing page", async () => {
   const listingEditLedgerPath = tempListingEdits();
   fs.appendFileSync(
     listingEditLedgerPath,
@@ -2251,7 +2251,8 @@ test("HTTP sitemap honors mounted listing edit ledger", async () => {
   const sitemap = await dispatchHttp(createHttpApp({ listingEditLedgerPath }), { url: "/sitemap.xml" });
 
   assert.equal(sitemap.status, 200);
-  assert.match(sitemap.body, /\/he\/locations\/runtime-only-city/);
+  assert.doesNotMatch(sitemap.body, /\/he\/locations\/runtime-only-city/);
+  assert.match(sitemap.body, /\/he\/locations\/sandanski/);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {

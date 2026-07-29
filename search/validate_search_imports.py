@@ -81,7 +81,10 @@ def main() -> int:
     if any(doc["locale"] == "fr" or doc["translation_indexable"] is not True for doc in index_docs):
         raise SystemExit("Search import must exclude French and non-indexable docs")
 
-    reviewed_description = "Updated approved source description."
+    reviewed_source = next((doc for doc in source_docs if doc["id"] == "MS-CRAWL-0001"), None)
+    if reviewed_source is None:
+        raise SystemExit("Reviewed source listing is missing from search imports")
+    reviewed_description = str(reviewed_source["description"])
     reviewed_docs = [doc for doc in index_docs if doc["source_listing_id"] == "MS-CRAWL-0001"]
     if {doc["locale"] for doc in reviewed_docs} != {"bg", "el", "he"}:
         raise SystemExit("Reviewed listing must export BG source plus Greek and Hebrew search docs")
@@ -124,6 +127,14 @@ def main() -> int:
     russian_listing = next(doc for doc in source_docs if doc["id"] == "MS-CRAWL-0114")
     if "apartamenty" not in str(russian_listing["search_text"]).lower():
         raise SystemExit("Search imports must include deterministic Cyrillic transliteration variants")
+
+    reviewed_locations = {doc["id"]: doc for doc in source_docs}
+    if reviewed_locations["MS-CRAWL-0033"]["location"] != "Polenitsa" or reviewed_locations["MS-CRAWL-0033"]["settlement_ekatte"] != "57176":
+        raise SystemExit("Search imports must use reviewed official settlement data")
+    if reviewed_locations["MS-CRAWL-0072"]["location"] != "Logari" or reviewed_locations["MS-CRAWL-0072"]["country_code"] != "GR":
+        raise SystemExit("Search imports must not label Greek listings as Sandanski")
+    if reviewed_locations["MS-CRAWL-0143"]["location_review_status"] != "legacy_area_only":
+        raise SystemExit("Route mentions must remain location-review holds")
 
     print("PASS: search import fixtures validate for Typesense and Meilisearch")
     return 0

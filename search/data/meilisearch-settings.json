@@ -4,7 +4,9 @@
     "description",
     "h1",
     "search_text",
-    "location"
+    "location",
+    "location_native",
+    "municipality"
   ],
   "filterableAttributes": [
     "source_listing_id",
@@ -20,6 +22,11 @@
     "translation_human_approved",
     "translation_indexable",
     "location",
+    "municipality",
+    "municipality_code",
+    "country_code",
+    "settlement_ekatte",
+    "location_review_status",
     "property_type",
     "offer_type",
     "bedrooms",

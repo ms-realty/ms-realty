@@ -2658,22 +2658,6 @@
     {
       "type": "location",
       "locale": "bg",
-      "location": "Hotovo",
-      "loc": "/bg/lokacii/hotovo",
-      "hreflang": [
-        {
-          "hreflang": "bg",
-          "href": "/bg/lokacii/hotovo"
-        },
-        {
-          "hreflang": "x-default",
-          "href": "/bg/lokacii/hotovo"
-        }
-      ]
-    },
-    {
-      "type": "location",
-      "locale": "bg",
       "location": "Petrich",
       "loc": "/bg/lokacii/petrich",
       "hreflang": [
@@ -2708,6 +2692,22 @@
         {
           "hreflang": "x-default",
           "href": "/bg/lokacii/petrich"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "bg",
+      "location": "Hotovo",
+      "loc": "/bg/lokacii/hotovo",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/hotovo"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/hotovo"
         }
       ]
     },

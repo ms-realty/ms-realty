@@ -248,7 +248,22 @@ export function buildCmsCollections(seed) {
           collectionField("source_url", "url", { required: true, unique: true }),
           collectionField("facts", "group", {
             required: true,
-            fields: ["title", "h1", "description", "property_type", "location", "price_eur", "area_sqm"],
+            fields: [
+              "title",
+              "h1",
+              "description",
+              "property_type",
+              "location",
+              "location_native",
+              "location_legacy",
+              "municipality",
+              "municipality_code",
+              "country_code",
+              "settlement_ekatte",
+              "location_review_status",
+              "price_eur",
+              "area_sqm",
+            ],
           }),
           collectionField("seo", "group", {
             required: true,

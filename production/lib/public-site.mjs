@@ -17,6 +17,8 @@ import {
   isTranslationIndexable,
   listingPath,
   locationPath,
+  matchesPublicLocationScope,
+  publicLocationNames,
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
@@ -767,6 +769,10 @@ export function localizedLocationValue(localeCode, value) {
   return LOCATION_NAMES[localeCode]?.[value] || String(value || "");
 }
 
+function localizedLocationForView(localeCode, view) {
+  return localeCode === "bg" && view.location_native ? view.location_native : localizedLocationValue(localeCode, view.location);
+}
+
 export function localizedSearchFilterValue(localeCode, key, value) {
   if (key === "property_type" || key === "offer_type") return localizedListingValue(localeCode, key, value);
   if (key === "location") return localizedLocationValue(localeCode, value);
@@ -1138,7 +1144,7 @@ function localizedCopy(localeCode, view) {
       description: view.description && view.description !== view.title ? view.description : sourceTitle,
     };
   }
-  const localizedView = { ...view, location: localizedLocationValue(localeCode, view.location) };
+  const localizedView = { ...view, location: localizedLocationForView(localeCode, view) };
   const title = template.title(localizedView);
   return {
     title,
@@ -1252,7 +1258,7 @@ function listingCard(registry, listing, locale) {
     translation_human_approved: state.translation?.human_approved === true,
     source_locale: listing.locale,
     content_locale: copyLocale,
-    location: localizedLocationValue(locale.code, view.location),
+    location: localizedLocationForView(locale.code, view),
     property_type: view.property_type,
     property_type_label: localizedListingValue(locale.code, "property_type", view.property_type),
     offer_type: view.offer_type,
@@ -1329,10 +1335,6 @@ function indexableListingForLocale(registry, listing, locale) {
   return searchTranslationState(registry, listing, locale).indexable;
 }
 
-function locationNamesFromListings(listings) {
-  return [...new Set(listings.map((listing) => listingToPublicViewModel(listing).location).filter(Boolean))].sort();
-}
-
 const CYRILLIC_TO_LATIN = Object.freeze({
   а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m",
   н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sht",
@@ -1364,7 +1366,18 @@ function queryTokens(query) {
 }
 
 function searchableText(view) {
-  const source = [view.id, view.title, view.h1, view.description, view.location, view.property_type, view.offer_type].join(" ");
+  const source = [
+    view.id,
+    view.title,
+    view.h1,
+    view.description,
+    view.location,
+    view.location_native,
+    view.municipality,
+    view.country_code,
+    view.property_type,
+    view.offer_type,
+  ].join(" ");
   return searchVariants(source).join(" ");
 }
 
@@ -1386,7 +1399,7 @@ function numberFilter(value, min, max) {
 function matchesSearch(view, query, filters = {}) {
   const text = searchableText(view);
   if (!queryTokens(query).every((variants) => variants.some((token) => text.includes(token)))) return false;
-  if (filters.location && !includesSearchValue(view.location, filters.location)) return false;
+  if (filters.location && !includesSearchValue([view.location, view.location_native, view.country_code].join(" "), filters.location)) return false;
   if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
   if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
   if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;
@@ -1598,7 +1611,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       description: copy.description,
       facts: {
         id: view.id,
-        location: localizedLocationValue(locale.code, view.location),
+        location: localizedLocationForView(locale.code, view),
         property_type: view.property_type,
         offer_type: view.offer_type,
         bedrooms: view.bedrooms,
@@ -1780,7 +1793,7 @@ export function renderHomePage({ registry, localeCode, listings }) {
   const path = homePath(registry, locale.code);
   const copy = homeCopy(locale.code);
   const search = renderSearchPage({ registry, localeCode: locale.code, listings, query: "" });
-  const locations = locationNamesFromListings(listings)
+  const locations = publicLocationNames(listings)
     .map((location) => {
       const page = renderLocationPage({ registry, localeCode: locale.code, location, listings });
       return page.status === 200
@@ -1999,13 +2012,13 @@ export function renderLocationPage({ registry, localeCode, location, listings })
   const locale = resolved.locale;
   const localizedMatches = listings.filter((listing) => {
     const view = listingToPublicViewModel(listing);
-    return norm(view.location) === norm(location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, locale);
+    return matchesPublicLocationScope(view, location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, locale);
   });
   const fallbackLocale = locale.fallback_locale || registry.source_locale;
   const fallbackMatches = listings.filter((listing) => {
     const view = listingToPublicViewModel(listing);
     return (
-      norm(view.location) === norm(location) &&
+      matchesPublicLocationScope(view, location) &&
       isActiveListing(listing) &&
       (listing.locale === fallbackLocale || listing.locale === registry.source_locale)
     );
@@ -2029,7 +2042,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
     .filter((candidate) =>
       listings.some((listing) => {
         const view = listingToPublicViewModel(listing);
-        return norm(view.location) === norm(location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, candidate);
+        return matchesPublicLocationScope(view, location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, candidate);
       }),
     )
     .map((candidate) => candidate.code);
