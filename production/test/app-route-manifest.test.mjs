@@ -57,10 +57,10 @@ test("generated App Router manifest is valid when present", () => {
   if (!fs.existsSync(file)) return;
   const manifest = JSON.parse(fs.readFileSync(file, "utf8"));
   assert.equal(assertAppRouteManifest(manifest), true);
-  assert.equal(manifest.summary.routes, 204);
-  assert.equal(manifest.summary.sitemap_indexable_routes, 197);
+  assert.equal(manifest.summary.routes, 205);
+  assert.equal(manifest.summary.sitemap_indexable_routes, 198);
   assert.equal(manifest.summary.by_type.search, 7);
-  assert.equal(manifest.summary.by_type.guide, 2);
+  assert.equal(manifest.summary.by_type.guide, 3);
   assert.equal(manifest.routes.some((route) => route.path.startsWith("/fr/")), false);
   assert.equal(assertAppRouteFiles(manifest), true);
 });
@@ -212,7 +212,7 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   const sitemap = renderAppSitemap();
   assert.equal(sitemap.status, 200);
   assert.equal(sitemap.headers["content-type"], "application/xml; charset=utf-8");
-  assert.equal(sitemap.sitemap.summary.entries, 195);
+  assert.equal(sitemap.sitemap.summary.entries, 196);
   assert.match(sitemap.body, /<loc>https:\/\/makler-realty.com\/he<\/loc>/);
   assert.match(sitemap.body, /\/he\/properties\/MS-CRAWL-0001/);
   assert.match(sitemap.body, /\/en\/guides\/foreign-buyers/);

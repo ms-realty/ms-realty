@@ -2093,6 +2093,28 @@ function GuideBody({ page }) {
         },
         primary ? null : h("h2", null, section.title),
         h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 15 }), fact))),
+        section.sources?.length
+          ? h(
+              "div",
+              { className: "guide-sources", "data-guide-sources": "true" },
+              section.sources_label ? h("p", { className: "guide-sources__label" }, section.sources_label) : null,
+              h(
+                "ul",
+                { className: "guide-sources__links" },
+                ...section.sources.map((source) =>
+                  h(
+                    "li",
+                    { key: source.id },
+                    h(
+                      "a",
+                      { href: source.url, target: "_blank", rel: "noopener noreferrer" },
+                      source.label || source.publisher,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       );
     }),
     h(

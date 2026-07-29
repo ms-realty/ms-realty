@@ -587,6 +587,33 @@ test("approved CMS guide page renders reviewed foreign-buyer facts", () => {
   assert.doesNotMatch(html, /<h2>Foreign buyers and Bulgarian land ownership<\/h2>/);
 });
 
+test("source-bound Bulgarian guide renders official citations without a machine translation", () => {
+  const path = "/bg/guides/proverka-na-imot-sandanski";
+  const guide = renderGuidePage({
+    registry,
+    localeCode: "bg",
+    path,
+    documents: approvedContentDocumentsForPath(readApprovedCmsContent(), path),
+  });
+  const html = renderReactPublicBody(guide);
+
+  assert.equal(guide.status, 200);
+  assert.equal(guide.indexable, true);
+  assert.equal(guide.body.sections[0].sources.length, 3);
+  assert.match(html, /data-guide-sources="true"/);
+  assert.match(html, /https:\/\/kais\.cadastre\.bg\//);
+  assert.match(html, /Официални източници/);
+  assert.equal(
+    renderGuidePage({
+      registry,
+      localeCode: "en",
+      path: "/en/guides/proverka-na-imot-sandanski",
+      documents: approvedContentDocumentsForPath(readApprovedCmsContent(), "/en/guides/proverka-na-imot-sandanski"),
+    }).status,
+    404,
+  );
+});
+
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {
   const adminRu = renderAdminShell({ registry, requestedLocale: "ru" });
   const adminEl = renderAdminShell({ registry, requestedLocale: "el" });

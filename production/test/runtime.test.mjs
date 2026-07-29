@@ -25,6 +25,7 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   const seller = renderRuntimePath(registry, seed, "/he/sell");
   const contact = renderRuntimePath(registry, seed, "/he/contact");
   const guide = renderRuntimePath(registry, seed, "/en/guides/foreign-buyers");
+  const bgGuide = renderRuntimePath(registry, seed, "/bg/guides/proverka-na-imot-sandanski");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
   const sourceLanguageRepair = renderRuntimePath(registry, seed, "/bg/imoti/MS-CRAWL-0006");
@@ -66,6 +67,10 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(guide.body.sections.length, 2);
   assert.match(guide.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
   assert.equal(renderRuntimePath(registry, seed, "/he/guides/foreign-buyers").status, 404);
+  assert.equal(bgGuide.status, 200);
+  assert.equal(bgGuide.indexable, true);
+  assert.equal(bgGuide.body.sections[0].sources.length, 3);
+  assert.equal(renderRuntimePath(registry, seed, "/en/guides/proverka-na-imot-sandanski").status, 404);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").kind, "location");
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length, 1);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/petrich").status, 404);

@@ -7,10 +7,10 @@
     "location_pages": 7,
     "seller_pages": 7,
     "contact_pages": 7,
-    "guide_pages": 2,
-    "entries": 197,
+    "guide_pages": 3,
+    "entries": 198,
     "byLocale": {
-      "bg": 119,
+      "bg": 120,
       "en": 5,
       "de": 3,
       "nl": 3,
@@ -3357,6 +3357,22 @@
         {
           "hreflang": "x-default",
           "href": "/en/guides/buying-process"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "bg",
+      "loc": "/bg/guides/proverka-na-imot-sandanski",
+      "guide_id": "sandanski-property-official-sources",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/guides/proverka-na-imot-sandanski"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/guides/proverka-na-imot-sandanski"
         }
       ]
     }

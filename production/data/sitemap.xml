@@ -1079,4 +1079,9 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://makler-realty.com/en/guides/buying-process" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/en/guides/buying-process" />
   </url>
+  <url>
+    <loc>https://makler-realty.com/bg/guides/proverka-na-imot-sandanski</loc>
+    <xhtml:link rel="alternate" hreflang="bg" href="https://makler-realty.com/bg/guides/proverka-na-imot-sandanski" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://makler-realty.com/bg/guides/proverka-na-imot-sandanski" />
+  </url>
 </urlset>

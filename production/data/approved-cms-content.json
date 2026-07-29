@@ -1,12 +1,18 @@
 {
-  "generated_at": "2026-07-06T00:00:00Z",
+  "generated_at": "2026-07-29T00:00:00Z",
   "documents": [
     {
       "id": "foreign-buyers-bg-land-ownership",
       "type": "guide",
+      "guide_key": "foreign-buyers-bg-land-ownership",
       "locale": "en",
+      "source_locale": "en",
       "status": "approved",
+      "human_approved": true,
       "reviewer": "editor_bg",
+      "approved_at": "2026-07-06T00:00:00Z",
+      "legacy_migration": true,
+      "source_hash": "d8bc20780f103ce7782105bdf901cd054120b577826b805435c711fd05e61974",
       "title": "Foreign buyers and Bulgarian land ownership",
       "path": "/en/guides/foreign-buyers",
       "keywords": ["foreign", "non-eu", "non eu", "land", "company", "ood", "ownership"],
@@ -19,9 +25,15 @@
     {
       "id": "foreign-buyers-financing-gap",
       "type": "guide",
+      "guide_key": "foreign-buyers-financing-gap",
       "locale": "en",
+      "source_locale": "en",
       "status": "approved",
+      "human_approved": true,
       "reviewer": "editor_bg",
+      "approved_at": "2026-07-06T00:00:00Z",
+      "legacy_migration": true,
+      "source_hash": "5dc709f987d37e6dfaa1914da9710115f421c87739f9494f6bbda788a36bc91f",
       "title": "Foreign-buyer financing checks",
       "path": "/en/guides/foreign-buyers",
       "keywords": ["foreign", "mortgage", "bank", "financing", "loan"],
@@ -33,15 +45,68 @@
     {
       "id": "buyer-due-diligence-liens",
       "type": "guide",
+      "guide_key": "buyer-due-diligence-liens",
       "locale": "en",
+      "source_locale": "en",
       "status": "approved",
+      "human_approved": true,
       "reviewer": "editor_bg",
+      "approved_at": "2026-07-06T00:00:00Z",
+      "legacy_migration": true,
+      "source_hash": "699e0f59593aa44a472e5201dc24eaa53f83fae9cdc0550cc4d8e505aa6b4d00",
       "title": "Title and encumbrance checks",
       "path": "/en/guides/buying-process",
       "keywords": ["title", "lien", "liens", "mortgage", "encumbrance", "deposit", "due diligence"],
       "facts": [
         "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
         "MS Realty treats title and encumbrance checks as part of the buying process before a buyer relies on the deal."
+      ]
+    },
+    {
+      "id": "sandanski-property-official-sources",
+      "type": "guide",
+      "guide_key": "sandanski-property-official-sources",
+      "locale": "bg",
+      "source_locale": "bg",
+      "status": "approved",
+      "human_approved": true,
+      "reviewer": "editor_bg",
+      "approved_at": "2026-07-29T00:00:00Z",
+      "source_hash": "7b5ea6144f8e7551f0f017fd4beb4559c8c24efe68b9c0c17109d135626fef5c",
+      "title": "Сандански: официални източници при проверка на имот",
+      "path": "/bg/guides/proverka-na-imot-sandanski",
+      "keywords": ["Сандански", "имотен регистър", "кадастър", "KAIS", "удостоверение за тежести"],
+      "facts": [
+        "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
+        "Имотният регистър съдържа актове за възникване, прехвърляне, изменение или прекратяване на вещни права върху недвижими имоти, както и възбрани и ипотеки.",
+        "Удостоверението от Имотния регистър отразява вписванията, отбелязванията и заличаванията за тежести и права към момента на издаването му."
+      ],
+      "sources_label": "Официални източници",
+      "sources": [
+        {
+          "id": "kais-cadastre",
+          "publisher": "Агенция по геодезия, картография и кадастър",
+          "label": "Кадастрален портал KAIS",
+          "url": "https://kais.cadastre.bg/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["cadastre-portal"]
+        },
+        {
+          "id": "registry-property-register",
+          "publisher": "Агенция по вписванията",
+          "label": "Имотен регистър",
+          "url": "https://www.registryagency.bg/bg/registri/imoten-registar/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["property-register"]
+        },
+        {
+          "id": "registry-property-certificates",
+          "publisher": "Агенция по вписванията",
+          "label": "Удостоверения от Имотния регистър",
+          "url": "https://www.registryagency.bg/bg/registri/imoten-registar/udostovereniya/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["property-certificates"]
+        }
       ]
     }
   ]

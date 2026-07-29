@@ -20,7 +20,7 @@ import {
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
-import { approvedContentGuideGroups, readApprovedCmsContent } from "./approved-content.mjs";
+import { approvedContentGuideGroups, isPublishableGuide, readApprovedCmsContent } from "./approved-content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
@@ -1894,7 +1894,7 @@ export function renderContactPage({ registry, localeCode }) {
 export function renderGuidePage({ registry, localeCode, path, documents }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
-  const docs = documents.filter((doc) => doc.status === "approved" && doc.locale === locale.code);
+  const docs = documents.filter((doc) => isPublishableGuide(doc) && doc.locale === locale.code);
   const first = docs[0];
   if (!first) return { kind: "not_found", status: 404, path, indexable: false };
   const indexable = resolved.available && locale.public_enabled && locale.indexable;
@@ -1931,6 +1931,8 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
         title: doc.title,
         facts: doc.facts,
         reviewer: doc.reviewer,
+        sources_label: doc.sources_label || "",
+        sources: doc.sources || [],
       })),
       ctas: {
         search: { path: `/${locale.code}/${locale.route_segments.search}` },
