@@ -84,6 +84,7 @@
     "node": ">=22.13"
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
     "@payloadcms/db-postgres": "3.85.2",
     "@payloadcms/next": "3.85.2",
     "@payloadcms/translations": "3.85.2",
@@ -91,7 +92,8 @@
     "next": "16.2.10",
     "payload": "3.85.2",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "zod": "4.2.0"
   },
   "overrides": {
     "@esbuild-kit/core-utils": {

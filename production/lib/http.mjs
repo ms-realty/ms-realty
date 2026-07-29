@@ -5,6 +5,7 @@ import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
+import { renderMcpResponse } from "./mcp-server.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
@@ -927,6 +928,25 @@ export function createHttpApp({
       : null;
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
+    if (url.pathname === "/mcp") {
+      const headers = new Headers();
+      for (const [name, value] of Object.entries(request.headers || {})) {
+        if (value !== undefined) headers.set(name, Array.isArray(value) ? value.join(", ") : String(value));
+      }
+      const method = String(request.method || "GET").toUpperCase();
+      const mcpResponse = await renderMcpResponse(
+        new Request(`http://ms-realty.local${url.pathname}${url.search}`, {
+          method,
+          headers,
+          ...(!["GET", "HEAD"].includes(method) && request.body ? { body: request.body } : {}),
+        }),
+      );
+      return {
+        status: mcpResponse.status,
+        headers: Object.fromEntries(mcpResponse.headers.entries()),
+        body: await mcpResponse.text(),
+      };
+    }
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
     const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
