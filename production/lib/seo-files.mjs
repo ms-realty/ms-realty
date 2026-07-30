@@ -13,6 +13,37 @@ import {
 } from "./seo.mjs";
 
 export const DEFAULT_PUBLIC_ORIGIN = process.env.MS_REALTY_PUBLIC_ORIGIN || "https://makler-realty.com";
+
+// Both domains are first-class and serve the same app, so canonical, hreflang,
+// sitemap, and robots must reflect the host the request actually arrived on —
+// otherwise .ru silently canonicalises and sitemaps itself into .com.
+export const PUBLIC_HOSTS = new Set(["makler-realty.com", "makler-realty.ru"]);
+
+export function publicOriginForHost(host, { env = process.env, fallback = DEFAULT_PUBLIC_ORIGIN } = {}) {
+  const normalized = String(host || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase()
+    .replace(/:\d+$/, "");
+  if (!normalized) return fallback;
+  const bare = normalized.replace(/^www\./, "");
+  if (PUBLIC_HOSTS.has(bare)) return `https://${bare}`;
+  const extra = String(env.MS_REALTY_ADDITIONAL_PUBLIC_ORIGINS || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  for (const candidate of extra) {
+    try {
+      const url = new URL(candidate.includes("://") ? candidate : `https://${candidate}`);
+      if (url.host.toLowerCase().replace(/^www\./, "") === bare) return `${url.protocol}//${url.host}`;
+    } catch {
+      /* ignore malformed configuration */
+    }
+  }
+  // Unknown host (local preview, health probe): keep paths relative so nothing
+  // publishes an absolute URL pointing at a hostname we do not own.
+  return "";
+}
 export const DEFAULT_LOCALIZED_SITEMAP_PATH = fromRoot("production", "data", "localized-sitemap.json");
 export const DEFAULT_SITEMAP_XML_OUTPUT = fromRoot("production", "data", "sitemap.xml");
 export const DEFAULT_ROBOTS_OUTPUT = fromRoot("production", "data", "robots.txt");

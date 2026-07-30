@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import {
+  adminHomePath,
   bindAuthenticatedOperator,
   canAdminAccess,
   canAdminMutate,
@@ -45,6 +46,13 @@ import {
   readAccountLedger,
 } from "./account-ledger.mjs";
 import { buildContactRecords } from "./contact-records.mjs";
+import { eraseContactSubject } from "./contact-erasure.mjs";
+import { authenticateOperator, clearedSessionCookie, issueSession, sessionCookie } from "./admin-sessions.mjs";
+import { renderAdminLoginPage } from "./admin-login.mjs";
+import { renderAdminHermesPage } from "./admin-hermes-page.mjs";
+import { hermesBackendStatus, setHermesBackend } from "./hermes-backend.mjs";
+import { CSP_HEADER, securityHeaders } from "./security-headers.mjs";
+import { crossOriginWriteRejection } from "./request-guard.mjs";
 import { loadMigrationRecords } from "./content.mjs";
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH, appendClosedDeal, readDeals } from "./deal-ledger.mjs";
@@ -203,13 +211,15 @@ import {
   readViewingFollowUps,
 } from "./viewing-follow-ups.mjs";
 
-const SECURITY_HEADERS = {
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "strict-origin-when-cross-origin",
-  "x-frame-options": "DENY",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+const SECURITY_HEADERS = securityHeaders();
+// The admin shell renders through this adapter in the deployed runtime, so the
+// CSP has to be attached here too — not only in the bare Node server.
+const PRIVATE_HTML_HEADERS = {
+  ...SECURITY_HEADERS,
+  ...CSP_HEADER,
+  "content-type": "text/html; charset=utf-8",
+  "cache-control": "no-store",
 };
-const PRIVATE_HTML_HEADERS = { ...SECURITY_HEADERS, "content-type": "text/html; charset=utf-8", "cache-control": "no-store" };
 const PRIVATE_JSON_HEADERS = {
   ...SECURITY_HEADERS,
   "content-type": "application/json; charset=utf-8",
@@ -844,36 +854,12 @@ function deployableRedirectArtifact(config = {}) {
   return JSON.parse(fs.readFileSync(/*turbopackIgnore: true*/ sourcePath, "utf8"));
 }
 
-function deployableRedirects(config = {}) {
-  return deployableRedirectArtifact(config).redirects || [];
-}
-
 function routeMapSummary(routes) {
   return { summary: summarizeLegacyRouteMap(routes), routes };
 }
 
 function currentLegacyRouteDecisions(config) {
   return buildLegacyRouteDecisions(routeMapRows(), readRedirectApprovals(config.redirectApprovalPath));
-}
-
-function currentDeployableArtifact(config) {
-  const decisions = currentLegacyRouteDecisions(config);
-  const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
-    old_url: decision.old_url,
-    target_path: decision.target_path,
-    status: 301,
-    source_domain: decision.source_domain,
-    target_locale: decision.target_locale,
-    url_type: decision.url_type,
-    reviewer: decision.reviewer,
-    approved_at: decision.approved_at,
-  }));
-  return {
-    summary: summarizeDeployableRedirects(redirects),
-    decision_summary: summarizeLegacyRouteDecisions(decisions),
-    redirects,
-    decisions,
-  };
 }
 
 function deployableRedirectsForLaunch(config) {
@@ -2114,9 +2100,66 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
   };
 }
 
+// Login and logout are the only admin routes reachable without a principal —
+// they are how one is obtained. The cross-origin guard still applies to the
+// POST, so the form cannot be driven from another site.
+async function renderAdminAuthRoute(request, url, config) {
+  if (request.method === "GET" && url.pathname === "/admin/login") {
+    return new Response(renderAdminLoginPage({ next: url.searchParams.get("next") || "" }), {
+      status: 200,
+      headers: PRIVATE_HTML_HEADERS,
+    });
+  }
+  if (request.method === "POST" && url.pathname === "/admin/login") {
+    const body = await readRequestBody(request, config.maxBodyBytes);
+    const input = parseBody(request, body);
+    const operator = authenticateOperator(input.operator, input.password);
+    if (!operator) {
+      // One message for a wrong id and a wrong password: naming which was
+      // wrong would confirm that an operator id exists.
+      return new Response(renderAdminLoginPage({ next: input.next || "", error: true }), {
+        status: 401,
+        headers: PRIVATE_HTML_HEADERS,
+      });
+    }
+    const target = String(input.next || "").startsWith("/admin") ? String(input.next) : adminHomePath(operator);
+    return new Response(null, {
+      status: 303,
+      headers: { ...PRIVATE_JSON_HEADERS, location: target, "set-cookie": sessionCookie(issueSession(operator)) },
+    });
+  }
+  if (request.method === "POST" && url.pathname === "/admin/logout") {
+    return new Response(null, {
+      status: 303,
+      headers: { ...PRIVATE_JSON_HEADERS, location: "/admin/login", "set-cookie": clearedSessionCookie() },
+    });
+  }
+  return null;
+}
+
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
-  const principal = resolveAdminPrincipal(request.headers.get("authorization") || "");
-  if (!principal) return adminUnauthorized();
+  const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
+  if (crossOrigin) {
+    return new Response(JSON.stringify({ kind: "cross_origin_write_blocked", reason: crossOrigin }), {
+      status: 403,
+      headers: PRIVATE_JSON_HEADERS,
+    });
+  }
+  const authUrl = new URL(request.url, "http://localhost");
+  const authRoute = await renderAdminAuthRoute(request, authUrl, config);
+  if (authRoute) return authRoute;
+
+  const principal = resolveAdminPrincipal(
+    request.headers.get("authorization") || "",
+    process.env,
+    request.headers.get("cookie") || "",
+  );
+  // A browser asking for a page gets the login form; an API client gets 401.
+  if (!principal) {
+    return (request.headers.get("accept") || "").includes("text/html")
+      ? new Response(null, { status: 303, headers: { ...PRIVATE_JSON_HEADERS, location: `/admin/login?next=${encodeURIComponent(authUrl.pathname)}` } })
+      : adminUnauthorized();
+  }
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
   config = { ...config, adminPrincipal: principal };
   try {
@@ -2126,6 +2169,39 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     const registry = loadLocaleRegistry(config.localeRegistryPath);
     if (request.method === "GET" && url.pathname === "/admin/today") return htmlResponse(todayPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/today") return jsonResponse(200, todayPayload(registry, url, config));
+    // Hermes generation backend switch — same semantics as the bare-node
+    // runtime in http.mjs: administration:read/write via the capability
+    // fallback, audit-logged inside setHermesBackend, plain HTML page (login
+    // pattern) so the pinned React-shell fixtures stay untouched.
+    if (request.method === "GET" && url.pathname === "/admin/hermes") {
+      const switched = url.searchParams.get("switched") === "1";
+      return new Response(renderAdminHermesPage({ status: hermesBackendStatus(), switched }), {
+        status: 200,
+        headers: PRIVATE_HTML_HEADERS,
+      });
+    }
+    if (request.method === "GET" && url.pathname === "/api/admin/hermes/backend") {
+      return jsonResponse(200, hermesBackendStatus());
+    }
+    if (request.method === "POST" && ["/admin/hermes", "/api/admin/hermes/backend"].includes(url.pathname)) {
+      const body = await readRequestBody(request, config.maxBodyBytes);
+      const input = parseBody(request, body);
+      try {
+        setHermesBackend(String(input.backend || ""), { actor: config.adminPrincipal.id, auditLogPath: config.auditLogPath });
+        if (url.pathname === "/admin/hermes") {
+          return new Response(null, { status: 303, headers: { ...PRIVATE_JSON_HEADERS, location: "/admin/hermes?switched=1" } });
+        }
+        return jsonResponse(200, hermesBackendStatus());
+      } catch (error) {
+        if (url.pathname === "/admin/hermes") {
+          return new Response(renderAdminHermesPage({ status: hermesBackendStatus(), error: error.message }), {
+            status: 200,
+            headers: PRIVATE_HTML_HEADERS,
+          });
+        }
+        return jsonResponse(400, { kind: "bad_request", message: error.message });
+      }
+    }
     if (request.method === "GET" && url.pathname === "/admin/leads") return htmlResponse(leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/leads") return jsonResponse(200, leadInboxPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/contacts") return htmlResponse(contactsPayload(registry, url, config));
@@ -2343,6 +2419,27 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
       const result = appendConsentWithdrawalEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
       return jsonResponse(result.idempotent ? 200 : 201, result);
+    }
+    if (request.method === "POST" && url.pathname === "/api/admin/contacts/erase") {
+      const input = bindAuthenticatedOperator(
+        parseBody(request, await readRequestBody(request, config.maxBodyBytes)),
+        config.adminPrincipal,
+      );
+      const result = eraseContactSubject(input, {
+        leadContactVaultPath: config.leadContactVaultPath,
+        publicContactVaultPath: config.publicContactVaultPath,
+      });
+      recordAudit(
+        {
+          action: "contact_erased",
+          actor: result.actor,
+          objectType: `${result.subject_type}_contact`,
+          objectId: result.subject_id,
+          metadata: { reason: result.reason, erased_rows: result.erased_rows },
+        },
+        config,
+      );
+      return jsonResponse(200, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
       return jsonResponse(201, await draftReply(parseJsonBody(await readRequestBody(request, config.maxBodyBytes)), config));

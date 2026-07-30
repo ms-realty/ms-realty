@@ -3,12 +3,16 @@
 Generated: 2026-07-05T00:00:00Z
 
 Status: blocked
-Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
+Blockers: redirect_reviews, locale_content_parity, media_migration, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery
 
 ## Blocked Gate Actions
 
 - redirect_reviews: Review every unresolved legacy URL in /admin/migration/review; retain equivalent content, map one-hop 301s, or approve a 410 individually.
 - redirect_reviews: Download /api/admin/redirect-approval-workbook?pending=1, record a terminal decision for each row, then import it through /api/admin/redirect-approvals/import.
+- locale_content_parity: Every indexable public locale needs at least one approved listing translation, or the locale must be set indexable: false in locales/registry.json until it has content.
+- locale_content_parity: Port the legacy /en/, /de/, and /nl/ translations, or run the Hermes draft queue and approve them in /admin/translations.
+- media_migration: Run node production/scripts/run-media-mirror.mjs to copy every legacy /wp-content/uploads asset onto owned storage.
+- media_migration: Legacy image URLs stop resolving the moment DNS moves; the mirror serves them at their original paths.
 - external_seo_exports: Import Search Console, Yandex Webmaster, and backlink CSV exports through /api/admin/seo-evidence/import.
 - external_seo_exports: Run npm run seo:preflight, npm run seo:evidence, and npm run seo:preflight:report after import.
 - listing_quality_review: Review listings one at a time in /admin/migration/review; each human sign-off is validated, persisted, and audited before the queue advances.
@@ -43,7 +47,7 @@ Blockers: redirect_reviews, external_seo_exports, listing_quality_review, live_s
 ## External SEO Exports
 
 - Missing required sources: search_console, yandex_webmaster, backlinks
-- Crawl coverage: 457 URLs (page 104, post 42, taxonomy 146, listing 165); URLs with any evidence: 3
+- Crawl coverage: 457 URLs (page 104, post 42, taxonomy 146, listing 165); URLs with any evidence: 5
 - `migration/external/seo/search-console.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none, signal domains: none
 - `migration/external/seo/yandex-webmaster.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none, signal domains: none
 - `migration/external/seo/backlinks.csv`: missing_export, rows 0, matched 0, signal 0, unmatched 0, duplicates 0, placeholders 0, domains: none, signal domains: none

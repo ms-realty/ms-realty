@@ -41,18 +41,29 @@ const locales = {
   ],
 };
 
+// Fail closed in production: a missing PAYLOAD_SECRET would otherwise sign
+// admin JWTs with a secret that is public in this repository.
+function requiredEnv(name, localDefault) {
+  const value = String(process.env[name] || "").trim();
+  if (value) return value;
+  if (process.env.NODE_ENV === "production" && process.env.NEXT_PHASE !== "phase-production-build") {
+    throw new Error(`${name} is required in production`);
+  }
+  return localDefault;
+}
+
 export default buildConfig({
   admin: { user: "admins" },
   routes: { admin: "/payload-admin" },
-  // ponytail: local defaults keep build/test importable; launch readiness still requires real env values.
-  secret: process.env.PAYLOAD_SECRET || "ms-realty-local-payload-secret",
+  // ponytail: local defaults keep build/test importable; production throws above.
+  secret: requiredEnv("PAYLOAD_SECRET", "ms-realty-local-payload-secret"),
   i18n: {
     fallbackLanguage: "en",
     supportedLanguages: { bg, ru, en },
   },
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL || "postgres://payload:payload@127.0.0.1:5432/ms_realty",
+      connectionString: requiredEnv("DATABASE_URL", "postgres://payload:payload@127.0.0.1:5432/ms_realty"),
     },
   }),
   collections: [admins, locales, ...generated.collections],

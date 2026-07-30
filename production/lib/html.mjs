@@ -14,19 +14,34 @@ function escapeHtml(value) {
 }
 
 function designSystemStyle() {
+  // Self-hosted fonts need no third-party preconnect — and must not emit one,
+  // since the point of self-hosting is that no visitor IP reaches Google.
+  const selfHosted = FONTS_URL.startsWith("/");
   return [
-    '<link rel="preconnect" href="https://fonts.googleapis.com">',
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
+    ...(selfHosted
+      ? []
+      : ['<link rel="preconnect" href="https://fonts.googleapis.com">', '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>']),
     `<link rel="stylesheet" href="${FONTS_URL}">`,
     `<link rel="stylesheet" href="/vendor/ms-realty.css?v=${DS_HASH}" data-ms-realty-design-system="external" data-ds-hash="${DS_HASH}">`,
   ].join("\n");
 }
 
-function openGraph(page) {
+// canonical, hreflang, and og:url must be absolute: Google ignores relative
+// hreflang entirely, and a relative canonical makes .com and .ru each
+// self-canonicalise the same content. `origin` comes from the request Host.
+export function absoluteHref(origin, value) {
+  const href = String(value || "/");
+  if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith("//")) return href;
+  if (!origin) return href;
+  return `${String(origin).replace(/\/+$/, "")}${href.startsWith("/") ? href : `/${href}`}`;
+}
+
+function openGraph(page, origin) {
   const title = page.metadata?.og_title || page.metadata?.title || "MS Realty";
   const description = page.metadata?.og_description || page.metadata?.description || "";
-  const url = page.canonical || page.path || "/";
-  const image = page.body?.media?.gallery?.find((item) => item.url)?.url || null;
+  const url = absoluteHref(origin, page.canonical || page.path || "/");
+  const cover = page.body?.media?.gallery?.find((item) => item.url) || null;
+  const image = cover?.url || null;
   return [
     ["og:type", page.kind === "listing" ? "article" : "website"],
     ["og:site_name", "MS Realty"],
@@ -35,21 +50,103 @@ function openGraph(page) {
     ["og:url", url],
     ["og:locale", page.lang || page.locale || "en"],
     image ? ["og:image", image] : null,
+    // Screen readers announce shared-link previews from this, and Google
+    // Images uses it as a relevance signal on the shared URL.
+    image && cover?.alt ? ["og:image:alt", cover.alt] : null,
   ]
     .filter(Boolean)
-    .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`);
+    .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`)
+    .concat(
+      // X/Twitter reads og:* for text but picks the card LAYOUT from its own
+      // namespace; without twitter:card a listing share renders as a bare link.
+      [
+        `<meta name="twitter:card" content="${image ? "summary_large_image" : "summary"}">`,
+        ...(image ? [`<meta name="twitter:image" content="${escapeHtml(image)}">`] : []),
+      ],
+    );
 }
 
-function meta(page) {
+function jsonLdScript(schema) {
+  return `<script type="application/ld+json">${JSON.stringify(schema).replace(/</g, "\\u003c")}</script>`;
+}
+
+// Mirrors the visible Home -> Search -> listing crumb trail, which is exactly
+// what Google requires of BreadcrumbList markup: never mark up a trail the
+// visitor cannot see.
+function breadcrumbSchema(page, origin) {
+  if (page.kind !== "listing" || !page.chrome?.home) return "";
+  const search = page.chrome.nav?.[0] || null;
+  const items = [
+    { name: page.chrome.home.label, item: absoluteHref(origin, page.chrome.home.href) },
+    search ? { name: search.label, item: absoluteHref(origin, search.href) } : null,
+    { name: page.body?.facts?.location || page.body?.h1 || page.metadata?.title || "Listing" },
+  ].filter(Boolean);
+  return jsonLdScript({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((entry, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: entry.name,
+      ...(entry.item ? { item: entry.item } : {}),
+    })),
+  });
+}
+
+// WebSite + SearchAction is what makes Google offer the sitelinks search box
+// under the brand result; ?q= is the real public search parameter.
+function websiteSchema(page, origin) {
+  if (page.kind !== "home") return "";
+  const search = page.chrome?.nav?.[0] || null;
+  return jsonLdScript({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "MS Realty",
+    url: absoluteHref(origin, page.canonical || page.path || "/"),
+    inLanguage: page.lang || page.locale || "en",
+    ...(search
+      ? {
+          potentialAction: {
+            "@type": "SearchAction",
+            target: `${absoluteHref(origin, search.href)}?q={search_term_string}`,
+            "query-input": "required name=search_term_string",
+          },
+        }
+      : {}),
+  });
+}
+
+// A single-location agency needs RealEstateAgent/LocalBusiness markup for local
+// search. Listing pages already carry RealEstateListing; this covers the org
+// itself on the home page.
+function organizationSchema(page, origin) {
+  if (page.kind !== "home") return "";
+  const contact = page.chrome?.contact || {};
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    name: "MS Realty",
+    url: absoluteHref(origin, page.canonical || page.path || "/"),
+    address: { "@type": "PostalAddress", addressLocality: "Sandanski", addressCountry: "BG" },
+    areaServed: String(contact.offices || "Sandanski")
+      .split("·")
+      .map((value) => value.trim())
+      .filter(Boolean),
+  };
+  if (contact.phone_label) schema.telephone = contact.phone_label;
+  if (contact.email) schema.email = contact.email;
+  return jsonLdScript(schema);
+}
+
+function meta(page, origin) {
   const links = [
-    `<link rel="canonical" href="${escapeHtml(page.canonical || page.path || "/")}">`,
+    `<link rel="canonical" href="${escapeHtml(absoluteHref(origin, page.canonical || page.path || "/"))}">`,
     ...(page.hreflang || []).map(
-      (link) => `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(link.href)}">`,
+      (link) =>
+        `<link rel="alternate" hreflang="${escapeHtml(link.hreflang)}" href="${escapeHtml(absoluteHref(origin, link.href))}">`,
     ),
   ];
-  const schema = page.schema
-    ? `<script type="application/ld+json">${JSON.stringify(page.schema).replace(/</g, "\\u003c")}</script>`
-    : "";
+  const schema = page.schema ? jsonLdScript(page.schema) : "";
   return [
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">",
@@ -57,9 +154,12 @@ function meta(page) {
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,
     `<meta name="robots" content="${escapeHtml(page.metadata?.robots || (page.indexable ? "index,follow" : "noindex,follow"))}">`,
-    ...openGraph(page),
+    ...openGraph(page, origin),
     ...links,
     schema,
+    breadcrumbSchema(page, origin),
+    websiteSchema(page, origin),
+    organizationSchema(page, origin),
   ]
     .filter(Boolean)
     .join("\n");
@@ -841,7 +941,7 @@ export function renderHtmlPage(page, options = {}) {
   return `<!doctype html>
 <html lang="${escapeHtml(page.lang || page.locale || "en")}" dir="${escapeHtml(page.dir || "ltr")}">
 <head>
-${meta(page)}
+${meta(page, options.origin || "")}
 </head>
 <body>
 ${body}

@@ -54,15 +54,22 @@ function readHeader(headers, name) {
   return headers[pascal] ? String(headers[pascal]) : "";
 }
 
-export function clientIpFromHeaders(headers = {}) {
-  const forwarded = readHeader(headers, "x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0].trim();
-    if (first) return first;
+// x-forwarded-for is client-controlled unless a proxy we trust rewrote it, so
+// honouring it unconditionally lets anyone reset their own rate-limit bucket by
+// varying one header. Set MS_REALTY_TRUST_PROXY=1 only when every request
+// really does arrive through the edge proxy (the Docker/Caddy topology).
+export function clientIpFromHeaders(headers = {}, { env = process.env, socketAddress = "" } = {}) {
+  if (env.MS_REALTY_TRUST_PROXY === "1") {
+    const forwarded = readHeader(headers, "x-forwarded-for");
+    if (forwarded) {
+      const first = forwarded.split(",")[0].trim();
+      if (first) return first;
+    }
+    const realIp = readHeader(headers, "x-real-ip");
+    if (realIp) return realIp;
   }
-  const realIp = readHeader(headers, "x-real-ip");
-  if (realIp) return realIp;
-  return "unknown";
+  const direct = String(socketAddress || readHeader(headers, "x-ms-realty-socket-address") || "").trim();
+  return direct || "unknown";
 }
 
 function intFrom(value, fallback, name) {

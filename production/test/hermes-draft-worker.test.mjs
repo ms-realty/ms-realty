@@ -87,16 +87,32 @@ function runScript(script, env) {
 }
 
 async function withHermesServer(fn) {
-  const draft = {
-    title: "MS-CRAWL-0001 Sandanski commercial rent",
-    body: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    seo_title: "MS-CRAWL-0001 Sandanski commercial rent",
-    meta_description: "MS-CRAWL-0001 Sandanski commercial rent draft",
-    citations: [{ source: "cms_seed", object_id: "MS-CRAWL-0001" }],
-  };
+  // Synthesize a contract-compliant draft from the facts in the incoming
+  // request instead of hard-coding one listing's facts: the worker reads the
+  // committed dispatch file, and pinning the mock to whichever row happened
+  // to be first broke the moment the dispatch was regenerated.
   const server = http.createServer((request, response) => {
-    request.resume();
+    let body = "";
+    request.on("data", (chunk) => {
+      body += chunk;
+    });
     request.on("end", () => {
+      let facts = {};
+      try {
+        const payload = JSON.parse(body);
+        const prompt = JSON.parse(payload.messages.at(-1).content);
+        facts = prompt.propertyFacts || {};
+      } catch {
+        facts = {};
+      }
+      const factLine = Object.values(facts).map(String).join(" ");
+      const draft = {
+        title: `${factLine} draft title`,
+        body: `${factLine} draft body`,
+        seo_title: factLine.slice(0, 60),
+        meta_description: `${factLine} draft`.slice(0, 160),
+        citations: [{ source: "cms_seed", object_id: facts.id || "unknown" }],
+      };
       response.setHeader("content-type", "application/json");
       response.end(JSON.stringify({ choices: [{ message: { content: JSON.stringify(draft) } }] }));
     });
@@ -430,7 +446,7 @@ test("live Hermes draft worker CLI fails closed when provider env is missing", (
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "run-hermes-draft-worker.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, HERMES_CHAT_COMPLETIONS_URL: "", HERMES_API_KEY: "" },
+    env: { ...process.env, HERMES_CHAT_COMPLETIONS_URL: "", HERMES_API_KEY: "", HERMES_BACKEND_FILE: "/nonexistent/hermes-backend.json" },
   });
 
   assert.notEqual(result.status, 0);
@@ -446,6 +462,9 @@ test("live Hermes draft worker CLI writes report and ledger to configured paths"
     const auditLogPath = `${dir}/audit-log.jsonl`;
     const result = await runScript("run-hermes-draft-worker.mjs", {
       ...process.env,
+      // Hermetic: never inherit this machine's backend switch (a dev box on
+      // claude-cli would otherwise call the real desktop CLI from the test).
+      HERMES_BACKEND_FILE: `${dir}/hermes-backend.json`,
       HERMES_CHAT_COMPLETIONS_URL: endpoint,
       HERMES_API_KEY: "test-key",
       HERMES_DRAFT_LIMIT: "1",

@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "next",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "node-adapter",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:node"],
+      "port": 3001,
+      "autoPort": true
+    }
+  ]
+}

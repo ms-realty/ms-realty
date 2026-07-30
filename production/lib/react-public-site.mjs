@@ -1,5 +1,5 @@
 import { h, renderStaticElement } from "./react-static-html.mjs";
-import { labelsFor, localizedListingValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
+import { humanizeIdentifier, labelsFor, localizedListingValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_SRC, LOGO_SRC_REVERSED } from "./ui/design-assets.mjs";
 
@@ -506,6 +506,9 @@ function EnquiryDialog({ page, labels, copy }) {
           h("option", { value: "phone" }, labels.phone),
           h("option", { value: "whatsapp" }, "WhatsApp"),
           h("option", { value: "viber" }, "Viber"),
+          // Foreign buyers researching from abroad will not place an
+          // international call; email is a first-class enquiry channel.
+          h("option", { value: "email" }, labels.email),
         ),
       ),
       h(
@@ -582,18 +585,57 @@ function cardBadge(card, labels, localeCode) {
   return null;
 }
 
+// Next.js image optimizer integration. The public site renders through two
+// surfaces: the Next App Router adapter (primary, where /_next/image exists)
+// and the bare Node server (smoke/fallback, where it does not). The adapter
+// calls enableNextImageOptimizer() at module load; everywhere else keeps the
+// plain original-URL behavior.
+let nextImageOptimizerEnabled = false;
+
+export function enableNextImageOptimizer() {
+  nextImageOptimizerEnabled = true;
+}
+
+const OPTIMIZABLE_HOSTS = new Set(["makler-realty.com", "makler-realty.ru"]);
+// All widths are in the Next default deviceSizes/imageSizes allowlist.
+const OPTIMIZED_IMAGE_WIDTHS = [384, 640, 828, 1200, 1920];
+
+function optimizerUrl(source, width) {
+  return `/_next/image?url=${encodeURIComponent(source)}&w=${width}&q=70`;
+}
+
+function optimizableSource(image) {
+  const source = image?.asset_url || image?.url || "";
+  if (!/^https?:\/\//.test(source)) return null;
+  try {
+    return OPTIMIZABLE_HOSTS.has(new URL(source).host) ? source : null;
+  } catch {
+    return null;
+  }
+}
+
 function photoCountLabel(count, labels) {
   return Number(count) === 1 ? labels.photo || labels.photos : labels.photos;
 }
 
-function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority) {
-  return {
-    src: image.url,
+function publicImageProps(image, fallbackAlt, loading = "lazy", fetchPriority, sizes = "100vw") {
+  const rest = {
     alt: image.alt || fallbackAlt,
     loading,
     decoding: "async",
     fetchPriority,
     "data-fallback-src": image.fallback_url || undefined,
+  };
+  const source = nextImageOptimizerEnabled ? optimizableSource(image) : null;
+  if (!source) {
+    return { src: image.url, ...rest };
+  }
+  return {
+    src: optimizerUrl(source, 828),
+    srcset: OPTIMIZED_IMAGE_WIDTHS.map((width) => `${optimizerUrl(source, width)} ${width}w`).join(", "),
+    sizes,
+    "data-original-src": source,
+    ...rest,
   };
 }
 
@@ -635,7 +677,7 @@ function SearchCard({ card, labels = labelsFor("en"), localeCode = "en", orienta
           "aria-label": card.title,
           lang: card.content_locale || undefined,
         },
-        h("img", publicImageProps(card.thumbnail, card.title, priority ? "eager" : "lazy", priority ? "high" : undefined)),
+        h("img", publicImageProps(card.thumbnail, card.title, priority ? "eager" : "lazy", priority ? "high" : undefined, "(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 33vw")),
         ...mediaChildren,
       )
     : h(
@@ -763,7 +805,7 @@ function HomeBody({ page }) {
       h(
         "div",
         { className: "hp-hero__bg", "data-hero-media": heroImage?.url ? "approved" : "fallback" },
-        heroImage?.url ? h("img", { src: heroImage.url, alt: heroImage.alt || page.body.h1, loading: "eager", decoding: "async", fetchPriority: "high" }) : null,
+        heroImage?.url ? h("img", publicImageProps(heroImage, page.body.h1, "eager", "high", "100vw")) : null,
       ),
       h(
         "div",
@@ -819,7 +861,7 @@ function HomeBody({ page }) {
                   className: "hp-resort",
                   "data-location-media": location.image?.url ? "approved" : "fallback",
                 },
-                location.image?.url ? h("img", { src: location.image.url, alt: location.image.alt || location.location, loading: "lazy", decoding: "async" }) : null,
+                location.image?.url ? h("img", publicImageProps(location.image, location.image.alt || location.location, "lazy", undefined, "(max-width: 640px) 100vw, 50vw")) : null,
                 location.listing_count ? h("span", { className: "hp-resort__c" }, location.listing_count) : null,
                 h("div", { className: "hp-resort__t" }, h("h3", null, location.location)),
               ),
@@ -1240,7 +1282,10 @@ function SearchBody({ page }) {
           h(
             "header",
             { className: "sr-mobile-filters__sheet-head" },
-            h("h2", { id: mobileFilterTitleId }, chrome.copy.filters || labels.activeFilters),
+            // role="dialog" is labelled by this node via aria-labelledby, so it
+            // does not need to be a heading — and as an h2 it rendered before the
+            // page h1, breaking heading order (WCAG 1.3.1).
+            h("p", { id: mobileFilterTitleId, className: "sr-mobile-filters__title" }, chrome.copy.filters || labels.activeFilters),
             h(
               "button",
               { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-mobile-filter-close": "true", "aria-label": chrome.copy.close },
@@ -1281,7 +1326,9 @@ function SearchBody({ page }) {
         : h(
         "aside",
         { className: "sr-filters sr-filters--desktop", "aria-label": chrome.copy.filters || labels.activeFilters },
-        h("h3", null, chrome.copy.filters || labels.activeFilters),
+        // The <aside> is already named by aria-label; the duplicate h3 only
+        // served to place a heading above the page h1.
+        h("p", { className: "sr-filters__title" }, chrome.copy.filters || labels.activeFilters),
         ...filterForms("sr"),
       ),
       h(
@@ -1729,7 +1776,7 @@ function ListingBody({ page }) {
                 "data-mobile-gallery-slide": String(index + 1),
                 "data-gallery-active": index === 0 ? "true" : undefined,
               },
-              image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined)) : null,
+              image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined, index === 0 ? "(max-width: 640px) 100vw, 66vw" : "(max-width: 640px) 33vw, 20vw")) : null,
               gallerySlides.length > 3 && index === 2
                 ? h("a", { className: "ld-g__more", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${photoCountLabel(page.body.media.gallery_count || gallery.length, labels)}`)
                 : null,
@@ -1784,13 +1831,13 @@ function ListingBody({ page }) {
           h(
             "section",
             { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
-            ...gallery.map((image) => h("img", { key: image.url, ...publicImageProps(image, page.body.h1) })),
+            ...gallery.map((image) => h("img", { key: image.url, ...publicImageProps(image, page.body.h1, "lazy", undefined, "(max-width: 640px) 50vw, 25vw") })),
           ),
           floorPlans.length
             ? h(
                 "section",
                 { id: "listing-floor-plans", className: "ld-gallery-full", "aria-label": labels.floorPlans, "data-floor-plan-gallery": "true" },
-                ...floorPlans.map((plan) => h("img", { key: plan.url, src: plan.url, alt: plan.alt, loading: "lazy" })),
+                ...floorPlans.map((plan) => h("img", { key: plan.url, ...publicImageProps(plan, plan.alt, "lazy", undefined, "(max-width: 640px) 100vw, 66vw") })),
               )
             : null,
           videos.length
@@ -1927,7 +1974,15 @@ function SellerBody({ page }) {
           "div",
           { className: "ct-form__row" },
           h("label", null, labels.name, h("input", { name: "contact.name", required: true, autoComplete: "name" })),
+          // A valuation callback needs a phone by contract; email stays optional
+          // so the written valuation can also be sent.
           h("label", null, labels.phone, h("input", { name: "contact.phone", type: "tel", required: true, autoComplete: "tel", inputMode: "tel" })),
+          h(
+            "label",
+            null,
+            labels.email,
+            h("input", { name: "contact.email", type: "email", autoComplete: "email", inputMode: "email" }),
+          ),
         ),
         h(
           "div",
@@ -1942,6 +1997,7 @@ function SellerBody({ page }) {
               h("option", { value: "phone" }, labels.phone),
               h("option", { value: "whatsapp" }, "WhatsApp"),
               h("option", { value: "viber" }, "Viber"),
+              h("option", { value: "email" }, labels.email),
             ),
           ),
           h("label", null, labels.propertyDetails, h("textarea", { name: "message", required: true })),

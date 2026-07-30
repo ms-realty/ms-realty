@@ -25,7 +25,9 @@ test("public write endpoints are rate limited when configured", async () => {
     app({
       method: "POST",
       url: "/api/events",
-      headers: { "content-type": "application/json", "x-forwarded-for": ip },
+      // The node server injects the socket address; forwarded headers are only
+      // honoured behind a trusted proxy (MS_REALTY_TRUST_PROXY=1).
+      headers: { "content-type": "application/json", "x-ms-realty-socket-address": ip },
       body: JSON.stringify({ event: "rate_limit_probe", page: "/bg" }),
     });
 

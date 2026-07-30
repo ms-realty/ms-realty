@@ -27,8 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # No NODE_ENV/tokens here: the test suite relies on the local
-      # non-production admin-token fallback and fixture defaults.
+      - name: Lint
+        run: npm run lint
+
+      # The test script sets MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN itself; the
+      # smoke admin token is never accepted without that explicit opt-in.
       - name: Generate runtime reports (gitignored, tests expect them)
         run: npm run payload:runtime
 
@@ -42,3 +45,19 @@ jobs:
         env:
           PAYLOAD_SECRET: ci-build-secret-not-a-real-secret-0123456789
           DATABASE_URL: postgresql://localhost:5432/ms_realty_ci
+
+  audit:
+    name: dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Fails on any high/critical advisory that is not a dated, documented
+      # exception in production/scripts/audit-dependencies.mjs.
+      - name: Audit runtime dependencies
+        run: npm run audit

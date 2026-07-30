@@ -421,6 +421,41 @@ const readyPayloadRuntime = {
     },
   ],
 };
+// EN/DE/NL currently have no approved listing translations and no legacy upload
+// is mirrored yet, so the ready-state fixtures supply passing evidence for the
+// two content/media gates the same way they do for live services.
+const readyLocaleContentParity = {
+  status: "ready",
+  ready: true,
+  indexable_locales: 7,
+  total_listings: 165,
+  approved_listings_by_locale: { bg: 113, de: 4, el: 1, en: 6, he: 1, nl: 3, ru: 52 },
+  indexable_locales_without_content: [],
+};
+
+const readyMediaMirror = {
+  status: "ready",
+  ready: true,
+  required_assets: 1714,
+  mirrored_assets: 1714,
+  missing_assets: 0,
+  external_assets: 13,
+  generated_at: "2026-07-05T00:00:00Z",
+  sample_missing: [],
+};
+
+// Pinned so blocked-state expectations do not depend on whether the developer
+// has run `npm run media:mirror`: the mirror is gitignored, so a fresh clone and
+// a mirrored working copy would otherwise disagree about the blocker list.
+const blockedMediaMirror = {
+  status: "missing_manifest",
+  ready: false,
+  required_assets: 1714,
+  mirrored_assets: 0,
+  missing_assets: 1714,
+  external_assets: 13,
+};
+
 const readyProductionRecovery = {
   status: "pass",
   path: "production/data/production-recovery-report.json",
@@ -653,11 +688,13 @@ async function withLiveServiceServer(fn) {
 }
 
 test("launch readiness stays blocked until production launch blockers are cleared", () => {
-  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror });
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.equal(report.launch_ready, false);
   assert.deepEqual(report.blockers, [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -722,6 +759,8 @@ test("launch readiness stays blocked until production launch blockers are cleare
   assert.match(report.gates.find((gate) => gate.id === "payload_runtime").next_actions.join(" "), /npm run payload:preflight/);
   for (const id of [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -745,6 +784,8 @@ test("launch readiness stays blocked until production launch blockers are cleare
     publicPayload.blocked_gates.map((gate) => gate.id),
     [
       "redirect_reviews",
+      "locale_content_parity",
+      "media_migration",
       "external_seo_exports",
       "listing_quality_review",
       "live_services",
@@ -777,6 +818,8 @@ test("launch readiness validator accepts ready state after required gates are cl
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
 
   assert.equal(assertLaunchReadinessReport(report), true);
@@ -825,7 +868,7 @@ test("launch readiness blocks forged terminal-decision summaries when rows lack 
 
 test("launch readiness validator requires blocked gate next actions", () => {
   for (const nextActions of [undefined, [], [""]]) {
-    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror });
     const gate = report.gates.find((item) => item.id === "external_seo_exports");
     if (nextActions === undefined) {
       delete gate.next_actions;
@@ -861,6 +904,8 @@ test("launch readiness rejects hand-cleared external SEO blockers", () => {
         appState: readyAppState,
         payloadRuntime: readyPayloadRuntime,
         productionRecovery: readyProductionRecovery,
+        localeContentParity: readyLocaleContentParity,
+        mediaMirror: readyMediaMirror,
       }),
     /SEO evidence missing required sources must match source evidence/,
   );
@@ -883,6 +928,8 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   const seoGate = report.gates.find((gate) => gate.id === "external_seo_exports");
   seoGate.evidence.sources.search_console.signal_rows = 0;
@@ -895,7 +942,7 @@ test("launch readiness validator rejects weak external SEO pass evidence", () =>
 });
 
 test("launch readiness validator rejects weak crawl inventory pass evidence", () => {
-  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror });
   const crawlGate = report.gates.find((gate) => gate.id === "crawl_inventory");
   crawlGate.evidence.total = 456;
 
@@ -913,7 +960,7 @@ test("launch readiness validator rejects weak redirect review pass evidence", ()
     { homepage_targets: 1 },
     { duplicate_old_urls: 1 },
   ]) {
-    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", routeMap, deployableRedirects });
+    const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", routeMap, deployableRedirects, mediaMirror: blockedMediaMirror });
     const redirectGate = report.gates.find((gate) => gate.id === "redirect_reviews");
     Object.assign(redirectGate.evidence, patch);
 
@@ -922,7 +969,7 @@ test("launch readiness validator rejects weak redirect review pass evidence", ()
 });
 
 test("launch readiness validator rejects weak sitemap pass evidence", () => {
-  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror });
   const sitemapGate = report.gates.find((gate) => gate.id === "localized_sitemap");
   sitemapGate.evidence.listing_entries = 166;
 
@@ -930,7 +977,7 @@ test("launch readiness validator rejects weak sitemap pass evidence", () => {
 });
 
 test("launch readiness validator rejects weak structured data pass evidence", () => {
-  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror });
   const structuredDataGate = report.gates.find((gate) => gate.id === "structured_data");
   structuredDataGate.evidence.failing_entries = 1;
 
@@ -938,7 +985,7 @@ test("launch readiness validator rejects weak structured data pass evidence", ()
 });
 
 test("launch readiness validator requires every production gate", () => {
-  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror });
 
   assert.throws(
     () => assertLaunchReadinessReport({ ...report, gates: report.gates.filter((gate) => gate.id !== "payload_runtime") }),
@@ -971,6 +1018,8 @@ test("launch readiness validator rejects weak runtime smoke pass evidence", () =
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   const smokeGate = report.gates.find((gate) => gate.id === "runtime_smoke");
   smokeGate.evidence.node_server_port_observed = false;
@@ -1009,6 +1058,8 @@ test("launch readiness validator rejects weak runtime pass evidence", () => {
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   const weakPayloadCredentials = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1115,6 +1166,8 @@ test("launch readiness validator rejects weak live service pass summaries", () =
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
 
   assert.throws(() => assertLaunchReadinessReport(report), /search sync summary evidence/);
@@ -1140,6 +1193,8 @@ test("launch readiness validator rejects weak live service operation evidence", 
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   const weakHermesProvider = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1156,6 +1211,8 @@ test("launch readiness validator rejects weak live service operation evidence", 
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   const weakHermesAudit = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1170,6 +1227,8 @@ test("launch readiness validator rejects weak live service operation evidence", 
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   const weakSyncOperation = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1195,6 +1254,8 @@ test("launch readiness validator rejects weak live service operation evidence", 
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   const wrongSyncPath = buildLaunchReadinessReport({
     generatedAt: "2026-07-05T00:00:00Z",
@@ -1225,6 +1286,8 @@ test("launch readiness validator rejects weak live service operation evidence", 
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
 
   assert.throws(() => assertLaunchReadinessReport(withoutQueryOperation), /search query operation evidence/);
@@ -1255,6 +1318,8 @@ test("launch readiness validator rejects weak live provisioning pass evidence", 
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
 
   assert.throws(() => assertLaunchReadinessReport(report), /provisioning check meilisearch_health/);
@@ -1283,6 +1348,8 @@ test("launch readiness blocks live services until provisioning passes", () => {
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
 
   const liveGate = report.gates.find((gate) => gate.id === "live_services");
@@ -1292,7 +1359,7 @@ test("launch readiness blocks live services until provisioning passes", () => {
 });
 
 test("launch readiness validator rejects weak production app layer pass evidence", () => {
-  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" });
+  const report = buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror });
   const appGate = report.gates.find((gate) => gate.id === "production_app_layer");
   appGate.evidence.start_script = "next start";
 
@@ -1330,6 +1397,8 @@ test("launch readiness validator rejects weak listing quality pass evidence", ()
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
 
   const listingGate = report.gates.find((gate) => gate.id === "listing_quality_review");
@@ -1376,6 +1445,8 @@ test("launch readiness blocks incomplete monitoring configuration", () => {
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
 
   assert.equal(report.gates.find((gate) => gate.id === "monitoring_rollback").status, "blocked");
@@ -1405,6 +1476,8 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   assert.equal(homepageReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(homepageReport.blockers, ["redirect_reviews"]);
@@ -1422,6 +1495,8 @@ test("launch readiness blocks broad or duplicate deployable redirect exports", (
     appState: readyAppState,
     payloadRuntime: readyPayloadRuntime,
     productionRecovery: readyProductionRecovery,
+    localeContentParity: readyLocaleContentParity,
+    mediaMirror: readyMediaMirror,
   });
   assert.equal(duplicateReport.gates.find((gate) => gate.id === "redirect_reviews").status, "blocked");
   assert.deepEqual(duplicateReport.blockers, ["redirect_reviews"]);
@@ -1439,7 +1514,7 @@ test("launch readiness build honors output path override", () => {
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-launch-readiness.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: outputPath },
+    env: { MS_REALTY_MEDIA_MIRROR_MANIFEST: "/nonexistent/manifest.json", ...process.env, MS_REALTY_LAUNCH_READINESS_OUTPUT_PATH: outputPath },
   });
 
   assert.equal(result.status, 0, result.stderr);
@@ -1448,6 +1523,8 @@ test("launch readiness build honors output path override", () => {
   assert.equal(assertLaunchReadinessReport(report), true);
   assert.deepEqual(report.blockers, [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -1493,6 +1570,8 @@ test("local readiness materializer promotes only fresh local Payload proof and p
   assert.equal(result.report.launch_ready, false);
   assert.deepEqual(result.report.blockers, [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -1537,13 +1616,13 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: "" },
+    env: { MS_REALTY_MEDIA_MIRROR_MANIFEST: "/nonexistent/manifest.json", ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: "" },
   });
 
   assert.notEqual(result.status, 0);
   assert.match(
     result.stderr,
-    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: redirect_reviews, locale_content_parity, media_migration, external_seo_exports, listing_quality_review, live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
   assert.match(result.stderr, /external_seo_exports missing: search_console, yandex_webmaster, backlinks/);
   assert.match(result.stderr, /listing_quality_review: missing_review .*migration\/reviews\/listing-quality\.csv/);
@@ -1563,7 +1642,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   const withPartialReviewPath = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: partialReviewPath },
+    env: { MS_REALTY_MEDIA_MIRROR_MANIFEST: "/nonexistent/manifest.json", ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: partialReviewPath },
   });
 
   assert.notEqual(withPartialReviewPath.status, 0);
@@ -1575,13 +1654,13 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   const withReviewPath = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath },
+    env: { MS_REALTY_MEDIA_MIRROR_MANIFEST: "/nonexistent/manifest.json", ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath },
   });
 
   assert.notEqual(withReviewPath.status, 0);
   assert.match(
     withReviewPath.stderr,
-    /LAUNCH BLOCKED: redirect_reviews, external_seo_exports, live_services, monitoring_rollback, payload_runtime, production_recovery/,
+    /LAUNCH BLOCKED: redirect_reviews, locale_content_parity, media_migration, external_seo_exports, live_services, monitoring_rollback, payload_runtime, production_recovery/,
   );
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review/);
   assert.doesNotMatch(withReviewPath.stderr, /listing_quality_review next:/);
@@ -1608,7 +1687,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   });
 
   assert.notEqual(ready.status, 0);
-  assert.match(ready.stderr, /LAUNCH BLOCKED: redirect_reviews, payload_runtime/);
+  assert.match(ready.stderr, /LAUNCH BLOCKED: redirect_reviews, locale_content_parity, media_migration, payload_runtime/);
 
   const seoOutputPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-seo-output-`)}/seo-evidence.json`;
   const seoBuild = spawnSync(process.execPath, [fromRoot("production", "scripts", "build-seo-evidence.mjs")], {
@@ -1637,7 +1716,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
     },
   });
   assert.notEqual(readyFromSeoOutput.status, 0);
-  assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: redirect_reviews, payload_runtime/);
+  assert.match(readyFromSeoOutput.stderr, /LAUNCH BLOCKED: redirect_reviews, locale_content_parity, media_migration, payload_runtime/);
 });
 
 test("launch preflight and input checklist honor env-mounted redirect and evidence paths", async () => {
@@ -1649,7 +1728,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
   const blocked = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: emptyRedirectsPath },
+    env: { MS_REALTY_MEDIA_MIRROR_MANIFEST: "/nonexistent/manifest.json", ...process.env, MS_REALTY_DEPLOYABLE_REDIRECTS_OUTPUT_PATH: emptyRedirectsPath },
   });
 
   assert.notEqual(blocked.status, 0);
@@ -1683,7 +1762,7 @@ test("launch preflight and input checklist honor env-mounted redirect and eviden
 
   assert.equal(ready.status, 0, ready.stderr);
   assert.match(markdown, /Status: blocked/);
-  assert.match(markdown, /Blockers: redirect_reviews, payload_runtime/);
+  assert.match(markdown, /Blockers: redirect_reviews, locale_content_parity, media_migration, payload_runtime/);
   assert.match(markdown, /MS_REALTY_LAUNCH_INPUT_CHECKLIST_OUTPUT_PATH/);
 });
 
@@ -2107,7 +2186,7 @@ test("launch input checklist names remaining operator-owned blockers", () => {
   const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
-    launchReadiness: buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" }),
+    launchReadiness: buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", mediaMirror: blockedMediaMirror }),
     seoEvidence,
     redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
     deployableRedirects: readJson(["production", "data", "deployable-redirects.json"]),

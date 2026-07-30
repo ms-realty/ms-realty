@@ -18,6 +18,7 @@ import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, appendPublicContact } from "./public
 import { searchRuntimeListings, loadCmsSeed, submitRuntimeLead, DEFAULT_CMS_SEED_PATH } from "./runtime.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { clientIpFromHeaders, createRateLimiter, rateLimitConfigFromEnv } from "./rate-limit.mjs";
+import { securityHeaders } from "./security-headers.mjs";
 import {
   DEFAULT_SAVED_SEARCH_LEDGER_PATH,
   appendSavedSearch,
@@ -35,12 +36,7 @@ const ERROR_JSON_HEADERS = {
   "cache-control": "no-store",
   "x-content-type-options": "nosniff",
 };
-const SECURITY_HEADERS = {
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "strict-origin-when-cross-origin",
-  "x-frame-options": "DENY",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
-};
+const SECURITY_HEADERS = securityHeaders();
 const PRIVATE_HEADERS = { "cache-control": "no-store" };
 const LAUNCH_READINESS_PATH = fromRoot("production", "data", "launch-readiness.json");
 const DEFAULT_LOCALE_REGISTRY_PATH = fromRoot("locales", "registry.json");
@@ -292,6 +288,16 @@ function routeLead(request, body, registry, seed, config) {
   try {
     const input = parseBody(request, body);
     const lead = submitRuntimeLead(registry, seed, input);
+    // Append to the ledger first: a replayed submit must not create a second
+    // contact-vault row, consent record, SLA timer, or seller pipeline item.
+    const ledger = appendLead(lead, {
+      filePath: config.leadLedgerPath,
+      receivedAt: config.receivedAt,
+      idempotencyKey: input.idempotencyKey || input.idempotency_key || null,
+    });
+    if (ledger.idempotent_replay) {
+      return privateJson(200, { ...lead, ledger, idempotent_replay: true });
+    }
     const contactVault = config.leadContactVaultPath
       ? appendLeadContact(lead, {
           filePath: config.leadContactVaultPath,
@@ -299,7 +305,6 @@ function routeLead(request, body, registry, seed, config) {
           storedAt: config.receivedAt,
         })
       : null;
-    const ledger = appendLead(lead, { filePath: config.leadLedgerPath, receivedAt: config.receivedAt });
     const consent = recordConsent(
       {
         consentType: "inquiry_follow_up",

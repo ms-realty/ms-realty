@@ -4,15 +4,17 @@ import { DEFAULT_BROKER_CONTACT_LEDGER_PATH } from "./broker-contacts.mjs";
 import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
+import { hermesBackendStatus, setHermesBackend } from "./hermes-backend.mjs";
+import { renderAdminHermesPage } from "./admin-hermes-page.mjs";
 import { readThroughCached } from "./file-cache.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
-import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
+import { CONTENT_SECURITY_POLICY, securityHeaders } from "./security-headers.mjs";
+import { crossOriginWriteRejection, readHeader, requestHost } from "./request-guard.mjs";
 import {
   adminHomePath,
   bindAuthenticatedOperator,
   canAdminAccess,
   canAdminMutate,
-  isAdminAuthorized,
   resolveAdminPrincipal,
   requiredAdminCapability,
   withAuthenticatedAuditActor,
@@ -38,6 +40,7 @@ import { loadMigrationRecords } from "./content.mjs";
 import {
   addLocaleToRegistry,
   loadLocaleRegistry,
+  negotiateRootLocale,
   requiredAdminLocales,
   requiredPublicLocales,
   websiteLanguageCoverage,
@@ -69,10 +72,16 @@ import {
   readReplyDeliveryOutcomes,
 } from "./reply-delivery-outcomes.mjs";
 import { appendBrokerContact, createBrokerContact, readBrokerContacts } from "./broker-contacts.mjs";
-import { loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
+import { canonicalCasePath, loadCmsSeed, renderRuntimePath, searchRuntimeListings, submitRuntimeLead } from "./runtime.mjs";
 import { summarizeLegacyRouteMap } from "./migration.mjs";
 import { attachMigrationReviewEvidence, filterMigrationReviewRoutes, migrationReviewTargetOptions } from "./migration-review.mjs";
-import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
+import {
+  DEFAULT_PUBLIC_ORIGIN,
+  buildRuntimeLocalizedSitemap,
+  publicOriginForHost,
+  renderRobotsTxt,
+  renderSitemapXml,
+} from "./seo-files.mjs";
 import {
   approveTranslationTask,
   createCrmInboxItem,
@@ -195,12 +204,7 @@ import { fromRoot } from "./paths.mjs";
 import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
 
-const SECURITY_HEADERS = {
-  "x-content-type-options": "nosniff",
-  "referrer-policy": "strict-origin-when-cross-origin",
-  "x-frame-options": "DENY",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
-};
+const SECURITY_HEADERS = securityHeaders();
 const PRIVATE_HEADERS = { "cache-control": "no-store" };
 
 // Public (unauthenticated) write endpoints protected by the rate limiter.
@@ -245,11 +249,16 @@ function wantsPrint(url, rendered) {
 }
 
 function publicResponse(request, url, rendered) {
+  const origin = publicOriginForHost(requestHost(request.headers));
   if (wantsPrint(url, rendered)) {
-    return response(rendered.status || 200, renderHtmlPage(rendered, { print: true }), "text/html; charset=utf-8");
+    return response(rendered.status || 200, renderHtmlPage(rendered, { print: true, origin }), "text/html; charset=utf-8");
   }
   if (wantsHtml(request, url)) {
-    return response(rendered.status || 200, renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered) }), "text/html; charset=utf-8");
+    return response(
+      rendered.status || 200,
+      renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered), origin }),
+      "text/html; charset=utf-8",
+    );
   }
   return json(rendered.status || 200, rendered);
 }
@@ -817,8 +826,6 @@ export function createHttpApp({
       events: readEventLedger(eventLedgerPath || undefined),
       generatedAt: reviewedAt || new Date().toISOString(),
     });
-  const currentLegacyRouteDecisions = () =>
-    buildLegacyRouteDecisions(routeMap, readRedirectApprovals(redirectApprovalPath || undefined));
   const currentDeployedRedirectArtifact = () => {
     const decisions = activeLegacyDecisions;
     const redirects = decisions.filter((decision) => decision.status === 301).map((decision) => ({
@@ -928,8 +935,13 @@ export function createHttpApp({
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
+    const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
+    if (crossOrigin) {
+      return response(403, { kind: "cross_origin_write_blocked", reason: crossOrigin }, "application/json; charset=utf-8", PRIVATE_HEADERS);
+    }
     const adminRequest = url.pathname === "/admin" || url.pathname.startsWith("/admin/") || url.pathname.startsWith("/api/admin/");
-    const principal = adminRequest ? resolveAdminPrincipal(auth) : null;
+    const cookieHeader = readHeader(request.headers, "cookie");
+    const principal = adminRequest ? resolveAdminPrincipal(auth, process.env, cookieHeader) : null;
     if (adminRequest && !principal) return adminUnauthorized();
     if (adminRequest && request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
     const requiredCapability = adminRequest ? requiredAdminCapability(request.method, url.pathname) : null;
@@ -980,6 +992,31 @@ export function createHttpApp({
       return publicResponse(request, url, retained);
     }
 
+    if (request.method === "GET" && url.pathname === "/") {
+      const rootLocaleTarget = `/${negotiateRootLocale(activeRegistry, { host, acceptLanguage: readHeader(request.headers, "accept-language") })}`;
+      return response(
+        307,
+        { kind: "root_locale_redirect", location: rootLocaleTarget },
+        "application/json; charset=utf-8",
+        {
+          location: rootLocaleTarget,
+          vary: "accept-language",
+          "cache-control": "no-store",
+        },
+      );
+    }
+
+    const canonicalCase =
+      request.method === "GET" ? canonicalCasePath(activeRegistry, currentSeed(), url.pathname, currentTranslationTasks()) : null;
+    if (canonicalCase) {
+      return response(
+        301,
+        { kind: "canonical_case_redirect", location: `${canonicalCase}${url.search}` },
+        "application/json; charset=utf-8",
+        { location: `${canonicalCase}${url.search}` },
+      );
+    }
+
     const slugRedirect =
       request.method === "GET" ? slugRedirectForPath(currentSlugHistory(), url.pathname) : null;
     if (slugRedirect) {
@@ -994,13 +1031,19 @@ export function createHttpApp({
     if (request.method === "GET" && url.pathname === "/sitemap.xml") {
       return response(
         200,
-        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), currentTranslationTasks())),
+        renderSitemapXml(buildRuntimeLocalizedSitemap(activeRegistry, currentSeed(), currentTranslationTasks()), {
+          origin: publicOriginForHost(requestHost(request.headers)) || DEFAULT_PUBLIC_ORIGIN,
+        }),
         "application/xml; charset=utf-8",
       );
     }
 
     if (request.method === "GET" && url.pathname === "/robots.txt") {
-      return response(200, renderRobotsTxt(), "text/plain; charset=utf-8");
+      return response(
+        200,
+        renderRobotsTxt({ origin: publicOriginForHost(requestHost(request.headers)) || DEFAULT_PUBLIC_ORIGIN }),
+        "text/plain; charset=utf-8",
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/favicon.ico") {
@@ -1094,15 +1137,47 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/leads") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
       const payload = currentAdminLeadPayload(requestedLocale, principal);
       if (wantsHtml(request, url)) return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       return adminJson(200, payload);
     }
 
+    // Hermes generation backend: which engine drafts listing translations
+    // (cloud OpenRouter vs the operator's desktop CLI subscriptions). GET is
+    // administration:read, POST administration:write via the capability
+    // fallback; switching is audit-logged inside setHermesBackend.
+    if (request.method === "GET" && ["/api/admin/hermes/backend", "/admin/hermes"].includes(url.pathname)) {
+      const status = hermesBackendStatus();
+      if (url.pathname === "/admin/hermes" || wantsHtml(request, url)) {
+        const switched = url.searchParams.get("switched") === "1";
+        return adminResponse(200, renderAdminHermesPage({ status, switched }), "text/html; charset=utf-8");
+      }
+      return adminJson(200, status);
+    }
+
+    if (request.method === "POST" && ["/api/admin/hermes/backend", "/admin/hermes"].includes(url.pathname)) {
+      const isForm = String(readHeader(request.headers, "content-type") || "").includes("application/x-www-form-urlencoded");
+      try {
+        const backend = isForm
+          ? String(new URLSearchParams(request.body || "").get("backend") || "")
+          : String(parseJsonBody(request).backend || "");
+        setHermesBackend(backend, { actor: principal.id, auditLogPath: auditLogPath || undefined });
+        if (isForm) {
+          return adminResponse(303, "", "text/plain; charset=utf-8", { location: "/admin/hermes?switched=1", "cache-control": "no-store" });
+        }
+        return adminJson(200, hermesBackendStatus());
+      } catch (error) {
+        if (isForm) {
+          return adminResponse(200, renderAdminHermesPage({ status: hermesBackendStatus(), error: error.message }), "text/html; charset=utf-8");
+        }
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
     if (request.method === "GET" && url.pathname === "/admin/leads") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(
         200,
         adminHtml(currentAdminLeadPayload(url.searchParams.get("locale") || "en", principal)),
@@ -1111,7 +1186,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/contacts", "/admin/contacts"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentContactPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/contacts" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1120,7 +1195,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/documents", "/admin/documents"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/documents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1129,7 +1204,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/consents", "/admin/consents"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentConsentPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/consents" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1138,7 +1213,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/admin") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const locale = url.searchParams.get("locale") || "en";
       return adminResponse(302, "", "text/plain; charset=utf-8", {
         location: `${adminHomePath(principal)}?locale=${encodeURIComponent(locale)}`,
@@ -1146,7 +1221,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/today", "/admin/today"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentTodayPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/today" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1155,7 +1230,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/pipeline", "/admin/pipeline"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentPipelinePayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/pipeline" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1164,7 +1239,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/requests", "/admin/requests"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentRequestsPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/requests" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1173,7 +1248,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/viewings", "/admin/viewings"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentViewingsPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/viewings" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1182,7 +1257,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/activity", "/admin/activity"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentActivityPayload(url, principal);
       if (url.pathname === "/admin/activity" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1191,7 +1266,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/listings", "/admin/listings"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentListingManagerPayload(url, principal);
       if (url.pathname === "/admin/listings" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1200,7 +1275,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/translations", "/admin/translations"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentTranslationQueuePayload(url, principal);
       if (url.pathname === "/admin/translations" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1209,7 +1284,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && ["/api/admin/reports", "/admin/reports"].includes(url.pathname)) {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = currentReportsPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/reports" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
@@ -1218,14 +1293,14 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/reports/export") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(200, renderOperationsReportCsv(currentOperationsReport()), "text/csv; charset=utf-8", {
         "content-disposition": 'attachment; filename="ms-realty-source-quality.csv"',
       });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/viewings.ics") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(
         200,
         renderViewingCalendar(readViewings(viewingLedgerPath || undefined), { now: bookedAt || receivedAt }),
@@ -1235,7 +1310,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/locales") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const requestedLocale = url.searchParams.get("locale") || "en";
       return adminJson(200, {
         workspace: renderAdminWorkspace({ registry: activeRegistry, requestedLocale }),
@@ -1244,17 +1319,17 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/cms-collections") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, { kind: "admin_cms_collections", ...loadCmsCollections() });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/payload-collections") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, { kind: "admin_payload_collections", ...loadPayloadCollections() });
     }
 
     if (request.method === "GET" && url.pathname === "/admin/listings/edit") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         return adminResponse(
           200,
@@ -1278,7 +1353,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/admin/migration/review") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const payload = renderMigrationReviewPayload(
         activeRegistry,
         url,
@@ -1293,7 +1368,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/migration/review") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
       const payload = renderMigrationReviewPayload(
         activeRegistry,
@@ -1310,32 +1385,32 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, seoEvidencePayload(currentSeoEvidence()));
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/launch-readiness") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, currentLaunchReadiness());
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/launch-input-checklist") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(200, currentLaunchInputChecklist(), "text/markdown; charset=utf-8");
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/preflight-reports") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, currentPreflightReports());
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-preflight") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, { kind: "admin_seo_preflight", seo: currentSeoPreflightReport() });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const generatedAt = listingQualityGeneratedAt || reviewedAt || new Date().toISOString();
       return adminJson(200, {
         kind: "admin_listing_quality",
@@ -1348,7 +1423,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-services") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, {
         kind: "admin_live_services",
         live_services: buildLiveServicePreflightReport({
@@ -1361,7 +1436,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-provisioning") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, {
         kind: "admin_live_service_provisioning",
         provisioning: liveServiceProvisioningState(liveServiceProvisioningReportPath || undefined),
@@ -1369,7 +1444,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-provisioning/import") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const report = reportJsonInput(parseJsonBody(request));
         const outPath = writeLiveServiceProvisioningReport(report, liveServiceProvisioningReportPath || undefined);
@@ -1392,7 +1467,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, {
         kind: "admin_payload_runtime",
         runtime: payloadRuntimeState(payloadRuntimeReportPath || undefined),
@@ -1400,12 +1475,12 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/payload-runtime-bootstrap") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, payloadRuntimeBootstrapPayload());
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/production-recovery") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminJson(200, {
         kind: "admin_production_recovery",
         recovery: productionRecoveryState(productionRecoveryReportPath || undefined),
@@ -1413,14 +1488,14 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/production-recovery-template") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(200, readProductionRecoveryTemplate(), "application/json; charset=utf-8", {
         "content-disposition": 'attachment; filename="production-recovery-report.json.example"',
       });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/live-service-report-template") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const template = readLiveServiceReportTemplate(url.searchParams.get("source"));
         return adminResponse(200, template.json, "application/json; charset=utf-8", {
@@ -1432,7 +1507,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/live-service-reports/import") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = liveServiceReportInput(request, url);
         const imported = writeLiveServiceReport(input.source, input.report, {
@@ -1465,7 +1540,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/payload-runtime/import") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const report = reportJsonInput(parseJsonBody(request));
         const outPath = writePayloadRuntimeReport(report, payloadRuntimeReportPath || undefined);
@@ -1491,7 +1566,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/production-recovery/import") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const report = reportJsonInput(parseJsonBody(request));
         const outPath = writeProductionRecoveryReport(report, productionRecoveryReportPath || undefined);
@@ -1516,7 +1591,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/launch-readiness/export") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const report = currentLaunchReadiness();
       const outPath = writeLaunchReadinessReport(report, launchReadinessOutputPath || undefined);
       recordAudit({
@@ -1530,7 +1605,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/seo-evidence/import") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = seoExportInput(request, url);
         const result = importAppSeoEvidenceRows(input, {
@@ -1558,14 +1633,14 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/export") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(200, `${JSON.stringify(currentSeoEvidence(), null, 2)}\n`, "application/json; charset=utf-8", {
         "content-disposition": 'attachment; filename="seo-evidence.json"',
       });
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/seo-evidence/template") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const template = readSeoExportTemplate(url.searchParams.get("source"));
         return adminResponse(200, template.csv, "text/csv; charset=utf-8", {
@@ -1577,7 +1652,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = redirectApprovalInput(request);
         const approval = appendRedirectApproval(routeMap, input, {
@@ -1605,7 +1680,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/redirect-approvals/import") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const imported = importRedirectApprovalsCsv(routeMap, csvInput(request), {
           filePath: redirectApprovalPath || undefined,
@@ -1632,7 +1707,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/deployable-redirects/export") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const approvals = readRedirectApprovals(redirectApprovalPath || undefined);
         const rows = buildDeployableRedirects(routeMap, approvals);
@@ -1652,7 +1727,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/redirect-approval-workbook") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const reviewRoutes = attachMigrationReviewEvidence(routeMap, loadMigrationRecords());
       const rows = url.searchParams.get("pending")
         ? buildPendingRedirectApprovalWorkbook(reviewRoutes, readRedirectApprovals(redirectApprovalPath || undefined))
@@ -1666,7 +1741,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-workbook") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(
         200,
         renderListingQualityWorkbook(currentListingQualityReport()),
@@ -1676,7 +1751,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-draft") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       return adminResponse(
         200,
         renderListingQualityReviewDraft(currentListingQualityReport()),
@@ -1686,7 +1761,7 @@ export function createHttpApp({
     }
 
     if (request.method === "GET" && url.pathname === "/api/admin/listing-quality-review-packet") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       const generatedAt = reviewedAt || new Date().toISOString();
       return adminJson(
         200,
@@ -1699,7 +1774,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/listing-quality/import") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = listingQualityReviewInput(request);
         const inputCsv = input.csv;
@@ -1785,7 +1860,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/locales") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
         const result = addLocaleToRegistry(activeRegistry, input);
@@ -1819,7 +1894,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/translations/draft") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
         const task = appendTranslationTask(createTranslationReviewTask(activeRegistry, input), { filePath: translationLedgerPath || undefined });
@@ -1838,7 +1913,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/translations/approve") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
         const task = latestTranslationTasks(currentTranslationTasks()).find((row) => row.id === input.taskId);
@@ -1861,7 +1936,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/translations/publish") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = parseJsonBody(request);
         const task = latestTranslationTasks(currentTranslationTasks()).find((row) => row.id === input.taskId);
@@ -1883,7 +1958,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/listings/edit") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         let input = bindAuthenticatedOperator(listingEditInput(request), principal, ["editor"]);
         if (input.mediaReviewer) input = bindAuthenticatedOperator(input, principal, ["mediaReviewer"]);
@@ -1914,7 +1989,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/media/reviews") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
         const review = createMediaReview(currentSeed(), input, reviewedAt);
@@ -1940,7 +2015,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/listings/status") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["editor"]);
         const batch = createBulkListingStatusEdits(
@@ -2084,7 +2159,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/listings/slug") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const change = appendSlugChange(activeRegistry, currentSeed(), parseBody(request), {
           filePath: slugHistoryPath || undefined,
@@ -2105,7 +2180,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/replies") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = reviewedReplyInput(request);
         const reply = appendReviewedReply(readLeadLedger(leadLedgerPath || undefined), input, {
@@ -2132,7 +2207,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/replies/delivery") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const recordedAt = replyDeliveredAt || reviewedAt || receivedAt || new Date().toISOString();
         const result = appendReplyDeliveryOutcome(
@@ -2172,7 +2247,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/lead-pipeline/outcome") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const recordedAt = leadPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
         const result = appendLeadPipelineOutcome(
@@ -2260,7 +2335,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/leads/assign") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
         const assignment = createLeadAssignment(currentLeads(), input, reviewedAt || receivedAt || new Date().toISOString());
@@ -2286,7 +2361,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/accounts") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
         const result = appendAccountCreation(input, {
@@ -2309,7 +2384,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/accounts/link") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
         const contacts = currentContactPayload("en", principal).contacts;
@@ -2333,7 +2408,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/documents/outcome") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
         const result = appendDocumentChecklistOutcome(currentLeads(), input, {
@@ -2362,7 +2437,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/consents/withdraw") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseBody(request), principal, ["actor"]);
         const result = createConsentWithdrawal(
@@ -2392,7 +2467,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/replies/draft") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const draft = await createHermesReplyDraft(readLeadLedger(leadLedgerPath || undefined), parseJsonBody(request), {
           auditLogPath: auditLogPath || undefined,
@@ -2406,7 +2481,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/viewings") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
         const viewing = appendViewing(currentLeadJourneyContext(), input, {
@@ -2430,7 +2505,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/viewings/follow-up") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const recordedAt = viewingFollowUpAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
         const result = appendViewingFollowUp(readViewings(viewingLedgerPath || undefined), bindAuthenticatedOperator(parseBody(request), principal), {
@@ -2461,7 +2536,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/seller-pipeline/outcome") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const recordedAt = sellerPipelineOutcomeAt || reviewedAt || bookedAt || receivedAt || new Date().toISOString();
         const input = bindAuthenticatedOperator(parseBody(request), principal);
@@ -2502,7 +2577,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/public-requests/outcome") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const recordedAt = publicRequestOutcomeAt || reviewedAt || receivedAt || new Date().toISOString();
         const result = appendPublicRequestOutcome(
@@ -2544,7 +2619,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/deals/close") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["broker"]);
         const deal = appendClosedDeal(currentLeadJourneyContext(), input, {
@@ -2568,7 +2643,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const contact = createBrokerContact(parseJsonBody(request), { reviewedAt });
         const persisted = appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined });
@@ -2586,7 +2661,7 @@ export function createHttpApp({
     }
 
     if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
-      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
         const tour = appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
           filePath: tourApprovalLedgerPath || undefined,
@@ -2608,10 +2683,21 @@ export function createHttpApp({
       try {
         const input = parseBody(request);
         const lead = submitRuntimeLead(activeRegistry, currentSeed(), input);
+        // Ledger first: a replayed submit must not create a second contact-vault
+        // row, consent record, SLA timer, or seller pipeline item.
+        const ledger = leadLedgerPath
+          ? appendLead(lead, {
+              filePath: leadLedgerPath,
+              receivedAt,
+              idempotencyKey: input.idempotencyKey || input.idempotency_key || null,
+            })
+          : null;
+        if (ledger?.idempotent_replay) {
+          return privateResponse(200, { ...lead, ledger, idempotent_replay: true }, "application/json; charset=utf-8");
+        }
         const contactVault = leadContactVaultPath
           ? appendLeadContact(lead, { filePath: leadContactVaultPath, secret: leadContactKey, storedAt: receivedAt })
           : null;
-        const ledger = leadLedgerPath ? appendLead(lead, { filePath: leadLedgerPath, receivedAt }) : null;
         const consent = recordConsent({
           consentType: "inquiry_follow_up",
           source: lead.lead?.source,
@@ -2765,15 +2851,13 @@ export async function dispatchHttp(app, { method = "GET", url, body, headers } =
 }
 
 export function assertHttpSmoke(smoke) {
-  const expectedBlockers = [
-    "redirect_reviews",
-    "external_seo_exports",
-    "listing_quality_review",
-    "live_services",
-    "monitoring_rollback",
-    "payload_runtime",
-    "production_recovery",
-  ];
+  // Derived from the report the app itself serves, not a literal: the point
+  // is that liveness and readiness agree with launch readiness, and a gate
+  // that legitimately clears must not read as a smoke failure.
+  const expectedBlockers = smoke.ready?.body?.blockers ?? [];
+  if (!Array.isArray(expectedBlockers) || !expectedBlockers.length) {
+    throw new Error("Smoke fixture must report the current launch blockers");
+  }
   if (
     smoke.health?.status !== 200 ||
     smoke.health.body.status !== "ok" ||

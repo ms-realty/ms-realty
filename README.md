@@ -30,8 +30,18 @@ Running code + `production/data/*` + crawl artifacts are authoritative; if a doc
 ## Run
 
 ```bash
-npm run check                                # tests + full validate pipeline
+npm run check                                # lint + tests + full validate pipeline
 MS_REALTY_ADMIN_TOKEN=replace-me MS_REALTY_ADMIN_ACTOR=operations_lead MS_REALTY_ADMIN_ROLES=admin npm start
+```
+
+The server refuses to start without `MS_REALTY_ADMIN_TOKEN` or the per-operator
+`MS_REALTY_ADMIN_CREDENTIALS_JSON` registry — there is no implicit admin credential.
+
+Before any production cutover, mirror the legacy media (every listing image is
+still served by the old WordPress origins):
+
+```bash
+npm run media:mirror
 ```
 
 Requires Node ≥ 22 and Python 3.

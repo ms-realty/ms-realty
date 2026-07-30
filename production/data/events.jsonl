@@ -63,3 +63,11 @@
 {"recorded_at":"2026-07-13T10:12:15.365Z","type":"page_view","path":"/he/","locale":"he","listing_reference":null,"action":null,"query":null,"filters":{}}
 {"recorded_at":"2026-07-15T19:55:02.071Z","type":"page_view","path":"/ru/","locale":"ru","listing_reference":null,"action":null,"query":null,"filters":{}}
 {"recorded_at":"2026-07-15T19:55:23.683Z","type":"page_view","path":"/ru/","locale":"ru","listing_reference":null,"action":null,"query":null,"filters":{}}
+{"recorded_at":"2026-07-25T14:30:45.817Z","type":"page_view","path":"/bg","locale":"bg","listing_reference":null,"action":null,"query":null,"filters":{},"sort":null,"page":null}
+{"recorded_at":"2026-07-25T14:30:45.851Z","type":"page_view","path":"/ru","locale":"ru","listing_reference":null,"action":null,"query":null,"filters":{},"sort":null,"page":null}
+{"recorded_at":"2026-07-25T14:30:45.883Z","type":"page_view","path":"/en","locale":"en","listing_reference":null,"action":null,"query":null,"filters":{},"sort":null,"page":null}
+{"recorded_at":"2026-07-25T14:30:45.913Z","type":"page_view","path":"/he","locale":"he","listing_reference":null,"action":null,"query":null,"filters":{},"sort":null,"page":null}
+{"recorded_at":"2026-07-25T14:30:45.927Z","type":"search","path":"/bg/tarsene","locale":"bg","listing_reference":null,"action":null,"query":"","filters":{},"sort":"recommended","page":1}
+{"recorded_at":"2026-07-25T14:30:45.969Z","type":"page_view","path":"/bg/imoti/MS-CRAWL-0001","locale":"bg","listing_reference":"MS-CRAWL-0001","action":null,"query":null,"filters":{},"sort":null,"page":null}
+{"recorded_at":"2026-07-25T14:30:45.988Z","type":"page_view","path":"/bg/prodai","locale":"bg","listing_reference":null,"action":null,"query":null,"filters":{},"sort":null,"page":null}
+{"recorded_at":"2026-07-25T14:30:46.005Z","type":"page_view","path":"/bg/lokacii/sandanski","locale":"bg","listing_reference":null,"action":null,"query":null,"filters":{},"sort":null,"page":null}

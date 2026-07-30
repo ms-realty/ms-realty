@@ -165,3 +165,41 @@ export function resolvePublicLocale(registry, requestedCode) {
   const fallbackCode = requested?.fallback_locale || registry.source_locale;
   return { locale: getLocale(registry, fallbackCode), available: false, requestedCode };
 }
+
+// Root-URL language negotiation. The bare domain root is the highest-authority
+// URL on both legacy sites, so it must always resolve to a real locale home.
+// `.ru` is a first-class Russian site and ignores Accept-Language.
+const RU_FIRST_PARTY_HOST = "makler-realty.ru";
+
+export function negotiateRootLocale(registry, { host = "", acceptLanguage = "" } = {}) {
+  const available = registry.locales.filter((locale) => locale.public_enabled && locale.indexable);
+  const codes = new Set(available.map((locale) => locale.code));
+
+  const bareHost = String(host || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase()
+    .replace(/:\d+$/, "")
+    .replace(/^www\./, "");
+  if (bareHost === RU_FIRST_PARTY_HOST && codes.has("ru")) return "ru";
+
+  const ranked = String(acceptLanguage || "")
+    .split(",")
+    .map((part) => {
+      const [tag, ...params] = part.trim().split(";");
+      const quality = params.map((value) => value.trim()).find((value) => value.startsWith("q="));
+      return { tag: tag.trim().toLowerCase(), q: quality ? Number(quality.slice(2)) : 1 };
+    })
+    .filter((entry) => entry.tag && entry.tag !== "*" && Number.isFinite(entry.q) && entry.q > 0)
+    .sort((left, right) => right.q - left.q);
+
+  for (const { tag } of ranked) {
+    if (codes.has(tag)) return tag;
+    const base = tag.split("-")[0];
+    if (codes.has(base)) return base;
+  }
+
+  const fallback = codes.has(registry.source_locale) ? registry.source_locale : available[0]?.code;
+  if (!fallback) throw new Error("No public indexable locale is available for the site root");
+  return fallback;
+}

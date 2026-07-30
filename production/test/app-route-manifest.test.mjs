@@ -98,7 +98,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /data-filter-form-id="sr-mobile"/);
   assert.match(search.html, /data-filter-chip="property_type"/);
   assert.match(search.html, /data-card-thumbnail="true"/);
-  assert.match(search.html, /<img src="https:\/\/makler-realty\./);
+  assert.match(search.html, /<img src="\/_next\/image\?url=https%3A%2F%2Fmakler-realty\./);
   assert.match(search.html, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
   assert.match(search.html, /data-ms-realty-public-client/);
   assert.doesNotMatch(search.html, /function submitHermesChat/);
@@ -233,9 +233,34 @@ test("App Router adapter serves approved sitemap, robots text, and favicon", asy
   const sitemapRoute = await import("../../app/sitemap.xml/route.js");
   const robotsRoute = await import("../../app/robots.txt/route.js");
   const faviconRoute = await import("../../app/favicon.ico/route.js");
-  assert.equal((await sitemapRoute.GET()).headers.get("content-type"), "application/xml; charset=utf-8");
-  assert.equal((await robotsRoute.GET()).headers.get("content-type"), "text/plain; charset=utf-8");
+  const request = (host) => new Request(`https://${host}/`, { headers: { host } });
+  const comSitemap = await sitemapRoute.GET(request("makler-realty.com"));
+  const ruSitemap = await sitemapRoute.GET(request("makler-realty.ru"));
+  assert.equal(comSitemap.headers.get("content-type"), "application/xml; charset=utf-8");
+  assert.equal((await robotsRoute.GET(request("makler-realty.com"))).headers.get("content-type"), "text/plain; charset=utf-8");
   assert.equal((await faviconRoute.GET()).headers.get("content-type"), "image/svg+xml; charset=utf-8");
+
+  // Each domain must publish its own absolute URLs, not the other domain's.
+  assert.match(await comSitemap.text(), /<loc>https:\/\/makler-realty\.com\//);
+  assert.match(await ruSitemap.text(), /<loc>https:\/\/makler-realty\.ru\//);
+  assert.match(await (await robotsRoute.GET(request("makler-realty.ru"))).text(), /Sitemap: https:\/\/makler-realty\.ru\/sitemap\.xml/);
+});
+
+test("the bare domain root negotiates to a locale home instead of 404", async () => {
+  const rootRoute = await import("../../app/route.js");
+  const at = (host, acceptLanguage) =>
+    rootRoute.GET(new Request(`https://${host}/`, { headers: { host, ...(acceptLanguage ? { "accept-language": acceptLanguage } : {}) } }));
+
+  const ru = await at("makler-realty.ru", "en-GB,en;q=0.9");
+  assert.equal(ru.status, 307, ".ru stays Russian regardless of Accept-Language");
+  assert.equal(ru.headers.get("location"), "/ru");
+
+  const german = await at("makler-realty.com", "de-DE,de;q=0.9,en;q=0.8");
+  assert.equal(german.headers.get("location"), "/de");
+
+  const unknown = await at("makler-realty.com", "ja-JP");
+  assert.equal(unknown.headers.get("location"), "/bg", "unmatched languages fall back to the source locale");
+  assert.equal(unknown.headers.get("vary"), "accept-language");
 });
 
 test("App Router serves reviewed legacy URLs as direct domain-aware redirects", () => {

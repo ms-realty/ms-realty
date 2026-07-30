@@ -16,7 +16,9 @@ import { fileSignature } from "./file-cache.mjs";
 //   is kept in a meta table so derived stores self-rebuild on upgrades.
 // - The .sqlite file lives next to the JSONL and is always derivable from it.
 
-const SCHEMA_VERSION = 1;
+// Bump when a store's column set changes: ensureFresh rebuilds derived stores
+// from the JSONL mirror on a version mismatch.
+const SCHEMA_VERSION = 2;
 const connections = new Map();
 
 function assertIdentifier(value, kind) {
@@ -82,14 +84,39 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
     db.prepare("INSERT INTO meta (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(key, value);
   }
 
-  function parseJsonl(filePath) {
+  // A torn append (crash mid-write, or two processes appending a >PIPE_BUF row)
+  // leaves one unparseable line. Failing the whole read would make the ledger
+  // permanently unreadable, so bad lines are quarantined and the rest survives.
+  function quarantinePath(filePath) {
+    return `${String(filePath).replace(/\.jsonl$/i, "")}.corrupt.jsonl`;
+  }
+
+  function parseJsonl(filePath, { quarantine = true } = {}) {
     if (!fs.existsSync(filePath)) return [];
-    return fs
-      .readFileSync(filePath, "utf8")
-      .trim()
-      .split("\n")
-      .filter(Boolean)
-      .map((line) => JSON.parse(line));
+    const rows = [];
+    const damaged = [];
+    for (const line of fs.readFileSync(filePath, "utf8").split("\n")) {
+      if (!line.trim()) continue;
+      try {
+        rows.push(JSON.parse(line));
+      } catch {
+        damaged.push(line);
+      }
+    }
+    if (damaged.length && quarantine) {
+      const target = quarantinePath(filePath);
+      fs.appendFileSync(target, `${damaged.join("\n")}\n`);
+      console.error(
+        JSON.stringify({
+          kind: "ledger_line_quarantined",
+          ledger: TABLE,
+          file: filePath,
+          quarantined: damaged.length,
+          quarantine_file: target,
+        }),
+      );
+    }
+    return rows;
   }
 
   function rowColumns(row) {
@@ -124,6 +151,15 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
     return db;
   }
 
+  // `CREATE TABLE IF NOT EXISTS` leaves an older table untouched, so a store
+  // that predates a column change must be detected structurally — the meta
+  // version alone is not enough if a store was written before meta existed.
+  function schemaMatches(db) {
+    if (readMeta(db, "schema_version") !== String(SCHEMA_VERSION)) return false;
+    const present = new Set(db.prepare(`PRAGMA table_info(${TABLE})`).all().map((row) => row.name));
+    return columns.every((column) => present.has(column));
+  }
+
   function ensureFresh(filePath) {
     const dbPath = sqlitePathFor(filePath);
     const jsonlSignature = fileSignature(filePath);
@@ -132,7 +168,7 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
       db = openDb(dbPath);
       connections.set(dbPath, db);
     }
-    if (db && readMeta(db, "schema_version") !== String(SCHEMA_VERSION)) {
+    if (db && !schemaMatches(db)) {
       const rows = fs.existsSync(filePath) ? parseJsonl(filePath) : readAllRows(db);
       db = rebuildDbFromRows(dbPath, rows);
       writeMeta(db, "jsonl_signature", jsonlSignature);
@@ -226,5 +262,15 @@ BEGIN SELECT RAISE(ABORT, 'ledger is append-only'); END;
     });
   }
 
-  return { sqlitePathFor, appendRow, readRows, resetLedger, importJsonl, exportJsonl, withDb, firstRowWhere };
+  // Indexed single-column lookup returning the most recent matching parsed row.
+  function lastRowWhere(filePath, column, value) {
+    if (!columns.includes(column)) throw new Error(`unknown sqlite ledger column: ${column}`);
+    return withDb(filePath, (db) => {
+      if (!db) return null;
+      const row = db.prepare(`SELECT row_json FROM ${TABLE} WHERE ${column} = ? ORDER BY seq DESC LIMIT 1`).get(value);
+      return row ? JSON.parse(row.row_json) : null;
+    });
+  }
+
+  return { sqlitePathFor, appendRow, readRows, resetLedger, importJsonl, exportJsonl, withDb, firstRowWhere, lastRowWhere };
 }

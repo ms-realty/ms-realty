@@ -4,6 +4,8 @@
   "status": "blocked",
   "blockers": [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -114,6 +116,52 @@
       }
     },
     {
+      "id": "locale_content_parity",
+      "status": "blocked",
+      "message": "An indexable locale with no approved listing translation publishes empty hreflang shells and loses the language coverage the legacy site had.",
+      "evidence": {
+        "status": "blocked",
+        "ready": false,
+        "indexable_locales": 7,
+        "total_listings": 165,
+        "approved_listings_by_locale": {
+          "bg": 113,
+          "de": 0,
+          "el": 1,
+          "en": 0,
+          "he": 1,
+          "nl": 0,
+          "ru": 52
+        },
+        "indexable_locales_without_content": [
+          "de",
+          "en",
+          "nl"
+        ]
+      },
+      "next_actions": [
+        "Every indexable public locale needs at least one approved listing translation, or the locale must be set indexable: false in locales/registry.json until it has content.",
+        "Port the legacy /en/, /de/, and /nl/ translations, or run the Hermes draft queue and approve them in /admin/translations."
+      ]
+    },
+    {
+      "id": "media_migration",
+      "status": "blocked",
+      "message": "Listing media is still hotlinked from the legacy WordPress origins and will 404 the moment DNS moves.",
+      "evidence": {
+        "status": "missing_manifest",
+        "ready": false,
+        "required_assets": 1714,
+        "mirrored_assets": 0,
+        "missing_assets": 1714,
+        "external_assets": 13
+      },
+      "next_actions": [
+        "Run node production/scripts/run-media-mirror.mjs to copy every legacy /wp-content/uploads asset onto owned storage.",
+        "Legacy image URLs stop resolving the moment DNS moves; the mirror serves them at their original paths."
+      ]
+    },
+    {
       "id": "structured_data",
       "status": "pass",
       "message": "Schema can pass while content warnings remain separate.",
@@ -152,7 +200,7 @@
           "taxonomy": 146,
           "listing": 165
         },
-        "urls_with_any_evidence": 3,
+        "urls_with_any_evidence": 5,
         "missing_required_sources": [
           "search_console",
           "yandex_webmaster",
@@ -162,9 +210,9 @@
           "source": "privacy_events",
           "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
           "status": "imported",
-          "row_count": 65,
-          "matched_rows": 29,
-          "unmatched_rows": 36
+          "row_count": 158,
+          "matched_rows": 39,
+          "unmatched_rows": 119
         },
         "analytics_export": {
           "source": "analytics_export",
@@ -236,9 +284,9 @@
             "source": "privacy_events",
             "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
             "status": "imported",
-            "row_count": 65,
-            "matched_rows": 29,
-            "unmatched_rows": 36
+            "row_count": 158,
+            "matched_rows": 39,
+            "unmatched_rows": 119
           }
         },
         "next_actions": [
@@ -588,7 +636,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-25T08:37:50.444Z",
+              "generated_at": "2026-07-25T11:35:53.289Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,

@@ -17,6 +17,7 @@ const ADMIN_ACTIONS = new Set([
   "deal_closed",
   "deployable_redirects_exported",
   "document_checklist_updated",
+  "hermes_backend_switch",
   "hermes_model_call",
   "launch_readiness_exported",
   "listing_edited",

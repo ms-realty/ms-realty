@@ -1,257 +1,15 @@
 {
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
-    "eligible_tasks": 659,
+    "eligible_tasks": 656,
     "batch_limit": 25,
     "batch_size": 25,
-    "remaining_after_batch": 634,
+    "remaining_after_batch": 631,
     "by_target_locale": {
-      "el": 1,
-      "de": 24
+      "de": 25
     }
   },
   "rows": [
-    {
-      "id": "translation-listing-MS-CRAWL-0001-el",
-      "status": "ready_for_hermes",
-      "task_type": "stale_review_required",
-      "object_type": "listing",
-      "object_id": "MS-CRAWL-0001",
-      "source_locale": "bg",
-      "target_locale": "el",
-      "target_direction": "ltr",
-      "reviewer_role": "translator_el",
-      "provider_mode": "hermes_draft",
-      "public_indexable": false,
-      "requires_human_approval": true,
-      "can_publish": false,
-      "can_mark_indexable": false,
-      "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
-      "draft_hash": "038b77ab9fdfca00c966a818501bf4ac877d6d42cb16f4847283eefb12457474",
-      "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=el",
-      "prompt": {
-        "role": "translation_draft",
-        "sourceLocale": "bg",
-        "targetLocale": "el",
-        "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\nUpdated approved source description.",
-        "propertyFacts": {
-          "id": "MS-CRAWL-0001",
-          "location": "Sandanski",
-          "property_type": "commercial",
-          "offer_type": "rent"
-        },
-        "glossary": {},
-        "toneRules": [
-          "Professional real-estate broker tone.",
-          "Factual and concise; no hype or unverifiable claims."
-        ],
-        "forbiddenClaims": [
-          "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
-          "Do not invent legal, tax, financing, residency, valuation, or availability claims."
-        ],
-        "seoTargets": {
-          "title_max_chars": 60,
-          "meta_description_min_chars": 120,
-          "meta_description_max_chars": 160
-        },
-        "capabilities": {
-          "can_publish": false,
-          "can_mark_indexable": false,
-          "requires_human_approval": true
-        },
-        "rules": [
-          "Draft only; never publish.",
-          "Preserve price, area, property ID, location, availability, and contact facts exactly.",
-          "Do not describe Sandanski as a sea destination.",
-          "Legal, tax, financing, and valuation claims require approved CMS source content.",
-          "Return SEO title drafts at or below 60 characters.",
-          "Return meta description drafts between 120 and 160 characters."
-        ]
-      },
-      "source_snapshot": {
-        "object_type": "listing",
-        "object_id": "MS-CRAWL-0001",
-        "source_locale": "bg",
-        "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
-        "approved_legal_content": false
-      },
-      "citations": [
-        {
-          "source": "cms_seed",
-          "object_id": "MS-CRAWL-0001",
-          "fields": [
-            "facts.title",
-            "facts.description",
-            "facts.location"
-          ]
-        },
-        {
-          "source": "translation_coverage",
-          "task_id": "translation-MS-CRAWL-0001-el"
-        }
-      ]
-    },
-    {
-      "id": "translation-listing-MS-3000-de",
-      "status": "ready_for_hermes",
-      "task_type": "hermes_draft_required",
-      "object_type": "listing",
-      "object_id": "MS-3000",
-      "source_locale": "bg",
-      "target_locale": "de",
-      "target_direction": "ltr",
-      "reviewer_role": "translator_de",
-      "provider_mode": "hermes_draft",
-      "public_indexable": false,
-      "requires_human_approval": true,
-      "can_publish": false,
-      "can_mark_indexable": false,
-      "source_hash": "fb8a31da230b00f16014b285eb764b623b95e98e10b8a2c2f2945ebd558162c6",
-      "draft_hash": "e0d0b1e10a44034945937b22cd5e94ffaf387e452cd91c00db91bceb5c048053",
-      "admin_path": "/admin/translations?objectType=listing&objectId=MS-3000&locale=de",
-      "prompt": {
-        "role": "translation_draft",
-        "sourceLocale": "bg",
-        "targetLocale": "de",
-        "sourceText": "Продажба на парцел в Струмяни - 3000 кв.м - Недвижими имоти в Сандански\nПарцела се намира в едно от най-големите и предпочитани села в югозападна България – Струмяни. Струмяни е село със статут на общински център. Намира се на около 10 км от Сандански, на главен път Е 79. Селото е с отлично развита инфраструктура. Имота се намира на края на селото, благодарение на което изгледа от парцела е много добър. В парцела има питейна вода. Тока и канализацията е на 10 метра от имота. Парцела е ограден с метална мрежа. Има засадени плодови и иглолистни дръвчета. Асфалтовия път стига почти до самия парцел.",
-        "propertyFacts": {
-          "id": "MS-3000",
-          "location": "Sandanski",
-          "property_type": "land",
-          "offer_type": "sale",
-          "price_eur": 38000
-        },
-        "glossary": {},
-        "toneRules": [
-          "Professional real-estate broker tone.",
-          "Factual and concise; no hype or unverifiable claims."
-        ],
-        "forbiddenClaims": [
-          "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
-          "Do not invent legal, tax, financing, residency, valuation, or availability claims."
-        ],
-        "seoTargets": {
-          "title_max_chars": 60,
-          "meta_description_min_chars": 120,
-          "meta_description_max_chars": 160
-        },
-        "capabilities": {
-          "can_publish": false,
-          "can_mark_indexable": false,
-          "requires_human_approval": true
-        },
-        "rules": [
-          "Draft only; never publish.",
-          "Preserve price, area, property ID, location, availability, and contact facts exactly.",
-          "Do not describe Sandanski as a sea destination.",
-          "Legal, tax, financing, and valuation claims require approved CMS source content.",
-          "Return SEO title drafts at or below 60 characters.",
-          "Return meta description drafts between 120 and 160 characters."
-        ]
-      },
-      "source_snapshot": {
-        "object_type": "listing",
-        "object_id": "MS-3000",
-        "source_locale": "bg",
-        "source_hash": "fb8a31da230b00f16014b285eb764b623b95e98e10b8a2c2f2945ebd558162c6",
-        "approved_legal_content": false
-      },
-      "citations": [
-        {
-          "source": "cms_seed",
-          "object_id": "MS-3000",
-          "fields": [
-            "facts.title",
-            "facts.description",
-            "facts.location"
-          ]
-        },
-        {
-          "source": "translation_coverage",
-          "task_id": "translation-MS-3000-de"
-        }
-      ]
-    },
-    {
-      "id": "translation-listing-MS-CRAWL-0001-de",
-      "status": "ready_for_hermes",
-      "task_type": "hermes_draft_required",
-      "object_type": "listing",
-      "object_id": "MS-CRAWL-0001",
-      "source_locale": "bg",
-      "target_locale": "de",
-      "target_direction": "ltr",
-      "reviewer_role": "translator_de",
-      "provider_mode": "hermes_draft",
-      "public_indexable": false,
-      "requires_human_approval": true,
-      "can_publish": false,
-      "can_mark_indexable": false,
-      "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
-      "draft_hash": "93fab17e00de692fd82e6c303c2552ff63952c309887bfaff0e53a5309671e2f",
-      "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0001&locale=de",
-      "prompt": {
-        "role": "translation_draft",
-        "sourceLocale": "bg",
-        "targetLocale": "de",
-        "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем! - Недвижими имоти в Сандански\nUpdated approved source description.",
-        "propertyFacts": {
-          "id": "MS-CRAWL-0001",
-          "location": "Sandanski",
-          "property_type": "commercial",
-          "offer_type": "rent"
-        },
-        "glossary": {},
-        "toneRules": [
-          "Professional real-estate broker tone.",
-          "Factual and concise; no hype or unverifiable claims."
-        ],
-        "forbiddenClaims": [
-          "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
-          "Do not invent legal, tax, financing, residency, valuation, or availability claims."
-        ],
-        "seoTargets": {
-          "title_max_chars": 60,
-          "meta_description_min_chars": 120,
-          "meta_description_max_chars": 160
-        },
-        "capabilities": {
-          "can_publish": false,
-          "can_mark_indexable": false,
-          "requires_human_approval": true
-        },
-        "rules": [
-          "Draft only; never publish.",
-          "Preserve price, area, property ID, location, availability, and contact facts exactly.",
-          "Do not describe Sandanski as a sea destination.",
-          "Legal, tax, financing, and valuation claims require approved CMS source content.",
-          "Return SEO title drafts at or below 60 characters.",
-          "Return meta description drafts between 120 and 160 characters."
-        ]
-      },
-      "source_snapshot": {
-        "object_type": "listing",
-        "object_id": "MS-CRAWL-0001",
-        "source_locale": "bg",
-        "source_hash": "f460997e5f6b3d3eab950dd71eb8f6a136a05227b5ea7fc32aa6838a169f6431",
-        "approved_legal_content": false
-      },
-      "citations": [
-        {
-          "source": "cms_seed",
-          "object_id": "MS-CRAWL-0001",
-          "fields": [
-            "facts.title",
-            "facts.description",
-            "facts.location"
-          ]
-        },
-        {
-          "source": "translation_coverage",
-          "task_id": "translation-MS-CRAWL-0001-de"
-        }
-      ]
-    },
     {
       "id": "translation-listing-MS-CRAWL-0002-de",
       "status": "ready_for_hermes",
@@ -2027,6 +1785,249 @@
         {
           "source": "translation_coverage",
           "task_id": "translation-MS-CRAWL-0023-de"
+        }
+      ]
+    },
+    {
+      "id": "translation-listing-MS-CRAWL-0024-de",
+      "status": "ready_for_hermes",
+      "task_type": "hermes_draft_required",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0024",
+      "source_locale": "bg",
+      "target_locale": "de",
+      "target_direction": "ltr",
+      "reviewer_role": "translator_de",
+      "provider_mode": "hermes_draft",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "can_publish": false,
+      "can_mark_indexable": false,
+      "source_hash": "73660ce6bfd31bd9acefd2fa6991e5605d0bd6855bfa0aca990d4ba6779c443d",
+      "draft_hash": "827ffa88e53b559f45e097925d279bf4a46121f02c532c7c4d8549004340e84f",
+      "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0024&locale=de",
+      "prompt": {
+        "role": "translation_draft",
+        "sourceLocale": "bg",
+        "targetLocale": "de",
+        "sourceText": "Продава апартамент в Солун - Недвижими имоти в Сандански\nАпартамента се намира в центъра на гр.Солун. Намира се на 4ти жилищен етаж и се състои от хол с кухня, спалня и WC.",
+        "propertyFacts": {
+          "id": "MS-CRAWL-0024",
+          "location": "Sandanski",
+          "property_type": "apartment",
+          "offer_type": "sale",
+          "price_eur": 125000
+        },
+        "glossary": {},
+        "toneRules": [
+          "Professional real-estate broker tone.",
+          "Factual and concise; no hype or unverifiable claims."
+        ],
+        "forbiddenClaims": [
+          "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+          "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+        ],
+        "seoTargets": {
+          "title_max_chars": 60,
+          "meta_description_min_chars": 120,
+          "meta_description_max_chars": 160
+        },
+        "capabilities": {
+          "can_publish": false,
+          "can_mark_indexable": false,
+          "requires_human_approval": true
+        },
+        "rules": [
+          "Draft only; never publish.",
+          "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+          "Do not describe Sandanski as a sea destination.",
+          "Legal, tax, financing, and valuation claims require approved CMS source content.",
+          "Return SEO title drafts at or below 60 characters.",
+          "Return meta description drafts between 120 and 160 characters."
+        ]
+      },
+      "source_snapshot": {
+        "object_type": "listing",
+        "object_id": "MS-CRAWL-0024",
+        "source_locale": "bg",
+        "source_hash": "73660ce6bfd31bd9acefd2fa6991e5605d0bd6855bfa0aca990d4ba6779c443d",
+        "approved_legal_content": false
+      },
+      "citations": [
+        {
+          "source": "cms_seed",
+          "object_id": "MS-CRAWL-0024",
+          "fields": [
+            "facts.title",
+            "facts.description",
+            "facts.location"
+          ]
+        },
+        {
+          "source": "translation_coverage",
+          "task_id": "translation-MS-CRAWL-0024-de"
+        }
+      ]
+    },
+    {
+      "id": "translation-listing-MS-CRAWL-0025-de",
+      "status": "ready_for_hermes",
+      "task_type": "hermes_draft_required",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0025",
+      "source_locale": "bg",
+      "target_locale": "de",
+      "target_direction": "ltr",
+      "reviewer_role": "translator_de",
+      "provider_mode": "hermes_draft",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "can_publish": false,
+      "can_mark_indexable": false,
+      "source_hash": "65f13fc869b5a44adc46d206c767134e363c11cf774fdf1c579fd14c52d7d4af",
+      "draft_hash": "34afa2ed10bd7e404e9c43eb0a0c5c1870019151a85833f2fbc9f7f3b24afba6",
+      "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0025&locale=de",
+      "prompt": {
+        "role": "translation_draft",
+        "sourceLocale": "bg",
+        "targetLocale": "de",
+        "sourceText": "Продава вила в Пирин планина - Недвижими имоти в Сандански\nПродава се вила в Пирин планина над село Илинденци – сред природа, тишина и чист въздух Предлагаме за продажба уютна вила в Пирин планина, разположена над село Илинденци, в живописна вилна зона, заобиколена от вековна гора и впечатляващи природни гледки. Имотът е отличен избор за хора, които търсят спокойствие, уединение и близост до природата, без да се лишават от удобствата на съвременния живот. Вилата разполага с всички необходими документи. Намира се в собствен поземлен имот с площ от 947 кв.м., а застроената площ на сградата е 51 кв.м. Сградата е на 2 нива. На първо ниво има хол с кухня, баня и тоалетна. На второ ниво 2 спални с обща баня и тоалетна. Имотът е напълно завършен и частично обзаведен, което позволява незабавно ползване както за лично ползване, така и като ваканционен имот или инвестиция за туристически наем. Къщата е електрифицирана и водоснабдена, с активни партиди за",
+        "propertyFacts": {
+          "id": "MS-CRAWL-0025",
+          "location": "Sandanski",
+          "property_type": "house",
+          "offer_type": "sale",
+          "price_eur": 86000
+        },
+        "glossary": {},
+        "toneRules": [
+          "Professional real-estate broker tone.",
+          "Factual and concise; no hype or unverifiable claims."
+        ],
+        "forbiddenClaims": [
+          "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+          "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+        ],
+        "seoTargets": {
+          "title_max_chars": 60,
+          "meta_description_min_chars": 120,
+          "meta_description_max_chars": 160
+        },
+        "capabilities": {
+          "can_publish": false,
+          "can_mark_indexable": false,
+          "requires_human_approval": true
+        },
+        "rules": [
+          "Draft only; never publish.",
+          "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+          "Do not describe Sandanski as a sea destination.",
+          "Legal, tax, financing, and valuation claims require approved CMS source content.",
+          "Return SEO title drafts at or below 60 characters.",
+          "Return meta description drafts between 120 and 160 characters."
+        ]
+      },
+      "source_snapshot": {
+        "object_type": "listing",
+        "object_id": "MS-CRAWL-0025",
+        "source_locale": "bg",
+        "source_hash": "65f13fc869b5a44adc46d206c767134e363c11cf774fdf1c579fd14c52d7d4af",
+        "approved_legal_content": false
+      },
+      "citations": [
+        {
+          "source": "cms_seed",
+          "object_id": "MS-CRAWL-0025",
+          "fields": [
+            "facts.title",
+            "facts.description",
+            "facts.location"
+          ]
+        },
+        {
+          "source": "translation_coverage",
+          "task_id": "translation-MS-CRAWL-0025-de"
+        }
+      ]
+    },
+    {
+      "id": "translation-listing-MS-CRAWL-0026-de",
+      "status": "ready_for_hermes",
+      "task_type": "hermes_draft_required",
+      "object_type": "listing",
+      "object_id": "MS-CRAWL-0026",
+      "source_locale": "bg",
+      "target_locale": "de",
+      "target_direction": "ltr",
+      "reviewer_role": "translator_de",
+      "provider_mode": "hermes_draft",
+      "public_indexable": false,
+      "requires_human_approval": true,
+      "can_publish": false,
+      "can_mark_indexable": false,
+      "source_hash": "87847cd575640f0f85933bd66ee0279468fc73e5c0f617378a9dfb26e14307f8",
+      "draft_hash": "8ddb45e3aadfd3ec076ba4d62ec205f02ee71c0aa876d82bb46a675c2ef50ed4",
+      "admin_path": "/admin/translations?objectType=listing&objectId=MS-CRAWL-0026&locale=de",
+      "prompt": {
+        "role": "translation_draft",
+        "sourceLocale": "bg",
+        "targetLocale": "de",
+        "sourceText": "Продава голяма къща в близост до гр.Сандански - Недвижими имоти в Сандански\nКъщата се намира в едно от големите и предпочитани села в близост до СПА курорт Сандански Парцела е с площ от 760 кв.м. Къщата е със застроена площ от 152м2, а втори етаж е 161кв.м. Къщата е на 2 етажа, като на първи етаж има голям хол и изход към панорамна тераса, като от терасата има достъп и до парцела и 4 спални, като всяка от спалните е със собствена баня и тоалетна. По вътрешно стълбище се стига до втория жилищен етаж, който е с площ от 161 кв.м., където има 4 стаи, хол с кухня и баня с тоалетна. Къщата се предлага в напълно завършен вид, подходяща е както за постоянно пребиваване, така и за отдаване под наем цялата или на отделни стаи.",
+        "propertyFacts": {
+          "id": "MS-CRAWL-0026",
+          "location": "Sandanski",
+          "property_type": "house",
+          "offer_type": "sale",
+          "price_eur": 225000
+        },
+        "glossary": {},
+        "toneRules": [
+          "Professional real-estate broker tone.",
+          "Factual and concise; no hype or unverifiable claims."
+        ],
+        "forbiddenClaims": [
+          "Do not describe Sandanski as a sea, beach, coast, or seaside destination.",
+          "Do not invent legal, tax, financing, residency, valuation, or availability claims."
+        ],
+        "seoTargets": {
+          "title_max_chars": 60,
+          "meta_description_min_chars": 120,
+          "meta_description_max_chars": 160
+        },
+        "capabilities": {
+          "can_publish": false,
+          "can_mark_indexable": false,
+          "requires_human_approval": true
+        },
+        "rules": [
+          "Draft only; never publish.",
+          "Preserve price, area, property ID, location, availability, and contact facts exactly.",
+          "Do not describe Sandanski as a sea destination.",
+          "Legal, tax, financing, and valuation claims require approved CMS source content.",
+          "Return SEO title drafts at or below 60 characters.",
+          "Return meta description drafts between 120 and 160 characters."
+        ]
+      },
+      "source_snapshot": {
+        "object_type": "listing",
+        "object_id": "MS-CRAWL-0026",
+        "source_locale": "bg",
+        "source_hash": "87847cd575640f0f85933bd66ee0279468fc73e5c0f617378a9dfb26e14307f8",
+        "approved_legal_content": false
+      },
+      "citations": [
+        {
+          "source": "cms_seed",
+          "object_id": "MS-CRAWL-0026",
+          "fields": [
+            "facts.title",
+            "facts.description",
+            "facts.location"
+          ]
+        },
+        {
+          "source": "translation_coverage",
+          "task_id": "translation-MS-CRAWL-0026-de"
         }
       ]
     }

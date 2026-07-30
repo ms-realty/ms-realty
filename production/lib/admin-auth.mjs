@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
+import { SESSION_COOKIE, parseCookies, readSession } from "./admin-sessions.mjs";
 
 const LOCAL_ADMIN_TOKEN = "local-admin-smoke";
 const CREDENTIALS_ENV = "MS_REALTY_ADMIN_CREDENTIALS_JSON";
@@ -55,6 +56,7 @@ const OPERATIONS_WRITE_PATHS = new Set([
   "/api/admin/accounts/link",
   "/api/admin/documents/outcome",
   "/api/admin/consents/withdraw",
+  "/api/admin/contacts/erase",
   "/api/admin/viewings",
   "/api/admin/viewings/follow-up",
   "/api/admin/seller-pipeline/outcome",
@@ -185,12 +187,39 @@ export function adminCredentials(env = process.env) {
   });
 }
 
+// The built-in smoke token is a full-mutation admin credential that is public
+// in this repository. It is opt-in only (set by `npm test` and the smoke
+// scripts) so that starting a server without MS_REALTY_ADMIN_TOKEN can never
+// silently accept it — NODE_ENV alone was too weak a signal, because
+// `node production/server.mjs` sets none.
+export function insecureLocalAdminAllowed(env = process.env) {
+  return env.NODE_ENV !== "production" && env.MS_REALTY_ALLOW_INSECURE_LOCAL_ADMIN === "1";
+}
+
 export function adminBearerToken(env = process.env) {
-  const token = env.MS_REALTY_ADMIN_TOKEN || (env.NODE_ENV === "production" ? "" : LOCAL_ADMIN_TOKEN);
+  const token = env.MS_REALTY_ADMIN_TOKEN || (insecureLocalAdminAllowed(env) ? LOCAL_ADMIN_TOKEN : "");
   return token ? `Bearer ${token}` : "";
 }
 
-export function resolveAdminPrincipal(auth, env = process.env) {
+// A signed session cookie beats every token path: it is the only source that
+// names a real human who typed a password. Bearer tokens stay for automation
+// (CI smoke, operator scripts) and for the transitional shared-token setup.
+export function resolveAdminPrincipal(auth, env = process.env, cookieHeader = "") {
+  const session = readSession(parseCookies(cookieHeader)[SESSION_COOKIE], { env });
+  if (session) {
+    try {
+      return {
+        id: operatorId(session.id, "session operator"),
+        source: "operator_session",
+        can_mutate: true,
+        roles: normalizedRoles(session.roles, "session roles"),
+        session_id: session.sid,
+      };
+    } catch {
+      return null; // a session carrying an unknown role is not trusted
+    }
+  }
+
   let credentials;
   try {
     credentials = adminCredentials(env);

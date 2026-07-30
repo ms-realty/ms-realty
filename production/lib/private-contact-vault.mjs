@@ -39,6 +39,64 @@ export function appendPrivateContact(
   return { subject_type: subjectType, subject_id: subjectId, stored_at: storedAt, encrypted: true };
 }
 
+// GDPR Art. 17 erasure against an append-only store: the ciphertext row stays
+// (the ledger's integrity depends on it), but its payload is replaced by a
+// tombstone so the personal data is unrecoverable. Erasure is itself an
+// append, which keeps the audit trail intact.
+export const ERASED_ALGORITHM = "erased";
+
+export function erasePrivateContact(
+  { subjectType, subjectId, actor, reason = "subject_request" },
+  { filePath, erasedAt = new Date().toISOString() } = {},
+) {
+  if (!subjectType || !subjectId) throw new Error("Contact erasure requires a subject type and subject id");
+  if (!String(actor || "").trim()) throw new Error("Contact erasure requires an attributable operator");
+  if (!filePath) throw new Error("Private contact vault path is required");
+  const tombstone = {
+    subject_type: subjectType,
+    subject_id: subjectId,
+    stored_at: erasedAt,
+    algorithm: ERASED_ALGORITHM,
+    erased: true,
+    erased_by: String(actor).trim(),
+    erasure_reason: String(reason || "subject_request").trim(),
+  };
+
+  // Hiding the row at read time is not erasure while the ciphertext and key
+  // both survive, so the ciphertext is physically dropped. Rewrite via a temp
+  // file + rename so a crash cannot leave a truncated vault.
+  const existing = fs.existsSync(filePath)
+    ? fs
+        .readFileSync(filePath, "utf8")
+        .split("\n")
+        .filter(Boolean)
+        .filter((line) => {
+          try {
+            const row = JSON.parse(line);
+            const rowSubjectId = row.subject_id || row.lead_id;
+            const rowSubjectType = row.subject_type || (row.lead_id ? "lead" : null);
+            return !(rowSubjectId === subjectId && rowSubjectType === subjectType);
+          } catch {
+            return true;
+          }
+        })
+    : [];
+  let erasedRows = 0;
+  if (fs.existsSync(filePath)) {
+    erasedRows = fs.readFileSync(filePath, "utf8").split("\n").filter(Boolean).length - existing.length;
+  }
+
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  const temporaryPath = `${filePath}.erase-${process.pid}.tmp`;
+  fs.writeFileSync(temporaryPath, `${[...existing, JSON.stringify(tombstone)].join("\n")}\n`, {
+    encoding: "utf8",
+    mode: 0o600,
+  });
+  fs.renameSync(temporaryPath, filePath);
+  fs.chmodSync(filePath, 0o600);
+  return { subject_type: subjectType, subject_id: subjectId, erased_at: erasedAt, erased: true, erased_rows: erasedRows };
+}
+
 export function readPrivateContacts(
   filePath,
   { secret, secretName = "contact vault secret", subjectType = null } = {},
@@ -48,6 +106,11 @@ export function readPrivateContacts(
   const contacts = new Map();
   for (const line of fs.readFileSync(filePath, "utf8").trim().split("\n").filter(Boolean)) {
     const row = JSON.parse(line);
+    if (row.algorithm === ERASED_ALGORITHM) {
+      // A later erasure wins over any earlier ciphertext for the same subject.
+      contacts.delete(row.subject_id);
+      continue;
+    }
     const legacyLeadRow = !row.subject_type && !row.subject_id && Boolean(row.lead_id);
     const rowSubjectType = legacyLeadRow ? "lead" : row.subject_type;
     const rowSubjectId = legacyLeadRow ? row.lead_id : row.subject_id;

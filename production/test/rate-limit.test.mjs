@@ -21,12 +21,23 @@ test("limiter validates its configuration", () => {
   assert.throws(() => createRateLimiter({ max: 0 }));
 });
 
-test("clientIpFromHeaders parses plain objects and fetch Headers", () => {
-  assert.equal(clientIpFromHeaders({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }), "203.0.113.7");
-  assert.equal(clientIpFromHeaders({ "X-Forwarded-For": "198.51.100.3" }), "198.51.100.3");
-  assert.equal(clientIpFromHeaders({ "x-real-ip": "192.0.2.9" }), "192.0.2.9");
-  assert.equal(clientIpFromHeaders(new Headers({ "x-forwarded-for": "203.0.113.99" })), "203.0.113.99");
-  assert.equal(clientIpFromHeaders({}), "unknown");
+test("clientIpFromHeaders ignores forwarded headers unless a proxy is trusted", () => {
+  // Untrusted (default): forwarded headers are client-controlled, so a caller
+  // cannot reset its own bucket by varying them.
+  assert.equal(clientIpFromHeaders({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }, { env: {} }), "unknown");
+  assert.equal(clientIpFromHeaders({ "x-real-ip": "192.0.2.9" }, { env: {} }), "unknown");
+  assert.equal(clientIpFromHeaders({ "x-forwarded-for": "203.0.113.7" }, { env: {}, socketAddress: "198.51.100.8" }), "198.51.100.8");
+  assert.equal(clientIpFromHeaders({ "x-ms-realty-socket-address": "198.51.100.9" }, { env: {} }), "198.51.100.9");
+  assert.equal(clientIpFromHeaders({}, { env: {} }), "unknown");
+});
+
+test("clientIpFromHeaders parses plain objects and fetch Headers behind a trusted proxy", () => {
+  const env = { MS_REALTY_TRUST_PROXY: "1" };
+  assert.equal(clientIpFromHeaders({ "x-forwarded-for": "203.0.113.7, 10.0.0.1" }, { env }), "203.0.113.7");
+  assert.equal(clientIpFromHeaders({ "X-Forwarded-For": "198.51.100.3" }, { env }), "198.51.100.3");
+  assert.equal(clientIpFromHeaders({ "x-real-ip": "192.0.2.9" }, { env }), "192.0.2.9");
+  assert.equal(clientIpFromHeaders(new Headers({ "x-forwarded-for": "203.0.113.99" }), { env }), "203.0.113.99");
+  assert.equal(clientIpFromHeaders({}, { env }), "unknown");
 });
 
 test("rateLimitConfigFromEnv parses, defaults, disables, and validates", () => {

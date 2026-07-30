@@ -903,6 +903,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
   assert.equal(smoke.health.body.status, "ok");
   assert.deepEqual(smoke.health.body.blockers, [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "external_seo_exports",
     "listing_quality_review",
     "live_services",
@@ -916,6 +918,8 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
     smoke.ready.body.blocked_gates.map((gate) => gate.id),
     [
       "redirect_reviews",
+      "locale_content_parity",
+      "media_migration",
       "external_seo_exports",
       "listing_quality_review",
       "live_services",
@@ -2090,6 +2094,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(launch.status, 200);
   assert.deepEqual(launch.body.blockers, [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "listing_quality_review",
     "live_services",
     "payload_runtime",
@@ -2104,6 +2110,8 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(launchReadinessOutputPath), true);
   assert.deepEqual(JSON.parse(fs.readFileSync(launchReadinessOutputPath, "utf8")).blockers, [
     "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
     "listing_quality_review",
     "live_services",
     "payload_runtime",
@@ -2160,7 +2168,13 @@ test("HTTP admin can import external SEO evidence without broad launch assumptio
   assert.equal(fs.existsSync(hermesWorkerReportPath), true);
   assert.equal(fs.existsSync(liveServiceProvisioningReportPath), true);
   assert.equal(fs.existsSync(payloadRuntimeReportPath), true);
-  assert.deepEqual(launchAfterLive.body.blockers, ["redirect_reviews", "listing_quality_review", "production_recovery"]);
+  assert.deepEqual(launchAfterLive.body.blockers, [
+    "redirect_reviews",
+    "locale_content_parity",
+    "media_migration",
+    "listing_quality_review",
+    "production_recovery",
+  ]);
   assert.equal(launchAfterLive.body.status, "blocked");
 });
 

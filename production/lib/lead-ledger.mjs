@@ -23,9 +23,15 @@ const store = createLedgerStore({
     "duplicate_status",
     "possible_duplicate_of",
     "sla_due_at",
+    "idempotency_key",
   ],
-  indexes: ["contact_fingerprint", "sla_due_at"],
+  indexes: ["contact_fingerprint", "sla_due_at", "idempotency_key"],
 });
+
+// A double-tap on a slow phone used to create two leads, two SLA timers, and two
+// consent records. Re-submitting the same enquiry inside this window returns the
+// original lead instead of appending a second one.
+const DEFAULT_IDEMPOTENCY_WINDOW_MINUTES = 10;
 
 export const sqlitePathFor = store.sqlitePathFor;
 
@@ -57,12 +63,41 @@ function optionalMessage(value) {
   return text ? text.slice(0, 2000) : null;
 }
 
+function idempotencyKey(lead, contact_fingerprint, explicitKey) {
+  const submitted = String(explicitKey || "").trim();
+  if (submitted) return `client:${submitted.slice(0, 128)}`;
+  if (!contact_fingerprint) return null;
+  const parts = [
+    contact_fingerprint,
+    String(lead.lead?.source || ""),
+    String(lead.lead?.listingReference || ""),
+    String(lead.message_original || lead.message || lead.lead?.message || ""),
+  ];
+  return `derived:${crypto.createHash("sha256").update(parts.join("|")).digest("hex")}`;
+}
+
 export function appendLead(
   lead,
-  { filePath = DEFAULT_LEAD_LEDGER_PATH, receivedAt = new Date().toISOString(), slaMinutes = 15, escalationMinutes = 60 } = {},
+  {
+    filePath = DEFAULT_LEAD_LEDGER_PATH,
+    receivedAt = new Date().toISOString(),
+    slaMinutes = 15,
+    escalationMinutes = 60,
+    idempotencyWindowMinutes = DEFAULT_IDEMPOTENCY_WINDOW_MINUTES,
+    idempotencyKey: submittedIdempotencyKey = null,
+  } = {},
 ) {
   const slaDueAt = minutesAfter(receivedAt, slaMinutes);
   const contact_fingerprint = contactFingerprint(lead.lead?.contact);
+  const idempotency_key = idempotencyKey(lead, contact_fingerprint, submittedIdempotencyKey);
+  if (idempotency_key && idempotencyWindowMinutes > 0) {
+    const previous = store.lastRowWhere(filePath, "idempotency_key", idempotency_key);
+    const previousAt = previous ? Date.parse(previous.received_at) : Number.NaN;
+    const now = Date.parse(receivedAt);
+    if (Number.isFinite(previousAt) && Number.isFinite(now) && now - previousAt <= idempotencyWindowMinutes * 60 * 1000) {
+      return { ...previous, idempotent_replay: true };
+    }
+  }
   const possibleDuplicate = contact_fingerprint ? store.firstRowWhere(filePath, "contact_fingerprint", contact_fingerprint) : null;
   const messageOriginal = optionalMessage(lead.message_original || lead.message || lead.lead?.message);
   const row = {
@@ -88,6 +123,7 @@ export function appendLead(
     assigned_broker: lead.broker_assignment?.broker_id || null,
     assignment_method: lead.broker_assignment?.method || null,
     contact_fingerprint,
+    idempotency_key,
     duplicate_status: contact_fingerprint ? (possibleDuplicate ? "possible_duplicate" : "new_contact") : "no_contact_key",
     possible_duplicate_of: possibleDuplicate?.lead_id || null,
     sla_due_at: slaDueAt,
