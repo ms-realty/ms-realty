@@ -95,6 +95,8 @@ export function createTourApproval(seed, input, approvedAt = new Date().toISOStr
   const record = listingRecord(seed, input.listingId);
   if (!record) throw new Error("Known listingId is required");
   if (!input.reviewer) throw new Error("Tour approval requires a reviewer");
+  const confirmed = input.reviewConfirmed === true || input.reviewConfirmed === "true" || input.reviewConfirmed === "on" || input.reviewConfirmed === "1";
+  if (!confirmed) throw new Error("Tour approval requires explicit human confirmation");
   const tour = createTourField({
     listingId: record.id,
     panoramaUrl: input.panoramaUrl,

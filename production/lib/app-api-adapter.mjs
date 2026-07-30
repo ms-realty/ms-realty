@@ -31,6 +31,7 @@ import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
+import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 
 const ERROR_JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -258,6 +259,10 @@ function withSearchBackend(result, engineResult) {
   };
 }
 
+function engineResultIsComplete(engineResult) {
+  return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
+}
+
 function withSearchIntent(result, searchRequest) {
   return {
     ...result,
@@ -269,7 +274,7 @@ function withSearchIntent(result, searchRequest) {
   };
 }
 
-async function routeSearch(requestUrl, registry, seed, config) {
+async function routeSearch(requestUrl, registry, seed, config, preview = false) {
   let searchRequest;
   try {
     searchRequest = normalizeSearchRequest(requestUrl.searchParams, {
@@ -305,7 +310,7 @@ async function routeSearch(requestUrl, registry, seed, config) {
     throw error;
   }
   const result =
-    engineResult.engine === "seed_fallback"
+    engineResult.engine === "seed_fallback" || !engineResultIsComplete(engineResult)
       ? localResult
       : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
           localeCode,
@@ -315,7 +320,7 @@ async function routeSearch(requestUrl, registry, seed, config) {
           page,
           translationTasks,
         });
-  recordEvent({ type: "search", path: requestUrl.pathname, locale: localeCode, query, filters, sort, page }, config);
+  if (!preview) recordEvent({ type: "search", path: requestUrl.pathname, locale: localeCode, query, filters, sort, page }, config);
   return json(200, withSearchIntent(withSearchBackend(result, engineResult), searchRequest));
 }
 
@@ -519,10 +524,30 @@ export async function renderAppApiResponse(request, { config = appApiConfigFromE
       );
     }
 
+    if (request.method === "GET" && url.pathname === "/api/geography") {
+      return webResponse(
+        json(
+          200,
+          geographySuggestionsPayload(loadGeographyRegistry(), {
+            query: url.searchParams.get("q") || "",
+            countryCode: (url.searchParams.get("country") || "").toUpperCase() || undefined,
+            levels: url.searchParams
+              .getAll("level")
+              .flatMap((value) => value.split(","))
+              .filter(Boolean),
+            parentId: url.searchParams.get("parent_id") || undefined,
+            ancestorId: url.searchParams.get("ancestor_id") || undefined,
+            limit: url.searchParams.get("limit") || 20,
+          }),
+          { "cache-control": "public, max-age=3600, stale-while-revalidate=86400" },
+        ),
+      );
+    }
+
     if (request.method === "GET" && url.pathname === "/api/search") {
       const registry = currentRegistry(config);
       const seed = currentSeed(config);
-      return webResponse(await routeSearch(url, registry, seed, config));
+      return webResponse(await routeSearch(url, registry, seed, config, request.headers.get("x-ms-realty-preview") === "search-count"));
     }
 
     if (request.method === "POST" && url.pathname === "/api/leads") {

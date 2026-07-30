@@ -1,15 +1,7 @@
 import { h, renderStaticElement } from "./react-static-html.mjs";
-import { labelsFor, localizedListingValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
+import { humanizeIdentifier, labelsFor, localizedListingValue, localizedSearchFilterValue, uiCopyFor } from "./public-site.mjs";
 import { Icon } from "./ui/icons.mjs";
-import { LOGO_ASPECT, LOGO_SRC, LOGO_SRC_REVERSED } from "./ui/design-assets.mjs";
-
-function humanizeIdentifier(value) {
-  const text = String(value || "").trim();
-  if (!text) return "";
-  return text
-    .replaceAll("_", " ")
-    .replace(/\b\p{L}/gu, (letter) => letter.toLocaleUpperCase());
-}
+import { LOGO_ASPECT, LOGO_URL, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
 
 function uiLabels(page) {
   return labelsFor(page.locale || page.lang || "en");
@@ -188,7 +180,7 @@ function SiteHeader({ chrome }) {
       h(
         "a",
         { href: chrome.home.href, className: "site-hd__logo", "aria-label": chrome.home.label },
-        h("img", { src: LOGO_SRC, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
+        h("img", { src: LOGO_URL, alt: chrome.home.label, height: 40, width: Math.round(40 * LOGO_ASPECT) }),
       ),
       h(
         "nav",
@@ -305,7 +297,7 @@ function SiteFooter({ chrome, labels }) {
         h(
           "a",
           { href: chrome.home.href, "aria-label": chrome.home.label, className: "site-ft__logo" },
-          h("img", { src: LOGO_SRC_REVERSED, alt: chrome.home.label, height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+          h("img", { src: LOGO_URL_REVERSED, alt: chrome.home.label, height: 30, width: Math.round(30 * LOGO_ASPECT), loading: "lazy", decoding: "async" }),
         ),
         h("p", { className: "site-ft__intro" }, copy.tagline),
         h(
@@ -757,21 +749,327 @@ function factsList(facts = {}, labels = labelsFor("en"), localeCode = "en") {
    Home (ui_kits/website/HomePage)
    ============================================================ */
 
+const HERO_GALLERY_SLIDES = [
+  {
+    id: "sandanski",
+    avif: "/hero/sandanski-town-1280.avif 1280w, /hero/sandanski-town-1920.avif 1920w",
+    webp: "/hero/sandanski-town-1280.webp 1280w, /hero/sandanski-town-1920.webp 1920w",
+    src: "/hero/sandanski-town-1920.webp",
+    mobileAvif: "/hero/sandanski-640.avif 640w, /hero/sandanski-1280.avif 1280w",
+    mobileWebp: "/hero/sandanski-640.webp 640w, /hero/sandanski-1280.webp 1280w",
+    width: 1920,
+    height: 1080,
+    objectPosition: "50% 54%",
+    mobileObjectPosition: "54% 50%",
+  },
+  {
+    id: "belogradchik",
+    avif: "/hero/belogradchik-960.avif 960w, /hero/belogradchik-1600.avif 1600w, /hero/belogradchik-1920.avif 1920w",
+    webp: "/hero/belogradchik-960.webp 960w, /hero/belogradchik-1600.webp 1600w, /hero/belogradchik-1920.webp 1920w",
+    src: "/hero/belogradchik-1920.webp",
+    mobileAvif: "/hero/belogradchik-480.avif 480w, /hero/belogradchik-612.avif 612w",
+    mobileWebp: "/hero/belogradchik-480.webp 480w, /hero/belogradchik-612.webp 612w",
+    width: 1920,
+    height: 1281,
+    objectPosition: "50% 52%",
+    mobileObjectPosition: "58% 46%",
+  },
+  {
+    id: "sozopol",
+    avif: "/hero/sozopol-town-1280.avif 1280w, /hero/sozopol-town-1920.avif 1920w",
+    webp: "/hero/sozopol-town-1280.webp 1280w, /hero/sozopol-town-1920.webp 1920w",
+    src: "/hero/sozopol-town-1920.webp",
+    mobileAvif: "/hero/sozopol-640.avif 640w, /hero/sozopol-1024.avif 1024w",
+    mobileWebp: "/hero/sozopol-640.webp 640w, /hero/sozopol-1024.webp 1024w",
+    width: 1920,
+    height: 1277,
+    objectPosition: "50% 56%",
+    mobileObjectPosition: "59% 48%",
+  },
+  {
+    id: "sandanski-hotel",
+    avif: "/hero/sandanski-hotel-640.avif 640w, /hero/sandanski-hotel-686.avif 686w",
+    webp: "/hero/sandanski-hotel-640.webp 640w, /hero/sandanski-hotel-686.webp 686w",
+    src: "/hero/sandanski-hotel-686.webp",
+    width: 686,
+    height: 386,
+    objectPosition: "50% 50%",
+    mobileObjectPosition: "50% 50%",
+    mobileOnly: true,
+  },
+];
+
+function heroSearchSelect({
+  formId,
+  id,
+  name,
+  label,
+  labels,
+  className = "",
+  values = [],
+  optionLabel = (value) => value,
+  optionValue = (value) => value,
+  optionAttributes = () => ({}),
+  data = {},
+}) {
+  return h(
+    "label",
+    { className: `hp-hero__advanced-field ${className}`.trim(), htmlFor: id },
+    h("span", null, label),
+    h(
+      "select",
+      { id, name, form: formId, ...data },
+      h("option", { value: "" }, labels.any),
+      ...values.map((value) =>
+        h("option", { key: optionValue(value), value: optionValue(value), ...optionAttributes(value) }, optionLabel(value)),
+      ),
+    ),
+  );
+}
+
+function HeroAdvancedSearch({ page, labels, chrome }) {
+  const formId = "home-hero-search-form";
+  const controls = page.body.search?.controls || {};
+  const filterOptions = controls.filter_options || {};
+  const advancedId = `home-advanced-search-${page.locale}`;
+  const filtersLabel = chrome.copy.filters || labels.activeFilters;
+  const selectProps = { formId, labels };
+
+  return h(
+    "form",
+    {
+      id: formId,
+      className: "hp-hero__search-form mk-search__bar",
+      action: page.body.search.path,
+      method: "get",
+      role: "search",
+      "data-hero-advanced-search": "true",
+    },
+    h(
+      "div",
+      { className: "mk-search__seg mk-search__seg--grow" },
+      h(Icon, { name: "map-pin", size: 20 }),
+      h(
+        "div",
+        {
+          className: "mk-search__field hp-hero__location-combobox",
+          "data-geography-combobox": "true",
+          "data-geography-endpoint": "/api/geography",
+          "data-geography-locale": page.locale,
+          "data-geography-empty-label": labels.noLocations,
+        },
+        h("label", { className: "mk-sr-only", htmlFor: "home-search-q" }, labels.location),
+        h("input", {
+          id: "home-search-q",
+          name: "location",
+          type: "search",
+          autoComplete: "off",
+          placeholder: labels.locationSearchHint,
+          role: "combobox",
+          "aria-autocomplete": "list",
+          "aria-haspopup": "listbox",
+          "aria-controls": "home-search-location-options",
+          "aria-expanded": "false",
+          "aria-describedby": "home-search-location-status",
+          "data-geography-input": "true",
+        }),
+        h("input", { type: "hidden", name: "geography_id", value: "", "data-geography-id": "true" }),
+        h(
+          "div",
+          {
+            id: "home-search-location-options",
+            className: "hp-hero__location-options",
+            role: "listbox",
+            "aria-label": labels.locationSuggestions,
+            "data-geography-options": "true",
+            hidden: true,
+          },
+        ),
+        h("span", {
+          id: "home-search-location-status",
+          className: "mk-sr-only",
+          role: "status",
+          "aria-live": "polite",
+          "aria-atomic": "true",
+          "data-geography-status": "true",
+        }),
+      ),
+    ),
+    h(
+      "button",
+      {
+        type: "button",
+        className: "hp-hero__advanced-trigger",
+        "data-hero-advanced-trigger": "true",
+        "aria-controls": advancedId,
+        "aria-expanded": "false",
+        "aria-label": filtersLabel,
+        title: filtersLabel,
+      },
+      h(Icon, { name: "sliders-horizontal", size: 17, "aria-hidden": "true" }),
+      h("span", { className: "mk-sr-only" }, filtersLabel),
+    ),
+    h(
+      "button",
+      { className: "mk-search__go", type: "submit", "aria-label": labels.search, title: labels.search },
+      h(Icon, { name: "search", size: 20, strokeWidth: 2.25 }),
+      h("span", null, labels.search),
+    ),
+    h(
+      "div",
+      { id: advancedId, className: "hp-hero__advanced-panel", hidden: true },
+      h(
+        "fieldset",
+        { className: "hp-hero__advanced-grid" },
+        h("legend", { className: "mk-sr-only" }, filtersLabel),
+        h("p", { className: "hp-hero__advanced-intro" }, labels.locationSearchHint),
+        heroSearchSelect({
+          ...selectProps,
+          id: "home-search-country",
+          name: "country_code",
+          label: labels.country,
+          className: "hp-hero__advanced-field--country",
+          values: filterOptions.countries || [],
+          optionLabel: (country) => localizedSearchFilterValue(page.locale, "country_code", country.code),
+          optionValue: (country) => country.code,
+          data: { "data-geography-country": "true" },
+        }),
+        heroSearchSelect({
+          ...selectProps,
+          id: "home-search-region",
+          name: "region_id",
+          label: labels.region,
+          className: "hp-hero__advanced-field--region",
+          values: filterOptions.regions || [],
+          optionLabel: (area) => localizedSearchFilterValue(page.locale, "region_id", area.id),
+          optionValue: (area) => area.id,
+          optionAttributes: (area) => ({ "data-country": area.country_code }),
+          data: { "data-geography-region": "true" },
+        }),
+        heroSearchSelect({
+          ...selectProps,
+          id: "home-search-offer-type",
+          name: "offer_type",
+          label: labels.factLabels?.offer_type || "Offer",
+          className: "hp-hero__advanced-field--offer",
+          values: filterOptions.offer_types || [],
+          optionLabel: (value) => localizedListingValue(page.locale, "offer_type", value),
+        }),
+        heroSearchSelect({
+          ...selectProps,
+          id: "home-search-property-type",
+          name: "property_type",
+          label: labels.propertyType,
+          className: "hp-hero__advanced-field--property",
+          values: filterOptions.property_types || [],
+          optionLabel: (value) => localizedListingValue(page.locale, "property_type", value),
+        }),
+        heroSearchSelect({
+          ...selectProps,
+          id: "home-search-bedrooms-min",
+          name: "bedrooms_min",
+          label: labels.factLabels?.bedrooms || "Bedrooms",
+          className: "hp-hero__advanced-field--bedrooms",
+          values: filterOptions.bedrooms || [],
+          optionLabel: (value) => `${value}+`,
+        }),
+        h(
+          "fieldset",
+          { className: "hp-hero__advanced-field hp-hero__advanced-field--pair hp-hero__advanced-field--price" },
+          h("legend", null, `${labels.price || "Price"} (EUR)`),
+          h(
+            "div",
+            null,
+            h("label", { htmlFor: "home-search-price-min" }, labels.priceMin),
+            h("input", { id: "home-search-price-min", name: "price_min", form: formId, type: "number", min: "0", inputMode: "numeric" }),
+          ),
+          h(
+            "div",
+            null,
+            h("label", { htmlFor: "home-search-price-max" }, labels.priceMax),
+            h("input", { id: "home-search-price-max", name: "price_max", form: formId, type: "number", min: "0", inputMode: "numeric" }),
+          ),
+        ),
+        h(
+          "fieldset",
+          { className: "hp-hero__advanced-field hp-hero__advanced-field--pair hp-hero__advanced-field--area" },
+          h("legend", null, labels.area),
+          h(
+            "div",
+            null,
+            h("label", { htmlFor: "home-search-area-min" }, labels.areaMin),
+            h("input", { id: "home-search-area-min", name: "area_min", form: formId, type: "number", min: "0", step: "any", inputMode: "decimal" }),
+          ),
+          h(
+            "div",
+            null,
+            h("label", { htmlFor: "home-search-area-max" }, labels.areaMax),
+            h("input", { id: "home-search-area-max", name: "area_max", form: formId, type: "number", min: "0", step: "any", inputMode: "decimal" }),
+          ),
+        ),
+        h(
+          "div",
+          { className: "hp-hero__advanced-actions" },
+          h(
+            "button",
+            { type: "reset", className: "mk-btn mk-btn--ghost mk-btn--sm" },
+            h(Icon, { name: "x", size: 15 }),
+            h("span", null, labels.clearFilters),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 function HomeBody({ page }) {
   const labels = uiLabels(page);
   const chrome = page.chrome || { copy: {} };
-  const heroImage = page.body.hero?.image;
   const guides = page.body.guides?.links || [];
   const main = h(
     "main",
-    { id: "main", "data-kind": "home", "data-react-public-ui": "home" },
+    { id: "main", tabIndex: -1, "data-kind": "home", "data-react-public-ui": "home" },
     h(
       "section",
-      { className: "hp-hero" },
+      {
+        className: "hp-hero",
+        "data-hero-gallery": "true",
+        "data-hero-gallery-interval": "7000",
+        "data-hero-gallery-label": labels.gallery,
+        "aria-roledescription": "carousel",
+        "aria-label": labels.gallery,
+      },
       h(
         "div",
-        { className: "hp-hero__bg", "data-hero-media": heroImage?.url ? "approved" : "fallback" },
-        heroImage?.url ? h("img", { src: heroImage.url, alt: heroImage.alt || page.body.h1, loading: "eager", decoding: "async", fetchPriority: "high" }) : null,
+        { className: "hp-hero__bg hp-hero__gallery", "data-hero-media": "approved" },
+        ...HERO_GALLERY_SLIDES.map((slide, index) =>
+          h(
+            "picture",
+            {
+              key: slide.id,
+              className: "hp-hero__slide",
+              "data-hero-gallery-slide": String(index + 1),
+              "data-gallery-active": index === 0 ? "true" : "false",
+              "aria-hidden": index === 0 ? "false" : "true",
+              "data-hero-mobile-only": slide.mobileOnly ? "true" : undefined,
+              hidden: index === 0 ? undefined : true,
+              style: `--hero-object-position:${slide.objectPosition};--hero-mobile-object-position:${slide.mobileObjectPosition}`,
+            },
+            slide.mobileAvif ? h("source", { media: "(max-width: 679px)", type: "image/avif", srcSet: slide.mobileAvif, sizes: "100vw" }) : null,
+            slide.mobileWebp ? h("source", { media: "(max-width: 679px)", type: "image/webp", srcSet: slide.mobileWebp, sizes: "100vw" }) : null,
+            h("source", { type: "image/avif", srcSet: slide.avif, sizes: "100vw" }),
+            h("source", { type: "image/webp", srcSet: slide.webp, sizes: "100vw" }),
+            h("img", {
+              src: slide.src,
+              alt: "",
+              width: slide.width,
+              height: slide.height,
+              loading: index === 0 ? "eager" : "lazy",
+              decoding: "async",
+              fetchPriority: index === 0 ? "high" : undefined,
+            }),
+          ),
+        ),
       ),
       h(
         "div",
@@ -786,29 +1084,10 @@ function HomeBody({ page }) {
         h(
           "div",
           { className: "hp-hero__search mk-search mk-search--lg" },
-          h(
-            "form",
-            { className: "mk-search__bar", action: page.body.search.path, method: "get", role: "search" },
-            h(
-              "div",
-              { className: "mk-search__seg mk-search__seg--grow" },
-              h(Icon, { name: "map-pin", size: 20 }),
-              h(
-                "div",
-                { className: "mk-search__field" },
-                h("label", { htmlFor: "home-search-q" }, labels.search),
-                h("input", { id: "home-search-q", name: "q", type: "search", autoComplete: "off", placeholder: labels.location }),
-              ),
-            ),
-            h(
-              "button",
-              { className: "mk-search__go", type: "submit", "aria-label": labels.search, title: labels.search },
-              h(Icon, { name: "search", size: 20, strokeWidth: 2.25 }),
-              h("span", null, labels.search),
-            ),
-          ),
+          h(HeroAdvancedSearch, { page, labels, chrome }),
         ),
       ),
+      h("span", { className: "mk-sr-only", role: "status", "aria-live": "off", "aria-atomic": "true", "data-hero-gallery-status": "true" }, `${labels.gallery} 1 / ${HERO_GALLERY_SLIDES.length}`),
     ),
     (page.body.locations || []).length
       ? h(
@@ -907,7 +1186,12 @@ function HomeBody({ page }) {
 
 const SEARCH_FILTER_QUERY_KEYS = [
   "exact_reference",
+  "country_code",
+  "geography_id",
+  "region_id",
   "location",
+  "municipality",
+  "district",
   "property_family",
   "property_subtype",
   "offer_type",
@@ -928,18 +1212,122 @@ const SEARCH_FILTER_QUERY_KEYS = [
   "status",
 ];
 
-function searchHref(page, omitFilter, targetPage = 1) {
+function searchHref(page, omitFilter, targetPage = 1, overrides = {}) {
   const params = new URLSearchParams();
   if (page.search.query) params.set("q", page.search.query);
   if (page.search.sort && page.search.sort !== "recommended") params.set("sort", page.search.sort);
+  if (page.search.view === "map") params.set("view", "map");
   for (const key of SEARCH_FILTER_QUERY_KEYS) {
     if (omitFilter === "*" || omitFilter === key) continue;
     const value = page.search.filters?.[key];
     if (value !== "" && value !== null && value !== undefined) params.set(key, String(value));
   }
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value) params.set(key, value);
+    else params.delete(key);
+  }
   if (targetPage > 1) params.set("page", String(targetPage));
   const query = params.toString();
   return query ? `${page.path}?${query}` : page.path;
+}
+
+function OfficialAreaMaps({ page, labels }) {
+  const maps = page.search.controls?.area_maps || [];
+  const source = page.search.controls?.area_map_source;
+  if (page.search.view !== "map" || !maps.length) return null;
+  return h(
+    "section",
+    { className: "sr-area-maps", "data-official-area-maps": "true", "aria-label": `${labels.region} · ${labels.view}` },
+    h(
+      "header",
+      { className: "sr-area-maps__head" },
+      h("div", null, h("h2", null, `${labels.region} · ${labels.view}`), h("p", null, `${source.authority} · ${source.dataset}`)),
+      h("a", { href: source.url, rel: "external", target: "_blank" }, source.crs),
+    ),
+    h(
+      "div",
+      { className: "sr-area-maps__grid" },
+      ...maps.map((country) => {
+        const countryLabel = localizedSearchFilterValue(page.locale, "country_code", country.country_code);
+        return h(
+          "article",
+          { key: country.country_code, className: "sr-area-map", "data-area-map-country": country.country_code },
+          h("h3", null, countryLabel),
+          h(
+            "svg",
+            {
+              viewBox: country.view_box,
+              role: "img",
+              "aria-label": `${countryLabel} · ${labels.region}`,
+              preserveAspectRatio: "xMidYMid meet",
+            },
+            ...country.areas.map((area) => {
+              const name = localizedSearchFilterValue(page.locale, "region_id", area.id);
+              const href = searchHref(page, null, 1, {
+                view: "map",
+                country_code: country.country_code,
+                region_id: area.id,
+                geography_id: "",
+                location: "",
+                municipality: "",
+                district: "",
+              });
+              return h(
+                "a",
+                {
+                  key: area.id,
+                  href,
+                  "aria-label": `${name} · ${area.count} ${labels.matches}`,
+                  "data-area-map-link": area.id,
+                  "data-area-map-count": area.count,
+                  "aria-current": area.selected ? "true" : undefined,
+                },
+                h("title", null, `${name} · ${area.count} ${labels.matches}`),
+                h("path", {
+                  d: area.path,
+                  className: `sr-area-map__shape${area.count ? " has-listings" : ""}${area.selected ? " is-selected" : ""}`,
+                  "fill-rule": "evenodd",
+                }),
+              );
+            }),
+          ),
+          h(
+            "details",
+            { className: "sr-area-map__directory" },
+            h("summary", null, `${labels.region} · ${country.areas.length}`),
+            h(
+              "ul",
+              null,
+              ...country.areas.map((area) => {
+                const name = localizedSearchFilterValue(page.locale, "region_id", area.id);
+                return h(
+                  "li",
+                  { key: area.id },
+                  h(
+                    "a",
+                    {
+                      href: searchHref(page, null, 1, {
+                        view: "map",
+                        country_code: country.country_code,
+                        region_id: area.id,
+                        geography_id: "",
+                        location: "",
+                        municipality: "",
+                        district: "",
+                      }),
+                      "aria-current": area.selected ? "page" : undefined,
+                    },
+                    h("span", null, name),
+                    h("strong", null, String(area.count)),
+                  ),
+                );
+              }),
+            ),
+          ),
+        );
+      }),
+    ),
+  );
 }
 
 function SearchBody({ page }) {
@@ -962,47 +1350,126 @@ function SearchBody({ page }) {
       labels.search,
   ).trim();
   const mobileSearchMeta = `${page.search.total_matches} ${labels.matches} · ${chrome.copy.filters || labels.activeFilters}`;
-  const filterSelect = (idPrefix, name, label, values, optionLabel = (value) => value) =>
+  const filterSelect = (
+    idPrefix,
+    name,
+    label,
+    values,
+    optionLabel = (value) => value,
+    optionValue = (value) => value,
+    optionAttributes = () => ({}),
+    className = "",
+  ) =>
     h(
       "div",
-      { key: name, className: "sr-fg" },
+      { key: name, className: `sr-fg ${className}`.trim() },
       h("label", { className: "hdr", htmlFor: `${idPrefix}-${name}` }, label),
       h(
         "select",
         { id: `${idPrefix}-${name}`, name },
         h("option", { value: "" }, labels.any),
         ...values.map((value) =>
-          h("option", { key: value, value, selected: String(page.search.filters?.[name] ?? "") === String(value) ? true : undefined }, optionLabel(value)),
+          h("option", {
+            key: optionValue(value),
+            value: optionValue(value),
+            selected: String(page.search.filters?.[name] ?? "") === String(optionValue(value)) ? true : undefined,
+            ...optionAttributes(value),
+          }, optionLabel(value)),
         ),
       ),
     );
+  const geographyField = (idPrefix) => {
+    const optionsId = `${idPrefix}-geography-options`;
+    const statusId = `${idPrefix}-geography-status`;
+    const selectedGeographyId = page.search.filters?.geography_id || "";
+    const selectedLabel =
+      page.search.filters?.location ||
+      (selectedGeographyId ? localizedSearchFilterValue(page.locale, "geography_id", selectedGeographyId) : "");
+    return h(
+      "div",
+      { className: "sr-fg sr-fg--location sr-fg--wide" },
+      h("label", { className: "hdr", htmlFor: `${idPrefix}-location` }, labels.location),
+      h(
+        "div",
+        {
+          className: "sr-geography-combobox",
+          "data-geography-combobox": "true",
+          "data-geography-endpoint": "/api/geography",
+          "data-geography-locale": page.locale,
+          "data-geography-empty-label": labels.noLocations,
+          "data-geography-query-name": "location",
+        },
+        h("input", {
+          id: `${idPrefix}-location`,
+          name: selectedGeographyId ? undefined : "location",
+          type: "search",
+          defaultValue: selectedLabel,
+          autoComplete: "off",
+          placeholder: labels.locationSearchHint,
+          role: "combobox",
+          "aria-autocomplete": "list",
+          "aria-haspopup": "listbox",
+          "aria-controls": optionsId,
+          "aria-expanded": "false",
+          "aria-describedby": statusId,
+          "data-geography-input": "true",
+        }),
+        h("input", {
+          type: "hidden",
+          name: "geography_id",
+          defaultValue: selectedGeographyId,
+          "data-geography-id": "true",
+        }),
+        h("div", {
+          id: optionsId,
+          className: "hp-hero__location-options sr-geography-options",
+          role: "listbox",
+          "aria-label": labels.locationSuggestions,
+          "data-geography-options": "true",
+          hidden: true,
+        }),
+        h("span", {
+          id: statusId,
+          className: "mk-sr-only",
+          role: "status",
+          "aria-live": "polite",
+          "aria-atomic": "true",
+          "data-geography-status": "true",
+        }),
+      ),
+    );
+  };
   const filterForm = (idPrefix) =>
     h(
       "form",
       { id: `${idPrefix}-filter-form`, action: page.path, method: "get", role: "search", "data-search-filter-form": "true", "data-filter-form-id": idPrefix },
       h(
         "div",
-        { className: "sr-fg" },
-        h("label", { className: "hdr", htmlFor: `${idPrefix}-q` }, labels.search),
+        { className: "sr-fg sr-fg--wide" },
+        h("label", { className: "hdr", htmlFor: `${idPrefix}-q` }, labels.keywordSearch || labels.search),
         h("input", { id: `${idPrefix}-q`, name: "q", type: "search", defaultValue: page.search.query || "", autoComplete: "off" }),
       ),
-      h(
-        "div",
-        { className: "sr-fg" },
-        h("label", { className: "hdr", htmlFor: `${idPrefix}-location` }, labels.location),
-        h("input", {
-          id: `${idPrefix}-location`,
-          name: "location",
-          list: `${idPrefix}-location-options`,
-          defaultValue: page.search.filters?.location || "",
-          autoComplete: "off",
-        }),
-        h(
-          "datalist",
-          { id: `${idPrefix}-location-options` },
-          ...(filterOptions.locations || []).map((location) => h("option", { key: location, value: location })),
-        ),
+      filterSelect(
+        idPrefix,
+        "country_code",
+        labels.country,
+        filterOptions.countries || [],
+        (country) => localizedSearchFilterValue(page.locale, "country_code", country.code),
+        (country) => country.code,
+        () => ({ "data-geography-country-option": "true" }),
+        "sr-fg--country",
       ),
+      filterSelect(
+        idPrefix,
+        "region_id",
+        labels.region,
+        filterOptions.regions || [],
+        (area) => localizedSearchFilterValue(page.locale, "region_id", area.id),
+        (area) => area.id,
+        (area) => ({ "data-country": area.country_code }),
+        "sr-fg--region",
+      ),
+      geographyField(idPrefix),
       filterSelect(
         idPrefix,
         "property_family",
@@ -1242,12 +1709,12 @@ function SearchBody({ page }) {
       h("div", { className: "sr-save-disclosure__body" }, saveSearchForm(idPrefix)),
     );
   const filterForms = (idPrefix) => [filterForm(idPrefix), saveSearchDisclosure(idPrefix)];
-  const mobileFilterTitleId = `mobile-search-filters-title-${page.locale}`;
   const mobileFilterPanelId = `mobile-search-filters-panel-${page.locale}`;
   const main = h(
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "search",
       "data-react-public-ui": "search",
       "data-total-matches": page.search.total_matches,
@@ -1269,7 +1736,6 @@ function SearchBody({ page }) {
           {
             className: "sr-mobile-filters__summary",
             "aria-controls": mobileFilterPanelId,
-            "aria-expanded": "false",
           },
           h(Icon, { name: "search", size: 18 }),
           h(
@@ -1285,61 +1751,13 @@ function SearchBody({ page }) {
             activeFilterCount ? h("span", { className: "sr-mobile-filters__count" }, String(activeFilterCount)) : null,
           ),
         ),
-        h("button", {
-          type: "button",
-          className: "sr-mobile-filters__backdrop",
-          "data-mobile-filter-close": "true",
-          "aria-label": chrome.copy.close,
-          "aria-hidden": "true",
-          tabIndex: -1,
-        }),
         h(
           "div",
           {
             id: mobileFilterPanelId,
             className: "sr-mobile-filters__panel",
-            "data-mobile-filter-sheet": "true",
-            role: "dialog",
-            "aria-modal": "true",
-            "aria-labelledby": mobileFilterTitleId,
           },
-          h(
-            "header",
-            { className: "sr-mobile-filters__sheet-head" },
-            h("h2", { id: mobileFilterTitleId }, chrome.copy.filters || labels.activeFilters),
-            h(
-              "button",
-              { type: "button", className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--md", "data-mobile-filter-close": "true", "aria-label": chrome.copy.close },
-              h(Icon, { name: "x", size: 20 }),
-            ),
-          ),
           h("div", { className: "sr-mobile-filters__sheet-body" }, ...filterForms("sr-mobile")),
-          h(
-            "footer",
-            { className: `sr-mobile-filters__sheet-foot${activeFilterCount ? "" : " sr-mobile-filters__sheet-foot--single"}` },
-            activeFilterCount ? h(Btn, { tag: "a", variant: "ghost", size: "sm", iconStart: "x", href: searchHref(page, "*") }, labels.clearFilters) : null,
-            h("span", {
-              className: "mk-sr-only",
-              role: "status",
-              "aria-live": "polite",
-              "aria-atomic": "true",
-              "data-mobile-filter-preview-status": "true",
-            }),
-            h(
-              Btn,
-              {
-                type: "submit",
-                form: "sr-mobile-filter-form",
-                variant: "primary",
-                full: true,
-                iconStart: "search",
-                "data-mobile-filter-submit": "true",
-                "data-mobile-filter-base-label": labels.search,
-                "data-mobile-filter-matches-label": labels.matches,
-              },
-              `${labels.search} · ${page.search.total_matches} ${labels.matches}`,
-            ),
-          ),
         ),
       ),
       savedView
@@ -1395,6 +1813,7 @@ function SearchBody({ page }) {
             ),
           ),
         ),
+        h(OfficialAreaMaps, { page, labels }),
         savedView
           ? h(
           "section",
@@ -1462,11 +1881,13 @@ function SearchBody({ page }) {
 function LocationBody({ page }) {
   const labels = uiLabels(page);
   const cards = page.cards || [];
+  const context = page.body.context;
   const searchPath = page.chrome?.nav?.find((item) => item.id === "buy")?.href || `/${page.locale}/search`;
   const main = h(
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "location",
       "data-react-public-ui": "location",
       "data-location": page.body.location,
@@ -1481,6 +1902,14 @@ function LocationBody({ page }) {
         { className: "hp-sec__head" },
         h("div", null, h("h1", null, page.body.h1), h("p", null, `${page.body.listing_count} ${labels.reviewedListings}`)),
       ),
+      context
+        ? h(
+            "aside",
+            { className: "mk-card mk-card--pad-md", "data-location-context": "true" },
+            h("p", null, context.summary),
+            h("a", { href: context.href }, context.title),
+          )
+        : null,
       cards.length
         ? h(
             "div",
@@ -1702,6 +2131,7 @@ function ListingBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "listing",
       "data-react-public-ui": "listing",
       "data-review-status": page.body.actions.direct_contact.review_status,
@@ -1781,23 +2211,26 @@ function ListingBody({ page }) {
             className: "ld-gallery",
             role: "region",
             "aria-label": labels.gallery,
+            "data-mobile-gallery-label": labels.gallery,
             "data-mobile-gallery": "true",
             "data-mobile-gallery-index": "1",
+      tabIndex: gallerySlides.length > 1 ? 0 : undefined,
           },
           ...gallerySlides.map((image, index) =>
             h(
-              "div",
+              "button",
               {
                 key: image?.url || `gallery-placeholder-${index}`,
+                type: "button",
                 className: `ld-g${index === 0 ? " ld-g--main" : ""}${index > 2 ? " ld-g--desktop-extra" : ""} mk-photo mk-photo--${index === 0 ? tone : index === 1 ? "sand" : "sky"}`,
-                role: "group",
                 "aria-label": `${index + 1} / ${gallerySlides.length}${image?.alt ? `: ${image.alt}` : ""}`,
                 "data-mobile-gallery-slide": String(index + 1),
                 "data-gallery-active": index === 0 ? "true" : undefined,
+                "data-listing-gallery-open": String(index),
               },
               image ? h("img", publicImageProps(image, page.body.h1, index === 0 ? "eager" : "lazy", index === 0 ? "high" : undefined)) : null,
               gallerySlides.length > 3 && index === 2
-                ? h("a", { className: "ld-g__more", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${photoCountLabel(page.body.media.gallery_count || gallery.length, labels)}`)
+                ? h("span", { className: "ld-g__more", "aria-hidden": "true" }, h(Icon, { name: "camera", size: 18 }), ` ${page.body.media.gallery_count || gallery.length} ${photoCountLabel(page.body.media.gallery_count || gallery.length, labels)}`)
                 : null,
             ),
           ),
@@ -1817,7 +2250,92 @@ function ListingBody({ page }) {
               h("span", null, h("span", { "data-mobile-gallery-current": "true" }, "1"), ` / ${gallerySlides.length}`),
             )
           : null,
+        gallerySlides.length > 1
+          ? h(
+              "div",
+              { className: "ld-g__controls", "aria-label": labels.gallery },
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "mk-btn mk-btn--secondary mk-btn--sm",
+                  "data-mobile-gallery-prev": "true",
+                  "aria-label": `${labels.previous} ${photoCountLabel(1, labels)}`,
+                },
+                h(Icon, { name: page.dir === "rtl" ? "chevron-right" : "chevron-left", size: 18 }),
+              ),
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "mk-btn mk-btn--secondary mk-btn--sm",
+                  "data-mobile-gallery-next": "true",
+                  "aria-label": `${labels.next} ${photoCountLabel(1, labels)}`,
+                },
+                h(Icon, { name: page.dir === "rtl" ? "chevron-left" : "chevron-right", size: 18 }),
+              ),
+            )
+          : null,
       ),
+      gallery.length
+        ? h(
+            "dialog",
+            { className: "ld-photo-viewer", "data-listing-gallery-dialog": "true", "aria-label": labels.gallery },
+            h(
+              "header",
+              { className: "ld-photo-viewer__head" },
+              h(
+                "p",
+                { className: "ld-photo-viewer__count", role: "status", "aria-live": "polite" },
+                h("span", { "data-listing-gallery-current": "true" }, "1"),
+                ` / ${gallery.length}`,
+              ),
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "mk-iconbtn mk-iconbtn--ghost mk-iconbtn--lg",
+                  "data-listing-gallery-close": "true",
+                  "aria-label": chrome?.copy?.close || "Close",
+                },
+                h(Icon, { name: "x", size: 22 }),
+              ),
+            ),
+            h(
+              "div",
+              { className: "ld-photo-viewer__stage" },
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "ld-photo-viewer__nav ld-photo-viewer__nav--prev",
+                  "data-listing-gallery-prev": "true",
+                  "aria-label": `${labels.previous} ${photoCountLabel(1, labels)}`,
+                },
+                h(Icon, { name: page.dir === "rtl" ? "chevron-right" : "chevron-left", size: 24 }),
+              ),
+              h(
+                "figure",
+                null,
+                h("img", {
+                  ...publicImageProps(gallery[0], page.body.h1, "lazy"),
+                  "data-listing-gallery-image": "true",
+                }),
+                h("figcaption", { "data-listing-gallery-caption": "true" }, gallery[0].alt || page.body.h1),
+              ),
+              h(
+                "button",
+                {
+                  type: "button",
+                  className: "ld-photo-viewer__nav ld-photo-viewer__nav--next",
+                  "data-listing-gallery-next": "true",
+                  "aria-label": `${labels.next} ${photoCountLabel(1, labels)}`,
+                },
+                h(Icon, { name: page.dir === "rtl" ? "chevron-left" : "chevron-right", size: 24 }),
+              ),
+            ),
+          )
+        : null,
       h(
         "section",
         { className: "ld-cols", "aria-label": labels.listingContent, "data-listing-content-grid": "true" },
@@ -1850,7 +2368,20 @@ function ListingBody({ page }) {
           h(
             "section",
             { id: "listing-gallery", className: "ld-gallery-full", "aria-label": labels.gallery, "data-photo-carousel": "true" },
-            ...gallery.map((image) => h("img", { key: image.url, ...publicImageProps(image, page.body.h1) })),
+            ...gallery.map((image, index) =>
+              h(
+                "button",
+                {
+                  key: image.url,
+                  type: "button",
+                  className: "ld-gallery-full__item",
+                  "data-listing-gallery-source": "true",
+                  "data-listing-gallery-open": String(index),
+                  "aria-label": `${index + 1} / ${gallery.length}${image.alt ? `: ${image.alt}` : ""}`,
+                },
+                h("img", publicImageProps(image, page.body.h1)),
+              ),
+            ),
           ),
           floorPlans.length
             ? h(
@@ -1887,6 +2418,14 @@ function ListingBody({ page }) {
                   "data-panorama-url": tour.panorama_url,
                 },
                 h("p", null, tour.accessibility_caption),
+                h(
+                  "div",
+                  { className: "ld-tour__fallback", hidden: true, "data-photo-sphere-fallback": "true", role: "status" },
+                  tour.fallback_gallery?.[0]
+                    ? h("img", { ...publicImageProps(tour.fallback_gallery[0], page.body.h1, "lazy") })
+                    : null,
+                  h("a", { className: "mk-btn mk-btn--secondary mk-btn--md", href: "#listing-gallery" }, h(Icon, { name: "camera", size: 18 }), ` ${labels.gallery}`),
+                ),
               )
             : null,
         ),
@@ -1936,6 +2475,7 @@ function SellerBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "seller",
       "data-react-public-ui": "seller",
       "data-phone-first": "true",
@@ -2029,7 +2569,7 @@ function ContactBody({ page }) {
   const callback = page.body.callback;
   const main = h(
     "main",
-    { id: "main", "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
+    { id: "main", tabIndex: -1, "data-kind": "contact", "data-react-public-ui": "contact", "data-phone-first": "true", "data-min-touch-target": "44", className: "ct-page" },
     h("div", { className: "ct-page__head" }, h("h1", null, page.body.h1), h("p", null, page.body.intro)),
     h(
       "div",
@@ -2099,6 +2639,7 @@ function LanguageFallbackBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "language-fallback",
       "data-react-public-ui": "language-fallback",
       "data-public-translation-available": page.public_translation_available ? "true" : "false",
@@ -2133,6 +2674,7 @@ function GuideBody({ page }) {
     "main",
     {
       id: "main",
+      tabIndex: -1,
       "data-kind": "guide",
       "data-react-public-ui": "guide",
       "data-approved-source": "cms",
@@ -2159,6 +2701,28 @@ function GuideBody({ page }) {
         },
         primary ? null : h("h2", null, section.title),
         h("ul", { className: "guide-facts" }, ...(section.facts || []).map((fact) => h("li", { key: fact }, h(Icon, { name: "check", size: 15 }), fact))),
+        section.sources?.length
+          ? h(
+              "div",
+              { className: "guide-sources", "data-guide-sources": "true" },
+              section.sources_label ? h("p", { className: "guide-sources__label" }, section.sources_label) : null,
+              h(
+                "ul",
+                { className: "guide-sources__links" },
+                ...section.sources.map((source) =>
+                  h(
+                    "li",
+                    { key: source.id },
+                    h(
+                      "a",
+                      { href: source.url, target: "_blank", rel: "noopener noreferrer" },
+                      source.label || source.publisher,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       );
     }),
     h(
@@ -2167,6 +2731,65 @@ function GuideBody({ page }) {
       h(Btn, { tag: "a", variant: "primary", iconStart: "search", href: page.body.ctas.search.path }, labels.search),
       h(Btn, { tag: "a", variant: "secondary", iconStart: "landmark", href: page.body.ctas.seller.path }, labels.sellerValuation),
       h(Btn, { tag: "a", variant: "secondary", iconStart: "phone", href: page.body.ctas.contact.path }, labels.contact),
+    ),
+  );
+  return shell(page, main);
+}
+
+function LegacyArchiveBody({ page }) {
+  const source = page.body.source || {};
+  const sourceFacts = [
+    ["Домейн", source.domain],
+    ["Тип", source.type],
+    ["Архивирано", source.captured_at_utc],
+    ["SHA-256", source.text_sha256],
+  ].filter(([, value]) => value);
+  const main = h(
+    "main",
+    {
+      id: "main",
+      tabIndex: -1,
+      "data-kind": "legacy-archive",
+      "data-react-public-ui": "legacy-archive",
+      "data-legacy-archive-source": "true",
+      className: "pg-narrow legacy-archive",
+    },
+    h(
+      "header",
+      { className: "ct-page__head guide-head" },
+      h(Badge, { variant: "neutral", icon: "file-text" }, "Неиндексиран архив"),
+      h("h1", null, page.body.h1),
+    ),
+    h(
+      "aside",
+      { className: "legacy-archive__notice", role: "note" },
+      h(Icon, { name: "info", size: 20 }),
+      h("p", null, page.body.notice),
+    ),
+    h(
+      "article",
+      { className: "mk-card mk-card--pad-lg legacy-archive__content" },
+      h("p", { className: "legacy-archive__text" }, page.body.text),
+      h(
+        "footer",
+        { className: "legacy-archive__source" },
+        h("h2", null, "Източник"),
+        h(
+          "dl",
+          null,
+          ...sourceFacts.flatMap(([label, value]) => [
+            h("dt", { key: `${label}-label` }, label),
+            h("dd", { key: `${label}-value` }, value),
+          ]),
+        ),
+        source.url
+          ? h(
+              "a",
+              { href: source.url, target: "_blank", rel: "nofollow noopener noreferrer" },
+              source.url,
+            )
+          : null,
+      ),
     ),
   );
   return shell(page, main);
@@ -2181,5 +2804,6 @@ export function renderReactPublicBody(page) {
   if (page.kind === "contact") return renderStaticElement(h(ContactBody, { page }));
   if (page.kind === "language_fallback") return renderStaticElement(h(LanguageFallbackBody, { page }));
   if (page.kind === "guide") return renderStaticElement(h(GuideBody, { page }));
+  if (page.kind === "legacy_archive") return renderStaticElement(h(LegacyArchiveBody, { page }));
   return "";
 }

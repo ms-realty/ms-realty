@@ -25,6 +25,8 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
   const summary = assertCmsSeed(seed);
   const fixtureListing = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const polenitsaListing = seed.records.find((record) => record.id === "MS-CRAWL-0033");
+  const greekListing = seed.records.find((record) => record.id === "MS-CRAWL-0072");
   const ruListing = seed.records.find((record) => record.source_locale === "ru");
 
   assert.equal(summary.listings, 165);
@@ -52,6 +54,46 @@ test("CMS seed composes listing, migration, route, translation, and media data",
   assert.equal(fixtureListing.tour.provider, "photo-sphere-viewer");
   assert.equal(fixtureListing.tour.is_public, false);
   assert.ok(fixtureListing.tour.fallback_gallery.length > 0);
+  assert.equal(fixtureListing.migration.source_seo.meta_description, migrationRecords.find((record) => record.old_url === fixtureListing.source_url).source_seo.meta_description);
+  assert.equal(fixtureListing.migration.source_seo.open_graph, migrationRecords.find((record) => record.old_url === fixtureListing.source_url).source_seo.open_graph);
+  assert.deepEqual(
+    {
+      location: polenitsaListing.facts.location,
+      location_native: polenitsaListing.facts.location_native,
+      municipality_code: polenitsaListing.facts.municipality_code,
+      district: polenitsaListing.facts.district,
+      district_code: polenitsaListing.facts.district_code,
+      geography_id: polenitsaListing.facts.geography_id,
+      settlement_ekatte: polenitsaListing.facts.settlement_ekatte,
+      status: polenitsaListing.facts.location_review_status,
+    },
+    {
+      location: "Polenitsa",
+      location_native: "Поленица",
+      municipality_code: "BLG40",
+      district: "Blagoevgrad",
+      district_code: "BLG",
+      geography_id: "BG:settlement:57176",
+      settlement_ekatte: "57176",
+      status: "confirmed_settlement",
+    },
+  );
+  assert.deepEqual(
+    {
+      location: greekListing.facts.location,
+      country_code: greekListing.facts.country_code,
+      geography_id: greekListing.facts.geography_id,
+      region_id: greekListing.facts.region_id,
+      status: greekListing.facts.location_review_status,
+    },
+    {
+      location: "Logari",
+      country_code: "GR",
+      geography_id: "GR:settlement:EL52:1202020404",
+      region_id: "GR:region:EL52",
+      status: "confirmed_foreign_settlement",
+    },
+  );
   assert.ok(ruListing.routing.target_path.startsWith("/ru/"));
   const property = seed.properties.find((record) => record.id === fixtureListing.property);
   assert.equal(property.location, fixtureListing.location);
@@ -209,6 +251,8 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
   assert.equal(listingsConfig.versions.drafts, true);
   assert.equal(listingsConfig.custom.publish_requires_human_review, true);
   assert.equal(facts.fields.some((field) => field.name === "price_eur" && field.type === "number"), true);
+  assert.equal(facts.fields.some((field) => field.name === "settlement_ekatte" && field.type === "text"), true);
+  assert.equal(facts.fields.some((field) => field.name === "district_code" && field.type === "text"), true);
   assert.equal(mediaConfig.fields.find((field) => field.name === "url").type, "text");
   assert.equal(toursConfig.fields.find((field) => field.name === "fallback_gallery").fields[0].name, "url");
   const propertiesConfig = payload.collections.find((collection) => collection.slug === "properties");

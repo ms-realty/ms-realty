@@ -12,6 +12,7 @@ __pycache__
 *.py[cod]
 migration/external/seo/*.csv
 !migration/external/seo/*.csv.example
+migration/content-evidence/
 production/data/search-engine-sync-report.json
 production/data/search-engine-query-report.json
 production/data/hermes-draft-worker-report.json

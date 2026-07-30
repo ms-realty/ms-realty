@@ -5,10 +5,12 @@ import { approvedTranslationRecordsForListing, publicPropertyProjection } from "
 import { createCrmInboxItem } from "./admin-workflows.mjs";
 import { normalizePublicLeadInput } from "./leads.mjs";
 import { applyListingEdits } from "./listing-edits.mjs";
+import { legacyArchiveEntryForPath } from "./legacy-archive.mjs";
 import { fromRoot } from "./paths.mjs";
 import {
   renderHomePage,
   renderGuidePage,
+  renderLegacyArchivePage,
   renderLanguageFallback,
   renderListingPage,
   renderLocationPage,
@@ -17,7 +19,7 @@ import {
   renderSellerPage,
   isActiveListing,
 } from "./public-site.mjs";
-import { contactPath, locationPath, listingPath, sellerPath } from "./seo.mjs";
+import { contactPath, locationPath, listingPath, publicLocationNames, sellerPath } from "./seo.mjs";
 import { publicFactValue } from "./listing-facts.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 import { latestTourForListing } from "./tours.mjs";
@@ -49,6 +51,19 @@ export function listingFromCmsRecord(record, approvedTour = null, property = nul
     description: record.facts.description || record.seo.description,
     h1: record.facts.h1,
     location: record.facts.location,
+    location_native: record.facts.location_native || "",
+    location_legacy: record.facts.location_legacy || record.facts.location || "",
+    municipality: record.facts.municipality || "",
+    municipality_code: record.facts.municipality_code || "",
+    district: record.facts.district || "",
+    district_code: record.facts.district_code || "",
+    region: record.facts.region || "",
+    region_id: record.facts.region_id || "",
+    country_code: record.facts.country_code || "",
+    geography_id: record.facts.geography_id || "",
+    geography_path: Array.isArray(record.facts.geography_path) ? record.facts.geography_path : [],
+    settlement_ekatte: record.facts.settlement_ekatte || "",
+    location_review_status: record.facts.location_review_status || "legacy_area_only",
     property_type: property?.property_family || record.facts.property_type,
     property_family: property?.property_family || null,
     property_subtype: property?.property_subtype || null,
@@ -134,7 +149,7 @@ function translationPathMatches(registry, record, translation, normalized) {
 }
 
 function locationNames(seed) {
-  return [...new Set(listingRecords(seed).map((record) => String(record.facts.location || "").trim()).filter(Boolean))];
+  return publicLocationNames(listingRecords(seed).map((record) => listingFromCmsRecord(record)));
 }
 
 function runtimeListings(seed, translationTasks = []) {
@@ -146,6 +161,9 @@ function runtimeListings(seed, translationTasks = []) {
 
 export function resolveRuntimePath(registry, seed, pathname, translationTasks = [], tourApprovals = []) {
   const normalized = pathname.replace(/\/$/, "");
+  const legacyArchive = legacyArchiveEntryForPath(normalized);
+  if (legacyArchive) return { type: "legacy_archive", entry: legacyArchive, path: normalized };
+
   for (const record of listingRecords(seed)) {
     const translations = mergeRuntimeTranslations(record, translationTasks);
     const fallbackLocale = registry.locales.find((locale) => {
@@ -253,6 +271,9 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
       documents: resolved.documents,
     });
   }
+  if (resolved.type === "legacy_archive") {
+    return renderLegacyArchivePage({ registry, entry: resolved.entry, path: resolved.path });
+  }
   if (resolved.type === "location") {
     return renderLocationPage({
       registry,
@@ -267,7 +288,7 @@ export function renderRuntimePath(registry, seed, pathname, translationTasks = [
 export function searchRuntimeListings(
   registry,
   seed,
-  { localeCode, query = "", filters = {}, sort = "recommended", page = 1, pageSize = 12, savedView = false, translationTasks = [] },
+  { localeCode, query = "", filters = {}, sort = "recommended", page = 1, pageSize = 12, savedView = false, view = "list", translationTasks = [] },
 ) {
   return renderSearchPage({
     registry,
@@ -279,6 +300,7 @@ export function searchRuntimeListings(
     page,
     pageSize,
     savedView,
+    view,
   });
 }
 

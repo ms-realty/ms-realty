@@ -1,12 +1,18 @@
 {
-  "generated_at": "2026-07-06T00:00:00Z",
+  "generated_at": "2026-07-29T00:00:00Z",
   "documents": [
     {
       "id": "foreign-buyers-bg-land-ownership",
       "type": "guide",
+      "guide_key": "foreign-buyers-bg-land-ownership",
       "locale": "en",
+      "source_locale": "en",
       "status": "approved",
+      "human_approved": true,
       "reviewer": "editor_bg",
+      "approved_at": "2026-07-06T00:00:00Z",
+      "legacy_migration": true,
+      "source_hash": "d8bc20780f103ce7782105bdf901cd054120b577826b805435c711fd05e61974",
       "title": "Foreign buyers and Bulgarian land ownership",
       "path": "/en/guides/foreign-buyers",
       "keywords": ["foreign", "non-eu", "non eu", "land", "company", "ood", "ownership"],
@@ -19,9 +25,15 @@
     {
       "id": "foreign-buyers-financing-gap",
       "type": "guide",
+      "guide_key": "foreign-buyers-financing-gap",
       "locale": "en",
+      "source_locale": "en",
       "status": "approved",
+      "human_approved": true,
       "reviewer": "editor_bg",
+      "approved_at": "2026-07-06T00:00:00Z",
+      "legacy_migration": true,
+      "source_hash": "5dc709f987d37e6dfaa1914da9710115f421c87739f9494f6bbda788a36bc91f",
       "title": "Foreign-buyer financing checks",
       "path": "/en/guides/foreign-buyers",
       "keywords": ["foreign", "mortgage", "bank", "financing", "loan"],
@@ -33,15 +45,143 @@
     {
       "id": "buyer-due-diligence-liens",
       "type": "guide",
+      "guide_key": "buyer-due-diligence-liens",
       "locale": "en",
+      "source_locale": "en",
       "status": "approved",
+      "human_approved": true,
       "reviewer": "editor_bg",
+      "approved_at": "2026-07-06T00:00:00Z",
+      "legacy_migration": true,
+      "source_hash": "de5204863e5dba0db97692c9f7173a08b956ad321da49f2cec5335229d60e98a",
       "title": "Title and encumbrance checks",
       "path": "/en/guides/buying-process",
       "keywords": ["title", "lien", "liens", "mortgage", "encumbrance", "deposit", "due diligence"],
       "facts": [
         "A property can have mortgages, liens, or other encumbrances that must be checked before completion.",
         "MS Realty treats title and encumbrance checks as part of the buying process before a buyer relies on the deal."
+      ],
+      "sources_label": "Official sources",
+      "sources": [
+        {
+          "id": "registry-property-register",
+          "publisher": "Registry Agency of the Republic of Bulgaria",
+          "label": "Property Registry services",
+          "url": "https://portal.registryagency.bg/en/home-pr",
+          "checked_at": "2026-07-29",
+          "claim_ids": [
+            "property-register",
+            "property-certificate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sandanski-property-official-sources",
+      "type": "guide",
+      "guide_key": "sandanski-property-official-sources",
+      "locale": "bg",
+      "source_locale": "bg",
+      "location": "Sandanski",
+      "status": "approved",
+      "human_approved": true,
+      "reviewer": "editor_bg",
+      "approved_at": "2026-07-29T00:00:00Z",
+      "source_hash": "43b6e9abb5893cb848beb2f59bfd49dbb1b8552fb55b2d669645f4f10b7fb848",
+      "title": "Сандански: официални източници при проверка на имот",
+      "path": "/bg/guides/proverka-na-imot-sandanski",
+      "keywords": ["Сандански", "имотен регистър", "кадастър", "KAIS", "удостоверение за тежести"],
+      "facts": [
+        "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
+        "Имотният регистър съдържа актове за възникване, прехвърляне, изменение или прекратяване на вещни права върху недвижими имоти, както и възбрани и ипотеки.",
+        "Удостоверението от Имотния регистър отразява вписванията, отбелязванията и заличаванията за тежести и права към момента на издаването му."
+      ],
+      "sources_label": "Официални източници",
+      "sources": [
+        {
+          "id": "kais-cadastre",
+          "publisher": "Агенция по геодезия, картография и кадастър",
+          "label": "Кадастрален портал KAIS",
+          "url": "https://kais.cadastre.bg/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["cadastre-portal"]
+        },
+        {
+          "id": "registry-property-register",
+          "publisher": "Агенция по вписванията",
+          "label": "Имотен регистър",
+          "url": "https://www.registryagency.bg/bg/registri/imoten-registar/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["property-register"]
+        },
+        {
+          "id": "registry-property-certificates",
+          "publisher": "Агенция по вписванията",
+          "label": "Удостоверения от Имотния регистър",
+          "url": "https://www.registryagency.bg/bg/registri/imoten-registar/udostovereniya/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["property-certificates"]
+        }
+      ]
+    },
+    {
+      "id": "hotovo-locality-official-context",
+      "type": "guide",
+      "guide_key": "hotovo-locality-official-context",
+      "locale": "bg",
+      "source_locale": "bg",
+      "location": "Hotovo",
+      "status": "approved",
+      "human_approved": true,
+      "reviewer": "editor_bg",
+      "approved_at": "2026-07-29T00:00:00Z",
+      "source_hash": "c73cf15bcc5b6104784354901503fc42d074f27a020c01c38ad219f2c2c792b3",
+      "title": "Хотово: официален контекст за населеното място",
+      "path": "/bg/guides/hotovo-obstinski-kontekst",
+      "keywords": ["Хотово", "Община Сандански", "Среден Пирин", "местност"],
+      "facts": [
+        "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин."
+      ],
+      "sources_label": "Официален източник",
+      "sources": [
+        {
+          "id": "sandanski-hotovo-locality",
+          "publisher": "Община Сандански",
+          "label": "Хотово",
+          "url": "https://sandanski.bg/%D0%BE%D0%B1%D1%89%D0%B8%D0%BD%D0%B0-%D1%81%D0%B0%D0%BD%D0%B4%D0%B0%D0%BD%D1%81%D0%BA%D0%B8/%D0%BD%D0%B0%D1%81%D0%B5%D0%BB%D0%B5%D0%BD%D0%B8-%D0%BC%D0%B5%D1%81%D1%82%D0%B0/%D1%85%D0%BE%D1%82%D0%BE%D0%B2%D0%BE/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["hotovo-locality"]
+        }
+      ]
+    },
+    {
+      "id": "petrich-municipality-official-context",
+      "type": "guide",
+      "guide_key": "petrich-municipality-official-context",
+      "locale": "bg",
+      "source_locale": "bg",
+      "location": "Petrich",
+      "status": "approved",
+      "human_approved": true,
+      "reviewer": "editor_bg",
+      "approved_at": "2026-07-29T00:00:00Z",
+      "source_hash": "2cba13e59ac3224c05d9164d08771461183cbcc6b3cf9f56e818cafed93a0228",
+      "title": "Петрич: официален контекст за общината",
+      "path": "/bg/guides/petrich-obstinski-kontekst",
+      "keywords": ["Петрич", "Община Петрич", "Санданско-Петричка котловина", "Беласица"],
+      "facts": [
+        "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин."
+      ],
+      "sources_label": "Официален източник",
+      "sources": [
+        {
+          "id": "petrich-municipality-geography",
+          "publisher": "Община Петрич",
+          "label": "За нас",
+          "url": "https://petrich.bg/bg/administraciya/za-nas/",
+          "checked_at": "2026-07-29",
+          "claim_ids": ["petrich-municipality-geography"]
+        }
       ]
     }
   ]

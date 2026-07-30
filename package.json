@@ -27,6 +27,8 @@
     "search:query": "node production/scripts/run-search-engine-query.mjs",
     "search:query:smoke": "node production/scripts/build-search-engine-query-smoke.mjs",
     "search:analytics": "node production/scripts/build-search-analytics-report.mjs",
+    "geography:build": "python3 production/scripts/build-geography-registry.py",
+    "geography:map:build": "python3 production/scripts/build-area-map.py",
     "migration:build": "node production/scripts/build-migration-records.mjs",
     "migration:compare:test": "python3 -m unittest migration/test_compare_crawl_artifacts.py",
     "migration:db": "python3 migration/build_migration_db.py",
@@ -39,6 +41,7 @@
     "structured:data": "node production/scripts/build-structured-data-report.mjs",
     "cms:build": "node production/scripts/build-cms-seed.mjs",
     "listing:quality": "node production/scripts/build-listing-quality-report.mjs",
+    "listing:description:review": "node production/scripts/build-listing-description-review.mjs",
     "listing:publication": "node production/scripts/build-listing-publication-report.mjs",
     "listing:publication:run": "node production/scripts/run-listing-publication-schedules.mjs",
     "listing:verification": "node production/scripts/build-listing-verification-report.mjs",
@@ -80,21 +83,24 @@
     "launch:inputs": "node production/scripts/build-launch-input-checklist.mjs",
     "launch:preflight": "node production/scripts/launch-preflight.mjs",
     "next:build": "next build",
-    "validate": "npm run design:build && python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run search:sync:smoke && npm run search:query:smoke && npm run migration:compare:test && npm run migration:build && npm run migration:db && npm run routes:build && npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run listing:quality && npm run listing:publication && npm run listing:verification && npm run listing:preflight:report && npm run listing:review-pack && npm run app:routes && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run search:analytics && npm run translation:coverage && npm run locale:rollout && npm run hermes:provisioning && npm run hermes:drafts && npm run hermes:worker:smoke && npm run lead:sla && npm run lead:matching && npm run saved-search:alerts && npm run seo:evidence && npm run seo:preflight:report && npm run live:provisioning && npm run live:report && npm run payload:bootstrap && npm run payload:runtime && npm run server:smoke && npm run qa:mobile && npm run launch:readiness && npm run launch:inputs && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
+    "validate": "npm run design:build && python3 locales/validate_locale_registry.py && python3 search/build_search_indexes.py && npm run search:validate && npm run search:sync:smoke && npm run search:query:smoke && npm run migration:compare:test && npm run migration:build && npm run migration:db && npm run routes:build && MS_REALTY_CONTENT_EVIDENCE_DIR=migration/content-evidence/20260729-legacy-content-review npm run migration:review && npm run redirects:build && npm run sitemap:build && npm run seo:build && npm run cms:build && npm run structured:data && npm run listing:quality && npm run listing:description:review && npm run listing:publication && npm run listing:verification && npm run listing:preflight:report && npm run listing:review-pack && npm run app:routes && npm run public:build && npm run admin:build && npm run runtime:build && npm run http:build && npm run search:analytics && npm run translation:coverage && npm run locale:rollout && npm run hermes:provisioning && npm run hermes:drafts && npm run hermes:worker:smoke && npm run lead:sla && npm run lead:matching && npm run saved-search:alerts && npm run seo:evidence && npm run seo:preflight:report && npm run live:provisioning && npm run live:report && npm run payload:bootstrap && npm run payload:runtime && npm run server:smoke && npm run qa:mobile && npm run launch:readiness && npm run launch:inputs && node production/scripts/validate-foundation.mjs && python3 qa/mobile_elderly_static_check.py",
     "check": "npm run test && npm run validate && npm run next:build"
   },
   "engines": {
     "node": ">=22.13"
   },
   "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
     "@payloadcms/db-postgres": "3.85.2",
     "@payloadcms/next": "3.85.2",
     "@payloadcms/translations": "3.85.2",
     "@photo-sphere-viewer/core": "5.14.3",
+    "jose": "5.10.0",
     "next": "16.2.10",
     "payload": "3.85.2",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "zod": "4.2.0"
   },
   "overrides": {
     "@esbuild-kit/core-utils": {
@@ -106,6 +112,6 @@
   "devDependencies": {
     "esbuild": "0.25.12",
     "lucide-static": "^1.24.0",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   }
 }

@@ -10,8 +10,11 @@ function listingRecords(seed) {
   return new Map(seed.records.filter((record) => record.collection === "listings").map((record) => [record.id, record]));
 }
 
-function latestEditsByListing(edits) {
-  return new Map(edits.map((edit) => [edit.listing_id, edit]));
+function editsByListing(edits) {
+  return edits.reduce((rows, edit) => {
+    rows.set(edit.listing_id, [...(rows.get(edit.listing_id) || []), edit]);
+    return rows;
+  }, new Map());
 }
 
 function ownerForLocale(locale) {
@@ -20,12 +23,29 @@ function ownerForLocale(locale) {
   return "broker_international";
 }
 
-function priority(edit) {
+function priorityForEdit(edit) {
   const fields = new Set(Object.keys(edit.patch || {}));
   if (Number(edit.stale_translation_count || 0) > 0) return "high";
   if (fields.has("price_eur") || fields.has("price_on_request") || fields.has("listing_status")) return "high";
   if (fields.has("location") || fields.has("property_type")) return "normal";
   return "low";
+}
+
+function isLegacyDescriptionRestoration(edit) {
+  const fields = Object.keys(edit.patch || {});
+  return edit.review_source === "legacy_wordpress_content_capture" && fields.length === 1 && fields[0] === "description";
+}
+
+function verificationPriority(edits) {
+  const rank = { low: 0, normal: 1, high: 2 };
+  const relevantEdits = isLegacyDescriptionRestoration(edits.at(-1)) ? edits.slice(-2) : edits.slice(-1);
+  return relevantEdits.reduce(
+    (current, edit) => {
+      const candidate = priorityForEdit(edit);
+      return rank[candidate] > rank[current] ? candidate : current;
+    },
+    "low",
+  );
 }
 
 function dueAt(generatedAt, rowPriority) {
@@ -39,11 +59,12 @@ export function buildListingVerificationReport({
   generatedAt = new Date().toISOString(),
 } = {}) {
   const records = listingRecords(seed);
-  const rows = [...latestEditsByListing(edits).values()]
-    .filter((edit) => records.has(edit.listing_id))
-    .map((edit) => {
-      const record = records.get(edit.listing_id);
-      const rowPriority = priority(edit);
+  const rows = [...editsByListing(edits).entries()]
+    .filter(([listingId]) => records.has(listingId))
+    .map(([listingId, listingEdits]) => {
+      const edit = listingEdits.at(-1);
+      const record = records.get(listingId);
+      const rowPriority = verificationPriority(listingEdits);
       const owner = ownerForLocale(edit.source_locale || record.source_locale);
       return {
         listing_id: edit.listing_id,

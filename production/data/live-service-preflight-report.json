@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-25T08:37:50.595Z",
+  "generated_at": "2026-07-30T16:20:34.252Z",
   "ready": false,
   "status": "blocked",
   "summary": {
@@ -9,26 +9,26 @@
     "invalid_report": 0,
     "example_report": 0,
     "configured_paths": {
-      "typesense_meilisearch_sync": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json",
-      "typesense_meilisearch_query": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json",
-      "hermes_draft_worker": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
+      "typesense_meilisearch_sync": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json",
+      "typesense_meilisearch_query": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json",
+      "hermes_draft_worker": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json"
     }
   },
   "reports": [
     {
       "source": "typesense_meilisearch_sync",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json"
     },
     {
       "source": "typesense_meilisearch_query",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json"
     },
     {
       "source": "hermes_draft_worker",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json"
     }
   ],
   "next_actions": [

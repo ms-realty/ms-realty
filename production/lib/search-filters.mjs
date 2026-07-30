@@ -2,6 +2,11 @@ import { normalizeSearchIntent, searchIntentToQueryFilters } from "./search-inte
 
 export const SEARCH_FILTER_FIELDS = [
   "location",
+  "country_code",
+  "geography_id",
+  "region_id",
+  "municipality",
+  "district",
   "location_id",
   "location_ids",
   "property_family",

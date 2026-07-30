@@ -104,6 +104,11 @@ test("SearchIntent rejects incompatible filters and retains mandatory server-sid
   assert.equal(intent.mandatory_filters.translation_human_approved, true);
   assert.deepEqual(searchIntentToQueryFilters(intent), {
     location: "",
+    country_code: "",
+    geography_id: "",
+    region_id: "",
+    municipality: "",
+    district: "",
     property_family: "plot",
     property_type: "plot",
     offer_type: "",

@@ -24,6 +24,8 @@ DEFAULT_ARTIFACT = ROOT / "migration" / "artifacts" / "20260704-211155"
 OUT_DIR = ROOT / "search" / "data"
 LOCALE_REGISTRY = ROOT / "locales" / "registry.json"
 LISTING_EDITS_LEDGER = ROOT / "production" / "data" / "listing-edits.jsonl"
+LOCATION_REVIEWS = ROOT / "production" / "data" / "location-reviews.json"
+GEOGRAPHY_REGISTRY = ROOT / "production" / "data" / "geography-registry.json"
 
 
 LOCATION_PATTERNS = [
@@ -144,6 +146,103 @@ def load_listing_edits(path: Path = LISTING_EDITS_LEDGER) -> list[dict[str, obje
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def load_location_reviews(path: Path = LOCATION_REVIEWS) -> dict[str, object]:
+    with path.open(encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def load_geography_registry(path: Path = GEOGRAPHY_REGISTRY) -> dict[str, dict[str, object]]:
+    with path.open(encoding="utf-8") as handle:
+        registry = json.load(handle)
+    return {str(area["id"]): area for area in registry.get("areas", [])}
+
+
+def geography_ancestors(area_id: str, areas_by_id: dict[str, dict[str, object]]) -> list[dict[str, object]]:
+    ancestors: list[dict[str, object]] = []
+    seen: set[str] = set()
+    current = areas_by_id.get(area_id)
+    while current:
+        current_id = str(current["id"])
+        if current_id in seen:
+            raise ValueError(f"Geography registry cycle at {current_id}")
+        seen.add(current_id)
+        ancestors.insert(0, current)
+        current = areas_by_id.get(str(current.get("parent_id") or ""))
+    if area_id and not ancestors:
+        raise ValueError(f"Unknown reviewed geography id: {area_id}")
+    return ancestors
+
+
+def reviewed_location_fields(
+    listing_id: str,
+    legacy_location: str,
+    reviews: dict[str, object],
+    areas_by_id: dict[str, dict[str, object]],
+) -> dict[str, object]:
+    statuses = reviews.get("listing_statuses", {})
+    status_row = statuses.get(listing_id, {}) if isinstance(statuses, dict) else {}
+    overrides = reviews.get("listing_overrides", {})
+    defaults = reviews.get("legacy_defaults", {})
+    place_key = status_row.get("place") or (overrides.get(listing_id) if isinstance(overrides, dict) else None)
+    if not place_key and isinstance(defaults, dict):
+        place_key = defaults.get(legacy_location)
+    places = reviews.get("places", {})
+    place = places.get(place_key, {}) if isinstance(places, dict) else {}
+    if place_key and not place:
+        raise ValueError(f"Unknown reviewed location place: {place_key}")
+
+    municipality = place.get("municipality", {}) if isinstance(place, dict) else {}
+    settlement = place.get("settlement", {}) if isinstance(place, dict) else {}
+    country_code = textish(place.get("country_code"))
+    municipality_code = textish(municipality.get("code"))
+    district_code = municipality_code[:3] if country_code == "BG" else ""
+    districts = reviews.get("districts", {})
+    district = districts.get(district_code, {}) if isinstance(districts, dict) else {}
+    if district_code and not isinstance(district, dict):
+        raise ValueError(f"Reviewed district {district_code} must be an object")
+    if district_code and not district:
+        raise ValueError(f"Unknown reviewed district code: {district_code}")
+    status = status_row.get("status") if isinstance(status_row, dict) else None
+    if not status:
+        status = "confirmed_settlement" if settlement and place.get("country_code") == "BG" else "confirmed_foreign_settlement" if settlement else "legacy_area_only"
+    geography_id = textish(place.get("geography_id"))
+    if not geography_id and country_code == "BG":
+        geography_id = (
+            f"BG:settlement:{textish(settlement.get('ekatte'))}"
+            if settlement.get("ekatte")
+            else f"BG:municipality:{municipality_code}"
+            if municipality_code
+            else ""
+        )
+    geography_areas = geography_ancestors(geography_id, areas_by_id)
+    if geography_areas and geography_areas[-1].get("country_code") != country_code:
+        raise ValueError(f"Reviewed geography country mismatch for {listing_id}: {geography_id}")
+    official_municipality = next((area for area in geography_areas if area.get("level") == "municipality"), {})
+    official_region = next((area for area in geography_areas if area.get("level") in {"district", "region"}), {})
+    municipality_code = municipality_code or textish(official_municipality.get("official_code"))
+    return {
+        "location": textish(place.get("location_name")) or legacy_location,
+        "location_native": textish(place.get("location_native")),
+        "location_legacy": legacy_location,
+        "municipality": textish(municipality.get("name")) or textish(official_municipality.get("names", {}).get("en")),
+        "municipality_code": municipality_code,
+        "district": textish(district.get("name")),
+        "district_code": district_code,
+        "region": textish(official_region.get("names", {}).get("en")),
+        "region_id": textish(official_region.get("id")),
+        "country_code": country_code,
+        "geography_id": geography_id,
+        "geography_path": [str(area["id"]) for area in geography_areas],
+        "settlement_ekatte": textish(settlement.get("ekatte")),
+        "location_review_status": str(status),
+        "location_precision": textish(place.get("location_precision")) or (
+            "approximate"
+            if status == "raw_locality_only"
+            else "area_only"
+        ),
+    }
 
 
 def path_from_env(name: str, default: Path) -> Path:
@@ -296,11 +395,23 @@ def apply_listing_edits(docs: list[dict[str, object]], edits: list[dict[str, obj
         ):
             if field in patch:
                 doc[field] = patch[field]
-        doc["search_text"] = search_text(doc.get("title"), doc.get("description"), doc.get("h1"))
+        doc["search_text"] = search_text(
+            doc.get("title"),
+            doc.get("description"),
+            doc.get("h1"),
+            doc.get("location"),
+            doc.get("location_native"),
+            doc.get("municipality"),
+        )
     return docs
 
 
-def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[dict[str, object]]:
+def load_listing_docs(
+    artifact_dir: Path,
+    registry: dict[str, object],
+    reviews: dict[str, object],
+    geography_areas: dict[str, dict[str, object]],
+) -> list[dict[str, object]]:
     metadata_path = artifact_dir / "metadata-inventory.csv"
     if not metadata_path.exists():
         raise FileNotFoundError(f"Missing metadata export: {metadata_path}")
@@ -332,8 +443,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
             locale_is_indexable = locale in indexable_locales
             thumbnail = thumbnails.get(url, {})
 
-            docs.append(
-                {
+            document = {
                     "id": extract_reference(url, len(docs) + 1),
                     "url": url,
                     "canonical": textish(row.get("canonical")),
@@ -361,8 +471,19 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
                     "schema_present": row.get("schema_present") == "true",
                     "source_sitemap": textish(row.get("sitemap_source")),
                     "search_text": search_text(title, description, h1),
-                }
+            }
+            document.update(reviewed_location_fields(str(document["id"]), textish(document["location"]), reviews, geography_areas))
+            document["search_text"] = search_text(
+                title,
+                description,
+                h1,
+                document["location"],
+                document["location_native"],
+                document["municipality"],
+                document["district"],
+                document["region"],
             )
+            docs.append(document)
 
     return docs
 
@@ -398,6 +519,20 @@ def write_typesense_schema(path: Path) -> None:
             {"name": "title", "type": "string"},
             {"name": "description", "type": "string", "optional": True},
             {"name": "location", "type": "string", "facet": True, "optional": True},
+            {"name": "location_native", "type": "string", "optional": True},
+            {"name": "location_legacy", "type": "string", "optional": True},
+            {"name": "municipality", "type": "string", "facet": True, "optional": True},
+            {"name": "municipality_code", "type": "string", "facet": True, "optional": True},
+            {"name": "district", "type": "string", "facet": True, "optional": True},
+            {"name": "district_code", "type": "string", "facet": True, "optional": True},
+            {"name": "region", "type": "string", "facet": True, "optional": True},
+            {"name": "region_id", "type": "string", "facet": True, "optional": True},
+            {"name": "country_code", "type": "string", "facet": True, "optional": True},
+            {"name": "geography_id", "type": "string", "facet": True, "optional": True},
+            {"name": "geography_path", "type": "string[]", "facet": True, "optional": True},
+            {"name": "settlement_ekatte", "type": "string", "facet": True, "optional": True},
+            {"name": "location_review_status", "type": "string", "facet": True},
+            {"name": "location_precision", "type": "string", "facet": True},
             {"name": "property_type", "type": "string", "facet": True},
             {"name": "offer_type", "type": "string", "facet": True},
             {"name": "bedrooms", "type": "int32", "facet": True, "optional": True},
@@ -418,7 +553,7 @@ def write_typesense_schema(path: Path) -> None:
 
 def write_meili_settings(path: Path) -> None:
     settings = {
-        "searchableAttributes": ["title", "description", "h1", "search_text", "location"],
+        "searchableAttributes": ["title", "description", "h1", "search_text", "location", "location_native", "municipality", "district", "region"],
         "filterableAttributes": [
             "source_listing_id",
             "search_document_type",
@@ -433,6 +568,18 @@ def write_meili_settings(path: Path) -> None:
             "translation_human_approved",
             "translation_indexable",
             "location",
+            "municipality",
+            "municipality_code",
+            "district",
+            "district_code",
+            "region",
+            "region_id",
+            "country_code",
+            "geography_id",
+            "geography_path",
+            "settlement_ekatte",
+            "location_review_status",
+            "location_precision",
             "property_type",
             "offer_type",
             "bedrooms",
@@ -456,9 +603,13 @@ def main() -> int:
 
     locale_registry_path = path_from_env("MS_REALTY_LOCALE_REGISTRY_PATH", LOCALE_REGISTRY)
     listing_edits_path = path_from_env("MS_REALTY_LISTING_EDIT_LEDGER_PATH", LISTING_EDITS_LEDGER)
+    location_reviews_path = path_from_env("MS_REALTY_LOCATION_REVIEWS_PATH", LOCATION_REVIEWS)
+    geography_registry_path = path_from_env("MS_REALTY_GEOGRAPHY_REGISTRY_PATH", GEOGRAPHY_REGISTRY)
     registry = load_locale_registry(locale_registry_path)
     listing_edits = load_listing_edits(listing_edits_path)
-    source_docs = apply_listing_edits(load_listing_docs(args.artifact_dir, registry), listing_edits)
+    location_reviews = load_location_reviews(location_reviews_path)
+    geography_areas = load_geography_registry(geography_registry_path)
+    source_docs = apply_listing_edits(load_listing_docs(args.artifact_dir, registry, location_reviews, geography_areas), listing_edits)
     if not source_docs:
         raise SystemExit(f"No listing records found in {args.artifact_dir}")
     index_docs = build_index_docs(source_docs, registry)
@@ -475,6 +626,8 @@ def main() -> int:
         "artifact_dir": str(args.artifact_dir),
         "locale_registry_path": str(locale_registry_path),
         "listing_edits_path": str(listing_edits_path),
+        "location_reviews_path": str(location_reviews_path),
+        "geography_registry_path": str(geography_registry_path),
         "source_listing_count": len(source_docs),
         "index_document_count": len(index_docs),
         "domains": sorted({str(doc["domain"]) for doc in source_docs}),

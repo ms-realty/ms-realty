@@ -2,6 +2,28 @@ import { getLocale, publicIndexableLocales } from "./locales.mjs";
 
 const PUBLIC_TRANSLATION_STATES = new Set(["approved", "published"]);
 const ACTIVE_LISTING_STATUSES = new Set(["available", "reserved"]);
+export const PUBLIC_LOCATION_SCOPES = Object.freeze({
+  Sandanski: { municipality_code: "BLG40" },
+  Petrich: { municipality_code: "BLG33" },
+  Hotovo: { settlement_ekatte: "77361" },
+});
+
+function listingField(listing, field) {
+  return listing[field] ?? listing.facts?.[field] ?? "";
+}
+
+export function matchesPublicLocationScope(listing, location) {
+  const scope = PUBLIC_LOCATION_SCOPES[location];
+  return (
+    Boolean(scope) &&
+    listingField(listing, "location_review_status") === "confirmed_settlement" &&
+    Object.entries(scope).every(([field, value]) => listingField(listing, field) === value)
+  );
+}
+
+export function publicLocationNames(listings) {
+  return Object.keys(PUBLIC_LOCATION_SCOPES).filter((location) => listings.some((listing) => matchesPublicLocationScope(listing, location)));
+}
 
 export function listingPath(registry, localeCode, listingId) {
   const locale = getLocale(registry, localeCode);
@@ -139,29 +161,19 @@ export function sitemapEntriesForContact(registry) {
   }));
 }
 
-function listingLocation(listing) {
-  return String(listing.location || listing.facts?.location || "").trim();
-}
-
 function isActiveListing(listing) {
   return ACTIVE_LISTING_STATUSES.has(listing.listing_status || listing.facts?.listing_status || "available");
 }
 
 export function sitemapEntriesForLocations(registry, listings, translationsForListing) {
-  const byLocation = new Map();
-  for (const listing of listings) {
-    if (!isActiveListing(listing)) continue;
-    const location = listingLocation(listing);
-    if (!location) continue;
-    for (const translation of translationsForListing(listing)) {
-      if (!isTranslationIndexable(registry, translation)) continue;
-      const locales = byLocation.get(location) || new Set();
-      locales.add(translation.locale);
-      byLocation.set(location, locales);
+  return publicLocationNames(listings).flatMap((location) => {
+    const locales = new Set();
+    for (const listing of listings) {
+      if (!isActiveListing(listing) || !matchesPublicLocationScope(listing, location)) continue;
+      for (const translation of translationsForListing(listing)) {
+        if (isTranslationIndexable(registry, translation)) locales.add(translation.locale);
+      }
     }
-  }
-
-  return [...byLocation.entries()].flatMap(([location, locales]) => {
     const localeCodes = [...locales].sort();
     const hreflang = hreflangForLocation(registry, location, localeCodes);
     return localeCodes.map((locale) => ({

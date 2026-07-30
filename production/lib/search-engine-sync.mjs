@@ -136,6 +136,12 @@ const PROJECTED_FACT_FIELDS = Object.freeze([
   "property_subtype",
   "location_id",
   "location_label",
+  "municipality",
+  "district",
+  "region_id",
+  "country_code",
+  "geography_id",
+  "geography_path",
   "price_amount",
   "price_currency",
   "price_period",
@@ -288,6 +294,12 @@ export function approvedSearchSchema(name = "ms_realty_listings") {
     ["property_subtype", "string"],
     ["location_id", "string"],
     ["location_label", "string"],
+    ["municipality", "string"],
+    ["district", "string"],
+    ["region_id", "string"],
+    ["country_code", "string"],
+    ["geography_id", "string"],
+    ["geography_path", "string[]"],
     ["price_amount", "float"],
     ["price_currency", "string"],
     ["price_period", "string"],
@@ -332,6 +344,12 @@ export function approvedSearchSchema(name = "ms_realty_listings") {
     "property_subtype",
     "location_id",
     "location_label",
+    "municipality",
+    "district",
+    "region_id",
+    "country_code",
+    "geography_id",
+    "geography_path",
     "price_amount",
     "price_currency",
     "price_period",
@@ -366,7 +384,7 @@ export function approvedSearchSchema(name = "ms_realty_listings") {
 
 export function approvedSearchSettings() {
   return {
-    searchableAttributes: ["title", "description", "search_text", "location_label", "listing_reference"],
+    searchableAttributes: ["title", "description", "search_text", "location_label", "municipality", "district", "listing_reference"],
     filterableAttributes: approvedSearchSchema().fields.filter((field) => field.facet).map((field) => field.name),
     sortableAttributes: ["price_amount", "primary_area_sqm"],
     displayedAttributes: ["*"],
@@ -1258,6 +1276,11 @@ export function typesenseFilterForIntent(intent, localeCodes) {
   }
   const locationFilter = typesenseLocationFilter(normalized.location_ids);
   if (locationFilter) filters.push(locationFilter);
+  if (normalized.country_code) filters.push(`country_code:=${typesenseLiteral(normalized.country_code)}`);
+  if (normalized.region_id) filters.push(`geography_path:=${typesenseLiteral(normalized.region_id)}`);
+  if (normalized.geography_id) filters.push(`geography_path:=${typesenseLiteral(normalized.geography_id)}`);
+  if (normalized.municipality) filters.push(`municipality:=${typesenseLiteral(normalized.municipality)}`);
+  if (normalized.district) filters.push(`district:=${typesenseLiteral(normalized.district)}`);
   for (const [field, min, max] of [
     ["price_amount", normalized.price_min, normalized.price_max],
     ["bedrooms_count", normalized.bedrooms_min, normalized.bedrooms_max],
@@ -1325,6 +1348,11 @@ function meilisearchFilterForIntent(intent, localeCodes) {
     ]);
     filters.push(`(${ids.join(" OR ")})`);
   }
+  if (normalized.country_code) filters.push(`country_code = ${JSON.stringify(normalized.country_code)}`);
+  if (normalized.region_id) filters.push(`geography_path = ${JSON.stringify(normalized.region_id)}`);
+  if (normalized.geography_id) filters.push(`geography_path = ${JSON.stringify(normalized.geography_id)}`);
+  if (normalized.municipality) filters.push(`municipality = ${JSON.stringify(normalized.municipality)}`);
+  if (normalized.district) filters.push(`district = ${JSON.stringify(normalized.district)}`);
   for (const [field, min, max] of [
     ["price_amount", normalized.price_min, normalized.price_max],
     ["bedrooms_count", normalized.bedrooms_min, normalized.bedrooms_max],
@@ -1357,11 +1385,12 @@ export async function queryPublicSearch({
   q = "",
   intent = null,
   localeCodes,
+  filters = {},
   perPage = 250,
   fetchImpl = globalThis.fetch,
 } = {}) {
   const normalizedLocales = normalizedLocaleCodes(localeCodes);
-  const normalizedIntent = backendIntent(intent, normalizedLocales);
+  const normalizedIntent = backendIntent(intent || (Object.keys(filters).length ? filters : null), normalizedLocales);
   const query = normalizedIntent?.exact_reference || normalizedIntent?.text_query || q;
   const typesenseFilter = typesenseFilterForIntent(normalizedIntent, normalizedLocales);
   const meilisearchFilter = meilisearchFilterForIntent(normalizedIntent, normalizedLocales);

@@ -41,6 +41,7 @@ import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
+import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -326,6 +327,66 @@ function actionCounts(rows) {
   }, {});
 }
 
+test("HTTP search previews do not pollute search analytics", async () => {
+  const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-preview-events-`)}/events.jsonl`;
+  resetEventLedger(eventLedgerPath);
+  const app = createHttpApp({ eventLedgerPath });
+
+  const preview = await dispatchHttp(app, {
+    url: "/api/search?locale=he&municipality=Sandanski",
+    headers: { "x-ms-realty-preview": "search-count" },
+  });
+  const search = await dispatchHttp(app, { url: "/api/search?locale=he&municipality=Sandanski" });
+
+  assert.equal(preview.status, 200);
+  assert.equal(search.status, 200);
+  assert.deepEqual(readEventLedger(eventLedgerPath).map((event) => event.type), ["search"]);
+});
+
+test("HTTP app serves only optimized local hero assets", async () => {
+  const app = createHttpApp();
+  const hero = await dispatchHttp(app, { url: "/hero/sandanski-640.avif" });
+  const disallowed = await dispatchHttp(app, { url: "/hero/sandanski.svg" });
+
+  assert.equal(hero.status, 200);
+  assert.equal(hero.headers["content-type"], "image/avif");
+  assert.equal(hero.headers["cache-control"], "public, max-age=31536000, immutable");
+  assert.equal(Buffer.isBuffer(hero.body), true);
+  assert.ok(hero.body.length > 0);
+  assert.equal(disallowed.status, 404);
+});
+
+test("HTTP app serves generated logo assets as immutable binary PNGs", async () => {
+  const app = createHttpApp();
+
+  for (const url of [LOGO_URL, LOGO_URL_REVERSED]) {
+    const logo = await dispatchHttp(app, { url });
+    assert.equal(logo.status, 200);
+    assert.equal(logo.headers["content-type"], "image/png");
+    assert.equal(logo.headers["cache-control"], "public, max-age=31536000, immutable");
+    assert.equal(Buffer.isBuffer(logo.body), true);
+    assert.deepEqual([...logo.body.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+  }
+});
+
+test("HTTP app serves bounded official bilingual geography suggestions", async () => {
+  const app = createHttpApp();
+  const sandanski = await dispatchHttp(app, {
+    url: "/api/geography?q=Sandanski&country=BG&level=settlement&limit=5",
+  });
+  const thessaloniki = await dispatchHttp(app, {
+    url: "/api/geography?q=Thessaloniki&country=GR&level=settlement&limit=5",
+  });
+
+  assert.equal(sandanski.status, 200);
+  assert.equal(sandanski.headers["cache-control"], "public, max-age=3600, stale-while-revalidate=86400");
+  assert.equal(sandanski.body.returned <= 5, true);
+  assert.equal(sandanski.body.results[0].id, "BG:settlement:65334");
+  assert.equal(sandanski.body.results[0].context.some((area) => area.official_code === "BLG40"), true);
+  assert.equal(thessaloniki.body.results[0].id, "GR:settlement:EL52:0701010001");
+  assert.equal(thessaloniki.body.results[0].active_market, true);
+});
+
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();
   const leadAssignmentLedgerPath = tempLeadAssignments();
@@ -434,6 +495,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
         accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
         reviewer: "media_editor",
+        reviewConfirmed: true,
       },
     }),
     listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
@@ -1178,8 +1240,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const translationLedgerPath = tempTranslations();
   const auditLogPath = tempAuditLog();
   const liveServiceProvisioningReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`)}/mounted-live-service-provisioning-report.json`;
-  const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-`)}/missing-payload-runtime-report.json`;
+  const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-`)}/mounted-payload-runtime-report.json`;
   fs.copyFileSync(fromRoot("production", "data", "live-service-provisioning-report.json"), liveServiceProvisioningReportPath);
+  fs.writeFileSync(
+    payloadRuntimeReportPath,
+    `${JSON.stringify(await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" }), null, 2)}\n`,
+  );
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -1489,7 +1555,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(preflightReports.body.reports.live_service_provisioning.status, "blocked_report");
   assert.ok(preflightReports.body.reports.live_service_provisioning.summary.missing_env.includes("TYPESENSE_URL"));
   assert.ok(preflightReports.body.reports.live_service_provisioning.next_actions.some((action) => action.includes("live:provisioning")));
-  assert.equal(preflightReports.body.reports.payload_runtime.status, "missing_report");
+  assert.equal(preflightReports.body.reports.payload_runtime.status, "blocked_report");
   assert.ok(preflightReports.body.reports.payload_runtime.next_actions.some((action) => action.includes("payload:runtime")));
   assert.equal(seoPreflightUnauthorized.status, 401);
   assert.equal(seoPreflight.status, 200);
@@ -1513,7 +1579,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   assert.equal(payloadRuntimeUnauthorized.status, 401);
   assert.equal(payloadRuntime.status, 200);
   assert.equal(payloadRuntime.body.kind, "admin_payload_runtime");
-  assert.equal(payloadRuntime.body.runtime.status, "missing_report");
+  assert.equal(payloadRuntime.body.runtime.status, "blocked_report");
   assert.ok(payloadRuntime.body.runtime.next_actions.some((action) => action.includes("payload:runtime")));
   assert.equal(payloadRuntimeBootstrapUnauthorized.status, 401);
   assert.equal(payloadRuntimeBootstrap.status, 200);
@@ -2232,7 +2298,7 @@ test("HTTP launch readiness stays tied to the deployed redirect artifact until e
   assert.equal(redirectGate.evidence.unresolved_legacy_urls, 292);
 });
 
-test("HTTP sitemap ignores legacy listing edit ledger mutations", async () => {
+test("HTTP sitemap ignores editor-only location mutations without removing reviewed landing pages", async () => {
   const listingEditLedgerPath = tempListingEdits();
   fs.appendFileSync(
     listingEditLedgerPath,
@@ -2248,6 +2314,7 @@ test("HTTP sitemap ignores legacy listing edit ledger mutations", async () => {
 
   assert.equal(sitemap.status, 200);
   assert.doesNotMatch(sitemap.body, /\/he\/locations\/runtime-only-city/);
+  assert.match(sitemap.body, /\/he\/locations\/sandanski/);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {
@@ -2553,6 +2620,107 @@ test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async 
     assert.equal(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath)[0].actor, "broker_bg");
     assert.equal(readAuditLog(auditLogPath).at(-1).actor, "broker_bg");
     assert.equal(inbox.body.workspace.operator_id, "broker_bg");
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
+test("HTTP public approval handlers bind reviewers and require confirmation", async () => {
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.MS_REALTY_ADMIN_TOKEN;
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "media_editor", token: "media-editor-production-token-0123456789", roles: ["admin"] },
+    ]);
+
+    const auditLogPath = tempAuditLog();
+    const app = createHttpApp({
+      auditLogPath,
+      brokerContactLedgerPath: tempBrokerContacts(),
+      tourApprovalLedgerPath: tempTourApprovals(),
+      reviewedAt: "2026-07-29T10:05:00Z",
+    });
+    const headers = { authorization: "Bearer media-editor-production-token-0123456789" };
+    const contact = {
+      id: "credentialed-broker-contact",
+      listingId: "MS-CRAWL-0001",
+      broker: "broker_bg",
+      phone: "+359880000000",
+      approved: true,
+    };
+    const spoofedContact = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/broker-contacts",
+      headers,
+      body: { ...contact, reviewer: "someone_else" },
+    });
+    const unconfirmedContact = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/broker-contacts",
+      headers,
+      body: { ...contact, approved: false },
+    });
+    const savedContact = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/broker-contacts",
+      headers,
+      body: contact,
+    });
+    const tour = {
+      id: "credentialed-tour-approval",
+      listingId: "MS-CRAWL-0001",
+      panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      reviewConfirmed: true,
+    };
+    const spoofedTour = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/tours/approve",
+      headers,
+      body: { ...tour, reviewer: "someone_else" },
+    });
+    const unconfirmedTour = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/tours/approve",
+      headers,
+      body: { ...tour, reviewConfirmed: false },
+    });
+    const savedTour = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/tours/approve",
+      headers,
+      body: tour,
+    });
+
+    assert.equal(spoofedContact.status, 400);
+    assert.match(spoofedContact.body.message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedContact.status, 400);
+    assert.match(unconfirmedContact.body.message, /explicitly approved/);
+    assert.equal(savedContact.status, 201);
+    assert.equal(savedContact.body.reviewer, "media_editor");
+    assert.equal(spoofedTour.status, 400);
+    assert.match(spoofedTour.body.message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedTour.status, 400);
+    assert.match(unconfirmedTour.body.message, /explicit human confirmation/);
+    assert.equal(savedTour.status, 201);
+    assert.equal(savedTour.body.reviewer, "media_editor");
+    assert.deepEqual(
+      readAuditLog(auditLogPath).map((row) => [row.action, row.actor]),
+      [
+        ["broker_contact_approved", "media_editor"],
+        ["tour_approved", "media_editor"],
+      ],
+    );
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];

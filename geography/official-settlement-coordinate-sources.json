@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-07-30",
+  "decision": {
+    "status": "not_automatable",
+    "scope": "approximate point coordinates for Bulgarian settlements",
+    "reason": "No checked official source both identifies EKATTE settlements and supplies a point or geometry for each settlement."
+  },
+  "sources": [
+    {
+      "id": "nsi-ekatte-territorial-units",
+      "authority": "National Statistical Institute of Bulgaria",
+      "url": "https://www.nsi.bg/nrnm/ekatte/territorial-units/json",
+      "format": "JSON",
+      "observed_payload_item_count": 5257,
+      "observed_settlement_record_count": 5256,
+      "settlement_identifier": "ekatte",
+      "observed_fields": [
+        "abc",
+        "altitude",
+        "category",
+        "document",
+        "ekatte",
+        "kind",
+        "kmetstvo",
+        "name",
+        "name_en",
+        "nuts1",
+        "nuts2",
+        "nuts3",
+        "oblast",
+        "oblast_name",
+        "obshtina",
+        "obshtina_name",
+        "t_v_m",
+        "text"
+      ],
+      "coordinate_or_geometry_fields": [],
+      "suitable_for_approximate_settlement_points": false,
+      "reason": "The official settlement register contains EKATTE and administrative metadata, but no latitude, longitude, point, or geometry field."
+    },
+    {
+      "id": "eurostat-gisco-nuts-label-points-2024",
+      "authority": "Eurostat GISCO",
+      "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_LB_2024_4326_LEVL_3.geojson",
+      "format": "GeoJSON",
+      "unit_scope": "NUTS level 3 regional label points",
+      "observed_feature_count": 1345,
+      "observed_bulgarian_feature_count": 28,
+      "required_properties": [
+        "CNTR_CODE",
+        "LEVL_CODE",
+        "NUTS_ID",
+        "LAT",
+        "LON"
+      ],
+      "settlement_identifier": null,
+      "coordinate_or_geometry_fields": [
+        "geometry",
+        "properties.LAT",
+        "properties.LON"
+      ],
+      "suitable_for_approximate_settlement_points": false,
+      "reason": "These are regional labels, not settlement records, and have no EKATTE identifier for a safe settlement join."
+    }
+  ],
+  "prohibited_inferences": [
+    "Do not assign a NUTS label point or regional centroid to a settlement.",
+    "Do not infer coordinates from a settlement name, municipality, district, or elevation category.",
+    "Do not expose viewport, radius, or draw-on-map search until a source with settlement-level geometry and reviewed provenance is approved."
+  ]
+}

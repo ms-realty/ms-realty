@@ -1,17 +1,21 @@
 {
   "generated_at": "2026-07-05T00:00:00Z",
   "summary": {
-    "search_events": 8,
+    "search_events": 12,
     "zero_result_events": 0,
-    "filtered_search_events": 1,
+    "filtered_search_events": 3,
     "locales": [
       {
         "key": "en",
-        "count": 4
+        "count": 6
       },
       {
         "key": "he",
         "count": 3
+      },
+      {
+        "key": "bg",
+        "count": 2
       },
       {
         "key": "el",
@@ -19,6 +23,10 @@
       }
     ],
     "popular_filters": [
+      {
+        "key": "offer_type=rent",
+        "count": 2
+      },
       {
         "key": "property_type=apartment",
         "count": 1
@@ -33,7 +41,7 @@
       "query": "Sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/he/search",
@@ -41,7 +49,7 @@
       "query": "Sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/api/search",
@@ -51,7 +59,7 @@
         "property_type": "apartment"
       },
       "filter_key": "property_type=apartment",
-      "result_count": 46
+      "result_count": 47
     },
     {
       "path": "/api/search",
@@ -59,7 +67,7 @@
       "query": "Sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/en/search",
@@ -83,7 +91,7 @@
       "query": "sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
     },
     {
       "path": "/en/search",
@@ -91,7 +99,43 @@
       "query": "sandanski",
       "filters": {},
       "filter_key": "none",
-      "result_count": 109
+      "result_count": 112
+    },
+    {
+      "path": "/en/search",
+      "locale": "en",
+      "query": "",
+      "filters": {
+        "offer_type": "rent"
+      },
+      "filter_key": "offer_type=rent",
+      "result_count": 23
+    },
+    {
+      "path": "/en/search",
+      "locale": "en",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
+    },
+    {
+      "path": "/bg/tarsene",
+      "locale": "bg",
+      "query": "",
+      "filters": {
+        "offer_type": "rent"
+      },
+      "filter_key": "offer_type=rent",
+      "result_count": 23
+    },
+    {
+      "path": "/bg/tarsene",
+      "locale": "bg",
+      "query": "",
+      "filters": {},
+      "filter_key": "none",
+      "result_count": 113
     }
   ]
 }

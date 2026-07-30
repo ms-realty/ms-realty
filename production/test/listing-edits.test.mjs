@@ -76,6 +76,8 @@ test("listing edits persist and stale dependent translations", () => {
 
 test("listing edit ledger overlays reviewed facts onto CMS seed records", () => {
   const seed = loadCmsSeed();
+  const original = seed.records.find((record) => record.id === "MS-CRAWL-0001");
+  const originalDescription = original.facts.description;
   const updated = applyListingEdits(seed, [
     {
       listing_id: "MS-CRAWL-0001",
@@ -105,10 +107,10 @@ test("listing edit ledger overlays reviewed facts onto CMS seed records", () => 
       media_reviewer: "media_editor",
     },
   ]);
-  const original = seed.records.find((record) => record.id === "MS-CRAWL-0001");
   const record = updated.records.find((candidate) => candidate.id === "MS-CRAWL-0001");
 
-  assert.equal(original.facts.description, "Updated approved source description.");
+  assert.equal(original.facts.description, originalDescription);
+  assert.notEqual(record.facts.description, originalDescription);
   assert.equal(record.facts.description, "Reviewed source description.");
   assert.equal(record.facts.price_eur, null);
   assert.equal(record.facts.bedrooms, 2);

@@ -477,13 +477,13 @@
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0064",
+          "from_path": "/bg/imoti/MS-CRAWL-0059",
           "to_path": "/bg/imoti/MS-CRAWL-0013",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0071",
+          "from_path": "/bg/imoti/MS-CRAWL-0064",
           "to_path": "/bg/imoti/MS-CRAWL-0013",
           "label": "Add as related listing"
         }
@@ -544,25 +544,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0015",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0015",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0057",
           "to_path": "/bg/imoti/MS-CRAWL-0015",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0016",
@@ -581,25 +569,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0016",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0036",
           "to_path": "/bg/imoti/MS-CRAWL-0016",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0112",
           "to_path": "/bg/imoti/MS-CRAWL-0016",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0017",
@@ -875,27 +857,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0024",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0024",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0024",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0024",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0025",
@@ -1210,20 +1174,20 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0033",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0046",
           "to_path": "/bg/imoti/MS-CRAWL-0033",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0058",
+          "to_path": "/bg/imoti/MS-CRAWL-0033",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0080",
           "to_path": "/bg/imoti/MS-CRAWL-0033",
           "label": "Add as related listing"
         }
@@ -1284,25 +1248,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0035",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0035",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0041",
           "to_path": "/bg/imoti/MS-CRAWL-0035",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0036",
@@ -1321,25 +1273,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0036",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0016",
           "to_path": "/bg/imoti/MS-CRAWL-0036",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0112",
           "to_path": "/bg/imoti/MS-CRAWL-0036",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0037",
@@ -1467,27 +1413,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0040",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0040",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0040",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0040",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0041",
@@ -1506,25 +1434,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0041",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0041",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0035",
           "to_path": "/bg/imoti/MS-CRAWL-0041",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0042",
@@ -1578,27 +1494,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0043",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0043",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0043",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0043",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0044",
@@ -1615,27 +1513,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0044",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0044",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0044",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0044",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0045",
@@ -1652,27 +1532,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0045",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0045",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0045",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0045",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0046",
@@ -1691,20 +1553,20 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0046",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0033",
           "to_path": "/bg/imoti/MS-CRAWL-0046",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0058",
+          "to_path": "/bg/imoti/MS-CRAWL-0046",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0080",
           "to_path": "/bg/imoti/MS-CRAWL-0046",
           "label": "Add as related listing"
         }
@@ -1726,27 +1588,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0047",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0047",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0047",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0047",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0048",
@@ -1763,27 +1607,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0048",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0048",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0048",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0048",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0049",
@@ -1837,27 +1663,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0050",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0050",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0050",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0050",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0051",
@@ -2098,25 +1906,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0057",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0057",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0015",
           "to_path": "/bg/imoti/MS-CRAWL-0057",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0058",
@@ -2135,20 +1931,20 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0058",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0033",
           "to_path": "/bg/imoti/MS-CRAWL-0058",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0046",
+          "to_path": "/bg/imoti/MS-CRAWL-0058",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0080",
           "to_path": "/bg/imoti/MS-CRAWL-0058",
           "label": "Add as related listing"
         }
@@ -2173,19 +1969,19 @@
         },
         {
           "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
+          "from_path": "/bg/lokacii/hotovo",
           "to_path": "/bg/imoti/MS-CRAWL-0059",
           "label": "Add to location inventory"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0013",
           "to_path": "/bg/imoti/MS-CRAWL-0059",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0064",
           "to_path": "/bg/imoti/MS-CRAWL-0059",
           "label": "Add as related listing"
         }
@@ -2246,25 +2042,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0061",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-3000",
           "to_path": "/bg/imoti/MS-CRAWL-0061",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0081",
           "to_path": "/bg/imoti/MS-CRAWL-0061",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0062",
@@ -2318,27 +2108,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0063",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0063",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0063",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0063",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0064",
@@ -2370,7 +2142,7 @@
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0071",
+          "from_path": "/bg/imoti/MS-CRAWL-0059",
           "to_path": "/bg/imoti/MS-CRAWL-0064",
           "label": "Add as related listing"
         }
@@ -2392,27 +2164,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0065",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0065",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0065",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0065",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0066",
@@ -2429,27 +2183,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0066",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0066",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0066",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0066",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0067",
@@ -2503,27 +2239,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0068",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0068",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0068",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0068",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0069",
@@ -2542,25 +2260,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0069",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0069",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0093",
           "to_path": "/bg/imoti/MS-CRAWL-0069",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0070",
@@ -2583,9 +2289,21 @@
           "from_path": "/bg/lokacii/petrich",
           "to_path": "/bg/imoti/MS-CRAWL-0070",
           "label": "Add to location inventory"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0094",
+          "to_path": "/bg/imoti/MS-CRAWL-0070",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0097",
+          "to_path": "/bg/imoti/MS-CRAWL-0070",
+          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 2
+      "internal_link_suggestion_count": 4
     },
     {
       "listing_id": "MS-CRAWL-0071",
@@ -2617,7 +2335,7 @@
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0064",
+          "from_path": "/bg/imoti/MS-CRAWL-0059",
           "to_path": "/bg/imoti/MS-CRAWL-0071",
           "label": "Add as related listing"
         }
@@ -2639,27 +2357,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0072",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0072",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0072",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0072",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0073",
@@ -2750,27 +2450,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0075",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0075",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0075",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0075",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-3000",
@@ -2789,25 +2471,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-3000",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0061",
           "to_path": "/bg/imoti/MS-3000",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0081",
           "to_path": "/bg/imoti/MS-3000",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0077",
@@ -2937,20 +2613,20 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0080",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0033",
           "to_path": "/bg/imoti/MS-CRAWL-0080",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0046",
+          "to_path": "/bg/imoti/MS-CRAWL-0080",
+          "label": "Add as related listing"
+        },
+        {
+          "kind": "related_listing",
+          "from_path": "/bg/imoti/MS-CRAWL-0058",
           "to_path": "/bg/imoti/MS-CRAWL-0080",
           "label": "Add as related listing"
         }
@@ -2974,25 +2650,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0081",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0061",
           "to_path": "/bg/imoti/MS-CRAWL-0081",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-3000",
           "to_path": "/bg/imoti/MS-CRAWL-0081",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0082",
@@ -3305,27 +2975,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0090",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0090",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0090",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0090",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0091",
@@ -3342,27 +2994,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0091",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0091",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0091",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0091",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0092",
@@ -3418,25 +3052,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0093",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0093",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0069",
           "to_path": "/bg/imoti/MS-CRAWL-0093",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0094",
@@ -3456,19 +3078,19 @@
         },
         {
           "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
+          "from_path": "/bg/lokacii/petrich",
           "to_path": "/bg/imoti/MS-CRAWL-0094",
           "label": "Add to location inventory"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0070",
           "to_path": "/bg/imoti/MS-CRAWL-0094",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0097",
           "to_path": "/bg/imoti/MS-CRAWL-0094",
           "label": "Add as related listing"
         }
@@ -3490,27 +3112,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0095",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0095",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0095",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0095",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0096",
@@ -3567,19 +3171,19 @@
         },
         {
           "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
+          "from_path": "/bg/lokacii/petrich",
           "to_path": "/bg/imoti/MS-CRAWL-0097",
           "label": "Add to location inventory"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0070",
           "to_path": "/bg/imoti/MS-CRAWL-0097",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0094",
           "to_path": "/bg/imoti/MS-CRAWL-0097",
           "label": "Add as related listing"
         }
@@ -3823,27 +3427,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0104",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0104",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0104",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0104",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0105",
@@ -3934,27 +3520,9 @@
           "from_path": "/bg",
           "to_path": "/bg/imoti/MS-CRAWL-0107",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0107",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
-          "to_path": "/bg/imoti/MS-CRAWL-0107",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
-          "to_path": "/bg/imoti/MS-CRAWL-0107",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0108",
@@ -4121,25 +3689,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/bg/lokacii/sandanski",
-          "to_path": "/bg/imoti/MS-CRAWL-0112",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0001",
+          "from_path": "/bg/imoti/MS-CRAWL-0016",
           "to_path": "/bg/imoti/MS-CRAWL-0112",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/bg/imoti/MS-CRAWL-0002",
+          "from_path": "/bg/imoti/MS-CRAWL-0036",
           "to_path": "/bg/imoti/MS-CRAWL-0112",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0113",
@@ -4304,27 +3866,9 @@
           "from_path": "/ru",
           "to_path": "/ru/properties/MS-CRAWL-0117",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0117",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0117",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
-          "to_path": "/ru/properties/MS-CRAWL-0117",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0118",
@@ -4341,27 +3885,9 @@
           "from_path": "/ru",
           "to_path": "/ru/properties/MS-CRAWL-0118",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0118",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0118",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
-          "to_path": "/ru/properties/MS-CRAWL-0118",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0119",
@@ -4738,25 +4264,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0129",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0129",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0148",
           "to_path": "/ru/properties/MS-CRAWL-0129",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0130",
@@ -4958,27 +4472,9 @@
           "from_path": "/ru",
           "to_path": "/ru/properties/MS-CRAWL-0135",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0135",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0135",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
-          "to_path": "/ru/properties/MS-CRAWL-0135",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0136",
@@ -4997,25 +4493,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0136",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0136",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0160",
           "to_path": "/ru/properties/MS-CRAWL-0136",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0137",
@@ -5034,25 +4518,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0137",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0137",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0156",
           "to_path": "/ru/properties/MS-CRAWL-0137",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0138",
@@ -5180,27 +4652,9 @@
           "from_path": "/ru",
           "to_path": "/ru/properties/MS-CRAWL-0141",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0141",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0141",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
-          "to_path": "/ru/properties/MS-CRAWL-0141",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0142",
@@ -5217,27 +4671,9 @@
           "from_path": "/ru",
           "to_path": "/ru/properties/MS-CRAWL-0142",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0142",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0142",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
-          "to_path": "/ru/properties/MS-CRAWL-0142",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0143",
@@ -5441,25 +4877,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0148",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0148",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0129",
           "to_path": "/ru/properties/MS-CRAWL-0148",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0149",
@@ -5515,25 +4939,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0150",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0150",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0152",
           "to_path": "/ru/properties/MS-CRAWL-0150",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0151",
@@ -5589,25 +5001,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0152",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0152",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0150",
           "to_path": "/ru/properties/MS-CRAWL-0152",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0153",
@@ -5626,25 +5026,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0153",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "from_path": "/ru/properties/MS-CRAWL-0154",
           "to_path": "/ru/properties/MS-CRAWL-0153",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0165",
           "to_path": "/ru/properties/MS-CRAWL-0153",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0154",
@@ -5663,25 +5057,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0154",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "from_path": "/ru/properties/MS-CRAWL-0153",
           "to_path": "/ru/properties/MS-CRAWL-0154",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0165",
           "to_path": "/ru/properties/MS-CRAWL-0154",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     },
     {
       "listing_id": "MS-CRAWL-0155",
@@ -5737,25 +5125,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0156",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0156",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0137",
           "to_path": "/ru/properties/MS-CRAWL-0156",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0157",
@@ -5885,25 +5261,13 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0160",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0160",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0136",
           "to_path": "/ru/properties/MS-CRAWL-0160",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 2
     },
     {
       "listing_id": "MS-CRAWL-0161",
@@ -6031,27 +5395,9 @@
           "from_path": "/ru",
           "to_path": "/ru/properties/MS-CRAWL-0164",
           "label": "Add to featured listings"
-        },
-        {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0164",
-          "label": "Add to location inventory"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
-          "to_path": "/ru/properties/MS-CRAWL-0164",
-          "label": "Add as related listing"
-        },
-        {
-          "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
-          "to_path": "/ru/properties/MS-CRAWL-0164",
-          "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 1
     },
     {
       "listing_id": "MS-CRAWL-0165",
@@ -6070,25 +5416,19 @@
           "label": "Add to featured listings"
         },
         {
-          "kind": "location_page",
-          "from_path": "/ru/locations/sandanski",
-          "to_path": "/ru/properties/MS-CRAWL-0165",
-          "label": "Add to location inventory"
-        },
-        {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0114",
+          "from_path": "/ru/properties/MS-CRAWL-0153",
           "to_path": "/ru/properties/MS-CRAWL-0165",
           "label": "Add as related listing"
         },
         {
           "kind": "related_listing",
-          "from_path": "/ru/properties/MS-CRAWL-0115",
+          "from_path": "/ru/properties/MS-CRAWL-0154",
           "to_path": "/ru/properties/MS-CRAWL-0165",
           "label": "Add as related listing"
         }
       ],
-      "internal_link_suggestion_count": 4
+      "internal_link_suggestion_count": 3
     }
   ]
 }

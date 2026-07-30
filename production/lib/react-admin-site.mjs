@@ -1,6 +1,6 @@
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
-import { LOGO_ASPECT, LOGO_SRC_REVERSED } from "./ui/design-assets.mjs";
+import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
 
 function adminCopy(page) {
   return page.workspace?.copy || {};
@@ -1091,7 +1091,7 @@ function Sidebar({ page }) {
       h(
         "a",
         { href: adminHref(adminHomeForPage(page), page), "aria-label": "MS Realty" },
-        h("img", { src: LOGO_SRC_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
+        h("img", { src: LOGO_URL_REVERSED, alt: "MS Realty", height: 30, width: Math.round(30 * LOGO_ASPECT) }),
       ),
     ),
     h(

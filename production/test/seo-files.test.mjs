@@ -5,6 +5,7 @@ import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
 import { applyListingEdits } from "../lib/listing-edits.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { loadCmsSeed } from "../lib/runtime.mjs";
+import { readTranslationLedger } from "../lib/translation-ledger.mjs";
 import {
   assertSeoFiles,
   buildRuntimeLocalizedSitemap,
@@ -51,7 +52,7 @@ test("runtime sitemap includes approved dynamic locale translations", () => {
   assert.equal(sitemap.summary.byLocale.es, 5);
   assert.equal(sitemap.summary.seller_pages, 8);
   assert.equal(sitemap.summary.contact_pages, 8);
-  assert.equal(sitemap.summary.guide_pages, 2);
+  assert.equal(sitemap.summary.guide_pages, 5);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es" && entry.type === "home"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/propiedades/MS-CRAWL-0001"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/es/locations/sandanski" && entry.type === "location"), true);
@@ -70,6 +71,22 @@ test("runtime sitemap keeps sold listings but not sold-only location pages", () 
 
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/he/properties/MS-CRAWL-0001"), true);
   assert.equal(sitemap.entries.some((entry) => entry.loc === "/he/locations/sold-only-runtime-city"), false);
+});
+
+test("runtime sitemap exposes only official reviewed location scopes", () => {
+  const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), loadCmsSeed());
+
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/sandanski"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/petrich"), true);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/bansko"), false);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/bg/lokacii/logari"), false);
+});
+
+test("runtime sitemap excludes stale translation routes", () => {
+  const sitemap = buildRuntimeLocalizedSitemap(loadLocaleRegistry(), loadCmsSeed(), readTranslationLedger());
+
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/el/akinita/MS-CRAWL-0001"), false);
+  assert.equal(sitemap.entries.some((entry) => entry.loc === "/el/topothesies/sandanski"), false);
 });
 
 test("generated SEO files are valid when present", () => {

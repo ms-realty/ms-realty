@@ -59,6 +59,18 @@ test("route decisions require an explicit terminal choice and same-content confi
   );
 });
 
+test("redirect approval workbooks retain crawl SEO evidence for editorial review", () => {
+  const routeMap = loadRouteMap();
+  const records = loadMigrationRecords();
+  const [route] = attachMigrationReviewEvidence(routeMap.slice(0, 1), records);
+  const [row] = buildRedirectApprovalWorkbook([route]);
+  const csv = renderRedirectApprovalWorkbook([row]);
+
+  assert.equal(row.source_meta_description, records[0].source_seo.meta_description);
+  assert.equal(row.source_open_graph, records[0].source_seo.open_graph);
+  assert.match(csv, /source_meta_description,source_open_graph/);
+});
+
 test("human-reviewed 410 and retained decisions are terminal without inventing a redirect", () => {
   const routeMap = loadRouteMap();
   const filePath = tempApprovalFile();

@@ -62,16 +62,19 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
     const startedAt = performance.now();
     let status = 500;
     try {
+      const headRequest = req.method === "HEAD";
       const response = await app({
-        method: req.method,
+        method: headRequest ? "GET" : req.method,
         url: req.url,
         headers: req.headers,
         body: await readBody(req, maxBodyBytes),
       });
       status = response.status;
       const headers = { ...response.headers };
-      let payload = typeof response.body === "string" ? response.body : JSON.stringify(response.body);
-      const byteLength = Buffer.byteLength(payload);
+      let payload = Buffer.isBuffer(response.body)
+        ? response.body
+        : Buffer.from(typeof response.body === "string" ? response.body : JSON.stringify(response.body), "utf8");
+      const byteLength = payload.length;
       const encoding =
         byteLength >= MIN_COMPRESS_BYTES && COMPRESSIBLE_CONTENT_TYPE.test(String(headers["content-type"] || "")) && !headers["content-encoding"]
           ? negotiatedEncoding(req.headers)
@@ -82,8 +85,9 @@ export function createNodeServer(app = createHttpApp(), { maxBodyBytes = DEFAULT
         headers.vary = headers.vary ? `${headers.vary}, accept-encoding` : "accept-encoding";
         headers["content-length"] = String(payload.length);
       }
+      if (!headers["content-length"]) headers["content-length"] = String(payload.length);
       res.writeHead(response.status, headers);
-      res.end(payload);
+      res.end(headRequest ? undefined : payload);
     } catch (error) {
       status = error.status || 500;
       res.writeHead(status, ERROR_HEADERS);

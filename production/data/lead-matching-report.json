@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-30T15:21:54.402Z",
+  "generated_at": "2026-07-30T16:20:33.388Z",
   "summary": {
     "matchable_leads_with_listing_reference": 2,
     "active_matchable_leads": 2,
@@ -89,14 +89,14 @@
           "price_on_request": false
         },
         {
-          "listing_id": "MS-CRAWL-0094",
-          "path": "/he/properties/MS-CRAWL-0094",
-          "title": "Индустриална сграда под наем в Петрич",
+          "listing_id": "MS-CRAWL-0096",
+          "path": "/he/properties/MS-CRAWL-0096",
+          "title": "Индустриална сграда под наем",
           "location": "סנדנסקי",
           "property_type": "commercial",
           "offer_type": "rent",
-          "price_eur": 1,
-          "price_on_request": false
+          "price_eur": null,
+          "price_on_request": true
         }
       ],
       "broker_task": {

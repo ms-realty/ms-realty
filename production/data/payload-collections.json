@@ -154,6 +154,62 @@
               "type": "text"
             },
             {
+              "name": "location_native",
+              "type": "text"
+            },
+            {
+              "name": "location_legacy",
+              "type": "text"
+            },
+            {
+              "name": "municipality",
+              "type": "text"
+            },
+            {
+              "name": "municipality_code",
+              "type": "text"
+            },
+            {
+              "name": "district",
+              "type": "text"
+            },
+            {
+              "name": "district_code",
+              "type": "text"
+            },
+            {
+              "name": "region",
+              "type": "text"
+            },
+            {
+              "name": "region_id",
+              "type": "text"
+            },
+            {
+              "name": "country_code",
+              "type": "text"
+            },
+            {
+              "name": "geography_id",
+              "type": "text"
+            },
+            {
+              "name": "geography_path",
+              "type": "json"
+            },
+            {
+              "name": "settlement_ekatte",
+              "type": "text"
+            },
+            {
+              "name": "location_review_status",
+              "type": "text"
+            },
+            {
+              "name": "location_precision",
+              "type": "text"
+            },
+            {
               "name": "property_type",
               "type": "text"
             },
@@ -200,10 +256,6 @@
             {
               "name": "condition",
               "type": "text"
-            },
-            {
-              "name": "location_precision",
-              "type": "text"
             }
           ]
         },
@@ -219,6 +271,14 @@
             },
             {
               "name": "description",
+              "type": "textarea"
+            },
+            {
+              "name": "og_title",
+              "type": "text"
+            },
+            {
+              "name": "og_description",
               "type": "textarea"
             },
             {
@@ -545,6 +605,76 @@
             {
               "name": "legacy_property_type",
               "type": "text",
+              "custom": {
+                "property_families": null
+              }
+            },
+            {
+              "name": "location_id",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "apartment",
+                  "house",
+                  "plot",
+                  "agricultural_land",
+                  "commercial",
+                  "hotel"
+                ]
+              }
+            },
+            {
+              "name": "location_label",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "apartment",
+                  "house",
+                  "plot",
+                  "agricultural_land",
+                  "commercial",
+                  "hotel"
+                ]
+              }
+            },
+            {
+              "name": "municipality",
+              "type": "text",
+              "custom": {
+                "property_families": null
+              }
+            },
+            {
+              "name": "district",
+              "type": "text",
+              "custom": {
+                "property_families": null
+              }
+            },
+            {
+              "name": "region_id",
+              "type": "text",
+              "custom": {
+                "property_families": null
+              }
+            },
+            {
+              "name": "country_code",
+              "type": "text",
+              "custom": {
+                "property_families": null
+              }
+            },
+            {
+              "name": "geography_id",
+              "type": "text",
+              "custom": {
+                "property_families": null
+              }
+            },
+            {
+              "name": "geography_path",
+              "type": "json",
               "custom": {
                 "property_families": null
               }

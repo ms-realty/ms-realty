@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_id": "20260729-legacy-content-review",
+  "captured_at_utc": "2026-07-29T12:39:33+00:00",
+  "extractor": "html-primary-content-v1",
+  "source_inventory": {
+    "path": "/Users/ivan/Code/MS-Realty-content-audit/migration/artifacts/20260704-211155/url-inventory.csv",
+    "sha256": "d310cbf93073d3ec7456af58d2c34dbbda40a1be8194bc1bec7d3ab5a822190f"
+  },
+  "counts": {
+    "source_urls": 457,
+    "captured": 418,
+    "skipped": 39
+  },
+  "robots": [
+    {
+      "host": "makler-realty.com",
+      "robots_url": "https://makler-realty.com/robots.txt",
+      "status": 200,
+      "error": ""
+    },
+    {
+      "host": "makler-realty.ru",
+      "robots_url": "https://makler-realty.ru/robots.txt",
+      "status": 200,
+      "error": ""
+    }
+  ],
+  "files": {
+    "content-inventory.jsonl": {
+      "sha256": "86942b54c7289085c9ba48d2a447019eff9f56b72a3178deef9a15666e42c2bb",
+      "rows": 418
+    },
+    "content-capture-skipped.csv": {
+      "sha256": "297606bd0f8208645cc910480c4dc32502334e3e0d1afb4cdf218125ec974021",
+      "rows": 39
+    }
+  }
+}

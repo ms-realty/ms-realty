@@ -84,6 +84,86 @@
       "optional": true
     },
     {
+      "name": "location_native",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "location_legacy",
+      "type": "string",
+      "optional": true
+    },
+    {
+      "name": "municipality",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "municipality_code",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "district",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "district_code",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "region",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "region_id",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "country_code",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "geography_id",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "geography_path",
+      "type": "string[]",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "settlement_ekatte",
+      "type": "string",
+      "facet": true,
+      "optional": true
+    },
+    {
+      "name": "location_review_status",
+      "type": "string",
+      "facet": true
+    },
+    {
+      "name": "location_precision",
+      "type": "string",
+      "facet": true
+    },
+    {
       "name": "property_type",
       "type": "string",
       "facet": true

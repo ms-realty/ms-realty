@@ -8,6 +8,7 @@ import { publicMediaLibrary } from "../lib/media.mjs";
 import { renderReactPublicBody } from "../lib/react-public-site.mjs";
 import { applyListingEdits } from "../lib/listing-edits.mjs";
 import { listingFromCmsRecord, loadCmsSeed } from "../lib/runtime.mjs";
+import { PUBLIC_APP_JS } from "../lib/ui/client.mjs";
 import {
   renderAdminShell,
   renderContactPage,
@@ -59,6 +60,19 @@ test("public listing routes render BG, Greek, and Hebrew locale-prefixed pages",
   );
 });
 
+test("listing language navigation keeps users on an available translation of the same listing", () => {
+  const page = renderListingPage({ registry, listing, localeCode: "he" });
+
+  assert.deepEqual(
+    page.chrome.languages.map(({ code, href }) => ({ code, href })),
+    [
+      { code: "bg", href: "/bg/imoti/MS-CRAWL-0001" },
+      { code: "el", href: "/el/akinita/MS-CRAWL-0001" },
+      { code: "he", href: "/he/properties/MS-CRAWL-0001" },
+    ],
+  );
+});
+
 test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct", () => {
   const html = renderReactPublicBody(renderListingPage({ registry, listing, localeCode: "ru" }));
 
@@ -84,6 +98,7 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-lead-type="renter"/);
   assert.match(html, /data-mobile-gallery="true"/);
   assert.match(html, /data-mobile-gallery-index="1"/);
+  assert.match(html, /data-mobile-gallery-label="Галерея"/);
   assert.match(html, /data-mobile-gallery-slide="1" data-gallery-active="true"/);
   assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 1);
   assert.doesNotMatch(html, /data-mobile-gallery-progress="true"/);
@@ -108,8 +123,39 @@ test("mobile listing gallery exposes every reviewed photo and its swipe position
   assert.match(html, /data-mobile-gallery-slide="14"/);
   assert.match(html, /data-mobile-gallery-progress="true" data-gallery-total="14"/);
   assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 14/);
+  assert.match(html, /data-mobile-gallery-prev="true"/);
+  assert.match(html, /data-mobile-gallery-next="true"/);
+  assert.match(html, /aria-label="Назад фото"/);
+  assert.match(html, /aria-label="Далее фото"/);
+  assert.doesNotMatch(html, /undefined/);
+  assert.match(html, /tabindex="0"/);
   assert.match(html, /role="region" aria-label="Галерея"/);
-  assert.match(html, /role="group" aria-label="14 \/ 14:/);
+  assert.match(html, /aria-label="14 \/ 14:[^"]*" data-mobile-gallery-slide="14"/);
+  assert.equal((html.match(/data-listing-gallery-source="true"/g) || []).length, 14);
+  assert.match(html, /data-listing-gallery-dialog="true"/);
+  assert.match(PUBLIC_APP_JS, /function initListingGallery\(\)/);
+  assert.match(PUBLIC_APP_JS, /dialog\.showModal\(\)/);
+  assert.match(PUBLIC_APP_JS, /event\.key === "Escape"[\s\S]*?dialog\.close\(\)/);
+  assert.match(PUBLIC_APP_JS, /event\.key === "ArrowLeft"/);
+  assert.match(PUBLIC_APP_JS, /initListingGallery\(\);\s+initMobileListingGallery\(\);/);
+});
+
+test("approved 360 tours retain a public gallery fallback when the viewer cannot load", () => {
+  const page = renderListingPage({ registry, listing, localeCode: "en" });
+  page.body.media.tour = {
+    available: true,
+    mount_target: "psv-listing-tour",
+    provider: "photo-sphere-viewer",
+    panorama_url: "https://cdn.example.org/panorama.jpg",
+    accessibility_caption: "A 360-degree view of the property.",
+    fallback_gallery: [page.body.media.gallery[0]],
+  };
+  const html = renderReactPublicBody(page);
+
+  assert.match(html, /id="listing-tour"/);
+  assert.match(html, /data-photo-sphere-fallback="true"/);
+  assert.match(html, /href="#listing-gallery"/);
+  assert.match(html, /ld-tour__fallback/);
 });
 
 test("approved broker contact data enables direct listing contact links", () => {
@@ -238,13 +284,13 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.equal(search.indexable, false);
   assert.equal(search.metadata.robots, "noindex,follow");
   assert.equal(search.mobile_policy.list_first_mobile, true);
-  assert.equal(search.mobile_policy.map_optional, false);
+  assert.equal(search.mobile_policy.map_optional, true);
   assert.deepEqual(search.search.engines, ["typesense", "meilisearch"]);
   assert.equal(search.search.filters.locale, "he");
   assert.equal(search.search.controls.save_search.endpoint, "/api/saved-searches");
   assert.equal(search.search.controls.save_search.payload.language, "he");
   assert.equal(search.search.controls.view_modes.find((mode) => mode.id === "list").default, true);
-  assert.equal(search.search.controls.view_modes.some((mode) => mode.id === "map"), false);
+  assert.equal(search.search.controls.view_modes.some((mode) => mode.id === "map"), true);
   assert.deepEqual(
     search.search.controls.sort_options.map((option) => option.id),
     ["recommended", "price_asc", "price_desc"],
@@ -273,6 +319,22 @@ test("search route is locale-scoped and list-first on mobile", () => {
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale"));
   assert.ok(search.cards.some((card) => card.translation_display === "fallback_source_locale" && card.content_locale === "bg"));
   assert.match(renderReactPublicBody(search), /data-content-language="bg"/);
+});
+
+test("map view browses official areas while keeping listing results clickable", () => {
+  const map = renderSearchPage({ registry, listings, localeCode: "en", view: "map" });
+  const html = renderReactPublicBody(map);
+
+  assert.equal(map.search.view, "map");
+  assert.equal(map.search.controls.area_maps.flatMap((country) => country.areas).length, 41);
+  assert.equal(map.search.controls.area_map_source.authority, "Eurostat GISCO");
+  assert.match(html, /data-official-area-maps="true"/);
+  assert.equal((html.match(/data-area-map-link=/g) || []).length, 41);
+  assert.match(html, /data-area-map-link="BG:district:BLG"/);
+  assert.match(html, /href="\/en\/search\?view=map&amp;country_code=BG&amp;region_id=BG%3Adistrict%3ABLG"/);
+  assert.doesNotMatch(html, /data-listing-map-pin/);
+  assert.match(html, /data-search-results="true"/);
+  assert.match(html, /data-card-action="detail"/);
 });
 
 test("saved listings are a private app-style collection rather than a dead toggle", () => {
@@ -353,20 +415,28 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /<h1>Property search<\/h1>/);
   assert.match(html, /class="sr-results__count" role="status" aria-live="polite">\d+ matches<\/p>/);
   assert.doesNotMatch(html, /<h1>Property search \| MS Realty<small>/);
-  assert.match(html, /data-mobile-filter-sheet="true"/);
-  assert.match(html, /data-mobile-filter-sheet="true" role="dialog" aria-modal="true" aria-labelledby="mobile-search-filters-title-en"/);
-  assert.match(html, /aria-controls="mobile-search-filters-panel-en" aria-expanded="false"/);
+  assert.match(html, /data-mobile-search-filters="true"/);
+  assert.match(html, /aria-controls="mobile-search-filters-panel-en"/);
+  assert.doesNotMatch(html, /data-mobile-filter-sheet=/);
+  assert.doesNotMatch(html, /id="mobile-search-filters-panel-en"[^>]*(?:role="dialog"|aria-modal=)/);
   assert.match(html, /class="sr-mobile-filters__copy"><strong class="sr-mobile-filters__label">Search/);
   assert.match(html, /class="sr-mobile-filters__control" aria-hidden="true"/);
-  assert.match(html, /data-mobile-filter-close="true"/);
+  assert.doesNotMatch(html, /data-mobile-filter-close=/);
   assert.match(html, /data-save-search-disclosure="sr-mobile"/);
   assert.match(html, /data-success-message="Search saved\. We will alert you when new properties match\."/);
-  assert.match(html, /form="sr-mobile-filter-form"/);
-  assert.match(html, /class="sr-mobile-filters__sheet-foot/);
-  assert.match(html, /data-mobile-filter-preview-status="true"/);
-  assert.match(html, /data-mobile-filter-submit="true"/);
-  assert.match(html, /data-mobile-filter-base-label="Search"/);
-  assert.match(html, /data-mobile-filter-matches-label="matches"/);
+  assert.match(html, /id="sr-mobile-filter-form"[^>]*data-search-filter-form="true"/);
+  assert.match(html, /class="sr-mobile-filters__sheet-body"/);
+  assert.doesNotMatch(html, /class="sr-mobile-filters__sheet-foot/);
+  assert.doesNotMatch(html, /data-mobile-filter-preview-status=/);
+  assert.match(html, /id="sr-mobile-filter-form"[\s\S]*?<button[^>]*class="mk-btn mk-btn--primary[^"]*"[^>]*type="submit"/);
+  const mobileFilterForm = html.slice(html.indexOf('id="sr-mobile-filter-form"'), html.indexOf("</form>", html.indexOf('id="sr-mobile-filter-form"')));
+  assert.match(mobileFilterForm, /name="country_code"/);
+  assert.match(mobileFilterForm, /name="region_id"/);
+  assert.match(mobileFilterForm, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"/);
+  assert.match(mobileFilterForm, /name="location" type="search"[^>]*role="combobox"/);
+  assert.match(mobileFilterForm, /type="hidden" name="geography_id"/);
+  assert.doesNotMatch(mobileFilterForm, /<datalist/);
+  assert.doesNotMatch(mobileFilterForm, /name="municipality"|name="district"/);
   assert.match(html, /data-card-action="detail"/);
   assert.match(html, /data-card-action="inquiry"/);
   assert.match(html, /data-card-action="save"/);
@@ -402,11 +472,85 @@ test("search applies text and facet filters before paginating cards", () => {
 
   assert.ok(petrich.search.total_matches > 0);
   assert.ok(petrich.cards.some((card) => card.location === "פטריץ׳"));
-  assert.ok(petrichLocation.cards.every((card) => card.location === "פטריץ׳"));
+  assert.ok(petrichLocation.cards.some((card) => card.location === "פטריץ׳"));
+  assert.ok(petrichLocation.cards.every((card) => ["פטריץ׳", "Petrich Municipality"].includes(card.location)));
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
   assert.equal(apartments.search.filters.property_family, "apartment");
   assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_family", value: "apartment", active: true }]);
+});
+
+test("official geography filters cover both countries and match reviewed Bulgarian hierarchy", () => {
+  const base = renderSearchPage({ registry, listings, localeCode: "en" });
+  const greece = renderSearchPage({ registry, listings, localeCode: "bg", filters: { country_code: "GR" }, pageSize: null });
+  const sandanski = renderSearchPage({
+    registry,
+    listings,
+    localeCode: "bg",
+    filters: { geography_id: "BG:settlement:65334" },
+    pageSize: null,
+  });
+  const blagoevgrad = renderSearchPage({
+    registry,
+    listings,
+    localeCode: "bg",
+    filters: { region_id: "BG:district:BLG" },
+    pageSize: null,
+  });
+  const sourceById = new Map(listings.map((candidate) => [candidate.id, candidate]));
+
+  assert.deepEqual(base.search.controls.filter_options.countries.map((country) => country.code), ["BG", "GR"]);
+  assert.equal(base.search.controls.filter_options.regions.filter((area) => area.country_code === "BG").length, 28);
+  assert.equal(base.search.controls.filter_options.regions.filter((area) => area.country_code === "GR").length, 13);
+  assert.ok(greece.cards.length > 0);
+  assert.ok(greece.cards.every((card) => sourceById.get(card.id)?.country_code === "GR"));
+  assert.ok(sandanski.cards.length > 0);
+  assert.ok(sandanski.cards.every((card) => sourceById.get(card.id)?.settlement_ekatte === "65334"));
+  assert.ok(blagoevgrad.cards.length > sandanski.cards.length);
+  assert.ok(blagoevgrad.cards.every((card) => sourceById.get(card.id)?.district_code === "BLG"));
+});
+
+test("municipality search exposes reviewed Bulgarian municipality scope at every known precision", () => {
+  const sandanski = renderSearchPage({ registry, listings, localeCode: "ru", filters: { municipality: "Sandanski" }, pageSize: null });
+  const html = renderReactPublicBody(sandanski);
+  const sourceById = new Map(listings.map((candidate) => [candidate.id, candidate]));
+
+  assert.ok(sandanski.search.controls.filter_options.municipalities.includes("Sandanski"));
+  assert.ok(sandanski.search.controls.filter_options.municipalities.includes("Petrich"));
+  assert.equal(sandanski.search.controls.filter_options.municipalities.includes("Thessaloniki"), false);
+  assert.ok(sandanski.cards.length > 0);
+  assert.ok(
+    sandanski.cards.every((card) => {
+      const source = sourceById.get(card.id);
+      return source?.country_code === "BG" && source?.geography_id && source?.municipality === "Sandanski";
+    }),
+  );
+  assert.equal(sandanski.cards.some((card) => card.id === "MS-CRAWL-0021"), false);
+  assert.deepEqual(sandanski.search.controls.active_filter_chips, [{ key: "municipality", value: "Sandanski", active: true }]);
+  assert.match(html, /data-geography-combobox="true"[^>]*data-geography-endpoint="\/api\/geography"/);
+  assert.match(html, /name="region_id"/);
+  assert.doesNotMatch(html, /name="municipality"/);
+});
+
+test("district search exposes official Bulgarian administrative areas without inventing neighbourhoods", () => {
+  const blagoevgrad = renderSearchPage({ registry, listings, localeCode: "ru", filters: { district: "Blagoevgrad" }, pageSize: null });
+  const html = renderReactPublicBody(blagoevgrad);
+  const sourceById = new Map(listings.map((candidate) => [candidate.id, candidate]));
+
+  assert.equal(blagoevgrad.search.controls.filter_options.districts.length, 28);
+  assert.ok(blagoevgrad.search.controls.filter_options.districts.includes("Blagoevgrad"));
+  assert.ok(blagoevgrad.search.controls.filter_options.districts.includes("Burgas"));
+  assert.ok(blagoevgrad.cards.length > 0);
+  assert.ok(
+    blagoevgrad.cards.every((card) => {
+      const source = sourceById.get(card.id);
+      return source?.country_code === "BG" && source?.district === "Blagoevgrad";
+    }),
+  );
+  assert.equal(blagoevgrad.cards.some((card) => card.id === "MS-CRAWL-0072"), false);
+  assert.deepEqual(blagoevgrad.search.controls.active_filter_chips, [{ key: "district", value: "Blagoevgrad", active: true }]);
+  assert.match(html, /<option value="BG:district:BLG" data-country="BG">Blagoevgrad<\/option>/);
+  assert.doesNotMatch(html, /name="district"/);
 });
 
 test("search matches Cyrillic listings across Latin and Cyrillic keyboard input", () => {
@@ -473,6 +617,10 @@ test("home page exposes search, seller, location, and featured listing paths", (
   assert.equal(he.dir, "rtl");
   assert.equal(he.indexable, true);
   assert.equal(he.body.search.path, "/he/search");
+  assert.deepEqual(
+    he.body.search.controls.filter_options,
+    renderSearchPage({ registry, listings, localeCode: "he" }).search.controls.filter_options,
+  );
   assert.equal(he.body.seller.path, "/he/sell");
   assert.equal(he.body.contact.path, "/he/contact");
   assert.equal(he.body.locations.some((location) => location.path === "/he/locations/sandanski"), true);
@@ -487,9 +635,11 @@ test("home page exposes search, seller, location, and featured listing paths", (
 
 test("English home makes every approved buyer guide discoverable without expanding the mobile task dock", () => {
   const en = renderHomePage({ registry, listings, localeCode: "en" });
+  const bg = renderHomePage({ registry, listings, localeCode: "bg" });
   const html = renderReactPublicBody(en);
 
   assert.equal(en.body.guides.label, "Buyer guides");
+  assert.equal(bg.body.guides.label, "Ръководства за купувачи");
   assert.deepEqual(
     en.body.guides.links.map((guide) => guide.href).sort(),
     ["/en/guides/buying-process", "/en/guides/foreign-buyers"],
@@ -499,12 +649,14 @@ test("English home makes every approved buyer guide discoverable without expandi
   assert.match(html, /href="\/en\/guides\/buying-process"/);
   assert.match(html, /href="\/en\/guides\/foreign-buyers"/);
   assert.match(html, /Foreign buyers and Bulgarian land ownership/);
+  assert.equal(en.body.locations.some((location) => location.path === "/en/locations/sandanski"), true);
   assert.equal((html.match(/data-mobile-task="/g) || []).length, 5);
 });
 
-test("location page exposes only indexable locale inventory", () => {
+test("location page keeps reviewed inventory indexable and serves source fallback without a soft 404", () => {
   const he = renderLocationPage({ registry, listings, localeCode: "he", location: "Sandanski" });
-  const missing = renderLocationPage({ registry, listings, localeCode: "he", location: "Petrich" });
+  const fallback = renderLocationPage({ registry, listings, localeCode: "he", location: "Petrich" });
+  const englishFallback = renderLocationPage({ registry, listings, localeCode: "en", location: "Sandanski" });
   const html = renderReactPublicBody(he);
 
   assert.equal(he.status, 200);
@@ -520,12 +672,69 @@ test("location page exposes only indexable locale inventory", () => {
   assert.equal(he.metadata.title, "נכסים ב-סנדנסקי | MS Realty");
   assert.match(he.metadata.description, /נכסים שנבדקו/);
   assert.match(html, /data-mobile-task="buy" data-active="true" aria-current="page"/);
-  assert.equal(missing.status, 404);
-  assert.equal(missing.indexable, false);
-  assert.equal(missing.metadata.robots, "noindex,follow");
-  const missingHtml = renderReactPublicBody(missing);
-  assert.match(missingHtml, /data-location-empty="true"/);
-  assert.match(missingHtml, /href="\/he\/search"/);
+  assert.equal(fallback.status, 200);
+  assert.equal(fallback.indexable, false);
+  assert.equal(fallback.cards.length > 0, true);
+  assert.equal(fallback.cards.every((card) => card.translation_indexable === false), true);
+  assert.equal(fallback.metadata.robots, "noindex,follow");
+  assert.equal(englishFallback.status, 200);
+  assert.equal(englishFallback.indexable, false);
+  assert.equal(englishFallback.cards.length > 0, true);
+  assert.equal(englishFallback.metadata.robots, "noindex,follow");
+});
+
+test("reviewed settlement search is exact and curated location pages exclude held or foreign inventory", () => {
+  const polenitsa = findListingById(listings, "MS-CRAWL-0033");
+  const greek = findListingById(listings, "MS-CRAWL-0072");
+  const held = findListingById(listings, "MS-CRAWL-0143");
+  const search = renderSearchPage({ registry, listings, localeCode: "bg", filters: { location: "Поленица" }, pageSize: null });
+  const sandanski = renderLocationPage({ registry, listings: [polenitsa, greek, held], localeCode: "bg", location: "Sandanski" });
+
+  assert.ok(search.cards.some((card) => card.id === "MS-CRAWL-0033"));
+  assert.ok(search.cards.every((card) => card.location === "Поленица"));
+  assert.equal(sandanski.status, 200);
+  assert.equal(sandanski.body.listing_count, 1);
+  assert.deepEqual(sandanski.cards.map((card) => card.id), ["MS-CRAWL-0033"]);
+});
+
+test("Bulgarian locations expose only their approved source-bound context", () => {
+  const bg = renderLocationPage({ registry, listings, localeCode: "bg", location: "Sandanski" });
+  const ru = renderLocationPage({ registry, listings, localeCode: "ru", location: "Sandanski" });
+  const hotovo = renderLocationPage({ registry, listings, localeCode: "bg", location: "Hotovo" });
+  const petrich = renderLocationPage({ registry, listings, localeCode: "bg", location: "Petrich" });
+  const html = renderReactPublicBody(bg);
+
+  assert.deepEqual(bg.body.context, {
+    href: "/bg/guides/proverka-na-imot-sandanski",
+    title: "Сандански: официални източници при проверка на имот",
+    summary: "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
+  });
+  assert.equal(
+    bg.metadata.description,
+    "Проверени обяви на MS Realty в Сандански и официални източници за кадастър, Имотен регистър и удостоверения.",
+  );
+  assert.equal("context" in ru.body, false);
+  assert.deepEqual(hotovo.body.context, {
+    href: "/bg/guides/hotovo-obstinski-kontekst",
+    title: "Хотово: официален контекст за населеното място",
+    summary: "Община Сандански посочва, че с. Хотово е разположено в западното подножие на Среден Пирин.",
+  });
+  assert.equal(
+    hotovo.metadata.description,
+    "Проверени обяви на MS Realty в Хотово. Община Сандански посочва, че селото е в западното подножие на Среден Пирин.",
+  );
+  assert.deepEqual(petrich.body.context, {
+    href: "/bg/guides/petrich-obstinski-kontekst",
+    title: "Петрич: официален контекст за общината",
+    summary: "Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина и обхваща части от Беласица, Огражден и южните склонове на Пирин.",
+  });
+  assert.equal(
+    petrich.metadata.description,
+    "Проверени обяви на MS Realty в Петрич. Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина.",
+  );
+  assert.match(html, /data-location-context="true"/);
+  assert.match(html, /href="\/bg\/guides\/proverka-na-imot-sandanski"/);
+  assert.doesNotMatch(renderReactPublicBody(ru), /data-location-context="true"/);
 });
 
 test("seller valuation page is locale-prefixed and posts seller leads", () => {
@@ -548,6 +757,7 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
 test("contact callback page is locale-prefixed and posts generic CRM leads", () => {
   const he = renderContactPage({ registry, localeCode: "he" });
   const el = renderContactPage({ registry, localeCode: "el" });
+  const bg = renderContactPage({ registry, localeCode: "bg" });
   const fr = renderContactPage({ registry, localeCode: "fr" });
 
   assert.equal(he.status, 200);
@@ -563,6 +773,10 @@ test("contact callback page is locale-prefixed and posts generic CRM leads", () 
   assert.equal(he.hreflang.some((link) => link.hreflang === "he"), true);
   assert.equal(el.path, "/el/epikoinonia");
   assert.equal(el.body.callback.label, "Επανάκληση");
+  assert.equal(
+    bg.body.intro,
+    "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty. За обратно обаждане посочете име, телефон и предпочитано време.",
+  );
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
 });
@@ -585,6 +799,54 @@ test("approved CMS guide page renders reviewed foreign-buyer facts", () => {
   assert.match(html, /data-guide-trust="approved"/);
   assert.match(html, /data-primary-guide-section="true" aria-label="Foreign buyers and Bulgarian land ownership"/);
   assert.doesNotMatch(html, /<h2>Foreign buyers and Bulgarian land ownership<\/h2>/);
+});
+
+test("source-bound Bulgarian guide renders official citations without a machine translation", () => {
+  const path = "/bg/guides/proverka-na-imot-sandanski";
+  const guide = renderGuidePage({
+    registry,
+    localeCode: "bg",
+    path,
+    documents: approvedContentDocumentsForPath(readApprovedCmsContent(), path),
+  });
+  const html = renderReactPublicBody(guide);
+
+  assert.equal(guide.status, 200);
+  assert.equal(guide.indexable, true);
+  assert.equal(guide.body.sections[0].sources.length, 3);
+  assert.equal(
+    guide.metadata.description,
+    "Порталът KAIS предоставя справки по кадастралната карта и регистрите и заявления за кадастрални услуги.",
+  );
+  assert.match(html, /data-guide-sources="true"/);
+  assert.match(html, /https:\/\/kais\.cadastre\.bg\//);
+  assert.match(html, /Официални източници/);
+  assert.equal(
+    renderGuidePage({
+      registry,
+      localeCode: "en",
+      path: "/en/guides/proverka-na-imot-sandanski",
+      documents: approvedContentDocumentsForPath(readApprovedCmsContent(), "/en/guides/proverka-na-imot-sandanski"),
+    }).status,
+    404,
+  );
+});
+
+test("buying-process guide retains its Registry Agency citation", () => {
+  const path = "/en/guides/buying-process";
+  const guide = renderGuidePage({
+    registry,
+    localeCode: "en",
+    path,
+    documents: approvedContentDocumentsForPath(readApprovedCmsContent(), path),
+  });
+  const html = renderReactPublicBody(guide);
+
+  assert.equal(guide.status, 200);
+  assert.equal(guide.body.sections[0].sources.length, 1);
+  assert.match(html, /data-guide-sources="true"/);
+  assert.match(html, /https:\/\/portal\.registryagency\.bg\/en\/home-pr/);
+  assert.match(html, /Official sources/);
 });
 
 test("admin CRM/CMS shell is available only in BG, RU, and EN", () => {

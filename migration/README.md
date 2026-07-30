@@ -40,3 +40,14 @@ This writes:
 - `production/data/migration.sqlite`
 - `production/data/migration-db-summary.json`
 - `production/data/migration-review-dashboard.json`
+
+Capture source body text separately, without publishing or approving it:
+
+```bash
+python3 migration/capture_content.py
+```
+
+This creates a new `migration/content-evidence/<timestamp>/` directory with a
+robots-respecting `content-inventory.jsonl`, an explicit skip report, and a
+SHA-256 manifest. It never overwrites a non-empty evidence directory and does
+not change the existing migration baseline or public content.

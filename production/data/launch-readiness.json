@@ -14,7 +14,11 @@
   "warnings": [
     {
       "id": "structured_data.missing_area",
-      "count": 167
+      "count": 166
+    },
+    {
+      "id": "structured_data.missing_bedrooms",
+      "count": 81
     },
     {
       "id": "structured_data.missing_public_images",
@@ -96,19 +100,19 @@
       "evidence": {
         "listings": 165,
         "home_pages": 7,
-        "listing_entries": 167,
-        "location_pages": 7,
+        "listing_entries": 166,
+        "location_pages": 6,
         "seller_pages": 7,
         "contact_pages": 7,
-        "guide_pages": 2,
-        "entries": 197,
+        "guide_pages": 5,
+        "entries": 198,
         "byLocale": {
-          "bg": 119,
+          "bg": 122,
           "en": 5,
           "de": 3,
           "nl": 3,
           "ru": 57,
-          "el": 5,
+          "el": 3,
           "he": 5
         }
       }
@@ -119,21 +123,20 @@
       "message": "Schema can pass while content warnings remain separate.",
       "evidence": {
         "generated_at": "2026-07-05T00:00:00Z",
-        "listing_entries": 167,
-        "guide_entries": 2,
+        "listing_entries": 166,
+        "guide_entries": 5,
         "failing_entries": 0,
         "entries_with_offer": 135,
         "warnings": {
           "missing_location": 0,
           "missing_price": 0,
-          "missing_area": 167,
-          "missing_bedrooms": 0,
+          "missing_area": 166,
+          "missing_bedrooms": 81,
           "missing_public_images": 4,
           "media_review_pending": 0
         },
         "by_locale": {
-          "bg": 113,
-          "el": 1,
+          "bg": 116,
           "he": 1,
           "ru": 52,
           "en": 2
@@ -152,7 +155,7 @@
           "taxonomy": 146,
           "listing": 165
         },
-        "urls_with_any_evidence": 3,
+        "urls_with_any_evidence": 4,
         "missing_required_sources": [
           "search_console",
           "yandex_webmaster",
@@ -160,15 +163,15 @@
         ],
         "privacy_events": {
           "source": "privacy_events",
-          "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
+          "input_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/events.jsonl",
           "status": "imported",
-          "row_count": 65,
-          "matched_rows": 29,
-          "unmatched_rows": 36
+          "row_count": 87,
+          "matched_rows": 42,
+          "unmatched_rows": 45
         },
         "analytics_export": {
           "source": "analytics_export",
-          "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/analytics.csv",
+          "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/analytics.csv",
           "status": "missing_export",
           "row_count": 0,
           "matched_rows": 0,
@@ -182,7 +185,7 @@
         "sources": {
           "search_console": {
             "source": "search_console",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/search-console.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/search-console.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -195,7 +198,7 @@
           },
           "yandex_webmaster": {
             "source": "yandex_webmaster",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/yandex-webmaster.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/yandex-webmaster.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -208,7 +211,7 @@
           },
           "backlinks": {
             "source": "backlinks",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/backlinks.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/backlinks.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -221,7 +224,7 @@
           },
           "analytics_export": {
             "source": "analytics_export",
-            "input_path": "/Users/ivan/Code/MS-Realty/migration/external/seo/analytics.csv",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/migration/external/seo/analytics.csv",
             "status": "missing_export",
             "row_count": 0,
             "matched_rows": 0,
@@ -234,11 +237,11 @@
           },
           "privacy_events": {
             "source": "privacy_events",
-            "input_path": "/Users/ivan/Code/MS-Realty/production/data/events.jsonl",
+            "input_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/events.jsonl",
             "status": "imported",
-            "row_count": 65,
-            "matched_rows": 29,
-            "unmatched_rows": 36
+            "row_count": 87,
+            "matched_rows": 42,
+            "unmatched_rows": 45
           }
         },
         "next_actions": [
@@ -258,7 +261,7 @@
       "message": "Human listing quality review CSV is required before launch.",
       "evidence": {
         "status": "missing_review",
-        "path": "/Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv",
+        "path": "/Users/ivan/Code/MS-Realty-content-audit/migration/reviews/listing-quality.csv",
         "summary": {
           "expected_review_rows": 165,
           "review_rows": 0,
@@ -470,22 +473,22 @@
           {
             "source": "typesense_meilisearch_sync",
             "status": "missing_report",
-            "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json"
+            "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json"
           },
           {
             "source": "typesense_meilisearch_query",
             "status": "missing_report",
-            "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json"
+            "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json"
           },
           {
             "source": "hermes_draft_worker",
             "status": "missing_report",
-            "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
+            "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json"
           }
         ],
         "provisioning": {
           "status": "blocked_report",
-          "path": "/Users/ivan/Code/MS-Realty/production/data/live-service-provisioning-report.json",
+          "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/live-service-provisioning-report.json",
           "summary": {
             "checks": 9,
             "missing_env": [
@@ -588,7 +591,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-25T08:37:50.444Z",
+              "generated_at": "2026-07-30T16:20:34.097Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,
@@ -685,7 +688,7 @@
       "message": "Payload runtime report must pass before final production readiness.",
       "evidence": {
         "status": "blocked_report",
-        "path": "/Users/ivan/Code/MS-Realty/production/data/payload-runtime-report.json",
+        "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/payload-runtime-report.json",
         "summary": {
           "admin_route": "/payload-admin",
           "checks": 9,
@@ -765,7 +768,7 @@
       "message": "Encrypted off-site backup and isolated production restore evidence are required before launch.",
       "evidence": {
         "status": "missing_report",
-        "path": "/Users/ivan/Code/MS-Realty/production/data/production-recovery-report.json"
+        "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/production-recovery-report.json"
       },
       "next_actions": [
         "Complete an encrypted off-site backup and isolated restore drill using production data stores.",
@@ -777,17 +780,17 @@
     {
       "source": "typesense_meilisearch_sync",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json"
     },
     {
       "source": "typesense_meilisearch_query",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json"
     },
     {
       "source": "hermes_draft_worker",
       "status": "missing_report",
-      "path": "/Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json"
+      "path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json"
     }
   ],
   "monitoring_plan": [

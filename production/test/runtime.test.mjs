@@ -2,8 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
-import { applyListingEdits } from "../lib/listing-edits.mjs";
+import { applyListingEdits, readListingEdits } from "../lib/listing-edits.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
+import { loadLegacyArchive, validateLegacyArchive } from "../lib/legacy-archive.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
   assertRuntimeSmoke,
@@ -25,9 +26,11 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   const seller = renderRuntimePath(registry, seed, "/he/sell");
   const contact = renderRuntimePath(registry, seed, "/he/contact");
   const guide = renderRuntimePath(registry, seed, "/en/guides/foreign-buyers");
+  const bgGuide = renderRuntimePath(registry, seed, "/bg/guides/proverka-na-imot-sandanski");
   const fr = renderRuntimePath(registry, seed, "/fr/");
   const missing = renderRuntimePath(registry, seed, "/he/properties/missing");
   const sourceLanguageRepair = renderRuntimePath(registry, seed, "/bg/imoti/MS-CRAWL-0006");
+  const sourceLanguageRecord = seed.records.find((record) => record.id === "MS-CRAWL-0006");
 
   assert.equal(he.status, 200);
   assert.equal(he.dir, "rtl");
@@ -66,14 +69,81 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(guide.body.sections.length, 2);
   assert.match(guide.body.sections[0].facts.join(" "), /Non-EU buyers cannot own Bulgarian land directly/);
   assert.equal(renderRuntimePath(registry, seed, "/he/guides/foreign-buyers").status, 404);
+  assert.equal(bgGuide.status, 200);
+  assert.equal(bgGuide.indexable, true);
+  assert.equal(bgGuide.body.sections[0].sources.length, 3);
+  assert.equal(renderRuntimePath(registry, seed, "/en/guides/proverka-na-imot-sandanski").status, 404);
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").kind, "location");
   assert.equal(renderRuntimePath(registry, seed, "/he/locations/sandanski").cards.length, 1);
-  assert.equal(renderRuntimePath(registry, seed, "/he/locations/petrich").status, 404);
+  const petrichFallback = renderRuntimePath(registry, seed, "/he/locations/petrich");
+  assert.equal(petrichFallback.status, 200);
+  assert.equal(petrichFallback.indexable, false);
+  assert.equal(petrichFallback.cards.length > 0, true);
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
   assert.equal(missing.status, 404);
   assert.equal(sourceLanguageRepair.metadata.title, "Дава под наем промишлена сграда в Сандански");
-  assert.equal(sourceLanguageRepair.body.description, "Дава под наем промишлена сграда в Сандански");
+  assert.equal(sourceLanguageRepair.body.description, sourceLanguageRecord.facts.description);
+});
+
+test("runtime renders only validated, source-faithful legacy archive entries", () => {
+  const archive = loadLegacyArchive();
+  const entry = archive.entries[0];
+  const missing = renderRuntimePath(registry, seed, "/archive/" + "f".repeat(64));
+  const uppercase = renderRuntimePath(registry, seed, `/archive/${entry.archive_id.toUpperCase()}`);
+
+  assert.equal(archive.entries.length, 108);
+  for (const archived of archive.entries) {
+    const page = renderRuntimePath(registry, seed, `/archive/${archived.archive_id}`);
+    assert.equal(page.status, 200, archived.source_url);
+    assert.equal(page.kind, "legacy_archive", archived.source_url);
+    assert.equal(page.path, `/archive/${archived.archive_id}`, archived.source_url);
+    assert.equal(page.canonical, page.path, archived.source_url);
+    assert.equal(page.indexable, false, archived.source_url);
+    assert.equal(page.metadata.robots, "noindex,nofollow", archived.source_url);
+    assert.deepEqual(page.hreflang, [], archived.source_url);
+    assert.equal(page.schema, null, archived.source_url);
+    assert.equal(page.body.text, archived.extracted_body_text, archived.source_url);
+    assert.equal(page.body.source.url, archived.source_url, archived.source_url);
+  }
+  assert.equal(missing.status, 404);
+  assert.equal(uppercase.status, 404);
+
+  assert.throws(
+    () => validateLegacyArchive({ ...archive, summary: { ...archive.summary, archive_rows: 1 }, entries: [{ ...entry, source_type: "taxonomy" }] }),
+    /invalid or untrusted/,
+  );
+  assert.throws(
+    () => validateLegacyArchive({ ...archive, summary: { ...archive.summary, archive_rows: 1 }, entries: [{ ...entry, content_scope: "document_text_fallback" }] }),
+    /invalid or untrusted/,
+  );
+  assert.throws(
+    () => validateLegacyArchive({ ...archive, summary: { ...archive.summary, archive_rows: 1 }, entries: [{ ...entry, extracted_body_text: "changed after capture" }] }),
+    /invalid or untrusted/,
+  );
+});
+
+test("runtime renders every second-batch source-reviewed listing description", () => {
+  const reviewedSeed = applyListingEdits(seed, readListingEdits());
+  const routes = {
+    "MS-CRAWL-0023": "/bg/imoti/MS-CRAWL-0023",
+    "MS-CRAWL-0080": "/bg/imoti/MS-CRAWL-0080",
+    "MS-CRAWL-0116": "/ru/properties/MS-CRAWL-0116",
+    "MS-CRAWL-0120": "/ru/properties/MS-CRAWL-0120",
+    "MS-CRAWL-0124": "/ru/properties/MS-CRAWL-0124",
+    "MS-CRAWL-0127": "/ru/properties/MS-CRAWL-0127",
+    "MS-CRAWL-0128": "/ru/properties/MS-CRAWL-0128",
+    "MS-CRAWL-0129": "/ru/properties/MS-CRAWL-0129",
+    "MS-CRAWL-0130": "/ru/properties/MS-CRAWL-0130",
+    "MS-CRAWL-0139": "/ru/properties/MS-CRAWL-0139",
+  };
+
+  for (const [listingId, route] of Object.entries(routes)) {
+    const record = reviewedSeed.records.find((candidate) => candidate.id === listingId);
+    const page = renderRuntimePath(registry, reviewedSeed, route);
+    assert.equal(page.status, 200, listingId);
+    assert.equal(page.body.description, record.facts.description, listingId);
+  }
 });
 
 test("runtime home uses a source-backed curated hero instead of crawler annotation media", () => {
@@ -114,6 +184,7 @@ test("runtime overlays approved 360 tour before public listing render", () => {
           panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
           accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
           reviewer: "media_editor",
+          reviewConfirmed: true,
         },
         "2026-07-05T00:00:00Z",
       ),

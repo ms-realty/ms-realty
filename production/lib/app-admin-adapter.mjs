@@ -1677,7 +1677,8 @@ function appendDealClose(input, config) {
 }
 
 function appendBrokerContactApproval(input, config) {
-  const contact = appendBrokerContact(createBrokerContact(input, { reviewedAt: config.reviewedAt }), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const contact = appendBrokerContact(createBrokerContact(attributed, { reviewedAt: config.reviewedAt }), {
     filePath: config.brokerContactLedgerPath,
   });
   recordAudit(
@@ -1694,7 +1695,8 @@ function appendBrokerContactApproval(input, config) {
 }
 
 function appendTourApprovalRow(input, config) {
-  const tour = appendTourApproval(createTourApproval(currentSeed(config), input, config.reviewedAt), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const tour = appendTourApproval(createTourApproval(currentSeed(config), attributed, config.reviewedAt), {
     filePath: config.tourApprovalLedgerPath,
   });
   recordAudit(
@@ -2089,7 +2091,7 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
 }
 
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
-  const principal = resolveAdminPrincipal(request.headers.get("authorization") || "");
+  const principal = config.adminPrincipal || resolveAdminPrincipal(request.headers.get("authorization") || "", config.authEnv || process.env);
   if (!principal) return adminUnauthorized();
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
   config = { ...config, adminPrincipal: principal };

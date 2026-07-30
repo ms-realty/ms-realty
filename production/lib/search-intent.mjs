@@ -110,6 +110,11 @@ export function normalizeSearchIntent(input = {}, { defaultLocale = "bg" } = {})
     has_approved_tour:
       input.has_approved_tour === true || input.has_approved_tour === "true" || input.has_approved_tour === "1" ? true : null,
     location_ids: [...new Set(values(input.location_ids || input.location_id || input.location))],
+    country_code: String(input.country_code || "").trim().toUpperCase() || null,
+    geography_id: String(input.geography_id || "").trim() || null,
+    region_id: String(input.region_id || "").trim() || null,
+    municipality: String(input.municipality || "").trim() || null,
+    district: String(input.district || "").trim() || null,
     map_bounds: mapBounds(input.map_bounds),
     radius: optionalNumber(input.radius, "radius"),
     sort: requiredEnum(input.sort || "recommended", SEARCH_SORTS, "sort") || "recommended",
@@ -144,6 +149,11 @@ export function searchIntentToQueryFilters(intent) {
   const normalized = normalizeSearchIntent(intent, { defaultLocale: intent.locale || "bg" });
   return {
     location: normalized.location_ids[0] || "",
+    country_code: normalized.country_code || "",
+    geography_id: normalized.geography_id || "",
+    region_id: normalized.region_id || "",
+    municipality: normalized.municipality || "",
+    district: normalized.district || "",
     property_family: normalized.property_families[0] || "",
     property_type: normalized.property_families[0] || "",
     offer_type: normalized.offer_type || "",
