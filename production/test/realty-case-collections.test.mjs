@@ -11,6 +11,7 @@ import { REQUIRED_PAYLOAD_COLLECTIONS } from "../lib/payload-runtime.mjs";
 
 const migrationPath = "migrations/20260730_142043_realty_case_persistence.ts";
 const mandateMigrationPath = "migrations/20260730_160000_realign_realty_case_mandate_projection.ts";
+const conditionMigrationPath = "migrations/20260730_170000_add_realty_case_conditions.ts";
 
 function collection(slug) {
   const result = REALTY_CASE_COLLECTIONS.find((item) => item.slug === slug);
@@ -30,13 +31,15 @@ test("RealtyCase Payload collections are registered as workspace-scoped durable 
 
   assert.deepEqual(REALTY_CASE_PAYLOAD_COLLECTION_SLUGS, [
     "realty_cases",
+    "realty_case_conditions",
+    "realty_case_condition_events",
     "realty_case_events",
     "realty_case_mandate_versions",
     "realty_case_evidence",
     "realty_case_outbox",
   ]);
   for (const slug of REALTY_CASE_PAYLOAD_COLLECTION_SLUGS) assert.ok(slugs.includes(slug));
-  assert.equal(REQUIRED_PAYLOAD_COLLECTIONS.length, 11);
+  assert.equal(REQUIRED_PAYLOAD_COLLECTIONS.length, 13);
   for (const slug of REQUIRED_PAYLOAD_COLLECTIONS) assert.ok(slugs.includes(slug));
 
   for (const slug of REALTY_CASE_PAYLOAD_COLLECTION_SLUGS) {
@@ -47,7 +50,7 @@ test("RealtyCase Payload collections are registered as workspace-scoped durable 
   }
 });
 
-test("RealtyCase snapshots, events, mandates, evidence, and outbox retain references instead of document content", () => {
+test("RealtyCase snapshots, conditions, events, mandates, evidence, and outbox retain references instead of document content", () => {
   const snapshot = field("realty_cases", "workflow_snapshot");
   assert.equal(snapshot.type, "json");
   assert.equal(snapshot.required, true);
@@ -67,6 +70,21 @@ test("RealtyCase snapshots, events, mandates, evidence, and outbox retain refere
   assert.equal(field("realty_case_evidence", "storage_ref").type, "text");
   assert.equal(field("realty_case_evidence", "metadata_refs").type, "json");
   assert.equal(field("realty_case_outbox", "payload_refs").type, "json");
+
+  const condition = collection("realty_case_conditions");
+  assert.equal(field("realty_case_conditions", "required_evidence_producer_refs").type, "json");
+  assert.equal(field("realty_case_conditions", "evidence_refs").type, "json");
+  assert.equal(field("realty_case_conditions", "last_event_sequence").type, "number");
+  assert.equal(field("realty_case_conditions", "last_event_at").type, "date");
+
+  const conditionEvent = collection("realty_case_condition_events");
+  assert.equal(conditionEvent.access.update(), false);
+  assert.equal(conditionEvent.access.delete(), false);
+  assert.equal(field("realty_case_condition_events", "condition").relationTo, "realty_case_conditions");
+  assert.equal(field("realty_case_condition_events", "sequence").type, "number");
+  assert.equal(field("realty_case_condition_events", "reference_payload").type, "json");
+  assert.equal(field("realty_case_condition_events", "payload_digest").required, true);
+  assert.equal(field("realty_case_condition_events", "idempotency_key").required, true);
 
   for (const item of REALTY_CASE_COLLECTIONS) {
     const names = item.fields.map((candidate) => candidate.name);
@@ -137,4 +155,32 @@ test("RealtyCase mandate migration preserves append-only idempotency across case
   assert.match(migration, /realty_case_mandates_workspace_idempotency_unique/);
   assert.match(migration, /UNIQUE \("workspace_id", "idempotency_key"\)/);
   assert.match(migration, /Cannot restore the legacy mandate uniqueness constraint/);
+});
+
+test("RealtyCase condition migration keeps projections mutable and condition events workspace-scoped, idempotent, and append-only", () => {
+  const migration = fs.readFileSync(conditionMigrationPath, "utf8");
+  const down = migration.slice(migration.indexOf("export async function down"));
+  const migrationIndex = fs.readFileSync("migrations/index.ts", "utf8");
+
+  assert.match(migrationIndex, /20260730_170000_add_realty_case_conditions/);
+  assert.match(migration, /CREATE TABLE "realty_case_conditions"/);
+  assert.match(migration, /CREATE TABLE "realty_case_condition_events"/);
+  assert.match(migration, /UNIQUE \("workspace_id", "case_id", "condition_id"\)/);
+  assert.match(migration, /UNIQUE \("workspace_id", "event_id"\)/);
+  assert.match(migration, /UNIQUE \("workspace_id", "idempotency_key"\)/);
+  assert.match(migration, /UNIQUE \("condition_id", "sequence"\)/);
+  assert.match(migration, /FOREIGN KEY \("case_id", "workspace_id"\) REFERENCES "public"\."realty_cases"\("id", "workspace_id"\)/);
+  assert.match(
+    migration,
+    /FOREIGN KEY \("condition_id", "workspace_id", "case_id"\) REFERENCES "public"\."realty_case_conditions"\("id", "workspace_id", "case_id"\)/,
+  );
+  assert.match(migration, /CREATE TRIGGER "realty_case_condition_events_append_only" BEFORE UPDATE OR DELETE/);
+  assert.ok(
+    down.indexOf('DROP TRIGGER "realty_case_condition_events_append_only"') < down.indexOf('DROP TABLE "realty_case_condition_events"'),
+    "rollback removes the immutable condition-event trigger before dropping its table",
+  );
+  assert.ok(
+    down.indexOf('DROP CONSTRAINT "payload_locked_rels_realty_case_condition_events_fk"') < down.indexOf('DROP TABLE "realty_case_condition_events"'),
+    "rollback removes Payload lock-table references before dropping condition events",
+  );
 });

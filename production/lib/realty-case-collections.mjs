@@ -4,6 +4,8 @@
 
 export const REALTY_CASE_PAYLOAD_COLLECTION_SLUGS = [
   "realty_cases",
+  "realty_case_conditions",
+  "realty_case_condition_events",
   "realty_case_events",
   "realty_case_mandate_versions",
   "realty_case_evidence",
@@ -22,6 +24,17 @@ export const REALTY_CASE_ACTIONS = [
   "case_closed",
   "case_cancelled",
 ];
+
+export const REALTY_CASE_CONDITION_ACTIONS = [
+  "condition_opened",
+  "condition_satisfied",
+  "condition_blocked",
+  "condition_expired",
+  "condition_waived",
+  "condition_reopened",
+];
+
+export const REALTY_CASE_CONDITION_STATUSES = ["open", "satisfied", "blocked", "expired", "waived"];
 
 const CASE_TYPES = [
   "buyer_purchase",
@@ -136,6 +149,55 @@ export const REALTY_CASE_COLLECTIONS = [
       { name: "last_event_id", type: "text", required: true, maxLength: 160 },
       { name: "last_event_action", type: "select", required: true, options: REALTY_CASE_ACTIONS },
       { name: "last_event_at", type: "date", required: true },
+    ],
+  },
+  {
+    slug: "realty_case_conditions",
+    admin: {
+      useAsTitle: "condition_id",
+      defaultColumns: ["workspace_id", "condition_id", "case", "condition_type", "status", "due_at"],
+    },
+    fields: [
+      workspaceField(),
+      { name: "case", type: "relationship", relationTo: "realty_cases", required: true },
+      { name: "condition_id", type: "text", required: true, index: true, maxLength: 160 },
+      { name: "condition_type", type: "text", required: true, maxLength: 120 },
+      { name: "due_at", type: "date", required: true },
+      referencePayloadField("required_evidence_producer_refs", { required: true }),
+      { name: "status", type: "select", required: true, defaultValue: "open", options: REALTY_CASE_CONDITION_STATUSES },
+      referencePayloadField("evidence_refs", { required: true }),
+      { name: "authority_ref", type: "text", maxLength: 240, admin: { description: "Reference only." } },
+      { name: "reason_code", type: "text", maxLength: 160 },
+      { name: "last_event_sequence", type: "number", required: true, defaultValue: 1, min: 1 },
+      { name: "last_event_id", type: "text", required: true, maxLength: 600 },
+      { name: "last_event_action", type: "select", required: true, options: REALTY_CASE_CONDITION_ACTIONS },
+      { name: "last_event_at", type: "date", required: true },
+      { name: "last_actor_ref", type: "text", required: true, maxLength: 160, admin: { description: "Reference only." } },
+    ],
+  },
+  {
+    slug: "realty_case_condition_events",
+    admin: {
+      useAsTitle: "event_id",
+      defaultColumns: ["workspace_id", "event_id", "case", "condition", "action", "recorded_at"],
+    },
+    access: appendOnlyAccess(),
+    fields: [
+      workspaceField(),
+      { name: "case", type: "relationship", relationTo: "realty_cases", required: true },
+      { name: "condition", type: "relationship", relationTo: "realty_case_conditions", required: true },
+      { name: "event_id", type: "text", required: true, index: true, maxLength: 600 },
+      { name: "sequence", type: "number", required: true, min: 1 },
+      { name: "action", type: "select", required: true, options: REALTY_CASE_CONDITION_ACTIONS },
+      { name: "actor_ref", type: "text", required: true, maxLength: 160, admin: { description: "Reference only." } },
+      { name: "executor_kind", type: "select", required: true, options: ["human", "agent"] },
+      { name: "assurance_ref", type: "text", maxLength: 240, admin: { description: "Reference only." } },
+      { name: "authority_ref", type: "text", maxLength: 240, admin: { description: "Reference only." } },
+      { name: "reason_code", type: "text", maxLength: 160 },
+      referencePayloadField("reference_payload", { required: true }),
+      { name: "payload_digest", type: "text", required: true, maxLength: 160 },
+      { name: "idempotency_key", type: "text", required: true, index: true, maxLength: 600 },
+      { name: "recorded_at", type: "date", required: true },
     ],
   },
   {
