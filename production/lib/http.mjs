@@ -193,6 +193,7 @@ import {
   writeListingQualityReviewCsv,
 } from "./listing-quality.mjs";
 import { fromRoot } from "./paths.mjs";
+import { queryPublicSearch } from "./search-engine-sync.mjs";
 import { searchIntentToQueryFilters } from "./search-intent.mjs";
 import { normalizeSearchRequest } from "./search-request.mjs";
 import { buildSearchAnalyticsReport } from "./search-analytics.mjs";
@@ -266,6 +267,52 @@ function publicResponse(request, url, rendered) {
     return response(rendered.status || 200, renderHtmlPage(rendered, { bodyHtml: renderReactPublicBody(rendered) }), "text/html; charset=utf-8");
   }
   return json(rendered.status || 200, rendered);
+}
+
+function activeListingRecord(record) {
+  const status = String(record.facts?.listing_status || "available").trim().toLowerCase();
+  return record.collection === "listings" && ["available", "reserved"].includes(status);
+}
+
+function engineLocaleCodes(seed, registry, result) {
+  if (seed.records.some((record) => activeListingRecord(record) && record.source_locale === result.locale)) {
+    return [result.locale];
+  }
+  return [...new Set([result.search.fallback?.locale || registry.source_locale, registry.source_locale].filter(Boolean))];
+}
+
+function seedForSearchHits(seed, hits) {
+  const recordsById = new Map(
+    seed.records.filter((record) => record.collection === "listings").map((record) => [record.id, record]),
+  );
+  const seen = new Set();
+  const records = [];
+  for (const hit of hits) {
+    const id = String(hit.source_listing_id || "").trim();
+    const record = recordsById.get(id);
+    if (!record || seen.has(id)) continue;
+    seen.add(id);
+    records.push(record);
+  }
+  return { ...seed, records };
+}
+
+function withSearchBackend(result, engineResult) {
+  const backend = {
+    engine: engineResult.engine,
+    mode: engineResult.engine === "typesense" ? "primary" : engineResult.engine === "meilisearch" ? "fallback" : "local_fallback",
+    locale_codes: engineResult.locale_codes,
+    unavailable_engines: engineResult.unavailable_engines,
+  };
+  if (Number.isFinite(engineResult.total)) backend.indexed_matches = engineResult.total;
+  return {
+    ...result,
+    search: {
+      ...result.search,
+      engines: [engineResult.engine],
+      backend,
+    },
+  };
 }
 
 function adminHtml(page) {
@@ -555,6 +602,7 @@ export function createHttpApp({
   hermesReplyProvider = null,
   rateLimit = null,
   naturalLanguageSearchEnabled = process.env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
+  search = {},
 } = {}) {
   let activeRegistry = registry || loadLocaleRegistry(localeRegistryPath || undefined);
   const activeLegacyDecisions = redirects ?? loadLegacyRouteDecisions(deployableRedirectOutputPath || undefined);
@@ -940,6 +988,36 @@ export function createHttpApp({
           filePath: auditLogPath,
         })
       : null;
+  const productionSearch = String(search.environment ?? process.env.NODE_ENV ?? "").trim().toLowerCase() === "production";
+  const currentSearchResult = async (searchRequest, options = {}) => {
+    const { intent, query, filters, sort, page } = searchRequest;
+    const seedForRequest = currentSeed();
+    const translationTasks = currentTranslationTasks();
+    const searchOptions = { localeCode: intent.locale, query, filters, sort, page, translationTasks, ...options };
+    const localResult = searchRuntimeListings(activeRegistry, seedForRequest, searchOptions);
+    const engineResult = await queryPublicSearch({
+      ...search,
+      q: query,
+      intent,
+      localeCodes: engineLocaleCodes(seedForRequest, activeRegistry, localResult),
+    });
+    if (productionSearch && engineResult.engine === "seed_fallback") {
+      throw new Error("Production search requires a selected configured engine");
+    }
+    const result =
+      engineResult.engine === "seed_fallback"
+        ? localResult
+        : searchRuntimeListings(activeRegistry, seedForSearchHits(seedForRequest, engineResult.hits), searchOptions);
+    return withSearchBackend(result, engineResult);
+  };
+  const searchResultOrUnavailable = async (searchRequest, options) => {
+    try {
+      return { result: await currentSearchResult(searchRequest, options) };
+    } catch (error) {
+      if (!productionSearch) throw error;
+      return { response: json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" }) };
+    }
+  };
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
@@ -1071,17 +1149,11 @@ export function createHttpApp({
       } catch (error) {
         return json(400, { kind: "bad_request", message: error.message });
       }
+      const outcome = await searchResultOrUnavailable(searchRequest);
+      if (outcome.response) return outcome.response;
       const { intent, query, filters, sort, page } = searchRequest;
-      const localeCode = intent.locale;
-      const result = searchRuntimeListings(activeRegistry, currentSeed(), {
-        localeCode,
-        query,
-        filters,
-        sort,
-        page,
-        translationTasks: currentTranslationTasks(),
-      });
-      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort, page });
+      const result = outcome.result;
+      recordEvent({ type: "search", path: url.pathname, locale: intent.locale, query, filters, sort, page });
       return json(200, { ...result, search: { ...result.search, intent, natural_language: searchRequest.natural_language } });
     }
 
@@ -1102,21 +1174,10 @@ export function createHttpApp({
         }
         const { intent, query, filters, sort, page } = searchRequest;
         const savedView = url.searchParams.get("saved") === "1";
+        const outcome = await searchResultOrUnavailable(searchRequest, { pageSize: savedView ? null : 12, savedView });
+        if (outcome.response) return outcome.response;
         recordEvent({ type: "search", path: url.pathname, locale: intent.locale, query, filters, sort, page });
-        return publicResponse(
-          request,
-          url,
-          searchRuntimeListings(activeRegistry, currentSeed(), {
-            localeCode: intent.locale,
-            query,
-            filters,
-            sort,
-            page,
-            pageSize: savedView ? null : 12,
-            savedView,
-            translationTasks: currentTranslationTasks(),
-          }),
-        );
+        return publicResponse(request, url, outcome.result);
       }
     }
 
