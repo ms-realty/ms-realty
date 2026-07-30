@@ -215,7 +215,7 @@ function SiteHeader({ chrome }) {
 }
 
 function MobileTaskNavigation({ page, chrome }) {
-  if (page.kind === "listing") return null;
+  if (page.kind === "listing" || page.kind === "seller") return null;
   const labels = uiLabels(page);
   const buy = chrome.nav.find((item) => item.id === "buy");
   const savedView = page.search?.saved_view === true;

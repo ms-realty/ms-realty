@@ -792,6 +792,7 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
   assert.match(html, /data-seller-summary="property.location"/);
   assert.match(html, /data-no-public-avm="true"/);
   assert.match(html, /data-broker-review-required="true"/);
+  assert.doesNotMatch(html, /data-mobile-task-navigation="true"/);
 });
 
 test("contact callback page is locale-prefixed and posts generic CRM leads", () => {
