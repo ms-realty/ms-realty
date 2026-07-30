@@ -225,8 +225,8 @@ test("case request projection is opt-in, case-scoped, and retryable from the aut
       }),
       { config: missingWorkspaceConfig },
     );
-    assert.equal(rejected.status, 400);
-    assert.match((await rejected.json()).message, /MS_REALTY_WORKSPACE_ID/);
+    assert.equal(rejected.status, 503);
+    assert.deepEqual(await rejected.json(), { kind: "realty_case_projection_unavailable", source_recorded: false });
     assert.equal(fs.readFileSync(missingWorkspaceLedgerPath, "utf8"), "");
 
     const missingRuntimeLedgerPath = tempLedger("admin-cases-projection-missing-runtime");
@@ -245,8 +245,8 @@ test("case request projection is opt-in, case-scoped, and retryable from the aut
       }),
       { config: missingRuntimeConfig },
     );
-    assert.equal(missingRuntime.status, 400);
-    assert.match((await missingRuntime.json()).message, /PAYLOAD_SECRET and DATABASE_URL/);
+    assert.equal(missingRuntime.status, 503);
+    assert.deepEqual(await missingRuntime.json(), { kind: "realty_case_projection_unavailable", source_recorded: false });
     assert.equal(fs.readFileSync(missingRuntimeLedgerPath, "utf8"), "");
 
     const ledgerPath = tempLedger("admin-cases-projection");
@@ -326,6 +326,27 @@ test("case request projection is opt-in, case-scoped, and retryable from the aut
     assert.equal((await advanced.json()).projection.status, "projected");
     assert.equal(projected.length, 2);
     assert.equal(projected[1].collections.realty_case_events.length, 2);
+
+    const formAdvanced = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/cases/actions", {
+        method: "POST",
+        headers: { ...auth.human, "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          id: "projection-autonomous-requirements-brief-1",
+          caseId: "projection-autonomous",
+          action: "step_completed",
+          stepKey: "requirements_brief",
+          evidenceRef: "projection-requirements-brief-1",
+          evidenceType: "requirements_brief_record",
+          evidenceProducerKind: "client",
+        }).toString(),
+      }),
+      { config },
+    );
+    assert.equal(formAdvanced.status, 201);
+    assert.equal((await formAdvanced.json()).projection.status, "projected");
+    assert.equal(projected.length, 3);
+    assert.equal(projected[2].collections.realty_case_events.length, 3);
 
     let retryProjection = false;
     const pendingLedgerPath = tempLedger("admin-cases-projection-pending");

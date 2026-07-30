@@ -2653,6 +2653,7 @@ export function createHttpApp({
         }
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) return adminJson(503, realtyCaseRequestProjectionFailure());
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
@@ -2706,6 +2707,7 @@ export function createHttpApp({
         }
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) return adminJson(503, realtyCaseRequestProjectionFailure());
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }

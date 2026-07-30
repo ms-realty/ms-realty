@@ -697,7 +697,8 @@ Configuration:
   `MS_REALTY_WORKSPACE_ID`, `PAYLOAD_SECRET`, and `DATABASE_URL`; it projects only that case after
   its ledger append. Case actions require a caller-supplied stable `id`, and client workspace fields
   are rejected. A failed immediate projection returns `503` with only the recorded case/event
-  references; there is no durable projection queue, so retry the scoped projector CLI from the ledger.
+  references; missing projection configuration also returns a reference-free `503` before a ledger
+  write. There is no durable projection queue, so retry the scoped projector CLI from the ledger.
 - `MS_REALTY_CASE_READBACK_DATABASE_URL`: required PostgreSQL connection URL for `case:reconcile`;
   use a dedicated SELECT-only role, never a migration or write-capable operator connection.
 - `PAYLOAD_SECRET` and `NODE_ENV=production`: required for `case:reconcile`; both belong in the

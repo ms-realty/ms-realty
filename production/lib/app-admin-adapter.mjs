@@ -2611,6 +2611,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         result = openRealtyCaseEntry(input, config);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) return jsonResponse(503, realtyCaseRequestProjectionFailure());
         return jsonResponse(400, { kind: "bad_request", message: error.message });
       }
       try {
@@ -2628,6 +2629,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
         result = appendRealtyCaseActionEntry(input, config);
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        if (error.status === 503) return jsonResponse(503, realtyCaseRequestProjectionFailure());
         return jsonResponse(400, { kind: "bad_request", message: error.message });
       }
       try {

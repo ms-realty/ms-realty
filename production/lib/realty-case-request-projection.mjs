@@ -8,6 +8,12 @@ function requiredText(value, label, max = 160) {
   return text;
 }
 
+function unavailableError(message) {
+  const error = new Error(message);
+  error.status = 503;
+  return error;
+}
+
 export function realtyCaseRequestProjectionConfigFromEnv(env = process.env) {
   return {
     realtyCaseRequestProjectionEnabled: env.MS_REALTY_CASE_REQUEST_PROJECTION_ENABLED === "true",
@@ -23,9 +29,11 @@ export function assertRealtyCaseRequestProjectionConfig({
   realtyCasePayloadRuntimeConfigured = false,
 } = {}) {
   if (!realtyCaseRequestProjectionEnabled) return false;
-  requiredText(realtyCaseWorkspaceId, "MS_REALTY_WORKSPACE_ID");
+  if (!String(realtyCaseWorkspaceId || "").trim()) {
+    throw unavailableError("Request-time case projection requires MS_REALTY_WORKSPACE_ID");
+  }
   if (typeof realtyCasePayloadProjector !== "function" && !realtyCasePayloadRuntimeConfigured) {
-    throw new Error("Request-time case projection requires PAYLOAD_SECRET and DATABASE_URL");
+    throw unavailableError("Request-time case projection requires PAYLOAD_SECRET and DATABASE_URL");
   }
   return true;
 }
@@ -41,11 +49,15 @@ export function assertRealtyCaseRequestProjectionInput(input, { action = false }
 }
 
 export function realtyCaseRequestProjectionFailure(result) {
-  return {
+  const failure = {
     kind: "realty_case_projection_unavailable",
-    source_recorded: true,
-    case_id: requiredText(result?.case?.id, "Realty case id"),
-    event_id: requiredText(result?.event?.id, "Realty case event id"),
+    source_recorded: Boolean(result),
+  };
+  if (!result) return failure;
+  return {
+    ...failure,
+    case_id: requiredText(result.case?.id, "Realty case id"),
+    event_id: requiredText(result.event?.id, "Realty case event id"),
   };
 }
 
