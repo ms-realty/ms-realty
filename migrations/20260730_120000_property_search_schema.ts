@@ -1,4 +1,4 @@
-import { MigrateDownArgs, MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+import { sql, type MigrateDownArgs, type MigrateUpArgs } from '@payloadcms/db-postgres'
 
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
@@ -16,8 +16,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
 
     CREATE TABLE "locations" (
       "id" varchar PRIMARY KEY NOT NULL,
-      "label" varchar,
-      "public_location_precision" "enum_locations_public_location_precision",
+      "label" varchar NOT NULL,
+      "public_location_precision" "enum_locations_public_location_precision" NOT NULL,
       "internal_latitude" numeric,
       "internal_longitude" numeric,
       "public_latitude" numeric,
@@ -31,8 +31,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
       "location_id" varchar,
       "property_family" "enum_properties_property_family",
       "property_subtype" varchar,
-      "taxonomy_mapping_version" varchar,
-      "taxonomy_review_status" "enum_properties_taxonomy_review_status",
+      "taxonomy_mapping_version" varchar NOT NULL,
+      "taxonomy_review_status" "enum_properties_taxonomy_review_status" NOT NULL,
       "facts_legacy_property_type" varchar,
       "facts_condition" varchar,
       "facts_construction_status" varchar,
@@ -57,7 +57,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
       "facts_public_location_precision" varchar,
       "facts_primary_area_sqm" numeric,
       "zero_value_audit" jsonb,
-      "legacy_listing_id" varchar,
+      "legacy_listing_id" varchar NOT NULL,
       "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
       "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
     );
@@ -66,8 +66,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
       "_order" integer NOT NULL,
       "_parent_id" varchar NOT NULL,
       "id" varchar PRIMARY KEY NOT NULL,
-      "field" varchar,
-      "state" "enum_properties_fact_verification_state",
+      "field" varchar NOT NULL,
+      "state" "enum_properties_fact_verification_state" NOT NULL,
       "source_type" varchar,
       "source_reference" varchar
     );
@@ -76,11 +76,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
       "id" varchar PRIMARY KEY NOT NULL,
       "listing_id" varchar,
       "property_id" varchar,
-      "task_type" "enum_listing_enrichment_tasks_task_type",
-      "task_state" "enum_listing_enrichment_tasks_task_state",
-      "idempotency_key" varchar,
+      "task_type" "enum_listing_enrichment_tasks_task_type" NOT NULL,
+      "task_state" "enum_listing_enrichment_tasks_task_state" NOT NULL,
+      "idempotency_key" varchar NOT NULL,
       "fact_fields" jsonb,
-      "source" "enum_listing_enrichment_tasks_source",
+      "source" "enum_listing_enrichment_tasks_source" NOT NULL,
       "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
       "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
     );
@@ -88,11 +88,11 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
     CREATE TABLE "search_outbox" (
       "id" varchar PRIMARY KEY NOT NULL,
       "listing_id" varchar,
-      "event_type" "enum_search_outbox_event_type",
-      "outbox_state" "enum_search_outbox_outbox_state",
-      "idempotency_key" varchar,
-      "payload" jsonb,
-      "attempts" numeric DEFAULT 0,
+      "event_type" "enum_search_outbox_event_type" NOT NULL,
+      "outbox_state" "enum_search_outbox_outbox_state" NOT NULL,
+      "idempotency_key" varchar NOT NULL,
+      "payload" jsonb NOT NULL,
+      "attempts" numeric DEFAULT 0 NOT NULL,
       "last_error" varchar,
       "updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
       "created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
@@ -426,8 +426,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
     ALTER TABLE "_listings_v" ADD CONSTRAINT "_listings_v_version_location_id_locations_id_fk" FOREIGN KEY ("version_location_id") REFERENCES "public"."locations"("id") ON DELETE set null ON UPDATE no action;
     ALTER TABLE "listing_translations" ADD CONSTRAINT "listing_translations_listing_id_listings_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."listings"("id") ON DELETE set null ON UPDATE no action;
     ALTER TABLE "_listing_translations_v" ADD CONSTRAINT "_listing_translations_v_version_listing_id_listings_id_fk" FOREIGN KEY ("version_listing_id") REFERENCES "public"."listings"("id") ON DELETE set null ON UPDATE no action;
-    ALTER TABLE "listing_enrichment_tasks" ADD CONSTRAINT "listing_enrichment_tasks_listing_id_listings_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."listings"("id") ON DELETE cascade ON UPDATE no action;
-    ALTER TABLE "listing_enrichment_tasks" ADD CONSTRAINT "listing_enrichment_tasks_property_id_properties_id_fk" FOREIGN KEY ("property_id") REFERENCES "public"."properties"("id") ON DELETE cascade ON UPDATE no action;
+    ALTER TABLE "listing_enrichment_tasks" ADD CONSTRAINT "listing_enrichment_tasks_listing_id_listings_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."listings"("id") ON DELETE set null ON UPDATE no action;
+    ALTER TABLE "listing_enrichment_tasks" ADD CONSTRAINT "listing_enrichment_tasks_property_id_properties_id_fk" FOREIGN KEY ("property_id") REFERENCES "public"."properties"("id") ON DELETE set null ON UPDATE no action;
     ALTER TABLE "search_outbox" ADD CONSTRAINT "search_outbox_listing_id_listings_id_fk" FOREIGN KEY ("listing_id") REFERENCES "public"."listings"("id") ON DELETE set null ON UPDATE no action;
 
     CREATE UNIQUE INDEX "locations_label_idx" ON "locations" USING btree ("label");
