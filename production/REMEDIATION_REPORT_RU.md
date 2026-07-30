@@ -1,95 +1,148 @@
-# Отчёт об исправлениях и технической проверке MS Realty
+# Отчёт об исправлениях и полной технической проверке MS Realty
 
-**Дата:** 29 июля 2026 г.
-**Ветка проверки:** codex/ms-realty-content-audit
-**Статус:** технический цикл исправлений завершён локально; production запуск всё ещё
-заблокирован только перечисленными в конце внешними доказательствами и решениями.
+**Дата:** 30 июля 2026 г.
 
-Этот документ перечисляет все дефекты, исправленные в данном цикле. Он не называет
-«исправленным» то, что требует реального production-доступа, ручной проверки фактов
-объектов или решения владельца контента.
+**Ветка:** `codex/ms-realty-content-audit`
 
-## Исправленные дефекты
+**Источник сайта:** новый код в текущем workspace; WordPress используется только как
+источник опубликованного legacy-контента для миграции и после переноса не требуется.
 
-| № | Дефект и причина | Исправление | Доказательство |
+## Текущий доказанный статус
+
+- Production build Next.js: **успешно**.
+- Полный автоматизированный regression suite: **545 passed, 0 failed**.
+- Полный генерационный и launch-evidence pipeline `npm run validate`: **успешно**.
+- Проверены **205** текущих public routes: 198 sitemap routes и 7 utility search routes.
+- Проверены **108 из 108** сохранённых legacy archive pages.
+- Реестр географии содержит **26 775** официальных территориальных записей.
+- Launch authority остаётся `blocked`: код собирается и тестируется, но семь внешних
+  production gates ещё не подтверждены.
+- Текущий live visual audit через запрошенный Browser plugin не выполнен: transport
+  закрывается до page discovery с ошибкой `Transport closed`. Поэтому этот отчёт не
+  называет интерфейс «pixel perfect» без последнего реального browser pass.
+
+## Исправленные ошибки и пробелы
+
+| № | Было | Исправлено | Проверка |
 | --- | --- | --- | --- |
-| 1 | В гайде была неверная ссылка на официальный источник Агентства по вписванията. | Источник заменён на проверенный официальный URL, без изменения смысла гайда. | a0f995f; unit tests контента. |
-| 2 | Описания объектов частично опирались на устаревший review overlay вместо сохранённого первоисточника миграции. | Восстановлены source-verified описания, audit overlay сохранён отдельно; не удалены исходные данные. | e6aab3c; тесты runtime и description review. |
-| 3 | Metadata страницы с одним гайдом обрезалась как будто это длинный список. | Общий генератор metadata выбирает полное описание, если страница содержит один guide. | 6aa82e7; public-site test. |
-| 4 | Локальный текст локации и контакта был недостаточно точен для Болгарии и иностранного покупателя. | Уточнены нейтральные factual copy и контактный route без добавления неподтверждённых обещаний. | 20beebe; public-site tests. |
-| 5 | Для локализованных location routes fallback мог вести на неверный результат. | Fallback теперь сохраняет locale и корректно выдаёт noindex/404, если пары locale/location нет. | 6ce900b; route manifest, runtime и public-site tests. |
-| 6 | География части объектов хранилась как свободный текст, что мешало проверке и поиску. | Добавлены reviewed страна, NSI municipality и settlement, обновлены CMS seed, sitemap и search documents. | b438c27; CMS/runtime/SEO/search tests. |
-| 7 | Не было безопасного connector surface для ChatGPT/Codex. | Добавлен /mcp: public discovery + строго role-bound staff tools, input validation, origin protection, no-store и audit. | 73c2964; MCP tests и Node-server parity. |
-| 8 | На узком мобильном экране ошибка 360 viewer могла скрыть весь блок медиа; управление галереей не имело полноценной keyboard/focus поддержки. | Сохранён gallery fallback, добавлены 44px controls, Arrow/Home/End, reduced-motion и видимый focus; static HTML корректно передаёт tabindex. | ad016b0; photo-sphere, public-site, app-route и мобильные проверки. |
-| 9 | В мобильной галерее отображалась строка вида undefined фото: использовались неверные ключи локализации. | Кнопки получили правильные locale labels во всех поддерживаемых языках. | 1b391c0; regression test. |
-| 10 | Staff не мог выполнять ограниченное content-редактирование через MCP. | Добавлены очередь контента, allowlisted text patch и bulk status update с обязательным подтверждением; tool не может публиковать или менять approval. | 2219e7c; MCP tests. |
-| 11 | Public approval flow позволял передать имя reviewer в запросе вместо привязки к authenticated operator; tour мог обходить явное подтверждение. | Reviewer server-bound к identity, spoofing отклоняется, для тура обязателен reviewConfirmed, audit остаётся append-only. | 8353416; admin/http/tour/runtime regression tests. |
-| 12 | Поиск не имел проверяемой территориальной грани, а search-engine ответ мог быть неполным из-за лимита hits. | Добавлен фильтр «Муниципалитет» на базе reviewed NSI данных; при неполном engine result UI использует полный безопасный локальный результат. | e65840d; app API, public site, search-engine tests. |
-| 13 | Полный test suite ожидал старое описание и не отправлял новое обязательное подтверждение тура. | Smoke fixtures приведены к источнику правды и новому approval contract. | e652d50; полный suite снова проходит. |
-| 14 | next build затягивал migration evidence runtime paths в server trace и выдавал warning, раздувая deployment trace. | Runtime-mounted evidence paths исключены из build tracing, при этом testable runtime behaviour сохранено. | 839f3ac; next:build проходит без этого warning. |
-| 15 | В архитектурном документе сохранялся старый fallback через OpenRouter, противоречащий текущей policy. | OpenRouter и внешние model aggregators исключены; при недоступности private Hermes optional drafting fail-closed, deterministic workflows остаются доступны. | Текущий документальный checkpoint; SOURCE_OF_TRUTH.md §11. |
-| 16 | Кнопка «Сохранить объект» показывала успех даже при отказе localStorage: ошибка записи подавлялась, а UI обновлялся без read-back. | writeSaved возвращает успех только после безопасной записи и точного read-back; при ошибке остаётся фактическое состояние и показывается toast. | public-client-saved-listing.test.mjs; normal и forced-failure browser path. |
-| 17 | Skip link менял #main, но main не был focusable; после Enter клавиатурный пользователь возвращался к началу документа. | Все public main landmarks получили tabindex=-1; click handler сохраняет нативную fragment-навигацию и переносит focus с preventScroll. | Client regression test; реальный Tab → Enter на 360px: #main, active element MAIN#main. |
-| 18 | После усиления tour approval два executable smoke fixture продолжали посылать старый request без reviewConfirmed, поэтому полный release validation ломался на HTTP/Node smoke. | Оба fixture явно моделируют подтверждённый human review; endpoint по-прежнему отклоняет неполные запросы. | npm run http:build, npm run server:smoke, полный npm run validate. |
-| 19 | Mobile filter live preview на каждое изменение загружал целую HTML search page и парсил DOM только ради числа совпадений. | Preview использует уже существующий /api/search, передаёт locale из form action и читает только search.total_matches из JSON. | client/QA regression tests; локальный fixture: 20 654 B JSON против 143 840 B HTML при одинаковых 71 matches. |
+| 1 | Миграция могла потерять опубликованный текст, который не превращался в современную страницу. | Исходный контент сохранён отдельно от нового IA: 418 crawl rows учтены, 108 подходящих записей доступны как opaque noindex archive pages, остальные классифицированы без выдуманных redirect assumptions. | Полный archive test проходит для 108/108 записей. |
+| 2 | WordPress мог остаться скрытой runtime-зависимостью нового сайта. | Legacy crawl и WordPress используются только как source evidence; public runtime, search, CMS seed и archive renderer работают из нового workspace. | Next build и standalone runtime tests проходят без WordPress runtime. |
+| 3 | Часть описаний объектов использовала устаревший overlay вместо сохранённого источника. | Source-verified descriptions восстановлены; enrichment и audit overlays сохранены отдельно и не удаляют исходный текст. | CMS seed, runtime и content tests. |
+| 4 | Metadata одиночного гайда обрезалась как metadata списка. | Общий metadata renderer использует полное описание для одиночной guide page. | Public-site metadata regression. |
+| 5 | Locale fallback для location route мог вести на неверную страницу или индексировать fallback. | Locale и canonical сохраняются; неподтверждённая locale/location пара получает корректный fallback/noindex либо 404. | Route-manifest, runtime и SEO tests. |
+| 6 | Redirect на homepage/search мог маскировать потерянный legacy URL. | Redirects разрешены только после индивидуального reviewed mapping; прямой archive capture имеет noindex и не создаёт ложный canonical. | Redirect/archive priority tests. |
+| 7 | Hero использовал неподходящие по качеству и размеру изображения. | Все предоставленные изображения подготовлены в responsive AVIF/WebP variants; добавлены более качественные 1280/1600/1920 variants, корректный crop и source attribution. | Файлы в `public/hero`, design-asset build и HTML tests. |
+| 8 | Hero gallery зависела от ручных кнопок и могла отвлекать пользователя. | Галерея автоматически меняет кадры, не требует кнопок, сохраняет readable overlay и останавливает лишнее движение при `prefers-reduced-motion`. | Hero UX regression и mobile QA. |
+| 9 | Главная строка поиска была визуально разорвана: label, pin, input, filter icon и Search не совпадали по высоте и margins. | Hero search полностью собран в единый grid/control contract с согласованными высотами, padding, border-radius и focus state. | `hero-search-ux.test.mjs`, CSS/HTML regressions. |
+| 10 | Advanced-search control был крупной отдельной кнопкой и ломал alignment. | Control стал компактной icon-only кнопкой внутри search shell с доступным именем и устойчивым размером. | Hero UX tests и accessibility markup checks. |
+| 11 | Advanced filters открывались отдельным modal/popup и перекрывали hero. | Фильтры разворачиваются в normal document flow внутри того же search surface; mobile sheet/modal удалён. | HTML/client regression. |
+| 12 | Expanded search визуально распадался на несвязанные колонки и дублировал Search button. | Фильтры сгруппированы по смыслу, единый submit остаётся в search shell, responsive grid перестраивается без overflow. | Hero UX and mobile QA tests. |
+| 13 | Поиск имел только свободный location text и неполную географию. | Hero и results page используют общий async geography combobox, country/region/municipality/district/settlement identifiers и сохраняют legacy query parameters. | Geography, runtime, app API и search filter tests. |
+| 14 | Не было профессионального полного справочника территорий. | Добавлен расширяемый registry: Болгария — 28 областей, 265 общин, 5 256 населённых мест; Греция — 13 регионов, 333 муниципалитета, 13 586 settlements, включая полный Northern Greece active-market hierarchy. | Registry contains 26 775 records; hierarchy/orphan tests. |
+| 15 | Районы, регионы и города могли быть придуманы из свободного текста. | Registry строится из NSI/EKATTE, ELSTAT census и NUTS 2024 snapshots с hash/revision; unknown listing facts не повышаются до verified. | Source snapshot и hierarchy validation. |
+| 16 | Не было единого API для нового региона и будущего расширения. | Добавлен `/api/geography` с bounded search, ancestry и стабильными area IDs; импорт нового региона проходит через тот же source-attributed registry contract. | App API, geography search и parity tests. |
+| 17 | Карта либо отсутствовала, либо потребовала бы фиктивных listing pins. | Добавлена area map по официальным NUTS 2024 geometries: 28 болгарских областей и 13 греческих регионов; pins не показываются без проверенных координат объекта. | Area-map coverage tests. |
+| 18 | Typesense/Meilisearch не знали новую территориальную модель. | Geography IDs и filters добавлены в search fixtures, Typesense schema и Meilisearch settings; engine response не может тихо потерять результаты из-за ограниченного hit window. | Search import/sync/query tests. |
+| 19 | Live-preview advanced filters загружал и парсил полную HTML page. | Preview использует существующий `/api/search` JSON и только `search.total_matches`. | Client/QA regression; меньший transfer и отсутствие DOM parsing. |
+| 20 | Значение `0` для непроверенной площади/цены могло выглядеть реальным фактом. | Unverified zero нормализуется как unknown; price-on-request и not-applicable сохраняются отдельно. | Search/runtime/schema tests. |
+| 21 | Карточки разной высоты заставляли Details/Inquiry/Save «танцевать». | Card body стал flex/grid contract с закреплённой action row и одинаковым baseline независимо от длины title/location. | Public-site/card HTML regressions. |
+| 22 | Listing card не всегда имела устойчивый click target. | Media/title/details ведут на canonical listing route; actions остаются отдельными доступными controls. | Route and public-client tests. |
+| 23 | Галерея listing page имела неравномерную mosaic layout и изображения нельзя было нормально листать. | Gallery получила устойчивый responsive layout, clickable items, active-image navigation, keyboard Arrow/Home/End и focus management. | Photo-sphere/public-client/listing gallery tests. |
+| 24 | Ошибка 360 viewer могла скрыть обычную галерею. | Gallery fallback всегда остаётся доступным; 360 показывается только для reviewed panorama с caption и fallback. | Tour approval и photo-sphere tests. |
+| 25 | В mobile gallery появлялось `undefined фото`. | Исправлены locale keys и доступные labels для всех поддерживаемых языков. | Public client localization regression. |
+| 26 | Print/PDF был непригодным: layout повторял экран, изображения были маленькими, лишние controls попадали в печать. | Добавлен самостоятельный A4 listing brochure: print typography, page breaks, full-resolution approved images, logo, property facts и contact block; navigation/actions скрываются. | Print HTML/CSS regression и production build. |
+| 27 | Save button показывал успех даже при отказе `localStorage`. | UI меняется только после записи и read-back; failure сохраняет фактическое состояние и показывает error toast. | Normal и forced-storage-failure tests. |
+| 28 | Skip link менял hash, но не переносил keyboard focus. | Public `main` получил `tabindex=-1`; native fragment navigation сохраняется, focus переносится на `MAIN#main`. | Keyboard regression. |
+| 29 | Mobile touch controls были слишком маленькими или могли выйти за viewport. | Mobile-first breakpoints, минимум 44 px для interactive controls, безопасные gaps, wrapping и reduced-motion rules применены к hero, cards, gallery и forms. | Mobile/elderly QA report и UI tests. |
+| 30 | Search, hero и listing media могли загружать лишний объём. | Responsive `srcset`, AVIF/WebP, bounded gallery payload, lazy loading вне LCP, JSON filter preview и уменьшенный server trace снижают transfer/package overhead. | Asset build, HTML tests и Next build. |
+| 31 | Public routes не имели полного автоматического контракта. | Manifest test рендерит все 205 routes и проверяет HTTP status, kind, title, metadata, H1, canonical/indexability и shell. | `app-route-manifest.test.mjs`. |
+| 32 | Контент legacy archive проверялся выборочно. | Test проходит по каждой из 108 страниц и сверяет path, source URL, exact preserved body, canonical policy, noindex/nofollow и отсутствие hreflang/schema. | `runtime.test.mjs`. |
+| 33 | Staff connector использовал бы общий secret и не мог безопасно атрибутировать сотрудника. | `/mcp` получил OAuth/OIDC resource-server boundary: JWKS signature, issuer, audience, expiry, scope и server-side `sub → operator_id/roles`. | MCP OIDC tests и protected-resource metadata route. |
+| 34 | Роли можно было бы подменить prompt/body/token claims. | Роли берутся только из server-side principals registry; actor/broker/reviewer привязываются к verified principal. | Spoofing и role-capability tests. |
+| 35 | ChatGPT/Codex имели только public search, но не полноценную staff work queue. | Добавлен privacy-safe `get_broker_work_queue`: lead SLA/pipeline, viewings, reply delivery, seller flow, public requests и inventory matches без raw contacts/messages. | MCP privacy regression. |
+| 36 | Staff connector не мог выполнять ежедневные CRM действия. | Добавлен allowlisted `run_operator_workflow`: assignment, buyer/renter pipeline, viewing/follow-up, manual-delivery outcome, document checklist, seller pipeline, public request и validated deal close. Все действия проходят существующие admin state/capability/audit checks. | MCP workflow test плюс существующие endpoint transition tests. |
+| 37 | Connector мог превратиться в unrestricted admin proxy. | Не добавлены arbitrary HTTP/SQL, permission changes, background task execution, content publication или автоматическая отправка сообщения. | Tool-list/role tests. |
+| 38 | Translation/Hermes мог публиковать draft или изображать человека. | Hermes может готовить draft, но publish/index/send остаются отдельными human-approved действиями; source facts сохраняются. | Translation/Hermes/audit tests. |
+| 39 | Считалось возможным использовать ChatGPT subscription как server API credential Hermes. | Зафиксирована реальная граница: subscription покрывает интерактивную модель в ChatGPT, а unattended Hermes требует self-hosted model либо отдельный API project/budget. | `MCP_OPERATOR_SETUP_RU.md`. |
+| 40 | Public/admin/API route handoff мог расходиться между standalone Node и Next. | Оба runtime используют общие adapters; OAuth metadata, MCP, geography, archive и admin routes добавлены в parity validation. | App-route parity, HTTP и node-server tests. |
+| 41 | Security headers и write boundaries были неполными. | CSP, no-store private responses, origin allowlist, role capabilities, bounded request bodies, optional rate limiting и privacy-safe audit metadata применены к соответствующим surfaces. | Security-header, rate-limit, auth и audit tests. |
+| 42 | Конкурентный и open-source анализ не был связан с решениями продукта. | Сравнение Airbnb, Booking, Imot/ImotiBG и релевантных open-source решений зафиксировано отдельно; в продукт перенесены паттерны progressive disclosure, map/search continuity, stable cards, saved search и guided operator workflow без копирования бренда/кода. | `COMPETITIVE_RESEARCH_RU.md` и реализованные regressions. |
 
-## Что именно добавлено для «районов» и почему
+## Проверенная география
 
-В данных нет утверждённой neighbourhood/district taxonomy для каждого объекта. Поэтому
-сайт не создаёт выдуманные «районы». В поиск добавлен проверяемый **муниципалитет**
-(NSI municipality) только для подтверждённых болгарских settlement records. Это честная
-территориальная фасета, которая не вводит покупателя в заблуждение. Районный фильтр можно
-добавить только после supplied/reviewed таблицы listing_id → district и проверки
-координат; map-first UI до этого не включается намеренно.
+| Страна | Проверенное покрытие |
+| --- | --- |
+| Болгария | 2 NUTS1, 6 NUTS2, 28 областей, 35 municipal districts, 265 общин, 5 256 населённых мест |
+| Греция | 4 NUTS1, 13 регионов, 75 regional units, 333 муниципалитета, 1 037 municipal units, 6 135 communities, 13 586 settlements |
 
-Полное сравнение с Imot, ImotiBG, Airbnb, Booking.com и релевантными open-source
-проектами, включая сознательно неиспользованные лицензии и следующий приоритет работ,
-зафиксировано в [COMPETITIVE_RESEARCH_RU.md](COMPETITIVE_RESEARCH_RU.md).
+Northern Greece отмечен как текущий active-market scope, но registry покрывает всю
+Грецию, поэтому новый регион можно включить без изменения search schema. Телефонный
+area code хранится как справочная географическая характеристика, а не как адрес или
+доказательство местоположения конкретного объекта.
 
-## Проверка этого цикла
+## Что проверено автоматически
 
-- Полный Node test suite: **517 passed, 0 failed**.
-- Полный npm run validate проходит: generated contracts, HTTP/Node smoke, mobile/elderly
-  QA и launch-evidence reports строятся без code failure. Его external blockers остаются
-  именно external blockers, а не замалчиваются.
-- npm run next:build завершён успешно; прежний warning про неожиданный файл в NFT list
-  устранён.
-- Измерение server trace после исправления: project references снижены с **36 682** до
-  **1 969**, total traced entries — с **73 912** до **14 665**. Это уменьшает deployment
-  packaging overhead; это не заявление о LCP/transfer-size без live измерения.
-- MCP regression suite проверяет anonymous/public разграничение, роли, origin rejection,
-  подтверждения, невозможность публикации и attribution в audit log.
-- Реальный Chromium audit на **360 × 800**: seller valuation и listing viewing отправляют
-  изолированные POST /api/leads с **201**, показывают success state и переносят focus на
-  корректный элемент; viewing сохраняет intent=viewing, source и listing reference.
-- На той же ширине проверены normal и forced-storage-failure ветки saved listing,
-  gallery/tour fallback и keyboard skip link. Mobile action controls в viewing path имеют
-  высоту **52 px**.
-- Тестовые журналы использовали временный localhost и после проверки перемещены в корзину;
-  рабочие lead/contact данные не затронуты.
+1. Все 205 public route contracts и 108 legacy archive routes.
+2. Hero/basic/advanced search markup, filter semantics и mobile behavior.
+3. Полный geography hierarchy, source snapshots, map coverage и API search.
+4. Typesense-first, Meilisearch fallback и seed fallback без скрытия ошибок.
+5. CMS seed, Payload-style collections, translations, structured data и sitemap.
+6. Listing cards, saved listings, galleries, 360 fallback, keyboard navigation и print.
+7. Lead intake, CRM pipelines, appointments, documents, replies, seller journey и deals.
+8. MCP anonymous/role separation, OIDC, privacy projection, confirmations и audit actor.
+9. Standalone Node/Next route parity, HTTP smoke, CSP, compression и rate limiting.
+10. Production build и generated launch-readiness artifacts.
 
-## Не считаются исправленными: внешние production gates
+## Не исправляется выдумыванием данных
 
-Ниже не дефекты кода, а обязательные реальные действия. По
-production/data/launch-readiness.json текущий launch status остаётся blocked:
+Текущий listing-quality report содержит 165 source listings:
 
-1. **292 legacy URL** требуют индивидуального решения: сохранить 200, одношаговый 301
-   на эквивалентный контент или обоснованный 410. Redirect на homepage/search запрещён.
-2. Нужны реальные CSV/export из **Google Search Console, Yandex Webmaster и backlinks**.
-3. Нужен заполненный human listing-quality CSV. В текущем отчёте всё ещё видны **165**
-   объектов без подтверждённой площади и **18** с тонкой публичной галереей; эти факты
-   нельзя выдумывать или «оптимизировать» текстом.
-4. Нужны live отчёты Typesense/Meilisearch, Hermes worker и Payload/Postgres runtime.
-5. Нужны monitoring/rollback proof и проверенный production recovery drill с разными
-   оператором и reviewer.
-6. Для staff-wide ChatGPT/Codex rollout нужен production HTTPS + OAuth/OIDC + индивидуальная
-   mapping identity→role. Текущий bearer registry безопасен для серверной интеграции с
-   индивидуальными secrets, но не является механизмом самостоятельного подключения каждым
-   сотрудником. Подробности: [MCP_OPERATOR_SETUP_RU.md](MCP_OPERATOR_SETUP_RU.md).
+- **165** не имеют подтверждённой площади;
+- **18** имеют thin public gallery;
+- цена, bedrooms, location и description не имеют текущих массовых missing issues.
 
-## Следующий безопасный порядок
+Площадь и дополнительные фотографии нельзя сгенерировать как property facts. Эти
+поля должны быть подтверждены сотрудником по документам/владельцу и импортированы
+через human listing-quality review.
 
-1. Развернуть staging с production-like identity и выполнить персональный MCP smoke test
-   для broker/editor/translator.
-2. Собрать внешние launch evidence, пройти npm run launch:preflight и только после этого
-   считать сайт готовым к production.
+## Оставшиеся внешние production gates
+
+`production/data/launch-readiness.json` содержит семь блокирующих gates:
+
+1. `redirect_reviews` — индивидуально утвердить оставшиеся legacy URL decisions.
+2. `external_seo_exports` — предоставить реальные Search Console, Yandex Webmaster и
+   backlink exports по обоим legacy-доменам.
+3. `listing_quality_review` — завершить human review CSV для 165 listings.
+4. `live_services` — предоставить live Typesense, Meilisearch и Hermes worker reports.
+5. `monitoring_rollback` — подтвердить production monitoring и rollback proof.
+6. `payload_runtime` — предоставить реальный Payload/Postgres runtime report.
+7. `production_recovery` — выполнить и подписать recovery drill с разделёнными ролями.
+
+Отдельно для staff-wide ChatGPT/Codex connector нужны live HTTPS/OIDC credentials,
+workspace app publication/RBAC, mapping реальных staff subjects и live smoke каждой
+роли. Код endpoint готов, но отсутствие этих внешних параметров нельзя закрыть
+локальным fixture.
+
+## Незавершённая визуальная проверка
+
+Запрошенный in-app Browser plugin был вызван повторно после успешного build, но его
+transport вернул `Transport closed` до получения списка страниц. Автоматические
+mobile/a11y/layout tests зелёные, однако финальный ручной responsive pass на реальном
+Chromium остаётся обязательным после восстановления Browser connection:
+
+- 360, 390, 768, 1024, 1440 и 1920 px;
+- collapsed/expanded hero search;
+- keyboard-only и reduced-motion;
+- cards, listing gallery/lightbox и print preview;
+- реальные network/LCP/CLS screenshots.
+
+## Основные официальные источники
+
+- NSI/EKATTE (Болгария) и ELSTAT Census 2021 (Греция), revisions и hashes сохранены
+  в `production/data/geography-registry.json`.
+- Eurostat GISCO NUTS 2024:
+  `https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326.geojson`.
+- MCP Authorization:
+  `https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization`.
+- OpenAI developer mode/full MCP:
+  `https://help.openai.com/en/articles/12584461-developer-mode-apps-and-full-mcp-connectors-in-chatgpt-beta`.
