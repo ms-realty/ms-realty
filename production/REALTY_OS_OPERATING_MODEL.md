@@ -642,11 +642,16 @@ Implemented in this change:
 - local AES-256-GCM JSONL evidence vault, scoped to workspace/case with payload-digest checks and
   idempotent reference writes; the case ledger and projections retain references rather than document
   content;
-- Payload-compatible PostgreSQL collection definitions and registered migration for case, event,
-  mandate, evidence, and outbox records; these are explicitly schema-only and the preview ledger
-  remains the runtime writer;
-- deterministic, reference-only Payload import manifest and offline drift/reconciliation report;
-  neither imports records nor writes to a live Payload runtime;
+- Payload-compatible PostgreSQL collection definitions and registered migrations for case, event,
+  mandate, evidence, and outbox records, including a forward mandate-idempotency correction that
+  preserves append-only historical versions and permits safe mandate-reference reuse across cases;
+- deterministic, reference-only Payload import manifest plus a transaction-backed projector for
+  cases, immutable events, and mandate versions. It uses Payload's serializable Local API
+  transaction, resolves workspace-scoped relationship IDs, retries bounded database races, rejects
+  immutable conflicts, and updates only the mutable case projection after ledger rows append;
+- `npm run case:project` is a scoped dry run by default. It requires `MS_REALTY_WORKSPACE_ID` and
+  respects `MS_REALTY_CASE_LEDGER_PATH`; applying requires an approved Payload runtime plus
+  `MS_REALTY_CASE_PROJECTOR_APPLY=1`;
 - regulatory-source snapshot primitives that bind official-source receipt references and SHA-256
   content digests, compare changes/staleness, and require professional and approval-evidence
   references before an all-successful snapshot can be approved;
@@ -674,15 +679,18 @@ Configuration:
 - `MS_REALTY_CASE_LEDGER_PATH`: local preview case-ledger location.
 - `MS_REALTY_CASE_CONDITION_LEDGER_PATH`: local preview condition-ledger location.
 - `MS_REALTY_CASE_RECORDED_AT`: deterministic test/smoke timestamp only.
+- `MS_REALTY_WORKSPACE_ID`: required scope for `case:manifest` and `case:project`.
+- `MS_REALTY_CASE_PROJECTOR_APPLY=1`: explicit opt-in to write a manifest through Payload; omission
+  remains a dry run.
 - `MS_REALTY_ADMIN_CREDENTIALS_JSON`: per-human/per-agent credentials and roles.
 - `MS_REALTY_EVIDENCE_VAULT_KEY`: local evidence-vault encryption key; it belongs in secret storage,
   never in a ledger, manifest, prompt, or committed file.
 
 Not yet production-complete:
 
-- applying the committed Payload/PostgreSQL schema in an approved runtime, a transactional
-  projector/live writer, and read-back reconciliation of the preview ledger; the current manifest is
-  a reference-only import plan, not a migration runner or database source of truth;
+- applying the committed Payload/PostgreSQL schema in an approved runtime and proving the
+  transaction-backed projector against migrated Postgres with read-back reconciliation of the
+  preview ledger; the manifest remains reference-only and is not a database source of truth;
 - condition workbench UI, durable Payload/PostgreSQL condition collection and projector, and
   production multi-writer/reconciliation coverage; the committed condition ledger/API is local only;
 - signed structured mandate limits beyond the current capability set;
@@ -735,17 +743,19 @@ Acceptance:
 
 ### Slice B — durable domain persistence
 
-Status: Payload/PostgreSQL collections and their migration are committed as schema-only. The
-condition ledger remains local and outside that migration. No live writer, applied-runtime migration,
-or database read-back reconciliation is claimed here.
+Status: a serializable, retry-bounded Payload Local API projector is implemented for the current
+case/event/mandate manifest, with fake-transaction crash/retry coverage and an explicit dry-run/apply
+CLI. It has not been executed against an approved migrated Postgres runtime; condition, evidence, and
+outbox durability remain outside the projector.
 
 - apply the normalized PostgreSQL/Payload schema for cases, immutable events, mandate versions,
   evidence metadata, links, deadlines, and projections;
-- transactionally append event and update query projection/outbox;
-- migrate/reconcile preview ledger by IDs/digests;
+- run the committed migration chain against approved Postgres and prove projector read-back
+  reconciliation by IDs/digests;
+- extend the transaction path to evidence and outbox only after their source contracts exist;
 - add a durable condition collection/projector and reconcile it with the local condition ledger;
-- keep the manifest/reconciliation artifact reference-only until an authorized transactional writer
-  and database read-back are implemented;
+- keep the manifest reference-only and keep database read-back mandatory before making it a runtime
+  source of operational truth;
 - enforce tenant/workspace, uniqueness, immutability, chronological ordering, and least privilege in
   the database;
 - include case data in backup/restore and recovery drills.

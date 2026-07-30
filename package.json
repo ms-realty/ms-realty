@@ -39,6 +39,7 @@
     "listing:publication:run": "node production/scripts/run-listing-publication-schedules.mjs",
     "case:executor": "node production/scripts/run-realty-case-executor.mjs",
     "case:manifest": "node production/scripts/build-realty-case-payload-manifest.mjs",
+    "case:project": "node production/scripts/run-realty-case-payload-projector.mjs",
     "listing:verification": "node production/scripts/build-listing-verification-report.mjs",
     "listing:preflight:report": "node production/scripts/build-listing-quality-preflight-report.mjs",
     "listing:review-pack": "node production/scripts/build-listing-quality-review-packet.mjs",
