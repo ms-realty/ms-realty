@@ -202,7 +202,7 @@ function recordConsent(input, config) {
   });
 }
 
-async function routeSearch(requestUrl, registry, seed, config) {
+async function routeSearch(requestUrl, registry, seed, config, preview = false) {
   try {
     const { result, request } = await executePublicSearch({
       registry,
@@ -213,7 +213,7 @@ async function routeSearch(requestUrl, registry, seed, config) {
       translationTasks: currentTranslationTasks(config),
     });
     const { intent, query, filters, sort, page } = request;
-    recordEvent({ type: "search", path: requestUrl.pathname, locale: intent.locale, query, filters, sort, page }, config);
+    if (!preview) recordEvent({ type: "search", path: requestUrl.pathname, locale: intent.locale, query, filters, sort, page }, config);
     return json(200, result);
   } catch (error) {
     if (error instanceof PublicSearchInputError) {

@@ -77,6 +77,10 @@ function searchBackend(engineResult) {
   return backend;
 }
 
+function engineResultIsComplete(engineResult) {
+  return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
+}
+
 function withSearchRequest(result, engineResult, request) {
   const saveSearch = result.search?.controls?.save_search;
   const controls = {
@@ -162,8 +166,9 @@ export async function executePublicSearch({
     throw error;
   }
 
-  const result = engineResult.engine === "seed_fallback"
-    ? searchRuntimeListings(registry, seed, options)
+  const localResult = searchRuntimeListings(registry, seed, options);
+  const result = engineResult.engine === "seed_fallback" || !engineResultIsComplete(engineResult)
+    ? localResult
     : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
         ...options,
         query: ""
