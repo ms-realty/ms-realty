@@ -11,8 +11,8 @@
 
   "containers": [
     {
-      // basic = 1 GiB / 4 GB disk. The bare Node adapter measures ~155 MB RSS;
-      // Next plus the 453 MB baked media needs the larger disk, not lite's 2 GB.
+      // basic = 1 GiB / 4 GB disk. Keep the Node runtime on this conservative
+      // size until a production cold-start and load test supports a reduction.
       "class_name": "MsRealtyContainer",
       "image": "./Dockerfile",
       "instance_type": "basic",

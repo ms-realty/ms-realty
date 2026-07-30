@@ -46,6 +46,12 @@ jobs:
           PAYLOAD_SECRET: ci-build-secret-not-a-real-secret-0123456789
           DATABASE_URL: postgresql://localhost:5432/ms_realty_ci
 
+      - name: Smoke built Next runtime
+        run: npm run next:smoke
+        env:
+          PAYLOAD_SECRET: ci-build-secret-not-a-real-secret-0123456789
+          DATABASE_URL: postgresql://localhost:5432/ms_realty_ci
+
   audit:
     name: dependency audit
     runs-on: ubuntu-latest

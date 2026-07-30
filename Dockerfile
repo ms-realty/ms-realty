@@ -1,12 +1,12 @@
 # Cloudflare Container image for the MS Realty Next runtime.
 #
 # The container's disk is ephemeral: every time the instance wakes it gets a
-# fresh copy of THIS image. That is why the mirrored legacy media is baked in —
-# it makes /wp-content/uploads/* survive restarts without needing R2, and the
-# 13 years of image-search equity on those URLs keeps resolving.
+# fresh copy of THIS image. Legacy media is deliberately not baked in: the
+# Worker serves /wp-content/uploads/* from R2 before it wakes this container.
+# That preserves the legacy URLs without re-pushing a 453 MB mirror on deploy.
 #
 # Anything that must survive *and change* (leads, consents, audit) cannot live
-# on this disk. That state moves to Durable Object SQLite separately.
+# on this disk. Public deployment requires a deliberately wired durable store.
 
 FROM node:22-bookworm-slim AS dependencies
 ENV NEXT_TELEMETRY_DISABLED=1
