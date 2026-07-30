@@ -116,6 +116,13 @@ const INTEGER_FACTS = new Set([
   "storeys_count",
 ]);
 
+const COORDINATE_LIMITS = Object.freeze({
+  internal_latitude: [-90, 90],
+  public_latitude: [-90, 90],
+  internal_longitude: [-180, 180],
+  public_longitude: [-180, 180],
+});
+
 const COMMON_LISTING_FACTS = Object.freeze([
   "listing_reference",
   "offer_type",
@@ -219,7 +226,11 @@ export function normalizeImportedFact(value, { field, family, subtype, verificat
   const numeric = numericValue(value);
   if (numeric === null) return { value: null, verification: { state: "unknown", ...source }, zero_value_audit: false };
   if (INTEGER_FACTS.has(field) && !Number.isInteger(numeric)) throw new Error(`${field} must be an integer`);
-  if (numeric < 0) throw new Error(`${field} must not be negative`);
+  const coordinateLimits = COORDINATE_LIMITS[field];
+  if (coordinateLimits && (numeric < coordinateLimits[0] || numeric > coordinateLimits[1])) {
+    throw new Error(`${field} is outside its valid coordinate range`);
+  }
+  if (!coordinateLimits && numeric < 0) throw new Error(`${field} must not be negative`);
 
   const verifiedZero = state === "broker_verified" && (field !== "bedrooms_count" || subtype === "studio");
   if (numeric === 0 && !verifiedZero) {

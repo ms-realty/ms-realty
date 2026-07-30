@@ -45,6 +45,11 @@ test("legacy taxonomy and zero handling preserve evidence without treating zero 
   });
   assert.equal(verifiedStudio.value, 0);
   assert.equal(verifiedStudio.verification.state, "broker_verified");
+  assert.equal(normalizeImportedFact(-23.4, { field: "public_longitude", family: "house" }).value, -23.4);
+  assert.throws(
+    () => normalizeImportedFact(181, { field: "public_longitude", family: "house" }),
+    /valid coordinate range/,
+  );
   const legacy = normalizeLegacyListingFacts({ id: "MS-CRAWL-ZERO", property_type: "apartment", bedrooms: 0 });
   assert.deepEqual(legacy.zero_value_audit, ["bedrooms_count"]);
   assert.equal(publicFactValue(legacy.facts, legacy.fact_verification, "bedrooms_count"), null);
