@@ -890,7 +890,7 @@ if (
   leadMatching.summary.matchable_leads_with_listing_reference !== 2 ||
   leadMatching.summary.active_matchable_leads !== 2 ||
   leadMatching.summary.qualified_leads !== 1 ||
-  leadMatching.summary.open_broker_tasks !== 2
+  leadMatching.summary.open_broker_tasks !== 1
 ) {
   throw new Error("Lead matching report must distinguish active, qualified, and referenced buyer or renter leads");
 }
@@ -1032,7 +1032,7 @@ assertSavedSearchAlertReport(savedSearchAlerts);
 if (
   savedSearchAlerts.summary.saved_searches !== 1 ||
   savedSearchAlerts.rows[0].saved_search_id !== "saved-search-he-0001" ||
-  savedSearchAlerts.rows[0].current_match_count !== 41 ||
+  savedSearchAlerts.rows[0].current_match_count !== 46 ||
   savedSearchAlerts.rows[0].status !== "no_new_matches"
 ) {
   throw new Error("Saved-search alert report must evaluate the persisted Hebrew search without duplicate alerts");

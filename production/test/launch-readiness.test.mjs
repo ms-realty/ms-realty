@@ -1534,10 +1534,13 @@ test("local readiness materializer promotes only fresh local Payload proof and p
 });
 
 test("launch preflight fails closed while launch blockers remain", async () => {
+  const payloadRuntimePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-launch-payload-runtime-`)}/payload-runtime-report.json`;
+  writeJson(payloadRuntimePath, await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" }));
+  const env = { ...process.env, MS_REALTY_PAYLOAD_RUNTIME_REPORT_PATH: payloadRuntimePath };
   const result = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: "" },
+    env: { ...env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: "" },
   });
 
   assert.notEqual(result.status, 0);
@@ -1563,7 +1566,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   const withPartialReviewPath = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: partialReviewPath },
+    env: { ...env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: partialReviewPath },
   });
 
   assert.notEqual(withPartialReviewPath.status, 0);
@@ -1575,7 +1578,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
   const withReviewPath = spawnSync(process.execPath, [fromRoot("production", "scripts", "launch-preflight.mjs")], {
     cwd: fromRoot(),
     encoding: "utf8",
-    env: { ...process.env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath },
+    env: { ...env, MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath },
   });
 
   assert.notEqual(withReviewPath.status, 0);
@@ -1596,7 +1599,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
     cwd: fromRoot(),
     encoding: "utf8",
     env: {
-      ...process.env,
+      ...env,
       MS_REALTY_LISTING_QUALITY_REVIEW_PATH: reviewPath,
       MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
       MS_REALTY_SEARCH_SYNC_REPORT_PATH: livePaths.syncReportPath,
@@ -1615,7 +1618,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
     cwd: fromRoot(),
     encoding: "utf8",
     env: {
-      ...process.env,
+      ...env,
       MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
       MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoOutputPath,
     },
@@ -2103,11 +2106,12 @@ test("live service report import writes only validated source reports", () => {
   assert.throws(() => writeLiveServiceReport("../bad", queryReport), /Unknown live service report source/);
 });
 
-test("launch input checklist names remaining operator-owned blockers", () => {
+test("launch input checklist names remaining operator-owned blockers", async () => {
   const seoEvidence = readJson(["production", "data", "seo-evidence.json"]);
+  const payloadRuntime = await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" });
   const markdown = renderLaunchInputChecklist({
     generatedAt: "2026-07-05T00:00:00Z",
-    launchReadiness: buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z" }),
+    launchReadiness: buildLaunchReadinessReport({ generatedAt: "2026-07-05T00:00:00Z", payloadRuntime }),
     seoEvidence,
     redirectWorkbookCsv: fs.readFileSync(fromRoot("production", "data", "redirect-approval-workbook.csv"), "utf8"),
     deployableRedirects: readJson(["production", "data", "deployable-redirects.json"]),
