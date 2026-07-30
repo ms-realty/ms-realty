@@ -9,7 +9,7 @@
       "missing_location": 0,
       "missing_price": 0,
       "missing_area": 166,
-      "missing_bedrooms": 0,
+      "missing_bedrooms": 81,
       "missing_public_images": 4,
       "media_review_pending": 0
     },
@@ -74,7 +74,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -88,7 +89,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -102,7 +104,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -130,7 +133,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -144,7 +148,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -158,7 +163,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -172,7 +178,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -228,7 +235,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -242,7 +250,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -256,7 +265,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -270,7 +280,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -326,7 +337,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -354,7 +366,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -368,7 +381,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -382,7 +396,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -396,7 +411,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -410,7 +426,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -424,7 +441,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -438,7 +456,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -452,7 +471,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -466,7 +486,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -480,7 +501,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -494,7 +516,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -508,7 +531,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -522,7 +546,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -634,7 +659,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -648,7 +674,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -662,7 +689,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -676,7 +704,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -690,7 +719,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -704,7 +734,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -732,7 +763,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -746,7 +778,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -788,7 +821,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -914,7 +948,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -928,7 +963,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -942,7 +978,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -956,7 +993,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -970,7 +1008,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1040,7 +1079,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1068,7 +1108,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1110,7 +1151,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1124,7 +1166,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1138,7 +1181,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1152,7 +1196,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1208,7 +1253,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1222,7 +1268,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1278,7 +1325,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1292,7 +1340,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1306,7 +1355,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1320,7 +1370,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1334,7 +1385,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1418,7 +1470,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1432,7 +1485,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1446,7 +1500,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1460,7 +1515,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1474,7 +1530,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1488,7 +1545,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1516,7 +1574,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1530,7 +1589,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1558,7 +1618,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1572,7 +1633,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1614,7 +1676,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1642,7 +1705,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1670,7 +1734,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1684,7 +1749,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1698,7 +1764,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1769,7 +1836,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1783,7 +1851,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1853,7 +1922,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1867,7 +1937,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1881,7 +1952,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1910,7 +1982,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -1924,7 +1997,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -2094,7 +2168,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -2108,7 +2183,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -2276,7 +2352,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -2290,7 +2367,8 @@
       "has_offer": false,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -2304,7 +2382,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -2318,7 +2397,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {
@@ -2332,7 +2412,8 @@
       "has_offer": true,
       "issues": [],
       "warnings": [
-        "missing_area"
+        "missing_area",
+        "missing_bedrooms"
       ]
     },
     {

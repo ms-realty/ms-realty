@@ -250,6 +250,55 @@
               "language": "he",
               "query": "",
               "filters": {},
+              "search_intent": {
+                "schema_version": 1,
+                "locale": "he",
+                "text_query": "",
+                "exact_reference": null,
+                "property_families": [],
+                "property_subtypes": [],
+                "offer_type": null,
+                "listing_status": null,
+                "price_currency": "EUR",
+                "price_period": null,
+                "parking_kinds": [],
+                "construction_statuses": [],
+                "has_approved_tour": null,
+                "location_ids": [],
+                "country_code": null,
+                "geography_id": null,
+                "region_id": null,
+                "municipality": null,
+                "district": null,
+                "map_bounds": null,
+                "radius": null,
+                "sort": "recommended",
+                "page": 1,
+                "page_size": 12,
+                "mandatory_filters": {
+                  "publication_state": "published",
+                  "listing_statuses": [
+                    "available",
+                    "reserved"
+                  ],
+                  "translation_human_approved": true,
+                  "locale_indexable": true
+                },
+                "price_min": null,
+                "price_max": null,
+                "bedrooms_min": null,
+                "bedrooms_max": null,
+                "premises_min": null,
+                "hotel_rooms_min": null,
+                "primary_area_min": null,
+                "primary_area_max": null,
+                "land_area_min": null,
+                "land_area_max": null,
+                "floor_min": null,
+                "floor_max": null,
+                "storeys_min": null,
+                "storeys_max": null
+              },
               "source": "website_search"
             }
           },
@@ -751,6 +800,15 @@
               "Burgas",
               "Blagoevgrad"
             ],
+            "property_families": [
+              "apartment",
+              "commercial",
+              "hotel",
+              "house",
+              "land",
+              "multi_unit",
+              "property"
+            ],
             "property_types": [
               "apartment",
               "commercial",
@@ -760,6 +818,7 @@
               "multi_unit",
               "property"
             ],
+            "property_subtypes": [],
             "offer_types": [
               "rent",
               "sale"
@@ -772,7 +831,9 @@
               4,
               6,
               7
-            ]
+            ],
+            "premises": [],
+            "hotel_rooms": []
           },
           "area_maps": [],
           "area_map_source": {
@@ -783,7 +844,21 @@
             "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326.geojson",
             "sha256": "8510ae0b3aebddd5cc171197db15a9b16f03f3808cec8d056cc4d65e92de1157",
             "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
-          }
+          },
+          "applicable_filter_fields": [
+            "property_subtype",
+            "bedrooms_min",
+            "premises_min",
+            "hotel_rooms_min",
+            "area_min",
+            "area_max",
+            "land_area_min",
+            "land_area_max",
+            "floor_min",
+            "floor_max",
+            "storeys_min",
+            "storeys_max"
+          ]
         }
       },
       "seller": {
@@ -2810,6 +2885,55 @@
         "typesense",
         "meilisearch"
       ],
+      "intent": {
+        "schema_version": 1,
+        "locale": "he",
+        "text_query": "Sandanski",
+        "exact_reference": null,
+        "property_families": [],
+        "property_subtypes": [],
+        "offer_type": null,
+        "listing_status": null,
+        "price_currency": "EUR",
+        "price_period": null,
+        "parking_kinds": [],
+        "construction_statuses": [],
+        "has_approved_tour": null,
+        "location_ids": [],
+        "country_code": null,
+        "geography_id": null,
+        "region_id": null,
+        "municipality": null,
+        "district": null,
+        "map_bounds": null,
+        "radius": null,
+        "sort": "recommended",
+        "page": 1,
+        "page_size": 12,
+        "mandatory_filters": {
+          "publication_state": "published",
+          "listing_statuses": [
+            "available",
+            "reserved"
+          ],
+          "translation_human_approved": true,
+          "locale_indexable": true
+        },
+        "price_min": null,
+        "price_max": null,
+        "bedrooms_min": null,
+        "bedrooms_max": null,
+        "premises_min": null,
+        "hotel_rooms_min": null,
+        "primary_area_min": null,
+        "primary_area_max": null,
+        "land_area_min": null,
+        "land_area_max": null,
+        "floor_min": null,
+        "floor_max": null,
+        "storeys_min": null,
+        "storeys_max": null
+      },
       "query": "Sandanski",
       "sort": "recommended",
       "view": "list",
@@ -2862,6 +2986,55 @@
             "language": "he",
             "query": "Sandanski",
             "filters": {},
+            "search_intent": {
+              "schema_version": 1,
+              "locale": "he",
+              "text_query": "Sandanski",
+              "exact_reference": null,
+              "property_families": [],
+              "property_subtypes": [],
+              "offer_type": null,
+              "listing_status": null,
+              "price_currency": "EUR",
+              "price_period": null,
+              "parking_kinds": [],
+              "construction_statuses": [],
+              "has_approved_tour": null,
+              "location_ids": [],
+              "country_code": null,
+              "geography_id": null,
+              "region_id": null,
+              "municipality": null,
+              "district": null,
+              "map_bounds": null,
+              "radius": null,
+              "sort": "recommended",
+              "page": 1,
+              "page_size": 12,
+              "mandatory_filters": {
+                "publication_state": "published",
+                "listing_statuses": [
+                  "available",
+                  "reserved"
+                ],
+                "translation_human_approved": true,
+                "locale_indexable": true
+              },
+              "price_min": null,
+              "price_max": null,
+              "bedrooms_min": null,
+              "bedrooms_max": null,
+              "premises_min": null,
+              "hotel_rooms_min": null,
+              "primary_area_min": null,
+              "primary_area_max": null,
+              "land_area_min": null,
+              "land_area_max": null,
+              "floor_min": null,
+              "floor_max": null,
+              "storeys_min": null,
+              "storeys_max": null
+            },
             "source": "website_search"
           }
         },
@@ -3363,6 +3536,15 @@
             "Burgas",
             "Blagoevgrad"
           ],
+          "property_families": [
+            "apartment",
+            "commercial",
+            "hotel",
+            "house",
+            "land",
+            "multi_unit",
+            "property"
+          ],
           "property_types": [
             "apartment",
             "commercial",
@@ -3372,6 +3554,7 @@
             "multi_unit",
             "property"
           ],
+          "property_subtypes": [],
           "offer_types": [
             "rent",
             "sale"
@@ -3384,7 +3567,9 @@
             4,
             6,
             7
-          ]
+          ],
+          "premises": [],
+          "hotel_rooms": []
         },
         "area_maps": [],
         "area_map_source": {
@@ -3395,7 +3580,21 @@
           "url": "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326.geojson",
           "sha256": "8510ae0b3aebddd5cc171197db15a9b16f03f3808cec8d056cc4d65e92de1157",
           "license_url": "https://ec.europa.eu/eurostat/about-us/policies/copyright"
-        }
+        },
+        "applicable_filter_fields": [
+          "property_subtype",
+          "bedrooms_min",
+          "premises_min",
+          "hotel_rooms_min",
+          "area_min",
+          "area_max",
+          "land_area_min",
+          "land_area_max",
+          "floor_min",
+          "floor_max",
+          "storeys_min",
+          "storeys_max"
+        ]
       },
       "fallback": {
         "enabled": true,

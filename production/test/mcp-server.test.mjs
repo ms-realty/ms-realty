@@ -67,7 +67,13 @@ function fixture() {
     MS_REALTY_TRANSLATION_LEDGER_PATH: paths.translationLedgerPath,
     MS_REALTY_REVIEWED_AT: "2026-07-29T10:05:00.000Z",
   };
-  return { config: mcpConfigFromEnv(env), paths };
+  const config = mcpConfigFromEnv(env);
+  const payloadEdits = [];
+  config.payloadListingWriter = async (input) => {
+    payloadEdits.push(input);
+    return { id: input.listingId };
+  };
+  return { config, paths, payloadEdits };
 }
 
 function ssePayload(text) {
@@ -201,7 +207,7 @@ test("MCP OIDC configuration requires a complete HTTPS resource-server identity"
 });
 
 test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing role tools", async () => {
-  const { config, paths } = fixture();
+  const { config, paths, payloadEdits } = fixture();
   config.publicOrigin = "https://realty.example";
   config.oidc = {
     issuer: "https://identity.example",
@@ -252,7 +258,10 @@ test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing
     auth,
   );
   assert.deepEqual(edit.changed_fields, ["description"]);
-  assert.equal(readListingEdits(paths.listingEditLedgerPath)[0].editor, "staff_editor");
+  assert.equal(edit.draft_only, true);
+  assert.equal(payloadEdits[0].principal.id, "staff_editor");
+  assert.equal(payloadEdits[0].patch.description, "OIDC-attributed staff edit for human publication review.");
+  assert.equal(readAuditLog(paths.auditLogPath)[0].actor, "staff_editor");
 
   for (const token of ["wrong-scope-token", "unknown-subject-token", "invalid-token"]) {
     const rejected = await mcpCall(
@@ -337,7 +346,7 @@ test("MCP exposes a privacy-safe broker queue and routes confirmed work through 
 });
 
 test("MCP bounds listing-content operations to authenticated, confirmed, non-approval changes", async () => {
-  const { config, paths } = fixture();
+  const { config, paths, payloadEdits } = fixture();
   const auth = { authorization: `Bearer ${EDITOR_TOKEN}` };
 
   const queue = await callTool(config, "get_listing_content_queue", { locale: "en", query: "MS-CRAWL-0001" }, auth);
@@ -421,13 +430,13 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
     auth,
   );
   assert.deepEqual(edit.changed_fields, ["description"]);
+  assert.equal(edit.draft_only, true);
   assert.equal(edit.publication_approval_changed, false);
   assert.equal("editor" in edit, false);
-  const saved = readListingEdits(paths.listingEditLedgerPath)[0];
-  assert.equal(saved.editor, "mcp_editor");
-  assert.equal(saved.patch.description, "Staff-reviewed source description for the listing.");
-  assert.equal("publish_approved" in saved.patch, false);
-  assert.equal("listing_status" in saved.patch, false);
+  assert.equal(payloadEdits[0].principal.id, "mcp_editor");
+  assert.equal(payloadEdits[0].patch.description, "Staff-reviewed source description for the listing.");
+  assert.equal("publish_approved" in payloadEdits[0].patch, false);
+  assert.equal("listing_status" in payloadEdits[0].patch, false);
 
   const rejectedBulk = await mcpCall(
     config,
@@ -448,7 +457,7 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   );
   assert.equal(rejectedBulk.response.status, 200);
   assert.equal(rejectedBulk.payload.result.isError, true);
-  assert.equal(readListingEdits(paths.listingEditLedgerPath).length, 1);
+  assert.equal(readListingEdits(paths.listingEditLedgerPath).length, 0);
 
   const status = await callTool(
     config,
@@ -464,8 +473,8 @@ test("MCP bounds listing-content operations to authenticated, confirmed, non-app
   assert.equal(status.updated, 2);
   assert.deepEqual(status.changed_listing_ids, ["MS-CRAWL-0001", "MS-CRAWL-0002"]);
   assert.equal("edits" in status, false);
-  assert.equal(readListingEdits(paths.listingEditLedgerPath).slice(1).every((row) => row.editor === "mcp_editor"), true);
-  assert.equal(readListingEdits(paths.listingEditLedgerPath).slice(1).every((row) => row.patch.publish_approved === undefined), true);
+  assert.equal(readListingEdits(paths.listingEditLedgerPath).every((row) => row.editor === "mcp_editor"), true);
+  assert.equal(readListingEdits(paths.listingEditLedgerPath).every((row) => row.patch.publish_approved === undefined), true);
   assert.equal(
     readAuditLog(paths.auditLogPath).every((row) => !["translation_approved", "translation_published"].includes(row.action)),
     true,

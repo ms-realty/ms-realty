@@ -17,6 +17,10 @@
       "count": 166
     },
     {
+      "id": "structured_data.missing_bedrooms",
+      "count": 81
+    },
+    {
       "id": "structured_data.missing_public_images",
       "count": 4
     },
@@ -127,7 +131,7 @@
           "missing_location": 0,
           "missing_price": 0,
           "missing_area": 166,
-          "missing_bedrooms": 0,
+          "missing_bedrooms": 81,
           "missing_public_images": 4,
           "media_review_pending": 0
         },
@@ -587,7 +591,7 @@
             "agent_runtime": {
               "kind": "hermes_agent_runtime",
               "evidence_scope": "live",
-              "generated_at": "2026-07-30T15:53:27.339Z",
+              "generated_at": "2026-07-30T16:20:34.097Z",
               "ready": false,
               "status": "blocked",
               "endpoint": null,

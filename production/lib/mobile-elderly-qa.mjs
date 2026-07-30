@@ -296,7 +296,8 @@ export function buildMobileElderlyQaReport({
     ),
     check(
       "source_backed_search_filters",
-      includes(pages.search, "name=\"property_type\"") &&
+      includes(pages.search, "name=\"property_family\"") &&
+        includes(pages.search, "name=\"property_subtype\"") &&
         includes(pages.search, "name=\"offer_type\"") &&
         includes(pages.search, "name=\"price_min\"") &&
         includes(pages.search, "name=\"price_max\"") &&

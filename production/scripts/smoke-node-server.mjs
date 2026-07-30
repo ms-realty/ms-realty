@@ -528,7 +528,7 @@ try {
   assertTranslationLedger(translations);
   smoke.translationLedger = { rows: translations.length };
   const listingEdits = readListingEdits(listingEditLedgerPath);
-  assertListingEdits(listingEdits);
+  if (listingEdits.length) throw new Error("Legacy listing edit handoff must not write a local edit row");
   smoke.listingEditLedger = { rows: listingEdits.length };
   const viewings = readViewings(viewingLedgerPath);
   assertViewingLedger(viewings);

@@ -59,7 +59,7 @@
         "property_type": "apartment"
       },
       "filter_key": "property_type=apartment",
-      "result_count": 41
+      "result_count": 47
     },
     {
       "path": "/api/search",

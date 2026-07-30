@@ -38,6 +38,8 @@ import {
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
+import { isFactApplicable } from "./listing-facts.mjs";
+import { normalizeSearchIntent, searchIntentToQueryFilters } from "./search-intent.mjs";
 
 const APPROVED_GUIDE_GROUPS = approvedContentGuideGroups(readApprovedCmsContent());
 const GEOGRAPHY_CATALOG = loadGeographyCatalog();
@@ -850,7 +852,9 @@ function localizedLocationForView(localeCode, view) {
 }
 
 export function localizedSearchFilterValue(localeCode, key, value) {
-  if (key === "property_type" || key === "offer_type") return localizedListingValue(localeCode, key, value);
+  if (key === "property_type" || key === "property_family" || key === "offer_type") {
+    return localizedListingValue(localeCode, key === "property_family" ? "property_type" : key, value);
+  }
   if (key === "location" || key === "municipality" || key === "district") return localizedLocationValue(localeCode, value);
   if (key === "country_code") {
     const country = GEOGRAPHY_CATALOG.countries.find((candidate) => candidate.code === value);
@@ -1537,6 +1541,7 @@ function officialAreaMaps(views, filters) {
 function matchesSearch(view, query, filters = {}) {
   const text = searchableText(view);
   if (!queryTokens(query).every((variants) => variants.some((token) => text.includes(token)))) return false;
+  if (filters.exact_reference && norm(view.id) !== norm(filters.exact_reference)) return false;
   if (filters.location && !includesSearchValue([view.location, view.location_native, view.country_code].join(" "), filters.location)) return false;
   if (filters.country_code && view.country_code !== String(filters.country_code).toUpperCase()) return false;
   if (!matchesGeography(view, filters.region_id) || !matchesGeography(view, filters.geography_id)) return false;
@@ -1547,12 +1552,22 @@ function matchesSearch(view, query, filters = {}) {
     return false;
   }
   if (filters.district && norm(view.district) !== norm(filters.district)) return false;
+  if (filters.property_family && norm(view.property_family || view.property_type) !== norm(filters.property_family)) return false;
   if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
+  if (filters.property_subtype && norm(view.property_subtype) !== norm(filters.property_subtype)) return false;
   if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
   if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;
   if (!numberFilter(view.price_eur, filters.price_min, filters.price_max)) return false;
-  if (!numberFilter(view.bedrooms, filters.bedrooms_min, undefined)) return false;
-  if (!numberFilter(view.area_sqm, filters.area_min, filters.area_max)) return false;
+  if (!numberFilter(view.bedrooms ?? view.bedrooms_count, filters.bedrooms_min, filters.bedrooms_max)) return false;
+  if (!numberFilter(view.premises_count, filters.premises_min, undefined)) return false;
+  if (!numberFilter(view.hotel_room_count, filters.hotel_rooms_min, undefined)) return false;
+  if (!numberFilter(view.primary_area_sqm ?? view.area_sqm, filters.area_min, filters.area_max)) return false;
+  if (!numberFilter(view.land_area_sqm, filters.land_area_min, filters.land_area_max)) return false;
+  if (!numberFilter(view.floor ?? view.floor_number, filters.floor_min, filters.floor_max)) return false;
+  if (!numberFilter(view.storeys_count, filters.storeys_min, filters.storeys_max)) return false;
+  if (filters.parking_kind && norm(view.parking_kind) !== norm(filters.parking_kind)) return false;
+  if (filters.construction_status && norm(view.construction_status) !== norm(filters.construction_status)) return false;
+  if (filters.has_approved_tour && view.tour?.is_public !== true) return false;
   return true;
 }
 
@@ -1826,6 +1841,20 @@ export function renderSearchPage({
   const locale = resolved.locale;
   const ui = uiCopyFor(locale.code);
   const labels = labelsFor(locale.code);
+  const searchIntent = normalizeSearchIntent(
+    {
+      ...filters,
+      locale: locale.code,
+      q: query,
+      sort,
+      page,
+      ...(pageSize === null ? {} : { page_size: pageSize }),
+    },
+    { defaultLocale: locale.code },
+  );
+  const intentFilters = Object.fromEntries(
+    Object.entries(searchIntentToQueryFilters(searchIntent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
+  );
   const activeListings = listings.filter(isActiveListing);
   const localeMatches = activeListings.filter((listing) => listing.locale === locale.code);
   const fallbackMatches = activeListings.filter(
@@ -1836,6 +1865,7 @@ export function renderSearchPage({
   const catalogDistricts = GEOGRAPHY_CATALOG.areas
     .filter((area) => area.country_code === "BG" && area.level === "district")
     .map((area) => area.names.en);
+  const familyFor = (listing) => listing.property_family || listing.property_type;
   const filterOptions = {
     countries: GEOGRAPHY_CATALOG.countries.map((country) => ({
       code: country.code,
@@ -1853,8 +1883,8 @@ export function renderSearchPage({
       .sort((left, right) =>
         localizedSearchFilterValue(locale.code, "region_id", left.id).localeCompare(
           localizedSearchFilterValue(locale.code, "region_id", right.id),
-        ),
       ),
+    ),
     locations: [...new Set(filterViews.map((listing) => listing.location).filter(Boolean))].sort(),
     municipalities: [
       ...new Set(
@@ -1867,14 +1897,48 @@ export function renderSearchPage({
     districts: [...new Set([...catalogDistricts, ...filterViews.filter((listing) => listing.country_code === "BG").map((listing) => listing.district).filter(Boolean)])].sort(
       (left, right) => localizedSearchFilterValue(locale.code, "district", left).localeCompare(localizedSearchFilterValue(locale.code, "district", right)),
     ),
-    property_types: [...new Set(filterViews.map((listing) => listing.property_type).filter(Boolean))].sort(),
+    property_families: [...new Set(filterViews.map(familyFor).filter(Boolean))].sort(),
+    property_types: [...new Set(filterViews.map(familyFor).filter(Boolean))].sort(),
+    property_subtypes: [...new Set(filterViews.map((listing) => listing.property_subtype).filter(Boolean))].sort(),
     offer_types: [...new Set(filterViews.map((listing) => listing.offer_type).filter(Boolean))].sort(),
-    bedrooms: [...new Set(filterViews.map((listing) => listing.bedrooms).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
+    bedrooms: [...new Set(filterViews.map((listing) => listing.bedrooms ?? listing.bedrooms_count).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
+    premises: [...new Set(filterViews.map((listing) => listing.premises_count).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
+    hotel_rooms: [...new Set(filterViews.map((listing) => listing.hotel_room_count).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
   };
+  const selectedFamilies = searchIntent.property_families;
+  const selectedSubtype = searchIntent.property_subtypes[0] || null;
+  const applicable = (field) => !selectedFamilies.length || selectedFamilies.every((family) => isFactApplicable(family, field, selectedSubtype));
+  const applicableFilterFields = [
+    "property_subtype",
+    "bedrooms_min",
+    "premises_min",
+    "hotel_rooms_min",
+    "area_min",
+    "area_max",
+    "land_area_min",
+    "land_area_max",
+    "floor_min",
+    "floor_max",
+    "storeys_min",
+    "storeys_max",
+  ].filter((field) => {
+    const fact = {
+      bedrooms_min: "bedrooms_count",
+      premises_min: "premises_count",
+      hotel_rooms_min: "hotel_room_count",
+      land_area_min: "land_area_sqm",
+      land_area_max: "land_area_sqm",
+      floor_min: "floor_number",
+      floor_max: "floor_number",
+      storeys_min: "storeys_count",
+      storeys_max: "storeys_count",
+    }[field];
+    return !fact || applicable(fact);
+  });
   const matchedListings = searchableListings.filter((listing) =>
-    matchesSearch(listingToPublicViewModel(listing), query, filters),
+    matchesSearch(listingToPublicViewModel(listing), searchIntent.text_query, intentFilters),
   );
-  const selectedSort = publicSearchSort(sort);
+  const selectedSort = publicSearchSort(searchIntent.sort);
   const selectedView = !savedView && view === "map" ? "map" : "list";
   const sortedListings = sortListingsForPublicSearch(matchedListings, selectedSort);
   const requestedPage = Number(page);
@@ -1887,12 +1951,34 @@ export function renderSearchPage({
   const cards = sortedListings
     .slice(offset, offset + normalizedPageSize)
     .map((listing) => listingCard(registry, listing, locale));
-  const activeFilterChips = ["location", "country_code", "geography_id", "region_id", "municipality", "district", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
-    .map((key) => ({
-      key,
-      value: filters[key] || "",
-      active: Boolean(filters[key]),
-    }))
+  const activeFilterChips = [
+    "exact_reference",
+    "location",
+    "country_code",
+    "geography_id",
+    "region_id",
+    "municipality",
+    "district",
+    "property_family",
+    "property_subtype",
+    "offer_type",
+    "price_min",
+    "price_max",
+    "bedrooms_min",
+    "bedrooms_max",
+    "premises_min",
+    "hotel_rooms_min",
+    "area_min",
+    "area_max",
+    "land_area_min",
+    "land_area_max",
+    "floor_min",
+    "floor_max",
+    "storeys_min",
+    "storeys_max",
+    "status",
+  ]
+    .map((key) => ({ key, value: intentFilters[key], active: intentFilters[key] !== undefined && intentFilters[key] !== "" }))
     .filter((chip) => chip.active);
 
   return {
@@ -1925,14 +2011,15 @@ export function renderSearchPage({
     search: {
       saved_view: savedView === true,
       engines: ["typesense", "meilisearch"],
-      query,
+      intent: searchIntent,
+      query: searchIntent.text_query,
       sort: selectedSort,
       view: selectedView,
       filters: {
         locale: locale.code,
         public_enabled: true,
         indexable: true,
-        ...filters,
+        ...intentFilters,
       },
       total_matches: matchedListings.length,
       returned: cards.length,
@@ -1958,15 +2045,17 @@ export function renderSearchPage({
           method: "POST",
           payload: {
             language: locale.code,
-            query,
-            filters: { ...filters },
+            query: searchIntent.text_query,
+            filters: { ...intentFilters },
+            search_intent: searchIntent,
             source: "website_search",
           },
         },
         active_filter_chips: activeFilterChips,
         filter_options: filterOptions,
-        area_maps: selectedView === "map" ? officialAreaMaps(filterViews, filters) : [],
+        area_maps: selectedView === "map" ? officialAreaMaps(filterViews, intentFilters) : [],
         area_map_source: AREA_MAP.source,
+        applicable_filter_fields: applicableFilterFields,
       },
       fallback: {
         enabled: true,

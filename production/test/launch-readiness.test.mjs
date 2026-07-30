@@ -1622,7 +1622,7 @@ test("launch preflight fails closed while launch blockers remain", async () => {
     cwd: fromRoot(),
     encoding: "utf8",
     env: {
-      ...process.env,
+      ...preflightEnv,
       MS_REALTY_SEO_EVIDENCE_INPUT_DIR: seoDir,
       MS_REALTY_SEO_EVIDENCE_OUTPUT_PATH: seoOutputPath,
     },

@@ -10,7 +10,8 @@
 ## Текущий доказанный статус
 
 - Production build Next.js: **успешно**.
-- Полный автоматизированный regression suite: **545 passed, 0 failed**.
+- Полный автоматизированный regression suite после слияния с актуальным
+  `origin/main`: **583 passed, 0 failed**.
 - Полный генерационный и launch-evidence pipeline `npm run validate`: **успешно**.
 - Проверены **205** текущих public routes: 198 sitemap routes и 7 utility search routes.
 - Проверены **108 из 108** сохранённых legacy archive pages.
@@ -67,6 +68,10 @@
 | 40 | Public/admin/API route handoff мог расходиться между standalone Node и Next. | Оба runtime используют общие adapters; OAuth metadata, MCP, geography, archive и admin routes добавлены в parity validation. | App-route parity, HTTP и node-server tests. |
 | 41 | Security headers и write boundaries были неполными. | CSP, no-store private responses, origin allowlist, role capabilities, bounded request bodies, optional rate limiting и privacy-safe audit metadata применены к соответствующим surfaces. | Security-header, rate-limit, auth и audit tests. |
 | 42 | Конкурентный и open-source анализ не был связан с решениями продукта. | Сравнение Airbnb, Booking, Imot/ImotiBG и релевантных open-source решений зафиксировано отдельно; в продукт перенесены паттерны progressive disclosure, map/search continuity, stable cards, saved search и guided operator workflow без копирования бренда/кода. | `COMPETITIVE_RESEARCH_RU.md` и реализованные regressions. |
+| 43 | После перехода на canonical Payload старый MCP content tool пытался писать в retired listing-edit endpoint и получал `409`. | `edit_listing_content` теперь создаёт только Payload draft через Local API, переносит verified operator identity в hook context, пишет privacy-safe audit row и возвращает canonical editor URL; публикация по-прежнему требует отдельного human review. | MCP Payload-writer/OIDC tests, Payload migration boot и production build. |
+| 44 | Слияние новой property/search модели создало дублированный `location_precision` в Payload schema. | Дубликат удалён в генераторе, а не в generated JSON; CMS/Payload artifacts пересобраны. | Payload config sanitize, migration boot, outbox hooks и полный suite. |
+| 45 | Governed SearchIntent мог потерять новые территориальные ограничения при переходе между HTML, API и search engines. | `country_code`, `geography_id`, `region_id`, `municipality` и `district` сохранены в едином intent/filter contract; Typesense, Meilisearch и fallback получают одинаковые ограничения. | Property contract, request, engine sync, API и HTTP production-search tests. |
+| 46 | Saved-search baseline не учитывал объект Hotovo в общине Sandanski после municipality-aware search. | Baseline обновлён с 46 до 47 только после доказанного совпадения по официальной иерархии; versioned intent хранит новые geography keys. | Saved-search alert build, foundation validation и search regressions. |
 
 ## Проверенная география
 
@@ -86,12 +91,14 @@ area code хранится как справочная географическ�
 2. Hero/basic/advanced search markup, filter semantics и mobile behavior.
 3. Полный geography hierarchy, source snapshots, map coverage и API search.
 4. Typesense-first, Meilisearch fallback и seed fallback без скрытия ошибок.
-5. CMS seed, Payload-style collections, translations, structured data и sitemap.
+5. CMS seed, реальный Payload config/migrations/draft writer, translations, structured
+   data и sitemap.
 6. Listing cards, saved listings, galleries, 360 fallback, keyboard navigation и print.
 7. Lead intake, CRM pipelines, appointments, documents, replies, seller journey и deals.
 8. MCP anonymous/role separation, OIDC, privacy projection, confirmations и audit actor.
 9. Standalone Node/Next route parity, HTTP smoke, CSP, compression и rate limiting.
-10. Production build и generated launch-readiness artifacts.
+10. Все **583** regression tests, production build и generated launch-readiness
+    artifacts.
 
 ## Не исправляется выдумыванием данных
 
@@ -125,10 +132,11 @@ workspace app publication/RBAC, mapping реальных staff subjects и live 
 
 ## Незавершённая визуальная проверка
 
-Запрошенный in-app Browser plugin был вызван повторно после успешного build, но его
-transport вернул `Transport closed` до получения списка страниц. Автоматические
+Запрошенные Chrome и in-app Browser connector paths были вызваны повторно после
+успешного build, но общий Node REPL transport вернул `Transport closed` до создания
+browser session; даже no-op transport check и reset не выполнились. Автоматические
 mobile/a11y/layout tests зелёные, однако финальный ручной responsive pass на реальном
-Chromium остаётся обязательным после восстановления Browser connection:
+Chromium остаётся обязательным после восстановления connector transport:
 
 - 360, 390, 768, 1024, 1440 и 1920 px;
 - collapsed/expanded hero search;

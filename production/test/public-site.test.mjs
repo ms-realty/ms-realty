@@ -476,8 +476,8 @@ test("search applies text and facet filters before paginating cards", () => {
   assert.ok(petrichLocation.cards.every((card) => ["פטריץ׳", "Petrich Municipality"].includes(card.location)));
   assert.ok(apartments.search.total_matches > apartments.cards.length);
   assert.ok(apartments.cards.every((card) => card.property_type === "apartment"));
-  assert.equal(apartments.search.filters.property_type, "apartment");
-  assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_type", value: "apartment", active: true }]);
+  assert.equal(apartments.search.filters.property_family, "apartment");
+  assert.deepEqual(apartments.search.controls.active_filter_chips, [{ key: "property_family", value: "apartment", active: true }]);
 });
 
 test("official geography filters cover both countries and match reviewed Bulgarian hierarchy", () => {

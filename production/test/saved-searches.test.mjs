@@ -51,6 +51,8 @@ test("saved search stores criteria and creates alert task", () => {
   );
   assert.equal(nativeFormSearch.locale, "he");
   assert.deepEqual(nativeFormSearch.filters, { property_type: "apartment" });
+  assert.equal(nativeFormSearch.search_intent.schema_version, 1);
+  assert.deepEqual(nativeFormSearch.search_intent.property_families, ["apartment"]);
   assert.equal(nativeFormSearch.contact.name, "Noa Levi");
   assert.equal(nativeFormSearch.contact_preference, "email");
 
@@ -84,5 +86,6 @@ test("saved search stores criteria and creates alert task", () => {
   assert.equal(rows[0].contact_preference, "whatsapp");
   assert.deepEqual(rows[0].price_snapshot, { "MS-CRAWL-0001": 120000 });
   assert.equal(rows[0].alert_task.status, "open");
+  assert.equal(rows[0].search_intent.schema_version, 1);
   assert.equal(assertSavedSearches(rows), true);
 });

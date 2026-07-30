@@ -4,6 +4,7 @@ import { z } from "zod";
 import { appAdminConfigFromEnv, renderAppAdminResponse } from "./app-admin-adapter.mjs";
 import { appApiConfigFromEnv, renderAppApiResponse } from "./app-api-adapter.mjs";
 import { canAdminAccess, canAdminMutate, normalizedRoles, operatorId, resolveAdminPrincipal } from "./admin-auth.mjs";
+import { appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { applyListingEdits, LISTING_STATUSES, readListingEdits } from "./listing-edits.mjs";
 import { loadLocaleRegistry } from "./locales.mjs";
 import { applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
@@ -26,6 +27,13 @@ const TEXT = (max) => z.string().trim().max(max);
 const CONTENT_TEXT = (max) => TEXT(max).min(1);
 const LISTING_STATUS = z.enum(LISTING_STATUSES);
 const LISTING_CONTENT_FIELDS = ["title", "h1", "description", "seo_title", "seo_description", "seo_og_title", "seo_og_description"];
+const PAYLOAD_FACT_CONTENT_FIELDS = new Set(["title", "h1", "description"]);
+const PAYLOAD_SEO_CONTENT_FIELDS = {
+  seo_title: "title",
+  seo_description: "description",
+  seo_og_title: "og_title",
+  seo_og_description: "og_description",
+};
 const LISTING_CONTENT_PATCH = z
   .object({
     title: CONTENT_TEXT(240).optional(),
@@ -292,6 +300,52 @@ function textResult(value) {
 
 function errorResult(message) {
   return { content: [{ type: "text", text: message }], isError: true };
+}
+
+async function updatePayloadListingContent(config, principal, listingId, patch) {
+  if (config.payloadListingWriter) return config.payloadListingWriter({ listingId, patch, principal });
+  if (!config.env.PAYLOAD_SECRET || !config.env.DATABASE_URL) {
+    throw new Error("Payload runtime is not configured");
+  }
+  const [{ getPayload }, payloadConfig] = await Promise.all([import("payload"), import("../../payload.config.js")]);
+  const payload = await getPayload({ config: payloadConfig.default });
+  const current = await payload.findByID({ collection: "listings", id: listingId, depth: 0, overrideAccess: true });
+  const facts = { ...(current.facts || {}) };
+  const seo = { ...(current.seo || {}) };
+  for (const [field, value] of Object.entries(patch)) {
+    if (PAYLOAD_FACT_CONTENT_FIELDS.has(field)) facts[field] = value;
+    else seo[PAYLOAD_SEO_CONTENT_FIELDS[field]] = value;
+  }
+  return payload.update({
+    collection: "listings",
+    id: listingId,
+    data: { facts, seo },
+    draft: true,
+    overrideAccess: true,
+    context: {
+      ms_realty_operator: {
+        id: principal.id,
+        roles: principal.roles,
+        source: principal.source || "mcp",
+      },
+    },
+  });
+}
+
+function recordPayloadListingEdit(config, principal, listingId, changedFields) {
+  appendAuditLog(
+    createAuditLogEntry(
+      {
+        action: "listing_edited",
+        actor: principal.id,
+        objectType: "listing",
+        objectId: listingId,
+        metadata: { changed_fields: changedFields, source: "mcp_payload_draft" },
+      },
+      config.adminConfig.reviewedAt || new Date().toISOString(),
+    ),
+    { filePath: config.adminConfig.auditLogPath },
+  );
 }
 
 function currentSeed(config) {
@@ -932,19 +986,14 @@ function authenticatedToolDefinitions(server, config, principal) {
       },
       async ({ listing_id: listingId, patch }) => {
         try {
-          const { response, payload } = await adminJson(config, principal, "/api/admin/listings/edit", {
-            method: "POST",
-            body: { listingId, patch },
-          });
-          const edit = payload?.edit;
-          if (!response.ok || !edit || edit.listing_id !== listingId) return errorResult("The listing content was not saved.");
+          await updatePayloadListingContent(config, principal, listingId, patch);
+          const changedFields = Object.keys(patch).filter((field) => LISTING_CONTENT_FIELDS.includes(field));
+          recordPayloadListingEdit(config, principal, listingId, changedFields);
           return textResult({
-            listing_id: edit.listing_id,
-            changed_fields: Object.keys(edit.patch || {}).filter((field) => LISTING_CONTENT_FIELDS.includes(field)),
-            source_locale: edit.source_locale,
-            stale_translation_count: edit.stale_translation_count || 0,
-            stale_locales: Array.isArray(edit.stale_locales) ? edit.stale_locales : [],
-            idempotent: edit.idempotent === true,
+            listing_id: listingId,
+            changed_fields: changedFields,
+            canonical_editor_url: `/payload-admin/collections/listings/${encodeURIComponent(listingId)}`,
+            draft_only: true,
             publication_approval_changed: false,
             next_step: "A qualified human must separately review any publication or translation decision.",
           });

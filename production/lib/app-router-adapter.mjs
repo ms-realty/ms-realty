@@ -5,7 +5,7 @@ import { loadCmsSeed, renderRuntimePath, searchRuntimeListings } from "./runtime
 import { DEFAULT_BROKER_CONTACT_LEDGER_PATH, readBrokerContacts } from "./broker-contacts.mjs";
 import { DEFAULT_LISTING_EDIT_LEDGER_PATH, applyListingEdits, readListingEdits } from "./listing-edits.mjs";
 import { DEFAULT_MEDIA_REVIEW_LEDGER_PATH, applyMediaReviews, readMediaReviews } from "./media-reviews.mjs";
-import { searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
+import { normalizeSearchRequest } from "./search-request.mjs";
 import { buildRuntimeLocalizedSitemap, renderRobotsTxt, renderSitemapXml } from "./seo-files.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH, readTourApprovals } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
@@ -31,6 +31,7 @@ export function appRouterConfigFromEnv(env = process.env) {
     localeRegistryPath: env.MS_REALTY_LOCALE_REGISTRY_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
+    naturalLanguageSearchEnabled: env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
   };
 }
 
@@ -92,13 +93,19 @@ export function renderAppRoute({ pathname, url = pathname, config = appRouterCon
   const translationTasks = currentTranslationTasks(config);
   const searchLocale = searchLocaleFor(registry, pathname);
   const savedView = requestUrl.searchParams.get("saved") === "1";
+  const searchRequest = searchLocale
+    ? normalizeSearchRequest(requestUrl.searchParams, {
+        defaultLocale: searchLocale.code,
+        naturalLanguageEnabled: config.naturalLanguageSearchEnabled === true,
+      })
+    : null;
   const rendered = searchLocale
     ? searchRuntimeListings(registry, seed, {
-        localeCode: searchLocale.code,
-        query: requestUrl.searchParams.get("q") || "",
-        filters: searchFiltersFromParams(requestUrl.searchParams),
-        sort: requestUrl.searchParams.get("sort") || "recommended",
-        page: searchPageFromParams(requestUrl.searchParams),
+        localeCode: searchRequest.intent.locale,
+        query: searchRequest.query,
+        filters: searchRequest.filters,
+        sort: searchRequest.sort,
+        page: searchRequest.page,
         pageSize: savedView ? null : 12,
         savedView,
         translationTasks,
@@ -141,7 +148,15 @@ export function renderAppRouteResponse({ pathname, url = pathname, host = "", co
   if (legacyDecision?.status === 200) {
     pathname = legacyDecision.target_path;
   }
-  const result = renderAppRoute({ pathname, url, config });
+  let result;
+  try {
+    result = renderAppRoute({ pathname, url, config });
+  } catch (error) {
+    return new Response(JSON.stringify({ kind: "bad_request", message: error.message }), {
+      status: 400,
+      headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
+    });
+  }
   if (result.status === 200 && pathname.length > 1 && pathname.endsWith("/")) {
     return new Response(null, {
       status: 308,
