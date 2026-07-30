@@ -118,7 +118,9 @@ export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
-  if (verb === "GET" && ["/admin/cases", "/api/admin/cases"].includes(pathname)) return "cases:read";
+  if (verb === "GET" && ["/admin/cases", "/api/admin/cases", "/api/admin/cases/intents"].includes(pathname)) {
+    return "cases:read";
+  }
   if (verb !== "GET" && ["/api/admin/cases", "/api/admin/cases/actions"].includes(pathname)) return "cases:write";
   if (verb === "GET" && OPERATIONS_READ_PATHS.has(pathname)) return "operations:read";
   if (verb === "GET" && CONTENT_READ_PATHS.has(pathname)) return "content:read";

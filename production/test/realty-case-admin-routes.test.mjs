@@ -143,6 +143,16 @@ test("admin case routes support human manual work and assured autonomous agents 
     assert.equal(queue.summary.manual, 1);
     assert.equal(queue.summary.autonomous, 1);
 
+    const intentsResponse = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/cases/intents", { headers: auth.agent }),
+      { config },
+    );
+    assert.equal(intentsResponse.status, 200);
+    const intents = (await intentsResponse.json()).intents;
+    assert.deepEqual(intents.map((intent) => intent.case_id), ["autonomous-1"]);
+    assert.equal(intents[0].step_key, "requirements_brief");
+    assert.equal(Object.hasOwn(intents[0], "client_ref"), false);
+
     const agentPage = await renderAppAdminResponse(
       new Request("https://example.test/admin/cases?locale=en", { headers: auth.agent }),
       { config },
@@ -226,6 +236,10 @@ test("standalone HTTP runtime serves the same autonomous case contract and admin
     const api = await dispatchHttp(app, { url: "/api/admin/cases?locale=en", headers: auth.agent });
     assert.equal(api.status, 200);
     assert.equal(api.body.realtyCaseQueue.summary.autonomous, 1);
+    const intents = await dispatchHttp(app, { url: "/api/admin/cases/intents", headers: auth.agent });
+    assert.equal(intents.status, 200);
+    assert.deepEqual(intents.body.intents.map((intent) => intent.case_id), ["http-autonomous-1"]);
+    assert.equal(intents.body.intents[0].step_key, "sale_objective");
     assert.equal(readAuditLog(auditLogPath).filter((row) => row.action.startsWith("realty_case_")).length, 2);
   });
 });

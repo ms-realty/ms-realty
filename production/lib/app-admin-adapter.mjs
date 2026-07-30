@@ -155,6 +155,7 @@ import {
   openRealtyCase,
   readRealtyCaseEvents,
 } from "./realty-cases.mjs";
+import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, readPublicContacts } from "./public-contact-vault.mjs";
 import {
   DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
@@ -752,6 +753,12 @@ function realtyCasesPayload(registry, url, config) {
     }),
     config.adminPrincipal || null,
   );
+}
+
+function realtyCaseIntentsPayload(config) {
+  return buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(config.realtyCaseLedgerPath), {
+    now: config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString(),
+  });
 }
 
 function operationalQueuePayload(registry, url, config, { kind, path, titleKey, descriptionKey }) {
@@ -2262,6 +2269,9 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
     if (request.method === "GET" && url.pathname === "/api/admin/pipeline") return jsonResponse(200, pipelinePayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/cases") return htmlResponse(realtyCasesPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/cases") return jsonResponse(200, realtyCasesPayload(registry, url, config));
+    if (request.method === "GET" && url.pathname === "/api/admin/cases/intents") {
+      return jsonResponse(200, realtyCaseIntentsPayload(config));
+    }
     if (request.method === "GET" && url.pathname === "/admin/requests") return htmlResponse(requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/api/admin/requests") return jsonResponse(200, requestsPayload(registry, url, config));
     if (request.method === "GET" && url.pathname === "/admin/viewings") return htmlResponse(viewingsPayload(registry, url, config));

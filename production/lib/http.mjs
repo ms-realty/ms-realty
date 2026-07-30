@@ -142,6 +142,7 @@ import {
   openRealtyCase,
   readRealtyCaseEvents,
 } from "./realty-cases.mjs";
+import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import {
@@ -758,6 +759,10 @@ export function createHttpApp({
       }),
       operatorId,
     );
+  const currentAutonomousRealtyCaseIntents = () =>
+    buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(realtyCaseLedgerPath || undefined), {
+      now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
+    });
   const currentConsentPayload = (requestedLocale, operatorId = null) =>
     renderAdminConsentPayload(
       activeRegistry,
@@ -1188,6 +1193,11 @@ export function createHttpApp({
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/admin/cases/intents") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      return adminJson(200, currentAutonomousRealtyCaseIntents());
     }
 
     if (request.method === "GET" && ["/api/admin/consents", "/admin/consents"].includes(url.pathname)) {
