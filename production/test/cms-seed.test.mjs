@@ -77,6 +77,43 @@ test("price-on-request seed records never retain a numeric price projection", ()
   assert.equal(seed.records[0].facts.price_eur, null);
 });
 
+test("canonical property backfill keeps physical facts pending review and audits unverified zeroes", () => {
+  const physicalFacts = listings.map((listing, index) =>
+    index === 0
+      ? {
+          ...listing,
+          property_type: "apartment",
+          bedrooms: 0,
+          area_sqm: 50,
+          floor: 2,
+          total_floors: 5,
+          land_area_sqm: 0,
+          condition: "ready to review",
+        }
+      : listing,
+  );
+  const seed = buildCmsSeed(registry, { listings: physicalFacts, migrationRecords, routeMap, mediaRows });
+  const listing = seed.records[0];
+  const property = seed.properties.find((candidate) => candidate.id === listing.property);
+  const task = seed.enrichment_tasks.find((candidate) => candidate.property === property.id);
+  const verification = new Map(property.fact_verification.map((fact) => [fact.field, fact.state]));
+
+  assert.equal(property.property_family, "apartment");
+  assert.equal(property.facts.built_area_sqm, 50);
+  assert.equal(property.facts.floor_number, 2);
+  assert.equal(property.facts.total_floors, 5);
+  assert.equal(property.facts.condition, "ready to review");
+  assert.equal(verification.get("built_area_sqm"), "entered_pending_review");
+  assert.equal(verification.get("floor_number"), "entered_pending_review");
+  assert.equal(verification.get("condition"), "entered_pending_review");
+  assert.equal(verification.get("bedrooms_count"), "unknown");
+  assert.equal(verification.get("land_area_sqm"), "unknown");
+  assert.deepEqual(property.zero_value_audit.sort(), ["bedrooms_count", "land_area_sqm"]);
+  for (const field of ["built_area_sqm", "floor_number", "total_floors", "condition", "bedrooms_count", "land_area_sqm"]) {
+    assert.equal(task.fact_fields.includes(field), true);
+  }
+});
+
 test("CMS collection manifest exposes implemented Payload-style contracts only", () => {
   const seed = buildCmsSeed(registry, { listings, migrationRecords, routeMap, mediaRows });
   const manifest = buildCmsCollections(seed);
@@ -136,6 +173,7 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
   const translationFields = new Map(translationsContract.fields.map((field) => [field.name, field]));
   assert.equal(translationFields.get("listing").relationTo, "listings");
   assert.equal(translationFields.get("translation_state").options.includes("approved"), true);
+  assert.equal(translationFields.get("translation_state").options.includes("draft"), true);
 
   const taskContract = manifest.collections.find((collection) => collection.slug === "listing_enrichment_tasks");
   const taskFields = new Map(taskContract.fields.map((field) => [field.name, field]));

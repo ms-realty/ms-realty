@@ -144,10 +144,20 @@
             "title",
             "h1",
             "description",
-            "property_type",
             "location",
+            "property_type",
+            "offer_type",
+            "bedrooms",
+            "bedrooms_not_applicable",
             "price_eur",
-            "area_sqm"
+            "price_on_request",
+            "image_count",
+            "area_sqm",
+            "floor",
+            "total_floors",
+            "land_area_sqm",
+            "condition",
+            "location_precision"
           ]
         },
         {
@@ -239,6 +249,7 @@
       "source": "listings.translations",
       "workflow": [
         "missing",
+        "draft",
         "hermes_drafted",
         "human_edited",
         "approved",
@@ -275,6 +286,7 @@
           "localized": false,
           "options": [
             "missing",
+            "draft",
             "hermes_drafted",
             "human_edited",
             "approved",
@@ -289,6 +301,7 @@
           "localized": false,
           "options": [
             "missing",
+            "draft",
             "hermes_drafted",
             "human_edited",
             "approved",

@@ -50,22 +50,23 @@ function outboxIdempotencyDuplicate(error) {
   return [error?.code, error?.cause?.code, error?.data?.code, error?.data?.cause?.code].includes("23505");
 }
 
-function outboxRecordFor(listing, { eventType = "upsert", changeToken } = {}) {
-  const event = searchOutboxEventForListing(listing, { eventType, changeToken });
+function outboxRecordFor(listing, { eventType = "upsert", changeToken, includeListingRelation = true } = {}) {
+  const { listing: listingId, ...event } = searchOutboxEventForListing(listing, { eventType, changeToken });
   return {
     ...event,
+    ...(includeListingRelation ? { listing: listingId } : {}),
     id: `search-${Buffer.from(event.idempotency_key).toString("base64url")}`,
     attempts: 0,
   };
 }
 
-export async function enqueueListingSearchOutbox({ listing, req, eventType = "upsert", changeToken } = {}) {
+export async function enqueueListingSearchOutbox({ listing, req, eventType = "upsert", changeToken, includeListingRelation = true } = {}) {
   const listingId = relationId(listing);
   if (!listingId || !req?.payload) return;
   try {
     await req.payload.create({
       collection: "search_outbox",
-      data: outboxRecordFor({ id: listingId }, { eventType, changeToken }),
+      data: outboxRecordFor({ id: listingId }, { eventType, changeToken, includeListingRelation }),
       req,
     });
   } catch (error) {
@@ -95,7 +96,8 @@ export async function listingSearchOutboxHook({ doc, operation, req }) {
 }
 
 export async function listingDeleteSearchOutboxHook({ doc, req }) {
-  await enqueueListingSearchOutbox({ listing: doc, req, changeToken: doc?.updatedAt, eventType: "delete" });
+  // After deletion the Listing relation no longer exists, but the immutable event payload retains its id.
+  await enqueueListingSearchOutbox({ listing: doc, req, changeToken: doc?.updatedAt, eventType: "delete", includeListingRelation: false });
   return doc;
 }
 
@@ -110,7 +112,8 @@ export async function propertySearchOutboxHook({ doc, req } = {}) {
 }
 
 export async function propertyDeleteSearchOutboxHook({ doc, req } = {}) {
-  await enqueueListingSearchOutbox({ listing: doc?.legacy_listing_id, req, changeToken: doc?.updatedAt, eventType: "delete" });
+  // The Listing survives a Property delete (its relationship is set NULL), so its search document must be recomputed.
+  await enqueueListingSearchOutbox({ listing: doc?.legacy_listing_id, req, changeToken: doc?.updatedAt, eventType: "upsert" });
   return doc;
 }
 
@@ -144,7 +147,7 @@ const collections = generated.collections.map((input) => {
   if (collection.slug === "listings") {
     return {
       ...collection,
-      hooks: { ...collection.hooks, afterChange: [listingSearchOutboxHook], beforeDelete: [listingDeleteSearchOutboxHook] },
+      hooks: { ...collection.hooks, afterChange: [listingSearchOutboxHook], afterDelete: [listingDeleteSearchOutboxHook] },
     };
   }
   if (collection.slug === "listing_translations") {

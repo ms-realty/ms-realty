@@ -141,7 +141,13 @@ function propertyFactsForListing(listing, snapshot, locationId) {
   const subtype = facts.property_subtype;
   const sourceArea = numberOrNull(snapshot.area_sqm);
   const areaField =
-    family === "commercial" ? "usable_area_sqm" : family === "plot" || family === "agricultural_land" ? "land_area_sqm" : "built_area_sqm";
+    family === "commercial"
+      ? "usable_area_sqm"
+      : family === "hotel"
+        ? "gross_floor_area_sqm"
+        : family === "plot" || family === "agricultural_land"
+          ? "land_area_sqm"
+          : "built_area_sqm";
 
   if (sourceArea !== null && facts[areaField] == null) {
     const result = normalizeImportedFact(sourceArea, {
@@ -158,6 +164,8 @@ function propertyFactsForListing(listing, snapshot, locationId) {
   const propertyFacts = {
     legacy_property_type: facts.legacy_property_type,
     condition: snapshot.condition || null,
+    construction_status: facts.construction_status ?? null,
+    parking_kind: facts.parking_kind ?? null,
     living_area_sqm: facts.living_area_sqm ?? null,
     built_area_sqm: facts.built_area_sqm ?? null,
     usable_area_sqm: facts.usable_area_sqm ?? null,
@@ -169,6 +177,12 @@ function propertyFactsForListing(listing, snapshot, locationId) {
     floor_number: facts.floor_number ?? null,
     total_floors: facts.total_floors ?? null,
     storeys_count: facts.storeys_count ?? null,
+    zoning_status: facts.zoning_status ?? null,
+    utilities_status: facts.utilities_status ?? null,
+    road_access_status: facts.road_access_status ?? null,
+    land_category: facts.land_category ?? null,
+    permanent_use: facts.permanent_use ?? null,
+    permitted_use: facts.permitted_use ?? null,
     public_location_precision: snapshot.location_precision || "approximate",
     primary_area_sqm: derivePrimaryAreaSqm(facts),
   };
@@ -482,7 +496,25 @@ export function buildCmsCollections(seed) {
           collectionField("source_url", "url", { required: true, unique: true }),
           collectionField("facts", "group", {
             required: true,
-            fields: ["title", "h1", "description", "property_type", "location", "price_eur", "area_sqm"],
+            fields: [
+              "title",
+              "h1",
+              "description",
+              "location",
+              "property_type",
+              "offer_type",
+              "bedrooms",
+              "bedrooms_not_applicable",
+              "price_eur",
+              "price_on_request",
+              "image_count",
+              "area_sqm",
+              "floor",
+              "total_floors",
+              "land_area_sqm",
+              "condition",
+              "location_precision",
+            ],
           }),
           collectionField("seo", "group", {
             required: true,
@@ -512,7 +544,7 @@ export function buildCmsCollections(seed) {
         slug: "listing_translations",
         records: translationRecords.length,
         source: "listings.translations",
-        workflow: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
+        workflow: ["missing", "draft", "hermes_drafted", "human_edited", "approved", "published", "stale"],
         publish_requires_human_review: true,
         fields: [
           collectionField("listing", "relationship", { required: true, relationTo: "listings" }),
@@ -520,11 +552,11 @@ export function buildCmsCollections(seed) {
           collectionField("source_locale", "relationship", { required: true, relationTo: "locales" }),
           collectionField("status", "select", {
             required: true,
-            options: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
+            options: ["missing", "draft", "hermes_drafted", "human_edited", "approved", "published", "stale"],
           }),
           collectionField("translation_state", "select", {
             required: true,
-            options: ["missing", "hermes_drafted", "human_edited", "approved", "published", "stale"],
+            options: ["missing", "draft", "hermes_drafted", "human_edited", "approved", "published", "stale"],
           }),
           collectionField("source_hash", "text", { required: true }),
           collectionField("translated_hash", "text", { required: true }),

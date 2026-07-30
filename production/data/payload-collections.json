@@ -166,6 +166,10 @@
               "type": "number"
             },
             {
+              "name": "bedrooms_not_applicable",
+              "type": "checkbox"
+            },
+            {
               "name": "price_eur",
               "type": "number"
             },
@@ -176,6 +180,30 @@
             {
               "name": "image_count",
               "type": "number"
+            },
+            {
+              "name": "area_sqm",
+              "type": "number"
+            },
+            {
+              "name": "floor",
+              "type": "number"
+            },
+            {
+              "name": "total_floors",
+              "type": "number"
+            },
+            {
+              "name": "land_area_sqm",
+              "type": "number"
+            },
+            {
+              "name": "condition",
+              "type": "text"
+            },
+            {
+              "name": "location_precision",
+              "type": "text"
             }
           ]
         },
@@ -357,6 +385,7 @@
           "localized": false,
           "options": [
             "missing",
+            "draft",
             "hermes_drafted",
             "human_edited",
             "approved",
@@ -371,6 +400,7 @@
           "localized": false,
           "options": [
             "missing",
+            "draft",
             "hermes_drafted",
             "human_edited",
             "approved",
@@ -429,6 +459,7 @@
         "source": "listings.translations",
         "workflow": [
           "missing",
+          "draft",
           "hermes_drafted",
           "human_edited",
           "approved",
@@ -520,6 +551,34 @@
             },
             {
               "name": "condition",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "apartment",
+                  "house",
+                  "plot",
+                  "agricultural_land",
+                  "commercial",
+                  "hotel"
+                ]
+              }
+            },
+            {
+              "name": "construction_status",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "apartment",
+                  "house",
+                  "plot",
+                  "agricultural_land",
+                  "commercial",
+                  "hotel"
+                ]
+              }
+            },
+            {
+              "name": "parking_kind",
               "type": "text",
               "custom": {
                 "property_families": [
@@ -640,6 +699,61 @@
                 "property_families": [
                   "house",
                   "hotel"
+                ]
+              }
+            },
+            {
+              "name": "zoning_status",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "plot"
+                ]
+              }
+            },
+            {
+              "name": "utilities_status",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "plot"
+                ]
+              }
+            },
+            {
+              "name": "road_access_status",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "plot",
+                  "agricultural_land"
+                ]
+              }
+            },
+            {
+              "name": "land_category",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "agricultural_land"
+                ]
+              }
+            },
+            {
+              "name": "permanent_use",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "agricultural_land"
+                ]
+              }
+            },
+            {
+              "name": "permitted_use",
+              "type": "text",
+              "custom": {
+                "property_families": [
+                  "commercial"
                 ]
               }
             },
