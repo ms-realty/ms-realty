@@ -29,6 +29,7 @@ import {
   renderAdminListingManagerPayload,
   renderAdminOperationsReportPayload,
   renderAdminOperationalQueuePayload,
+  renderAdminRealtyCasesPayload,
   renderAdminTranslationQueuePayload,
 } from "./admin-payloads.mjs";
 import { appendDocumentChecklistOutcome, buildDocumentChecklistQueue, readDocumentChecklistOutcomes } from "./document-checklists.mjs";
@@ -135,6 +136,12 @@ import {
 import { appendSellerPipeline, createSellerPipelineItem, readSellerPipeline } from "./seller-pipeline.mjs";
 import { appendSellerPipelineOutcome, buildSellerPipelineQueue, readSellerPipelineOutcomes } from "./seller-pipeline-outcomes.mjs";
 import { appendClosedDeal, readDeals } from "./deal-ledger.mjs";
+import {
+  appendRealtyCaseAction,
+  buildRealtyCaseQueue,
+  openRealtyCase,
+  readRealtyCaseEvents,
+} from "./realty-cases.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import {
@@ -302,6 +309,41 @@ function parseBody(request) {
     return output;
   }
   return parseJsonBody(request);
+}
+
+function realtyCaseInput(input) {
+  const output = { ...(input || {}) };
+  if (!output.mandate && (output.mandateRef || output.mandate_ref)) {
+    output.mandate = {
+      ref: output.mandateRef || output.mandate_ref,
+      grantedByRef: output.mandateGrantedByRef || output.mandate_granted_by_ref,
+      signedAt: output.mandateSignedAt || output.mandate_signed_at,
+      expiresAt: output.mandateExpiresAt || output.mandate_expires_at || null,
+      capabilities: String(output.mandateCapabilities || output.mandate_capabilities || "case:*")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    };
+  }
+  if (!output.evidenceRefs && !output.evidence_refs && (output.evidenceRef || output.evidence_ref)) {
+    output.evidenceRefs = [{
+      ref: output.evidenceRef || output.evidence_ref,
+      type: output.evidenceType || output.evidence_type,
+      producerKind: output.evidenceProducerKind || output.evidence_producer_kind,
+      issuedAt: output.evidenceIssuedAt || output.evidence_issued_at || null,
+      digest: output.evidenceDigest || output.evidence_digest || null,
+    }];
+  }
+  return output;
+}
+
+function bindRealtyCaseExecutor(input, principal) {
+  const expectedKind = principal?.roles?.includes("agent") ? "agent" : "human";
+  const submittedKind = String(input?.executorKind || input?.executor_kind || "").trim();
+  if (submittedKind && submittedKind !== expectedKind) {
+    throw new Error("Case executor kind must match the authenticated principal");
+  }
+  return bindAuthenticatedOperator({ ...realtyCaseInput(input), executorKind: expectedKind }, principal);
 }
 
 function redirectApprovalInput(request) {
@@ -502,6 +544,7 @@ export function createHttpApp({
   sellerPipelineOutcomeLedgerPath = null,
   dealLedgerPath = null,
   documentChecklistLedgerPath = null,
+  realtyCaseLedgerPath = null,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
@@ -535,6 +578,7 @@ export function createHttpApp({
   sellerPipelineCreatedAt,
   sellerPipelineOutcomeAt,
   dealClosedAt,
+  realtyCaseRecordedAt,
   slugChangedAt,
   listingQualityGeneratedAt,
   leadSlaGeneratedAt,
@@ -702,6 +746,15 @@ export function createHttpApp({
       requestedLocale,
       buildDocumentChecklistQueue(currentLeads(), readDocumentChecklistOutcomes(documentChecklistLedgerPath || undefined), {
         locale: requestedLocale,
+      }),
+      operatorId,
+    );
+  const currentRealtyCasePayload = (requestedLocale, operatorId = null) =>
+    renderAdminRealtyCasesPayload(
+      activeRegistry,
+      requestedLocale,
+      buildRealtyCaseQueue(readRealtyCaseEvents(realtyCaseLedgerPath || undefined), {
+        now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
       }),
       operatorId,
     );
@@ -1123,6 +1176,15 @@ export function createHttpApp({
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       const payload = currentDocumentChecklistPayload(url.searchParams.get("locale") || "en", principal);
       if (url.pathname === "/admin/documents" || wantsHtml(request, url)) {
+        return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
+      }
+      return adminJson(200, payload);
+    }
+
+    if (request.method === "GET" && ["/api/admin/cases", "/admin/cases"].includes(url.pathname)) {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      const payload = currentRealtyCasePayload(url.searchParams.get("locale") || "en", principal);
+      if (url.pathname === "/admin/cases" || wantsHtml(request, url)) {
         return adminResponse(200, adminHtml(payload), "text/html; charset=utf-8");
       }
       return adminJson(200, payload);
@@ -2354,6 +2416,76 @@ export function createHttpApp({
               has_reference: Boolean(result.outcome.reference),
             },
           });
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const result = openRealtyCase(bindRealtyCaseExecutor(parseBody(request), principal), {
+          filePath: realtyCaseLedgerPath || undefined,
+          recordedAt,
+        });
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_opened" && row.object_id === result.case.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_opened",
+            actor: result.event.actor,
+            objectType: "realty_case",
+            objectId: result.case.id,
+            metadata: {
+              jurisdiction: result.case.jurisdiction,
+              case_type: result.case.case_type,
+              asset_kind: result.case.asset_kind,
+              execution_mode: result.case.execution_mode,
+              workflow_version: result.case.workflow_version,
+            },
+          }, recordedAt);
+        }
+        return adminJson(result.idempotent ? 200 : 201, result);
+      } catch (error) {
+        return adminJson(400, { kind: "bad_request", message: error.message });
+      }
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/cases/actions") {
+      if (!isAdminAuthorized(auth)) return adminUnauthorized();
+      try {
+        const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
+        const result = appendRealtyCaseAction(bindRealtyCaseExecutor(parseBody(request), principal), {
+          filePath: realtyCaseLedgerPath || undefined,
+          recordedAt,
+        });
+        const audited = auditLogPath
+          ? readAuditLog(auditLogPath).some(
+              (row) => row.action === "realty_case_action_recorded" && row.object_id === result.event.id,
+            )
+          : false;
+        if (!audited) {
+          recordAudit({
+            action: "realty_case_action_recorded",
+            actor: result.event.actor,
+            objectType: "realty_case_event",
+            objectId: result.event.id,
+            metadata: {
+              case_id: result.case.id,
+              case_action: result.event.action,
+              step_key: result.event.step_key,
+              execution_mode: result.case.execution_mode,
+              executor_kind: result.event.executor_kind,
+              case_status: result.case.status,
+              progress_percent: result.case.progress_percent,
+            },
+          }, recordedAt);
         }
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {

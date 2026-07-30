@@ -15,6 +15,7 @@ production/data/search-engine-query-report.json
 production/data/hermes-draft-worker-report.json
 production/data/hermes-agent-runtime-report.json
 production/data/audit-log.jsonl
+production/data/realty-case-events.jsonl
 production/data/lead-contact-vault.jsonl
 production/data/public-contact-vault.jsonl
 production/data/payload-runtime-report.json
