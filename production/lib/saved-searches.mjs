@@ -3,6 +3,8 @@ import path from "node:path";
 import { normalizeLeadInput } from "./leads.mjs";
 import { resolvePublicLocale } from "./locales.mjs";
 import { fromRoot } from "./paths.mjs";
+import { searchIntentToQueryFilters } from "./search-intent.mjs";
+import { normalizeSearchRequest } from "./search-request.mjs";
 
 export const DEFAULT_SAVED_SEARCH_LEDGER_PATH = fromRoot("production", "data", "saved-searches.jsonl");
 
@@ -46,6 +48,19 @@ export function normalizeSavedSearchInput(input = {}) {
   };
 }
 
+export function savedSearchIntent(registry, input) {
+  const savedSearchInput = normalizeSavedSearchInput(input);
+  return normalizeSearchRequest(
+    {
+      locale: savedSearchInput.locale || registry.source_locale,
+      query: savedSearchInput.query,
+      filters: savedSearchInput.filters,
+      search_intent: savedSearchInput.search_intent || savedSearchInput.searchIntent || savedSearchInput.intent,
+    },
+    { defaultLocale: registry.source_locale },
+  ).intent;
+}
+
 export function resetSavedSearches(filePath = DEFAULT_SAVED_SEARCH_LEDGER_PATH) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, "");
@@ -63,9 +78,13 @@ export function readSavedSearches(filePath = DEFAULT_SAVED_SEARCH_LEDGER_PATH) {
 
 export function createSavedSearch(registry, input, { matchCount = 0, savedAt = new Date().toISOString() } = {}) {
   const savedSearchInput = normalizeSavedSearchInput(input);
-  const query = String(savedSearchInput.query || "").trim();
-  const filters = savedSearchInput.filters || {};
-  if (typeof filters !== "object" || Array.isArray(filters)) throw new Error("filters must be an object");
+  const searchIntent = savedSearchIntent(registry, savedSearchInput);
+  const query = searchIntent.text_query;
+  const filters = Object.fromEntries(
+    Object.entries(searchIntentToQueryFilters(searchIntent)).filter(
+      ([key, value]) => key !== "property_family" && value !== "" && value !== null && value !== undefined,
+    ),
+  );
   if (!query && !Object.keys(filters).length) throw new Error("query or filters are required");
   if (!savedSearchInput.contact?.name) throw new Error("contact.name is required");
   const channels = reachableChannels(savedSearchInput.contact);
@@ -93,6 +112,7 @@ export function createSavedSearch(registry, input, { matchCount = 0, savedAt = n
     fallback_used: !resolved.available,
     query,
     filters,
+    search_intent: searchIntent,
     contact: savedSearchInput.contact,
     contact_preference: contactPreference,
     alert_consent: true,
@@ -137,6 +157,9 @@ export function assertSavedSearches(rows) {
     if (row.status !== "active") throw new Error("Saved search must stay active");
     if (row.alert_task?.status !== "open") throw new Error("Saved search must create an open alert task");
     if (!FREQUENCIES.has(row.alert_frequency)) throw new Error("Saved search has invalid alert frequency");
+    if (!row.search_intent || row.search_intent.schema_version !== 1) {
+      throw new Error("Saved search must store a versioned SearchIntent");
+    }
   }
   return true;
 }

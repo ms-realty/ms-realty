@@ -24,9 +24,11 @@ import {
   createSavedSearch,
   normalizeSavedSearchInput,
   privacySafeSavedSearch,
+  savedSearchIntent,
 } from "./saved-searches.mjs";
 import { queryPublicSearch } from "./search-engine-sync.mjs";
-import { searchFiltersFromObject, searchFiltersFromParams, searchPageFromParams } from "./search-filters.mjs";
+import { searchIntentToQueryFilters } from "./search-intent.mjs";
+import { normalizeSearchRequest } from "./search-request.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH, appendSellerPipeline, createSellerPipelineItem } from "./seller-pipeline.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH, readTranslationLedger } from "./translation-ledger.mjs";
 
@@ -75,6 +77,8 @@ export function appApiConfigFromEnv(env = process.env) {
     savedSearchLedgerPath: env.MS_REALTY_SAVED_SEARCH_LEDGER_PATH || DEFAULT_SAVED_SEARCH_LEDGER_PATH,
     sellerPipelinePath: env.MS_REALTY_SELLER_PIPELINE_PATH || DEFAULT_SELLER_PIPELINE_PATH,
     search: {
+      engine: env.MS_REALTY_SEARCH_ENGINE,
+      environment: env.NODE_ENV,
       typesense: {
         baseUrl: env.TYPESENSE_URL,
         apiKey: env.TYPESENSE_API_KEY,
@@ -86,6 +90,7 @@ export function appApiConfigFromEnv(env = process.env) {
         indexName: env.MEILI_INDEX || "ms_realty_listings",
       },
       fetchImpl: globalThis.fetch,
+      naturalLanguageEnabled: env.MS_REALTY_SEARCH_NL_INTENT_ENABLED === "true",
     },
     translationLedgerPath: env.MS_REALTY_TRANSLATION_LEDGER_PATH || DEFAULT_TRANSLATION_LEDGER_PATH,
     receivedAt: env.MS_REALTY_RECEIVED_AT,
@@ -253,12 +258,29 @@ function withSearchBackend(result, engineResult) {
   };
 }
 
+function withSearchIntent(result, searchRequest) {
+  return {
+    ...result,
+    search: {
+      ...result.search,
+      intent: searchRequest.intent,
+      natural_language: searchRequest.natural_language,
+    },
+  };
+}
+
 async function routeSearch(requestUrl, registry, seed, config) {
-  const localeCode = requestUrl.searchParams.get("locale") || "bg";
-  const query = requestUrl.searchParams.get("q") || "";
-  const filters = searchFiltersFromParams(requestUrl.searchParams);
-  const sort = requestUrl.searchParams.get("sort") || "recommended";
-  const page = searchPageFromParams(requestUrl.searchParams);
+  let searchRequest;
+  try {
+    searchRequest = normalizeSearchRequest(requestUrl.searchParams, {
+      defaultLocale: requestUrl.searchParams.get("locale") || registry.source_locale,
+      naturalLanguageEnabled: config.search?.naturalLanguageEnabled === true,
+    });
+  } catch (error) {
+    return json(400, { kind: "bad_request", message: error.message });
+  }
+  const { intent, query, filters, sort, page } = searchRequest;
+  const localeCode = intent.locale;
   const translationTasks = currentTranslationTasks(config);
   const localResult = searchRuntimeListings(registry, seed, {
     localeCode,
@@ -268,11 +290,20 @@ async function routeSearch(requestUrl, registry, seed, config) {
     page,
     translationTasks,
   });
-  const engineResult = await queryPublicSearch({
-    ...(config.search || {}),
-    q: query,
-    localeCodes: engineLocaleCodes(seed, registry, localResult),
-  });
+  let engineResult;
+  try {
+    engineResult = await queryPublicSearch({
+      ...(config.search || {}),
+      q: query,
+      intent,
+      localeCodes: engineLocaleCodes(seed, registry, localResult),
+    });
+  } catch (error) {
+    if (String(config.search?.environment || "").toLowerCase() === "production") {
+      return json(503, { kind: "search_unavailable", message: "Search is temporarily unavailable" });
+    }
+    throw error;
+  }
   const result =
     engineResult.engine === "seed_fallback"
       ? localResult
@@ -285,7 +316,7 @@ async function routeSearch(requestUrl, registry, seed, config) {
           translationTasks,
         });
   recordEvent({ type: "search", path: requestUrl.pathname, locale: localeCode, query, filters, sort, page }, config);
-  return json(200, withSearchBackend(result, engineResult));
+  return json(200, withSearchIntent(withSearchBackend(result, engineResult), searchRequest));
 }
 
 function routeLead(request, body, registry, seed, config) {
@@ -393,18 +424,27 @@ function routeLanguageRequest(request, body, registry, config) {
 function routeSavedSearch(request, body, registry, seed, config) {
   try {
     const input = normalizeSavedSearchInput(parseBody(request, body));
-    const filters = searchFiltersFromObject(input.filters);
+    const intent = savedSearchIntent(registry, input);
+    const filters = Object.fromEntries(
+      Object.entries(searchIntentToQueryFilters(intent)).filter(([, value]) => value !== "" && value !== null && value !== undefined),
+    );
     const search = searchRuntimeListings(registry, seed, {
-      localeCode: input.locale || registry.source_locale,
-      query: input.query || "",
+      localeCode: intent.locale,
+      query: intent.text_query,
       filters,
+      sort: intent.sort,
+      page: intent.page,
       pageSize: null,
       translationTasks: currentTranslationTasks(config),
     });
     const priceSnapshot = Object.fromEntries(
       search.cards.map((card) => [card.id, Number(card.price_eur)]).filter(([, price]) => Number.isFinite(price)),
     );
-    const savedSearch = createSavedSearch(registry, { ...input, filters, priceSnapshot }, { matchCount: search.search.total_matches, savedAt: config.savedAt });
+    const savedSearch = createSavedSearch(
+      registry,
+      { ...input, search_intent: intent, priceSnapshot },
+      { matchCount: search.search.total_matches, savedAt: config.savedAt },
+    );
     if (!config.publicContactVaultPath) throw new Error("Public contact delivery storage is not configured");
     const contactVault = config.publicContactVaultPath
       ? appendPublicContact(

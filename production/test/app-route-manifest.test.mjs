@@ -96,7 +96,7 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.match(search.html, /data-mobile-search-filters="true"/);
   assert.match(search.html, /data-mobile-filter-count="1"/);
   assert.match(search.html, /data-filter-form-id="sr-mobile"/);
-  assert.match(search.html, /data-filter-chip="property_type"/);
+  assert.match(search.html, /data-filter-chip="property_family"/);
   assert.match(search.html, /data-card-thumbnail="true"/);
   assert.match(search.html, /<img src="https:\/\/makler-realty\./);
   assert.match(search.html, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
