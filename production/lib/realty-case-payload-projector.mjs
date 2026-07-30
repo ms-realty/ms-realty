@@ -27,7 +27,7 @@ const CASE_MUTABLE_FIELDS = [
   "last_event_action",
   "last_event_at",
 ];
-const FIELDS_BY_COLLECTION = {
+export const REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS = {
   realty_cases: [...CASE_IMMUTABLE_FIELDS, ...CASE_MUTABLE_FIELDS],
   realty_case_events: [
     "workspace_id",
@@ -59,6 +59,7 @@ const FIELDS_BY_COLLECTION = {
     "idempotency_key",
   ],
 };
+const FIELDS_BY_COLLECTION = REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS;
 
 function isRecord(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);

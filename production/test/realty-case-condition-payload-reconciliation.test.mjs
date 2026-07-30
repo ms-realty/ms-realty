@@ -112,6 +112,33 @@ test("condition manifest deterministically projects current state and append-onl
   assert.equal(first.collections.realty_case_condition_events.every((row) => row.idempotency_key.startsWith("mrcc:")), true);
 });
 
+test("condition manifest orders multiple conditions by their parent case reference", () => {
+  const files = ledgers();
+  seededEvents(files);
+  openRealtyCaseCondition(
+    {
+      caseId: "case-condition-payload-1",
+      conditionId: "tax-clearance",
+      type: "municipal_tax_clearance",
+      dueAt: "2026-07-31T11:00:00.000Z",
+      requiredEvidenceProducerRefs: ["municipality://tax-clearance"],
+      actor: "broker-sandanski-1",
+      executorKind: "human",
+    },
+    { filePath: files.conditionLedgerPath, caseLedgerPath: files.caseLedgerPath, recordedAt: "2026-07-30T11:00:00.000Z" },
+  );
+
+  const manifest = readRealtyCaseConditionPayloadManifest({
+    filePath: files.conditionLedgerPath,
+    workspaceId: "workspace-sandanski",
+  });
+
+  assert.deepEqual(
+    manifest.collections.realty_case_conditions.map((row) => row.data.condition_id),
+    ["tax-clearance", "title-clearance"],
+  );
+});
+
 test("condition manifest rejects raw data and source events that violate ledger evidence rules", () => {
   const events = seededEvents(ledgers());
   const privateEvent = clone(events);

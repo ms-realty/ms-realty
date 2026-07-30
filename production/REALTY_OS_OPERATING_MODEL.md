@@ -752,17 +752,18 @@ Acceptance:
 
 ### Slice B — durable domain persistence
 
-Status: a serializable, retry-bounded Payload Local API projector is implemented for the current
-case/event/mandate manifest, with fake-transaction crash/retry coverage and an explicit dry-run/apply
-CLI. It has not been executed against an approved migrated Postgres runtime; condition, evidence, and
-outbox durability remain outside the projector.
+Status: serializable, retry-bounded Payload Local API projectors are implemented for the current
+case/event/mandate and condition manifests, with fake-transaction crash/retry coverage and explicit
+dry-run/apply CLIs. The committed migrations, idempotent projectors, and `case:reconcile` read-back
+have passed against a disposable migrated PostgreSQL runtime. `case:reconcile` uses an explicit
+read-back URL, a workspace-scoped repeatable-read transaction, and reports sanitized drift counts
+only. It is not production-runtime evidence or a source of operational truth.
 
-- apply the normalized PostgreSQL/Payload schema for cases, immutable events, mandate versions,
-  evidence metadata, links, deadlines, and projections;
-- run the committed migration chain against approved Postgres and prove projector read-back
-  reconciliation by IDs/digests;
+- run the committed migration chain against approved PostgreSQL and prove projector read-back
+  reconciliation with a dedicated SELECT-only read-back role;
+- replace the preview local-ledger request path with a workspace-scoped durable writer and
+  transactional outbox before any runtime depends on these projections;
 - extend the transaction path to evidence and outbox only after their source contracts exist;
-- add a durable condition collection/projector and reconcile it with the local condition ledger;
 - keep the manifest reference-only and keep database read-back mandatory before making it a runtime
   source of operational truth;
 - enforce tenant/workspace, uniqueness, immutability, chronological ordering, and least privilege in

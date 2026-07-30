@@ -248,7 +248,8 @@ function sortedCollections(collections) {
   return {
     realty_case_conditions: [...collections.realty_case_conditions].sort(
       (left, right) =>
-        left.data.case_id.localeCompare(right.data.case_id) || left.data.condition_id.localeCompare(right.data.condition_id),
+        left.references.case.match.case_id.localeCompare(right.references.case.match.case_id) ||
+        left.data.condition_id.localeCompare(right.data.condition_id),
     ),
     realty_case_condition_events: [...collections.realty_case_condition_events].sort(
       (left, right) =>

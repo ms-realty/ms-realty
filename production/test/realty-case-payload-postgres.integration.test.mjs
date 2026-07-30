@@ -140,6 +140,31 @@ test(
       run("npm", ["run", "case:conditions:project"], { env, label: "Condition projection", secrets });
       run("npm", ["run", "case:project"], { env, label: "Case projection replay", secrets });
       run("npm", ["run", "case:conditions:project"], { env, label: "Condition projection replay", secrets });
+      const readback = run(process.execPath, [fromRoot("production", "scripts", "run-realty-case-payload-readback.mjs")], {
+        env: {
+          ...env,
+          MS_REALTY_CASE_PROJECTOR_APPLY: "",
+          MS_REALTY_CASE_READBACK_DATABASE_URL: databaseUrl,
+        },
+        label: "Payload read-back",
+        secrets,
+      });
+      const readbackOutput = readback.stdout.trim();
+      assert.equal(readbackOutput.startsWith("{"), true, readbackOutput);
+      assert.deepEqual(JSON.parse(readbackOutput), {
+        kind: "realty_case_payload_readback",
+        workspace_id: "workspace-payload-postgres-it",
+        clean: true,
+        case: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
+        conditions: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
+        scanned: {
+          realty_cases: 1,
+          realty_case_events: 1,
+          realty_case_mandate_versions: 1,
+          realty_case_conditions: 1,
+          realty_case_condition_events: 2,
+        },
+      });
 
       const { Client } = await import("pg");
       client = new Client({ connectionString: databaseUrl });

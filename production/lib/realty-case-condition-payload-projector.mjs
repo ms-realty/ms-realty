@@ -19,7 +19,7 @@ const CONDITION_MUTABLE_FIELDS = [
   "last_event_at",
   "last_actor_ref",
 ];
-const FIELDS_BY_COLLECTION = {
+export const REALTY_CASE_CONDITION_PAYLOAD_PROJECTOR_FIELDS = {
   realty_case_conditions: [...CONDITION_IMMUTABLE_FIELDS, ...CONDITION_MUTABLE_FIELDS],
   realty_case_condition_events: [
     "workspace_id",
@@ -37,6 +37,7 @@ const FIELDS_BY_COLLECTION = {
     "recorded_at",
   ],
 };
+const FIELDS_BY_COLLECTION = REALTY_CASE_CONDITION_PAYLOAD_PROJECTOR_FIELDS;
 const STATUS_BY_LAST_ACTION = {
   condition_opened: "open",
   condition_satisfied: "satisfied",
