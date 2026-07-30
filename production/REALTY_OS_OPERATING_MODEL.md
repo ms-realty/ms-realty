@@ -651,6 +651,9 @@ Implemented in this change:
   Payload's serializable Local API transaction, resolve workspace-scoped relationship IDs, retry
   bounded database races, reject immutable conflicts, and update only mutable projections after
   their immutable ledger rows append; a condition projector requires its parent case to exist first;
+- each successful case projection atomically creates or reuses a reference-only `reconciliation`
+  intent in `realty_case_outbox`, bound to its case projection digest and latest case event. This is
+  internal audit/read-back work only; it is not a provider dispatch, scheduler, or customer action;
 - `npm run case:project` and `npm run case:conditions:project` are scoped dry runs by default. They
   require `MS_REALTY_WORKSPACE_ID`, respect their corresponding ledger-path variables, and require
   `MS_REALTY_CASE_PROJECTOR_APPLY=1` to write; the case projector runs before the condition projector;
@@ -709,7 +712,8 @@ Not yet production-complete:
   reference-only rather than a database source of truth;
 - production multi-writer/reconciliation coverage and a durable request-path writer; the committed
   case and condition workbenches currently write to the local SQLite/JSONL preview ledger before
-  explicit projection, rather than directly to an agency production database;
+  explicit projection, rather than directly to an agency production database. The internal
+  reconciliation intent does not replace either of those missing runtime boundaries;
 - signed structured mandate limits beyond the current capability set;
 - child booking/stay/management-period runs;
 - official-source retrieval, receipt custody, source-refresh monitoring, geographic rules, and
@@ -721,6 +725,7 @@ Not yet production-complete:
 - identity, AML, registry, cadastre, tax, notary, bank, payment, e-signature, portal, messaging,
   accounting, ESTI, AADE, and property-management integrations;
 - provider outbox/inbox, webhook, reconciliation, dead-letter, compensation, and scheduler runtime;
+  `realty_case_outbox` has no claim/lease worker or provider dispatch contract yet;
 - continuous autonomous scheduling, assurance-provider verification, and provider-action dispatch;
   the committed executor is an explicitly invoked local runner over externally supplied result data,
   not a continuously running provider worker;
@@ -762,16 +767,19 @@ Acceptance:
 
 Status: serializable, retry-bounded Payload Local API projectors are implemented for the current
 case/event/mandate and condition manifests, with fake-transaction crash/retry coverage and explicit
-dry-run/apply CLIs. The committed migrations, idempotent projectors, and `case:reconcile` read-back
-have passed against a disposable migrated PostgreSQL runtime. `case:reconcile` uses an explicit
-read-back URL, a workspace-scoped repeatable-read transaction, and reports sanitized drift counts
-only. It is not production-runtime evidence or a source of operational truth.
+dry-run/apply CLIs. A case projector atomically derives one reference-only internal reconciliation
+intent per case projection digest. The committed migrations, idempotent projectors, and
+`case:reconcile` read-back have passed against a disposable migrated PostgreSQL runtime.
+`case:reconcile` uses an explicit read-back URL, a workspace-scoped repeatable-read transaction,
+and reports sanitized drift counts only. Neither it nor the internal intent is production-runtime
+evidence or a source of operational truth.
 
 - run the committed migration chain against approved PostgreSQL and prove projector read-back
   reconciliation with a dedicated SELECT-only read-back role;
 - replace the preview local-ledger request path with a workspace-scoped durable writer and
   transactional outbox before any runtime depends on these projections;
-- extend the transaction path to evidence and outbox only after their source contracts exist;
+- extend the transaction path to evidence and provider-facing outbox work only after their source
+  contracts exist; the committed outbox entry is solely an internal reconciliation intent;
 - keep the manifest reference-only and keep database read-back mandatory before making it a runtime
   source of operational truth;
 - enforce tenant/workspace, uniqueness, immutability, chronological ordering, and least privilege in

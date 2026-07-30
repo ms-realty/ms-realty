@@ -62,6 +62,8 @@ function digest(value) {
   return createHash("sha256").update(stableJson(value)).digest("hex");
 }
 
+export { digest as stableRealtyCasePayloadDigest };
+
 function stableId(collection, workspaceId, identity) {
   return `mrc_${digest([collection, workspaceId, identity]).slice(0, 32)}`;
 }

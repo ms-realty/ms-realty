@@ -1,6 +1,18 @@
-import { REALTY_CASE_PAYLOAD_MANIFEST_VERSION } from "./realty-case-payload-reconciliation.mjs";
+import { REALTY_CASE_PAYLOAD_MANIFEST_VERSION, stableRealtyCasePayloadDigest } from "./realty-case-payload-reconciliation.mjs";
 
 const COLLECTION_ORDER = ["realty_cases", "realty_case_events", "realty_case_mandate_versions"];
+const OUTBOX_COLLECTION = "realty_case_outbox";
+const PROJECTED_COLLECTIONS = [...COLLECTION_ORDER, OUTBOX_COLLECTION];
+const OUTBOX_IMMUTABLE_FIELDS = [
+  "workspace_id",
+  "outbox_id",
+  "idempotency_key",
+  "kind",
+  "destination_ref",
+  "payload_refs",
+  "payload_digest",
+  "not_before",
+];
 const CASE_IMMUTABLE_FIELDS = [
   "workspace_id",
   "case_id",
@@ -197,7 +209,8 @@ export function validateRealtyCasePayloadManifest(manifest) {
   const unknownCollections = Object.keys(manifest.collections).filter((collection) => !COLLECTION_ORDER.includes(collection));
   if (unknownCollections.length) throw new Error(`Payload manifest has unsupported collections: ${unknownCollections.join(", ")}`);
 
-  const caseIds = new Set(rowsFor(manifest, "realty_cases").map((row) => assertRow(row, workspaceId, "realty_cases")));
+  const caseRows = rowsFor(manifest, "realty_cases");
+  const caseIds = new Set(caseRows.map((row) => assertRow(row, workspaceId, "realty_cases")));
   for (const collection of COLLECTION_ORDER.slice(1)) {
     for (const row of rowsFor(manifest, collection)) {
       const caseId = assertRow(row, workspaceId, collection);
@@ -206,7 +219,10 @@ export function validateRealtyCasePayloadManifest(manifest) {
   }
   return {
     workspace_id: workspaceId,
-    planned: Object.fromEntries(COLLECTION_ORDER.map((collection) => [collection, rowsFor(manifest, collection).length])),
+    planned: {
+      ...Object.fromEntries(COLLECTION_ORDER.map((collection) => [collection, rowsFor(manifest, collection).length])),
+      [OUTBOX_COLLECTION]: caseRows.length,
+    },
   };
 }
 
@@ -237,6 +253,7 @@ async function resolveCases(payload, manifest, workspaceId, req, report) {
 }
 
 async function appendRows(payload, manifest, collection, workspaceId, cases, req, report) {
+  const documents = new Map();
   for (const row of rowsFor(manifest, collection)) {
     const externalCaseId = caseReference(row, workspaceId, collection);
     const caseDocument = cases.get(externalCaseId);
@@ -247,12 +264,71 @@ async function appendRows(payload, manifest, collection, workspaceId, cases, req
       : { workspace_id: workspaceId, case: caseDocument.id, version_number: row.data.version_number };
     const current = await findUnique(payload, collection, match, req, `${collection} row`);
     if (!current) {
-      await payload.create({ collection, data: expected, depth: 0, overrideAccess: true, req });
+      const created = await payload.create({ collection, data: expected, depth: 0, overrideAccess: true, req });
+      if (collection === "realty_case_events") documents.set(row.data.event_id, created);
       report.created[collection] += 1;
     } else if (matchingData(current, expected, ["case"])) {
+      if (collection === "realty_case_events") documents.set(row.data.event_id, current);
       report.reused[collection] += 1;
     } else {
       throw new Error(`Payload ${collection} conflicts with immutable source facts`);
+    }
+  }
+  return documents;
+}
+
+function reconciliationOutboxForCase(row, workspaceId) {
+  const caseId = requiredText(row?.data?.case_id, "Payload case id", 160);
+  const lastEventId = requiredText(row?.data?.last_event_id, "Payload case last event id", 160);
+  const projectionDigest = requiredText(row?.projection_digest, "Payload case projection digest", 160);
+  const payloadRefs = {
+    manifest_kind: "realty_case_payload_manifest",
+    manifest_version: REALTY_CASE_PAYLOAD_MANIFEST_VERSION,
+    case_id: caseId,
+    last_event_id: lastEventId,
+    last_event_sequence: row.data.last_event_sequence,
+    case_projection_digest: projectionDigest,
+  };
+  const identityDigest = stableRealtyCasePayloadDigest([OUTBOX_COLLECTION, workspaceId, caseId, projectionDigest]);
+  return {
+    caseId,
+    lastEventId,
+    data: {
+      workspace_id: workspaceId,
+      outbox_id: `mrc_outbox_${identityDigest.slice(0, 32)}`,
+      idempotency_key: `mrc:${OUTBOX_COLLECTION}:${identityDigest.slice(0, 48)}`,
+      kind: "reconciliation",
+      destination_ref: "internal:realty_case_payload_readback",
+      payload_refs: payloadRefs,
+      payload_digest: stableRealtyCasePayloadDigest(payloadRefs),
+      status: "pending",
+      not_before: requiredText(row?.data?.last_event_at, "Payload case last event timestamp", 80),
+      attempt_count: 0,
+    },
+  };
+}
+
+async function appendReconciliationOutbox(payload, manifest, workspaceId, cases, eventDocuments, req, report) {
+  for (const row of rowsFor(manifest, "realty_cases")) {
+    const outbox = reconciliationOutboxForCase(row, workspaceId);
+    const caseDocument = cases.get(outbox.caseId);
+    const eventDocument = eventDocuments.get(outbox.lastEventId);
+    if (!caseDocument?.id || !eventDocument?.id) throw new Error(`Payload case ${outbox.caseId} is missing its projected last event`);
+    const expected = { ...outbox.data, case: caseDocument.id, source_event: eventDocument.id };
+    const current = await findUnique(
+      payload,
+      OUTBOX_COLLECTION,
+      { workspace_id: workspaceId, idempotency_key: outbox.data.idempotency_key },
+      req,
+      `reconciliation outbox for case ${outbox.caseId}`,
+    );
+    if (!current) {
+      await payload.create({ collection: OUTBOX_COLLECTION, data: expected, depth: 0, overrideAccess: true, req });
+      report.created[OUTBOX_COLLECTION] += 1;
+    } else if (matchingData(current, { ...dataForFields(outbox.data, OUTBOX_IMMUTABLE_FIELDS), case: caseDocument.id, source_event: eventDocument.id }, ["case", "source_event"])) {
+      report.reused[OUTBOX_COLLECTION] += 1;
+    } else {
+      throw new Error(`Payload reconciliation outbox for case ${outbox.caseId} conflicts with immutable source facts`);
     }
   }
 }
@@ -279,19 +355,20 @@ async function applyOnce(manifest, payload, validation, attempt) {
   const report = {
     workspace_id: validation.workspace_id,
     planned: validation.planned,
-    created: Object.fromEntries(COLLECTION_ORDER.map((collection) => [collection, 0])),
-    reused: Object.fromEntries(COLLECTION_ORDER.map((collection) => [collection, 0])),
+    created: Object.fromEntries(PROJECTED_COLLECTIONS.map((collection) => [collection, 0])),
+    reused: Object.fromEntries(PROJECTED_COLLECTIONS.map((collection) => [collection, 0])),
     updated: { realty_cases: 0 },
   };
   let committed = false;
   try {
     const { cases, updates } = await resolveCases(payload, manifest, validation.workspace_id, req, report);
-    await appendRows(payload, manifest, "realty_case_events", validation.workspace_id, cases, req, report);
+    const eventDocuments = await appendRows(payload, manifest, "realty_case_events", validation.workspace_id, cases, req, report);
     await appendRows(payload, manifest, "realty_case_mandate_versions", validation.workspace_id, cases, req, report);
     for (const update of updates) {
       await payload.update({ collection: "realty_cases", data: update.data, depth: 0, id: update.id, overrideAccess: true, req });
       report.updated.realty_cases += 1;
     }
+    await appendReconciliationOutbox(payload, manifest, validation.workspace_id, cases, eventDocuments, req, report);
     await payload.db.commitTransaction(transactionId);
     committed = true;
     return { ...report, attempts: attempt };

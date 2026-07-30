@@ -174,17 +174,42 @@ test(
           (SELECT count(*)::int FROM realty_cases) AS cases,
           (SELECT count(*)::int FROM realty_case_events) AS case_events,
           (SELECT count(*)::int FROM realty_case_mandate_versions) AS mandates,
+          (SELECT count(*)::int FROM realty_case_outbox) AS outbox,
           (SELECT count(*)::int FROM realty_case_conditions) AS conditions,
           (SELECT count(*)::int FROM realty_case_condition_events) AS condition_events
       `);
-      assert.deepEqual(counts[0], { cases: 1, case_events: 1, mandates: 1, conditions: 1, condition_events: 2 });
+      assert.deepEqual(counts[0], { cases: 1, case_events: 1, mandates: 1, outbox: 1, conditions: 1, condition_events: 2 });
       const { rows: cases } = await client.query("SELECT id FROM realty_cases");
+      const { rows: caseEvents } = await client.query("SELECT id, event_id, sequence FROM realty_case_events");
+      const { rows: outbox } = await client.query(
+        "SELECT case_id, source_event_id, kind, destination_ref, payload_refs, payload_digest, status, attempt_count FROM realty_case_outbox",
+      );
       const { rows: conditions } = await client.query(
         "SELECT id, case_id, last_event_sequence, status FROM realty_case_conditions",
       );
       const { rows: conditionEvents } = await client.query(
         "SELECT case_id, condition_id, idempotency_key FROM realty_case_condition_events ORDER BY sequence",
       );
+      assert.equal(outbox.length, 1);
+      assert.equal(outbox[0].case_id, cases[0].id);
+      assert.equal(outbox[0].source_event_id, caseEvents[0].id);
+      assert.equal(outbox[0].kind, "reconciliation");
+      assert.equal(outbox[0].destination_ref, "internal:realty_case_payload_readback");
+      assert.equal(outbox[0].status, "pending");
+      assert.equal(Number(outbox[0].attempt_count), 0);
+      assert.deepEqual(Object.keys(outbox[0].payload_refs).sort(), [
+        "case_id",
+        "case_projection_digest",
+        "last_event_id",
+        "last_event_sequence",
+        "manifest_kind",
+        "manifest_version",
+      ]);
+      assert.equal(outbox[0].payload_refs.case_id, "case-payload-postgres-it-1");
+      assert.equal(outbox[0].payload_refs.last_event_id, caseEvents[0].event_id);
+      assert.equal(Number(outbox[0].payload_refs.last_event_sequence), Number(caseEvents[0].sequence));
+      assert.match(outbox[0].payload_digest, /^[a-f0-9]{64}$/);
+      assert.equal(JSON.stringify(outbox[0].payload_refs).includes("client-payload-postgres-it-1"), false);
       assert.equal(conditions[0].case_id, cases[0].id);
       assert.equal(Number(conditions[0].last_event_sequence), 2);
       assert.equal(conditions[0].status, "satisfied");

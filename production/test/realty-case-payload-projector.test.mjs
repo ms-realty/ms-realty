@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { openRealtyCase, readRealtyCaseEvents, resetRealtyCaseLedger } from "../lib/realty-cases.mjs";
+import { appendRealtyCaseAction, openRealtyCase, readRealtyCaseEvents, resetRealtyCaseLedger } from "../lib/realty-cases.mjs";
 import { buildRealtyCasePayloadManifest } from "../lib/realty-case-payload-reconciliation.mjs";
 import { applyRealtyCasePayloadManifest, validateRealtyCasePayloadManifest } from "../lib/realty-case-payload-projector.mjs";
 import { fromRoot } from "../lib/paths.mjs";
@@ -42,7 +42,7 @@ function manifest({ includeFilePath = false } = {}) {
 }
 
 function fakePayload({ failOnCreate = null, raceOnCreate = null } = {}) {
-  const rows = Object.fromEntries(["realty_cases", "realty_case_events", "realty_case_mandate_versions"].map((collection) => [collection, []]));
+  const rows = Object.fromEntries(["realty_cases", "realty_case_events", "realty_case_mandate_versions", "realty_case_outbox"].map((collection) => [collection, []]));
   const calls = { begin: 0, commit: 0, rollback: 0, update: [] };
   let nextId = 1;
   let snapshot = null;
@@ -99,18 +99,61 @@ test("Payload projector writes a complete case in one transaction and is idempot
   const target = fakePayload();
 
   const first = await applyRealtyCasePayloadManifest(source, { payload: target.payload });
-  assert.deepEqual(first.created, { realty_cases: 1, realty_case_events: 1, realty_case_mandate_versions: 1 });
-  assert.deepEqual(first.reused, { realty_cases: 0, realty_case_events: 0, realty_case_mandate_versions: 0 });
+  assert.deepEqual(first.created, { realty_cases: 1, realty_case_events: 1, realty_case_mandate_versions: 1, realty_case_outbox: 1 });
+  assert.deepEqual(first.reused, { realty_cases: 0, realty_case_events: 0, realty_case_mandate_versions: 0, realty_case_outbox: 0 });
   assert.equal(target.calls.commit, 1);
   assert.equal(target.calls.rollback, 0);
   assert.deepEqual(target.calls.transactionOptions, { accessMode: "read write", isolationLevel: "serializable" });
   assert.equal(target.rows.realty_cases.length, 1);
   assert.equal(target.rows.realty_case_events[0].case, target.rows.realty_cases[0].id);
+  const outbox = target.rows.realty_case_outbox[0];
+  assert.equal(outbox.case, target.rows.realty_cases[0].id);
+  assert.equal(outbox.source_event, target.rows.realty_case_events[0].id);
+  assert.equal(outbox.kind, "reconciliation");
+  assert.deepEqual(outbox.payload_refs, {
+    manifest_kind: "realty_case_payload_manifest",
+    manifest_version: 1,
+    case_id: "case-projector-1",
+    last_event_id: target.rows.realty_case_events[0].event_id,
+    last_event_sequence: 1,
+    case_projection_digest: source.collections.realty_cases[0].projection_digest,
+  });
+  assert.equal(JSON.stringify(outbox.payload_refs).includes("contact-buyer-1"), false);
+  outbox.status = "delivered";
+  outbox.attempt_count = 1;
 
   const retry = await applyRealtyCasePayloadManifest(source, { payload: target.payload });
-  assert.deepEqual(retry.created, { realty_cases: 0, realty_case_events: 0, realty_case_mandate_versions: 0 });
-  assert.deepEqual(retry.reused, { realty_cases: 1, realty_case_events: 1, realty_case_mandate_versions: 1 });
+  assert.deepEqual(retry.created, { realty_cases: 0, realty_case_events: 0, realty_case_mandate_versions: 0, realty_case_outbox: 0 });
+  assert.deepEqual(retry.reused, { realty_cases: 1, realty_case_events: 1, realty_case_mandate_versions: 1, realty_case_outbox: 1 });
+  assert.equal(outbox.status, "delivered");
   assert.equal(target.calls.commit, 2);
+});
+
+test("Payload projector records a new reconciliation intent when an immutable case event changes its projection", async () => {
+  const source = manifest({ includeFilePath: true });
+  const target = fakePayload();
+  await applyRealtyCasePayloadManifest(source.manifest, { payload: target.payload });
+  const firstOutbox = target.rows.realty_case_outbox[0];
+  appendRealtyCaseAction(
+    {
+      caseId: "case-projector-1",
+      action: "case_frozen",
+      authorityRef: "broker-sandanski-1",
+      reasonCode: "awaiting_client_instruction",
+      actor: "broker-sandanski-1",
+      executorKind: "human",
+    },
+    { filePath: source.filePath, recordedAt: "2026-07-30T08:10:00.000Z" },
+  );
+
+  const advanced = buildRealtyCasePayloadManifest(readRealtyCaseEvents(source.filePath), { workspaceId: "workspace-sandanski" });
+  const result = await applyRealtyCasePayloadManifest(advanced, { payload: target.payload });
+  assert.equal(result.created.realty_case_events, 1);
+  assert.equal(result.created.realty_case_outbox, 1);
+  assert.equal(result.updated.realty_cases, 1);
+  assert.equal(target.rows.realty_case_outbox.length, 2);
+  assert.notEqual(target.rows.realty_case_outbox[1].idempotency_key, firstOutbox.idempotency_key);
+  assert.equal(target.rows.realty_case_outbox[1].source_event, target.rows.realty_case_events[1].id);
 });
 
 test("Payload projector retries a concurrent unique-key race and advances a stale projection without mutable snapshots", async () => {
@@ -139,6 +182,7 @@ test("Payload projector rolls back partial writes and rejects unresolved manifes
   await assert.rejects(() => applyRealtyCasePayloadManifest(source, { payload: target.payload }), /forced realty_case_events failure/);
   assert.equal(target.calls.rollback, 1);
   assert.equal(target.rows.realty_cases.length, 0);
+  assert.equal(target.rows.realty_case_outbox.length, 0);
 
   const blocked = clone(source);
   blocked.reconciliation.ready_for_import = false;
@@ -146,6 +190,18 @@ test("Payload projector rolls back partial writes and rejects unresolved manifes
   assert.throws(() => validateRealtyCasePayloadManifest(blocked), /unresolved source gaps/);
   await assert.rejects(() => applyRealtyCasePayloadManifest(blocked, { payload: preflightTarget.payload }), /unresolved source gaps/);
   assert.equal(preflightTarget.calls.begin, 0);
+});
+
+test("Payload projector rolls back a complete projection when its internal reconciliation intent cannot persist", async () => {
+  const source = manifest();
+  const target = fakePayload({ failOnCreate: "realty_case_outbox" });
+
+  await assert.rejects(() => applyRealtyCasePayloadManifest(source, { payload: target.payload }), /forced realty_case_outbox failure/);
+  assert.equal(target.calls.rollback, 1);
+  assert.equal(target.rows.realty_cases.length, 0);
+  assert.equal(target.rows.realty_case_events.length, 0);
+  assert.equal(target.rows.realty_case_mandate_versions.length, 0);
+  assert.equal(target.rows.realty_case_outbox.length, 0);
 });
 
 test("Payload projector detects an immutable append conflict instead of rewriting a ledger row", async () => {
@@ -186,6 +242,6 @@ test("Payload projector CLI defaults to a scoped dry run against the requested l
   assert.deepEqual(JSON.parse(run.stdout), {
     dry_run: true,
     workspace_id: "workspace-sandanski",
-    planned: { realty_cases: 1, realty_case_events: 1, realty_case_mandate_versions: 1 },
+    planned: { realty_cases: 1, realty_case_events: 1, realty_case_mandate_versions: 1, realty_case_outbox: 1 },
   });
 });
