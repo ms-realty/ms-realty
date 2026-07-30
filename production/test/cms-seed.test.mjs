@@ -99,7 +99,10 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
 
   const toursContract = manifest.collections.find((collection) => collection.slug === "listing_tours");
   const tourFields = new Map(toursContract.fields.map((field) => [field.name, field]));
-  assert.deepEqual(tourFields.get("panorama_url").required_when, ["approved", "published"]);
+  assert.deepEqual(tourFields.get("provider").options, ["photo-sphere-viewer", "supersplat-viewer"]);
+  assert.equal(tourFields.get("panorama_url").required_when, undefined);
+  assert.equal(tourFields.get("viewer_url").type, "url");
+  assert.equal(tourFields.get("review_status").options.includes("needs_viewer_upload"), true);
   assert.equal(tourFields.get("accessibility_caption").localized, true);
 });
 
@@ -119,6 +122,7 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
   assert.equal(facts.fields.some((field) => field.name === "settlement_ekatte" && field.type === "text"), true);
   assert.equal(mediaConfig.fields.find((field) => field.name === "url").type, "text");
   assert.equal(toursConfig.fields.find((field) => field.name === "fallback_gallery").fields[0].name, "url");
+  assert.equal(toursConfig.fields.find((field) => field.name === "viewer_url").type, "text");
 });
 
 test("generated CMS seed file is valid when present", () => {

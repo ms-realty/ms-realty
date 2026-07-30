@@ -29,6 +29,12 @@ test("Payload config exposes generated CMS collections behind an admin runtime",
       .find((collection) => collection.slug === "listing_translations")
       .fields.some((field) => field.name === "locale" && field.relationTo === "locales"),
   );
+  assert.equal(
+    resolved.collections
+      .find((collection) => collection.slug === "listing_tours")
+      .fields.some((field) => field.name === "viewer_url" && field.type === "text"),
+    true,
+  );
 
   const payloadLayout = fs.readFileSync("app/(payload)/layout.js", "utf8");
   const payloadAdminCss = fs.readFileSync("app/(payload)/payload-admin.css", "utf8");

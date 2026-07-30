@@ -28,6 +28,7 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /PHOTO_SPHERE_VIEWER_CSS_URL = "\/vendor\/photo-sphere-viewer\.css"/);
   assert.match(PUBLIC_APP_JS, /function loadPhotoSphereViewer/);
   assert.doesNotMatch(PUBLIC_APP_JS, /esm\.sh|jsdelivr/);
+  assert.doesNotMatch(PUBLIC_APP_JS, /supersplat/i);
   assert.match(PUBLIC_APP_JS, /\[data-photo-sphere-viewer="psv-listing-tour"\]/);
   assert.match(PUBLIC_APP_JS, /data-panorama-url/);
   assert.match(PUBLIC_APP_JS, /function isApprovedPanoramaUrl/);
@@ -107,6 +108,10 @@ test("admin client enhances the reviewed 360 form without disabling lead queue f
   assert.match(ADMIN_APP_JS, /initTourEditor\(\);/);
   assert.match(ADMIN_APP_JS, /data-tour-editor-form/);
   assert.match(ADMIN_APP_JS, /function tourPayload/);
+  assert.match(ADMIN_APP_JS, /function syncTourProviderInputs/);
+  assert.match(ADMIN_APP_JS, /data-tour-provider/);
+  assert.match(ADMIN_APP_JS, /viewer\.required = isSupersplat/);
+  assert.match(ADMIN_APP_JS, /form\.checkValidity\(\)/);
   assert.match(ADMIN_APP_JS, /credentials: "same-origin"/);
   assert.match(ADMIN_APP_JS, /payload\.is_public !== true/);
   assert.match(ADMIN_APP_JS, /data-tour-review-status", "available/);

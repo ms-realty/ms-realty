@@ -327,6 +327,7 @@
       "source": "listings.tour",
       "workflow": [
         "needs_panorama_upload",
+        "needs_viewer_upload",
         "review_required",
         "approved",
         "published"
@@ -339,7 +340,8 @@
           "required": true,
           "localized": false,
           "options": [
-            "photo-sphere-viewer"
+            "photo-sphere-viewer",
+            "supersplat-viewer"
           ]
         },
         {
@@ -354,10 +356,18 @@
           "type": "url",
           "required": false,
           "localized": false,
-          "required_when": [
-            "approved",
-            "published"
-          ]
+          "admin": {
+            "description": "Required for approved Photo Sphere Viewer tours."
+          }
+        },
+        {
+          "name": "viewer_url",
+          "type": "url",
+          "required": false,
+          "localized": false,
+          "admin": {
+            "description": "Required for approved SuperSplat Viewer tours."
+          }
         },
         {
           "name": "thumbnail_url",
@@ -394,6 +404,7 @@
           "localized": false,
           "options": [
             "needs_panorama_upload",
+            "needs_viewer_upload",
             "review_required",
             "approved",
             "published"

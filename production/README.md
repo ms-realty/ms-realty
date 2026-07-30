@@ -32,8 +32,8 @@ What it proves now:
 - Generated `sitemap.xml` and `robots.txt` from approved localized sitemap entries.
 - Canonical CMS seed records composed from crawl, route, translation, and media evidence.
 - Moderated public media contract that separates imported gallery photos from review-gated floor-plan/video/tour assets.
-- Draft Photo Sphere Viewer 360 tour fields with required gallery fallback policy.
-- Authenticated 360 tour approval endpoint and ledger; approved tours overlay public listing routes with Photo Sphere Viewer mount data.
+- Draft Photo Sphere Viewer and SuperSplat Viewer tour fields with required gallery fallback policy.
+- Authenticated tour approval endpoint and ledger; approved panorama tours overlay public listing routes with Photo Sphere Viewer mount data, while approved 3D tours link to a reviewed HTTPS static viewer.
 - Public route fixtures for locale-prefixed listing/search/contact/guide/fallback routes.
 - Locale homepages with search, seller, contact, location, and featured listing paths.
 - Crawlable location pages generated from reviewed listing inventory.
@@ -202,7 +202,10 @@ loopback-only Caddy boundary. Payload keeps its own login and first-admin setup 
 
 Approved 360 tours load Photo Sphere Viewer from the locally bundled
 `/vendor/photo-sphere-viewer.js` and `/vendor/photo-sphere-viewer.css` assets. The Docker
-preview does not depend on an external viewer CDN.
+preview does not depend on an external viewer CDN. Approved SuperSplat tours open a reviewed
+HTTPS static viewer page in a separate tab; the public app does not bundle or invoke a GPU
+reconstruction service. See [3D-tour pilot](3d-tour-pilot.md) for the private capture,
+reconstruction, review, and deployment handoff.
 
 The compose stack keeps CRM/CMS JSONL preview state and the admin locale registry in the
 named `local-dev-app-data` Docker volume. App rebuilds, recreates, and `npm run docker:down`

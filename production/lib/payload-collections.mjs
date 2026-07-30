@@ -52,7 +52,10 @@ function cleanField(field) {
     type: field.type === "url" ? "text" : field.type,
   };
   if (field.type === "url") {
-    payloadField.admin = { ...(payloadField.admin || {}), description: "URL field from migration manifest." };
+    payloadField.admin = {
+      ...(payloadField.admin || {}),
+      description: payloadField.admin?.description || "URL field from migration manifest.",
+    };
   }
   if (requiredWhen) {
     payloadField.admin = {

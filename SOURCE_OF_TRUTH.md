@@ -115,7 +115,7 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 | Database | **PostgreSQL** | Canonical business data; keep Property identity separate from Listing publication |
 | Search | **Typesense or Meilisearch** | Both prototyped with real data; final pick after BG/RU transliteration + geo + rebuild-speed testing |
 | Maps | **MapLibre GL JS** | No Google billing; Google optional only for geocoding if justified |
-| 360 tours | **Photo Sphere Viewer** (Pannellum/Marzipano as fallbacks) | Gated approval overlay; WebGL fallback gallery required |
+| 360 / 3D tours | **Photo Sphere Viewer** plus self-hosted **SuperSplat Viewer** exports | Gated approval overlay; mandatory caption and gallery fallback |
 | Video | **Video.js + HLS.js** | Where adaptive playback is needed |
 | Workers/queues | App-owned queues | Imports, sitemap gen, media processing, saved-search alerts, stale checks, CRM reminders, AI jobs |
 | Automation (non-critical) | **n8n**, self-hosted, locked down | Internal experiments only — never the source of truth |
@@ -264,13 +264,16 @@ source CMS or enriched extraction fills them; production search ranking must not
 
 Pipeline supports: photo gallery + alt-text workflow; **broker/editor moderation before publish**;
 floor plans; short vertical video; long walkthrough video; **360 panorama via Photo Sphere Viewer**;
-optional multi-room hotspot tours; low-bandwidth mobile behavior. **WebGL fallback is mandatory** — a
-normal gallery and accessible caption must always work.
+and reviewer-approved 3D Gaussian-splat tours through a self-hosted SuperSplat Viewer export.
+**WebGL fallback is mandatory** — a normal gallery and accessible caption must always work.
 
-First production implementation is the **gated approval overlay**: imported listings start with draft
-tour fields; only reviewer-approved panorama rows become public Photo Sphere Viewer mounts. Imported
-crawl media is normalized into public gallery candidates; floor-plan/video/tour assets stay
-review-gated until explicitly approved. No unreviewed crawl media is published as a public 360 panorama.
+The gated approval overlay accepts two explicit providers. A reviewer-approved panorama becomes a
+Photo Sphere Viewer mount. A phone-video 3D tour is reconstructed privately on an authorized GPU
+worker, cleaned and exported as a static SuperSplat Viewer app, then approved with an HTTPS viewer
+URL. The public listing opens that viewer in a separate tab; it does not embed a third-party viewer,
+accept raw-video uploads, or expose the reconstruction worker. Imported crawl media remains
+review-gated until explicitly approved. The operating procedure is
+[production/3d-tour-pilot.md](production/3d-tour-pilot.md).
 
 ---
 
@@ -513,7 +516,7 @@ Phases gate by dependency (each ships when its predecessor is proven), not by a 
 | **P1 · Migration model** | Crawl CSVs → structured migration DB; reviewer UI for URL classification; redirect-map editor; metadata-gap + media-reconciliation dashboards; GSC/Yandex/backlink/analytics joins | **Operator workflow implemented; human evidence incomplete.** The SQLite inventory, reviewer UI/API, import/export workbooks, terminal-decision validator, and evidence join are built. All 165 listing redirects are reviewed; 292 page/post/taxonomy decisions and the external exports remain blocked inputs. |
 | **P2 · Production public site** | Server-rendered routes, listing/search/location/seller/contact/guide pages, hreflang/canonical/schema, sitemap gen | **Implemented and browser-audited locally** across phone/desktop and BG/EN/DE/NL/RU/EL/HE; only human-approved translations index, fallback-language content is labelled/noindex, and listing claims use reviewed facts/media only. Production cutover remains gated by P6. |
 | **P3 · CMS & CRM** | Payload content runtime, property editor, media manager, translation workflow, dynamic locale registry (BG/RU/EN admin), lead inbox, contacts/accounts, consent/documents, buyer/seller pipelines, viewing/calendar/tasks | **Implemented and browser-audited locally** with encrypted contact vaults, attributable role-scoped mutations, append-only audit/activity, assignment, matching, distinct communication threads, delivery outcomes, publication schedules, and operations reports. Payload/Postgres migrations and admin runtime are proven locally; production operator initialization, durable provider storage, and deployment proof remain external work. |
-| **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer production; video/floor-plan; media fallback/captions | Both engines sync/query 167 reviewed locale documents locally; facets, pagination, cross-keyboard Cyrillic/Latin matching, saved-search matching, human-reviewed media, gallery fallbacks, and gated 360 tours are implemented. Final live engine provisioning and geo/map behavior remain blocked on provider credentials and reviewed coordinates. |
+| **P4 · Search, media & tours** | Final Typesense/Meilisearch index + worker; saved searches/alerts; Photo Sphere Viewer and static SuperSplat 3D-tour handoff; video/floor-plan; media fallback/captions | Both engines sync/query 167 reviewed locale documents locally; facets, pagination, cross-keyboard Cyrillic/Latin matching, saved-search matching, human-reviewed media, gallery fallbacks, and gated 360 / 3D tour publishing are implemented. A real phone-video reconstruction still requires an authorized GPU worker and broker review. Final live engine provisioning and geo/map behavior remain blocked on provider credentials and reviewed coordinates. |
 | **P5 · Automation & AI** | Deterministic workers; broker reminders; stale checks; translation/SEO tasks; **Hermes** (self-hosted Nous open-weight) draft assistants with audit logs | Deterministic workflow truth, human approval boundaries, translation coverage/rollout, draft dispatch/worker validation, and audit contracts are implemented. Hermes still has no public/customer write capability; a real self-hosted Hermes/private-model endpoint and live worker report remain required. |
 | **P6 · Launch readiness** | Production crawl diff; redirect-chain + sitemap/robots + schema validation; accessibility QA; performance budgets; analytics + monitoring; backup/rollback plan; **legacy media mirror**; **per-locale content parity** | Local build/runtime, mobile/RTL/browser QA, privacy analytics, and a checksummed backup/restore drill across Payload/Postgres plus CRM/CMS/evidence volumes are proven. The 457-row workbook still has 292 unresolved page/post/taxonomy URLs; **launch remains blocked on those reviews, Search Console/Yandex/backlink exports, the complete 165-row human listing review, provisioned live search/Hermes/Payload reports, and a real encrypted off-site backup/DR policy**. |
 
