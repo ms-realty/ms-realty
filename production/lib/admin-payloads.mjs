@@ -97,6 +97,28 @@ export function renderAdminOperationsReportPayload(registry, requestedLocale, re
   };
 }
 
+export function renderAdminRealtyCasesPayload(registry, requestedLocale, realtyCaseQueue, operator = null) {
+  const workspace = renderAdminWorkspace({ registry, requestedLocale });
+  return {
+    kind: "admin_realty_cases",
+    status: 200,
+    locale: workspace.locale,
+    lang: workspace.lang,
+    dir: workspace.dir,
+    path: "/admin/cases",
+    canonical: "/admin/cases",
+    indexable: false,
+    metadata: {
+      title: `Transaction cases | MS Realty`,
+      description:
+        "Manual and autonomous purchase, sale, rental, short-stay, and property-management cases on one evidence-gated workflow.",
+      robots: "noindex,nofollow",
+    },
+    workspace: workspaceWithOperator(workspace, operator),
+    realtyCaseQueue,
+  };
+}
+
 export function renderAdminOperationalQueuePayload(payload, { kind, path, titleKey, descriptionKey }) {
   const copy = payload.workspace.copy;
   return {

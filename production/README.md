@@ -133,6 +133,9 @@ What it proves now:
 - Public cards expose only reviewed/renderable gallery counts and label fallback source-language content without making it indexable.
 - Search normalizes accents and Cyrillic/Latin keyboard variants in both runtime matching and Typesense/Meilisearch documents without manufacturing translations.
 - Task-first BG/RU/EN broker routes cover Today, leads, contacts/accounts, consent, documents, buyer/renter and seller pipelines, requests, viewings, reports, activity, listings, translations, and migration review.
+- Versioned BG/GR `RealtyCase` workflows cover buying, selling, long-term rental, short-term rental, land/new-build/commercial work, and property management in manual or autonomous mode.
+- RealtyCase actions enforce signed-mandate capabilities, agent assurance, chronological phase progression, accepted external evidence, optional-step authority, freeze/resume, and complete-close gates.
+- Trusted `agent` credentials are limited to the case workbench/API and cannot bypass the mandate through broker-wide operational endpoints.
 - Role-scoped, attributable operations include broker-originated intake, manual assignment, lead next actions, inventory matching, publication schedules, bulk status changes, consent withdrawal, document outcomes, communication threads, delivery outcomes, and entity timelines.
 - Local recovery snapshots quiesce writes and checksum Payload/Postgres plus CRM/CMS and evidence volumes; restore requires explicit confirmation, validates secret compatibility and archive paths, retains a rollback snapshot, then rebuilds migrations, search, and runtime reports.
 
@@ -261,6 +264,8 @@ Useful operator endpoints:
 - `GET /api/admin/cms-collections` returns the implemented CMS collection contract manifest.
 - `POST /mcp` is the bounded remote MCP endpoint for approved ChatGPT/Codex operator tools; see `MCP_OPERATOR_SETUP_RU.md` before exposing it to staff.
 - `GET /api/admin/payload-collections` returns Payload-compatible collection configs generated from that manifest.
+- `GET /admin/cases?locale=bg|ru|en` and `GET /api/admin/cases` return the RealtyCase queue for both human and autonomous execution.
+- `POST /api/admin/cases` opens a versioned BG/GR case; `POST /api/admin/cases/actions` advances, blocks, reopens, freezes, resumes, changes mode, closes, or cancels it through the same authority/evidence contract.
 - `GET /admin/requests?locale=bg|ru|en` and `GET /api/admin/requests` return the broker queue for saved-search alerts and language requests. Private contact values are decrypted only for this authenticated, `no-store` response.
 - `GET /admin/pipeline?locale=bg|ru|en` and `GET /api/admin/pipeline` return the buyer/renter operating queue, derived from attributed qualification outcomes plus actual viewing and closed-deal ledgers.
 - `POST /api/admin/lead-pipeline/outcome` records qualification, offer/application, due-diligence/contract/lease, loss/reopen, and internal-note transitions. The authenticated principal replaces any actor supplied by the browser.
@@ -280,12 +285,13 @@ MS_REALTY_ADMIN_CREDENTIALS_JSON='[{"id":"broker_bg","token":"a-long-random-bear
 
 The registry supersedes `MS_REALTY_ADMIN_TOKEN` when configured. Keep every
 token only in deployment secrets; never commit this value. Every registry row
-must declare one or more supported roles: `admin`, `broker`, `editor`, or
-`translator`; rotated credentials for the same operator must keep the same
+must declare one or more supported roles: `admin`, `broker`, `editor`,
+`translator`, or `agent`; rotated credentials for the same operator must keep the same
 roles. Broker accounts can operate CRM workflows and read listing facts,
 editors own listing/media changes and approved translation publication,
 translators can draft and approve translations but cannot publish them, and
-only admins can enter commission values or change launch evidence. Unauthorized
+trusted agents can access only the mandate-enforced RealtyCase routes. Only
+admins can enter commission values or change launch evidence. Unauthorized
 routes return a capability-specific `403 forbidden` response and are omitted
 from the authenticated workspace navigation.
 
@@ -318,6 +324,10 @@ is a deterministic test/smoke timestamp only; production should use wall-clock t
 Set `MS_REALTY_LEAD_PIPELINE_OUTCOME_LEDGER_PATH` to durable private storage for
 buyer/renter milestones. `MS_REALTY_LEAD_PIPELINE_OUTCOME_AT` is a deterministic
 test/smoke timestamp only; production should use wall-clock time.
+Set `MS_REALTY_CASE_LEDGER_PATH` to durable private storage for RealtyCase
+events. `MS_REALTY_CASE_RECORDED_AT` is a deterministic test/smoke timestamp
+only; production should use wall-clock time. The complete operating and
+integration contract is in `production/REALTY_OS_OPERATING_MODEL.md`.
 Set `MS_REALTY_*_LEDGER_PATH` variables only when production append ledgers
 need to live outside `production/data/`.
 Set `MS_REALTY_LOCALE_REGISTRY_PATH` when admin-added locales must persist

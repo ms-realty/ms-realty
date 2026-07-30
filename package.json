@@ -97,19 +97,21 @@
     "@payloadcms/next": "3.85.2",
     "@payloadcms/translations": "3.85.2",
     "@photo-sphere-viewer/core": "5.14.3",
-    "next": "16.2.11",
+    "next": "16.2.12",
     "payload": "3.85.2",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "sharp": "^0.35.3",
+    "sharp": "0.35.3",
     "zod": "4.2.0"
   },
   "overrides": {
     "@esbuild-kit/core-utils": {
       "esbuild": "0.25.12"
     },
-    "dompurify": "3.4.11",
-    "postcss": "^8.5.18"
+    "dompurify": "3.4.12",
+    "fast-uri": "3.1.4",
+    "postcss": "8.5.25",
+    "sharp": "0.35.3"
   },
   "devDependencies": {
     "@cloudflare/containers": "^0.3.7",

@@ -6,13 +6,14 @@ const CREDENTIALS_ENV = "MS_REALTY_ADMIN_CREDENTIALS_JSON";
 const OPERATOR_ID = /^[a-z0-9][a-z0-9._-]{1,63}$/i;
 const MIN_OPERATOR_TOKEN_LENGTH = 24;
 
-export const ADMIN_ROLES = ["admin", "broker", "editor", "translator"];
+export const ADMIN_ROLES = ["admin", "broker", "editor", "translator", "agent"];
 
 const ROLE_CAPABILITIES = {
   admin: ["*"],
-  broker: ["workspace:read", "operations:read", "operations:write", "content:read", "activity:read"],
+  broker: ["workspace:read", "operations:read", "operations:write", "cases:read", "cases:write", "content:read", "activity:read"],
   editor: ["workspace:read", "content:read", "content:write", "translations:read", "translations:write", "translations:publish", "activity:read"],
   translator: ["workspace:read", "content:read", "translations:read", "translations:write", "activity:read"],
+  agent: ["workspace:read", "cases:read", "cases:write", "activity:read"],
 };
 
 const OPERATIONS_READ_PATHS = new Set([
@@ -119,6 +120,8 @@ export function requiredAdminCapability(method, pathname) {
   const verb = String(method || "GET").toUpperCase();
   if (pathname === "/admin") return "workspace:read";
   if (verb === "GET" && ["/admin/activity", "/api/admin/activity"].includes(pathname)) return "activity:read";
+  if (verb === "GET" && ["/admin/cases", "/api/admin/cases"].includes(pathname)) return "cases:read";
+  if (verb !== "GET" && ["/api/admin/cases", "/api/admin/cases/actions"].includes(pathname)) return "cases:write";
   if (verb === "GET" && OPERATIONS_READ_PATHS.has(pathname)) return "operations:read";
   if (verb === "GET" && CONTENT_READ_PATHS.has(pathname)) return "content:read";
   if (verb === "GET" && TRANSLATION_READ_PATHS.has(pathname)) return "translations:read";
@@ -137,6 +140,7 @@ export function requiredAdminCapability(method, pathname) {
 
 export function adminHomePath(principal) {
   if (principal?.roles?.includes("admin") || principal?.roles?.includes("broker")) return "/admin/today";
+  if (principal?.roles?.includes("agent")) return "/admin/cases";
   if (principal?.roles?.includes("editor")) return "/admin/listings";
   if (principal?.roles?.includes("translator")) return "/admin/translations";
   return "/admin";
