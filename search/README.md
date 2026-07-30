@@ -27,6 +27,37 @@ npm run search:query:smoke
 Set `MS_REALTY_LOCALE_REGISTRY_PATH` and `MS_REALTY_LISTING_EDIT_LEDGER_PATH`
 when building fixtures from mounted production locale/listing-review state.
 
+## Approved Projection and Benchmark Baseline
+
+The production rebuild input is a joined listing/approval JSON file. It is
+fail-closed: a row is emitted only when its explicit approval says
+`publication_state=published`, `translation_human_approved=true`, and
+`locale_indexable=true`; unverified facts and internal coordinates are never
+written to the projection.
+
+Production search also requires one explicit runtime choice:
+`MS_REALTY_SEARCH_ENGINE=typesense` or `MS_REALTY_SEARCH_ENGINE=meilisearch`.
+It does not fall through to the other provider or to seed data when the chosen
+engine is unavailable.
+
+```bash
+npm run search:projection -- --input /secure/joined-listings.json --out /tmp/ms-realty-approved-search
+```
+
+The no-Docker benchmark harness has a separate tested-image baseline of
+Typesense `30.2` and Meilisearch `v1.11.3`. It starts no services and does not
+change `production/docker-compose.local-production.yml`.
+
+```bash
+npm run search:benchmark -- \
+  --typesense-url "$TYPESENSE_URL" --typesense-key "$TYPESENSE_API_KEY" \
+  --meili-url "$MEILI_URL" --meili-key "$MEILI_API_KEY" \
+  --out /tmp/ms-realty-search-benchmark.json
+```
+
+If you launch temporary containers for this benchmark, stop and remove only
+those explicitly named benchmark containers after preserving the report.
+
 Generated files:
 
 - `search/data/listings.json` - 165 source listings used by CMS/import prototypes.

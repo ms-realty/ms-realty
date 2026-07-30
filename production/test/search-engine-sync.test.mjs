@@ -7,10 +7,26 @@ import { spawn, spawnSync } from "node:child_process";
 import {
   assertSearchEngineQueryReport,
   assertSearchEngineSyncReport,
+  approvedSearchSchema,
+  buildApprovedSearchProjection,
+  createSearchRebuildPlan,
+  createSearchRollbackPlan,
+  enqueueSearchOutbox,
+  processSearchOutbox,
   queryPublicSearch,
+  projectApprovedSearchDocument,
+  readSearchOutbox,
+  reconcileSearchOutbox,
+  resetSearchOutbox,
+  rollbackSearchEngineRebuild,
   runSearchEngineQuerySmoke,
+  runSearchEngineRebuild,
   runSearchEngineSync,
+  selectSearchRuntime,
   syncTypesense,
+  typesenseFilterForIntent,
+  versionedSearchTarget,
+  writeApprovedSearchProjection,
 } from "../lib/search-engine-sync.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -103,6 +119,40 @@ test("public search queries Typesense first with only reviewed locale documents"
   });
 });
 
+test("selected Typesense receives the validated exact and structured intent", async () => {
+  await withSearchServer(async (baseUrl, calls) => {
+    await queryPublicSearch({
+      engine: "typesense",
+      environment: "production",
+      typesense: { baseUrl, apiKey: "typesense-key" },
+      localeCodes: ["bg"],
+      q: "ignored lexical query",
+      intent: {
+        locale: "bg",
+        exact_reference: "MS-CRAWL-0001",
+        property_family: "commercial",
+        offer_type: "rent",
+        price_max: 120000,
+        map_bounds: "23,41,24,42",
+      },
+    });
+
+    assert.equal(calls.length, 1);
+    const request = new URL(`http://search.test${calls[0].url}`);
+    assert.equal(request.searchParams.get("q"), "MS-CRAWL-0001");
+    assert.equal(request.searchParams.get("num_typos"), "0");
+    assert.equal(request.searchParams.get("drop_tokens_threshold"), "0");
+    const filter = request.searchParams.get("filter_by");
+    assert.match(filter, /publication_state:=published/);
+    assert.match(filter, /listing_status:=available/);
+    assert.match(filter, /property_family:=`commercial`/);
+    assert.match(filter, /offer_type:=`rent`/);
+    assert.match(filter, /price_amount:<=120000/);
+    assert.match(filter, /public_longitude:>=23/);
+    assert.match(filter, /listing_reference:=`MS-CRAWL-0001`/);
+  });
+});
+
 test("public search uses Meilisearch only when Typesense is unavailable", async () => {
   await withSearchServer(
     async (baseUrl, calls) => {
@@ -151,6 +201,251 @@ test("public search labels an unconfigured backend as a local seed fallback", as
   assert.equal(result.engine, "seed_fallback");
   assert.equal(result.total, null);
   assert.deepEqual(result.unavailable_engines, ["typesense", "meilisearch"]);
+});
+
+test("approved search projection omits pending and private facts", () => {
+  const listing = {
+    id: "MS-2026-0001",
+    listing_reference: "MS-2026-0001",
+    locale: "bg",
+    locale_path: "/bg/imoti/MS-2026-0001",
+    title: "Verified apartment",
+    description: "Approved public description.",
+    property_family: "apartment",
+    property_subtype: "studio",
+    built_area_sqm: 71,
+    bedrooms_count: 0,
+    price_amount: 123000,
+    internal_latitude: 41.566,
+    internal_longitude: 23.278,
+    public_latitude: 41.56,
+    public_longitude: 23.27,
+  };
+  const approval = {
+    publication_state: "published",
+    translation_human_approved: true,
+    locale_indexable: true,
+    fact_verification: [
+      { field: "property_family", state: "broker_verified" },
+      { field: "property_subtype", state: "broker_verified" },
+      { field: "built_area_sqm", state: "broker_verified" },
+      { field: "bedrooms_count", state: "entered_pending_review" },
+      { field: "price_amount", state: "entered_pending_review" },
+      { field: "public_latitude", state: "broker_verified" },
+      { field: "public_longitude", state: "entered_pending_review" },
+    ],
+  };
+
+  const document = projectApprovedSearchDocument({ listing, approval });
+  assert.equal(document.source_listing_id, "MS-2026-0001");
+  assert.equal(document.listing_reference, "MS-2026-0001");
+  assert.equal(document.property_family, "apartment");
+  assert.equal(document.property_subtype, "studio");
+  assert.equal(document.primary_area_sqm, 71);
+  assert.equal(document.bedrooms_count, undefined);
+  assert.equal(document.price_amount, undefined);
+  assert.equal(document.internal_latitude, undefined);
+  assert.equal(document.internal_longitude, undefined);
+  assert.equal(document.public_latitude, undefined);
+  assert.equal(document.public_longitude, undefined);
+
+  const withCoordinates = projectApprovedSearchDocument({
+    listing,
+    approval: {
+      ...approval,
+      fact_verification: approval.fact_verification.map((entry) =>
+        entry.field === "public_longitude" ? { ...entry, state: "broker_verified" } : entry,
+      ),
+    },
+  });
+  assert.equal(withCoordinates.public_latitude, 41.56);
+  assert.equal(withCoordinates.public_longitude, 23.27);
+  assert.equal(withCoordinates.internal_latitude, undefined);
+
+  const projection = buildApprovedSearchProjection([
+    { listing, approval },
+    { listing: { ...listing, id: "MS-2026-0002" }, approval: { ...approval, publication_state: "draft" } },
+  ]);
+  assert.equal(projection.summary.input_rows, 2);
+  assert.equal(projection.summary.projected_documents, 1);
+  assert.equal(projection.documents[0].id, "MS-2026-0001:bg");
+  const outDir = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-approved-search-`)}/data`;
+  const outputs = writeApprovedSearchProjection(projection, outDir);
+  const schema = JSON.parse(fs.readFileSync(outputs.schema, "utf8"));
+  assert.ok(schema.fields.some((field) => field.name === "primary_area_sqm"));
+  assert.equal(fs.readFileSync(outputs.typesense, "utf8").includes("internal_latitude"), false);
+});
+
+test("production search requires one configured engine and never falls back", async () => {
+  assert.throws(
+    () => selectSearchRuntime({ environment: "production", typesense: {}, meilisearch: {} }),
+    /MS_REALTY_SEARCH_ENGINE is required in production/,
+  );
+  assert.deepEqual(
+    selectSearchRuntime({
+      engine: "typesense",
+      environment: "production",
+      typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+      meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+    }),
+    { engine: "typesense", mode: "single" },
+  );
+  const calls = [];
+  await assert.rejects(
+    () =>
+      queryPublicSearch({
+        engine: "typesense",
+        environment: "production",
+        localeCodes: ["bg"],
+        typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+        meilisearch: { baseUrl: "http://meili.local", apiKey: "meili-key" },
+        fetchImpl: async (url) => {
+          calls.push(url);
+          return { status: 503, async json() { return {}; } };
+        },
+      }),
+    /Selected search engine typesense is unavailable/,
+  );
+  assert.equal(calls.length, 1);
+  assert.match(calls[0], /typesense\.local/);
+});
+
+test("search intent builds approved-only canonical filters with exact-reference precedence", async () => {
+  const intent = {
+    locale: "bg",
+    exact_reference: "MS-2026-0001",
+    property_family: "apartment",
+    bedrooms_min: 1,
+    price_max: 150000,
+    sort: "price_asc",
+  };
+  const filter = typesenseFilterForIntent(intent, ["bg"]);
+  assert.match(filter, /publication_state:=published/);
+  assert.match(filter, /listing_status:=available/);
+  assert.match(filter, /listing_reference:=`MS-2026-0001`/);
+  assert.match(filter, /property_family:=`apartment`/);
+  assert.match(filter, /bedrooms_count:>=1/);
+  assert.match(filter, /price_amount:<=150000/);
+
+  await withSearchServer(async (baseUrl, calls) => {
+    await queryPublicSearch({
+      engine: "typesense",
+      environment: "test",
+      typesense: { baseUrl, apiKey: "typesense-key" },
+      meilisearch: { baseUrl, apiKey: "meili-key" },
+      localeCodes: ["bg"],
+      intent,
+    });
+    const request = new URL(`http://search.test${calls[0].url}`);
+    assert.equal(request.searchParams.get("q"), "MS-2026-0001");
+    assert.equal(request.searchParams.get("query_by"), "listing_reference,source_listing_id");
+    assert.equal(request.searchParams.get("num_typos"), "0");
+    assert.equal(request.searchParams.get("sort_by"), "price_amount:asc");
+  });
+});
+
+test("versioned rebuild plans support deterministic alias rollback", () => {
+  assert.equal(versionedSearchTarget("ms_realty_listings", "20260730a"), "ms_realty_listings__20260730a");
+  const typesense = createSearchRebuildPlan({
+    engine: "typesense",
+    alias: "ms_realty_listings",
+    version: "20260730a",
+    previousVersion: "20260729z",
+  });
+  assert.deepEqual(typesense.activation, {
+    method: "PUT",
+    path: "/aliases/ms_realty_listings",
+    body: { collection_name: "ms_realty_listings__20260730a" },
+  });
+  assert.deepEqual(createSearchRollbackPlan(typesense).activation.body, { collection_name: "ms_realty_listings__20260729z" });
+
+  const meilisearch = createSearchRebuildPlan({ engine: "meilisearch", alias: "ms_realty_listings", version: "20260730a" });
+  assert.deepEqual(meilisearch.activation, {
+    method: "POST",
+    path: "/swap-indexes",
+    body: [{ indexes: ["ms_realty_listings", "ms_realty_listings__20260730a"] }],
+  });
+});
+
+test("versioned Typesense rebuild imports a new target before alias activation and rollback", async () => {
+  const calls = [];
+  const statuses = [201, 202, 200, 200];
+  const fetchImpl = async (url, options) => {
+    calls.push({ url, options });
+    return { status: statuses.shift() };
+  };
+  const rebuild = await runSearchEngineRebuild({
+    engine: "typesense",
+    alias: "ms_realty_listings",
+    version: "20260730a",
+    previousVersion: "20260729z",
+    documents: [
+      {
+        id: "MS-2026-0001:bg",
+        source_listing_id: "MS-2026-0001",
+        listing_reference: "MS-2026-0001",
+        locale: "bg",
+        locale_path: "/bg/imoti/MS-2026-0001",
+        title: "Verified apartment",
+        publication_state: "published",
+        translation_human_approved: true,
+        locale_indexable: true,
+        translation_indexable: true,
+        search_text: "Verified apartment",
+      },
+    ],
+    schema: approvedSearchSchema(),
+    typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+    fetchImpl,
+    activate: true,
+  });
+  assert.equal(rebuild.sync.collection, "ms_realty_listings__20260730a");
+  assert.equal(JSON.parse(calls[0].options.body).name, "ms_realty_listings__20260730a");
+  assert.equal(calls[2].options.method, "PUT");
+  assert.deepEqual(JSON.parse(calls[2].options.body), { collection_name: "ms_realty_listings__20260730a" });
+
+  const rollback = await rollbackSearchEngineRebuild(rebuild, {
+    typesense: { baseUrl: "http://typesense.local", apiKey: "type-key" },
+    fetchImpl,
+  });
+  assert.equal(rollback.target, "ms_realty_listings__20260729z");
+  assert.deepEqual(JSON.parse(calls[3].options.body), { collection_name: "ms_realty_listings__20260729z" });
+});
+
+test("search outbox is idempotent, retryable, and reconciles delete tombstones", async () => {
+  const filePath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-search-outbox-`)}/outbox.jsonl`;
+  resetSearchOutbox(filePath);
+  const input = {
+    type: "rebuild",
+    idempotencyKey: "rebuild:20260730a",
+    payload: { version: "20260730a", target: "ms_realty_listings__20260730a" },
+  };
+  const queued = enqueueSearchOutbox(input, { filePath, recordedAt: "2026-07-30T10:00:00Z" });
+  const duplicate = enqueueSearchOutbox(input, { filePath, recordedAt: "2026-07-30T10:01:00Z" });
+  assert.equal(queued.idempotent, false);
+  assert.equal(duplicate.idempotent, true);
+
+  const failed = await processSearchOutbox({
+    filePath,
+    dispatch: async () => {
+      throw new Error("temporary engine outage");
+    },
+    recordedAt: "2026-07-30T10:02:00Z",
+  });
+  assert.equal(failed.results[0].status, "retry_scheduled");
+  assert.equal(reconcileSearchOutbox(readSearchOutbox(filePath)).pending[0].attempts, 1);
+
+  const delivered = [];
+  const completed = await processSearchOutbox({
+    filePath,
+    dispatch: async (message) => delivered.push(message),
+    recordedAt: "2026-07-30T10:03:00Z",
+  });
+  assert.equal(completed.results[0].status, "deleted");
+  assert.equal(delivered[0].idempotency_key, "rebuild:20260730a");
+  const reconciliation = reconcileSearchOutbox(readSearchOutbox(filePath));
+  assert.deepEqual(reconciliation.pending, []);
+  assert.equal(reconciliation.deleted[0].message_id, queued.message_id);
 });
 
 test("search engine sync posts existing fixtures to Typesense and Meilisearch", async () => {
