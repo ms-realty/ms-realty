@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import {
+  assertAgentRealtyCaseMutation,
   bindAuthenticatedOperator,
   canAdminAccess,
   canAdminMutate,
@@ -542,7 +543,9 @@ function bindRealtyCaseExecutor(input, principal) {
   if (submittedKind && submittedKind !== expectedKind) {
     throw new Error("Case executor kind must match the authenticated principal");
   }
-  return bindAuthenticatedOperator({ ...realtyCaseInput(input), executorKind: expectedKind }, principal);
+  const prepared = { ...realtyCaseInput(input), executorKind: expectedKind };
+  assertAgentRealtyCaseMutation(principal, prepared);
+  return bindAuthenticatedOperator(prepared, principal);
 }
 
 function currentSeed(config) {

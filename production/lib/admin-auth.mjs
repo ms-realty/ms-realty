@@ -15,6 +15,8 @@ const ROLE_CAPABILITIES = {
   agent: ["workspace:read", "cases:read", "cases:write", "activity:read"],
 };
 
+const AGENT_REALTY_CASE_ACTIONS = new Set(["step_completed", "step_blocked"]);
+
 const OPERATIONS_READ_PATHS = new Set([
   "/admin/today",
   "/api/admin/today",
@@ -241,6 +243,15 @@ export function isAdminAuthorized(auth, env = process.env) {
 
 export function canAdminMutate(principal) {
   return Boolean(principal?.can_mutate);
+}
+
+export function assertAgentRealtyCaseMutation(principal, input) {
+  if (!principal?.roles?.includes("agent")) return;
+  if (AGENT_REALTY_CASE_ACTIONS.has(String(input?.action || "").trim())) return;
+  const error = new Error("Agents may only complete or block existing autonomous case steps");
+  error.status = 403;
+  error.capability = "human_case_control";
+  throw error;
 }
 
 export function bindAuthenticatedOperator(input, principal, fields = ["actor"]) {

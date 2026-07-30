@@ -79,6 +79,17 @@ test("admin case routes support human manual work and assured autonomous agents 
     const manual = await manualOpen.json();
     assert.equal(manual.case.execution_mode, "manual");
 
+    const agentOpen = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/cases", {
+        method: "POST",
+        headers: { ...auth.agent, "content-type": "application/json" },
+        body: JSON.stringify(caseInput("agent-created", "autonomous")),
+      }),
+      { config },
+    );
+    assert.equal(agentOpen.status, 403);
+    assert.equal((await agentOpen.json()).required_capability, "human_case_control");
+
     const rejectedAgent = await renderAppAdminResponse(
       new Request("https://example.test/api/admin/cases/actions", {
         method: "POST",
@@ -124,6 +135,22 @@ test("admin case routes support human manual work and assured autonomous agents 
     assert.equal(step.event.executor_kind, "agent");
     assert.equal(step.case.progress_percent > 0, true);
 
+    const agentFreeze = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/cases/actions", {
+        method: "POST",
+        headers: { ...auth.agent, "content-type": "application/json" },
+        body: JSON.stringify({
+          caseId: "autonomous-1",
+          action: "case_frozen",
+          authorityRef: "authority://agent-must-not-control",
+          reasonCode: "unsafe",
+        }),
+      }),
+      { config },
+    );
+    assert.equal(agentFreeze.status, 403);
+    assert.equal((await agentFreeze.json()).required_capability, "human_case_control");
+
     const page = await renderAppAdminResponse(
       new Request("https://example.test/admin/cases?locale=en", { headers: auth.human }),
       { config },
@@ -159,7 +186,7 @@ test("admin case routes support human manual work and assured autonomous agents 
     );
     const agentHtml = await agentPage.text();
     assert.equal(agentPage.status, 200, agentHtml);
-    assert.match(agentHtml, /data-admin-mutation-form="realty-case-open"/);
+    assert.doesNotMatch(agentHtml, /data-admin-mutation-form="realty-case-open"/);
     assert.match(agentHtml, /href="\/admin\/cases"/);
 
     const forbiddenReply = await renderAppAdminResponse(
@@ -228,6 +255,20 @@ test("standalone HTTP runtime serves the same autonomous case contract and admin
     assert.equal(advanced.status, 201);
     assert.equal(advanced.body.event.actor, "trusted_agent_1");
     assert.equal(advanced.body.event.executor_kind, "agent");
+
+    const rejectedFreeze = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/cases/actions",
+      headers: auth.agent,
+      body: {
+        caseId: "http-autonomous-1",
+        action: "case_frozen",
+        authorityRef: "authority://agent-must-not-control",
+        reasonCode: "unsafe",
+      },
+    });
+    assert.equal(rejectedFreeze.status, 403);
+    assert.equal(rejectedFreeze.body.required_capability, "human_case_control");
 
     const page = await dispatchHttp(app, { url: "/admin/cases?locale=en", headers: auth.human });
     assert.equal(page.status, 200);

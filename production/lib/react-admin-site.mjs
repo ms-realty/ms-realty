@@ -2357,6 +2357,7 @@ function RealtyCaseStep({ page, caseRecord, step }) {
   const copy = caseCopy(page);
   const actor = page.workspace?.operator_id || "admin";
   const producer = step.evidence_producers[0];
+  const agent = page.workspace?.operator_roles?.includes("agent");
   return h(
     "li",
     { key: step.key, "data-case-step": step.key, "data-step-status": step.status },
@@ -2382,7 +2383,7 @@ function RealtyCaseStep({ page, caseRecord, step }) {
             h("label", null, copy.evidence, h("input", { name: "evidenceRef", required: true, maxLength: 240 })),
             h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.complete),
           ),
-          step.optional
+          step.optional && !agent
             ? h(
                 "form",
                 caseMutationAttrs("not-applicable", "Step marked not applicable. Refreshing case state."),
@@ -2405,6 +2406,7 @@ function RealtyCaseCard({ page, caseRecord }) {
   const actor = page.workspace?.operator_id || "admin";
   const modeTone = caseRecord.execution_mode === "autonomous" ? "success" : "neutral";
   const statusAction = caseRecord.status === "frozen" ? "case_resumed" : "case_frozen";
+  const agent = page.workspace?.operator_roles?.includes("agent");
   return h(
     "article",
     {
@@ -2433,7 +2435,7 @@ function RealtyCaseCard({ page, caseRecord }) {
         ? h("ul", { className: "adm-task-list" }, ...caseRecord.next_steps.map((step) => h(RealtyCaseStep, { page, caseRecord, step })))
         : h("p", { className: "adm-empty" }, "All workflow steps are resolved."),
     ),
-    pageCan(page, "cases:write")
+    pageCan(page, "cases:write") && !agent
       ? h(
           "details",
           { className: "adm-pipeline-secondary" },
@@ -2452,7 +2454,7 @@ function RealtyCaseCard({ page, caseRecord }) {
           ),
         )
       : null,
-    pageCan(page, "cases:write") && caseRecord.progress_percent === 100 && caseRecord.status === "active"
+    pageCan(page, "cases:write") && !agent && caseRecord.progress_percent === 100 && caseRecord.status === "active"
       ? h(
           "form",
           caseMutationAttrs("close", "Case closed."),
@@ -2467,7 +2469,7 @@ function RealtyCaseCard({ page, caseRecord }) {
 
 function RealtyCaseCreateForm({ page }) {
   const copy = caseCopy(page);
-  if (!pageCan(page, "cases:write")) return null;
+  if (!pageCan(page, "cases:write") || page.workspace?.operator_roles?.includes("agent")) return null;
   const actor = page.workspace?.operator_id || "admin";
   return h(
     WorkbenchDisclosure,

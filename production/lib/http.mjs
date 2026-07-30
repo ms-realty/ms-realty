@@ -9,6 +9,7 @@ import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
   adminHomePath,
+  assertAgentRealtyCaseMutation,
   bindAuthenticatedOperator,
   canAdminAccess,
   canAdminMutate,
@@ -344,7 +345,9 @@ function bindRealtyCaseExecutor(input, principal) {
   if (submittedKind && submittedKind !== expectedKind) {
     throw new Error("Case executor kind must match the authenticated principal");
   }
-  return bindAuthenticatedOperator({ ...realtyCaseInput(input), executorKind: expectedKind }, principal);
+  const prepared = { ...realtyCaseInput(input), executorKind: expectedKind };
+  assertAgentRealtyCaseMutation(principal, prepared);
+  return bindAuthenticatedOperator(prepared, principal);
 }
 
 function redirectApprovalInput(request) {
@@ -2463,6 +2466,7 @@ export function createHttpApp({
         }
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
@@ -2499,6 +2503,7 @@ export function createHttpApp({
         }
         return adminJson(result.idempotent ? 200 : 201, result);
       } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
         return adminJson(400, { kind: "bad_request", message: error.message });
       }
     }
