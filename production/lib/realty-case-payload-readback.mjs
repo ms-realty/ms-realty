@@ -13,6 +13,7 @@ import {
 const CASE_COLLECTIONS = ["realty_cases", "realty_case_events", "realty_case_mandate_versions"];
 const CONDITION_COLLECTIONS = ["realty_case_conditions", "realty_case_condition_events"];
 const OUTBOX_COLLECTION = "realty_case_outbox";
+const RECONCILIATION_DESTINATION = "internal:realty_case_payload_readback";
 const COLLECTIONS = [
   { collection: "realty_cases", fields: REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS.realty_cases, relationships: [] },
   { collection: "realty_case_events", fields: REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS.realty_case_events, relationships: ["case"] },
@@ -35,6 +36,10 @@ const COLLECTIONS = [
     collection: OUTBOX_COLLECTION,
     fields: REALTY_CASE_RECONCILIATION_OUTBOX_FIELDS,
     relationships: ["case", "source_event"],
+    filters: {
+      kind: { equals: "reconciliation" },
+      destination_ref: { equals: RECONCILIATION_DESTINATION },
+    },
   },
 ];
 
@@ -212,7 +217,7 @@ async function findWorkspaceRows(payload, definition, workspaceId, req) {
     pagination: false,
     req,
     select: selectFor(definition.fields, definition.relationships),
-    where: { workspace_id: { equals: workspaceId } },
+    where: { workspace_id: { equals: workspaceId }, ...(definition.filters || {}) },
   });
   if (!Array.isArray(result?.docs)) throw new Error(`Payload read-back ${definition.collection} did not return documents`);
   result.docs.forEach((document) => workspaceDocument(document, workspaceId, definition.collection));

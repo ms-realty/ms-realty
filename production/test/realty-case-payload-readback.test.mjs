@@ -126,7 +126,13 @@ function fakePayload(documents) {
     },
     find: async (args) => {
       calls.push(args);
-      return { docs: clone(documents[args.collection] || []) };
+      return {
+        docs: clone(
+          (documents[args.collection] || []).filter((document) =>
+            Object.entries(args.where).every(([field, rule]) => document[field] === rule.equals),
+          ),
+        ),
+      };
     },
     transactions,
   };
@@ -144,6 +150,12 @@ test("Payload read-back uses one workspace-scoped read-only snapshot and returns
   const documents = payloadDocuments(source);
   documents.realty_case_outbox[0].status = "delivered";
   documents.realty_case_outbox[0].attempt_count = 1;
+  documents.realty_case_outbox.push({
+    id: "provider-outbox-db-1",
+    workspace_id: WORKSPACE_ID,
+    kind: "provider_request",
+    destination_ref: "provider://registry",
+  });
   const { payload, result } = await reconcile(documents, source);
 
   assert.deepEqual(result, {
@@ -171,7 +183,16 @@ test("Payload read-back uses one workspace-scoped read-only snapshot and returns
     assert.equal(call.depth, 0);
     assert.equal(call.overrideAccess, true);
     assert.equal(call.pagination, false);
-    assert.deepEqual(call.where, { workspace_id: { equals: WORKSPACE_ID } });
+    assert.deepEqual(
+      call.where,
+      call.collection === "realty_case_outbox"
+        ? {
+            workspace_id: { equals: WORKSPACE_ID },
+            kind: { equals: "reconciliation" },
+            destination_ref: { equals: "internal:realty_case_payload_readback" },
+          }
+        : { workspace_id: { equals: WORKSPACE_ID } },
+    );
     assert.equal(call.req.payload, payload);
     assert.equal(call.req.transactionID, "readback-tx");
     assert.equal(call.select.id, true);
