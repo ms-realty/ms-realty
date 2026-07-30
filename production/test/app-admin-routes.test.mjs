@@ -2301,7 +2301,9 @@ test("Next admin public approvals bind reviewers and require confirmation", asyn
       id: "next-credentialed-broker-contact",
       listingId: "MS-CRAWL-0001",
       broker: "broker_bg",
-      phone: "+359880000000",
+      phone: "+359880123456",
+      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      validationStatus: "broker_verified",
       approved: true,
     };
     const spoofedContact = await renderAppAdminResponse(
