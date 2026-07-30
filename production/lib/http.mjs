@@ -153,6 +153,12 @@ import {
   readRealtyCaseConditionEvents,
 } from "./realty-case-conditions.mjs";
 import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
+import {
+  assertRealtyCaseRequestProjectionConfig,
+  assertRealtyCaseRequestProjectionInput,
+  projectRealtyCaseRequest,
+  realtyCaseRequestProjectionFailure,
+} from "./realty-case-request-projection.mjs";
 import { appendTourApproval, createTourApproval, readTourApprovals } from "./tours.mjs";
 import { appendEvent, createEvent, readEventLedger } from "./events.mjs";
 import {
@@ -632,6 +638,10 @@ export function createHttpApp({
   documentChecklistLedgerPath = null,
   realtyCaseLedgerPath = null,
   realtyCaseConditionLedgerPath = null,
+  realtyCaseRequestProjectionEnabled = false,
+  realtyCaseWorkspaceId = "",
+  realtyCasePayloadProjector = null,
+  realtyCasePayloadRuntimeConfigured = false,
   brokerContactLedgerPath = null,
   tourApprovalLedgerPath = null,
   eventLedgerPath = null,
@@ -851,6 +861,16 @@ export function createHttpApp({
     buildAutonomousRealtyCaseIntents(readRealtyCaseEvents(realtyCaseLedgerPath || undefined), {
       now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
     });
+  const projectCurrentRealtyCase = async (result) => {
+    if (!realtyCaseRequestProjectionEnabled) return null;
+    return projectRealtyCaseRequest({
+      caseId: result.case.id,
+      eventId: result.event.id,
+      filePath: realtyCaseLedgerPath || undefined,
+      workspaceId: realtyCaseWorkspaceId,
+      projector: realtyCasePayloadProjector,
+    });
+  };
   const currentRealtyCaseConditionQueue = () =>
     buildRealtyCaseConditionQueue(readRealtyCaseConditionEvents(realtyCaseConditionLedgerPath || undefined), {
       now: realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString(),
@@ -2589,8 +2609,19 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/cases") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
+        const input = parseBody(request);
+        if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input);
+        }
         const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
-        const result = openRealtyCase(bindRealtyCaseExecutor(parseBody(request), principal), {
+        const result = openRealtyCase(bindRealtyCaseExecutor(input, principal), {
           filePath: realtyCaseLedgerPath || undefined,
           recordedAt,
         });
@@ -2614,7 +2645,12 @@ export function createHttpApp({
             },
           }, recordedAt);
         }
-        return adminJson(result.idempotent ? 200 : 201, result);
+        try {
+          const projection = await projectCurrentRealtyCase(result);
+          return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+        } catch {
+          return adminJson(503, realtyCaseRequestProjectionFailure(result));
+        }
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
         return adminJson(400, { kind: "bad_request", message: error.message });
@@ -2624,8 +2660,19 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/cases/actions") {
       if (!isAdminAuthorized(auth)) return adminUnauthorized();
       try {
+        const input = parseBody(request);
+        if (
+          assertRealtyCaseRequestProjectionConfig({
+            realtyCaseRequestProjectionEnabled,
+            realtyCaseWorkspaceId,
+            realtyCasePayloadProjector,
+            realtyCasePayloadRuntimeConfigured,
+          })
+        ) {
+          assertRealtyCaseRequestProjectionInput(input, { action: true });
+        }
         const recordedAt = realtyCaseRecordedAt || reviewedAt || receivedAt || new Date().toISOString();
-        const result = appendRealtyCaseAction(bindRealtyCaseExecutor(parseBody(request), principal), {
+        const result = appendRealtyCaseAction(bindRealtyCaseExecutor(input, principal), {
           filePath: realtyCaseLedgerPath || undefined,
           recordedAt,
         });
@@ -2651,7 +2698,12 @@ export function createHttpApp({
             },
           }, recordedAt);
         }
-        return adminJson(result.idempotent ? 200 : 201, result);
+        try {
+          const projection = await projectCurrentRealtyCase(result);
+          return adminJson(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+        } catch {
+          return adminJson(503, realtyCaseRequestProjectionFailure(result));
+        }
       } catch (error) {
         if (error.status === 403) return adminForbidden(error.capability || "administration:write");
         return adminJson(400, { kind: "bad_request", message: error.message });

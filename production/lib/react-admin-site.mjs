@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { h, renderStaticElement } from "./react-static-html.mjs";
 import { Icon } from "./ui/icons.mjs";
 import { LOGO_ASPECT, LOGO_URL_REVERSED } from "./ui/design-assets.mjs";
@@ -2392,6 +2393,11 @@ function caseMutationAttrs(kind, success) {
   };
 }
 
+function caseActionEventId(caseRecord, action, stepKey = "") {
+  const source = [caseRecord.id, caseRecord.last_event_id || caseRecord.last_recorded_at, action, stepKey].join("\u0000");
+  return `realty-case-action-${createHash("sha256").update(source).digest("hex").slice(0, 48)}`;
+}
+
 function conditionMutationAttrs(action, success) {
   return {
     method: "post",
@@ -2615,6 +2621,7 @@ function RealtyCaseStep({ page, caseRecord, step }) {
             h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
             h("input", { type: "hidden", name: "action", value: "step_completed" }),
             h("input", { type: "hidden", name: "stepKey", value: step.key }),
+            h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, "step_completed", step.key) }),
             h("input", { type: "hidden", name: "actor", value: actor }),
             h("input", { type: "hidden", name: "evidenceType", value: `${step.key}_record` }),
             h("input", { type: "hidden", name: "evidenceProducerKind", value: producer }),
@@ -2628,6 +2635,7 @@ function RealtyCaseStep({ page, caseRecord, step }) {
                 h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
                 h("input", { type: "hidden", name: "action", value: "step_not_applicable" }),
                 h("input", { type: "hidden", name: "stepKey", value: step.key }),
+                h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, "step_not_applicable", step.key) }),
                 h("input", { type: "hidden", name: "actor", value: actor }),
                 h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240 })),
                 h("label", null, copy.reason, h("input", { name: "reasonCode", required: true, maxLength: 120 })),
@@ -2683,6 +2691,7 @@ function RealtyCaseCard({ page, caseRecord }) {
             caseMutationAttrs("status", "Case status updated. Refreshing case state."),
             h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
             h("input", { type: "hidden", name: "action", value: statusAction }),
+            h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, statusAction) }),
             h("input", { type: "hidden", name: "actor", value: actor }),
             h("label", null, copy.authority, h("input", { name: "authorityRef", required: true, maxLength: 240 })),
             statusAction === "case_frozen"
@@ -2698,6 +2707,7 @@ function RealtyCaseCard({ page, caseRecord }) {
           caseMutationAttrs("close", "Case closed."),
           h("input", { type: "hidden", name: "caseId", value: caseRecord.id }),
           h("input", { type: "hidden", name: "action", value: "case_closed" }),
+          h("input", { type: "hidden", name: "id", value: caseActionEventId(caseRecord, "case_closed") }),
           h("input", { type: "hidden", name: "actor", value: actor }),
           h("button", { type: "submit", className: "mk-btn mk-btn--primary mk-btn--sm" }, copy.close),
         )

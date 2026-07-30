@@ -163,6 +163,13 @@ import {
   readRealtyCaseConditionEvents,
 } from "./realty-case-conditions.mjs";
 import { buildAutonomousRealtyCaseIntents } from "./realty-case-executor.mjs";
+import {
+  assertRealtyCaseRequestProjectionConfig,
+  assertRealtyCaseRequestProjectionInput,
+  projectRealtyCaseRequest,
+  realtyCaseRequestProjectionConfigFromEnv,
+  realtyCaseRequestProjectionFailure,
+} from "./realty-case-request-projection.mjs";
 import { DEFAULT_PUBLIC_CONTACT_VAULT_PATH, readPublicContacts } from "./public-contact-vault.mjs";
 import {
   DEFAULT_PUBLIC_REQUEST_OUTCOME_LEDGER_PATH,
@@ -254,6 +261,7 @@ export function appAdminConfigFromEnv(env = process.env) {
     realtyCaseLedgerPath: env.MS_REALTY_CASE_LEDGER_PATH || DEFAULT_REALTY_CASE_LEDGER_PATH,
     realtyCaseConditionLedgerPath:
       env.MS_REALTY_CASE_CONDITION_LEDGER_PATH || DEFAULT_REALTY_CASE_CONDITION_LEDGER_PATH,
+    ...realtyCaseRequestProjectionConfigFromEnv(env),
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
     eventLedgerPath: env.MS_REALTY_EVENT_LEDGER_PATH || DEFAULT_EVENT_LEDGER_PATH,
@@ -1680,6 +1688,17 @@ function appendRealtyCaseActionEntry(input, config) {
   return result;
 }
 
+async function projectRealtyCaseEntry(result, config) {
+  if (!config.realtyCaseRequestProjectionEnabled) return null;
+  return projectRealtyCaseRequest({
+    caseId: result.case.id,
+    eventId: result.event.id,
+    filePath: config.realtyCaseLedgerPath,
+    workspaceId: config.realtyCaseWorkspaceId,
+    projector: config.realtyCasePayloadProjector,
+  });
+}
+
 function openRealtyCaseConditionEntry(input, config) {
   const recordedAt = config.realtyCaseRecordedAt || config.reviewedAt || new Date().toISOString();
   const result = openRealtyCaseCondition(
@@ -2585,12 +2604,38 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
       return jsonResponse(result.idempotent ? 200 : 201, result);
     }
     if (request.method === "POST" && url.pathname === "/api/admin/cases") {
-      const result = openRealtyCaseEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
-      return jsonResponse(result.idempotent ? 200 : 201, result);
+      let result;
+      try {
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input);
+        result = openRealtyCaseEntry(input, config);
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        return jsonResponse(400, { kind: "bad_request", message: error.message });
+      }
+      try {
+        const projection = await projectRealtyCaseEntry(result, config);
+        return jsonResponse(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+      } catch {
+        return jsonResponse(503, realtyCaseRequestProjectionFailure(result));
+      }
     }
     if (request.method === "POST" && url.pathname === "/api/admin/cases/actions") {
-      const result = appendRealtyCaseActionEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);
-      return jsonResponse(result.idempotent ? 200 : 201, result);
+      let result;
+      try {
+        const input = parseBody(request, await readRequestBody(request, config.maxBodyBytes));
+        if (assertRealtyCaseRequestProjectionConfig(config)) assertRealtyCaseRequestProjectionInput(input, { action: true });
+        result = appendRealtyCaseActionEntry(input, config);
+      } catch (error) {
+        if (error.status === 403) return adminForbidden(error.capability || "administration:write");
+        return jsonResponse(400, { kind: "bad_request", message: error.message });
+      }
+      try {
+        const projection = await projectRealtyCaseEntry(result, config);
+        return jsonResponse(result.idempotent ? 200 : 201, projection ? { ...result, projection } : result);
+      } catch {
+        return jsonResponse(503, realtyCaseRequestProjectionFailure(result));
+      }
     }
     if (request.method === "POST" && url.pathname === "/api/admin/cases/conditions") {
       const result = openRealtyCaseConditionEntry(parseBody(request, await readRequestBody(request, config.maxBodyBytes)), config);

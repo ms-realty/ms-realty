@@ -23,6 +23,7 @@ import { DEFAULT_CONSENT_LEDGER_PATH } from "./lib/consent-ledger.mjs";
 import { DEFAULT_DEAL_LEDGER_PATH } from "./lib/deal-ledger.mjs";
 import { DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH } from "./lib/document-checklists.mjs";
 import { DEFAULT_REALTY_CASE_LEDGER_PATH } from "./lib/realty-cases.mjs";
+import { realtyCaseRequestProjectionConfigFromEnv } from "./lib/realty-case-request-projection.mjs";
 import { DEFAULT_SAVED_SEARCH_LEDGER_PATH } from "./lib/saved-searches.mjs";
 import { DEFAULT_SELLER_PIPELINE_PATH } from "./lib/seller-pipeline.mjs";
 import { DEFAULT_SELLER_PIPELINE_OUTCOME_LEDGER_PATH } from "./lib/seller-pipeline-outcomes.mjs";
@@ -112,6 +113,7 @@ export function productionServerConfig(env = process.env) {
     documentChecklistLedgerPath:
       env.MS_REALTY_DOCUMENT_CHECKLIST_LEDGER_PATH || DEFAULT_DOCUMENT_CHECKLIST_LEDGER_PATH,
     realtyCaseLedgerPath: env.MS_REALTY_CASE_LEDGER_PATH || DEFAULT_REALTY_CASE_LEDGER_PATH,
+    ...realtyCaseRequestProjectionConfigFromEnv(env),
     slugHistoryPath: env.MS_REALTY_SLUG_HISTORY_PATH || DEFAULT_SLUG_HISTORY_PATH,
     brokerContactLedgerPath: env.MS_REALTY_BROKER_CONTACT_LEDGER_PATH || DEFAULT_BROKER_CONTACT_LEDGER_PATH,
     tourApprovalLedgerPath: env.MS_REALTY_TOUR_APPROVAL_LEDGER_PATH || DEFAULT_TOUR_APPROVAL_LEDGER_PATH,
@@ -169,6 +171,9 @@ export function createProductionHttpApp(config = productionServerConfig()) {
     dealLedgerPath: config.dealLedgerPath,
     documentChecklistLedgerPath: config.documentChecklistLedgerPath,
     realtyCaseLedgerPath: config.realtyCaseLedgerPath,
+    realtyCaseRequestProjectionEnabled: config.realtyCaseRequestProjectionEnabled,
+    realtyCaseWorkspaceId: config.realtyCaseWorkspaceId,
+    realtyCasePayloadRuntimeConfigured: config.realtyCasePayloadRuntimeConfigured,
     slugHistoryPath: config.slugHistoryPath,
     brokerContactLedgerPath: config.brokerContactLedgerPath,
     tourApprovalLedgerPath: config.tourApprovalLedgerPath,
