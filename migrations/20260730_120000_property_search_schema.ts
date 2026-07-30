@@ -478,8 +478,22 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
     ALTER TABLE "_listing_translations_v" DROP COLUMN "version_listing_id";
     ALTER TABLE "listing_translations" DROP COLUMN "translation_state";
     ALTER TABLE "listing_translations" DROP COLUMN "listing_id";
+    ALTER TABLE "_listings_v" DROP COLUMN "version_facts_location_precision";
+    ALTER TABLE "_listings_v" DROP COLUMN "version_facts_condition";
+    ALTER TABLE "_listings_v" DROP COLUMN "version_facts_land_area_sqm";
+    ALTER TABLE "_listings_v" DROP COLUMN "version_facts_total_floors";
+    ALTER TABLE "_listings_v" DROP COLUMN "version_facts_floor";
+    ALTER TABLE "_listings_v" DROP COLUMN "version_facts_area_sqm";
+    ALTER TABLE "_listings_v" DROP COLUMN "version_facts_bedrooms_not_applicable";
     ALTER TABLE "_listings_v" DROP COLUMN "version_location_id";
     ALTER TABLE "_listings_v" DROP COLUMN "version_property_id";
+    ALTER TABLE "listings" DROP COLUMN "facts_location_precision";
+    ALTER TABLE "listings" DROP COLUMN "facts_condition";
+    ALTER TABLE "listings" DROP COLUMN "facts_land_area_sqm";
+    ALTER TABLE "listings" DROP COLUMN "facts_total_floors";
+    ALTER TABLE "listings" DROP COLUMN "facts_floor";
+    ALTER TABLE "listings" DROP COLUMN "facts_area_sqm";
+    ALTER TABLE "listings" DROP COLUMN "facts_bedrooms_not_applicable";
     ALTER TABLE "listings" DROP COLUMN "location_id";
     ALTER TABLE "listings" DROP COLUMN "property_id";
 

@@ -250,6 +250,32 @@ test("backfill tasks and search outbox events are deterministic and exclude priv
   assert.equal(JSON.stringify(event.payload).includes("latitude"), false);
 });
 
+test("property schema migration reverses every legacy compatibility field it adds", () => {
+  const migration = fs.readFileSync(fromRoot("migrations", "20260730_120000_property_search_schema.ts"), "utf8");
+  const [up, down] = migration.split("export async function down");
+  const compatibilityFields = [
+    ["listings", "facts_bedrooms_not_applicable"],
+    ["listings", "facts_area_sqm"],
+    ["listings", "facts_floor"],
+    ["listings", "facts_total_floors"],
+    ["listings", "facts_land_area_sqm"],
+    ["listings", "facts_condition"],
+    ["listings", "facts_location_precision"],
+    ["_listings_v", "version_facts_bedrooms_not_applicable"],
+    ["_listings_v", "version_facts_area_sqm"],
+    ["_listings_v", "version_facts_floor"],
+    ["_listings_v", "version_facts_total_floors"],
+    ["_listings_v", "version_facts_land_area_sqm"],
+    ["_listings_v", "version_facts_condition"],
+    ["_listings_v", "version_facts_location_precision"],
+  ];
+
+  for (const [table, field] of compatibilityFields) {
+    assert.match(up, new RegExp(`ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "${field}"`));
+    assert.match(down, new RegExp(`ALTER TABLE "${table}" DROP COLUMN "${field}"`));
+  }
+});
+
 test("generated CMS seed file is valid when present", () => {
   const file = fromRoot("production", "data", "cms-seed.json");
   if (!fs.existsSync(file)) return;
