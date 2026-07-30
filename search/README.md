@@ -79,6 +79,14 @@ npm run search:benchmark -- \
 If you launch temporary containers for this benchmark, stop and remove only
 those explicitly named benchmark containers after preserving the report.
 
+The checked-in [local benchmark result](data/search-engine-benchmark-20260730.json)
+used that exact sequence against the 167-document BG crawl corpus. Both engines
+returned 109 matches; the local repeated-query result was Typesense p50/p95
+`8.779`/`9.957` ms and Meilisearch p50/p95 `3.688`/`5.495` ms. This is a
+reproducible local latency observation, not a production-selection decision:
+production continues to require one explicitly selected engine and a live
+operational/relevance sign-off.
+
 Generated files:
 
 - `search/data/listings.json` - 165 source listings used by CMS/import prototypes.
