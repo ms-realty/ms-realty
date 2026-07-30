@@ -65,6 +65,7 @@ test("Payload migration boot configuration and generated constraints stay runnab
     assert.ok(sql.includes(column));
     assert.equal(sql.includes(`${column} NOT NULL`), false, `${column} must remain nullable`);
   }
+  assert.match(migration, /properties_location_id_locations_id_fk" FOREIGN KEY \("location_id"\).*ON DELETE set null/);
   assert.match(migration, /listing_enrichment_tasks_listing_id_listings_id_fk" FOREIGN KEY \("listing_id"\).*ON DELETE set null/);
   assert.match(migration, /listing_enrichment_tasks_property_id_properties_id_fk" FOREIGN KEY \("property_id"\).*ON DELETE set null/);
 
