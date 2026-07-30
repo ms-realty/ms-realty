@@ -6,7 +6,9 @@
     "search_text",
     "location",
     "location_native",
-    "municipality"
+    "municipality",
+    "district",
+    "region"
   ],
   "filterableAttributes": [
     "source_listing_id",
@@ -24,9 +26,16 @@
     "location",
     "municipality",
     "municipality_code",
+    "district",
+    "district_code",
+    "region",
+    "region_id",
     "country_code",
+    "geography_id",
+    "geography_path",
     "settlement_ekatte",
     "location_review_status",
+    "location_precision",
     "property_type",
     "offer_type",
     "bedrooms",

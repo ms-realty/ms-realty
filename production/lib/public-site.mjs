@@ -23,6 +23,13 @@ import {
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
 import {
+  geographyRegistryAncestors,
+  geographyRegistryArea,
+  loadAreaMap,
+  loadGeographyCatalog,
+  loadGeographyRegistry,
+} from "./geography.mjs";
+import {
   approvedContentDocumentsForLocation,
   approvedContentGuideGroups,
   isPublishableGuide,
@@ -33,6 +40,14 @@ import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
 
 const APPROVED_GUIDE_GROUPS = approvedContentGuideGroups(readApprovedCmsContent());
+const GEOGRAPHY_CATALOG = loadGeographyCatalog();
+const AREA_MAP = loadAreaMap();
+let publicGeographyRegistryCache = null;
+
+function publicGeographyRegistry() {
+  publicGeographyRegistryCache ||= loadGeographyRegistry();
+  return publicGeographyRegistryCache;
+}
 
 const ACTION_LABELS = {
   bg: {
@@ -50,6 +65,7 @@ const ACTION_LABELS = {
     print: "Печат/PDF",
     results: "Назад към резултатите",
     search: "Търсене",
+    keywordSearch: "Ключови думи или референция",
     contact: "Контакт",
     primaryActions: "Основни действия",
     locations: "Локации",
@@ -58,7 +74,13 @@ const ACTION_LABELS = {
     photo: "снимка",
     photos: "снимки",
     location: "Локация",
+    country: "Държава",
+    region: "Регион / област",
+    locationSearchHint: "Град, село, община или област",
+    locationSuggestions: "Предложения за локация",
+    noLocations: "Няма намерени локации.",
     municipality: "Община",
+    district: "Област",
     propertyType: "Тип",
     area: "Площ (m²)",
     areaMin: "Мин. площ (m²)",
@@ -134,6 +156,7 @@ const ACTION_LABELS = {
     print: "Print/PDF",
     results: "Back to results",
     search: "Search",
+    keywordSearch: "Keywords or reference",
     contact: "Contact",
     primaryActions: "Primary actions",
     locations: "Locations",
@@ -142,7 +165,13 @@ const ACTION_LABELS = {
     photo: "photo",
     photos: "photos",
     location: "Location",
+    country: "Country",
+    region: "Region / district",
+    locationSearchHint: "City, town, municipality or region",
+    locationSuggestions: "Location suggestions",
+    noLocations: "No locations found.",
     municipality: "Municipality",
+    district: "District",
     propertyType: "Type",
     area: "Area (m²)",
     areaMin: "Min. area (m²)",
@@ -218,6 +247,7 @@ const ACTION_LABELS = {
     print: "Drucken/PDF",
     results: "Zurück zu den Ergebnissen",
     search: "Suchen",
+    keywordSearch: "Suchbegriff oder Referenz",
     contact: "Kontakt",
     primaryActions: "Hauptaktionen",
     locations: "Orte",
@@ -226,7 +256,13 @@ const ACTION_LABELS = {
     photo: "Foto",
     photos: "Fotos",
     location: "Ort",
+    country: "Land",
+    region: "Region / Bezirk",
+    locationSearchHint: "Stadt, Ort, Gemeinde oder Region",
+    locationSuggestions: "Ortsvorschläge",
+    noLocations: "Keine Orte gefunden.",
     municipality: "Gemeinde",
+    district: "Verwaltungsbezirk",
     propertyType: "Typ",
     area: "Fläche (m²)",
     areaMin: "Mindestfläche (m²)",
@@ -302,6 +338,7 @@ const ACTION_LABELS = {
     print: "Print/PDF",
     results: "Terug naar resultaten",
     search: "Zoeken",
+    keywordSearch: "Trefwoord of referentie",
     contact: "Contact",
     primaryActions: "Primaire acties",
     locations: "Locaties",
@@ -310,7 +347,13 @@ const ACTION_LABELS = {
     photo: "foto",
     photos: "foto's",
     location: "Locatie",
+    country: "Land",
+    region: "Regio / district",
+    locationSearchHint: "Stad, dorp, gemeente of regio",
+    locationSuggestions: "Locatiesuggesties",
+    noLocations: "Geen locaties gevonden.",
     municipality: "Gemeente",
+    district: "Bestuurlijk district",
     propertyType: "Type",
     area: "Oppervlakte (m²)",
     areaMin: "Min. oppervlakte (m²)",
@@ -386,6 +429,7 @@ const ACTION_LABELS = {
     print: "Печать/PDF",
     results: "Назад к результатам",
     search: "Поиск",
+    keywordSearch: "Ключевые слова или номер",
     contact: "Контакт",
     primaryActions: "Основные действия",
     locations: "Локации",
@@ -394,7 +438,13 @@ const ACTION_LABELS = {
     photo: "фото",
     photos: "фото",
     location: "Локация",
+    country: "Страна",
+    region: "Регион / область",
+    locationSearchHint: "Город, посёлок, муниципалитет или регион",
+    locationSuggestions: "Подсказки по локации",
+    noLocations: "Локации не найдены.",
     municipality: "Муниципалитет",
+    district: "Область",
     propertyType: "Тип",
     area: "Площадь (м²)",
     areaMin: "Мин. площадь (м²)",
@@ -470,6 +520,7 @@ const ACTION_LABELS = {
     print: "Εκτύπωση/PDF",
     results: "Πίσω στα αποτελέσματα",
     search: "Αναζήτηση",
+    keywordSearch: "Λέξη-κλειδί ή κωδικός",
     contact: "Επικοινωνία",
     primaryActions: "Κύριες ενέργειες",
     locations: "Τοποθεσίες",
@@ -478,7 +529,13 @@ const ACTION_LABELS = {
     photo: "φωτογραφία",
     photos: "φωτογραφίες",
     location: "Τοποθεσία",
+    country: "Χώρα",
+    region: "Περιφέρεια / ενότητα",
+    locationSearchHint: "Πόλη, οικισμός, δήμος ή περιφέρεια",
+    locationSuggestions: "Προτάσεις τοποθεσίας",
+    noLocations: "Δεν βρέθηκαν τοποθεσίες.",
     municipality: "Δήμος",
+    district: "Διοικητική περιφέρεια",
     propertyType: "Τύπος",
     area: "Εμβαδόν (m²)",
     areaMin: "Ελάχ. εμβαδόν (m²)",
@@ -554,6 +611,7 @@ const ACTION_LABELS = {
     print: "הדפסה/PDF",
     results: "חזרה לתוצאות",
     search: "חיפוש",
+    keywordSearch: "מילת חיפוש או מזהה",
     contact: "יצירת קשר",
     primaryActions: "פעולות ראשיות",
     locations: "אזורים",
@@ -562,7 +620,13 @@ const ACTION_LABELS = {
     photo: "תמונה",
     photos: "תמונות",
     location: "מיקום",
+    country: "מדינה",
+    region: "אזור / מחוז",
+    locationSearchHint: "עיר, יישוב, רשות או אזור",
+    locationSuggestions: "הצעות מיקום",
+    noLocations: "לא נמצאו מיקומים.",
     municipality: "רשות מקומית",
+    district: "מחוז",
     propertyType: "סוג",
     area: "שטח (מ״ר)",
     areaMin: "שטח מינימלי (מ״ר)",
@@ -750,15 +814,15 @@ const UI_COPY = {
   },
 };
 
-function humanizeIdentifier(value) {
+export function humanizeIdentifier(value) {
   return String(value || "").replaceAll("_", " ");
 }
 
 const LOCATION_NAMES = {
-  bg: { Sandanski: "Сандански", Petrich: "Петрич", Hotovo: "Хотово", Bansko: "Банско", "Sveti Vlas": "Свети Влас" },
-  ru: { Sandanski: "Сандански", Petrich: "Петрич", Hotovo: "Хотово", Bansko: "Банско", "Sveti Vlas": "Свети-Влас" },
-  el: { Sandanski: "Σαντάνσκι", Petrich: "Πετρίτσι", Hotovo: "Χότοβο", Bansko: "Μπάνσκο", "Sveti Vlas": "Σβέτι Βλας" },
-  he: { Sandanski: "סנדנסקי", Petrich: "פטריץ׳", Hotovo: "חוטובו", Bansko: "בנסקו", "Sveti Vlas": "סבטי ולאס" },
+  bg: { Sandanski: "Сандански", Petrich: "Петрич", Hotovo: "Хотово", Bansko: "Банско", "Sveti Vlas": "Свети Влас", Blagoevgrad: "Благоевград", Burgas: "Бургас" },
+  ru: { Sandanski: "Сандански", Petrich: "Петрич", Hotovo: "Хотово", Bansko: "Банско", "Sveti Vlas": "Свети-Влас", Blagoevgrad: "Благоевград", Burgas: "Бургас" },
+  el: { Sandanski: "Σαντάνσκι", Petrich: "Πετρίτσι", Hotovo: "Χότοβο", Bansko: "Μπάνσκο", "Sveti Vlas": "Σβέτι Βλας", Blagoevgrad: "Μπλαγκόεβγκραντ", Burgas: "Μπουργκάς" },
+  he: { Sandanski: "סנדנסקי", Petrich: "פטריץ׳", Hotovo: "חוטובו", Bansko: "בנסקו", "Sveti Vlas": "סבטי ולאס", Blagoevgrad: "בלגואבגרד", Burgas: "בורגס" },
 };
 
 export function uiCopyFor(localeCode) {
@@ -773,7 +837,12 @@ export function localizedListingValue(localeCode, key, value) {
 }
 
 export function localizedLocationValue(localeCode, value) {
-  return LOCATION_NAMES[localeCode]?.[value] || String(value || "");
+  const catalogArea = GEOGRAPHY_CATALOG.areas.find((area) => area.names?.en === value);
+  if (LOCATION_NAMES[localeCode]?.[value]) return LOCATION_NAMES[localeCode][value];
+  if (catalogArea && (localeCode === "bg" || (localeCode === "el" && catalogArea.country_code === "GR"))) {
+    return catalogArea.names.native;
+  }
+  return catalogArea?.names?.en || String(value || "");
 }
 
 function localizedLocationForView(localeCode, view) {
@@ -782,7 +851,23 @@ function localizedLocationForView(localeCode, view) {
 
 export function localizedSearchFilterValue(localeCode, key, value) {
   if (key === "property_type" || key === "offer_type") return localizedListingValue(localeCode, key, value);
-  if (key === "location" || key === "municipality") return localizedLocationValue(localeCode, value);
+  if (key === "location" || key === "municipality" || key === "district") return localizedLocationValue(localeCode, value);
+  if (key === "country_code") {
+    const country = GEOGRAPHY_CATALOG.countries.find((candidate) => candidate.code === value);
+    if (!country) return humanizeIdentifier(value);
+    return (localeCode === "bg" && value === "BG") || (localeCode === "el" && value === "GR")
+      ? country.names.native
+      : country.names.en;
+  }
+  if (key === "geography_id" || key === "region_id") {
+    const area =
+      GEOGRAPHY_CATALOG.areas.find((candidate) => candidate.id === value) ||
+      geographyRegistryArea(publicGeographyRegistry(), value);
+    if (!area) return humanizeIdentifier(value);
+    return (localeCode === "bg" && area.country_code === "BG") || (localeCode === "el" && area.country_code === "GR")
+      ? area.names.native
+      : area.names.en;
+  }
   return humanizeIdentifier(value);
 }
 
@@ -1109,13 +1194,15 @@ function publicChrome(registry, locale, { hreflang = [], active = null, location
       { id: "sell", href: sellerPath(registry, locale.code), label: copy.navSell, active: active === "seller" },
       { id: "contact", href: contactPath(registry, locale.code), label: copy.navContact, active: active === "contact" },
     ],
-    languages: publicIndexableLocales(registry).map((entry) => ({
+    languages: publicIndexableLocales(registry)
+      .filter((entry) => active !== "listing" || alternates.has(entry.code))
+      .map((entry) => ({
       code: entry.code,
       label: entry.native_name || entry.code.toUpperCase(),
       href: alternates.get(entry.code) || homePath(registry, entry.code),
       active: entry.code === locale.code,
       dir: entry.direction || "ltr",
-    })),
+      })),
     contact: { ...BRAND_CONTACT, offices: copy.offices },
     resources: guideLinks.length
       ? {
@@ -1381,6 +1468,8 @@ function searchableText(view) {
     view.location,
     view.location_native,
     view.municipality,
+    view.district,
+    view.region,
     view.country_code,
     view.property_type,
     view.offer_type,
@@ -1403,16 +1492,61 @@ function numberFilter(value, min, max) {
   return true;
 }
 
+function listingGeographyIds(view) {
+  const ids = new Set(Array.isArray(view.geography_path) ? view.geography_path : []);
+  if (view.geography_id) {
+    ids.add(view.geography_id);
+    if (!view.geography_path?.length) {
+      for (const area of geographyRegistryAncestors(publicGeographyRegistry(), view.geography_id)) ids.add(area.id);
+    }
+  }
+  if (view.country_code === "BG") {
+    if (view.district_code) ids.add(`BG:district:${view.district_code}`);
+    if (view.municipality_code) ids.add(`BG:municipality:${view.municipality_code}`);
+    if (view.settlement_ekatte) ids.add(`BG:settlement:${view.settlement_ekatte}`);
+  }
+  return ids;
+}
+
+function matchesGeography(view, areaId) {
+  if (!areaId) return true;
+  const area = geographyRegistryArea(publicGeographyRegistry(), areaId);
+  return Boolean(area && area.country_code === view.country_code && listingGeographyIds(view).has(area.id));
+}
+
+function officialAreaMaps(views, filters) {
+  const nonGeographicFilters = { ...filters };
+  for (const key of ["country_code", "location", "geography_id", "region_id", "municipality", "district"]) {
+    delete nonGeographicFilters[key];
+  }
+  const facetViews = views.filter((view) => matchesSearch(view, "", nonGeographicFilters));
+  const facetGeographyIds = facetViews.map(listingGeographyIds);
+  const selectedIds = new Set();
+  for (const areaId of [filters.region_id, filters.geography_id].filter(Boolean)) {
+    for (const area of geographyRegistryAncestors(publicGeographyRegistry(), areaId)) selectedIds.add(area.id);
+  }
+  return AREA_MAP.countries.map((country) => ({
+    ...country,
+    areas: country.areas.map((area) => {
+      const count = facetGeographyIds.filter((ids) => ids.has(area.id)).length;
+      return { ...area, count, selected: selectedIds.has(area.id) };
+    }),
+  }));
+}
+
 function matchesSearch(view, query, filters = {}) {
   const text = searchableText(view);
   if (!queryTokens(query).every((variants) => variants.some((token) => text.includes(token)))) return false;
   if (filters.location && !includesSearchValue([view.location, view.location_native, view.country_code].join(" "), filters.location)) return false;
+  if (filters.country_code && view.country_code !== String(filters.country_code).toUpperCase()) return false;
+  if (!matchesGeography(view, filters.region_id) || !matchesGeography(view, filters.geography_id)) return false;
   if (
     filters.municipality &&
-    (view.country_code !== "BG" || view.location_review_status !== "confirmed_settlement" || norm(view.municipality) !== norm(filters.municipality))
+    (!view.geography_id || norm(view.municipality) !== norm(filters.municipality))
   ) {
     return false;
   }
+  if (filters.district && norm(view.district) !== norm(filters.district)) return false;
   if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
   if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
   if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;
@@ -1686,6 +1820,7 @@ export function renderSearchPage({
   page = 1,
   pageSize = 12,
   savedView = false,
+  view = "list",
 }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
@@ -1698,7 +1833,28 @@ export function renderSearchPage({
   );
   const searchableListings = localeMatches.length ? localeMatches : fallbackMatches;
   const filterViews = searchableListings.map((listing) => listingToPublicViewModel(listing));
+  const catalogDistricts = GEOGRAPHY_CATALOG.areas
+    .filter((area) => area.country_code === "BG" && area.level === "district")
+    .map((area) => area.names.en);
   const filterOptions = {
+    countries: GEOGRAPHY_CATALOG.countries.map((country) => ({
+      code: country.code,
+      names: country.names,
+    })),
+    regions: GEOGRAPHY_CATALOG.areas
+      .filter((area) => (area.country_code === "BG" && area.level === "district") || (area.country_code === "GR" && area.level === "region"))
+      .map((area) => ({
+        id: area.id,
+        country_code: area.country_code,
+        level: area.level,
+        official_code: area.official_code,
+        names: area.names,
+      }))
+      .sort((left, right) =>
+        localizedSearchFilterValue(locale.code, "region_id", left.id).localeCompare(
+          localizedSearchFilterValue(locale.code, "region_id", right.id),
+        ),
+      ),
     locations: [...new Set(filterViews.map((listing) => listing.location).filter(Boolean))].sort(),
     municipalities: [
       ...new Set(
@@ -1708,6 +1864,9 @@ export function renderSearchPage({
           .filter(Boolean),
       ),
     ].sort((left, right) => localizedLocationValue(locale.code, left).localeCompare(localizedLocationValue(locale.code, right))),
+    districts: [...new Set([...catalogDistricts, ...filterViews.filter((listing) => listing.country_code === "BG").map((listing) => listing.district).filter(Boolean)])].sort(
+      (left, right) => localizedSearchFilterValue(locale.code, "district", left).localeCompare(localizedSearchFilterValue(locale.code, "district", right)),
+    ),
     property_types: [...new Set(filterViews.map((listing) => listing.property_type).filter(Boolean))].sort(),
     offer_types: [...new Set(filterViews.map((listing) => listing.offer_type).filter(Boolean))].sort(),
     bedrooms: [...new Set(filterViews.map((listing) => listing.bedrooms).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
@@ -1716,6 +1875,7 @@ export function renderSearchPage({
     matchesSearch(listingToPublicViewModel(listing), query, filters),
   );
   const selectedSort = publicSearchSort(sort);
+  const selectedView = !savedView && view === "map" ? "map" : "list";
   const sortedListings = sortListingsForPublicSearch(matchedListings, selectedSort);
   const requestedPage = Number(page);
   const normalizedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
@@ -1727,8 +1887,12 @@ export function renderSearchPage({
   const cards = sortedListings
     .slice(offset, offset + normalizedPageSize)
     .map((listing) => listingCard(registry, listing, locale));
-  const activeFilterChips = ["location", "municipality", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
-    .map((key) => ({ key, value: filters[key] || "", active: Boolean(filters[key]) }))
+  const activeFilterChips = ["location", "country_code", "geography_id", "region_id", "municipality", "district", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
+    .map((key) => ({
+      key,
+      value: filters[key] || "",
+      active: Boolean(filters[key]),
+    }))
     .filter((chip) => chip.active);
 
   return {
@@ -1751,9 +1915,9 @@ export function renderSearchPage({
     },
     mobile_policy: {
       list_first_mobile: true,
-      // Listing coordinates are not reviewed yet. Do not expose a map switch
-      // that implies address-level geography until that source is available.
-      map_optional: false,
+      // This is an official-area browser, not a property-pin map. Listing
+      // coordinates remain private until individually reviewed.
+      map_optional: true,
       sticky_contact_actions: true,
       minimum_tap_target_px: 44,
     },
@@ -1763,6 +1927,7 @@ export function renderSearchPage({
       engines: ["typesense", "meilisearch"],
       query,
       sort: selectedSort,
+      view: selectedView,
       filters: {
         locale: locale.code,
         public_enabled: true,
@@ -1779,7 +1944,10 @@ export function renderSearchPage({
         has_next: currentPage < totalPages,
       },
       controls: {
-        view_modes: [{ id: "list", label: ui.list, default: true }],
+        view_modes: [
+          { id: "list", label: ui.list, default: selectedView === "list" },
+          { id: "map", label: ui.map, default: selectedView === "map" },
+        ],
         sort_options: [
           { id: "recommended", label: ui.recommended, default: true },
           { id: "price_asc", label: ui.priceLowToHigh },
@@ -1797,6 +1965,8 @@ export function renderSearchPage({
         },
         active_filter_chips: activeFilterChips,
         filter_options: filterOptions,
+        area_maps: selectedView === "map" ? officialAreaMaps(filterViews, filters) : [],
+        area_map_source: AREA_MAP.source,
       },
       fallback: {
         enabled: true,
@@ -1861,6 +2031,10 @@ export function renderHomePage({ registry, localeCode, listings }) {
         endpoint: "/api/search",
         method: "GET",
         query_param: "q",
+        // Keep the home hero and the catalog on one filter contract. The
+        // client may progressively disclose these controls, while the GET
+        // form remains usable without JavaScript.
+        controls: search.search.controls,
       },
       seller: {
         path: sellerPath(registry, locale.code),
@@ -1977,6 +2151,41 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
         search: { path: `/${locale.code}/${locale.route_segments.search}` },
         seller: { path: sellerPath(registry, locale.code) },
         contact: { path: contactPath(registry, locale.code) },
+      },
+    },
+  };
+}
+
+export function renderLegacyArchivePage({ registry, entry, path }) {
+  const locale = resolvePublicLocale(registry, registry.source_locale).locale;
+  const title = "Архив от предишния сайт | MS Realty";
+  return {
+    kind: "legacy_archive",
+    status: 200,
+    locale: locale.code,
+    lang: locale.code,
+    dir: locale.direction,
+    path,
+    canonical: path,
+    indexable: false,
+    metadata: {
+      title,
+      description: "Историческо съдържание, запазено от предишния сайт на MS Realty.",
+      robots: "noindex,nofollow",
+    },
+    hreflang: [],
+    schema: null,
+    chrome: publicChrome(registry, locale, { active: null }),
+    body: {
+      h1: "Архив от предишния сайт",
+      notice: "Текстът по-долу е запазен от предишния сайт и не е превеждан, редактиран или потвърждаван като актуален.",
+      text: entry.extracted_body_text,
+      source: {
+        url: entry.source_url,
+        domain: entry.source_domain,
+        type: entry.source_type,
+        captured_at_utc: entry.captured_at_utc,
+        text_sha256: entry.text_sha256,
       },
     },
   };

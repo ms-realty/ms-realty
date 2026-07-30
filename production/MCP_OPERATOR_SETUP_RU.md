@@ -7,12 +7,11 @@ MCP endpoint приложения — POST https://<production-domain>/mcp. Он
 минимальный набор данных, а изменения требуют подтверждения, роли и append-only audit
 записи.
 
-Сейчас endpoint уже поддерживает индивидуальные записи операторов через
-MS_REALTY_ADMIN_CREDENTIALS_JSON: admin, broker, editor, translator. Однако bearer-токен
-— только переходная серверная интеграция. Его нельзя копировать в ChatGPT, Codex или
-общий документ и нельзя использовать как общий staff credential. Перед workspace-wide
-подключением нужен OAuth/OIDC, который сопоставляет отдельного сотрудника с устойчивым
-operator_id и ролью приложения.
+Endpoint поддерживает OAuth/OIDC и переходные индивидуальные записи операторов через
+MS_REALTY_ADMIN_CREDENTIALS_JSON: admin, broker, editor, translator. Bearer-токен нельзя
+копировать в ChatGPT, Codex или общий документ и нельзя использовать как общий staff
+credential. Для workspace-wide подключения используется OAuth/OIDC: проверенный `sub`
+каждого сотрудника сервер сопоставляет с устойчивым `operator_id` и ролью приложения.
 
 ## Доступные tools
 
@@ -24,16 +23,23 @@ operator_id и ролью приложения.
 
 После идентификации tools добавляются строго по роли:
 
-- broker: рабочая сводка, очередь контента, постановка уже проверенного ответа в ручную
-  отправку;
+- broker: рабочая сводка и персональная/командная очередь, подбор объектов,
+  постановка уже проверенного ответа в ручную отправку, назначение лида, этапы
+  buyer/renter/seller pipeline, показы и follow-up, результат ручной доставки,
+  документный checklist, public requests и закрытие сделки после существующих
+  процессных проверок;
 - editor: очередь контента, правка разрешённых текстовых полей, массовая смена статуса,
   очередь и черновик перевода;
 - translator: очередь контента, очередь и черновик перевода.
 
-Endpoint намеренно не даёт tool для публикации страницы, индексирования перевода,
-отправки сообщения клиенту, назначения прав доступа, произвольного SQL/HTTP-запроса
-или запуска фоновых задач. Черновик ответа всегда ждёт ручной доставки брокером;
-изменение контента не меняет publish_approved.
+`get_broker_work_queue` не возвращает raw contact и customer message body.
+`run_operator_workflow` принимает только девять allowlisted операций и повторно
+проходит те же state-transition, capability, confirmation и audit проверки, что
+обычный admin UI. Endpoint намеренно не даёт tool для публикации страницы,
+индексирования перевода, фактической отправки сообщения клиенту, назначения прав
+доступа, произвольного SQL/HTTP-запроса или запуска фоновых задач. Черновик ответа
+всегда ждёт ручной доставки брокером; изменение контента не меняет
+`publish_approved`.
 
 ## Модель для сотрудников
 
@@ -44,6 +50,30 @@ role и capability → ограниченный MCP tool → подтвержд�
 Это даёт сотруднику нормальный диалоговый интерфейс, но оставляет фактическую
 публикацию, коммуникацию с клиентом и launch-решения в существующем контролируемом
 операционном контуре.
+
+## Реализованная OAuth/OIDC граница
+
+При наличии OIDC-конфигурации `/mcp` становится защищённым resource server: до tool
+scan проверяются подпись JWT по JWKS, issuer, audience, срок действия, scope и точное
+соответствие `sub` записи сотрудника. Роли не принимаются из prompt или request body.
+Discovery доступен по
+`/.well-known/oauth-protected-resource/mcp`.
+
+Переменные deployment secret/environment:
+
+```dotenv
+MS_REALTY_PUBLIC_ORIGIN=https://realty.example
+MS_REALTY_MCP_OIDC_ISSUER=https://identity.example
+MS_REALTY_MCP_OIDC_AUDIENCE=https://realty.example/mcp
+MS_REALTY_MCP_OIDC_JWKS_URL=https://identity.example/.well-known/jwks.json
+MS_REALTY_MCP_OIDC_SCOPE=ms-realty:operator
+MS_REALTY_MCP_OIDC_PRINCIPALS_JSON=[{"subject":"provider-subject","id":"staff_editor","roles":["editor"]}]
+```
+
+В production все URL обязаны использовать HTTPS, а конфигурация должна быть полной.
+Неизвестный `sub`, отсутствующий scope, неправильный issuer/audience или невалидная
+подпись дают HTTP 401 до создания MCP session. Пример без реальных identity находится
+в `production/data/mcp-oidc.env.example`.
 
 ## ChatGPT Business / Enterprise / Edu: запуск после production identity setup
 
@@ -99,5 +129,6 @@ ChatGPT](https://help.openai.com/en/articles/8156019-is-api-usage-included-in-ch
 - workspace admin review и публикация connector;
 - отдельный live smoke test после публикации.
 
-Пока эти пункты не выполнены, /mcp остаётся реализованным и протестированным endpoint,
-но не готовым для самостоятельного подключения всеми сотрудниками.
+Пока live identity, HTTPS и workspace publication не подтверждены, `/mcp` остаётся
+реализованным и протестированным endpoint, но не считается подключённым всеми
+сотрудниками.

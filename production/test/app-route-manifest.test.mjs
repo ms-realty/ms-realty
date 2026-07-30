@@ -14,6 +14,7 @@ import {
 } from "../lib/app-router-adapter.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
+import { loadLegacyArchive } from "../lib/legacy-archive.mjs";
 
 const registry = loadLocaleRegistry();
 
@@ -309,4 +310,49 @@ test("App Router serves reviewed legacy URLs as direct domain-aware redirects", 
   assert.equal(wrongDomain.status, 404);
   assert.equal(canonicalHome.status, 308);
   assert.equal(canonicalHome.headers.get("location"), "/he?from=legacy-link");
+});
+
+test("App Router exposes only opaque noindex legacy archive captures", async () => {
+  const entry = loadLegacyArchive().entries[0];
+  const pathname = `/archive/${entry.archive_id}`;
+  const archive = renderAppRoute({ pathname, url: `https://example.test${pathname}` });
+  const sitemap = renderAppSitemap();
+  const manifest = JSON.parse(fs.readFileSync(fromRoot("production", "data", "app-route-manifest.json"), "utf8"));
+  const routeModule = await import("../../app/archive/[archiveId]/route.js");
+
+  assert.equal(archive.status, 200);
+  assert.equal(archive.rendered.kind, "legacy_archive");
+  assert.equal(archive.rendered.indexable, false);
+  assert.match(archive.html, /<meta name="robots" content="noindex,nofollow">/);
+  assert.match(archive.html, new RegExp(`<link rel="canonical" href="${entry.archive_id}">`.replace(entry.archive_id, pathname)));
+  assert.match(archive.html, /data-react-public-ui="legacy-archive"/);
+  assert.match(archive.html, /data-legacy-archive-source="true"/);
+  assert.doesNotMatch(archive.html, /data-approved-source="cms"/);
+  assert.doesNotMatch(sitemap.body, new RegExp(entry.archive_id));
+  assert.equal(manifest.routes.some((route) => route.path === pathname), false);
+
+  const forwarded = await routeModule.GET(new Request(`https://example.test${pathname}`));
+  assert.equal(forwarded.status, 200);
+  assert.match(await forwarded.text(), /data-react-public-ui="legacy-archive"/);
+});
+
+test("reviewed legacy redirects take priority over an archive capture", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "ms-realty-archive-redirect-"));
+  const deployableRedirectOutputPath = path.join(directory, "deployable-redirects.json");
+  const entry = loadLegacyArchive().entries[0];
+  const pathname = `/archive/${entry.archive_id}`;
+  fs.writeFileSync(
+    deployableRedirectOutputPath,
+    `${JSON.stringify({ decisions: [{ old_url: `https://makler-realty.com${pathname}`, status: 301, target_path: "/bg/imoti/MS-CRAWL-0001" }] })}\n`,
+  );
+
+  const response = renderAppRouteResponse({
+    pathname,
+    url: `http://app:3000${pathname}`,
+    host: "makler-realty.com",
+    config: { ...appRouterConfigFromEnv(), deployableRedirectOutputPath },
+  });
+
+  assert.equal(response.status, 301);
+  assert.equal(response.headers.get("location"), "/bg/imoti/MS-CRAWL-0001");
 });

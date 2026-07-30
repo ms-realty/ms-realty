@@ -142,6 +142,74 @@ function assertPrivateSecurityHeaders(headers) {
   assert.equal(headers["permissions-policy"], "camera=(), microphone=(), geolocation=()");
 }
 
+test("Node server preserves binary response bodies", async () => {
+  const expected = Buffer.from([0, 1, 2, 250, 255]);
+  const server = createNodeServer(async () => ({
+    status: 200,
+    headers: { "content-type": "image/avif" },
+    body: expected,
+  }));
+  const address = await listen(server);
+  try {
+    const response = await fetch(`http://${address.address}:${address.port}/hero-test`);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "image/avif");
+    assert.equal(response.headers.get("content-length"), String(expected.length));
+    assert.deepEqual(Buffer.from(await response.arrayBuffer()), expected);
+  } finally {
+    await close(server);
+  }
+});
+
+test("Node server measures UTF-8 response content length in bytes", async () => {
+  const body = JSON.stringify({ location: "Сандански", country: "България" });
+  const server = createNodeServer(async () => ({
+    status: 200,
+    headers: { "content-type": "application/json; charset=utf-8" },
+    body,
+  }));
+  const address = await listen(server);
+  try {
+    const response = await fetch(`http://${address.address}:${address.port}/utf8-test`, {
+      headers: { "accept-encoding": "identity" },
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-length"), String(Buffer.byteLength(body, "utf8")));
+    assert.equal(await response.text(), body);
+  } finally {
+    await close(server);
+  }
+});
+
+test("Node server serves HEAD through the matching GET route without a response body", async () => {
+  let receivedMethod = "";
+  const server = createNodeServer(async (request) => {
+    receivedMethod = request.method;
+    return {
+      status: 200,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+      body: "hello",
+    };
+  });
+  const address = await listen(server);
+  try {
+    const response = await fetch(`http://${address.address}:${address.port}/head-test`, {
+      method: "HEAD",
+      headers: { "accept-encoding": "identity" },
+    });
+
+    assert.equal(receivedMethod, "GET");
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("content-type"), "text/plain; charset=utf-8");
+    assert.equal(response.headers.get("content-length"), "5");
+    assert.equal(await response.text(), "");
+  } finally {
+    await close(server);
+  }
+});
+
 test("Node server serves live listing, search, lead, and viewing endpoints", async () => {
   await withServer(
     async (

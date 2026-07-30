@@ -6,8 +6,14 @@ import path from "node:path";
 import { readAuditLog } from "../lib/audit-log.mjs";
 import { createHttpApp, dispatchHttp } from "../lib/http.mjs";
 import { readListingEdits } from "../lib/listing-edits.mjs";
+import { readLeadAssignments } from "../lib/lead-assignments.mjs";
 import { readReplyOutbox } from "../lib/lead-replies.mjs";
-import { mcpConfigFromEnv, renderMcpResponse } from "../lib/mcp-server.mjs";
+import {
+  mcpConfigFromEnv,
+  mcpOidcConfigFromEnv,
+  renderMcpProtectedResourceMetadata,
+  renderMcpResponse,
+} from "../lib/mcp-server.mjs";
 import { readTranslationLedger } from "../lib/translation-ledger.mjs";
 
 const EDITOR_TOKEN = "mcp-editor-token-0123456789abcdef";
@@ -32,9 +38,11 @@ function fixture() {
     admin_locale: "en",
     message_original: "Please contact me about this property.",
     contact_preference: "email",
+    assigned_broker: "mcp_broker",
   };
   const paths = {
     auditLogPath: jsonl(directory, "audit"),
+    leadAssignmentLedgerPath: jsonl(directory, "lead-assignments"),
     leadLedgerPath: jsonl(directory, "leads", [lead]),
     listingEditLedgerPath: jsonl(directory, "listing-edits"),
     mediaReviewLedgerPath: jsonl(directory, "media-reviews"),
@@ -50,6 +58,7 @@ function fixture() {
       { id: "mcp_translator", token: TRANSLATOR_TOKEN, roles: ["translator"] },
     ]),
     MS_REALTY_AUDIT_LOG_PATH: paths.auditLogPath,
+    MS_REALTY_LEAD_ASSIGNMENT_LEDGER_PATH: paths.leadAssignmentLedgerPath,
     MS_REALTY_LEAD_LEDGER_PATH: paths.leadLedgerPath,
     MS_REALTY_LISTING_EDIT_LEDGER_PATH: paths.listingEditLedgerPath,
     MS_REALTY_MEDIA_REVIEW_LEDGER_PATH: paths.mediaReviewLedgerPath,
@@ -117,8 +126,10 @@ test("MCP separates anonymous public discovery from role-bound operator tools", 
     "get_public_listing",
     "get_launch_status",
     "get_operator_brief",
+    "get_broker_work_queue",
     "get_listing_content_queue",
     "queue_reviewed_reply",
+    "run_operator_workflow",
   ]);
 
   const translatorTools = await listTools(config, { authorization: `Bearer ${TRANSLATOR_TOKEN}` });
@@ -150,6 +161,107 @@ test("MCP returns only public listing data and rejects untrusted origins", async
   );
   assert.equal(rejected.response.status, 403);
   assert.equal(rejected.payload.error.message, "Forbidden origin");
+});
+
+test("MCP OIDC configuration requires a complete HTTPS resource-server identity", () => {
+  const env = {
+    NODE_ENV: "production",
+    MS_REALTY_PUBLIC_ORIGIN: "https://realty.example",
+    MS_REALTY_MCP_OIDC_ISSUER: "https://identity.example",
+    MS_REALTY_MCP_OIDC_AUDIENCE: "https://realty.example/mcp",
+    MS_REALTY_MCP_OIDC_JWKS_URL: "https://identity.example/.well-known/jwks.json",
+    MS_REALTY_MCP_OIDC_PRINCIPALS_JSON: JSON.stringify([
+      { subject: "staff-subject-1", id: "staff_editor", roles: ["editor"] },
+    ]),
+  };
+  const oidc = mcpOidcConfigFromEnv(env);
+  assert.equal(oidc.issuer, "https://identity.example");
+  assert.equal(oidc.audience, "https://realty.example/mcp");
+  assert.equal(oidc.scope, "ms-realty:operator");
+  assert.deepEqual(oidc.principals.get("staff-subject-1"), { id: "staff_editor", roles: ["editor"] });
+  assert.throws(
+    () => mcpOidcConfigFromEnv({ ...env, MS_REALTY_MCP_OIDC_JWKS_URL: "" }),
+    /MCP OIDC configuration is incomplete: MS_REALTY_MCP_OIDC_JWKS_URL/,
+  );
+  assert.throws(
+    () => mcpOidcConfigFromEnv({ ...env, MS_REALTY_MCP_OIDC_ISSUER: "http://identity.example" }),
+    /MS_REALTY_MCP_OIDC_ISSUER must use https/,
+  );
+  assert.throws(
+    () =>
+      mcpOidcConfigFromEnv({
+        ...env,
+        MS_REALTY_MCP_OIDC_PRINCIPALS_JSON: JSON.stringify([
+          { subject: "staff-subject-1", id: "staff_editor", roles: ["editor"] },
+          { subject: "staff-subject-2", id: "staff_editor", roles: ["broker"] },
+        ]),
+      }),
+    /operator IDs must be unique/,
+  );
+});
+
+test("MCP publishes OAuth metadata and binds a verified OIDC subject to existing role tools", async () => {
+  const { config, paths } = fixture();
+  config.publicOrigin = "https://realty.example";
+  config.oidc = {
+    issuer: "https://identity.example",
+    audience: "https://realty.example/mcp",
+    jwksUrl: "https://identity.example/.well-known/jwks.json",
+    scope: "ms-realty:operator",
+    principals: new Map([["staff-subject-1", { id: "staff_editor", roles: ["editor"] }]]),
+    verify: async (token) => {
+      if (token === "valid-oidc-token") return { payload: { sub: "staff-subject-1", scope: "openid ms-realty:operator" } };
+      if (token === "wrong-scope-token") return { payload: { sub: "staff-subject-1", scope: "openid" } };
+      if (token === "unknown-subject-token") return { payload: { sub: "staff-subject-2", scope: "ms-realty:operator" } };
+      throw new Error("invalid token");
+    },
+  };
+
+  const unauthenticated = await mcpCall(config, { jsonrpc: "2.0", id: 10, method: "tools/list", params: {} });
+  assert.equal(unauthenticated.response.status, 401);
+  assert.match(
+    unauthenticated.response.headers.get("www-authenticate"),
+    /resource_metadata="https:\/\/realty\.example\/\.well-known\/oauth-protected-resource\/mcp"/,
+  );
+  assert.match(unauthenticated.response.headers.get("www-authenticate"), /scope="ms-realty:operator"/);
+
+  const metadataResponse = renderMcpProtectedResourceMetadata(
+    new Request("http://local.test/.well-known/oauth-protected-resource/mcp"),
+    { config },
+  );
+  assert.equal(metadataResponse.status, 200);
+  assert.deepEqual(await metadataResponse.json(), {
+    resource: "https://realty.example/mcp",
+    authorization_servers: ["https://identity.example"],
+    scopes_supported: ["ms-realty:operator"],
+    bearer_methods_supported: ["header"],
+  });
+
+  const auth = { authorization: "Bearer valid-oidc-token" };
+  const tools = await listTools(config, auth);
+  assert.equal(tools.includes("edit_listing_content"), true);
+  assert.equal(tools.includes("queue_reviewed_reply"), false);
+  const edit = await callTool(
+    config,
+    "edit_listing_content",
+    {
+      listing_id: "MS-CRAWL-0001",
+      patch: { description: "OIDC-attributed staff edit for human publication review." },
+      confirmation: "EDIT_LISTING_CONTENT",
+    },
+    auth,
+  );
+  assert.deepEqual(edit.changed_fields, ["description"]);
+  assert.equal(readListingEdits(paths.listingEditLedgerPath)[0].editor, "staff_editor");
+
+  for (const token of ["wrong-scope-token", "unknown-subject-token", "invalid-token"]) {
+    const rejected = await mcpCall(
+      config,
+      { jsonrpc: "2.0", id: 11, method: "tools/list", params: {} },
+      { authorization: `Bearer ${token}` },
+    );
+    assert.equal(rejected.response.status, 401);
+  }
 });
 
 test("MCP saves review-only translation drafts and queues replies without delivery", async () => {
@@ -195,6 +307,33 @@ test("MCP saves review-only translation drafts and queues replies without delive
   assert.equal(queued.status, "queued_for_manual_send");
   assert.equal(queued.reviewer, "mcp_broker");
   assert.equal(readAuditLog(paths.auditLogPath).some((row) => row.action === "reply_approved"), true);
+});
+
+test("MCP exposes a privacy-safe broker queue and routes confirmed work through the admin audit boundary", async () => {
+  const { config, paths } = fixture();
+  const auth = { authorization: `Bearer ${BROKER_TOKEN}` };
+  const queue = await callTool(config, "get_broker_work_queue", { locale: "en", scope: "mine" }, auth);
+  assert.deepEqual(queue.privacy, { raw_contacts_included: false, customer_message_bodies_included: false });
+  assert.equal(queue.lead_pipeline[0].lead_id, "mcp-lead-0001");
+  assert.equal(JSON.stringify(queue).includes("message_original"), false);
+  assert.equal(JSON.stringify(queue).includes("Please contact me"), false);
+
+  const assignment = await callTool(
+    config,
+    "run_operator_workflow",
+    {
+      operation: "assign_lead",
+      lead_id: "mcp-lead-0001",
+      broker_id: "broker_ru",
+      reason: "Confirmed reassignment for Russian-language follow-up.",
+      confirmation: "RUN_OPERATOR_WORKFLOW",
+    },
+    auth,
+  );
+  assert.equal(assignment.lead_id, "mcp-lead-0001");
+  assert.equal(assignment.broker_id, "broker_ru");
+  assert.equal(readLeadAssignments(paths.leadAssignmentLedgerPath)[0].assigned_by, "mcp_broker");
+  assert.equal(readAuditLog(paths.auditLogPath).some((row) => row.action === "lead_assigned" && row.actor === "mcp_broker"), true);
 });
 
 test("MCP bounds listing-content operations to authenticated, confirmed, non-approval changes", async () => {
@@ -344,4 +483,12 @@ test("the standalone production server serves the same MCP endpoint", async () =
   assert.equal(response.status, 200);
   const payload = ssePayload(response.body);
   assert.equal(payload.result.tools.some((tool) => tool.name === "search_public_listings"), true);
+
+  const metadata = await dispatchHttp(app, {
+    method: "GET",
+    url: "/.well-known/oauth-protected-resource/mcp",
+    headers: {},
+  });
+  assert.equal(metadata.status, 404);
+  assert.match(metadata.body, /MCP OAuth protected resource is not configured/);
 });

@@ -104,8 +104,32 @@
               "type": "text"
             },
             {
+              "name": "district",
+              "type": "text"
+            },
+            {
+              "name": "district_code",
+              "type": "text"
+            },
+            {
+              "name": "region",
+              "type": "text"
+            },
+            {
+              "name": "region_id",
+              "type": "text"
+            },
+            {
               "name": "country_code",
               "type": "text"
+            },
+            {
+              "name": "geography_id",
+              "type": "text"
+            },
+            {
+              "name": "geography_path",
+              "type": "json"
             },
             {
               "name": "settlement_ekatte",
@@ -113,6 +137,10 @@
             },
             {
               "name": "location_review_status",
+              "type": "text"
+            },
+            {
+              "name": "location_precision",
               "type": "text"
             },
             {

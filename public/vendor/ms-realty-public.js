@@ -399,139 +399,342 @@
     var forms = document.querySelectorAll("[data-save-search-form]");
     for (var i = 0; i < forms.length; i += 1) updateSavedSearchContact(forms[i]);
   }
-  function initMobileSearchFilters() {
-    var sheet = document.querySelector("[data-mobile-search-filters]");
-    if (!sheet) return;
-    var summary = sheet.querySelector("summary");
-    var panel = sheet.querySelector("[data-mobile-filter-sheet]");
-    var wasOpen = Boolean(sheet.open);
-    var focusableSelector = "a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex='-1'])";
-    function focusableControls() {
-      if (!panel) return [];
-      return Array.prototype.filter.call(panel.querySelectorAll(focusableSelector), function (element) {
-        return !element.hidden && element.getAttribute("aria-hidden") !== "true" && element.getClientRects().length > 0;
-      });
+  function initGeographyComboboxes() {
+    var comboboxes = document.querySelectorAll("[data-geography-combobox]");
+    for (var i = 0; i < comboboxes.length; i += 1) initGeographyCombobox(comboboxes[i]);
+  }
+  function initGeographyCombobox(combobox) {
+    var form = combobox.closest("form");
+    if (!form) return;
+    var locationInput = combobox ? combobox.querySelector("[data-geography-input]") : null;
+    var geographyId = combobox ? combobox.querySelector("[data-geography-id]") : null;
+    var options = combobox ? combobox.querySelector("[data-geography-options]") : null;
+    var status = combobox ? combobox.querySelector("[data-geography-status]") : null;
+    var country = form.querySelector("[data-geography-country]");
+    var region = form.querySelector("[data-geography-region]");
+    var results = [];
+    var activeIndex = -1;
+    var searchTimer = 0;
+    var searchRequest = 0;
+    var searchController = null;
+    var optionIdPrefix = ((options && options.id) || "geography-options") + "-option-";
+    var queryName = (locationInput && locationInput.getAttribute("name")) || combobox.getAttribute("data-geography-query-name") || "";
+    function setFreeTextEnabled(enabled) {
+      if (!locationInput || !queryName) return;
+      if (enabled) locationInput.setAttribute("name", queryName);
+      else locationInput.removeAttribute("name");
     }
-    function closeSheet() {
-      sheet.open = false;
-      syncSheetState();
-      if (summary) summary.focus();
+    function clearGeographySelection(clearLabel) {
+      if (!geographyId) return;
+      var hadSelection = Boolean(geographyId.value);
+      geographyId.value = "";
+      setFreeTextEnabled(true);
+      if (clearLabel && hadSelection && locationInput) locationInput.value = "";
     }
-    function syncSheetState() {
-      var isOpen = Boolean(sheet.open);
-      document.documentElement.classList.toggle("mobile-sheet-open", isOpen);
-      if (summary) summary.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      if (isOpen && !wasOpen) {
-        window.requestAnimationFrame(function () {
-          var controls = focusableControls();
-          if (controls[0]) controls[0].focus();
-          else if (panel) {
-            panel.setAttribute("tabindex", "-1");
-            panel.focus();
-          }
-        });
+    function localizedGeographyName(item) {
+      var locale = combobox ? combobox.getAttribute("data-geography-locale") || "en" : "en";
+      var useNative = (locale === "bg" && item.country_code === "BG") || (locale === "el" && item.country_code === "GR");
+      return String((useNative ? item.names && item.names.native : item.names && item.names.en) || item.names && item.names.native || item.official_code || "");
+    }
+    function geographyContext(item) {
+      var ancestors = Array.isArray(item.context) ? item.context : [];
+      var names = ancestors
+        .slice(-2)
+        .map(localizedGeographyName)
+        .filter(function (name) { return name && name !== localizedGeographyName(item); });
+      names.push(item.country_code);
+      return names.filter(Boolean).join(" · ");
+    }
+    function closeGeographyOptions() {
+      if (!locationInput || !options) return;
+      options.hidden = true;
+      locationInput.setAttribute("aria-expanded", "false");
+      locationInput.removeAttribute("aria-activedescendant");
+      activeIndex = -1;
+    }
+    function setActiveGeographyOption(nextIndex) {
+      if (!locationInput || !options || !results.length) return;
+      activeIndex = (nextIndex + results.length) % results.length;
+      var optionNodes = options.querySelectorAll("[data-geography-option]");
+      for (var i = 0; i < optionNodes.length; i += 1) {
+        var active = i === activeIndex;
+        optionNodes[i].setAttribute("aria-selected", active ? "true" : "false");
+        if (active) optionNodes[i].scrollIntoView({ block: "nearest" });
       }
-      wasOpen = isOpen;
+      locationInput.setAttribute("aria-activedescendant", optionIdPrefix + String(activeIndex));
     }
-    sheet.addEventListener("toggle", syncSheetState);
-    sheet.addEventListener("click", function (event) {
-      var close = event.target.closest("[data-mobile-filter-close]");
-      if (!close) return;
-      event.preventDefault();
-      closeSheet();
-    });
-    document.addEventListener("keydown", function (event) {
-      if (!sheet.open) return;
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeSheet();
+    function syncRegionOptions() {
+      if (!country || !region) return;
+      var selectedCountry = country.value;
+      var regionOptions = region.querySelectorAll("option[data-country]");
+      for (var i = 0; i < regionOptions.length; i += 1) {
+        var available = !selectedCountry || regionOptions[i].getAttribute("data-country") === selectedCountry;
+        regionOptions[i].hidden = !available;
+        regionOptions[i].disabled = !available;
+      }
+      if (region.selectedOptions.length && region.selectedOptions[0].disabled) region.value = "";
+    }
+    function selectGeography(item) {
+      if (!locationInput || !geographyId) return;
+      locationInput.value = localizedGeographyName(item);
+      geographyId.value = item.id || "";
+      setFreeTextEnabled(false);
+      if (country && item.country_code) country.value = item.country_code;
+      syncRegionOptions();
+      if (region) {
+        var hierarchy = [item].concat(Array.isArray(item.context) ? item.context : []);
+        var regionalArea = hierarchy.find(function (candidate) {
+          return candidate.level === "district" || candidate.level === "region";
+        });
+        var regionOptions = region.querySelectorAll("option");
+        for (var i = 0; regionalArea && i < regionOptions.length; i += 1) {
+          if (regionOptions[i].value === regionalArea.id) region.value = regionalArea.id;
+        }
+      }
+      closeGeographyOptions();
+      if (status) status.textContent = localizedGeographyName(item) + " · " + geographyContext(item);
+    }
+    function renderGeographyOptions(items) {
+      if (!locationInput || !options) return;
+      options.textContent = "";
+      results = Array.isArray(items) ? items : [];
+      activeIndex = -1;
+      if (!results.length) {
+        var empty = document.createElement("div");
+        empty.className = "hp-hero__location-empty";
+        empty.setAttribute("role", "option");
+        empty.setAttribute("aria-disabled", "true");
+        empty.textContent = combobox.getAttribute("data-geography-empty-label") || "No locations found.";
+        options.appendChild(empty);
+        options.hidden = false;
+        locationInput.setAttribute("aria-expanded", "true");
+        if (status) status.textContent = empty.textContent;
         return;
       }
-      if (event.key !== "Tab") return;
-      var controls = focusableControls();
-      if (!controls.length) return;
-      var first = controls[0];
-      var last = controls[controls.length - 1];
-      if (!panel.contains(document.activeElement)) {
-        event.preventDefault();
-        first.focus();
-      } else if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
+      for (var i = 0; i < results.length; i += 1) {
+        (function (item, index) {
+          var option = document.createElement("button");
+          var name = document.createElement("strong");
+          var context = document.createElement("span");
+          option.type = "button";
+          option.id = optionIdPrefix + String(index);
+          option.className = "hp-hero__location-option";
+          option.setAttribute("role", "option");
+          option.setAttribute("aria-selected", "false");
+          option.setAttribute("data-geography-option", item.id || "");
+          option.tabIndex = -1;
+          name.textContent = localizedGeographyName(item);
+          context.textContent = geographyContext(item);
+          option.appendChild(name);
+          option.appendChild(context);
+          option.addEventListener("pointerdown", function (event) { event.preventDefault(); });
+          option.addEventListener("click", function () { selectGeography(item); });
+          options.appendChild(option);
+        })(results[i], i);
       }
-    });
-    syncSheetState();
-  }
-  function initMobileFilterPreview() {
-    var form = document.getElementById("sr-mobile-filter-form");
-    var submit = document.querySelector("[data-mobile-filter-submit]");
-    var status = document.querySelector("[data-mobile-filter-preview-status]");
-    if (!form || !submit || typeof window.fetch !== "function") return;
-    var timer = 0;
-    var controller = null;
-    var requestNumber = 0;
-    function setBusy(value) {
-      if (value) submit.setAttribute("aria-busy", "true");
-      else submit.removeAttribute("aria-busy");
+      options.hidden = false;
+      locationInput.setAttribute("aria-expanded", "true");
+      if (status) status.textContent = String(results.length);
     }
-    function updateCount(total) {
-      var base = submit.getAttribute("data-mobile-filter-base-label") || "Search";
-      var matches = submit.getAttribute("data-mobile-filter-matches-label") || "matches";
-      var text = base + " · " + String(total) + " " + matches;
-      var label = submit.querySelector("span") || submit;
-      label.textContent = text;
-      submit.setAttribute("aria-label", text);
-      if (status) status.textContent = String(total) + " " + matches;
-    }
-    function preview() {
-      requestNumber += 1;
-      var currentRequest = requestNumber;
-      if (controller) controller.abort();
-      controller = typeof AbortController === "function" ? new AbortController() : null;
-      var pageUrl = new URL(form.getAttribute("action") || window.location.pathname, window.location.href);
-      var apiUrl = new URL("/api/search", window.location.href);
-      var locale = pageUrl.pathname.split("/")[1] || "bg";
-      var params = new URLSearchParams();
-      new FormData(form).forEach(function (value, key) {
-        if (String(value) !== "") params.set(key, String(value));
-      });
-      params.set("locale", locale);
-      apiUrl.search = params.toString();
-      setBusy(true);
-      fetch(apiUrl.toString(), {
+    function fetchGeographyOptions() {
+      if (!combobox || !locationInput || !options) return;
+      var query = locationInput.value.trim();
+      if (query.length < 2) {
+        results = [];
+        closeGeographyOptions();
+        if (status) status.textContent = "";
+        return;
+      }
+      searchRequest += 1;
+      var request = searchRequest;
+      if (searchController) searchController.abort();
+      searchController = typeof AbortController === "function" ? new AbortController() : null;
+      var url = new URL(combobox.getAttribute("data-geography-endpoint") || "/api/geography", window.location.href);
+      url.searchParams.set("q", query);
+      url.searchParams.set("limit", "8");
+      url.searchParams.set("level", "settlement,municipality,municipal_district,municipal_unit,community,regional_unit,district,region");
+      if (country && country.value) url.searchParams.set("country", country.value);
+      if (region && region.value) url.searchParams.set("ancestor_id", region.value);
+      combobox.setAttribute("aria-busy", "true");
+      fetch(url.toString(), {
         credentials: "same-origin",
-        headers: { accept: "application/json", "x-ms-realty-preview": "search-count" },
-        signal: controller ? controller.signal : undefined,
+        headers: { accept: "application/json" },
+        signal: searchController ? searchController.signal : undefined,
       })
         .then(function (response) {
           if (!response.ok) throw new Error(String(response.status));
           return response.json();
         })
         .then(function (payload) {
-          if (currentRequest !== requestNumber) return;
-          var total = Number(payload && payload.search && payload.search.total_matches);
-          if (Number.isFinite(total) && total >= 0) updateCount(total);
+          if (request !== searchRequest) return;
+          renderGeographyOptions(payload && payload.results);
         })
         .catch(function (error) {
           if (error && error.name === "AbortError") return;
+          if (request === searchRequest) closeGeographyOptions();
         })
         .then(function () {
-          if (currentRequest === requestNumber) setBusy(false);
+          if (request === searchRequest) combobox.removeAttribute("aria-busy");
         });
     }
-    function schedulePreview() {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(preview, 320);
+    function scheduleGeographyOptions() {
+      window.clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(fetchGeographyOptions, 220);
     }
-    form.addEventListener("input", schedulePreview);
-    form.addEventListener("change", schedulePreview);
-    form.addEventListener("submit", function () {
-      window.clearTimeout(timer);
-      if (controller) controller.abort();
+    if (locationInput && geographyId && options) {
+      locationInput.addEventListener("input", function () {
+        clearGeographySelection(false);
+        scheduleGeographyOptions();
+      });
+      locationInput.addEventListener("keydown", function (event) {
+        if (event.key === "ArrowDown" && results.length) {
+          event.preventDefault();
+          setActiveGeographyOption(activeIndex + 1);
+        } else if (event.key === "ArrowUp" && results.length) {
+          event.preventDefault();
+          setActiveGeographyOption(activeIndex - 1);
+        } else if (event.key === "Enter" && activeIndex >= 0 && results[activeIndex]) {
+          event.preventDefault();
+          selectGeography(results[activeIndex]);
+        } else if (event.key === "Escape" && !options.hidden) {
+          event.preventDefault();
+          closeGeographyOptions();
+        }
+      });
+      locationInput.addEventListener("blur", function () {
+        window.setTimeout(closeGeographyOptions, 120);
+      });
+    }
+    if (country) {
+      country.addEventListener("change", function () {
+        clearGeographySelection(true);
+        syncRegionOptions();
+        if (locationInput && locationInput.value.trim().length >= 2) scheduleGeographyOptions();
+      });
+    }
+    if (region) {
+      region.addEventListener("change", function () {
+        clearGeographySelection(true);
+        var selected = region.selectedOptions[0];
+        if (selected && country && !country.value) {
+          country.value = selected.getAttribute("data-country") || "";
+          syncRegionOptions();
+        }
+        if (locationInput && locationInput.value.trim().length >= 2) scheduleGeographyOptions();
+      });
+    }
+    form.addEventListener("reset", function () {
+      window.setTimeout(function () {
+        clearGeographySelection(false);
+        results = [];
+        syncRegionOptions();
+        closeGeographyOptions();
+      });
     });
+    form.addEventListener("submit", function () {
+      window.clearTimeout(searchTimer);
+      if (searchController) searchController.abort();
+    });
+    syncRegionOptions();
+    setFreeTextEnabled(!geographyId || !geographyId.value);
+  }
+  function initHeroAdvancedSearch() {
+    var form = document.querySelector("[data-hero-advanced-search]");
+    if (!form) return;
+    var trigger = form.querySelector("[data-hero-advanced-trigger]");
+    var panel = form.querySelector(".hp-hero__advanced-panel");
+    if (!trigger || !panel) return;
+    function setExpanded(expanded) {
+      trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
+      panel.hidden = !expanded;
+    }
+    trigger.addEventListener("click", function () {
+      setExpanded(trigger.getAttribute("aria-expanded") !== "true");
+    });
+    form.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || trigger.getAttribute("aria-expanded") !== "true") return;
+      event.preventDefault();
+      setExpanded(false);
+      trigger.focus();
+    });
+    setExpanded(false);
+  }
+  function initHeroGallery() {
+    var gallery = document.querySelector("[data-hero-gallery]");
+    if (!gallery) return;
+    var allSlides = gallery.querySelectorAll("[data-hero-gallery-slide]");
+    var mobileViewport = window.matchMedia ? window.matchMedia("(max-width: 679px)") : null;
+    function availableSlides() {
+      return Array.prototype.filter.call(allSlides, function (slide) {
+        return slide.getAttribute("data-hero-mobile-only") !== "true" || Boolean(mobileViewport && mobileViewport.matches);
+      });
+    }
+    var slides = availableSlides();
+    if (slides.length < 2) return;
+    var status = gallery.querySelector("[data-hero-gallery-status]");
+    var interval = Math.max(3000, Number(gallery.getAttribute("data-hero-gallery-interval")) || 7000);
+    var label = gallery.getAttribute("data-hero-gallery-label") || "Gallery";
+    var motion = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+    var index = 0;
+    var timer = 0;
+    var pointerInside = false;
+    var focusInside = false;
+    function paused() {
+      return pointerInside || focusInside || document.hidden || Boolean(motion && motion.matches);
+    }
+    function clearTimer() {
+      if (!timer) return;
+      window.clearTimeout(timer);
+      timer = 0;
+    }
+    function apply(nextIndex, announce) {
+      slides = availableSlides();
+      if (!slides.length) return;
+      index = (nextIndex + slides.length) % slides.length;
+      var activeSlide = slides[index];
+      for (var i = 0; i < allSlides.length; i += 1) {
+        var active = allSlides[i] === activeSlide;
+        allSlides[i].hidden = !active;
+        allSlides[i].setAttribute("data-gallery-active", active ? "true" : "false");
+        allSlides[i].setAttribute("aria-hidden", active ? "false" : "true");
+      }
+      if (status) {
+        status.setAttribute("aria-live", announce ? "polite" : "off");
+        status.textContent = label + " " + String(index + 1) + " / " + String(slides.length);
+      }
+    }
+    function schedule() {
+      clearTimer();
+      if (paused()) return;
+      timer = window.setTimeout(function () {
+        apply(index + 1, false);
+        schedule();
+      }, interval);
+    }
+    gallery.addEventListener("pointerenter", function () { pointerInside = true; schedule(); });
+    gallery.addEventListener("pointerleave", function () { pointerInside = false; schedule(); });
+    gallery.addEventListener("focusin", function () { focusInside = true; schedule(); });
+    gallery.addEventListener("focusout", function () {
+      window.setTimeout(function () {
+        focusInside = gallery.contains(document.activeElement);
+        schedule();
+      });
+    });
+    document.addEventListener("visibilitychange", schedule);
+    function resetForViewport() {
+      apply(0, false);
+      schedule();
+    }
+    if (mobileViewport) {
+      if (mobileViewport.addEventListener) mobileViewport.addEventListener("change", resetForViewport);
+      else if (mobileViewport.addListener) mobileViewport.addListener(resetForViewport);
+    }
+    if (motion) {
+      if (motion.addEventListener) motion.addEventListener("change", schedule);
+      else if (motion.addListener) motion.addListener(schedule);
+    }
+    apply(0, false);
+    schedule();
   }
   function initImageFallbacks() {
     var images = document.querySelectorAll("main[data-react-public-ui] img, img[data-fallback-src]");
@@ -552,6 +755,86 @@
         if (image.complete && image.naturalWidth === 0) recoverImage(image);
       })(images[i]);
     }
+  }
+  function initListingGallery() {
+    var dialog = document.querySelector("[data-listing-gallery-dialog]");
+    var sourceButtons = document.querySelectorAll("[data-listing-gallery-source]");
+    var openers = document.querySelectorAll("[data-listing-gallery-open]");
+    if (!dialog || typeof dialog.showModal !== "function" || !sourceButtons.length || !openers.length) return;
+    var image = dialog.querySelector("[data-listing-gallery-image]");
+    var caption = dialog.querySelector("[data-listing-gallery-caption]");
+    var current = dialog.querySelector("[data-listing-gallery-current]");
+    var previous = dialog.querySelector("[data-listing-gallery-prev]");
+    var next = dialog.querySelector("[data-listing-gallery-next]");
+    var close = dialog.querySelector("[data-listing-gallery-close]");
+    if (!image || !caption || !current) return;
+    var sources = [];
+    var activeIndex = 0;
+    var returnTarget = null;
+    for (var i = 0; i < sourceButtons.length; i += 1) {
+      var sourceImage = sourceButtons[i].querySelector("img");
+      if (!sourceImage) continue;
+      sources.push({
+        src: sourceImage.getAttribute("src") || "",
+        alt: sourceImage.getAttribute("alt") || "",
+        fallback: sourceImage.getAttribute("data-fallback-src") || "",
+      });
+    }
+    if (!sources.length) return;
+    function show(index) {
+      activeIndex = Math.max(0, Math.min(sources.length - 1, index));
+      var source = sources[activeIndex];
+      image.hidden = false;
+      image.removeAttribute("data-image-state");
+      image.setAttribute("src", source.src);
+      image.setAttribute("alt", source.alt);
+      if (source.fallback) image.setAttribute("data-fallback-src", source.fallback);
+      else image.removeAttribute("data-fallback-src");
+      caption.textContent = source.alt;
+      current.textContent = String(activeIndex + 1);
+      if (previous) previous.disabled = activeIndex === 0;
+      if (next) next.disabled = activeIndex === sources.length - 1;
+    }
+    function openAt(trigger) {
+      var index = Number(trigger.getAttribute("data-listing-gallery-open"));
+      returnTarget = trigger;
+      show(Number.isFinite(index) ? index : 0);
+      dialog.showModal();
+      syncPublicDialogState();
+      if (close) window.requestAnimationFrame(function () { close.focus(); });
+    }
+    for (var j = 0; j < openers.length; j += 1) {
+      openers[j].addEventListener("click", function (event) { openAt(event.currentTarget); });
+    }
+    if (previous) previous.addEventListener("click", function () { show(activeIndex - 1); });
+    if (next) next.addEventListener("click", function () { show(activeIndex + 1); });
+    if (close) close.addEventListener("click", function () { dialog.close(); });
+    dialog.addEventListener("click", function (event) {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        dialog.close();
+        return;
+      }
+      var rtl = document.documentElement.dir === "rtl";
+      var nextIndex = null;
+      if (event.key === "ArrowLeft") nextIndex = activeIndex + (rtl ? 1 : -1);
+      if (event.key === "ArrowRight") nextIndex = activeIndex + (rtl ? -1 : 1);
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = sources.length - 1;
+      if (nextIndex === null) return;
+      event.preventDefault();
+      show(nextIndex);
+    });
+    dialog.addEventListener("close", function () {
+      syncPublicDialogState();
+      var target = returnTarget;
+      returnTarget = null;
+      if (target && target.isConnected) window.requestAnimationFrame(function () { target.focus(); });
+    });
+    show(0);
   }
   function initMobileListingGallery() {
     var gallery = document.querySelector("[data-mobile-gallery]");
@@ -717,7 +1000,8 @@
   function syncPublicDialogState() {
     var enquiry = document.getElementById("mk-enquiry");
     var contactOptions = document.querySelector("[data-mobile-contact-options]");
-    var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open));
+    var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
+    var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
     document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
   }
   function initPublicMobileNavigation() {
@@ -939,9 +1223,11 @@
   initDialogFocusReturn();
   initPublicMobileNavigation();
   initSavedSearchContacts();
-  initMobileSearchFilters();
-  initMobileFilterPreview();
+  initGeographyComboboxes();
+  initHeroAdvancedSearch();
+  initHeroGallery();
   initImageFallbacks();
+  initListingGallery();
   initMobileListingGallery();
   initPhotoSphereViewers();
 })();

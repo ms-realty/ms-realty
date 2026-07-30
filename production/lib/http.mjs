@@ -5,7 +5,7 @@ import { DEFAULT_SLUG_HISTORY_PATH } from "./slug-history.mjs";
 import { DEFAULT_TOUR_APPROVAL_LEDGER_PATH } from "./tours.mjs";
 import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { readThroughCached } from "./file-cache.mjs";
-import { renderMcpResponse } from "./mcp-server.mjs";
+import { renderMcpProtectedResourceMetadata, renderMcpResponse } from "./mcp-server.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY } from "./security-headers.mjs";
 import {
@@ -147,6 +147,7 @@ import {
 } from "./consent-ledger.mjs";
 import { appendSlugChange, readSlugHistory, slugRedirectForPath } from "./slug-history.mjs";
 import { renderFaviconSvg } from "./favicon.mjs";
+import { geographySuggestionsPayload, loadGeographyRegistry } from "./geography.mjs";
 import {
   buildSeoEvidence,
   buildSeoEvidencePreflightReport,
@@ -928,13 +929,16 @@ export function createHttpApp({
       : null;
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
-    if (url.pathname === "/mcp") {
+    const mcpMetadataRoute =
+      url.pathname === "/.well-known/oauth-protected-resource" ||
+      url.pathname === "/.well-known/oauth-protected-resource/mcp";
+    if (url.pathname === "/mcp" || mcpMetadataRoute) {
       const headers = new Headers();
       for (const [name, value] of Object.entries(request.headers || {})) {
         if (value !== undefined) headers.set(name, Array.isArray(value) ? value.join(", ") : String(value));
       }
       const method = String(request.method || "GET").toUpperCase();
-      const mcpResponse = await renderMcpResponse(
+      const mcpResponse = await (mcpMetadataRoute ? renderMcpProtectedResourceMetadata : renderMcpResponse)(
         new Request(`http://ms-realty.local${url.pathname}${url.search}`, {
           method,
           headers,
@@ -1029,15 +1033,34 @@ export function createHttpApp({
       });
     }
 
+    if (request.method === "GET" && url.pathname.startsWith("/hero/")) {
+      const heroMatch = url.pathname.match(/^\/hero\/([a-z0-9][a-z0-9._-]*\.(avif|webp))$/i);
+      if (heroMatch) {
+        const heroPath = fromRoot("public", "hero", heroMatch[1]);
+        if (fs.existsSync(heroPath)) {
+          return response(200, fs.readFileSync(heroPath), `image/${heroMatch[2].toLowerCase()}`, {
+            "cache-control": "public, max-age=31536000, immutable",
+          });
+        }
+      }
+      return json(404, { kind: "not_found", message: "Unknown hero asset" });
+    }
+
     if (request.method === "GET" && url.pathname.startsWith("/vendor/")) {
       // Versioned browser bundles generated into public/vendor by
       // scripts/build-design-assets.mjs (?v= content hash → immutable cache).
-      const vendorMatch = url.pathname.match(/^\/vendor\/([a-z0-9][a-z0-9._-]*\.(js|css|txt))$/i);
+      const vendorMatch = url.pathname.match(/^\/vendor\/([a-z0-9][a-z0-9._-]*\.(js|css|txt|png))$/i);
       if (vendorMatch) {
         const vendorPath = fromRoot("public", "vendor", vendorMatch[1]);
         if (fs.existsSync(vendorPath)) {
-          const vendorTypes = { js: "text/javascript; charset=utf-8", css: "text/css; charset=utf-8", txt: "text/plain; charset=utf-8" };
-          return response(200, fs.readFileSync(vendorPath, "utf8"), vendorTypes[vendorMatch[2].toLowerCase()], {
+          const extension = vendorMatch[2].toLowerCase();
+          const vendorTypes = {
+            js: "text/javascript; charset=utf-8",
+            css: "text/css; charset=utf-8",
+            txt: "text/plain; charset=utf-8",
+            png: "image/png",
+          };
+          return response(200, fs.readFileSync(vendorPath, extension === "png" ? undefined : "utf8"), vendorTypes[extension], {
             "cache-control": "public, max-age=31536000, immutable",
           });
         }
@@ -1066,6 +1089,25 @@ export function createHttpApp({
       );
     }
 
+    if (request.method === "GET" && url.pathname === "/api/geography") {
+      return response(
+        200,
+        geographySuggestionsPayload(loadGeographyRegistry(), {
+          query: url.searchParams.get("q") || "",
+          countryCode: (url.searchParams.get("country") || "").toUpperCase() || undefined,
+          levels: url.searchParams
+            .getAll("level")
+            .flatMap((value) => value.split(","))
+            .filter(Boolean),
+          parentId: url.searchParams.get("parent_id") || undefined,
+          ancestorId: url.searchParams.get("ancestor_id") || undefined,
+          limit: url.searchParams.get("limit") || 20,
+        }),
+        "application/json; charset=utf-8",
+        { "cache-control": "public, max-age=3600, stale-while-revalidate=86400" },
+      );
+    }
+
     if (request.method === "GET" && url.pathname === "/api/search") {
       const localeCode = url.searchParams.get("locale") || "bg";
       const query = url.searchParams.get("q") || "";
@@ -1080,7 +1122,9 @@ export function createHttpApp({
         page,
         translationTasks: currentTranslationTasks(),
       });
-      recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort, page });
+      if ((request.headers?.["x-ms-realty-preview"] || request.headers?.["X-MS-REALTY-PREVIEW"]) !== "search-count") {
+        recordEvent({ type: "search", path: url.pathname, locale: localeCode, query, filters, sort, page });
+      }
       return json(200, result);
     }
 
@@ -1094,6 +1138,7 @@ export function createHttpApp({
         const filters = searchFiltersFromParams(url.searchParams);
         const sort = url.searchParams.get("sort") || "recommended";
         const page = searchPageFromParams(url.searchParams);
+        const view = url.searchParams.get("view") || "list";
         const savedView = url.searchParams.get("saved") === "1";
         recordEvent({ type: "search", path: url.pathname, locale: searchLocale.code, query, filters, sort, page });
         return publicResponse(
@@ -1107,6 +1152,7 @@ export function createHttpApp({
             page,
             pageSize: savedView ? null : 12,
             savedView,
+            view,
             translationTasks: currentTranslationTasks(),
           }),
         );

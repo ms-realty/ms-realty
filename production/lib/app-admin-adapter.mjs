@@ -2117,7 +2117,7 @@ function importListingQualityRows(inputCsv, config, source = "listing_quality_cs
 }
 
 export async function renderAppAdminResponse(request, { config = appAdminConfigFromEnv() } = {}) {
-  const principal = resolveAdminPrincipal(request.headers.get("authorization") || "", config.authEnv || process.env);
+  const principal = config.adminPrincipal || resolveAdminPrincipal(request.headers.get("authorization") || "", config.authEnv || process.env);
   if (!principal) return adminUnauthorized();
   if (request.method !== "GET" && !canAdminMutate(principal)) return adminOperatorIdentityRequired();
   config = { ...config, adminPrincipal: principal };

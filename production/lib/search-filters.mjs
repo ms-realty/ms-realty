@@ -1,6 +1,10 @@
 export const SEARCH_FILTER_FIELDS = [
   "location",
+  "country_code",
+  "geography_id",
+  "region_id",
   "municipality",
+  "district",
   "property_type",
   "offer_type",
   "status",

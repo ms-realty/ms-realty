@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { createBrokerContact } from "../lib/broker-contacts.mjs";
 import { applyListingEdits, readListingEdits } from "../lib/listing-edits.mjs";
 import { addLocaleToRegistry, loadLocaleRegistry } from "../lib/locales.mjs";
+import { loadLegacyArchive, validateLegacyArchive } from "../lib/legacy-archive.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import {
   assertRuntimeSmoke,
@@ -83,6 +84,43 @@ test("runtime resolves locale-prefixed listing and fallback routes from CMS seed
   assert.equal(missing.status, 404);
   assert.equal(sourceLanguageRepair.metadata.title, "Дава под наем промишлена сграда в Сандански");
   assert.equal(sourceLanguageRepair.body.description, sourceLanguageRecord.facts.description);
+});
+
+test("runtime renders only validated, source-faithful legacy archive entries", () => {
+  const archive = loadLegacyArchive();
+  const entry = archive.entries[0];
+  const missing = renderRuntimePath(registry, seed, "/archive/" + "f".repeat(64));
+  const uppercase = renderRuntimePath(registry, seed, `/archive/${entry.archive_id.toUpperCase()}`);
+
+  assert.equal(archive.entries.length, 108);
+  for (const archived of archive.entries) {
+    const page = renderRuntimePath(registry, seed, `/archive/${archived.archive_id}`);
+    assert.equal(page.status, 200, archived.source_url);
+    assert.equal(page.kind, "legacy_archive", archived.source_url);
+    assert.equal(page.path, `/archive/${archived.archive_id}`, archived.source_url);
+    assert.equal(page.canonical, page.path, archived.source_url);
+    assert.equal(page.indexable, false, archived.source_url);
+    assert.equal(page.metadata.robots, "noindex,nofollow", archived.source_url);
+    assert.deepEqual(page.hreflang, [], archived.source_url);
+    assert.equal(page.schema, null, archived.source_url);
+    assert.equal(page.body.text, archived.extracted_body_text, archived.source_url);
+    assert.equal(page.body.source.url, archived.source_url, archived.source_url);
+  }
+  assert.equal(missing.status, 404);
+  assert.equal(uppercase.status, 404);
+
+  assert.throws(
+    () => validateLegacyArchive({ ...archive, summary: { ...archive.summary, archive_rows: 1 }, entries: [{ ...entry, source_type: "taxonomy" }] }),
+    /invalid or untrusted/,
+  );
+  assert.throws(
+    () => validateLegacyArchive({ ...archive, summary: { ...archive.summary, archive_rows: 1 }, entries: [{ ...entry, content_scope: "document_text_fallback" }] }),
+    /invalid or untrusted/,
+  );
+  assert.throws(
+    () => validateLegacyArchive({ ...archive, summary: { ...archive.summary, archive_rows: 1 }, entries: [{ ...entry, extracted_body_text: "changed after capture" }] }),
+    /invalid or untrusted/,
+  );
 });
 
 test("runtime renders every second-batch source-reviewed listing description", () => {

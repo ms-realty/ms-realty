@@ -10,7 +10,15 @@
       "download_url": "https://www.nsi.bg/nrnm/ekatte/zip/download?files_type=json",
       "format": "zip/json",
       "verified_at": "2026-07-29",
-      "coverage": ["NUTS1", "NUTS2", "district", "municipality", "mayoralty", "municipal_district", "settlement"],
+      "coverage": [
+        "NUTS1",
+        "NUTS2",
+        "district",
+        "municipality",
+        "mayoralty",
+        "municipal_district",
+        "settlement"
+      ],
       "use": "Authoritative Bulgarian administrative names and identifiers. Capture the source revision on every import."
     },
     {
@@ -19,7 +27,12 @@
       "url": "https://www.statistics.gr/en/statistics/-/publication/SKA01/-",
       "format": "official publication",
       "verified_at": "2026-07-29",
-      "coverage": ["municipality", "municipal_unit", "community", "settlement"],
+      "coverage": [
+        "municipality",
+        "municipal_unit",
+        "community",
+        "settlement"
+      ],
       "use": "Authoritative Greek register for imported municipality and settlement records."
     },
     {
@@ -28,7 +41,11 @@
       "url": "https://ec.europa.eu/eurostat/web/nuts",
       "format": "official EU territorial classification",
       "verified_at": "2026-07-29",
-      "coverage": ["NUTS1", "NUTS2", "NUTS3"],
+      "coverage": [
+        "NUTS1",
+        "NUTS2",
+        "NUTS3"
+      ],
       "use": "Stable cross-border regional identifiers. NUTS is statistical geography, not a replacement for national property-address validation."
     },
     {
@@ -37,7 +54,12 @@
       "url": "https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units/territorial-units-statistics",
       "format": "downloadable GIS geometry",
       "verified_at": "2026-07-29",
-      "coverage": ["map_geometry", "NUTS1", "NUTS2", "NUTS3"],
+      "coverage": [
+        "map_geometry",
+        "NUTS1",
+        "NUTS2",
+        "NUTS3"
+      ],
       "use": "Map boundary source for NUTS-level browse surfaces. Keep geometry version and CRS with each imported boundary."
     },
     {
@@ -46,7 +68,15 @@
       "url": "https://www.statistics.gr/en/digital-cartographical-data",
       "format": "official census cartographic data",
       "verified_at": "2026-07-29",
-      "coverage": ["map_geometry", "region", "regional_unit", "municipality", "municipal_unit", "community", "settlement"],
+      "coverage": [
+        "map_geometry",
+        "region",
+        "regional_unit",
+        "municipality",
+        "municipal_unit",
+        "community",
+        "settlement"
+      ],
       "use": "Greek administrative/census-map import source. These maps are census geography and must not be represented as legal cadastral boundaries."
     },
     {
@@ -56,7 +86,9 @@
       "document_url": "https://www.crc.bg/files/_en/bulgarian_NNP-en-2012.pdf",
       "format": "national numbering plan",
       "verified_at": "2026-07-29",
-      "coverage": ["telephone_geographic_area_code"],
+      "coverage": [
+        "telephone_geographic_area_code"
+      ],
       "use": "Telephone number-area codes only; never infer a listing address from a code."
     },
     {
@@ -66,7 +98,9 @@
       "document_url": "https://www.eett.gr/opencms/export/sites/default/EETT/Electronic_Communications/Telecoms/Numbering/Doc_GR.pdf",
       "format": "national numbering plan",
       "verified_at": "2026-07-29",
-      "coverage": ["telephone_geographic_area_code"],
+      "coverage": [
+        "telephone_geographic_area_code"
+      ],
       "use": "Telephone number-area codes only; never infer a listing address from a code."
     },
     {
@@ -75,86 +109,710 @@
       "url": "https://postalcodes.elta.gr/en/",
       "format": "official postal-code and address lookup",
       "verified_at": "2026-07-30",
-      "coverage": ["postal_code", "address_lookup"],
+      "coverage": [
+        "postal_code",
+        "address_lookup"
+      ],
       "use": "Validate or enrich a submitted Greek address through the official lookup; do not derive a property location solely from a postcode."
+    },
+    {
+      "id": "gr-elstat-census-2021",
+      "authority": "Hellenic Statistical Authority (ELSTAT)",
+      "url": "https://www.statistics.gr/el/2021-census-res-pop-results",
+      "document_url": "https://www.statistics.gr/documents/20181/17286366/MON_PLI_DHM_OIKISN_2021.xlsx/2b5a5f24-4083-ede5-7201-3c4fb109fb44",
+      "format": "official XLSX census hierarchy",
+      "verified_at": "2026-07-30",
+      "coverage": [
+        "regional_unit",
+        "municipality",
+        "municipal_unit",
+        "community",
+        "settlement"
+      ],
+      "use": "Official 2021 census hierarchy and settlement names, published to settlement level on 29 March 2024."
     }
   ],
   "countries": [
     {
       "code": "BG",
-      "names": { "native": "България", "en": "Bulgaria" },
+      "names": {
+        "native": "България",
+        "en": "Bulgaria"
+      },
       "country_calling_code": "+359",
-      "hierarchy": ["NUTS1", "NUTS2", "district", "municipality", "mayoralty", "municipal_district", "settlement", "neighborhood"],
+      "hierarchy": [
+        "NUTS1",
+        "NUTS2",
+        "district",
+        "municipality",
+        "mayoralty",
+        "municipal_district",
+        "settlement",
+        "neighborhood"
+      ],
       "registry_source_id": "bg-nsi-ekatte"
     },
     {
       "code": "GR",
-      "names": { "native": "Ελλάδα", "en": "Greece" },
+      "names": {
+        "native": "Ελλάδα",
+        "en": "Greece"
+      },
       "country_calling_code": "+30",
-      "hierarchy": ["NUTS1", "region", "regional_unit", "municipality", "municipal_unit", "community", "settlement", "neighborhood"],
+      "hierarchy": [
+        "NUTS1",
+        "region",
+        "regional_unit",
+        "municipality",
+        "municipal_unit",
+        "community",
+        "settlement",
+        "neighborhood"
+      ],
       "registry_source_id": "gr-elstat-register"
     }
   ],
   "areas": [
-    { "id": "BG:district:BLG", "country_code": "BG", "level": "district", "official_code": "BLG", "nuts3": "BG413", "names": { "native": "Благоевград", "en": "Blagoevgrad" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:BGS", "country_code": "BG", "level": "district", "official_code": "BGS", "nuts3": "BG341", "names": { "native": "Бургас", "en": "Burgas" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:VAR", "country_code": "BG", "level": "district", "official_code": "VAR", "nuts3": "BG331", "names": { "native": "Варна", "en": "Varna" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:VTR", "country_code": "BG", "level": "district", "official_code": "VTR", "nuts3": "BG321", "names": { "native": "Велико Търново", "en": "Veliko Tarnovo" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:VID", "country_code": "BG", "level": "district", "official_code": "VID", "nuts3": "BG311", "names": { "native": "Видин", "en": "Vidin" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:VRC", "country_code": "BG", "level": "district", "official_code": "VRC", "nuts3": "BG313", "names": { "native": "Враца", "en": "Vratsa" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:GAB", "country_code": "BG", "level": "district", "official_code": "GAB", "nuts3": "BG322", "names": { "native": "Габрово", "en": "Gabrovo" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:DOB", "country_code": "BG", "level": "district", "official_code": "DOB", "nuts3": "BG332", "names": { "native": "Добрич", "en": "Dobrich" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:KRZ", "country_code": "BG", "level": "district", "official_code": "KRZ", "nuts3": "BG425", "names": { "native": "Кърджали", "en": "Kardzhali" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:KNL", "country_code": "BG", "level": "district", "official_code": "KNL", "nuts3": "BG415", "names": { "native": "Кюстендил", "en": "Kyustendil" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:LOV", "country_code": "BG", "level": "district", "official_code": "LOV", "nuts3": "BG315", "names": { "native": "Ловеч", "en": "Lovech" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:MON", "country_code": "BG", "level": "district", "official_code": "MON", "nuts3": "BG312", "names": { "native": "Монтана", "en": "Montana" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:PAZ", "country_code": "BG", "level": "district", "official_code": "PAZ", "nuts3": "BG423", "names": { "native": "Пазарджик", "en": "Pazardzhik" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:PER", "country_code": "BG", "level": "district", "official_code": "PER", "nuts3": "BG414", "names": { "native": "Перник", "en": "Pernik" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:PVN", "country_code": "BG", "level": "district", "official_code": "PVN", "nuts3": "BG314", "names": { "native": "Плевен", "en": "Pleven" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:PDV", "country_code": "BG", "level": "district", "official_code": "PDV", "nuts3": "BG421", "names": { "native": "Пловдив", "en": "Plovdiv" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:RAZ", "country_code": "BG", "level": "district", "official_code": "RAZ", "nuts3": "BG324", "names": { "native": "Разград", "en": "Razgrad" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:RSE", "country_code": "BG", "level": "district", "official_code": "RSE", "nuts3": "BG323", "names": { "native": "Русе", "en": "Ruse" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:SLS", "country_code": "BG", "level": "district", "official_code": "SLS", "nuts3": "BG325", "names": { "native": "Силистра", "en": "Silistra" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:SLV", "country_code": "BG", "level": "district", "official_code": "SLV", "nuts3": "BG342", "names": { "native": "Сливен", "en": "Sliven" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:SML", "country_code": "BG", "level": "district", "official_code": "SML", "nuts3": "BG424", "names": { "native": "Смолян", "en": "Smolyan" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:SFO", "country_code": "BG", "level": "district", "official_code": "SFO", "nuts3": "BG412", "names": { "native": "София", "en": "Sofia" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:SOF", "country_code": "BG", "level": "district", "official_code": "SOF", "nuts3": "BG411", "names": { "native": "София (столица)", "en": "Sofia (stolitsa)" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:SZR", "country_code": "BG", "level": "district", "official_code": "SZR", "nuts3": "BG344", "names": { "native": "Стара Загора", "en": "Stara Zagora" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:TGV", "country_code": "BG", "level": "district", "official_code": "TGV", "nuts3": "BG334", "names": { "native": "Търговище", "en": "Targovishte" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:HKV", "country_code": "BG", "level": "district", "official_code": "HKV", "nuts3": "BG422", "names": { "native": "Хасково", "en": "Haskovo" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:SHU", "country_code": "BG", "level": "district", "official_code": "SHU", "nuts3": "BG333", "names": { "native": "Шумен", "en": "Shumen" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "BG:district:JAM", "country_code": "BG", "level": "district", "official_code": "JAM", "nuts3": "BG343", "names": { "native": "Ямбол", "en": "Yambol" }, "source_id": "bg-nsi-ekatte" },
-    { "id": "GR:NUTS1:EL5", "country_code": "GR", "level": "NUTS1", "official_code": "EL5", "names": { "native": "Βόρεια Ελλάδα", "en": "Northern Greece" }, "source_id": "eu-nuts-2024" },
-    { "id": "GR:region:EL51", "country_code": "GR", "level": "region", "official_code": "EL51", "parent_id": "GR:NUTS1:EL5", "nuts2": "EL51", "names": { "native": "Ανατολική Μακεδονία και Θράκη", "en": "Eastern Macedonia and Thrace" }, "source_id": "eu-nuts-2024" },
-    { "id": "GR:region:EL52", "country_code": "GR", "level": "region", "official_code": "EL52", "parent_id": "GR:NUTS1:EL5", "nuts2": "EL52", "names": { "native": "Κεντρική Μακεδονία", "en": "Central Macedonia" }, "source_id": "eu-nuts-2024" },
-    { "id": "GR:region:EL53", "country_code": "GR", "level": "region", "official_code": "EL53", "parent_id": "GR:NUTS1:EL5", "nuts2": "EL53", "names": { "native": "Δυτική Μακεδονία", "en": "Western Macedonia" }, "source_id": "eu-nuts-2024" },
-    { "id": "GR:region:EL54", "country_code": "GR", "level": "region", "official_code": "EL54", "parent_id": "GR:NUTS1:EL5", "nuts2": "EL54", "names": { "native": "Ήπειρος", "en": "Epirus" }, "source_id": "eu-nuts-2024" }
+    {
+      "id": "BG:district:BLG",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "BLG",
+      "nuts3": "BG413",
+      "names": {
+        "native": "Благоевград",
+        "en": "Blagoevgrad"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:BGS",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "BGS",
+      "nuts3": "BG341",
+      "names": {
+        "native": "Бургас",
+        "en": "Burgas"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:VAR",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "VAR",
+      "nuts3": "BG331",
+      "names": {
+        "native": "Варна",
+        "en": "Varna"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:VTR",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "VTR",
+      "nuts3": "BG321",
+      "names": {
+        "native": "Велико Търново",
+        "en": "Veliko Tarnovo"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:VID",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "VID",
+      "nuts3": "BG311",
+      "names": {
+        "native": "Видин",
+        "en": "Vidin"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:VRC",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "VRC",
+      "nuts3": "BG313",
+      "names": {
+        "native": "Враца",
+        "en": "Vratsa"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:GAB",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "GAB",
+      "nuts3": "BG322",
+      "names": {
+        "native": "Габрово",
+        "en": "Gabrovo"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:DOB",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "DOB",
+      "nuts3": "BG332",
+      "names": {
+        "native": "Добрич",
+        "en": "Dobrich"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:KRZ",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "KRZ",
+      "nuts3": "BG425",
+      "names": {
+        "native": "Кърджали",
+        "en": "Kardzhali"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:KNL",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "KNL",
+      "nuts3": "BG415",
+      "names": {
+        "native": "Кюстендил",
+        "en": "Kyustendil"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:LOV",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "LOV",
+      "nuts3": "BG315",
+      "names": {
+        "native": "Ловеч",
+        "en": "Lovech"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:MON",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "MON",
+      "nuts3": "BG312",
+      "names": {
+        "native": "Монтана",
+        "en": "Montana"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:PAZ",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "PAZ",
+      "nuts3": "BG423",
+      "names": {
+        "native": "Пазарджик",
+        "en": "Pazardzhik"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:PER",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "PER",
+      "nuts3": "BG414",
+      "names": {
+        "native": "Перник",
+        "en": "Pernik"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:PVN",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "PVN",
+      "nuts3": "BG314",
+      "names": {
+        "native": "Плевен",
+        "en": "Pleven"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:PDV",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "PDV",
+      "nuts3": "BG421",
+      "names": {
+        "native": "Пловдив",
+        "en": "Plovdiv"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:RAZ",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "RAZ",
+      "nuts3": "BG324",
+      "names": {
+        "native": "Разград",
+        "en": "Razgrad"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:RSE",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "RSE",
+      "nuts3": "BG323",
+      "names": {
+        "native": "Русе",
+        "en": "Ruse"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:SLS",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "SLS",
+      "nuts3": "BG325",
+      "names": {
+        "native": "Силистра",
+        "en": "Silistra"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:SLV",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "SLV",
+      "nuts3": "BG342",
+      "names": {
+        "native": "Сливен",
+        "en": "Sliven"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:SML",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "SML",
+      "nuts3": "BG424",
+      "names": {
+        "native": "Смолян",
+        "en": "Smolyan"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:SFO",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "SFO",
+      "nuts3": "BG412",
+      "names": {
+        "native": "София",
+        "en": "Sofia"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:SOF",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "SOF",
+      "nuts3": "BG411",
+      "names": {
+        "native": "София (столица)",
+        "en": "Sofia (stolitsa)"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:SZR",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "SZR",
+      "nuts3": "BG344",
+      "names": {
+        "native": "Стара Загора",
+        "en": "Stara Zagora"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:TGV",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "TGV",
+      "nuts3": "BG334",
+      "names": {
+        "native": "Търговище",
+        "en": "Targovishte"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:HKV",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "HKV",
+      "nuts3": "BG422",
+      "names": {
+        "native": "Хасково",
+        "en": "Haskovo"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:SHU",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "SHU",
+      "nuts3": "BG333",
+      "names": {
+        "native": "Шумен",
+        "en": "Shumen"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "BG:district:JAM",
+      "country_code": "BG",
+      "level": "district",
+      "official_code": "JAM",
+      "nuts3": "BG343",
+      "names": {
+        "native": "Ямбол",
+        "en": "Yambol"
+      },
+      "source_id": "bg-nsi-ekatte"
+    },
+    {
+      "id": "GR:NUTS1:EL3",
+      "country_code": "GR",
+      "level": "NUTS1",
+      "official_code": "EL3",
+      "names": {
+        "native": "Αττική",
+        "en": "Attiki"
+      },
+      "source_id": "eu-nuts-2024"
+    },
+    {
+      "id": "GR:NUTS1:EL4",
+      "country_code": "GR",
+      "level": "NUTS1",
+      "official_code": "EL4",
+      "names": {
+        "native": "Νησιά Αιγαίου, Κρήτη",
+        "en": "Nisia Aigaiou, Kriti"
+      },
+      "source_id": "eu-nuts-2024"
+    },
+    {
+      "id": "GR:NUTS1:EL5",
+      "country_code": "GR",
+      "level": "NUTS1",
+      "official_code": "EL5",
+      "names": {
+        "native": "Βόρεια Ελλάδα",
+        "en": "Northern Greece"
+      },
+      "source_id": "eu-nuts-2024"
+    },
+    {
+      "id": "GR:NUTS1:EL6",
+      "country_code": "GR",
+      "level": "NUTS1",
+      "official_code": "EL6",
+      "names": {
+        "native": "Κεντρική Ελλάδα",
+        "en": "Kentriki Elláda"
+      },
+      "source_id": "eu-nuts-2024"
+    },
+    {
+      "id": "GR:region:EL30",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL30",
+      "names": {
+        "native": "Aττική",
+        "en": "Attiki"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL3",
+      "nuts2": "EL30"
+    },
+    {
+      "id": "GR:region:EL41",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL41",
+      "names": {
+        "native": "Βόρειο Αιγαίο",
+        "en": "Voreio Aigaio"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL4",
+      "nuts2": "EL41"
+    },
+    {
+      "id": "GR:region:EL42",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL42",
+      "names": {
+        "native": "Νότιο Αιγαίο",
+        "en": "Notio Aigaio"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL4",
+      "nuts2": "EL42"
+    },
+    {
+      "id": "GR:region:EL43",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL43",
+      "names": {
+        "native": "Κρήτη",
+        "en": "Kriti"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL4",
+      "nuts2": "EL43"
+    },
+    {
+      "id": "GR:region:EL51",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL51",
+      "names": {
+        "native": "Ανατολική Μακεδονία και Θράκη",
+        "en": "Eastern Macedonia and Thrace"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL5",
+      "nuts2": "EL51"
+    },
+    {
+      "id": "GR:region:EL52",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL52",
+      "names": {
+        "native": "Κεντρική Μακεδονία",
+        "en": "Central Macedonia"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL5",
+      "nuts2": "EL52"
+    },
+    {
+      "id": "GR:region:EL53",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL53",
+      "names": {
+        "native": "Δυτική Μακεδονία",
+        "en": "Western Macedonia"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL5",
+      "nuts2": "EL53"
+    },
+    {
+      "id": "GR:region:EL54",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL54",
+      "names": {
+        "native": "Ήπειρος",
+        "en": "Epirus"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL5",
+      "nuts2": "EL54"
+    },
+    {
+      "id": "GR:region:EL61",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL61",
+      "names": {
+        "native": "Θεσσαλία",
+        "en": "Thessalia"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL6",
+      "nuts2": "EL61"
+    },
+    {
+      "id": "GR:region:EL62",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL62",
+      "names": {
+        "native": "Ιόνια Νησιά",
+        "en": "Ionia Nisia"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL6",
+      "nuts2": "EL62"
+    },
+    {
+      "id": "GR:region:EL63",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL63",
+      "names": {
+        "native": "Δυτική Ελλάδα",
+        "en": "Dytiki Elláda"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL6",
+      "nuts2": "EL63"
+    },
+    {
+      "id": "GR:region:EL64",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL64",
+      "names": {
+        "native": "Στερεά Ελλάδα",
+        "en": "Sterea Elláda"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL6",
+      "nuts2": "EL64"
+    },
+    {
+      "id": "GR:region:EL65",
+      "country_code": "GR",
+      "level": "region",
+      "official_code": "EL65",
+      "names": {
+        "native": "Πελοπόννησος",
+        "en": "Peloponnisos"
+      },
+      "source_id": "eu-nuts-2024",
+      "parent_id": "GR:NUTS1:EL6",
+      "nuts2": "EL65"
+    }
   ],
   "coverage": {
     "BG": {
       "scope": "All Bulgaria administrative search geography.",
-      "bundled": { "district": { "count": 28, "source_id": "bg-nsi-ekatte" } },
-      "import_required": {
-        "municipality": { "source_count": 265, "source_id": "bg-nsi-ekatte" },
-        "settlement": { "source_count": 5256, "source_id": "bg-nsi-ekatte" },
-        "map_geometry": { "source_id": "eu-gisco-nuts" },
-        "postal_code": { "status": "official_bulk_source_not_verified", "rule": "Do not publish a Bulgarian postcode facet until a reusable authoritative source and its refresh terms are verified." }
+      "bundled": {
+        "NUTS1": {
+          "count": 2,
+          "source_id": "bg-nsi-ekatte"
+        },
+        "NUTS2": {
+          "count": 6,
+          "source_id": "bg-nsi-ekatte"
+        },
+        "district": {
+          "count": 28,
+          "source_id": "bg-nsi-ekatte"
+        },
+        "municipal_district": {
+          "count": 35,
+          "source_id": "bg-nsi-ekatte"
+        },
+        "municipality": {
+          "count": 265,
+          "source_id": "bg-nsi-ekatte"
+        },
+        "settlement": {
+          "count": 5256,
+          "source_id": "bg-nsi-ekatte"
+        }
       },
-      "not_a_registry": ["neighborhood", "marketing_area", "legacy_free_text"]
+      "import_required": {
+        "map_geometry": {
+          "source_id": "eu-gisco-nuts"
+        },
+        "postal_code": {
+          "status": "official_bulk_source_not_verified",
+          "rule": "Do not publish a Bulgarian postcode facet until a reusable authoritative source and its refresh terms are verified."
+        }
+      },
+      "not_a_registry": [
+        "neighborhood",
+        "marketing_area",
+        "legacy_free_text"
+      ]
     },
     "GR": {
-      "scope": "Northern Greece means NUTS1 EL5: Eastern Macedonia and Thrace, Central Macedonia, Western Macedonia, and Epirus. It does not silently include Thessaly or the rest of Greece.",
-      "bundled": { "NUTS1": { "count": 1, "source_id": "eu-nuts-2024" }, "region": { "count": 4, "source_id": "eu-nuts-2024" } },
-      "import_required": {
-        "regional_unit": { "source_id": "gr-elstat-register" },
-        "municipality": { "source_id": "gr-elstat-register" },
-        "municipal_unit": { "source_id": "gr-elstat-register" },
-        "community": { "source_id": "gr-elstat-register" },
-        "settlement": { "source_id": "gr-elstat-register" },
-        "map_geometry": { "source_id": "gr-elstat-boundaries" },
-        "postal_code": { "source_id": "gr-elta-postcodes", "mode": "official_lookup" }
+      "scope": "The official registry is bundled country-wide to preserve every migrated Greek listing. Northern Greece (NUTS1 EL5) is the complete active market scope; other Greek regions can be activated without a schema import.",
+      "bundled": {
+        "NUTS1": {
+          "count": 4,
+          "source_id": "eu-nuts-2024"
+        },
+        "community": {
+          "count": 6135,
+          "source_id": "gr-elstat-census-2021"
+        },
+        "municipal_unit": {
+          "count": 1037,
+          "source_id": "gr-elstat-census-2021"
+        },
+        "municipality": {
+          "count": 333,
+          "source_id": "gr-elstat-census-2021"
+        },
+        "region": {
+          "count": 13,
+          "source_id": "eu-nuts-2024"
+        },
+        "regional_unit": {
+          "count": 75,
+          "source_id": "gr-elstat-census-2021"
+        },
+        "settlement": {
+          "count": 13586,
+          "source_id": "gr-elstat-census-2021"
+        }
       },
-      "not_a_registry": ["neighborhood", "marketing_area", "legacy_free_text"]
+      "import_required": {
+        "map_geometry": {
+          "source_id": "gr-elstat-boundaries"
+        },
+        "postal_code": {
+          "source_id": "gr-elta-postcodes",
+          "mode": "official_lookup"
+        }
+      },
+      "not_a_registry": [
+        "neighborhood",
+        "marketing_area",
+        "legacy_free_text"
+      ]
     }
   },
   "import_profiles": [
@@ -170,14 +828,28 @@
         "NUTS2": "ek_reg2.json",
         "municipal_district": "ek_raion.json"
       },
-      "required_provenance": ["source_id", "source_revision", "official_code", "imported_at"]
+      "required_provenance": [
+        "source_id",
+        "source_revision",
+        "official_code",
+        "imported_at"
+      ],
+      "status": "bundled"
     },
     {
       "id": "gr-elstat-register",
       "country_code": "GR",
-      "source_id": "gr-elstat-register",
-      "required_provenance": ["source_id", "source_revision", "official_code", "imported_at"],
-      "manual_review_required": "Confirm the ELSTAT publication edition and field mapping before the first import; do not synthesize a code from a display name."
+      "source_id": "gr-elstat-census-2021",
+      "required_provenance": [
+        "source_id",
+        "source_revision",
+        "official_code",
+        "imported_at"
+      ],
+      "status": "bundled",
+      "artifact_files": {
+        "hierarchy": "MON_PLI_DHM_OIKISN_2021.xlsx"
+      }
     }
   ],
   "area_code_policies": [
@@ -199,12 +871,42 @@
     }
   ],
   "extension_contract": {
-    "required_area_fields": ["id", "country_code", "level", "official_code", "names.native", "names.en", "source_id"],
+    "required_area_fields": [
+      "id",
+      "country_code",
+      "level",
+      "official_code",
+      "names.native",
+      "names.en",
+      "source_id"
+    ],
     "rules": [
       "Add a country with its official registry source and an explicit coverage statement before exposing it as a search facet.",
       "Keep official administrative hierarchy separate from operator-curated neighborhoods, resort names, and legacy free text.",
       "A listing may receive an administrative facet only from a matching catalog record or a reviewed official-code mapping.",
       "Store map geometry by source version and CRS; do not claim census/statistical boundaries are cadastral boundaries."
+    ]
+  },
+  "registry": {
+    "path": "production/data/geography-registry.json",
+    "generated_at": "2026-07-30T14:20:00Z",
+    "area_count": 26775,
+    "source_snapshots": [
+      {
+        "source_id": "bg-nsi-ekatte",
+        "revision": "EKATTE 2025",
+        "sha256": "0bf017c6b3bd5683215f9734cc5bb70c15c3b96b2fd9b6dda5d5096e92bae397"
+      },
+      {
+        "source_id": "gr-elstat-census-2021",
+        "revision": "2021 census settlement results published 2024-03-29",
+        "sha256": "7bca25fef57294a7b9a75531658d530187622e03e084460082de3d6be79d5534"
+      },
+      {
+        "source_id": "eu-nuts-2024",
+        "revision": "NUTS 2024",
+        "sha256": "d54c09a22656cff1b9a752fc40356a9d28e176b2a3bc716275a37fe5512a0c8f"
+      }
     ]
   }
 }

@@ -26,6 +26,8 @@ def field_ok(value: object, field: dict[str, object]) -> bool:
     kind = field["type"]
     if kind == "string":
         return isinstance(value, str)
+    if kind == "string[]":
+        return isinstance(value, list) and all(isinstance(item, str) for item in value)
     if kind == "bool":
         return isinstance(value, bool)
     if kind == "int32":
@@ -131,8 +133,22 @@ def main() -> int:
     reviewed_locations = {doc["id"]: doc for doc in source_docs}
     if reviewed_locations["MS-CRAWL-0033"]["location"] != "Polenitsa" or reviewed_locations["MS-CRAWL-0033"]["settlement_ekatte"] != "57176":
         raise SystemExit("Search imports must use reviewed official settlement data")
+    if reviewed_locations["MS-CRAWL-0033"]["district"] != "Blagoevgrad" or reviewed_locations["MS-CRAWL-0033"]["district_code"] != "BLG":
+        raise SystemExit("Search imports must derive the reviewed official Bulgarian district")
+    if "district" not in settings["filterableAttributes"] or "district_code" not in settings["filterableAttributes"]:
+        raise SystemExit("Search imports must expose reviewed Bulgarian districts as engine facets")
     if reviewed_locations["MS-CRAWL-0072"]["location"] != "Logari" or reviewed_locations["MS-CRAWL-0072"]["country_code"] != "GR":
         raise SystemExit("Search imports must not label Greek listings as Sandanski")
+    if reviewed_locations["MS-CRAWL-0072"]["geography_id"] != "GR:settlement:EL52:1202020404":
+        raise SystemExit("Search imports must anchor Logari to the official Greek settlement")
+    if "GR:region:EL52" not in reviewed_locations["MS-CRAWL-0072"]["geography_path"]:
+        raise SystemExit("Search imports must preserve official Greek region ancestry")
+    if reviewed_locations["MS-CRAWL-0050"]["geography_id"] != "GR:municipality:EL52:1303":
+        raise SystemExit("Imprecise Elani-Sani source content must remain municipality-anchored")
+    if reviewed_locations["MS-CRAWL-0043"]["location_precision"] != "approximate":
+        raise SystemExit("Kotroni must remain a locality label anchored to official Eretria")
+    if "geography_path" not in settings["filterableAttributes"]:
+        raise SystemExit("Search imports must expose official geography ancestry as an engine facet")
     if reviewed_locations["MS-CRAWL-0143"]["location_review_status"] != "legacy_area_only":
         raise SystemExit("Route mentions must remain location-review holds")
 

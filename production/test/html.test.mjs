@@ -37,6 +37,30 @@ test("HTML renderer honors reviewed Open Graph listing fields", () => {
   assert.match(html, /property="og:description" content="Reviewed social description\."/);
 });
 
+test("print brochure prefers full-resolution WordPress media without repeating thumbnail variants", () => {
+  const page = renderListingPage({ registry, listing, localeCode: "bg" });
+  const html = renderHtmlPage(
+    {
+      ...page,
+      body: {
+        ...page.body,
+        media: {
+          ...page.body.media,
+          gallery: [
+            { url: "https://makler-realty.com/wp-content/uploads/room-680x510.jpg", alt: "Room thumbnail" },
+            { url: "https://makler-realty.com/wp-content/uploads/other.jpg", alt: "Other room" },
+            { url: "https://makler-realty.com/wp-content/uploads/room.jpg", alt: "Room original" },
+          ],
+        },
+      },
+    },
+    { print: true },
+  );
+
+  assert.doesNotMatch(html, /<img src="[^"]*room-680x510\.jpg/);
+  assert.equal((html.match(/<img src="[^"]*room\.jpg/g) || []).length, 1);
+});
+
 test("HTML renderer emits SEO-safe listing, search, and fallback documents", () => {
   const homeHtml = renderHtmlPage(renderHomePage({ registry, listings, localeCode: "he" }));
   const listingHtml = renderHtmlPage(renderListingPage({ registry, listing, localeCode: "he" }));
@@ -115,7 +139,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(listingPrintHtml, /data-print-status="browser-pdf-ready"/);
   assert.match(listingPrintHtml, /data-print-document="property-brochure"/);
   assert.match(listingPrintHtml, /data-print-trigger="true"/);
-  assert.match(listingPrintHtml, /@page \{ size: A4; margin: 12mm; \}/);
+  assert.match(listingPrintHtml, /@page \{ size: A4; margin: 0; \}/);
+  assert.match(listingPrintHtml, /ms-print-document__brand[^>]*><img src="data:image\/png;base64,/);
+  assert.doesNotMatch(listingPrintHtml, /data-ms-realty-design-system="external"/);
   assert.match(listingPrintHtml, /data-print-facts="true"/);
   assert.match(listingPrintHtml, /ms-print-document__hero-media/);
   assert.match(runtimeListingPrintHtml, /data-print-gallery="true"/);
@@ -127,7 +153,7 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.equal(assertHtmlPage(searchHtml, { lang: "he", dir: "rtl", kind: "search" }), true);
   assert.match(searchHtml, /property="og:type" content="website"/);
   assert.match(searchHtml, /data-total-matches=/);
-  assert.match(searchHtml, /data-map-optional="false"/);
+  assert.match(searchHtml, /data-map-optional="true"/);
   assert.match(searchHtml, /שמירת חיפוש/);
   assert.match(contactHtml, /פעולות קשר/);
   assert.match(searchHtml, /data-save-search-endpoint="\/api\/saved-searches"/);
@@ -143,8 +169,9 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /name="bedrooms_min"/);
   assert.match(searchHtml, /name="area_min"/);
   assert.match(searchHtml, /name="area_max"/);
-  assert.match(searchHtml, /id="sr-location-options"/);
-  assert.match(searchHtml, /id="sr-mobile-location-options"/);
+  assert.match(searchHtml, /id="sr-geography-options"/);
+  assert.match(searchHtml, /id="sr-mobile-geography-options"/);
+  assert.match(searchHtml, /data-geography-endpoint="\/api\/geography"/);
   assert.match(searchHtml, /data-mobile-search-filters="true"/);
   assert.doesNotMatch(searchHtml, /data-hermes-(assistant|mode|chat-form|chat-output)|\/api\/hermes\/chat/);
   assert.match(searchHtml, /defer src="\/vendor\/ms-realty-public\.js\?v=[a-f0-9]{12}"/);
@@ -164,7 +191,8 @@ test("HTML renderer emits SEO-safe listing, search, and fallback documents", () 
   assert.match(searchHtml, /data-search-card="true"/);
   assert.match(searchHtml, /data-card-thumbnail="true"/);
   assert.match(searchHtml, /<img src="https:\/\/makler-realty\./);
-  assert.doesNotMatch(searchHtml, /data-view-mode=/);
+  assert.match(searchHtml, /<button(?=[^>]*data-view-mode="list")(?=[^>]*aria-pressed="true")[^>]*>/);
+  assert.match(searchHtml, /<button[^>]*data-view-mode="map"[^>]*>/);
   assert.doesNotMatch(searchHtml, /verified inventory/);
   assert.match(searchHtml, /data-client-save-listing="MS-CRAWL-/);
   assert.match(searchHtml, /data-endpoint="\/api\/leads"/);

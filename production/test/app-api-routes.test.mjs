@@ -52,16 +52,24 @@ test("API search preserves complete municipality results when engine hits are tr
     );
   };
 
-  const response = await renderAppApiResponse(new Request("https://example.test/api/search?locale=bg&municipality=Sandanski"), { config });
+  const response = await renderAppApiResponse(
+    new Request("https://example.test/api/search?locale=bg&municipality=Sandanski&district=Blagoevgrad", {
+      headers: { "x-ms-realty-preview": "search-count" },
+    }),
+    { config },
+  );
   const payload = await response.json();
   const request = new URL(calls[0]);
 
   assert.equal(response.status, 200);
   assert.equal(payload.search.filters.municipality, "Sandanski");
+  assert.equal(payload.search.filters.district, "Blagoevgrad");
   assert.ok(payload.search.total_matches > 1);
   assert.equal(payload.search.backend.indexed_matches, 999);
   assert.match(request.searchParams.get("filter_by"), /municipality:=`Sandanski`/);
-  assert.match(request.searchParams.get("filter_by"), /location_review_status:=`confirmed_settlement`/);
+  assert.match(request.searchParams.get("filter_by"), /district:=`Blagoevgrad`/);
+  assert.doesNotMatch(request.searchParams.get("filter_by"), /location_review_status/);
+  assert.equal(readEventLedger(config.eventLedgerPath).length, 0);
 });
 
 test("Next API routes reuse health, readiness, search, and lead HTTP contracts", async () => {
@@ -119,6 +127,7 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
     },
     async () => {
       const eventRoute = await import("../../app/api/events/route.js");
+      const geographyRoute = await import("../../app/api/geography/route.js");
       const healthRoute = await import("../../app/api/health/route.js");
       const languageRequestRoute = await import("../../app/api/language-requests/route.js");
       const readyRoute = await import("../../app/api/ready/route.js");
@@ -163,6 +172,15 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(searchBody.kind, "search");
       assert.equal(searchBody.search.query, "Sandanski");
       assert.ok(searchBody.search.total_matches > 0);
+
+      const geography = await geographyRoute.GET(
+        new Request("https://example.test/api/geography?q=Thessaloniki&country=GR&level=settlement&limit=3"),
+      );
+      const geographyBody = await geography.json();
+      assert.equal(geography.status, 200);
+      assert.equal(geography.headers.get("cache-control"), "public, max-age=3600, stale-while-revalidate=86400");
+      assert.equal(geographyBody.results[0].id, "GR:settlement:EL52:0701010001");
+      assert.equal(geographyBody.returned <= 3, true);
 
       const lead = await leadRoute.POST(
         new Request("https://example.test/api/leads", {

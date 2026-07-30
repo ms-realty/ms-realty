@@ -31,9 +31,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0002",
@@ -67,9 +80,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0003",
@@ -103,9 +129,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0004",
@@ -139,9 +178,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0005",
@@ -175,9 +227,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0006",
@@ -211,9 +276,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0007",
@@ -247,9 +325,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0008",
@@ -283,9 +374,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0009",
@@ -319,9 +423,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0010",
@@ -355,9 +472,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0011",
@@ -391,9 +521,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0012",
@@ -427,9 +570,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0013",
@@ -463,9 +619,22 @@
     "location_legacy": "",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:77361",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:77361"
+    ],
     "settlement_ekatte": "77361",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0014",
@@ -499,9 +668,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0015",
@@ -535,9 +717,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:49686",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:49686"
+    ],
     "settlement_ekatte": "49686",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0016",
@@ -571,9 +766,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:20780",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:20780"
+    ],
     "settlement_ekatte": "20780",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0017",
@@ -607,9 +815,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0018",
@@ -643,9 +864,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0019",
@@ -679,9 +913,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0020",
@@ -715,9 +962,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0021",
@@ -751,9 +1011,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0022",
@@ -787,9 +1060,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0023",
@@ -823,9 +1109,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0024",
@@ -854,14 +1153,29 @@
     "word_count": 393,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.com/sitemap-pt-listings-2024-01.html",
-    "search_text": "Продава апартамент в Солун - Недвижими имоти в Сандански Апартамент в центъра на Солун, на четвърти жилищен етаж. Жилището е с площ 45 кв.м. и се състои от хол с кухня, спалня и WC. Продава апартамент в Солун Thessaloniki Солун prodava apartament v solun - nedvizhimi imoti v sandanski apartament v tsentara na solun, na chetvarti zhilishten etazh. zhilishteto e s plosht 45 kv.m. i se sastoi ot hol s kuhnya, spalnya i wc. prodava apartament v solun thessaloniki solun",
+    "search_text": "Продава апартамент в Солун - Недвижими имоти в Сандански Апартамент в центъра на Солун, на четвърти жилищен етаж. Жилището е с площ 45 кв.м. и се състои от хол с кухня, спалня и WC. Продава апартамент в Солун Thessaloniki Солун Thessalonikis prodava apartament v solun - nedvizhimi imoti v sandanski apartament v tsentara na solun, na chetvarti zhilishten etazh. zhilishteto e s plosht 45 kv.m. i se sastoi ot hol s kuhnya, spalnya i wc. prodava apartament v solun thessaloniki solun thessalonikis",
     "location_native": "Солун",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Thessalonikis",
+    "municipality_code": "0701",
+    "district": "",
+    "district_code": "",
+    "region": "Central Macedonia",
+    "region_id": "GR:region:EL52",
     "country_code": "GR",
+    "geography_id": "GR:settlement:EL52:0701010001",
+    "geography_path": [
+      "GR:NUTS1:EL5",
+      "GR:region:EL52",
+      "GR:regional_unit:EL52:07",
+      "GR:municipality:EL52:0701",
+      "GR:municipal_unit:EL52:070101",
+      "GR:community:EL52:07010100",
+      "GR:settlement:EL52:0701010001"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0025",
@@ -895,9 +1209,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0026",
@@ -931,9 +1258,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0027",
@@ -967,9 +1307,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0028",
@@ -1003,9 +1356,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0029",
@@ -1039,9 +1405,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0030",
@@ -1075,9 +1454,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0031",
@@ -1111,9 +1503,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0032",
@@ -1147,9 +1552,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0033",
@@ -1183,9 +1601,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:57176",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:57176"
+    ],
     "settlement_ekatte": "57176",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0034",
@@ -1219,9 +1650,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0035",
@@ -1255,9 +1699,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43243",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43243"
+    ],
     "settlement_ekatte": "43243",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0036",
@@ -1291,9 +1748,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:20780",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:20780"
+    ],
     "settlement_ekatte": "20780",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0037",
@@ -1327,9 +1797,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0038",
@@ -1363,9 +1846,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0039",
@@ -1399,9 +1895,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0040",
@@ -1435,9 +1944,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43150",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43150"
+    ],
     "settlement_ekatte": "43150",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0041",
@@ -1471,9 +1993,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43243",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43243"
+    ],
     "settlement_ekatte": "43243",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0042",
@@ -1507,9 +2042,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0043",
@@ -1538,14 +2086,29 @@
     "word_count": 467,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.com/sitemap-pt-listings-2024-04.html",
-    "search_text": "Продава къща в Гърция, Еретрия - Котрони - Недвижими имоти в Сандански Предлага се за продажба ексклузивна триетажна вила в Еретрия-Котрони, Гърция. Сградата с обща площ от 300 кв.м. e построена през 2009 г. върху парцел от 5.000 кв.м. Вилата е стилно обзаведена, като оборудването включва богат набор от удобства, сред които асансьор, камина, климатична система, отоплителна инсталация със слънчеви панели за вода, игрална зала, алуминиеви прозорци и щори, вътрешни стълби. Разпределението със своите 3 кухни, 4 бани, 1 отделна тоалетна, 2 хола, 6 спални, и едно складово помещение предлага значителен комфорт. Отоплението се осигурява от модерна система. Вилата оборудвана с алармена система Продава къща в Гърция, Еретрия – Котрони Eretria-Kotroni Еретрия-Котрони prodava kashta v gartsiya, eretriya - kotroni - nedvizhimi imoti v sandanski predlaga se za prodazhba ekskluzivna trietazhna vila v eretriya-kotroni, gartsiya. sgradata s obshta plosht ot 300 kv.m. e postroena prez 2009 g. varhu partsel ot 5.000 kv.m. vilata e stilno obzavedena, kato oborudvaneto vklyuchva bogat nabor ot udobstva, sred koito asansyor, kamina, klimatichna sistema, otoplitelna instalatsiya sas slanchevi paneli za voda, igralna zala, aluminievi prozortsi i shtori, vatreshni stalbi. razpredelenieto sas svoite 3 kuhni, 4 bani, 1 otdelna toaletna, 2 hola, 6 spalni, i edno skladovo pomeshtenie predlaga znachitelen komfort. otoplenieto se osiguryava ot moderna sistema. vilata oborudvana s alarmena sistema prodava kashta v gartsiya, eretriya – kotroni eretria-kotroni eretriya-kotroni",
+    "search_text": "Продава къща в Гърция, Еретрия - Котрони - Недвижими имоти в Сандански Предлага се за продажба ексклузивна триетажна вила в Еретрия-Котрони, Гърция. Сградата с обща площ от 300 кв.м. e построена през 2009 г. върху парцел от 5.000 кв.м. Вилата е стилно обзаведена, като оборудването включва богат набор от удобства, сред които асансьор, камина, климатична система, отоплителна инсталация със слънчеви панели за вода, игрална зала, алуминиеви прозорци и щори, вътрешни стълби. Разпределението със своите 3 кухни, 4 бани, 1 отделна тоалетна, 2 хола, 6 спални, и едно складово помещение предлага значителен комфорт. Отоплението се осигурява от модерна система. Вилата оборудвана с алармена система Продава къща в Гърция, Еретрия – Котрони Eretria-Kotroni Еретрия-Котрони Eretrias prodava kashta v gartsiya, eretriya - kotroni - nedvizhimi imoti v sandanski predlaga se za prodazhba ekskluzivna trietazhna vila v eretriya-kotroni, gartsiya. sgradata s obshta plosht ot 300 kv.m. e postroena prez 2009 g. varhu partsel ot 5.000 kv.m. vilata e stilno obzavedena, kato oborudvaneto vklyuchva bogat nabor ot udobstva, sred koito asansyor, kamina, klimatichna sistema, otoplitelna instalatsiya sas slanchevi paneli za voda, igralna zala, aluminievi prozortsi i shtori, vatreshni stalbi. razpredelenieto sas svoite 3 kuhni, 4 bani, 1 otdelna toaletna, 2 hola, 6 spalni, i edno skladovo pomeshtenie predlaga znachitelen komfort. otoplenieto se osiguryava ot moderna sistema. vilata oborudvana s alarmena sistema prodava kashta v gartsiya, eretriya – kotroni eretria-kotroni eretriya-kotroni eretrias",
     "location_native": "Еретрия-Котрони",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Eretrias",
+    "municipality_code": "2903",
+    "district": "",
+    "district_code": "",
+    "region": "Sterea Elláda",
+    "region_id": "GR:region:EL64",
     "country_code": "GR",
+    "geography_id": "GR:settlement:EL64:2903010101",
+    "geography_path": [
+      "GR:NUTS1:EL6",
+      "GR:region:EL64",
+      "GR:regional_unit:EL64:29",
+      "GR:municipality:EL64:2903",
+      "GR:municipal_unit:EL64:290301",
+      "GR:community:EL64:29030101",
+      "GR:settlement:EL64:2903010101"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "approximate"
   },
   {
     "id": "MS-CRAWL-0044",
@@ -1579,9 +2142,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Petrich",
     "municipality_code": "BLG33",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:40539",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG33",
+      "BG:settlement:40539"
+    ],
     "settlement_ekatte": "40539",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0045",
@@ -1615,9 +2191,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:56410",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:56410"
+    ],
     "settlement_ekatte": "56410",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0046",
@@ -1651,9 +2240,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:57176",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:57176"
+    ],
     "settlement_ekatte": "57176",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0047",
@@ -1687,9 +2289,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:68223",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:68223"
+    ],
     "settlement_ekatte": "68223",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0048",
@@ -1723,9 +2338,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:78046",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:78046"
+    ],
     "settlement_ekatte": "78046",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0049",
@@ -1759,9 +2387,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0050",
@@ -1790,14 +2431,26 @@
     "word_count": 446,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.com/sitemap-pt-listings-2024-01.html",
-    "search_text": "Продава мезонет в Халкидики, р-н Елани Сани - Недвижими имоти в Сандански Продава мезонет в Халкидики, на първи ръкав Имота се намира в един от най-красивите райони на Халкидики, само на 1 км от Сани Бийч Ризорт. Мезонета е построен през 2005 г. Състои се от хол с кухня, 2 бани с тоалетни и 3 спални. Общата площ на имота е 110 кв.м., има и градина с площ 150 кв.м. Предлага се в напълно завършен вид, отоплението е със дизелов котел. Продава мезонет в Халкидики, р-н Елани Сани Elani-Sani, Halkidiki Елани-Сани, Халкидики prodava mezonet v halkidiki, r-n elani sani - nedvizhimi imoti v sandanski prodava mezonet v halkidiki, na parvi rakav imota se namira v edin ot nai-krasivite raioni na halkidiki, samo na 1 km ot sani biich rizort. mezoneta e postroen prez 2005 g. sastoi se ot hol s kuhnya, 2 bani s toaletni i 3 spalni. obshtata plosht na imota e 110 kv.m., ima i gradina s plosht 150 kv.m. predlaga se v napalno zavarshen vid, otoplenieto e sas dizelov kotel. prodava mezonet v halkidiki, r-n elani sani elani-sani, halkidiki elani-sani, halkidiki",
+    "search_text": "Продава мезонет в Халкидики, р-н Елани Сани - Недвижими имоти в Сандански Продава мезонет в Халкидики, на първи ръкав Имота се намира в един от най-красивите райони на Халкидики, само на 1 км от Сани Бийч Ризорт. Мезонета е построен през 2005 г. Състои се от хол с кухня, 2 бани с тоалетни и 3 спални. Общата площ на имота е 110 кв.м., има и градина с площ 150 кв.м. Предлага се в напълно завършен вид, отоплението е със дизелов котел. Продава мезонет в Халкидики, р-н Елани Сани Elani-Sani, Halkidiki Елани-Сани, Халкидики Kassandras prodava mezonet v halkidiki, r-n elani sani - nedvizhimi imoti v sandanski prodava mezonet v halkidiki, na parvi rakav imota se namira v edin ot nai-krasivite raioni na halkidiki, samo na 1 km ot sani biich rizort. mezoneta e postroen prez 2005 g. sastoi se ot hol s kuhnya, 2 bani s toaletni i 3 spalni. obshtata plosht na imota e 110 kv.m., ima i gradina s plosht 150 kv.m. predlaga se v napalno zavarshen vid, otoplenieto e sas dizelov kotel. prodava mezonet v halkidiki, r-n elani sani elani-sani, halkidiki elani-sani, halkidiki kassandras",
     "location_native": "Елани-Сани, Халкидики",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Kassandras",
+    "municipality_code": "1303",
+    "district": "",
+    "district_code": "",
+    "region": "Central Macedonia",
+    "region_id": "GR:region:EL52",
     "country_code": "GR",
+    "geography_id": "GR:municipality:EL52:1303",
+    "geography_path": [
+      "GR:NUTS1:EL5",
+      "GR:region:EL52",
+      "GR:regional_unit:EL52:13",
+      "GR:municipality:EL52:1303"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "approximate"
   },
   {
     "id": "MS-CRAWL-0051",
@@ -1831,9 +2484,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0052",
@@ -1867,9 +2533,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0053",
@@ -1903,9 +2582,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0054",
@@ -1939,9 +2631,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0055",
@@ -1975,9 +2680,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0056",
@@ -2011,9 +2729,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0057",
@@ -2047,9 +2778,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:49686",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:49686"
+    ],
     "settlement_ekatte": "49686",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0058",
@@ -2083,9 +2827,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:57176",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:57176"
+    ],
     "settlement_ekatte": "57176",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0059",
@@ -2119,9 +2876,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:77361",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:77361"
+    ],
     "settlement_ekatte": "77361",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0060",
@@ -2155,9 +2925,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0061",
@@ -2191,9 +2974,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:69969",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:69969"
+    ],
     "settlement_ekatte": "69969",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0062",
@@ -2227,9 +3023,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0063",
@@ -2263,9 +3072,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:32322",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:32322"
+    ],
     "settlement_ekatte": "32322",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0064",
@@ -2299,9 +3121,22 @@
     "location_legacy": "",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:77361",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:77361"
+    ],
     "settlement_ekatte": "77361",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0065",
@@ -2335,9 +3170,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Bansko",
     "municipality_code": "BLG01",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:02676",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG01",
+      "BG:settlement:02676"
+    ],
     "settlement_ekatte": "02676",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0066",
@@ -2366,14 +3214,29 @@
     "word_count": 470,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.com/sitemap-pt-listings-2025-05.html",
-    "search_text": "Продава тристаен апартамент в Паралия Офринио, Гърция - Недвижими имоти в Сандански Продава тристаен апартамент в Паралиа Офринио, Гърция Комплекс Ариадни се състои от няколко двуетжни жилищни сгради с добре завършени общи части и прилежаща територия. Апартамента се намира на втори жилищен етаж, кота +2.8м, състои се от хол с кухня, 2 спални, 2 тераси и баня с тоалетна. Чистата жилищната площ по документи за собственост е 42 кв.м. (начина на измерване на квадратурите в България е съвсем различен, затова аналогичен апартамент в БГ ще бъде с площ от около 65-70 м2 с общи части). Апартамента се предлага в напълно завършен вид, но без мебели. Монтирана е и кухня без електроуреди. Продава тристаен апартамент в Паралия Офринио, Гърция Paralia Ofrinio Паралия Офринио prodava tristaen apartament v paraliya ofrinio, gartsiya - nedvizhimi imoti v sandanski prodava tristaen apartament v paralia ofrinio, gartsiya kompleks ariadni se sastoi ot nyakolko dvuetzhni zhilishtni sgradi s dobre zavarsheni obshti chasti i prilezhashta teritoriya. apartamenta se namira na vtori zhilishten etazh, kota +2.8m, sastoi se ot hol s kuhnya, 2 spalni, 2 terasi i banya s toaletna. chistata zhilishtnata plosht po dokumenti za sobstvenost e 42 kv.m. (nachina na izmervane na kvadraturite v balgariya e savsem razlichen, zatova analogichen apartament v bg shte bade s plosht ot okolo 65-70 m2 s obshti chasti). apartamenta se predlaga v napalno zavarshen vid, no bez mebeli. montirana e i kuhnya bez elektrouredi. prodava tristaen apartament v paraliya ofrinio, gartsiya paralia ofrinio paraliya ofrinio",
+    "search_text": "Продава тристаен апартамент в Паралия Офринио, Гърция - Недвижими имоти в Сандански Продава тристаен апартамент в Паралиа Офринио, Гърция Комплекс Ариадни се състои от няколко двуетжни жилищни сгради с добре завършени общи части и прилежаща територия. Апартамента се намира на втори жилищен етаж, кота +2.8м, състои се от хол с кухня, 2 спални, 2 тераси и баня с тоалетна. Чистата жилищната площ по документи за собственост е 42 кв.м. (начина на измерване на квадратурите в България е съвсем различен, затова аналогичен апартамент в БГ ще бъде с площ от около 65-70 м2 с общи части). Апартамента се предлага в напълно завършен вид, но без мебели. Монтирана е и кухня без електроуреди. Продава тристаен апартамент в Паралия Офринио, Гърция Paralia Ofrinio Паралия Офринио Paggaioy prodava tristaen apartament v paraliya ofrinio, gartsiya - nedvizhimi imoti v sandanski prodava tristaen apartament v paralia ofrinio, gartsiya kompleks ariadni se sastoi ot nyakolko dvuetzhni zhilishtni sgradi s dobre zavarsheni obshti chasti i prilezhashta teritoriya. apartamenta se namira na vtori zhilishten etazh, kota +2.8m, sastoi se ot hol s kuhnya, 2 spalni, 2 terasi i banya s toaletna. chistata zhilishtnata plosht po dokumenti za sobstvenost e 42 kv.m. (nachina na izmervane na kvadraturite v balgariya e savsem razlichen, zatova analogichen apartament v bg shte bade s plosht ot okolo 65-70 m2 s obshti chasti). apartamenta se predlaga v napalno zavarshen vid, no bez mebeli. montirana e i kuhnya bez elektrouredi. prodava tristaen apartament v paraliya ofrinio, gartsiya paralia ofrinio paraliya ofrinio paggaioy",
     "location_native": "Паралия Офринио",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Paggaioy",
+    "municipality_code": "0503",
+    "district": "",
+    "district_code": "",
+    "region": "Eastern Macedonia and Thrace",
+    "region_id": "GR:region:EL51",
     "country_code": "GR",
+    "geography_id": "GR:settlement:EL51:0503030502",
+    "geography_path": [
+      "GR:NUTS1:EL5",
+      "GR:region:EL51",
+      "GR:regional_unit:EL51:05",
+      "GR:municipality:EL51:0503",
+      "GR:municipal_unit:EL51:050303",
+      "GR:community:EL51:05030305",
+      "GR:settlement:EL51:0503030502"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0067",
@@ -2407,9 +3270,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0068",
@@ -2443,9 +3319,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Petrich",
     "municipality_code": "BLG33",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:36083",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG33",
+      "BG:settlement:36083"
+    ],
     "settlement_ekatte": "36083",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0069",
@@ -2479,9 +3368,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43565",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43565"
+    ],
     "settlement_ekatte": "43565",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0070",
@@ -2515,9 +3417,22 @@
     "location_legacy": "Petrich",
     "municipality": "Petrich",
     "municipality_code": "BLG33",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:56126",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG33",
+      "BG:settlement:56126"
+    ],
     "settlement_ekatte": "56126",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0071",
@@ -2551,9 +3466,22 @@
     "location_legacy": "",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:77361",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:77361"
+    ],
     "settlement_ekatte": "77361",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0072",
@@ -2582,14 +3510,29 @@
     "word_count": 886,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.com/sitemap-pt-listings-2025-11.html",
-    "search_text": "Продажба на апартаменти в Логари, Гърция - Недвижими имоти в Сандански РАЗПОЛОЖЕНИЕ: Представяме ви ново поколение жилищни имоти на плажа Логари в Гърция – резиденциите THEROS. Морското селище Логари, с кристално чистите си тъмносини води и пясъчния плаж, който е обществено достъпен и разполага с бийч бар, се простира наповече от 1,5 км. Това е място, където природата, спокойствието и качеството на живот се сливат по идеален начин. Логари също така предлага отличен достъп до основните центрове на Северна Гърция и Балканите, тъй като се намира само на 70 минути от международното летище Македония (Солун) и на 1 час от българската граница (Кулата). ЗА ПРОЕКТА Theros е лимитирана колекция от осем двуетажни крайморски резиденции, всяка от които е внимателно проектирана, за да предлага перфектния баланс между уединение, комфорт и архитектурна елегантност. Съчетавайки изчистени, модерни линии с естествени материали и меки средиземноморски тонове, всяка къща Продажба на апартаменти в Логари, Гърция Logari Логари prodazhba na apartamenti v logari, gartsiya - nedvizhimi imoti v sandanski razpolozhenie: predstavyame vi novo pokolenie zhilishtni imoti na plazha logari v gartsiya – rezidentsiite theros. morskoto selishte logari, s kristalno chistite si tamnosini vodi i pyasachniya plazh, koito e obshtestveno dostapen i razpolaga s biich bar, se prostira napoveche ot 1,5 km. tova e myasto, kadeto prirodata, spokoistvieto i kachestvoto na zhivot se slivat po idealen nachin. logari sashto taka predlaga otlichen dostap do osnovnite tsentrove na severna gartsiya i balkanite, tai kato se namira samo na 70 minuti ot mezhdunarodnoto letishte makedoniya (solun) i na 1 chas ot balgarskata granitsa (kulata). za proekta theros e limitirana kolektsiya ot osem dvuetazhni kraimorski rezidentsii, vsyaka ot koito e vnimatelno proektirana, za da predlaga perfektniya balans mezhdu uedinenie, komfort i arhitekturna elegantnost. sachetavaiki izchisteni, moderni linii s estestveni materiali i meki sredizemnomorski tonove, vsyaka kashta prodazhba na apartamenti v logari, gartsiya logari logari",
+    "search_text": "Продажба на апартаменти в Логари, Гърция - Недвижими имоти в Сандански РАЗПОЛОЖЕНИЕ: Представяме ви ново поколение жилищни имоти на плажа Логари в Гърция – резиденциите THEROS. Морското селище Логари, с кристално чистите си тъмносини води и пясъчния плаж, който е обществено достъпен и разполага с бийч бар, се простира наповече от 1,5 км. Това е място, където природата, спокойствието и качеството на живот се сливат по идеален начин. Логари също така предлага отличен достъп до основните центрове на Северна Гърция и Балканите, тъй като се намира само на 70 минути от международното летище Македония (Солун) и на 1 час от българската граница (Кулата). ЗА ПРОЕКТА Theros е лимитирана колекция от осем двуетажни крайморски резиденции, всяка от които е внимателно проектирана, за да предлага перфектния баланс между уединение, комфорт и архитектурна елегантност. Съчетавайки изчистени, модерни линии с естествени материали и меки средиземноморски тонове, всяка къща Продажба на апартаменти в Логари, Гърция Logari Логари Amfipolis prodazhba na apartamenti v logari, gartsiya - nedvizhimi imoti v sandanski razpolozhenie: predstavyame vi novo pokolenie zhilishtni imoti na plazha logari v gartsiya – rezidentsiite theros. morskoto selishte logari, s kristalno chistite si tamnosini vodi i pyasachniya plazh, koito e obshtestveno dostapen i razpolaga s biich bar, se prostira napoveche ot 1,5 km. tova e myasto, kadeto prirodata, spokoistvieto i kachestvoto na zhivot se slivat po idealen nachin. logari sashto taka predlaga otlichen dostap do osnovnite tsentrove na severna gartsiya i balkanite, tai kato se namira samo na 70 minuti ot mezhdunarodnoto letishte makedoniya (solun) i na 1 chas ot balgarskata granitsa (kulata). za proekta theros e limitirana kolektsiya ot osem dvuetazhni kraimorski rezidentsii, vsyaka ot koito e vnimatelno proektirana, za da predlaga perfektniya balans mezhdu uedinenie, komfort i arhitekturna elegantnost. sachetavaiki izchisteni, moderni linii s estestveni materiali i meki sredizemnomorski tonove, vsyaka kashta prodazhba na apartamenti v logari, gartsiya logari logari amfipolis",
     "location_native": "Логари",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Amfipolis",
+    "municipality_code": "1202",
+    "district": "",
+    "district_code": "",
+    "region": "Central Macedonia",
+    "region_id": "GR:region:EL52",
     "country_code": "GR",
+    "geography_id": "GR:settlement:EL52:1202020404",
+    "geography_path": [
+      "GR:NUTS1:EL5",
+      "GR:region:EL52",
+      "GR:regional_unit:EL52:12",
+      "GR:municipality:EL52:1202",
+      "GR:municipal_unit:EL52:120202",
+      "GR:community:EL52:12020204",
+      "GR:settlement:EL52:1202020404"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0073",
@@ -2623,9 +3566,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0074",
@@ -2659,9 +3615,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0075",
@@ -2695,9 +3664,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Blagoevgrad",
     "municipality_code": "BLG03",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:04279",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG03",
+      "BG:settlement:04279"
+    ],
     "settlement_ekatte": "04279",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-3000",
@@ -2731,9 +3713,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:69969",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:69969"
+    ],
     "settlement_ekatte": "69969",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0077",
@@ -2767,9 +3762,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0078",
@@ -2803,9 +3811,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0079",
@@ -2839,9 +3860,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0080",
@@ -2875,9 +3909,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:57176",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:57176"
+    ],
     "settlement_ekatte": "57176",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0081",
@@ -2911,9 +3958,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:69969",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:69969"
+    ],
     "settlement_ekatte": "69969",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0082",
@@ -2947,9 +4007,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0083",
@@ -2983,9 +4056,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0084",
@@ -3019,9 +4105,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0085",
@@ -3055,9 +4154,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0086",
@@ -3091,9 +4203,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0087",
@@ -3127,9 +4252,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0088",
@@ -3163,9 +4301,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0089",
@@ -3199,9 +4350,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0090",
@@ -3230,14 +4394,29 @@
     "word_count": 425,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.com/sitemap-pt-listings-2024-04.html",
-    "search_text": "Апартамент на първа линия в Пасалимани, Пиреус -Гърция - Недвижими имоти в Сандански 200 метра плюс 40 метра балкони общо 240 метра 3 спални 1 Кухня 2 бани 1 wc 1 много голяма всекидневна 1 Трапезария 1 склад 1 халат за отделение 1 чакалня 1 офис стая Отоплението е на газ Сградата разполага с асансьор Цена 1 250 000 евро Мястото е едно от най-скъпите места в Гърция. Апартамент на първа линия в Пасалимани, Пиреус -Гърция Pasalimani, Piraeus Пасалимани, Пиреус apartament na parva liniya v pasalimani, pireus -gartsiya - nedvizhimi imoti v sandanski 200 metra plyus 40 metra balkoni obshto 240 metra 3 spalni 1 kuhnya 2 bani 1 wc 1 mnogo golyama vsekidnevna 1 trapezariya 1 sklad 1 halat za otdelenie 1 chakalnya 1 ofis staya otoplenieto e na gaz sgradata razpolaga s asansyor tsena 1 250 000 evro myastoto e edno ot nai-skapite mesta v gartsiya. apartament na parva liniya v pasalimani, pireus -gartsiya pasalimani, piraeus pasalimani, pireus",
+    "search_text": "Апартамент на първа линия в Пасалимани, Пиреус -Гърция - Недвижими имоти в Сандански 200 метра плюс 40 метра балкони общо 240 метра 3 спални 1 Кухня 2 бани 1 wc 1 много голяма всекидневна 1 Трапезария 1 склад 1 халат за отделение 1 чакалня 1 офис стая Отоплението е на газ Сградата разполага с асансьор Цена 1 250 000 евро Мястото е едно от най-скъпите места в Гърция. Апартамент на първа линия в Пасалимани, Пиреус -Гърция Pasalimani, Piraeus Пасалимани, Пиреус Peiraios apartament na parva liniya v pasalimani, pireus -gartsiya - nedvizhimi imoti v sandanski 200 metra plyus 40 metra balkoni obshto 240 metra 3 spalni 1 kuhnya 2 bani 1 wc 1 mnogo golyama vsekidnevna 1 trapezariya 1 sklad 1 halat za otdelenie 1 chakalnya 1 ofis staya otoplenieto e na gaz sgradata razpolaga s asansyor tsena 1 250 000 evro myastoto e edno ot nai-skapite mesta v gartsiya. apartament na parva liniya v pasalimani, pireus -gartsiya pasalimani, piraeus pasalimani, pireus peiraios",
     "location_native": "Пасалимани, Пиреус",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Peiraios",
+    "municipality_code": "5101",
+    "district": "",
+    "district_code": "",
+    "region": "Attiki",
+    "region_id": "GR:region:EL30",
     "country_code": "GR",
+    "geography_id": "GR:settlement:EL30:5101000001",
+    "geography_path": [
+      "GR:NUTS1:EL3",
+      "GR:region:EL30",
+      "GR:regional_unit:EL30:51",
+      "GR:municipality:EL30:5101",
+      "GR:municipal_unit:EL30:510100",
+      "GR:community:EL30:51010000",
+      "GR:settlement:EL30:5101000001"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "approximate"
   },
   {
     "id": "MS-CRAWL-0091",
@@ -3271,9 +4450,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:11168",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:11168"
+    ],
     "settlement_ekatte": "11168",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0092",
@@ -3307,9 +4499,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0093",
@@ -3343,9 +4548,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43565",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43565"
+    ],
     "settlement_ekatte": "43565",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0094",
@@ -3379,9 +4597,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Petrich",
     "municipality_code": "BLG33",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:56126",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG33",
+      "BG:settlement:56126"
+    ],
     "settlement_ekatte": "56126",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0095",
@@ -3415,9 +4646,21 @@
     "location_legacy": "Sandanski",
     "municipality": "Petrich",
     "municipality_code": "BLG33",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:municipality:BLG33",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG33"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "municipality_only"
+    "location_review_status": "municipality_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0096",
@@ -3451,9 +4694,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0097",
@@ -3487,9 +4743,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Petrich",
     "municipality_code": "BLG33",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:56126",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG33",
+      "BG:settlement:56126"
+    ],
     "settlement_ekatte": "56126",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0098",
@@ -3523,9 +4792,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0099",
@@ -3559,9 +4841,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0100",
@@ -3595,9 +4890,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0101",
@@ -3631,9 +4939,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0102",
@@ -3667,9 +4988,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0103",
@@ -3703,9 +5037,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0104",
@@ -3734,14 +5081,29 @@
     "word_count": 459,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.com/sitemap-pt-listings-2024-04.html",
-    "search_text": "Продава имение в Гърция, гр.Нафлио - Недвижими имоти в Сандански 1.Къща 250м на 3 етажа с: 2 камини; 2 спални; 3 бани; 1 кухня; 1 голяма всекидневна; 1 трапезария; 1 гардеробна; 1 склад; 1 паркинг 2. Къща за гости 35 метра с кухня – спалня – баня 3. Конюшна 30 метра 4. Кокошарник 15 метра 5. Барбекю – пещ на дърва с оградено пространство 200 метра 6. 200 маслинови дръвчета 7. 130 лозови дървета Напълно обзаведена. Целият имот е ограден На 5 км от центъра на Нафплио На 8 км от най-близкия слънчев плаж Цена 650 000 евро Продава имение в Гърция, гр.Нафлио Nafplio Нафлио prodava imenie v gartsiya, gr.naflio - nedvizhimi imoti v sandanski 1.kashta 250m na 3 etazha s: 2 kamini; 2 spalni; 3 bani; 1 kuhnya; 1 golyama vsekidnevna; 1 trapezariya; 1 garderobna; 1 sklad; 1 parking 2. kashta za gosti 35 metra s kuhnya – spalnya – banya 3. konyushna 30 metra 4. kokosharnik 15 metra 5. barbekyu – pesht na darva s ogradeno prostranstvo 200 metra 6. 200 maslinovi dravcheta 7. 130 lozovi darveta napalno obzavedena. tseliyat imot e ograden na 5 km ot tsentara na nafplio na 8 km ot nai-blizkiya slanchev plazh tsena 650 000 evro prodava imenie v gartsiya, gr.naflio nafplio naflio",
+    "search_text": "Продава имение в Гърция, гр.Нафлио - Недвижими имоти в Сандански 1.Къща 250м на 3 етажа с: 2 камини; 2 спални; 3 бани; 1 кухня; 1 голяма всекидневна; 1 трапезария; 1 гардеробна; 1 склад; 1 паркинг 2. Къща за гости 35 метра с кухня – спалня – баня 3. Конюшна 30 метра 4. Кокошарник 15 метра 5. Барбекю – пещ на дърва с оградено пространство 200 метра 6. 200 маслинови дръвчета 7. 130 лозови дървета Напълно обзаведена. Целият имот е ограден На 5 км от центъра на Нафплио На 8 км от най-близкия слънчев плаж Цена 650 000 евро Продава имение в Гърция, гр.Нафлио Nafplio Нафлио Nayplieon prodava imenie v gartsiya, gr.naflio - nedvizhimi imoti v sandanski 1.kashta 250m na 3 etazha s: 2 kamini; 2 spalni; 3 bani; 1 kuhnya; 1 golyama vsekidnevna; 1 trapezariya; 1 garderobna; 1 sklad; 1 parking 2. kashta za gosti 35 metra s kuhnya – spalnya – banya 3. konyushna 30 metra 4. kokosharnik 15 metra 5. barbekyu – pesht na darva s ogradeno prostranstvo 200 metra 6. 200 maslinovi dravcheta 7. 130 lozovi darveta napalno obzavedena. tseliyat imot e ograden na 5 km ot tsentara na nafplio na 8 km ot nai-blizkiya slanchev plazh tsena 650 000 evro prodava imenie v gartsiya, gr.naflio nafplio naflio nayplieon",
     "location_native": "Нафлио",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Nayplieon",
+    "municipality_code": "4101",
+    "district": "",
+    "district_code": "",
+    "region": "Peloponnisos",
+    "region_id": "GR:region:EL65",
     "country_code": "GR",
+    "geography_id": "GR:settlement:EL65:4101010101",
+    "geography_path": [
+      "GR:NUTS1:EL6",
+      "GR:region:EL65",
+      "GR:regional_unit:EL65:41",
+      "GR:municipality:EL65:4101",
+      "GR:municipal_unit:EL65:410101",
+      "GR:community:EL65:41010101",
+      "GR:settlement:EL65:4101010101"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0105",
@@ -3775,9 +5137,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0106",
@@ -3811,9 +5186,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0107",
@@ -3847,9 +5235,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Nesebar",
     "municipality_code": "BGS15",
+    "district": "Burgas",
+    "district_code": "BGS",
+    "region": "Burgas",
+    "region_id": "BG:district:BGS",
     "country_code": "BG",
+    "geography_id": "BG:settlement:11538",
+    "geography_path": [
+      "BG:NUTS1:BG3",
+      "BG:NUTS2:BG34",
+      "BG:district:BGS",
+      "BG:municipality:BGS15",
+      "BG:settlement:11538"
+    ],
     "settlement_ekatte": "11538",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0108",
@@ -3883,9 +5284,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0109",
@@ -3919,9 +5333,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0110",
@@ -3955,9 +5382,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0111",
@@ -3991,9 +5431,22 @@
     "location_legacy": "",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0112",
@@ -4027,9 +5480,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:20780",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:20780"
+    ],
     "settlement_ekatte": "20780",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0113",
@@ -4063,9 +5529,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0114",
@@ -4099,9 +5578,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0115",
@@ -4135,9 +5627,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0116",
@@ -4171,9 +5676,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0117",
@@ -4207,9 +5725,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:68223",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:68223"
+    ],
     "settlement_ekatte": "68223",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0118",
@@ -4243,9 +5774,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:56174",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:56174"
+    ],
     "settlement_ekatte": "56174",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0119",
@@ -4279,9 +5823,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0120",
@@ -4315,9 +5872,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0121",
@@ -4351,9 +5921,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0122",
@@ -4387,9 +5970,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0123",
@@ -4423,9 +6019,22 @@
     "location_legacy": "Petrich",
     "municipality": "Petrich",
     "municipality_code": "BLG33",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:56126",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG33",
+      "BG:settlement:56126"
+    ],
     "settlement_ekatte": "56126",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0124",
@@ -4459,9 +6068,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0125",
@@ -4495,9 +6117,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0126",
@@ -4531,9 +6166,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0127",
@@ -4567,9 +6215,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0128",
@@ -4603,9 +6264,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0129",
@@ -4639,9 +6313,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:11168",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:11168"
+    ],
     "settlement_ekatte": "11168",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0130",
@@ -4675,9 +6362,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0131",
@@ -4711,9 +6411,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0132",
@@ -4747,9 +6460,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0133",
@@ -4783,9 +6509,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0134",
@@ -4819,9 +6558,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0135",
@@ -4855,9 +6607,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Bansko",
     "municipality_code": "BLG01",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:02676",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG01",
+      "BG:settlement:02676"
+    ],
     "settlement_ekatte": "02676",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0136",
@@ -4891,9 +6656,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43243",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43243"
+    ],
     "settlement_ekatte": "43243",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0137",
@@ -4927,9 +6705,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43150",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43150"
+    ],
     "settlement_ekatte": "43150",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0138",
@@ -4963,9 +6754,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0139",
@@ -4999,9 +6803,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0140",
@@ -5035,9 +6852,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0141",
@@ -5071,9 +6901,21 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:municipality:BLG40",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "raw_locality_only"
+    "location_review_status": "raw_locality_only",
+    "location_precision": "approximate"
   },
   {
     "id": "MS-CRAWL-0142",
@@ -5107,9 +6949,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43699",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43699"
+    ],
     "settlement_ekatte": "43699",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0143",
@@ -5143,9 +6998,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0144",
@@ -5179,9 +7047,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0145",
@@ -5215,9 +7096,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0146",
@@ -5251,9 +7145,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0147",
@@ -5287,9 +7194,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0148",
@@ -5323,9 +7243,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:11168",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:11168"
+    ],
     "settlement_ekatte": "11168",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0149",
@@ -5359,9 +7292,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0150",
@@ -5395,9 +7341,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43565",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43565"
+    ],
     "settlement_ekatte": "43565",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0151",
@@ -5431,9 +7390,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0152",
@@ -5467,9 +7439,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43565",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43565"
+    ],
     "settlement_ekatte": "43565",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0153",
@@ -5503,9 +7488,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:69969",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:69969"
+    ],
     "settlement_ekatte": "69969",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0154",
@@ -5539,9 +7537,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:69969",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:69969"
+    ],
     "settlement_ekatte": "69969",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0155",
@@ -5575,9 +7586,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0156",
@@ -5611,9 +7635,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43150",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43150"
+    ],
     "settlement_ekatte": "43150",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0157",
@@ -5647,9 +7684,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0158",
@@ -5683,9 +7733,22 @@
     "location_legacy": "",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0159",
@@ -5719,9 +7782,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "legacy_area_only"
+    "location_review_status": "legacy_area_only",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0160",
@@ -5755,9 +7831,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:43243",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:43243"
+    ],
     "settlement_ekatte": "43243",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0161",
@@ -5791,9 +7880,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0162",
@@ -5827,9 +7929,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0163",
@@ -5863,9 +7978,22 @@
     "location_legacy": "Sandanski",
     "municipality": "Sandanski",
     "municipality_code": "BLG40",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:65334",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG40",
+      "BG:settlement:65334"
+    ],
     "settlement_ekatte": "65334",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0164",
@@ -5894,14 +8022,29 @@
     "word_count": 484,
     "schema_present": false,
     "source_sitemap": "https://makler-realty.ru/listings-sitemap.xml",
-    "search_text": "Продажа трехкомнатной квартиры в Паралия Офринио, Греция - Недвижимость в Болгарии. Агентство недвижимости в г.Сандански Комплекс Арианди состоит из нескольких двухэтажных жилых зданий с благоустроенными общими частями и прилегающей территорией. Квартира расположена на втором жилом этаже, высота +2,8 м, состоит из гостиной с кухней, 2 спален, 2 террас и ванной комнаты с туалетом. Чистая жилая площадь по документам на недвижимость составляет 42 кв. м. (в Болгарии метод измерения квадратных метров совершенно другой, поэтому аналогичная квартира в Болгарии будет иметь площадь около 65-70 м2 с общими частями). Квартира предлагается в полностью готовом виде, но без мебели. Также установлена ​​кухня без электроприборов. Продажа трехкомнатной квартиры в Паралия Офринио, Греция Paralia Ofrinio Паралия Офринио prodazha trehkomnatnoi kvartiry v paraliya ofrinio, gretsiya - nedvizhimosty v bolgarii. agentstvo nedvizhimosti v g.sandanski kompleks ariandi sostoit iz neskolykih dvuhetazhnyh zhilyh zdanii s blagoustroennymi obshtimi chastyami i prilegayushtei territoriei. kvartira raspolozhena na vtorom zhilom etazhe, vysota +2,8 m, sostoit iz gostinoi s kuhnei, 2 spalen, 2 terras i vannoi komnaty s tualetom. chistaya zhilaya ploshtady po dokumentam na nedvizhimosty sostavlyaet 42 kv. m. (v bolgarii metod izmereniya kvadratnyh metrov sovershenno drugoi, poetomu analogichnaya kvartira v bolgarii budet imety ploshtady okolo 65-70 m2 s obshtimi chastyami). kvartira predlagaetsya v polnostyyu gotovom vide, no bez mebeli. takzhe ustanovlena ​​kuhnya bez elektropriborov. prodazha trehkomnatnoi kvartiry v paraliya ofrinio, gretsiya paralia ofrinio paraliya ofrinio",
+    "search_text": "Продажа трехкомнатной квартиры в Паралия Офринио, Греция - Недвижимость в Болгарии. Агентство недвижимости в г.Сандански Комплекс Арианди состоит из нескольких двухэтажных жилых зданий с благоустроенными общими частями и прилегающей территорией. Квартира расположена на втором жилом этаже, высота +2,8 м, состоит из гостиной с кухней, 2 спален, 2 террас и ванной комнаты с туалетом. Чистая жилая площадь по документам на недвижимость составляет 42 кв. м. (в Болгарии метод измерения квадратных метров совершенно другой, поэтому аналогичная квартира в Болгарии будет иметь площадь около 65-70 м2 с общими частями). Квартира предлагается в полностью готовом виде, но без мебели. Также установлена ​​кухня без электроприборов. Продажа трехкомнатной квартиры в Паралия Офринио, Греция Paralia Ofrinio Паралия Офринио Paggaioy prodazha trehkomnatnoi kvartiry v paraliya ofrinio, gretsiya - nedvizhimosty v bolgarii. agentstvo nedvizhimosti v g.sandanski kompleks ariandi sostoit iz neskolykih dvuhetazhnyh zhilyh zdanii s blagoustroennymi obshtimi chastyami i prilegayushtei territoriei. kvartira raspolozhena na vtorom zhilom etazhe, vysota +2,8 m, sostoit iz gostinoi s kuhnei, 2 spalen, 2 terras i vannoi komnaty s tualetom. chistaya zhilaya ploshtady po dokumentam na nedvizhimosty sostavlyaet 42 kv. m. (v bolgarii metod izmereniya kvadratnyh metrov sovershenno drugoi, poetomu analogichnaya kvartira v bolgarii budet imety ploshtady okolo 65-70 m2 s obshtimi chastyami). kvartira predlagaetsya v polnostyyu gotovom vide, no bez mebeli. takzhe ustanovlena ​​kuhnya bez elektropriborov. prodazha trehkomnatnoi kvartiry v paraliya ofrinio, gretsiya paralia ofrinio paraliya ofrinio paggaioy",
     "location_native": "Паралия Офринио",
     "location_legacy": "Sandanski",
-    "municipality": "",
-    "municipality_code": "",
+    "municipality": "Paggaioy",
+    "municipality_code": "0503",
+    "district": "",
+    "district_code": "",
+    "region": "Eastern Macedonia and Thrace",
+    "region_id": "GR:region:EL51",
     "country_code": "GR",
+    "geography_id": "GR:settlement:EL51:0503030502",
+    "geography_path": [
+      "GR:NUTS1:EL5",
+      "GR:region:EL51",
+      "GR:regional_unit:EL51:05",
+      "GR:municipality:EL51:0503",
+      "GR:municipal_unit:EL51:050303",
+      "GR:community:EL51:05030305",
+      "GR:settlement:EL51:0503030502"
+    ],
     "settlement_ekatte": "",
-    "location_review_status": "confirmed_foreign_settlement"
+    "location_review_status": "confirmed_foreign_settlement",
+    "location_precision": "area_only"
   },
   {
     "id": "MS-CRAWL-0165",
@@ -5935,8 +8078,21 @@
     "location_legacy": "Sandanski",
     "municipality": "Strumyani",
     "municipality_code": "BLG49",
+    "district": "Blagoevgrad",
+    "district_code": "BLG",
+    "region": "Blagoevgrad",
+    "region_id": "BG:district:BLG",
     "country_code": "BG",
+    "geography_id": "BG:settlement:69969",
+    "geography_path": [
+      "BG:NUTS1:BG4",
+      "BG:NUTS2:BG41",
+      "BG:district:BLG",
+      "BG:municipality:BLG49",
+      "BG:settlement:69969"
+    ],
     "settlement_ekatte": "69969",
-    "location_review_status": "confirmed_settlement"
+    "location_review_status": "confirmed_settlement",
+    "location_precision": "area_only"
   }
 ]

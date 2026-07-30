@@ -41,6 +41,7 @@ import { buildPayloadRuntimeReport } from "../lib/payload-runtime.mjs";
 import { parseCsv } from "../lib/csv.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 import { appendRedirectApproval } from "../lib/redirect-approvals.mjs";
+import { LOGO_URL, LOGO_URL_REVERSED } from "../lib/ui/design-assets.mjs";
 
 function healthyHermesAgentFetch(url) {
   if (String(url).endsWith("/v1/capabilities")) {
@@ -325,6 +326,66 @@ function actionCounts(rows) {
     return counts;
   }, {});
 }
+
+test("HTTP search previews do not pollute search analytics", async () => {
+  const eventLedgerPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-preview-events-`)}/events.jsonl`;
+  resetEventLedger(eventLedgerPath);
+  const app = createHttpApp({ eventLedgerPath });
+
+  const preview = await dispatchHttp(app, {
+    url: "/api/search?locale=he&municipality=Sandanski",
+    headers: { "x-ms-realty-preview": "search-count" },
+  });
+  const search = await dispatchHttp(app, { url: "/api/search?locale=he&municipality=Sandanski" });
+
+  assert.equal(preview.status, 200);
+  assert.equal(search.status, 200);
+  assert.deepEqual(readEventLedger(eventLedgerPath).map((event) => event.type), ["search"]);
+});
+
+test("HTTP app serves only optimized local hero assets", async () => {
+  const app = createHttpApp();
+  const hero = await dispatchHttp(app, { url: "/hero/sandanski-640.avif" });
+  const disallowed = await dispatchHttp(app, { url: "/hero/sandanski.svg" });
+
+  assert.equal(hero.status, 200);
+  assert.equal(hero.headers["content-type"], "image/avif");
+  assert.equal(hero.headers["cache-control"], "public, max-age=31536000, immutable");
+  assert.equal(Buffer.isBuffer(hero.body), true);
+  assert.ok(hero.body.length > 0);
+  assert.equal(disallowed.status, 404);
+});
+
+test("HTTP app serves generated logo assets as immutable binary PNGs", async () => {
+  const app = createHttpApp();
+
+  for (const url of [LOGO_URL, LOGO_URL_REVERSED]) {
+    const logo = await dispatchHttp(app, { url });
+    assert.equal(logo.status, 200);
+    assert.equal(logo.headers["content-type"], "image/png");
+    assert.equal(logo.headers["cache-control"], "public, max-age=31536000, immutable");
+    assert.equal(Buffer.isBuffer(logo.body), true);
+    assert.deepEqual([...logo.body.subarray(0, 8)], [137, 80, 78, 71, 13, 10, 26, 10]);
+  }
+});
+
+test("HTTP app serves bounded official bilingual geography suggestions", async () => {
+  const app = createHttpApp();
+  const sandanski = await dispatchHttp(app, {
+    url: "/api/geography?q=Sandanski&country=BG&level=settlement&limit=5",
+  });
+  const thessaloniki = await dispatchHttp(app, {
+    url: "/api/geography?q=Thessaloniki&country=GR&level=settlement&limit=5",
+  });
+
+  assert.equal(sandanski.status, 200);
+  assert.equal(sandanski.headers["cache-control"], "public, max-age=3600, stale-while-revalidate=86400");
+  assert.equal(sandanski.body.returned <= 5, true);
+  assert.equal(sandanski.body.results[0].id, "BG:settlement:65334");
+  assert.equal(sandanski.body.results[0].context.some((area) => area.official_code === "BLG40"), true);
+  assert.equal(thessaloniki.body.results[0].id, "GR:settlement:EL52:0701010001");
+  assert.equal(thessaloniki.body.results[0].active_market, true);
+});
 
 test("HTTP app serves listing, search, fallback, and lead JSON contracts", async () => {
   const leadLedgerPath = tempLedger();

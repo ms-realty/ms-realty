@@ -3,7 +3,12 @@
   "sources": {
     "listing_source": "search/data/listings.json",
     "national_registry": "https://www.nsi.bg/nrnm/ekatte/index",
+    "geography_registry": "production/data/geography-registry.json",
     "reviewed_at": "2026-07-29"
+  },
+  "districts": {
+    "BLG": { "name": "Blagoevgrad", "native_name": "Благоевград" },
+    "BGS": { "name": "Burgas", "native_name": "Бургас" }
   },
   "places": {
     "sandanski": { "country_code": "BG", "country_name": "Bulgaria", "location_name": "Sandanski", "location_native": "Сандански", "municipality": { "name": "Sandanski", "native_name": "Сандански", "code": "BLG40" }, "settlement": { "name": "Sandanski", "native_name": "Сандански", "ekatte": "65334", "type": "town" } },
@@ -30,13 +35,13 @@
     "lilyanovo": { "country_code": "BG", "country_name": "Bulgaria", "location_name": "Lilyanovo", "location_native": "Лиляново", "municipality": { "name": "Sandanski", "native_name": "Сандански", "code": "BLG40" }, "settlement": { "name": "Lilyanovo", "native_name": "Лиляново", "ekatte": "43699", "type": "village" } },
     "petrich_municipality": { "country_code": "BG", "country_name": "Bulgaria", "location_name": "Petrich Municipality", "location_native": "Община Петрич", "municipality": { "name": "Petrich", "native_name": "Петрич", "code": "BLG33" } },
     "derbere_sandanski": { "country_code": "BG", "country_name": "Bulgaria", "location_name": "Derbere, Sandanski", "location_native": "Дербере, Сандански", "municipality": { "name": "Sandanski", "native_name": "Сандански", "code": "BLG40" }, "raw_locality": "Дербере" },
-    "thessaloniki": { "country_code": "GR", "country_name": "Greece", "location_name": "Thessaloniki", "location_native": "Солун", "settlement": { "name": "Thessaloniki", "native_name": "Солун", "type": "city" } },
-    "eretria_kotroni": { "country_code": "GR", "country_name": "Greece", "location_name": "Eretria-Kotroni", "location_native": "Еретрия-Котрони", "settlement": { "name": "Eretria-Kotroni", "native_name": "Еретрия-Котрони", "type": "locality" } },
-    "elani_sani": { "country_code": "GR", "country_name": "Greece", "location_name": "Elani-Sani, Halkidiki", "location_native": "Елани-Сани, Халкидики", "settlement": { "name": "Elani-Sani, Halkidiki", "native_name": "Елани-Сани, Халкидики", "type": "locality" } },
-    "paralia_ofrinio": { "country_code": "GR", "country_name": "Greece", "location_name": "Paralia Ofrinio", "location_native": "Паралия Офринио", "settlement": { "name": "Paralia Ofrinio", "native_name": "Паралия Офринио", "type": "locality" } },
-    "logari": { "country_code": "GR", "country_name": "Greece", "location_name": "Logari", "location_native": "Логари", "settlement": { "name": "Logari", "native_name": "Логари", "type": "locality" } },
-    "pasalimani_piraeus": { "country_code": "GR", "country_name": "Greece", "location_name": "Pasalimani, Piraeus", "location_native": "Пасалимани, Пиреус", "settlement": { "name": "Pasalimani, Piraeus", "native_name": "Пасалимани, Пиреус", "type": "locality" } },
-    "nafplio": { "country_code": "GR", "country_name": "Greece", "location_name": "Nafplio", "location_native": "Нафлио", "settlement": { "name": "Nafplio", "native_name": "Нафлио", "type": "city" } }
+    "thessaloniki": { "country_code": "GR", "country_name": "Greece", "location_name": "Thessaloniki", "location_native": "Солун", "geography_id": "GR:settlement:EL52:0701010001", "location_precision": "area_only", "settlement": { "name": "Thessaloniki", "native_name": "Солун", "type": "city" } },
+    "eretria_kotroni": { "country_code": "GR", "country_name": "Greece", "location_name": "Eretria-Kotroni", "location_native": "Еретрия-Котрони", "geography_id": "GR:settlement:EL64:2903010101", "location_precision": "approximate", "settlement": { "name": "Eretria-Kotroni", "native_name": "Еретрия-Котрони", "type": "locality" } },
+    "elani_sani": { "country_code": "GR", "country_name": "Greece", "location_name": "Elani-Sani, Halkidiki", "location_native": "Елани-Сани, Халкидики", "geography_id": "GR:municipality:EL52:1303", "location_precision": "approximate", "settlement": { "name": "Elani-Sani, Halkidiki", "native_name": "Елани-Сани, Халкидики", "type": "locality" } },
+    "paralia_ofrinio": { "country_code": "GR", "country_name": "Greece", "location_name": "Paralia Ofrinio", "location_native": "Паралия Офринио", "geography_id": "GR:settlement:EL51:0503030502", "location_precision": "area_only", "settlement": { "name": "Paralia Ofrinio", "native_name": "Паралия Офринио", "type": "locality" } },
+    "logari": { "country_code": "GR", "country_name": "Greece", "location_name": "Logari", "location_native": "Логари", "geography_id": "GR:settlement:EL52:1202020404", "location_precision": "area_only", "settlement": { "name": "Logari", "native_name": "Логари", "type": "locality" } },
+    "pasalimani_piraeus": { "country_code": "GR", "country_name": "Greece", "location_name": "Pasalimani, Piraeus", "location_native": "Пасалимани, Пиреус", "geography_id": "GR:settlement:EL30:5101000001", "location_precision": "approximate", "settlement": { "name": "Pasalimani, Piraeus", "native_name": "Пасалимани, Пиреус", "type": "locality" } },
+    "nafplio": { "country_code": "GR", "country_name": "Greece", "location_name": "Nafplio", "location_native": "Нафлио", "geography_id": "GR:settlement:EL65:4101010101", "location_precision": "area_only", "settlement": { "name": "Nafplio", "native_name": "Нафлио", "type": "city" } }
   },
   "legacy_defaults": { "Sandanski": "sandanski", "Petrich": "petrich", "Hotovo": "hotovo" },
   "listing_overrides": {

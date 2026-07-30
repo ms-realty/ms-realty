@@ -3,6 +3,7 @@
   "locale_registry_path": "/Users/ivan/Code/MS-Realty-content-audit/locales/registry.json",
   "listing_edits_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/listing-edits.jsonl",
   "location_reviews_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/location-reviews.json",
+  "geography_registry_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/geography-registry.json",
   "source_listing_count": 165,
   "index_document_count": 167,
   "domains": [

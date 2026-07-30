@@ -41,16 +41,8 @@ test("public client loads the pinned local Photo Sphere Viewer bundle only for a
   assert.match(PUBLIC_APP_JS, /function initImageFallbacks/);
   assert.match(PUBLIC_APP_JS, /main\[data-react-public-ui\] img, img\[data-fallback-src\]/);
   assert.match(PUBLIC_APP_JS, /data-image-state", "unavailable/);
-  assert.match(PUBLIC_APP_JS, /function initMobileFilterPreview/);
-  assert.match(PUBLIC_APP_JS, /window\.setTimeout\(preview, 320\)/);
-  assert.match(PUBLIC_APP_JS, /new URL\("\/api\/search", window\.location\.href\)/);
-  assert.match(PUBLIC_APP_JS, /params\.set\("locale", locale\)/);
-  assert.match(PUBLIC_APP_JS, /return response\.json\(\)/);
-  assert.match(PUBLIC_APP_JS, /payload && payload\.search && payload\.search\.total_matches/);
-  assert.doesNotMatch(PUBLIC_APP_JS, /accept: "text\/html"/);
-  assert.doesNotMatch(PUBLIC_APP_JS, /new DOMParser\(\)/);
-  assert.match(PUBLIC_APP_JS, /x-ms-realty-preview": "search-count/);
-  assert.match(PUBLIC_APP_JS, /initMobileFilterPreview\(\);/);
+  assert.doesNotMatch(PUBLIC_APP_JS, /initMobileFilterPreview/);
+  assert.doesNotMatch(PUBLIC_APP_JS, /initMobileSearchFilters/);
   assert.match(PUBLIC_APP_JS, /function initPublicMobileNavigation/);
   assert.match(PUBLIC_APP_JS, /initPublicMobileNavigation\(\);/);
   assert.match(PUBLIC_APP_JS, /function initSearchScrollRestoration/);

@@ -1,7 +1,7 @@
 import { renderReactAdminBody } from "./react-admin-site.mjs";
 import { renderReactPublicBody } from "./react-public-site.mjs";
 import { chromeCopyFor, labelsFor, localizedListingValue, uiCopyFor } from "./public-site.mjs";
-import { ADMIN_CLIENT_HASH, DS_HASH, FONTS_URL, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
+import { ADMIN_CLIENT_HASH, DS_HASH, FONTS_URL, LOGO_ASPECT, LOGO_SRC, PUBLIC_CLIENT_HASH } from "./ui/design-assets.mjs";
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => {
@@ -40,7 +40,7 @@ function openGraph(page) {
     .map(([property, content]) => `<meta property="${escapeHtml(property)}" content="${escapeHtml(content)}">`);
 }
 
-function meta(page) {
+function meta(page, options = {}) {
   const links = [
     `<link rel="canonical" href="${escapeHtml(page.canonical || page.path || "/")}">`,
     ...(page.hreflang || []).map(
@@ -53,7 +53,7 @@ function meta(page) {
   return [
     "<meta charset=\"utf-8\">",
     "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">",
-    designSystemStyle(),
+    options.print ? "" : designSystemStyle(),
     `<title>${escapeHtml(page.metadata?.title || "MS Realty")}</title>`,
     `<meta name="description" content="${escapeHtml(page.metadata?.description || "")}">`,
     `<meta name="robots" content="${escapeHtml(page.metadata?.robots || (page.indexable ? "index,follow" : "noindex,follow"))}">`,
@@ -239,7 +239,18 @@ function renderListingPrint(page) {
   const labels = labelsFor(page.locale || page.lang || "en");
   const ui = uiCopyFor(page.locale || page.lang || "en");
   const facts = page.body.facts || {};
-  const images = (page.body.media.gallery || []).slice(0, 4);
+  const wordpressSizeSuffix = /-\d+x\d+(?=\.[a-z0-9]+(?:[?#]|$))/i;
+  const imagesBySource = new Map();
+  for (const image of page.body.media.gallery || []) {
+    const url = String(image?.url || "");
+    if (!url) continue;
+    const sourceKey = url.replace(wordpressSizeSuffix, "");
+    const existing = imagesBySource.get(sourceKey);
+    if (!existing || (wordpressSizeSuffix.test(String(existing.url || "")) && !wordpressSizeSuffix.test(url))) {
+      imagesBySource.set(sourceKey, image);
+    }
+  }
+  const images = [...imagesBySource.values()].slice(0, 4);
   const [heroImage, ...galleryImages] = images;
   const price = Number(facts.price_eur);
   const priceLabel = facts.price_on_request || !Number.isFinite(price) || price <= 1 ? labels.priceOnRequest : `EUR ${price.toLocaleString("en-US")}`;
@@ -285,57 +296,68 @@ function renderListingPrint(page) {
         labels.contactBroker,
       )}" data-broker-contact-actions="true">${direct}</nav></footer>`
     : "";
+  const logoWidth = Math.round(36 * LOGO_ASPECT);
   return `
 <style>
-@page { size: A4; margin: 12mm; }
-.ms-print-document { box-sizing: border-box; color: #192018; font: 16px/1.5 Inter, Arial, sans-serif; max-width: 960px; margin: 32px auto; padding: 32px; background: #fff; }
+@page { size: A4; margin: 0; }
+html, body { min-height: 100%; }
+body { margin: 0; background: #f3efe8; }
+.ms-print-document { box-sizing: border-box; color: #241f18; font: 16px/1.5 Arial, sans-serif; max-width: 1040px; margin: 32px auto; padding: 32px 40px; background: #fff; }
 .ms-print-document *, .ms-print-document *::before, .ms-print-document *::after { box-sizing: inherit; }
-.ms-print-document__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 28px; }
-.ms-print-document__toolbar a { color: #355b38; font-weight: 800; text-decoration: none; }
-.ms-print-document__toolbar button { border: 0; border-radius: 999px; padding: 12px 18px; background: #355b38; color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
-.ms-print-document__header, .ms-print-document__footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-color: #d8dfd1; }
-.ms-print-document__header { padding-bottom: 16px; border-bottom: 1px solid #d8dfd1; }
-.ms-print-document__brand { color: #355b38; font-size: 20px; font-weight: 900; letter-spacing: .02em; text-decoration: none; }
-.ms-print-document__reference { color: #536052; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
-.ms-print-document__hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(240px, .9fr); gap: 24px; align-items: start; padding: 28px 0; }
-.ms-print-document__eyebrow { margin: 0 0 8px; color: #7d6b4c; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-.ms-print-document h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.12; }
-.ms-print-document__location { margin: 14px 0 0; color: #536052; font-size: 17px; }
-.ms-print-document__price { margin: 20px 0 0; color: #355b38; font-size: 28px; font-weight: 900; }
+.ms-print-document__toolbar { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 24px; }
+.ms-print-document__toolbar button { min-height: 44px; border: 0; border-radius: 8px; padding: 11px 18px; background: #c42d2d; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.ms-print-document__header, .ms-print-document__footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-color: #e6dccb; }
+.ms-print-document__header { padding-bottom: 16px; border-bottom: 1px solid #e6dccb; }
+.ms-print-document__brand { display: inline-flex; align-items: center; text-decoration: none; }
+.ms-print-document__brand img { width: auto; height: 36px; border-radius: 0; object-fit: contain; }
+.ms-print-document__reference { color: #73644a; font: 700 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .08em; }
+.ms-print-document__hero { display: grid; grid-template-columns: minmax(0, .95fr) minmax(280px, 1.05fr); gap: 28px; align-items: center; padding: 28px 0; }
+.ms-print-document__eyebrow { margin: 0 0 8px; color: #73644a; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.ms-print-document h1, .ms-print-document h2 { font-family: Georgia, "Times New Roman", serif; color: #241f18; }
+.ms-print-document h1 { margin: 0; font-size: clamp(30px, 3.6vw, 42px); line-height: 1.1; }
+.ms-print-document__location { margin: 14px 0 0; color: #73644a; font-size: 16px; }
+.ms-print-document__price { margin: 20px 0 0; color: #181818; font-size: 28px; font-weight: 800; }
 .ms-print-document figure { margin: 0; }
 .ms-print-document img { display: block; width: 100%; height: 100%; border-radius: 12px; object-fit: cover; }
-.ms-print-document__hero-media { aspect-ratio: 4 / 3; min-height: 210px; overflow: hidden; background: #edf1ea; }
-.ms-print-document__section { padding-top: 24px; border-top: 1px solid #d8dfd1; }
+.ms-print-document__hero-media { aspect-ratio: 3 / 2; min-height: 230px; overflow: hidden; background: #f2ece1; }
+.ms-print-document__section { padding-top: 24px; border-top: 1px solid #e6dccb; }
 .ms-print-document__section h2 { margin: 0 0 14px; font-size: 20px; }
 .ms-print-document__description p { margin: 0 0 12px; }
 .ms-print-document__facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
-.ms-print-document__facts > div { min-width: 0; padding: 12px 14px; border-radius: 10px; background: #f4f7f1; }
-.ms-print-document__facts dt { color: #667262; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-.ms-print-document__facts dd { margin: 4px 0 0; font-weight: 800; overflow-wrap: anywhere; }
+.ms-print-document__facts > div { min-width: 0; padding: 12px 14px; border-radius: 10px; background: #faf7f1; }
+.ms-print-document__facts dt { color: #73644a; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.ms-print-document__facts dd { margin: 4px 0 0; font-weight: 700; overflow-wrap: anywhere; }
 .ms-print-document__gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.ms-print-document__gallery figure { aspect-ratio: 4 / 3; overflow: hidden; background: #edf1ea; }
-.ms-print-document__footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #d8dfd1; color: #536052; font-size: 12px; }
+.ms-print-document__gallery figure { aspect-ratio: 3 / 2; overflow: hidden; background: #f2ece1; }
+.ms-print-document__footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #e6dccb; color: #73644a; font-size: 12px; }
 .ms-print-document__footer a { color: inherit; overflow-wrap: anywhere; }
 .ms-print-document__contact { display: flex; flex-wrap: wrap; gap: 10px; }
-.ms-print-document__contact a { color: #355b38; font-weight: 800; }
+.ms-print-document__contact a { color: #a32323; font-weight: 700; }
 @media screen and (max-width: 640px) {
-  body { background: #f4f3ef; }
   .ms-print-document { margin: 0; padding: 20px; }
   .ms-print-document__hero { grid-template-columns: 1fr; }
   .ms-print-document__facts { grid-template-columns: 1fr; }
   .ms-print-document__gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media print {
-  html, body { margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .ms-print-document { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; }
+  html, body { width: 210mm; min-height: 297mm; margin: 0; padding: 0; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ms-print-document { width: 210mm; min-height: 297mm; max-width: none; margin: 0; padding: 10mm 12mm; font-size: 9.5pt; line-height: 1.42; }
   .ms-print-document__toolbar { display: none; }
-  .ms-print-document__hero, .ms-print-document__section, .ms-print-document__footer { break-inside: avoid; }
-  .ms-print-document__hero { grid-template-columns: minmax(0, 1.1fr) minmax(170px, .9fr); gap: 18px; padding: 18px 0; }
-  .ms-print-document h1 { font-size: 25pt; }
-  .ms-print-document__price { font-size: 18pt; }
-  .ms-print-document__section { padding-top: 16px; }
-  .ms-print-document__facts > div { padding: 8px 10px; }
-  .ms-print-document__gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .ms-print-document__header, .ms-print-document__hero, .ms-print-document__facts > div, .ms-print-document__gallery figure, .ms-print-document__footer { break-inside: avoid; }
+  .ms-print-document__header { padding-bottom: 4mm; }
+  .ms-print-document__brand img { height: 8mm; }
+  .ms-print-document__hero { grid-template-columns: minmax(0, .95fr) minmax(70mm, 1.05fr); gap: 6mm; padding: 6mm 0; }
+  .ms-print-document__hero-media { min-height: 0; }
+  .ms-print-document h1 { font-size: 22pt; }
+  .ms-print-document__price { margin-top: 5mm; font-size: 17pt; }
+  .ms-print-document__section { padding-top: 4mm; }
+  .ms-print-document__section h2 { break-after: avoid; margin-bottom: 3mm; font-size: 15pt; }
+  .ms-print-document__description { break-inside: auto; }
+  .ms-print-document__description p { widows: 3; orphans: 3; }
+  .ms-print-document__facts { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2mm; }
+  .ms-print-document__facts > div { padding: 2.5mm 3mm; }
+  .ms-print-document__gallery { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2mm; }
+  .ms-print-document__gallery figure { aspect-ratio: 16 / 9; }
   .ms-print-document a[href]::after { content: none; }
 }
 </style>
@@ -343,11 +365,10 @@ function renderListingPrint(page) {
     page.body.actions.direct_contact.review_status,
   )}">
   <nav class="ms-print-document__toolbar" aria-label="${escapeHtml(labels.print)}">
-    <a href="${escapeHtml(page.canonical)}">MS Realty</a>
     <button type="button" data-print-trigger="true" onclick="window.print()">${escapeHtml(labels.print)}</button>
   </nav>
   <header class="ms-print-document__header">
-    <a class="ms-print-document__brand" href="${escapeHtml(page.canonical)}">MS Realty</a>
+    <a class="ms-print-document__brand" href="${escapeHtml(page.canonical)}" aria-label="MS Realty"><img src="${LOGO_SRC}" alt="MS Realty" width="${logoWidth}" height="36"></a>
     <span class="ms-print-document__reference">${escapeHtml(facts.id || "")}</span>
   </header>
   <section class="ms-print-document__hero" aria-label="${escapeHtml(labels.listingSummary)}">
@@ -953,7 +974,7 @@ export function renderHtmlPage(page, options = {}) {
   return `<!doctype html>
 <html lang="${escapeHtml(page.lang || page.locale || "en")}" dir="${escapeHtml(page.dir || "ltr")}">
 <head>
-${meta(page)}
+${meta(page, options)}
 </head>
 <body>
 ${body}

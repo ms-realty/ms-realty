@@ -474,7 +474,11 @@ function publicSearchFilterValues(filters = {}) {
     return Number.isFinite(parsed) ? parsed : null;
   };
   return {
+    country_code: text(filters.country_code).toUpperCase(),
+    geography_id: text(filters.geography_id),
+    region_id: text(filters.region_id),
     municipality: text(filters.municipality),
+    district: text(filters.district),
     property_type: text(filters.property_type),
     offer_type: text(filters.offer_type),
     price_min: number(filters.price_min),
@@ -494,13 +498,11 @@ function typesensePublicFilter(localeCodes, filters) {
     "locale_is_indexable:=true",
     localeCodes.length === 1 ? localeFilter : `(${localeFilter})`,
   ];
-  if (values.municipality) {
-    clauses.push(
-      `municipality:=${typesenseLiteral(values.municipality)}`,
-      "country_code:=`BG`",
-      "location_review_status:=`confirmed_settlement`",
-    );
-  }
+  if (values.country_code) clauses.push(`country_code:=${typesenseLiteral(values.country_code)}`);
+  if (values.region_id) clauses.push(`geography_path:=${typesenseLiteral(values.region_id)}`);
+  if (values.geography_id) clauses.push(`geography_path:=${typesenseLiteral(values.geography_id)}`);
+  if (values.municipality) clauses.push(`municipality:=${typesenseLiteral(values.municipality)}`);
+  if (values.district) clauses.push(`district:=${typesenseLiteral(values.district)}`);
   for (const field of ["property_type", "offer_type"]) {
     if (values[field]) clauses.push(`${field}:=${typesenseLiteral(values[field])}`);
   }
@@ -525,13 +527,11 @@ function meilisearchPublicFilter(localeCodes, filters) {
     "locale_is_indexable = true",
     localeCodes.length === 1 ? localeFilter : `(${localeFilter})`,
   ];
-  if (values.municipality) {
-    clauses.push(
-      `municipality = ${JSON.stringify(values.municipality)}`,
-      'country_code = "BG"',
-      'location_review_status = "confirmed_settlement"',
-    );
-  }
+  if (values.country_code) clauses.push(`country_code = ${JSON.stringify(values.country_code)}`);
+  if (values.region_id) clauses.push(`geography_path = ${JSON.stringify(values.region_id)}`);
+  if (values.geography_id) clauses.push(`geography_path = ${JSON.stringify(values.geography_id)}`);
+  if (values.municipality) clauses.push(`municipality = ${JSON.stringify(values.municipality)}`);
+  if (values.district) clauses.push(`district = ${JSON.stringify(values.district)}`);
   for (const field of ["property_type", "offer_type"]) {
     if (values[field]) clauses.push(`${field} = ${JSON.stringify(values[field])}`);
   }
