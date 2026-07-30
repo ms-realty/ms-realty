@@ -168,7 +168,7 @@ function SiteHeader({ chrome }) {
           ),
         ),
       ),
-      h(Btn, { tag: "a", variant: "accent", size: "md", full: true, iconStart: "phone", href: chrome.contact.phone_href }, copy.callBroker),
+      h(Btn, { tag: "a", variant: "accent", size: "md", full: true, iconStart: "message-circle", href: chrome.contact.path }, chrome.contact.label),
     ),
   );
   return h(
@@ -204,11 +204,11 @@ function SiteHeader({ chrome }) {
         h(LanguageMenu, { languages: chrome.languages, label: copy.languageLabel }),
         h(
           Btn,
-          { tag: "a", variant: "accent", size: "sm", iconStart: "phone", href: chrome.contact.phone_href, className: "site-hd__call mk-btn mk-btn--accent mk-btn--sm" },
-          copy.callBroker,
+          { tag: "a", variant: "accent", size: "sm", iconStart: "message-circle", href: chrome.contact.path, className: "site-hd__call mk-btn mk-btn--accent mk-btn--sm" },
+          chrome.contact.label,
         ),
       ),
-      h("a", { className: "site-hd__mobile-call", href: chrome.contact.phone_href, "aria-label": copy.callBroker, title: copy.callBroker }, h(Icon, { name: "phone", size: 20 })),
+      h("a", { className: "site-hd__mobile-call", href: chrome.contact.path, "aria-label": chrome.contact.label, title: chrome.contact.label }, h(Icon, { name: "message-circle", size: 20 })),
       mobileMenu,
     ),
   );
@@ -277,7 +277,6 @@ function SiteFooter({ chrome, labels }) {
   const contactLinks = [
     { id: "contact", href: chrome.nav.find((item) => item.id === "contact")?.href || chrome.home.href, label: copy.navContact },
     { id: "seller", href: chrome.nav.find((item) => item.id === "sell")?.href || chrome.home.href, label: labels.sellerValuation },
-    { id: "phone", href: chrome.contact.phone_href, label: chrome.contact.phone_label },
     { id: "email", href: `mailto:${chrome.contact.email}`, label: chrome.contact.email },
   ];
   const mobileGroups = [
@@ -303,7 +302,6 @@ function SiteFooter({ chrome, labels }) {
         h(
           "div",
           { className: "site-ft__contact" },
-          h("span", null, h(Icon, { name: "phone", size: 16 }), h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
           h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
           h("span", null, h(Icon, { name: "map-pin", size: 16 }), copy.offices),
         ),
@@ -2590,7 +2588,6 @@ function ContactBody({ page }) {
                   "div",
                   { className: "ct-office__meta" },
                   h("span", null, h(Icon, { name: "map-pin", size: 16 }), ` ${chrome.copy.offices}`),
-                  h("span", null, h(Icon, { name: "phone", size: 16 }), h("a", { href: chrome.contact.phone_href }, chrome.contact.phone_label)),
                   h("span", null, h(Icon, { name: "mail", size: 16 }), h("a", { href: `mailto:${chrome.contact.email}` }, chrome.contact.email)),
                 ),
               ),

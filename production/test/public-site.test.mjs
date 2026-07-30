@@ -166,23 +166,25 @@ test("approved broker contact data enables direct listing contact links", () => 
     brokerContact: createBrokerContact({
       listingId: listing.id,
       broker: "broker_ru",
-      phone: "+359880000000",
+      phone: "+447700900001",
       reviewer: "owner",
+      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      validationStatus: "broker_verified",
       approved: true,
     }),
   });
 
   assert.equal(page.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(page.body.actions.direct_contact.broker, "broker_ru");
-  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "phone").href, "tel:+359880000000");
+  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "phone").href, "tel:+447700900001");
   assert.equal(
     page.body.actions.direct_contact.channels.find((channel) => channel.id === "whatsapp").href,
-    "https://wa.me/359880000000",
+    "https://wa.me/447700900001",
   );
   const html = renderReactPublicBody(page);
   assert.match(html, /ld-contact-options__direct/);
-  assert.match(html, /href="tel:\+359880000000"/);
-  assert.match(html, /href="https:\/\/wa\.me\/359880000000"/);
+  assert.match(html, /href="tel:\+447700900001"/);
+  assert.match(html, /href="https:\/\/wa\.me\/447700900001"/);
 });
 
 test("listing SEO includes approved hreflang and excludes unavailable draft locales", () => {

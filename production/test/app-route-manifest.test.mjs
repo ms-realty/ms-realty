@@ -140,6 +140,8 @@ test("App Router adapter renders home, search, listing, and RTL HTML", () => {
   assert.equal((listing.html.match(/<[^>]+data-compact-mobile-action="true"/g) || []).length, 3);
   assert.match(listing.html, /href="\/he\/search"/);
   assert.match(listing.html, /data-related-listings="true"/);
+  assert.equal(listing.rendered.body.actions.direct_contact.review_status, "needs_broker_contact_review");
+  assert.doesNotMatch(listing.html, /href="(?:tel:|https:\/\/wa\.me\/|viber:)/);
 
   const listingFallback = renderAppRoute({
     pathname: "/en/properties/MS-CRAWL-0001",

@@ -2957,7 +2957,7 @@ export function assertHttpSmoke(smoke) {
   ) {
     throw new Error("HTTP smoke must expose listing conversion actions without inventing broker contact data");
   }
-  if (smoke.brokerContact?.status !== 201 || smoke.brokerContact.body.channels?.phone !== "tel:+359880000000") {
+  if (smoke.brokerContact?.status !== 201 || !smoke.brokerContact.body.channels?.phone?.startsWith("tel:+")) {
     throw new Error("HTTP smoke must approve broker contact data");
   }
   if (
@@ -3152,7 +3152,7 @@ export function assertHttpSmoke(smoke) {
     smoke.listingHtml.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.listingHtml.body.includes("<html lang=\"he\" dir=\"rtl\">") ||
     !smoke.listingHtml.body.includes("data-kind=\"listing\"") ||
-    smoke.listingHtml.body.includes("tel:+359880000000")
+    smoke.listingHtml.body.includes('href="tel:')
   ) {
     throw new Error("HTTP smoke must serve rendered listing HTML without unapproved direct contact");
   }
@@ -3161,7 +3161,7 @@ export function assertHttpSmoke(smoke) {
     smoke.listingPrint.headers["content-type"] !== "text/html; charset=utf-8" ||
     !smoke.listingPrint.body.includes("data-kind=\"listing-print\"") ||
     !smoke.listingPrint.body.includes("data-print-status=\"browser-pdf-ready\"") ||
-    smoke.listingPrint.body.includes("tel:+359880000000")
+    smoke.listingPrint.body.includes('href="tel:')
   ) {
     throw new Error("HTTP smoke must serve browser-print listing HTML without unapproved direct contact");
   }

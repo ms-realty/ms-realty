@@ -36,6 +36,7 @@ import {
   readApprovedCmsContent,
 } from "./approved-content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
+import { isPublicBrokerContact } from "./broker-contacts.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
 import { isFactApplicable } from "./listing-facts.mjs";
@@ -1170,10 +1171,7 @@ const CHROME_COPY = {
   },
 };
 
-// Reviewed brand office contact (design-system SiteChrome handoff).
 const BRAND_CONTACT = {
-  phone_label: "+359 879 69 68 70",
-  phone_href: "tel:+359879696870",
   email: "office@makler-realty.com",
 };
 
@@ -1206,8 +1204,8 @@ function publicChrome(registry, locale, { hreflang = [], active = null, location
       href: alternates.get(entry.code) || homePath(registry, entry.code),
       active: entry.code === locale.code,
       dir: entry.direction || "ltr",
-      })),
-    contact: { ...BRAND_CONTACT, offices: copy.offices },
+    })),
+    contact: { ...BRAND_CONTACT, path: contactPath(registry, locale.code), label: copy.navContact, offices: copy.offices },
     resources: guideLinks.length
       ? {
           label: copy.buyerGuides || copy.explore,
@@ -1639,6 +1637,7 @@ function contactChannelLabel(channel, labels) {
 }
 
 function listingActions(locale, view, path, labels, brokerContact = null) {
+  const approvedBrokerContact = isPublicBrokerContact(brokerContact) ? brokerContact : null;
   const leadPayload = { leadType: "buyer", language: locale.code, listingReference: view.id };
   const searchPath = `/${locale.code}/${locale.route_segments?.search || "search"}`;
   return {
@@ -1679,14 +1678,14 @@ function listingActions(locale, view, path, labels, brokerContact = null) {
       },
     ],
     direct_contact: {
-      review_status: brokerContact ? "approved_broker_contact" : "needs_broker_contact_review",
-      broker: brokerContact?.broker || null,
-      reviewer: brokerContact?.reviewer || null,
+      review_status: approvedBrokerContact ? "approved_broker_contact" : "needs_broker_contact_review",
+      broker: approvedBrokerContact?.broker || null,
+      reviewer: approvedBrokerContact?.reviewer || null,
       channels: ["phone", "whatsapp", "viber"].map((channel) => ({
         id: channel,
         label: contactChannelLabel(channel, labels),
-        enabled: Boolean(brokerContact?.channels?.[channel]),
-        href: brokerContact?.channels?.[channel] || null,
+        enabled: Boolean(approvedBrokerContact?.channels?.[channel]),
+        href: approvedBrokerContact?.channels?.[channel] || null,
       })),
     },
     secondary: [
