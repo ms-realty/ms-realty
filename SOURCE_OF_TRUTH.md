@@ -1,7 +1,7 @@
 # MS Realty — Source of Truth
 
 **Single canonical document for the MS Realty rebuild** (`makler-realty.com` + `makler-realty.ru`).
-Last updated: 2026-07-19.
+Last updated: 2026-07-30.
 
 > **Precedence.** Running code, crawl artifacts, generated `production/data/*`, and the
 > subsystem READMEs (`production/`, `migration/`, `search/`, `locales/`,
@@ -120,6 +120,7 @@ real-estate CMS.** Build a domain-specific platform from modern open-source bloc
 | Workers/queues | App-owned queues | Imports, sitemap gen, media processing, saved-search alerts, stale checks, CRM reminders, AI jobs |
 | Automation (non-critical) | **n8n**, self-hosted, locked down | Internal experiments only — never the source of truth |
 | AI | **Hermes Agent** — self-hosted Nous Research **open-weight Hermes models** + Hermes function-calling format (model-agnostic seam) | Authenticated internal draft assistant only; schema-validated JSON outputs; human approval; full audit logs. No public chat capability. Full spec in §11 |
+| Trusted case execution | App-owned `RealtyCase` state machine + separately assured agent principals | Manual and autonomous modes use the same mandate, phase, evidence, freeze, and audit controls; Hermes credentials are never reused |
 | Locales | Admin-managed dynamic registry | Hermes drafts; humans approve; RTL support before Hebrew launch |
 
 The current app is a **hybrid operating platform**: `production/` keeps dependency-light,
@@ -127,7 +128,7 @@ deterministically tested policy and workflow contracts, while `app/` exposes the
 App Router runtime. The React public UI covers home, search, listings, locations, seller valuation,
 contact, approved guides, and unavailable-language fallback. The role-scoped React broker workspace
 covers Today, leads, contacts/accounts, consent, documents, buyer/renter and seller pipelines,
-requests, viewings, reports, activity, listings, translations, and migration review. Those surfaces
+requests, viewings, Realty Cases, reports, activity, listings, translations, and migration review. Those surfaces
 have been browser-audited locally across all seven public locales, including Hebrew RTL and compact
 mobile layouts. Payload 3.85 runs against PostgreSQL in the loopback Docker production preview with
 versioned migrations and its real admin shell at `/payload-admin`; generated collection configs are
@@ -149,6 +150,7 @@ can have several listings/status changes over time, but old public URLs still ne
 
 `Property` · `Listing` · `ListingTranslation` · `MediaAsset` · `Location` · `TaxonomyTerm` · `Agent` ·
 `Contact` · `Lead` · `Deal` · `Viewing` · `SavedSearch` · `Inquiry` · `Communication` · `Task` ·
+`RealtyCase` · `RealtyCaseEvent` · `Mandate` · `EvidenceRef` · `Condition` · `RegulatorySnapshot` ·
 `Redirect` · `SeoMetadata` · `SitemapUrl` · `MigrationSnapshot` · `Consent` · `AuditLog`.
 
 ---
@@ -223,6 +225,22 @@ timeline per contact and property; commission/process notes visible to authorize
 for lead volume, response time, source quality, and stale tasks. Real-estate-specific and compact —
 **not** a generic enterprise CRM clone.
 
+### 8.1 RealtyCase control plane
+
+The end-to-end Bulgaria/Greece operating contract is
+[`production/REALTY_OS_OPERATING_MODEL.md`](production/REALTY_OS_OPERATING_MODEL.md). One versioned
+`RealtyCase` coordinates buying, selling, long-term rental, short-term rental, land/new-build/
+commercial work, and property management. It supports `manual` and `autonomous` execution without
+changing the workflow or evidence standard. Autonomous actions require a separate trusted-agent
+credential, a case assurance reference, a live mandate capability, phase order, and evidence from an
+accepted producer. Client freeze, revocation, mandate expiry, external professional/public acts, and
+official evidence remain binding even when the executor is assumed fully reliable.
+
+The current event ledger and `/admin/cases` workbench are the executable control-plane slice. They are
+not yet the authoritative production database or external-country integration layer; the remaining
+durable persistence, evidence vault, provider integrations, autonomous runner, and rollout gates are
+listed in the operating model.
+
 ---
 
 ## 9. Search
@@ -258,7 +276,7 @@ review-gated until explicitly approved. No unreviewed crawl media is published a
 
 ## 11. AI layer — the Hermes Agent
 
-The AI layer is named after, and built on, **Nous Research's open-source Hermes system**. It is
+The draft-assistance AI layer is named after, and built on, **Nous Research's open-source Hermes system**. Hermes is
 **assistive, never authoritative**, added **after** deterministic workflows exist. The engine and
 contracts below are the Phase-5 specification the current `Hermes*` guardrails target. The local
 production stack now runs the official Hermes Agent as a bounded, authenticated draft gateway in front
@@ -318,13 +336,28 @@ Agent cannot reach CMS, CRM, a customer, or public publishing directly. The appl
 draft and its audit entry; a human broker/editor must approve every visible, indexable, or sent action.
 
 ### 11.5 Guardrails (hard)
-Hermes has no public capability and never sends customer messages. AI never publishes listings,
+Hermes has no public capability and never sends customer messages. Hermes never publishes listings,
 translations, valuations, legal/tax answers, or listing changes without human approval. Hermes
 translation drafts cannot publish or mark pages indexable. Legal/tax/process drafts must cite approved
 CMS content. Internal users must see that a draft came from Hermes. **Sensitive owner/buyer inference
 goes only through the self-hosted Hermes Agent to a private EU model endpoint;** hosted OpenRouter is
 forbidden for that data and is allowed only for explicitly non-sensitive tasks. Every Hermes call is
 logged in the AuditLog (model, prompt version, tool calls, tokens, sensitive-vs-not).
+
+### 11.6 Trusted autonomous case executor — separate identity and authority
+
+The `agent` admin role is not Hermes. It is reserved for a separately authenticated executor whose
+reliability is established by an external assurance system. It receives only `cases:read`,
+`cases:write`, `activity:read`, and workspace access. It cannot call legacy broker reply, assignment,
+listing, translation, publication, or deal-closing mutations.
+
+An agent case action is accepted only when the case is autonomous, carries an assurance reference,
+the current signed mandate authorizes the action or step, the mandate has not expired, all earlier
+phases are resolved, and required evidence comes from an accepted producer. The external evidence
+standard does not change: notary, registry, tax authority, engineer, bank, insurer, counterparty, and
+physical handover outputs remain attributable evidence. This boundary supports the user's assumed
+fully reliable agents without weakening authority or auditability and without changing Hermes's launch
+guardrails.
 
 ---
 
@@ -340,6 +373,11 @@ review → indexable only after approval; stale listing → broker verification 
 broker tasks; new valuation request → seller pipeline + callback task; post-viewing → append-only broker outcome
 (complete/reschedule/no-show/private note) → remaining feedback request; closed deal → testimonial/referral
 request.
+
+`RealtyCase` adds the cross-workflow transaction spine: intake → authority/AML/regulatory snapshot →
+property evidence → commercial/market work → offer/conditions/agreement → completion/registration →
+handover/aftercare. BG and GR opening events contain the applicable workflow snapshot so a later code
+or rule-pack deployment cannot silently change an in-flight case.
 
 **Integrations — required:** Google Search Console · Yandex Webmaster · GA4 or privacy-aware analytics
 · CRM email inbox · WhatsApp/Viber/phone click tracking · SMTP/email delivery · map provider · image
