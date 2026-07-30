@@ -654,6 +654,8 @@ Implemented in this change:
 - each successful case projection atomically creates or reuses a reference-only `reconciliation`
   intent in `realty_case_outbox`, bound to its case projection digest and latest case event. This is
   internal audit/read-back work only; it is not a provider dispatch, scheduler, or customer action;
+  `case:reconcile` verifies its projector-owned identity, payload references, and case/event binding,
+  while deliberately leaving worker-owned delivery and lease state outside that comparison;
 - `npm run case:project` and `npm run case:conditions:project` are scoped dry runs by default. They
   require `MS_REALTY_WORKSPACE_ID`, respect their corresponding ledger-path variables, and require
   `MS_REALTY_CASE_PROJECTOR_APPLY=1` to write; the case projector runs before the condition projector;
@@ -771,8 +773,9 @@ dry-run/apply CLIs. A case projector atomically derives one reference-only inter
 intent per case projection digest. The committed migrations, idempotent projectors, and
 `case:reconcile` read-back have passed against a disposable migrated PostgreSQL runtime.
 `case:reconcile` uses an explicit read-back URL, a workspace-scoped repeatable-read transaction,
-and reports sanitized drift counts only. Neither it nor the internal intent is production-runtime
-evidence or a source of operational truth.
+and reports sanitized drift counts for case, condition, and internal reconciliation-intent records
+only. Neither it nor the internal intent is production-runtime evidence or a source of operational
+truth.
 
 - run the committed migration chain against approved PostgreSQL and prove projector read-back
   reconciliation with a dedicated SELECT-only read-back role;

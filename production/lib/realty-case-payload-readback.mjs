@@ -4,10 +4,15 @@ import {
 } from "./realty-case-condition-payload-reconciliation.mjs";
 import { REALTY_CASE_CONDITION_PAYLOAD_PROJECTOR_FIELDS } from "./realty-case-condition-payload-projector.mjs";
 import { detectRealtyCasePayloadDrift } from "./realty-case-payload-reconciliation.mjs";
-import { REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS } from "./realty-case-payload-projector.mjs";
+import {
+  buildRealtyCaseReconciliationOutbox,
+  REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS,
+  REALTY_CASE_RECONCILIATION_OUTBOX_FIELDS,
+} from "./realty-case-payload-projector.mjs";
 
 const CASE_COLLECTIONS = ["realty_cases", "realty_case_events", "realty_case_mandate_versions"];
 const CONDITION_COLLECTIONS = ["realty_case_conditions", "realty_case_condition_events"];
+const OUTBOX_COLLECTION = "realty_case_outbox";
 const COLLECTIONS = [
   { collection: "realty_cases", fields: REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS.realty_cases, relationships: [] },
   { collection: "realty_case_events", fields: REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS.realty_case_events, relationships: ["case"] },
@@ -25,6 +30,11 @@ const COLLECTIONS = [
     collection: "realty_case_condition_events",
     fields: REALTY_CASE_CONDITION_PAYLOAD_PROJECTOR_FIELDS.realty_case_condition_events,
     relationships: ["case", "condition"],
+  },
+  {
+    collection: OUTBOX_COLLECTION,
+    fields: REALTY_CASE_RECONCILIATION_OUTBOX_FIELDS,
+    relationships: ["case", "source_event"],
   },
 ];
 
@@ -115,6 +125,10 @@ function caseReference(workspaceId, caseId) {
   return { collection: "realty_cases", match: { workspace_id: workspaceId, case_id: caseId } };
 }
 
+function eventReference(workspaceId, eventId) {
+  return { collection: "realty_case_events", match: { workspace_id: workspaceId, event_id: eventId } };
+}
+
 function conditionReference(workspaceId, condition) {
   return {
     collection: "realty_case_conditions",
@@ -125,6 +139,11 @@ function conditionReference(workspaceId, condition) {
 function caseIdFromRelationship(value, caseByDocumentId) {
   const id = relationshipId(value);
   return (id && caseByDocumentId.get(id)) || opaqueRelationship("realty_cases", id);
+}
+
+function eventIdFromRelationship(value, eventByDocumentId) {
+  const id = relationshipId(value);
+  return (id && eventByDocumentId.get(id)) || opaqueRelationship("realty_case_events", id);
 }
 
 function conditionFromRelationship(value, conditionByDocumentId) {
@@ -142,12 +161,30 @@ function observedRecord({ candidate, claimed, collection, data, document, match,
   return { collection, manifest_id: manifestId, match, ...(references ? { references } : {}), data, importable: true };
 }
 
-function expectedIndexes(caseManifest, conditionManifest) {
+function expectedOutboxRows(caseManifest, workspaceId) {
+  return rowsFor(caseManifest, "realty_cases").map((row) => {
+    const outbox = buildRealtyCaseReconciliationOutbox(row, workspaceId);
+    return {
+      collection: OUTBOX_COLLECTION,
+      manifest_id: outbox.data.outbox_id,
+      match: { workspace_id: workspaceId, idempotency_key: outbox.data.idempotency_key },
+      references: {
+        case: caseReference(workspaceId, outbox.caseId),
+        source_event: eventReference(workspaceId, outbox.lastEventId),
+      },
+      data: dataFor(outbox.data, REALTY_CASE_RECONCILIATION_OUTBOX_FIELDS),
+      importable: true,
+    };
+  });
+}
+
+function expectedIndexes(caseManifest, conditionManifest, workspaceId) {
   const caseRows = rowsFor(caseManifest, "realty_cases");
   const caseEventRows = rowsFor(caseManifest, "realty_case_events");
   const mandateRows = rowsFor(caseManifest, "realty_case_mandate_versions");
   const conditionRows = rowsFor(conditionManifest, "realty_case_conditions");
   const conditionEventRows = rowsFor(conditionManifest, "realty_case_condition_events");
+  const outboxRows = expectedOutboxRows(caseManifest, workspaceId);
   return {
     casesById: indexRows(caseRows, (row) => row.data.case_id),
     caseEventsById: indexRows(caseEventRows, (row) => row.data.event_id),
@@ -157,6 +194,9 @@ function expectedIndexes(caseManifest, conditionManifest) {
     conditionsById: indexRows(conditionRows, (row) => row.data.condition_id),
     conditionsByLastEvent: indexRows(conditionRows, (row) => row.data.last_event_id),
     conditionEventsById: indexRows(conditionEventRows, (row) => row.data.event_id),
+    outboxById: indexRows(outboxRows, (row) => row.data.outbox_id),
+    outboxByIdempotencyKey: indexRows(outboxRows, (row) => row.data.idempotency_key),
+    outboxRows,
   };
 }
 
@@ -207,7 +247,9 @@ function buildObservedRows(documents, indexes, workspaceId) {
   const claimed = new Set();
   const caseRows = [];
   const conditionRows = [];
+  const outboxRows = [];
   const caseByDocumentId = new Map();
+  const eventByDocumentId = new Map();
   const conditionByDocumentId = new Map();
 
   for (const document of documents.realty_cases) {
@@ -251,6 +293,7 @@ function buildObservedRows(documents, indexes, workspaceId) {
   for (const document of documents.realty_case_events) {
     const data = dataFor(document, REALTY_CASE_PAYLOAD_PROJECTOR_FIELDS.realty_case_events);
     const caseId = caseIdFromRelationship(document.case, caseByDocumentId);
+    eventByDocumentId.set(documentId(document, "case event"), data.event_id);
     caseRows.push(
       observedRecord({
         candidate: unique(indexes.caseEventsById, data.event_id),
@@ -303,7 +346,30 @@ function buildObservedRows(documents, indexes, workspaceId) {
     );
   }
 
-  return { caseRows, conditionRows };
+  for (const document of documents[OUTBOX_COLLECTION]) {
+    const data = dataFor(document, REALTY_CASE_RECONCILIATION_OUTBOX_FIELDS);
+    const caseId = caseIdFromRelationship(document.case, caseByDocumentId);
+    const eventId = eventIdFromRelationship(document.source_event, eventByDocumentId);
+    const candidate =
+      unique(indexes.outboxById, data.outbox_id) ||
+      unique(indexes.outboxByIdempotencyKey, data.idempotency_key);
+    outboxRows.push(
+      observedRecord({
+        candidate,
+        claimed,
+        collection: OUTBOX_COLLECTION,
+        data,
+        document,
+        match: { workspace_id: workspaceId, idempotency_key: data.idempotency_key },
+        references: {
+          case: caseReference(workspaceId, caseId),
+          source_event: eventReference(workspaceId, eventId),
+        },
+      }),
+    );
+  }
+
+  return { caseRows, conditionRows, outboxRows };
 }
 
 function summary(report) {
@@ -316,8 +382,8 @@ function summary(report) {
 }
 
 /**
- * Reconciles the reference-only case and condition manifests against a single, workspace-scoped
- * Payload snapshot. The result intentionally exposes counts only.
+ * Reconciles the reference-only case and condition manifests plus their derived internal
+ * reconciliation intents against one workspace-scoped Payload snapshot. The result exposes counts only.
  */
 export async function reconcileRealtyCasePayloadReadback({ caseManifest, conditionManifest, payload, workspaceId } = {}) {
   const workspaceIdValue = requiredText(workspaceId, "workspaceId", 160);
@@ -326,15 +392,18 @@ export async function reconcileRealtyCasePayloadReadback({ caseManifest, conditi
   assertPayload(payload);
 
   const documents = await readSnapshot(payload, workspaceIdValue);
-  const observed = buildObservedRows(documents, expectedIndexes(caseManifest, conditionManifest), workspaceIdValue);
+  const indexes = expectedIndexes(caseManifest, conditionManifest, workspaceIdValue);
+  const observed = buildObservedRows(documents, indexes, workspaceIdValue);
   const caseDrift = detectRealtyCasePayloadDrift(caseManifest, observed.caseRows);
   const conditionDrift = detectRealtyCaseConditionPayloadDrift(conditionManifest, observed.conditionRows);
+  const outboxDrift = detectRealtyCasePayloadDrift(indexes.outboxRows, observed.outboxRows);
   return {
     kind: "realty_case_payload_readback",
     workspace_id: workspaceIdValue,
-    clean: caseDrift.clean && conditionDrift.clean,
+    clean: caseDrift.clean && conditionDrift.clean && outboxDrift.clean,
     case: summary(caseDrift),
     conditions: summary(conditionDrift),
+    outbox: summary(outboxDrift),
     scanned: Object.fromEntries(COLLECTIONS.map(({ collection }) => [collection, documents[collection].length])),
   };
 }

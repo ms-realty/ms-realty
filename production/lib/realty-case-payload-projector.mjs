@@ -3,7 +3,7 @@ import { REALTY_CASE_PAYLOAD_MANIFEST_VERSION, stableRealtyCasePayloadDigest } f
 const COLLECTION_ORDER = ["realty_cases", "realty_case_events", "realty_case_mandate_versions"];
 const OUTBOX_COLLECTION = "realty_case_outbox";
 const PROJECTED_COLLECTIONS = [...COLLECTION_ORDER, OUTBOX_COLLECTION];
-const OUTBOX_IMMUTABLE_FIELDS = [
+export const REALTY_CASE_RECONCILIATION_OUTBOX_FIELDS = [
   "workspace_id",
   "outbox_id",
   "idempotency_key",
@@ -13,6 +13,7 @@ const OUTBOX_IMMUTABLE_FIELDS = [
   "payload_digest",
   "not_before",
 ];
+const OUTBOX_IMMUTABLE_FIELDS = REALTY_CASE_RECONCILIATION_OUTBOX_FIELDS;
 const CASE_IMMUTABLE_FIELDS = [
   "workspace_id",
   "case_id",
@@ -277,7 +278,7 @@ async function appendRows(payload, manifest, collection, workspaceId, cases, req
   return documents;
 }
 
-function reconciliationOutboxForCase(row, workspaceId) {
+export function buildRealtyCaseReconciliationOutbox(row, workspaceId) {
   const caseId = requiredText(row?.data?.case_id, "Payload case id", 160);
   const lastEventId = requiredText(row?.data?.last_event_id, "Payload case last event id", 160);
   const projectionDigest = requiredText(row?.projection_digest, "Payload case projection digest", 160);
@@ -310,7 +311,7 @@ function reconciliationOutboxForCase(row, workspaceId) {
 
 async function appendReconciliationOutbox(payload, manifest, workspaceId, cases, eventDocuments, req, report) {
   for (const row of rowsFor(manifest, "realty_cases")) {
-    const outbox = reconciliationOutboxForCase(row, workspaceId);
+    const outbox = buildRealtyCaseReconciliationOutbox(row, workspaceId);
     const caseDocument = cases.get(outbox.caseId);
     const eventDocument = eventDocuments.get(outbox.lastEventId);
     if (!caseDocument?.id || !eventDocument?.id) throw new Error(`Payload case ${outbox.caseId} is missing its projected last event`);

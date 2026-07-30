@@ -8,6 +8,7 @@ import { openRealtyCaseCondition, resetRealtyCaseConditionLedger } from "../lib/
 import { readRealtyCaseConditionPayloadManifest } from "../lib/realty-case-condition-payload-reconciliation.mjs";
 import { readRealtyCasePayloadManifest } from "../lib/realty-case-payload-reconciliation.mjs";
 import { reconcileRealtyCasePayloadReadback } from "../lib/realty-case-payload-readback.mjs";
+import { buildRealtyCaseReconciliationOutbox } from "../lib/realty-case-payload-projector.mjs";
 import { openRealtyCase, resetRealtyCaseLedger } from "../lib/realty-cases.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -73,6 +74,12 @@ function manifests() {
 
 function payloadDocuments({ caseManifest, conditionManifest }) {
   const caseDocument = { id: "case-db-1", ...clone(caseManifest.collections.realty_cases[0].data) };
+  const caseEventDocument = {
+    id: "case-event-db-1",
+    ...clone(caseManifest.collections.realty_case_events[0].data),
+    case: caseDocument.id,
+  };
+  const outbox = buildRealtyCaseReconciliationOutbox(caseManifest.collections.realty_cases[0], WORKSPACE_ID);
   const conditionDocument = {
     id: "condition-db-1",
     ...clone(conditionManifest.collections.realty_case_conditions[0].data),
@@ -80,9 +87,7 @@ function payloadDocuments({ caseManifest, conditionManifest }) {
   };
   return {
     realty_cases: [caseDocument],
-    realty_case_events: [
-      { id: "case-event-db-1", ...clone(caseManifest.collections.realty_case_events[0].data), case: caseDocument.id },
-    ],
+    realty_case_events: [caseEventDocument],
     realty_case_mandate_versions: [
       { id: "mandate-db-1", ...clone(caseManifest.collections.realty_case_mandate_versions[0].data), case: caseDocument.id },
     ],
@@ -93,6 +98,14 @@ function payloadDocuments({ caseManifest, conditionManifest }) {
         ...clone(conditionManifest.collections.realty_case_condition_events[0].data),
         case: caseDocument.id,
         condition: conditionDocument.id,
+      },
+    ],
+    realty_case_outbox: [
+      {
+        id: "outbox-db-1",
+        ...clone(outbox.data),
+        case: caseDocument.id,
+        source_event: caseEventDocument.id,
       },
     ],
   };
@@ -128,7 +141,10 @@ async function reconcile(documents, source = manifests()) {
 
 test("Payload read-back uses one workspace-scoped read-only snapshot and returns sanitized counts", async () => {
   const source = manifests();
-  const { payload, result } = await reconcile(payloadDocuments(source), source);
+  const documents = payloadDocuments(source);
+  documents.realty_case_outbox[0].status = "delivered";
+  documents.realty_case_outbox[0].attempt_count = 1;
+  const { payload, result } = await reconcile(documents, source);
 
   assert.deepEqual(result, {
     kind: "realty_case_payload_readback",
@@ -136,19 +152,21 @@ test("Payload read-back uses one workspace-scoped read-only snapshot and returns
     clean: true,
     case: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
     conditions: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
+    outbox: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
     scanned: {
       realty_cases: 1,
       realty_case_events: 1,
       realty_case_mandate_versions: 1,
       realty_case_conditions: 1,
       realty_case_condition_events: 1,
+      realty_case_outbox: 1,
     },
   });
   assert.equal(JSON.stringify(result).includes(CLIENT_SENTINEL), false);
   assert.deepEqual(payload.transactions.begin, [{ accessMode: "read only", isolationLevel: "repeatable read" }]);
   assert.deepEqual(payload.transactions.committed, ["readback-tx"]);
   assert.deepEqual(payload.transactions.rolledBack, []);
-  assert.equal(payload.calls.length, 5);
+  assert.equal(payload.calls.length, 6);
   for (const call of payload.calls) {
     assert.equal(call.depth, 0);
     assert.equal(call.overrideAccess, true);
@@ -166,6 +184,7 @@ test("Payload read-back counts changed fields, broken relationships, missing row
   documents.realty_cases[0].status = "frozen";
   documents.realty_case_events = [];
   documents.realty_case_condition_events[0].condition = "missing-condition-db-id";
+  documents.realty_case_outbox[0].payload_digest = "different-digest";
   documents.realty_cases.push({ ...clone(documents.realty_cases[0]), id: "case-db-unexpected", case_id: "case-unexpected" });
 
   const { result } = await reconcile(documents, source);
@@ -173,6 +192,7 @@ test("Payload read-back counts changed fields, broken relationships, missing row
   assert.equal(result.clean, false);
   assert.deepEqual(result.case, { missing: 1, changed: 1, unexpected: 1, source_gaps: 0 });
   assert.deepEqual(result.conditions, { missing: 0, changed: 1, unexpected: 0, source_gaps: 0 });
+  assert.deepEqual(result.outbox, { missing: 0, changed: 1, unexpected: 0, source_gaps: 0 });
   assert.equal(JSON.stringify(result).includes("case-unexpected"), false);
 });
 

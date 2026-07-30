@@ -140,6 +140,11 @@ test(
       run("npm", ["run", "case:conditions:project"], { env, label: "Condition projection", secrets });
       run("npm", ["run", "case:project"], { env, label: "Case projection replay", secrets });
       run("npm", ["run", "case:conditions:project"], { env, label: "Condition projection replay", secrets });
+      const { Client } = await import("pg");
+      client = new Client({ connectionString: databaseUrl });
+      await client.connect();
+      await client.query("UPDATE realty_case_outbox SET status = 'delivered', attempt_count = 1");
+      run("npm", ["run", "case:project"], { env, label: "Case projection after reconciliation delivery", secrets });
       const readback = run(process.execPath, [fromRoot("production", "scripts", "run-realty-case-payload-readback.mjs")], {
         env: {
           ...env,
@@ -157,18 +162,17 @@ test(
         clean: true,
         case: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
         conditions: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
+        outbox: { missing: 0, changed: 0, unexpected: 0, source_gaps: 0 },
         scanned: {
           realty_cases: 1,
           realty_case_events: 1,
           realty_case_mandate_versions: 1,
           realty_case_conditions: 1,
           realty_case_condition_events: 2,
+          realty_case_outbox: 1,
         },
       });
 
-      const { Client } = await import("pg");
-      client = new Client({ connectionString: databaseUrl });
-      await client.connect();
       const { rows: counts } = await client.query(`
         SELECT
           (SELECT count(*)::int FROM realty_cases) AS cases,
@@ -195,8 +199,8 @@ test(
       assert.equal(outbox[0].source_event_id, caseEvents[0].id);
       assert.equal(outbox[0].kind, "reconciliation");
       assert.equal(outbox[0].destination_ref, "internal:realty_case_payload_readback");
-      assert.equal(outbox[0].status, "pending");
-      assert.equal(Number(outbox[0].attempt_count), 0);
+      assert.equal(outbox[0].status, "delivered");
+      assert.equal(Number(outbox[0].attempt_count), 1);
       assert.deepEqual(Object.keys(outbox[0].payload_refs).sort(), [
         "case_id",
         "case_projection_digest",
