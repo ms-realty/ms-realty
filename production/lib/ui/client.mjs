@@ -13,6 +13,7 @@ export const PUBLIC_APP_JS = `(function () {
   var KEY = "ms-realty:saved-listings";
   var SEARCH_SCROLL_KEY = "ms-realty:search-scroll";
   var SEARCH_RETURN_KEY = "ms-realty:search-return";
+  var RECENT_SEARCH_KEY = "ms-realty:recent-searches:v1";
   var lastLeadTrigger = null;
   var lastContactOptionsTrigger = null;
   var toastTimer = 0;
@@ -904,6 +905,217 @@ export const PUBLIC_APP_JS = `(function () {
     window.addEventListener("resize", scheduleGalleryPosition);
     updateGalleryPosition();
   }
+  function initSellerIntake() {
+    var form = document.querySelector("form[data-seller-intake]");
+    if (!form) return;
+    var panels = form.querySelectorAll("[data-seller-step]");
+    var indicators = document.querySelectorAll("[data-seller-step-indicator]");
+    if (!panels.length) return;
+    var currentIndex = 0;
+    function fieldValue(control) {
+      if (!control) return "";
+      if (control.tagName === "SELECT" && control.options && control.selectedIndex >= 0) return control.options[control.selectedIndex].textContent || "";
+      return typeof control.value === "string" ? control.value.trim() : "";
+    }
+    function updateReview() {
+      var rows = form.querySelectorAll("[data-seller-summary-row]");
+      for (var i = 0; i < rows.length; i += 1) {
+        var valueNode = rows[i].querySelector("[data-seller-summary]");
+        var name = valueNode ? valueNode.getAttribute("data-seller-summary") : "";
+        var control = name ? form.elements.namedItem(name) : null;
+        var value = fieldValue(control);
+        rows[i].hidden = !value;
+        if (valueNode) valueNode.textContent = value;
+      }
+    }
+    function showStep(index, moveFocus) {
+      currentIndex = Math.max(0, Math.min(index, panels.length - 1));
+      form.setAttribute("data-seller-step", String(currentIndex + 1));
+      for (var i = 0; i < panels.length; i += 1) panels[i].hidden = i !== currentIndex;
+      for (var j = 0; j < indicators.length; j += 1) {
+        var active = j === currentIndex;
+        if (active) indicators[j].setAttribute("aria-current", "step");
+        else indicators[j].removeAttribute("aria-current");
+        if (j < currentIndex) indicators[j].setAttribute("data-complete", "true");
+        else indicators[j].removeAttribute("data-complete");
+        if (active) indicators[j].setAttribute("data-active", "true");
+        else indicators[j].removeAttribute("data-active");
+      }
+      if (currentIndex === panels.length - 1) updateReview();
+      if (moveFocus) {
+        var title = panels[currentIndex].querySelector("[data-seller-step-title]");
+        if (title) window.requestAnimationFrame(function () { title.focus(); });
+      }
+    }
+    function currentStepIsValid() {
+      var fields = panels[currentIndex].querySelectorAll("input[required], select[required], textarea[required]");
+      for (var i = 0; i < fields.length; i += 1) {
+        if (fields[i].checkValidity()) continue;
+        fields[i].reportValidity();
+        return false;
+      }
+      return true;
+    }
+    form.addEventListener("click", function (event) {
+      var next = event.target.closest("[data-seller-next]");
+      if (next && form.contains(next)) {
+        event.preventDefault();
+        if (currentStepIsValid()) showStep(currentIndex + 1, true);
+        return;
+      }
+      var back = event.target.closest("[data-seller-back]");
+      if (back && form.contains(back)) {
+        event.preventDefault();
+        showStep(currentIndex - 1, true);
+      }
+    });
+    form.addEventListener("submit", function (event) {
+      if (currentIndex === panels.length - 1) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (currentStepIsValid()) showStep(currentIndex + 1, true);
+    });
+    showStep(0, false);
+  }
+  function initGuidedSearch() {
+    var root = document.querySelector("main[data-guided-search-path]");
+    if (!root) return;
+    var path = root.getAttribute("data-guided-search-path") || "";
+    if (!path || path.charAt(0) !== "/") return;
+    var storageKey = RECENT_SEARCH_KEY + ":" + path;
+    function normalizeSuggestionValue(value) {
+      var normalized = String(value || "");
+      if (typeof normalized.normalize === "function") normalized = normalized.normalize("NFKD");
+      return normalized.replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+    }
+    function suggestionOptions(kind) {
+      var nodes = root.querySelectorAll('[data-guided-search-suggestion="' + kind + '"]');
+      var options = [];
+      for (var i = 0; i < nodes.length; i += 1) {
+        var value = nodes[i].getAttribute("data-guided-search-value") || "";
+        var label = (nodes[i].textContent || "").trim();
+        if (!value || !label || optionFor(options, value)) continue;
+        options.push({ value: value, label: label });
+      }
+      return options;
+    }
+    function optionFor(options, value) {
+      var normalized = normalizeSuggestionValue(value);
+      if (!normalized) return null;
+      for (var i = 0; i < options.length; i += 1) {
+        if (normalizeSuggestionValue(options[i].value) === normalized) return options[i];
+      }
+      return null;
+    }
+    var locations = suggestionOptions("location");
+    var propertyFamilies = suggestionOptions("property_family");
+    function keyFor(record) {
+      return (record.location || "") + "\u0000" + (record.propertyFamily || "");
+    }
+    function readRecentSearches() {
+      try {
+        var stored = JSON.parse(sessionStorage.getItem(storageKey));
+        if (!Array.isArray(stored)) return [];
+        var records = [];
+        for (var i = 0; i < stored.length; i += 1) {
+          var candidate = stored[i];
+          if (!candidate || typeof candidate !== "object") continue;
+          var location = optionFor(locations, candidate.location);
+          var propertyFamily = optionFor(propertyFamilies, candidate.propertyFamily);
+          if (!location && !propertyFamily) continue;
+          var record = {
+            location: location ? location.value : "",
+            propertyFamily: propertyFamily ? propertyFamily.value : "",
+          };
+          var duplicate = false;
+          for (var j = 0; j < records.length; j += 1) {
+            if (keyFor(records[j]) === keyFor(record)) {
+              duplicate = true;
+              break;
+            }
+          }
+          if (!duplicate) records.push(record);
+          if (records.length === 5) break;
+        }
+        return records;
+      } catch (error) { return []; }
+    }
+    function writeRecentSearches(records) {
+      try { sessionStorage.setItem(storageKey, JSON.stringify(records.slice(0, 5))); } catch (error) {}
+    }
+    function currentSuccessfulSearch() {
+      if (root.getAttribute("data-guided-search-success") !== "true") return null;
+      var params = new URLSearchParams(window.location.search || "");
+      // Session-only records are made exclusively from reviewed suggestion
+      // values. Free-text queries are never persisted.
+      var location = optionFor(locations, params.get("location")) || optionFor(locations, params.get("q"));
+      var propertyFamily = optionFor(propertyFamilies, params.get("property_family")) || optionFor(propertyFamilies, params.get("q"));
+      if (!location && !propertyFamily) return null;
+      return {
+        location: location ? location.value : "",
+        propertyFamily: propertyFamily ? propertyFamily.value : "",
+      };
+    }
+    function recentSearchHref(record) {
+      var params = new URLSearchParams();
+      if (record.location) params.set("location", record.location);
+      if (record.propertyFamily) params.set("property_family", record.propertyFamily);
+      var query = params.toString();
+      return query ? path + "?" + query : path;
+    }
+    function recentSearchLabel(record) {
+      var parts = [];
+      var location = optionFor(locations, record.location);
+      var propertyFamily = optionFor(propertyFamilies, record.propertyFamily);
+      if (location) parts.push(location.label);
+      if (propertyFamily) parts.push(propertyFamily.label);
+      return parts.join(" · ");
+    }
+    function renderRecentSearches(records) {
+      var visible = [];
+      for (var i = 0; i < records.length; i += 1) {
+        if (recentSearchLabel(records[i])) visible.push(records[i]);
+      }
+      var sections = root.querySelectorAll("[data-recent-searches]");
+      for (var j = 0; j < sections.length; j += 1) {
+        var section = sections[j];
+        var list = section.querySelector("[data-recent-search-list]");
+        if (!list) continue;
+        while (list.firstChild) list.removeChild(list.firstChild);
+        for (var k = 0; k < visible.length; k += 1) {
+          var item = document.createElement("li");
+          var link = document.createElement("a");
+          link.className = "sr-guided__link";
+          link.href = recentSearchHref(visible[k]);
+          link.setAttribute("data-recent-search", "true");
+          link.textContent = recentSearchLabel(visible[k]);
+          item.appendChild(link);
+          list.appendChild(item);
+        }
+        section.hidden = visible.length === 0;
+      }
+    }
+    var records = readRecentSearches();
+    var current = currentSuccessfulSearch();
+    if (current) {
+      var currentKey = keyFor(current);
+      var next = [current];
+      for (var i = 0; i < records.length; i += 1) {
+        if (keyFor(records[i]) !== currentKey) next.push(records[i]);
+      }
+      records = next.slice(0, 5);
+      writeRecentSearches(records);
+    }
+    renderRecentSearches(records);
+    document.addEventListener("click", function (event) {
+      var clear = event.target.closest("[data-clear-recent-searches]");
+      if (!clear || !root.contains(clear)) return;
+      event.preventDefault();
+      records = [];
+      writeRecentSearches(records);
+      renderRecentSearches(records);
+    });
+  }
   function initSearchScrollRestoration() {
     var searchRoot = document.querySelector("[data-search-results], [data-saved-listings-view='true']");
     if (!searchRoot) return;
@@ -998,13 +1210,13 @@ export const PUBLIC_APP_JS = `(function () {
     });
     syncPublicDialogState();
   }
-  function syncPublicDialogState() {
-    var enquiry = document.getElementById("mk-enquiry");
-    var contactOptions = document.querySelector("[data-mobile-contact-options]");
-    var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
-    var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
-    document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
-  }
+   function syncPublicDialogState() {
+     var enquiry = document.getElementById("mk-enquiry");
+     var contactOptions = document.querySelector("[data-mobile-contact-options]");
+     var listingGallery = document.querySelector("[data-listing-gallery-dialog]");
+     var dialogOpen = Boolean((enquiry && enquiry.open) || (contactOptions && contactOptions.open) || (listingGallery && listingGallery.open));
+     document.documentElement.classList.toggle("public-dialog-open", dialogOpen);
+   }
   function initPublicMobileNavigation() {
     var mobileMenu = document.querySelector("[data-mobile-menu]");
     if (!mobileMenu) return;
@@ -1220,6 +1432,7 @@ export const PUBLIC_APP_JS = `(function () {
     if (event.key === KEY) markSaved();
   });
   markSaved();
+  initGuidedSearch();
   initSearchScrollRestoration();
   initDialogFocusReturn();
   initPublicMobileNavigation();
@@ -1228,9 +1441,10 @@ export const PUBLIC_APP_JS = `(function () {
   initHeroAdvancedSearch();
   initHeroGallery();
   initImageFallbacks();
-  initListingGallery();
-  initMobileListingGallery();
-  initPhotoSphereViewers();
+ initListingGallery();
+ initMobileListingGallery();
+ initSellerIntake();
+ initPhotoSphereViewers();
 })();`;
 
 export const ADMIN_APP_JS = `(function () {

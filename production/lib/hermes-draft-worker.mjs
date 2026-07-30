@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { DEFAULT_AUDIT_LOG_PATH, appendAuditLog, createAuditLogEntry } from "./audit-log.mjs";
 import { validateHermesTranslationDraft } from "./hermes.mjs";
-import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH } from "./hermes-draft-dispatch.mjs";
+import { DEFAULT_HERMES_DRAFT_DISPATCH_PATH, HERMES_NON_SENSITIVE_LISTING_TRANSLATION } from "./hermes-draft-dispatch.mjs";
 import {
   HERMES_AGENT_TERMINAL_BACKENDS,
   HERMES_AGENT_MESSAGING_PLATFORMS,
@@ -59,19 +59,180 @@ function contentPayload(content) {
   return null;
 }
 
-function toolArgumentsPayload(message) {
-  const toolCall = message.tool_calls?.find((call) => call?.function?.arguments);
-  if (toolCall) return toolCall.function.arguments;
-  if (message.function_call?.arguments) return message.function_call.arguments;
-  return null;
+function nonEmptyInvocation(value) {
+  if (Array.isArray(value)) return value.some((entry) => nonEmptyInvocation(entry));
+  if (value && typeof value === "object") return Object.keys(value).length > 0;
+  return Boolean(String(value || "").trim());
+}
+
+function assertNoProviderToolCalls(message) {
+  if (nonEmptyInvocation(message?.tool_calls) || nonEmptyInvocation(message?.function_call)) {
+    throw new Error("Hermes provider returned a tool call despite tool_choice none");
+  }
 }
 
 function draftPayloadFromMessage(message) {
+  assertNoProviderToolCalls(message);
   const content = contentPayload(message.content);
   if (content) return content;
-  const toolArguments = toolArgumentsPayload(message);
-  if (toolArguments) return toolArguments;
   throw new Error("Hermes provider returned no draft JSON");
+}
+
+const HOSTED_ROW_FIELDS = new Set([
+  "id",
+  "status",
+  "task_type",
+  "object_type",
+  "object_id",
+  "source_locale",
+  "target_locale",
+  "target_direction",
+  "reviewer_role",
+  "provider_mode",
+  "data_classification",
+  "public_indexable",
+  "requires_human_approval",
+  "can_publish",
+  "can_mark_indexable",
+  "source_hash",
+  "draft_hash",
+  "admin_path",
+  "prompt",
+  "source_snapshot",
+  "citations",
+]);
+const HOSTED_PROMPT_FIELDS = new Set([
+  "role",
+  "sourceLocale",
+  "targetLocale",
+  "sourceText",
+  "propertyFacts",
+  "glossary",
+  "toneRules",
+  "forbiddenClaims",
+  "seoTargets",
+  "capabilities",
+  "rules",
+]);
+const HOSTED_PROPERTY_FACT_FIELDS = new Set([
+  "id",
+  "location",
+  "property_type",
+  "offer_type",
+  "price_eur",
+  "area_sqm",
+  "bedrooms",
+  "listing_status",
+]);
+const HOSTED_SOURCE_SNAPSHOT_FIELDS = new Set(["object_type", "object_id", "source_locale", "source_hash", "approved_legal_content"]);
+const HOSTED_SEO_TARGET_FIELDS = new Set(["title_max_chars", "meta_description_min_chars", "meta_description_max_chars"]);
+const HOSTED_CAPABILITY_FIELDS = new Set(["can_publish", "can_mark_indexable", "requires_human_approval"]);
+const HOSTED_CITATION_FIELDS = new Set(["source", "object_id", "task_id", "fields"]);
+const HOSTED_CMS_CITATION_FIELDS = new Set([
+  "facts.title",
+  "facts.description",
+  "facts.location",
+  "facts.property_type",
+  "facts.offer_type",
+  "facts.price_eur",
+  "facts.area_sqm",
+  "facts.bedrooms",
+  "facts.listing_status",
+]);
+const HASH_FIELDS = new Set(["source_hash", "draft_hash"]);
+const SENSITIVE_FIELD_NAME = /(^|_)(contact|email|phone|mobile|whatsapp|viber|telegram|signal|sms|message|lead|buyer|seller|owner|customer|client|person|name)(_|$)/;
+const EMAIL_ADDRESS = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+const PHONE_NUMBER = /(?:\+|00)\s*\d(?:[\s().-]*\d){6,}|\b(?:\d[\s().-]*){7,}\d\b/;
+
+function normalizedFieldName(key) {
+  return String(key || "")
+    .replace(/([a-z\d])([A-Z])/g, "$1_$2")
+    .replace(/[^a-zA-Z\d]+/g, "_")
+    .toLowerCase();
+}
+
+function assertAllowedFields(value, allowed, label) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${label} must be an object`);
+  for (const key of Object.keys(value)) {
+    if (!allowed.has(key)) throw new Error(`${label} contains a non-allowlisted field: ${key}`);
+  }
+}
+
+function assertNoPii(value, label = "dispatch", field = null) {
+  if (typeof value === "string") {
+    if (HASH_FIELDS.has(field) && /^[a-f\d]{64}$/i.test(value)) return;
+    if (EMAIL_ADDRESS.test(value) || PHONE_NUMBER.test(value)) throw new Error(`${label} contains PII-like contact data`);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => assertNoPii(entry, `${label}[${index}]`, field));
+    return;
+  }
+  if (!value || typeof value !== "object") return;
+  for (const [key, nested] of Object.entries(value)) {
+    if (SENSITIVE_FIELD_NAME.test(normalizedFieldName(key))) {
+      throw new Error(`${label} contains a sensitive field: ${key}`);
+    }
+    assertNoPii(nested, `${label}.${key}`, key);
+  }
+}
+
+function assertHostedCitations(citations) {
+  if (!Array.isArray(citations) || !citations.length) throw new Error("Hosted Hermes fallback requires canonical source citations");
+  for (const citation of citations) {
+    assertAllowedFields(citation, HOSTED_CITATION_FIELDS, "Hosted Hermes dispatch citation");
+    if (citation.source === "cms_seed") {
+      if (
+        !citation.object_id ||
+        !Array.isArray(citation.fields || []) ||
+        citation.fields.some((field) => !HOSTED_CMS_CITATION_FIELDS.has(field))
+      ) {
+        throw new Error("Hosted Hermes fallback requires CMS source citations");
+      }
+      continue;
+    }
+    if (citation.source === "translation_coverage" && citation.task_id) continue;
+    throw new Error("Hosted Hermes fallback only accepts CMS and translation coverage citations");
+  }
+}
+
+function assertHostedFallbackDispatch(row) {
+  if (row?.data_classification !== HERMES_NON_SENSITIVE_LISTING_TRANSLATION) {
+    throw new Error("Hosted Hermes fallback requires an explicitly classified non-sensitive listing translation dispatch");
+  }
+  if (row.object_type !== "listing" || row.status !== "ready_for_hermes" || row.provider_mode !== "hermes_draft") {
+    throw new Error("Hosted Hermes fallback only accepts model-ready listing translation dispatches");
+  }
+  assertAllowedFields(row, HOSTED_ROW_FIELDS, "Hosted Hermes dispatch");
+  assertAllowedFields(row.prompt, HOSTED_PROMPT_FIELDS, "Hosted Hermes dispatch prompt");
+  assertAllowedFields(row.prompt.propertyFacts || {}, HOSTED_PROPERTY_FACT_FIELDS, "Hosted Hermes dispatch property facts");
+  assertAllowedFields(row.source_snapshot, HOSTED_SOURCE_SNAPSHOT_FIELDS, "Hosted Hermes dispatch source snapshot");
+  if (row.prompt.seoTargets !== undefined) {
+    assertAllowedFields(row.prompt.seoTargets, HOSTED_SEO_TARGET_FIELDS, "Hosted Hermes dispatch SEO targets");
+  }
+  if (row.prompt.capabilities !== undefined) {
+    assertAllowedFields(row.prompt.capabilities, HOSTED_CAPABILITY_FIELDS, "Hosted Hermes dispatch capabilities");
+  }
+  if (row.prompt.glossary && Object.keys(row.prompt.glossary).length) {
+    throw new Error("Hosted Hermes fallback requires an empty allowlisted glossary");
+  }
+  assertHostedCitations(row.citations);
+  if (
+    row.prompt.role !== "translation_draft" ||
+    row.prompt.sourceLocale !== row.source_locale ||
+    row.prompt.targetLocale !== row.target_locale ||
+    row.source_snapshot?.object_type !== "listing" ||
+    row.source_snapshot?.object_id !== row.object_id ||
+    row.source_snapshot?.source_hash !== row.source_hash
+  ) {
+    throw new Error("Hosted Hermes fallback requires a canonical listing translation prompt and source snapshot");
+  }
+  assertNoPii(row);
+}
+
+function assertProviderMayReceiveDispatch(row, providerMetadata) {
+  if (providerMetadata?.mode === "self_hosted" && providerMetadata.sensitiveDataAllowed === true) return;
+  assertHostedFallbackDispatch(row);
 }
 
 export function readHermesDraftDispatch(filePath = DEFAULT_HERMES_DRAFT_DISPATCH_PATH) {
@@ -215,6 +376,7 @@ export async function runHermesDraftWorker({
 
   for (const row of rows) {
     try {
+      assertProviderMayReceiveDispatch(row, providerMetadata);
       const draft = await provider(row);
       const task = taskFromHermesDraft(row, draft);
       appendTranslationTask(task, { filePath, auditPath, recordedAt });

@@ -1514,8 +1514,10 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
           body: JSON.stringify({
             listingId: "MS-CRAWL-0001",
             broker: "broker_ru",
-            phone: "+359880000000",
+            phone: "+447700900001",
             reviewer: "owner",
+            sourceReference: "test://broker-contact/MS-CRAWL-0001",
+            validationStatus: "broker_verified",
             approved: true,
           }),
         }),
@@ -1523,7 +1525,7 @@ test("Next admin pages expose CRM lead inbox and CMS listing editor behind admin
       const brokerContactBody = await brokerContact.json();
       assert.equal(brokerContact.status, 201);
       assert.equal(brokerContactBody.status, "approved");
-      assert.equal(brokerContactBody.channels.phone, "tel:+359880000000");
+      assert.equal(brokerContactBody.channels.phone, "tel:+447700900001");
 
       const editor = await listingEditorRoute.GET(
         new Request("https://example.test/admin/listings/edit?locale=bg&listingId=MS-CRAWL-0001", { headers: auth }),
@@ -2299,7 +2301,9 @@ test("Next admin public approvals bind reviewers and require confirmation", asyn
       id: "next-credentialed-broker-contact",
       listingId: "MS-CRAWL-0001",
       broker: "broker_bg",
-      phone: "+359880000000",
+      phone: "+359880123456",
+      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      validationStatus: "broker_verified",
       approved: true,
     };
     const spoofedContact = await renderAppAdminResponse(

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { assertPublicationReady } from "./listing-facts.mjs";
 import { fromRoot } from "./paths.mjs";
 import { appendListingEdit, applyListingEdits, createListingEdit } from "./listing-edits.mjs";
 import { appendTranslationTask } from "./translation-ledger.mjs";
@@ -50,6 +51,11 @@ function assertNoPrivateFields(value) {
 
 function listingFor(seed, listingId) {
   return seed.records.find((record) => record.collection === "listings" && record.id === listingId);
+}
+
+function propertyForListing(seed, listing) {
+  const propertyId = String(listing?.property || "").trim();
+  return propertyId ? (seed.properties || []).find((property) => property.id === propertyId) || null : null;
 }
 
 function appendEvent(event, filePath) {
@@ -154,7 +160,8 @@ export function appendListingPublicationSchedule(
 ) {
   assertNoPrivateFields(input);
   const listingId = requiredText(input.listingId || input.listing_id, "listingId", 120);
-  if (!listingFor(seed, listingId)) throw new Error("Publication schedule requires a known listingId");
+  const listing = listingFor(seed, listingId);
+  if (!listing) throw new Error("Publication schedule requires a known listingId");
   const action = String(input.action || "").trim().toLowerCase();
   if (!ACTIONS.has(action)) throw new Error("Publication schedule action must be publish or unpublish");
   const createdAtIso = isoTimestamp(createdAt, "createdAt");
@@ -194,6 +201,9 @@ export function appendListingPublicationSchedule(
     (state) => state.listing_id === listingId && state.status === "scheduled",
   );
   if (openForListing) throw new Error("Cancel the existing listing publication schedule before creating another");
+  if (action === "publish") {
+    assertPublicationReady({ listing, property: propertyForListing(seed, listing), now: createdAtIso, requirePublishApproval: true });
+  }
   return appendEvent(event, filePath);
 }
 
@@ -241,6 +251,14 @@ export function executeDueListingPublicationSchedules({
   for (const schedule of queue.rows.filter((row) => row.due)) {
     const listing = listingFor(workingSeed, schedule.listing_id);
     if (!listing) throw new Error(`Scheduled listing no longer exists: ${schedule.listing_id}`);
+    if (schedule.action === "publish") {
+      assertPublicationReady({
+        listing,
+        property: propertyForListing(workingSeed, listing),
+        now: executedAt,
+        requirePublishApproval: true,
+      });
+    }
     const previousStatus = listing.facts?.listing_status || "available";
     let edit = null;
     let persistedStaleTranslations = [];

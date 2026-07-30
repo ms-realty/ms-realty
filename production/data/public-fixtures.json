@@ -174,9 +174,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/he/contact",
+        "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "resources": null,
@@ -1357,9 +1357,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/bg/kontakt",
+        "label": "Контакти",
         "offices": "Сандански · Банско · Свети Влас"
       },
       "resources": {
@@ -1719,9 +1719,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/el/epikoinonia",
+        "label": "Επικοινωνία",
         "offices": "Σαντάνσκι · Μπάνσκο · Σβετί Βλας"
       },
       "resources": null,
@@ -2053,9 +2053,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/he/contact",
+        "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "resources": null,
@@ -2349,9 +2349,9 @@
       ],
       "languages": [],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/en/contact",
+        "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
       "resources": {
@@ -2695,9 +2695,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/en/contact",
+        "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
       "resources": {
@@ -2867,9 +2867,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/he/contact",
+        "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "resources": null,
@@ -4405,9 +4405,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/he/contact",
+        "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "resources": null,
@@ -4632,9 +4632,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/he/contact",
+        "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "resources": null,
@@ -4832,9 +4832,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/he/contact",
+        "label": "צור קשר",
         "offices": "סנדנסקי · בנסקו · סבטי ולאס"
       },
       "resources": null,
@@ -5001,9 +5001,9 @@
         }
       ],
       "contact": {
-        "phone_label": "+359 879 69 68 70",
-        "phone_href": "tel:+359879696870",
         "email": "office@makler-realty.com",
+        "path": "/en/contact",
+        "label": "Contact",
         "offices": "Sandanski · Bansko · Sveti Vlas"
       },
       "resources": {

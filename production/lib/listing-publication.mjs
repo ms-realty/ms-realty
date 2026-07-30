@@ -5,6 +5,7 @@ import { fromRoot } from "./paths.mjs";
 import { buildRuntimeLocalizedSitemap } from "./seo-files.mjs";
 import { homePath, locationPath } from "./seo.mjs";
 import { loadCmsSeed } from "./runtime.mjs";
+import { publicationReadinessFor } from "./listing-facts.mjs";
 
 export const DEFAULT_LISTING_PUBLICATION_REPORT = fromRoot("production", "data", "listing-publication-report.json");
 
@@ -47,11 +48,13 @@ export function buildListingPublicationReport({
   suggestionLimit = 4,
 } = {}) {
   const records = listingRecords(seed);
+  const properties = new Map((seed.properties || []).map((property) => [property.id, property]));
   const sitemapLocs = new Set(sitemap.entries.map((entry) => entry.loc));
   const rows = records.map((record) => {
     const locale = record.source_locale || registry.source_locale;
     const sitemapEntries = sitemap.entries.filter((entry) => entry.type === "listing" && entry.loc.endsWith(`/${record.id}`));
     const primaryPath = pathFor(sitemap.entries, record.id, locale) || sitemapEntries[0]?.loc || null;
+    const publicationReadiness = publicationReadinessFor({ listing: record, property: properties.get(record.property), now: generatedAt });
     const internalLinks = primaryPath
       ? suggestions({ registry, sitemap, sitemapLocs, records, record, locale, toPath: primaryPath, limit: suggestionLimit })
       : [];
@@ -64,6 +67,10 @@ export function buildListingPublicationReport({
       sitemap_entry_count: sitemapEntries.length,
       internal_link_suggestions: internalLinks,
       internal_link_suggestion_count: internalLinks.length,
+      publication_readiness: {
+        ready: publicationReadiness.ready,
+        blocking_fields: publicationReadiness.blocking_fields,
+      },
     };
   });
 
@@ -74,6 +81,8 @@ export function buildListingPublicationReport({
       listings_with_sitemap_entries: rows.filter((row) => row.sitemap_entry_count > 0).length,
       listings_with_internal_link_suggestions: rows.filter((row) => row.internal_link_suggestion_count > 0).length,
       missing_sitemap_entries: rows.filter((row) => row.sitemap_entry_count === 0).length,
+      ready_for_publish: rows.filter((row) => row.publication_readiness.ready).length,
+      blocked_for_publish: rows.filter((row) => !row.publication_readiness.ready).length,
     },
     rows,
   };
@@ -88,6 +97,12 @@ export function assertListingPublicationReport(report) {
   }
   if (!report.rows.some((row) => row.internal_link_suggestion_count > 0)) {
     throw new Error("Listing publication report must include internal-link suggestions");
+  }
+  if (report.rows.some((row) => !row.publication_readiness || typeof row.publication_readiness.ready !== "boolean")) {
+    throw new Error("Listing publication report must expose publish readiness without changing public visibility");
+  }
+  if (report.summary.ready_for_publish + report.summary.blocked_for_publish !== report.rows.length) {
+    throw new Error("Listing publication readiness summary must match rows");
   }
   return true;
 }

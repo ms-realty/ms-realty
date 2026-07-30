@@ -334,6 +334,11 @@ test("Next API routes reuse health, readiness, search, and lead HTTP contracts",
       assert.equal(disabledHermesChat.status, 404);
       assert.equal(disabledHermesChat.headers.get("cache-control"), "no-store");
       assert.equal((await retiredHermesChatRoute.GET(new Request("https://example.test/api/hermes/chat"))).status, 404);
+      const adapterDisabledHermesChat = await renderAppApiResponse(
+        new Request("https://example.test/api/hermes/chat", { method: "POST", body: "not parsed" }),
+      );
+      assert.equal(adapterDisabledHermesChat.status, 404);
+      assert.equal(adapterDisabledHermesChat.headers.get("cache-control"), "no-store");
       assert.equal(fs.existsSync("app/api/hermes/chat/route.js"), true);
     },
   );

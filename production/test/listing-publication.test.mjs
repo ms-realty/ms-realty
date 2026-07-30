@@ -20,6 +20,9 @@ test("listing publication report covers sitemap entries and internal-link sugges
   assert.ok(row.sitemap_paths.includes("/bg/imoti/MS-CRAWL-0001"));
   assert.ok(row.internal_link_suggestions.some((link) => link.kind === "homepage_feature"));
   assert.ok(row.internal_link_suggestions.some((link) => link.kind === "location_page"));
+  assert.equal(row.publication_readiness.ready, false);
+  assert.ok(row.publication_readiness.blocking_fields.includes("primary_area_sqm"));
+  assert.equal(report.summary.ready_for_publish + report.summary.blocked_for_publish, report.summary.listings);
 });
 
 test("new listing records inherit sitemap coverage and editor link suggestions", () => {

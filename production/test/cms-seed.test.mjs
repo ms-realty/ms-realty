@@ -204,6 +204,7 @@ test("CMS collection manifest exposes implemented Payload-style contracts only",
   assert.equal(listingFields.get("tour").relationTo, "listing_tours");
   assert.equal(listingFields.get("property").relationTo, "properties");
   assert.equal(listingFields.get("location").relationTo, "locations");
+  assert.equal(listingFields.get("workflow").type, "group");
 
   const propertyContract = manifest.collections.find((collection) => collection.slug === "properties");
   const propertyFields = new Map(propertyContract.fields.map((field) => [field.name, field]));
@@ -262,6 +263,10 @@ test("Payload collection configs adapt CMS manifest fields without adding Payloa
   const propertyFacts = propertiesConfig.fields.find((field) => field.name === "facts");
   assert.equal(propertyFacts.fields.find((field) => field.name === "bedrooms_count").custom.property_families.includes("apartment"), true);
   assert.equal(propertyFacts.fields.find((field) => field.name === "bedrooms_count").custom.property_families.includes("plot"), false);
+  const workflow = listingsConfig.fields.find((field) => field.name === "workflow");
+  assert.equal(workflow.fields.find((field) => field.name === "location_verified_at").type, "date");
+  assert.equal(workflow.fields.find((field) => field.name === "price_on_request_verified_at").type, "date");
+  assert.equal(workflow.fields.find((field) => field.name === "publish_approved").type, "checkbox");
   assert.equal(typeof payload.taxonomy_contract.version, "string");
   assert.ok(payload.taxonomy_contract.version);
   const taskConfig = payload.collections.find((collection) => collection.slug === "listing_enrichment_tasks");

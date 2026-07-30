@@ -97,10 +97,10 @@ test("listing CTA dialog keeps inquiry, callback, and viewing intents distinct",
   assert.match(html, /data-lead-source="website_viewing_request"/);
   assert.match(html, /data-lead-type="renter"/);
   assert.match(html, /data-mobile-gallery="true"/);
-  assert.match(html, /data-mobile-gallery-index="1"/);
-  assert.match(html, /data-mobile-gallery-label="Галерея"/);
-  assert.match(html, /data-mobile-gallery-slide="1" data-gallery-active="true"/);
-  assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 1);
+ assert.match(html, /data-mobile-gallery-index="1"/);
+ assert.match(html, /data-mobile-gallery-label="Галерея"/);
+ assert.match(html, /data-mobile-gallery-slide="1" data-gallery-active="true"/);
+ assert.equal((html.match(/data-mobile-gallery-slide=/g) || []).length, 1);
   assert.doesNotMatch(html, /data-mobile-gallery-progress="true"/);
   assert.match(html, /data-mobile-sticky-primary="true"/);
   assert.match(html, /data-mobile-contact-options="true"/);
@@ -125,13 +125,13 @@ test("mobile listing gallery exposes every reviewed photo and its swipe position
   assert.match(html, /data-mobile-gallery-current="true">1<\/span> \/ 14/);
   assert.match(html, /data-mobile-gallery-prev="true"/);
   assert.match(html, /data-mobile-gallery-next="true"/);
-  assert.match(html, /aria-label="Назад фото"/);
-  assert.match(html, /aria-label="Далее фото"/);
+ assert.match(html, /aria-label="Назад фото"/);
+ assert.match(html, /aria-label="Далее фото"/);
   assert.doesNotMatch(html, /undefined/);
   assert.match(html, /tabindex="0"/);
   assert.match(html, /role="region" aria-label="Галерея"/);
   assert.match(html, /aria-label="14 \/ 14:[^"]*" data-mobile-gallery-slide="14"/);
-  assert.equal((html.match(/data-listing-gallery-source="true"/g) || []).length, 14);
+ assert.equal((html.match(/data-listing-gallery-source="true"/g) || []).length, 14);
   assert.match(html, /data-listing-gallery-dialog="true"/);
   assert.match(PUBLIC_APP_JS, /function initListingGallery\(\)/);
   assert.match(PUBLIC_APP_JS, /dialog\.showModal\(\)/);
@@ -152,10 +152,10 @@ test("approved 360 tours retain a public gallery fallback when the viewer cannot
   };
   const html = renderReactPublicBody(page);
 
-  assert.match(html, /id="listing-tour"/);
-  assert.match(html, /data-photo-sphere-fallback="true"/);
-  assert.match(html, /href="#listing-gallery"/);
-  assert.match(html, /ld-tour__fallback/);
+ assert.match(html, /id="listing-tour"/);
+ assert.match(html, /data-photo-sphere-fallback="true"/);
+ assert.match(html, /href="#listing-gallery"/);
+ assert.match(html, /ld-tour__fallback/);
 });
 
 test("approved broker contact data enables direct listing contact links", () => {
@@ -166,23 +166,25 @@ test("approved broker contact data enables direct listing contact links", () => 
     brokerContact: createBrokerContact({
       listingId: listing.id,
       broker: "broker_ru",
-      phone: "+359880000000",
+      phone: "+447700900001",
       reviewer: "owner",
+      sourceReference: "test://broker-contact/MS-CRAWL-0001",
+      validationStatus: "broker_verified",
       approved: true,
     }),
   });
 
   assert.equal(page.body.actions.direct_contact.review_status, "approved_broker_contact");
   assert.equal(page.body.actions.direct_contact.broker, "broker_ru");
-  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "phone").href, "tel:+359880000000");
+  assert.equal(page.body.actions.direct_contact.channels.find((channel) => channel.id === "phone").href, "tel:+447700900001");
   assert.equal(
     page.body.actions.direct_contact.channels.find((channel) => channel.id === "whatsapp").href,
-    "https://wa.me/359880000000",
+    "https://wa.me/447700900001",
   );
   const html = renderReactPublicBody(page);
   assert.match(html, /ld-contact-options__direct/);
-  assert.match(html, /href="tel:\+359880000000"/);
-  assert.match(html, /href="https:\/\/wa\.me\/359880000000"/);
+  assert.match(html, /href="tel:\+447700900001"/);
+  assert.match(html, /href="https:\/\/wa\.me\/447700900001"/);
 });
 
 test("listing SEO includes approved hreflang and excludes unavailable draft locales", () => {
@@ -444,6 +446,33 @@ test("search result count is announced separately from the page heading", () => 
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*loading="eager"/);
   assert.match(html, /data-card-thumbnail="true"[^>]*><img[^>]*fetchPriority="high"/);
   assert.match(html, /<img[^>]*loading="lazy"[^>]*decoding="async"/);
+});
+
+test("search exposes reviewed crawlable suggestions and localized recent-search containers", () => {
+  const english = renderReactPublicBody(
+    renderSearchPage({ registry, listings, localeCode: "en", filters: { location: "Sandanski" } }),
+  );
+  const hebrewPage = renderSearchPage({ registry, listings, localeCode: "he", filters: { property_family: "apartment" } });
+  const hebrew = renderReactPublicBody(hebrewPage);
+
+  assert.match(english, /data-guided-search-path="\/en\/search" data-guided-search-success="true"/);
+  assert.match(
+    english,
+    /<a class="sr-guided__link" href="\/en\/search\?location=Sandanski" data-guided-search-suggestion="location" data-guided-search-value="Sandanski">Sandanski<\/a>/,
+  );
+  assert.match(
+    english,
+    /<a class="sr-guided__link" href="\/en\/search\?property_family=apartment" data-guided-search-suggestion="property_family" data-guided-search-value="apartment">Apartment<\/a>/,
+  );
+  assert.match(english, /data-recent-searches="true" aria-labelledby="sr-mobile-recent-searches-title" hidden/);
+  assert.match(english, /data-recent-search-list="true"/);
+  assert.match(english, /data-clear-recent-searches="true" aria-label="Clear">Clear<\/button>/);
+  assert.doesNotMatch(english, /data-guided-search-suggestion="(?:location|property_family)"[^>]*href="[^"]*\?q=/);
+
+  assert.equal(hebrewPage.dir, "rtl");
+  assert.match(hebrew, /data-guided-search-path="\/he\/search" data-guided-search-success="true"/);
+  assert.match(hebrew, /חיפושים אחרונים/);
+  assert.match(hebrew, /href="\/he\/search\?property_family=apartment"/);
 });
 
 test("zero-result searches render a useful mobile recovery state", () => {
@@ -740,6 +769,7 @@ test("Bulgarian locations expose only their approved source-bound context", () =
 test("seller valuation page is locale-prefixed and posts seller leads", () => {
   const he = renderSellerPage({ registry, localeCode: "he" });
   const fr = renderSellerPage({ registry, localeCode: "fr" });
+  const html = renderReactPublicBody(he);
 
   assert.equal(he.status, 200);
   assert.equal(he.path, "/he/sell");
@@ -752,6 +782,17 @@ test("seller valuation page is locale-prefixed and posts seller leads", () => {
   assert.equal(he.body.valuation.required_fields.includes("contact.phone"), true);
   assert.equal(fr.locale, "en");
   assert.equal(fr.indexable, false);
+  assert.match(html, /data-seller-intake="true" data-seller-step="1"/);
+  assert.match(html, /data-seller-step-indicator="1" aria-current="step"/);
+  assert.match(html, /data-seller-step="2" role="group"/);
+  assert.match(html, /data-seller-step="3" role="group"/);
+  assert.match(html, /data-seller-next="true"/);
+  assert.match(html, /data-seller-back="true"/);
+  assert.match(html, /data-seller-review="true"/);
+  assert.match(html, /data-seller-summary="property.location"/);
+  assert.match(html, /data-no-public-avm="true"/);
+  assert.match(html, /data-broker-review-required="true"/);
+  assert.doesNotMatch(html, /data-mobile-task-navigation="true"/);
 });
 
 test("contact callback page is locale-prefixed and posts generic CRM leads", () => {

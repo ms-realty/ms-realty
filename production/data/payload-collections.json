@@ -292,6 +292,66 @@
           ]
         },
         {
+          "name": "workflow",
+          "type": "group",
+          "required": false,
+          "localized": false,
+          "fields": [
+            {
+              "name": "availability_verified_at",
+              "type": "date"
+            },
+            {
+              "name": "availability_verified_by",
+              "type": "text"
+            },
+            {
+              "name": "location_verified_at",
+              "type": "date"
+            },
+            {
+              "name": "location_verified_by",
+              "type": "text"
+            },
+            {
+              "name": "price_verified_at",
+              "type": "date"
+            },
+            {
+              "name": "price_verified_by",
+              "type": "text"
+            },
+            {
+              "name": "price_on_request_verified_at",
+              "type": "date"
+            },
+            {
+              "name": "price_on_request_verified_by",
+              "type": "text"
+            },
+            {
+              "name": "publish_approved",
+              "type": "checkbox"
+            },
+            {
+              "name": "publish_approved_at",
+              "type": "date"
+            },
+            {
+              "name": "publish_approved_by",
+              "type": "text"
+            },
+            {
+              "name": "last_edited_at",
+              "type": "date"
+            },
+            {
+              "name": "last_editor",
+              "type": "text"
+            }
+          ]
+        },
+        {
           "name": "property",
           "type": "relationship",
           "required": true,

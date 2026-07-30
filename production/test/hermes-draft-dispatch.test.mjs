@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { assertHermesDraftDispatch, buildHermesDraftDispatch } from "../lib/hermes-draft-dispatch.mjs";
+import {
+  assertHermesDraftDispatch,
+  buildHermesDraftDispatch,
+  HERMES_NON_SENSITIVE_LISTING_TRANSLATION,
+} from "../lib/hermes-draft-dispatch.mjs";
 import { loadLocaleRegistry } from "../lib/locales.mjs";
 import { fromRoot } from "../lib/paths.mjs";
 
@@ -80,15 +84,26 @@ test("Hermes draft dispatch batches model-ready tasks without publish rights", (
   assert.equal(dispatch.rows[0].public_indexable, false);
   assert.equal(dispatch.rows[0].can_publish, false);
   assert.equal(dispatch.rows[0].requires_human_approval, true);
+  assert.equal(dispatch.rows[0].data_classification, HERMES_NON_SENSITIVE_LISTING_TRANSLATION);
   assert.match(dispatch.rows[0].prompt.rules.join(" "), /Draft only; never publish/);
   assert.match(dispatch.rows[0].prompt.forbiddenClaims.join(" "), /Sandanski/);
   assert.equal(dispatch.rows[0].prompt.seoTargets.title_max_chars, 60);
   assert.equal(dispatch.rows[0].prompt.capabilities.can_mark_indexable, false);
   assert.equal(dispatch.rows[0].citations.length, 2);
+  assert.throws(
+    () =>
+      assertHermesDraftDispatch({
+        ...dispatch,
+        rows: [{ ...dispatch.rows[0], data_classification: "sensitive" }],
+      }),
+    /non-sensitive listing translation classification/,
+  );
 });
 
 test("generated Hermes draft dispatch is valid when present", () => {
   const file = fromRoot("production", "data", "hermes-draft-dispatch.json");
   if (!fs.existsSync(file)) return;
-  assert.equal(assertHermesDraftDispatch(JSON.parse(fs.readFileSync(file, "utf8"))), true);
+  const dispatch = JSON.parse(fs.readFileSync(file, "utf8"));
+  assert.equal(assertHermesDraftDispatch(dispatch), true);
+  assert.equal(dispatch.rows.every((row) => row.data_classification === HERMES_NON_SENSITIVE_LISTING_TRANSLATION), true);
 });

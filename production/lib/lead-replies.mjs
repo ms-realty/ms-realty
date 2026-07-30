@@ -66,8 +66,16 @@ function parseJsonObject(value) {
   return JSON.parse(String(value || "").trim().replace(/^```(?:json)?\s*|\s*```$/g, ""));
 }
 
-function toolArgumentsPayload(message) {
-  return message.tool_calls?.find((call) => call?.function?.arguments)?.function?.arguments || message.function_call?.arguments || null;
+function nonEmptyInvocation(value) {
+  if (Array.isArray(value)) return value.some((entry) => nonEmptyInvocation(entry));
+  if (value && typeof value === "object") return Object.keys(value).length > 0;
+  return Boolean(String(value || "").trim());
+}
+
+function assertNoProviderToolCalls(message) {
+  if (nonEmptyInvocation(message?.tool_calls) || nonEmptyInvocation(message?.function_call)) {
+    throw new Error("Hermes reply provider returned a tool call despite tool_choice none");
+  }
 }
 
 function replyProviderRequestBody(prompt, model) {
@@ -104,7 +112,8 @@ export function openAiCompatibleHermesReplyProvider({ env = process.env, fetchIm
     const payload = await response.json();
     const message = payload.choices?.[0]?.message;
     if (!message) throw new Error("Hermes reply provider returned no message");
-    return parseJsonObject(toolArgumentsPayload(message) || message.content);
+    assertNoProviderToolCalls(message);
+    return parseJsonObject(message.content);
   };
 }
 
