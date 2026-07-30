@@ -1,21 +1,21 @@
 {
-  "artifact_id": "localized-sitemap-20260704",
+  "artifact_id": "runtime-localized-sitemap",
   "summary": {
     "listings": 165,
     "home_pages": 7,
-    "listing_entries": 167,
-    "location_pages": 7,
+    "listing_entries": 166,
+    "location_pages": 6,
     "seller_pages": 7,
     "contact_pages": 7,
-    "guide_pages": 2,
-    "entries": 197,
+    "guide_pages": 5,
+    "entries": 198,
     "byLocale": {
-      "bg": 119,
+      "bg": 122,
       "en": 5,
       "de": 3,
       "nl": 3,
       "ru": 57,
-      "el": 5,
+      "el": 3,
       "he": 5
     }
   },
@@ -303,33 +303,6 @@
           "href": "/bg/imoti/MS-CRAWL-0001"
         },
         {
-          "hreflang": "el",
-          "href": "/el/akinita/MS-CRAWL-0001"
-        },
-        {
-          "hreflang": "he",
-          "href": "/he/properties/MS-CRAWL-0001"
-        },
-        {
-          "hreflang": "x-default",
-          "href": "/bg/imoti/MS-CRAWL-0001"
-        }
-      ]
-    },
-    {
-      "type": "listing",
-      "locale": "el",
-      "loc": "/el/akinita/MS-CRAWL-0001",
-      "hreflang": [
-        {
-          "hreflang": "bg",
-          "href": "/bg/imoti/MS-CRAWL-0001"
-        },
-        {
-          "hreflang": "el",
-          "href": "/el/akinita/MS-CRAWL-0001"
-        },
-        {
           "hreflang": "he",
           "href": "/he/properties/MS-CRAWL-0001"
         },
@@ -347,10 +320,6 @@
         {
           "hreflang": "bg",
           "href": "/bg/imoti/MS-CRAWL-0001"
-        },
-        {
-          "hreflang": "el",
-          "href": "/el/akinita/MS-CRAWL-0001"
         },
         {
           "hreflang": "he",
@@ -2625,38 +2594,6 @@
           "href": "/bg/lokacii/sandanski"
         },
         {
-          "hreflang": "el",
-          "href": "/el/topothesies/sandanski"
-        },
-        {
-          "hreflang": "he",
-          "href": "/he/locations/sandanski"
-        },
-        {
-          "hreflang": "ru",
-          "href": "/ru/locations/sandanski"
-        },
-        {
-          "hreflang": "x-default",
-          "href": "/bg/lokacii/sandanski"
-        }
-      ]
-    },
-    {
-      "type": "location",
-      "locale": "el",
-      "location": "Sandanski",
-      "loc": "/el/topothesies/sandanski",
-      "hreflang": [
-        {
-          "hreflang": "bg",
-          "href": "/bg/lokacii/sandanski"
-        },
-        {
-          "hreflang": "el",
-          "href": "/el/topothesies/sandanski"
-        },
-        {
           "hreflang": "he",
           "href": "/he/locations/sandanski"
         },
@@ -2679,10 +2616,6 @@
         {
           "hreflang": "bg",
           "href": "/bg/lokacii/sandanski"
-        },
-        {
-          "hreflang": "el",
-          "href": "/el/topothesies/sandanski"
         },
         {
           "hreflang": "he",
@@ -2709,10 +2642,6 @@
           "href": "/bg/lokacii/sandanski"
         },
         {
-          "hreflang": "el",
-          "href": "/el/topothesies/sandanski"
-        },
-        {
           "hreflang": "he",
           "href": "/he/locations/sandanski"
         },
@@ -2723,22 +2652,6 @@
         {
           "hreflang": "x-default",
           "href": "/bg/lokacii/sandanski"
-        }
-      ]
-    },
-    {
-      "type": "location",
-      "locale": "bg",
-      "location": "Hotovo",
-      "loc": "/bg/lokacii/hotovo",
-      "hreflang": [
-        {
-          "hreflang": "bg",
-          "href": "/bg/lokacii/hotovo"
-        },
-        {
-          "hreflang": "x-default",
-          "href": "/bg/lokacii/hotovo"
         }
       ]
     },
@@ -2779,6 +2692,22 @@
         {
           "hreflang": "x-default",
           "href": "/bg/lokacii/petrich"
+        }
+      ]
+    },
+    {
+      "type": "location",
+      "locale": "bg",
+      "location": "Hotovo",
+      "loc": "/bg/lokacii/hotovo",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/lokacii/hotovo"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/lokacii/hotovo"
         }
       ]
     },
@@ -3357,6 +3286,54 @@
         {
           "hreflang": "x-default",
           "href": "/en/guides/buying-process"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "bg",
+      "loc": "/bg/guides/proverka-na-imot-sandanski",
+      "guide_id": "sandanski-property-official-sources",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/guides/proverka-na-imot-sandanski"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/guides/proverka-na-imot-sandanski"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "bg",
+      "loc": "/bg/guides/hotovo-obstinski-kontekst",
+      "guide_id": "hotovo-locality-official-context",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/guides/hotovo-obstinski-kontekst"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/guides/hotovo-obstinski-kontekst"
+        }
+      ]
+    },
+    {
+      "type": "guide",
+      "locale": "bg",
+      "loc": "/bg/guides/petrich-obstinski-kontekst",
+      "guide_id": "petrich-municipality-official-context",
+      "hreflang": [
+        {
+          "hreflang": "bg",
+          "href": "/bg/guides/petrich-obstinski-kontekst"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "/bg/guides/petrich-obstinski-kontekst"
         }
       ]
     }

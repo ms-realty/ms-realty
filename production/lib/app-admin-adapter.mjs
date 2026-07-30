@@ -1689,7 +1689,8 @@ function appendDealClose(input, config) {
 }
 
 function appendBrokerContactApproval(input, config) {
-  const contact = appendBrokerContact(createBrokerContact(input, { reviewedAt: config.reviewedAt }), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const contact = appendBrokerContact(createBrokerContact(attributed, { reviewedAt: config.reviewedAt }), {
     filePath: config.brokerContactLedgerPath,
   });
   recordAudit(
@@ -1706,7 +1707,8 @@ function appendBrokerContactApproval(input, config) {
 }
 
 function appendTourApprovalRow(input, config) {
-  const tour = appendTourApproval(createTourApproval(currentSeed(config), input, config.reviewedAt), {
+  const attributed = bindAuthenticatedOperator(input, config.adminPrincipal, ["reviewer"]);
+  const tour = appendTourApproval(createTourApproval(currentSeed(config), attributed, config.reviewedAt), {
     filePath: config.tourApprovalLedgerPath,
   });
   recordAudit(
@@ -2151,7 +2153,7 @@ export async function renderAppAdminResponse(request, { config = appAdminConfigF
 
   const principal = resolveAdminPrincipal(
     request.headers.get("authorization") || "",
-    process.env,
+    config.authEnv || process.env,
     request.headers.get("cookie") || "",
   );
   // A browser asking for a page gets the login form; an API client gets 401.

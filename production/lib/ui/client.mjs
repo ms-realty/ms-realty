@@ -25,8 +25,18 @@ export const PUBLIC_APP_JS = `(function () {
       return Array.isArray(value) ? value.filter(function (id) { return typeof id === "string" && id; }) : [];
     } catch (error) { return []; }
   }
+  function savedListsMatch(left, right) {
+    if (left.length !== right.length) return false;
+    for (var i = 0; i < left.length; i += 1) {
+      if (left[i] !== right[i]) return false;
+    }
+    return true;
+  }
   function writeSaved(ids) {
-    try { localStorage.setItem(KEY, JSON.stringify(ids)); } catch (error) {}
+    try {
+      localStorage.setItem(KEY, JSON.stringify(ids));
+      return savedListsMatch(readSaved(), ids);
+    } catch (error) { return false; }
   }
   function markSaved() {
     var saved = readSaved();
@@ -241,7 +251,14 @@ export const PUBLIC_APP_JS = `(function () {
     if (mount && mount.parentNode) mount.parentNode.removeChild(mount);
     section.setAttribute("data-photo-sphere-viewer-state", "fallback");
     section.removeAttribute("aria-busy");
+    var fallback = section.querySelector("[data-photo-sphere-fallback]");
     var navigationLink = section.id ? document.querySelector('a[href="#' + section.id + '"]') : null;
+    if (fallback) {
+      fallback.hidden = false;
+      if (navigationLink) navigationLink.hidden = false;
+      section.hidden = false;
+      return;
+    }
     if (navigationLink) navigationLink.hidden = true;
     section.hidden = true;
   }
@@ -476,7 +493,7 @@ export const PUBLIC_APP_JS = `(function () {
     var form = document.getElementById("sr-mobile-filter-form");
     var submit = document.querySelector("[data-mobile-filter-submit]");
     var status = document.querySelector("[data-mobile-filter-preview-status]");
-    if (!form || !submit || typeof window.fetch !== "function" || typeof window.DOMParser !== "function") return;
+    if (!form || !submit || typeof window.fetch !== "function") return;
     var timer = 0;
     var controller = null;
     var requestNumber = 0;
@@ -498,27 +515,28 @@ export const PUBLIC_APP_JS = `(function () {
       var currentRequest = requestNumber;
       if (controller) controller.abort();
       controller = typeof AbortController === "function" ? new AbortController() : null;
-      var url = new URL(form.getAttribute("action") || window.location.pathname, window.location.href);
+      var pageUrl = new URL(form.getAttribute("action") || window.location.pathname, window.location.href);
+      var apiUrl = new URL("/api/search", window.location.href);
+      var locale = pageUrl.pathname.split("/")[1] || "bg";
       var params = new URLSearchParams();
       new FormData(form).forEach(function (value, key) {
         if (String(value) !== "") params.set(key, String(value));
       });
-      url.search = params.toString();
+      params.set("locale", locale);
+      apiUrl.search = params.toString();
       setBusy(true);
-      fetch(url.toString(), {
+      fetch(apiUrl.toString(), {
         credentials: "same-origin",
-        headers: { accept: "text/html", "x-ms-realty-preview": "search-count" },
+        headers: { accept: "application/json", "x-ms-realty-preview": "search-count" },
         signal: controller ? controller.signal : undefined,
       })
         .then(function (response) {
           if (!response.ok) throw new Error(String(response.status));
-          return response.text();
+          return response.json();
         })
-        .then(function (html) {
+        .then(function (payload) {
           if (currentRequest !== requestNumber) return;
-          var parsed = new DOMParser().parseFromString(html, "text/html");
-          var root = parsed.querySelector('main[data-kind="search"][data-total-matches]');
-          var total = root ? Number(root.getAttribute("data-total-matches")) : NaN;
+          var total = Number(payload && payload.search && payload.search.total_matches);
           if (Number.isFinite(total) && total >= 0) updateCount(total);
         })
         .catch(function (error) {
@@ -564,14 +582,22 @@ export const PUBLIC_APP_JS = `(function () {
     var shell = gallery ? gallery.closest(".ld-gallery-shell") : null;
     var current = shell ? shell.querySelector("[data-mobile-gallery-current]") : null;
     var progress = shell ? shell.querySelector("[data-mobile-gallery-progress]") : null;
+    var previous = shell ? shell.querySelector("[data-mobile-gallery-prev]") : null;
+    var next = shell ? shell.querySelector("[data-mobile-gallery-next]") : null;
     var slides = gallery ? gallery.querySelectorAll("[data-mobile-gallery-slide]") : [];
     if (!gallery || !current || slides.length < 2) return;
     var frame = 0;
+    var activeIndex = 0;
+    function scrollToGalleryIndex(index) {
+      var nextIndex = Math.max(0, Math.min(slides.length - 1, index));
+      var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      slides[nextIndex].scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest", inline: "start" });
+    }
     function updateGalleryPosition() {
       frame = 0;
       var galleryBox = gallery.getBoundingClientRect();
       var galleryCenter = galleryBox.left + galleryBox.width / 2;
-      var activeIndex = 0;
+      activeIndex = 0;
       var activeDistance = Infinity;
       for (var i = 0; i < slides.length; i += 1) {
         var slideBox = slides[i].getBoundingClientRect();
@@ -584,14 +610,37 @@ export const PUBLIC_APP_JS = `(function () {
       }
       slides[activeIndex].setAttribute("data-gallery-active", "true");
       gallery.setAttribute("data-mobile-gallery-index", String(activeIndex + 1));
+      gallery.setAttribute("aria-label", gallery.getAttribute("data-mobile-gallery-label") + ", " + String(activeIndex + 1) + " / " + String(slides.length));
       current.textContent = String(activeIndex + 1);
       if (progress) progress.setAttribute("aria-label", String(activeIndex + 1) + " / " + String(slides.length));
+      if (previous) previous.disabled = activeIndex === 0;
+      if (next) next.disabled = activeIndex === slides.length - 1;
     }
     function scheduleGalleryPosition() {
       if (frame) return;
       frame = window.requestAnimationFrame(updateGalleryPosition);
     }
     gallery.addEventListener("scroll", scheduleGalleryPosition, { passive: true });
+    gallery.addEventListener("keydown", function (event) {
+      if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+        event.preventDefault();
+        scrollToGalleryIndex(activeIndex - 1);
+      }
+      if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+        event.preventDefault();
+        scrollToGalleryIndex(activeIndex + 1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        scrollToGalleryIndex(0);
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        scrollToGalleryIndex(slides.length - 1);
+      }
+    });
+    if (previous) previous.addEventListener("click", function () { scrollToGalleryIndex(activeIndex - 1); });
+    if (next) next.addEventListener("click", function () { scrollToGalleryIndex(activeIndex + 1); });
     window.addEventListener("resize", scheduleGalleryPosition);
     updateGalleryPosition();
   }
@@ -781,6 +830,13 @@ export const PUBLIC_APP_JS = `(function () {
       event.target.close();
       return;
     }
+    var skipLink = event.target && event.target.closest ? event.target.closest('a[href="#main"]') : null;
+    if (skipLink) {
+      var main = document.getElementById("main");
+      if (main && typeof main.focus === "function") {
+        window.requestAnimationFrame(function () { main.focus({ preventScroll: true }); });
+      }
+    }
     var contactOptionsOpen = event.target.closest("[data-mobile-contact-options-open]");
     if (contactOptionsOpen) {
       var contactOptions = document.querySelector("[data-mobile-contact-options]");
@@ -816,7 +872,11 @@ export const PUBLIC_APP_JS = `(function () {
       var removingFromSavedView = index !== -1 && Boolean(save.closest("[data-saved-listings-view='true']"));
       if (index === -1) ids.push(id);
       else ids.splice(index, 1);
-      writeSaved(ids);
+      if (!writeSaved(ids)) {
+        markSaved();
+        showToast(I18N.requestFailed || "Could not save this property.");
+        return;
+      }
       markSaved();
       if (removingFromSavedView) {
         var savedViewFocus = document.querySelector("[data-saved-listings-view='true'] [data-search-card]:not([hidden]) [data-client-save-listing]")

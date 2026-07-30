@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { loadLocaleRegistry, assertLocaleRegistry, publicIndexableLocales } from "../lib/locales.mjs";
 import { hreflangForListing } from "../lib/seo.mjs";
 import { assertHermesActionAllowed } from "../lib/hermes.mjs";
-import { assertHermesAuditLedger } from "../lib/translation-ledger.mjs";
+import { assertHermesAuditLedger, assertTranslationLedger, latestTranslationTasks } from "../lib/translation-ledger.mjs";
 import { createLeadDraft } from "../lib/leads.mjs";
 import { assertConsentLedger } from "../lib/consent-ledger.mjs";
 import { assertAuditLog } from "../lib/audit-log.mjs";
@@ -199,11 +199,11 @@ if (redirectApprovals.length !== routeMap.summary.mappedListings) {
 const sitemap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "localized-sitemap.json"), "utf8"));
 if (
   sitemap.summary.home_pages !== 7 ||
-  sitemap.summary.listing_entries !== 167 ||
+  sitemap.summary.listing_entries !== 166 ||
   sitemap.summary.location_pages < 6 ||
   sitemap.summary.seller_pages !== 7 ||
   sitemap.summary.contact_pages !== 7 ||
-  sitemap.summary.guide_pages !== 2
+  sitemap.summary.guide_pages !== 5
 ) {
   throw new Error("Localized sitemap must include approved home, listing, location, seller, contact, and guide pages");
 }
@@ -220,7 +220,7 @@ if (sitemap.summary.entries !== expectedSitemapEntries) {
 if (sitemap.summary.byLocale.bg < 118 || sitemap.summary.byLocale.ru !== 57) {
   throw new Error("Localized sitemap must include published source BG/RU listings");
 }
-if (sitemap.summary.byLocale.el !== 5 || sitemap.summary.byLocale.he !== 5) {
+if (sitemap.summary.byLocale.el !== 3 || sitemap.summary.byLocale.he !== 5) {
   throw new Error("Localized sitemap must include approved Greek and Hebrew seeds");
 }
 if (sitemap.summary.byLocale.fr) throw new Error("Localized sitemap must not include unapproved French");
@@ -228,10 +228,10 @@ const appRouteManifest = JSON.parse(fs.readFileSync(fromRoot("production", "data
 assertAppRouteManifest(appRouteManifest);
 assertAppRouteFiles(appRouteManifest);
 if (
-  appRouteManifest.summary.routes !== 204 ||
+  appRouteManifest.summary.routes !== 205 ||
   appRouteManifest.summary.sitemap_indexable_routes !== sitemap.summary.entries ||
   appRouteManifest.summary.by_type.search !== 7 ||
-  appRouteManifest.summary.by_type.guide !== 2 ||
+  appRouteManifest.summary.by_type.guide !== 5 ||
   appRouteManifest.routes.find((route) => route.path === "/he")?.dir !== "rtl"
 ) {
   throw new Error("App Router manifest must map sitemap routes plus no-store search routes");
@@ -948,8 +948,19 @@ if (
 ) {
   throw new Error("Hermes provider provisioning report must preserve self-hosted Hermes/vLLM safety settings");
 }
-const translationTasks = fs.readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8").trim().split("\n").filter(Boolean);
-if (translationTasks.length !== 3) throw new Error("Translation task artifact must contain draft, published, and stale smoke rows");
+const translationTaskEvents = fs
+  .readFileSync(fromRoot("production", "data", "translation-tasks.jsonl"), "utf8")
+  .trim()
+  .split("\n")
+  .filter(Boolean)
+  .map((line) => JSON.parse(line));
+assertTranslationLedger(translationTaskEvents);
+const currentGreekTask = latestTranslationTasks(translationTaskEvents).find(
+  (task) => task.id === "translation-listing-MS-CRAWL-0001-el",
+);
+if (currentGreekTask?.status !== "stale" || currentGreekTask.public_indexable !== false) {
+  throw new Error("Translation task artifact must retain the latest Greek listing task as stale and non-indexable");
+}
 const translationCoverage = JSON.parse(fs.readFileSync(fromRoot("production", "data", "translation-coverage-report.json"), "utf8"));
 assertTranslationCoverageReport(translationCoverage);
 if (
@@ -967,8 +978,11 @@ const hermesAudit = fs
   .split("\n")
   .filter(Boolean)
   .map((line) => JSON.parse(line));
-if (hermesAudit.length !== 3) throw new Error("Hermes audit artifact must contain draft, published, and stale smoke rows");
 assertHermesAuditLedger(hermesAudit);
+const greekAuditHistory = hermesAudit.filter((row) => row.task_id === "translation-listing-MS-CRAWL-0001-el");
+if (!["hermes_drafted", "published", "stale"].every((status) => greekAuditHistory.some((row) => row.status === status))) {
+  throw new Error("Hermes audit artifact must retain draft, published, and stale Greek listing history");
+}
 const hermesDraftDispatch = JSON.parse(fs.readFileSync(fromRoot("production", "data", "hermes-draft-dispatch.json"), "utf8"));
 assertHermesDraftDispatch(hermesDraftDispatch);
 if (
@@ -1087,8 +1101,8 @@ for (const source of ["search_console", "yandex_webmaster", "backlinks"]) {
 
 const structuredData = JSON.parse(fs.readFileSync(fromRoot("production", "data", "structured-data-report.json"), "utf8"));
 if (
-  structuredData.summary.listing_entries !== 167 ||
-  structuredData.summary.guide_entries !== 2 ||
+  structuredData.summary.listing_entries !== 166 ||
+  structuredData.summary.guide_entries !== 5 ||
   structuredData.summary.failing_entries !== 0
 ) {
   throw new Error("Structured data report must cover all indexable listing and guide entries without schema failures");

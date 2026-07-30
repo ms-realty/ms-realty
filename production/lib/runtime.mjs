@@ -16,7 +16,7 @@ import {
   renderSellerPage,
   isActiveListing,
 } from "./public-site.mjs";
-import { contactPath, locationPath, listingPath, sellerPath } from "./seo.mjs";
+import { contactPath, locationPath, listingPath, publicLocationNames, sellerPath } from "./seo.mjs";
 import { latestTranslationTasks } from "./translation-ledger.mjs";
 import { latestTourForListing } from "./tours.mjs";
 
@@ -43,6 +43,13 @@ export function listingFromCmsRecord(record, approvedTour = null) {
     description: record.facts.description || record.seo.description,
     h1: record.facts.h1,
     location: record.facts.location,
+    location_native: record.facts.location_native || "",
+    location_legacy: record.facts.location_legacy || record.facts.location || "",
+    municipality: record.facts.municipality || "",
+    municipality_code: record.facts.municipality_code || "",
+    country_code: record.facts.country_code || "",
+    settlement_ekatte: record.facts.settlement_ekatte || "",
+    location_review_status: record.facts.location_review_status || "legacy_area_only",
     property_type: record.facts.property_type,
     offer_type: record.facts.offer_type,
     listing_status: record.facts.listing_status || "available",
@@ -105,7 +112,7 @@ function translationPathMatches(registry, record, translation, normalized) {
 }
 
 function locationNames(seed) {
-  return [...new Set(listingRecords(seed).map((record) => String(record.facts.location || "").trim()).filter(Boolean))];
+  return publicLocationNames(listingRecords(seed).map((record) => listingFromCmsRecord(record)));
 }
 
 function runtimeListings(seed, translationTasks = []) {

@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { contentEvidenceForOldUrl } from "./migration-content-evidence.mjs";
 import { fromRoot } from "./paths.mjs";
 
 export const DEFAULT_MIGRATION_REVIEW_OUTPUT = fromRoot("production", "data", "migration-review-queue.json");
@@ -66,6 +67,8 @@ export function attachMigrationReviewEvidence(routes, records) {
         canonical: record.canonical || "",
         robots_meta: record.robots_meta || "",
         hreflang: record.hreflang || "",
+        meta_description: record.source_seo?.meta_description || "",
+        open_graph: record.source_seo?.open_graph || "",
         word_count: Number(record.word_count || 0),
         image_count: Number(record.image_count || 0),
         internal_link_count: Number(record.internal_link_count || 0),
@@ -110,6 +113,7 @@ export function filterMigrationReviewRoutes(routes, requestedFilters = {}) {
         route.target_path,
         evidence.title,
         evidence.h1,
+        evidence.meta_description,
         evidence.canonical,
       ].some((value) => String(value || "").toLocaleLowerCase().includes(query));
     });
@@ -132,7 +136,7 @@ export function migrationReviewTargetOptions(manifest) {
   return [...new Map(options.map((option) => [option.path, option])).values()];
 }
 
-export function buildMigrationReviewQueue(records, routeMap) {
+export function buildMigrationReviewQueue(records, routeMap, contentEvidence) {
   const routesByUrl = new Map(routeMap.map((route) => [route.old_url, route]));
   const rows = records.map((record) => {
     const route = routesByUrl.get(record.old_url) || {};
@@ -151,6 +155,7 @@ export function buildMigrationReviewQueue(records, routeMap) {
       deployable: route.deployable === true,
       metadata_gaps: gaps,
       risk_flags: riskFlags(record, route, gaps),
+      content_evidence: contentEvidenceForOldUrl(contentEvidence, record.old_url),
     };
   });
 
@@ -175,7 +180,22 @@ export function buildMigrationReviewQueue(records, routeMap) {
   };
 }
 
+function assertNoCapturedBody(value) {
+  if (!value || typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    for (const item of value) assertNoCapturedBody(item);
+    return;
+  }
+  for (const [key, nested] of Object.entries(value)) {
+    if (key === "extracted_body_text") {
+      throw new Error("Migration review queue must not serialize captured source body text");
+    }
+    assertNoCapturedBody(nested);
+  }
+}
+
 export function assertMigrationReviewQueue(queue) {
+  assertNoCapturedBody(queue);
   if (queue.summary.total !== 457) throw new Error("Migration review queue must cover every crawled URL");
   if (queue.summary.ruRows !== 179) throw new Error("Migration review queue must preserve all RU rows");
   if (queue.summary.nonListingUnmapped !== 292) throw new Error("Non-listing rows must remain unmapped until editorial review");

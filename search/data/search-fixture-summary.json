@@ -1,7 +1,8 @@
 {
-  "artifact_dir": "/Users/ivan/Code/MS-Realty/migration/artifacts/20260704-211155",
-  "locale_registry_path": "/Users/ivan/Code/MS-Realty/locales/registry.json",
-  "listing_edits_path": "/Users/ivan/Code/MS-Realty/production/data/listing-edits.jsonl",
+  "artifact_dir": "/Users/ivan/Code/MS-Realty-content-audit/migration/artifacts/20260704-211155",
+  "locale_registry_path": "/Users/ivan/Code/MS-Realty-content-audit/locales/registry.json",
+  "listing_edits_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/listing-edits.jsonl",
+  "location_reviews_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/location-reviews.json",
   "source_listing_count": 165,
   "index_document_count": 167,
   "domains": [
@@ -32,11 +33,39 @@
     "nl",
     "ru"
   ],
-  "listing_edit_count": 377,
+  "listing_edit_count": 397,
   "url_strategy": "locale_prefix",
   "locations": [
+    "Bansko",
+    "Blagoevgrad",
+    "Derbere, Sandanski",
+    "Dzhigurovo",
+    "Elani-Sani, Halkidiki",
+    "Eretria-Kotroni",
     "Hotovo",
+    "Igralishte",
+    "Kapatovo",
+    "Kulata",
+    "Laskarevo",
+    "Leshnitsa",
+    "Levunovo",
+    "Lilyanovo",
+    "Logari",
+    "Mikrevo",
+    "Nafplio",
+    "Paralia Ofrinio",
+    "Pasalimani, Piraeus",
     "Petrich",
-    "Sandanski"
+    "Petrich Municipality",
+    "Petrovo",
+    "Pirin",
+    "Polenitsa",
+    "Sandanski",
+    "Spatovo",
+    "Strumyani",
+    "Sveti Vlas",
+    "Thessaloniki",
+    "Tsaparevo",
+    "Vinogradi"
   ]
 }

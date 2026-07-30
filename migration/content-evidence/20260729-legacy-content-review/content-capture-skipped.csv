@@ -1,0 +1,40 @@
+source_domain,url,url_type,status,final_url,reason,detail
+makler-realty.com,https://makler-realty.com/balcon/1/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/balcon/2/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/balcon/3/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/balcon/4/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/bedroom/1/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/bedroom/2/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/bedroom/3/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/bedroom/4/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/bedroom/5/,page,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/de/bulgarien-leben-im-kurort-sandanski/,page,404,https://makler-realty.com/de/bulgarien-leben-im-kurort-sandanski/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/de/transfer-thessaloniki-bansko/,page,404,https://makler-realty.com/de/transfer-thessaloniki-bansko/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/en/transfer-thessaloniki-bansko/,page,404,https://makler-realty.com/en/transfer-thessaloniki-bansko/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/floors/1/,taxonomy,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/floors/2/,taxonomy,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/floors/3/,taxonomy,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/floors/4/,taxonomy,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/floors/5/,taxonomy,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/floors/6/,taxonomy,200,,robots_disallowed,https://makler-realty.com/robots.txt
+makler-realty.com,https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/,listing,404,https://makler-realty.com/listing/%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d1%86%d0%b5%d0%bd%d1%82%d1%8a%d1%80%d0%b0-%d0%bd%d0%b0-%d1%81%d0%b0%d0%bd%d0%b4/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/,listing,404,https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b2%d0%b0-%d0%b4%d0%b2%d1%83%d1%81%d1%82%d0%b0%d0%b5%d0%bd-%d0%b0%d0%bf%d0%b0%d1%80%d1%82%d0%b0%d0%bc%d0%b5%d0%bd%d1%82-%d0%b2-%d0%b3%d1%80-%d1%81%d0%b0%d0%bd%d0%b4/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/,listing,404,https://makler-realty.com/listing/%d0%bf%d1%80%d0%be%d0%b4%d0%b0%d0%b6%d0%b1%d0%b0-%d0%bd%d0%b0-%d0%bf%d0%b0%d1%80%d1%86%d0%b5%d0%bb-%d0%b2-%d1%81%d1%82%d1%80%d1%83%d0%bc%d1%8f%d0%bd%d0%b8-3000-%d0%ba%d0%b2-%d0%bc/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/,listing,404,https://makler-realty.com/listing/apartment-mit-einem-schlafzimmer-in-sandanski-zu-vermieten/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/nl/transfer-thessaloniki-bansko/,page,404,https://makler-realty.com/nl/transfer-thessaloniki-bansko/,fetch_failed,HTTP 404
+makler-realty.com,https://makler-realty.com/transfer-thessaloniki-bansko/,post,404,https://makler-realty.com/transfer-thessaloniki-bansko/,fetch_failed,HTTP 404
+makler-realty.ru,https://makler-realty.ru/balcon/1/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/balcon/2/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/balcon/3/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/balcon/4/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/bedroom/1/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/bedroom/2/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/bedroom/3/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/bedroom/4/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/bedroom/5/,page,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/floors/1/,taxonomy,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/floors/2/,taxonomy,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/floors/3/,taxonomy,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/floors/4/,taxonomy,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/floors/5/,taxonomy,200,,robots_disallowed,https://makler-realty.ru/robots.txt
+makler-realty.ru,https://makler-realty.ru/listing/uchastok-strumiani/,listing,404,https://makler-realty.ru/listing/uchastok-strumiani/,fetch_failed,HTTP 404

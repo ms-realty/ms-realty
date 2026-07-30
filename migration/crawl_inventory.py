@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import html
 import http.client
 import json
@@ -32,6 +33,8 @@ DEFAULT_WORKERS = 8
 DEFAULT_TIMEOUT = 25
 MAX_INTERNAL_LINKS = 120
 CONTEXT_BASE_URL = "https://api.context.dev/v1"
+PRIMARY_CONTENT_CLASSES = ("post_content", "post_content_default", "entry-content", "entry_content")
+VOID_HTML_TAGS = frozenset({"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"})
 
 
 def _create_ipv4_connection(
@@ -120,6 +123,10 @@ class PageRecord:
     schema_present: bool = False
     error: str = ""
     images: list[dict[str, str]] = field(default_factory=list)
+    content_scope: str = ""
+    content_word_count: int = 0
+    content_sha256: str = ""
+    content_text: str = ""
 
 
 class SitemapHTMLParser(HTMLParser):
@@ -151,13 +158,26 @@ class PageParser(HTMLParser):
         self.open_graph: dict[str, str] = {}
         self.schema_present = False
         self.text_parts: list[str] = []
+        self.content_text_parts: list[str] = []
+        self.content_scope = ""
         self._in_title = False
         self._in_h1 = False
         self._skip_depth = 0
+        self._content_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         tag = tag.lower()
         attr = {k.lower(): (v or "") for k, v in attrs}
+
+        if self._content_depth:
+            if tag not in VOID_HTML_TAGS:
+                self._content_depth += 1
+        else:
+            classes = set(attr.get("class", "").split())
+            matched_class = next((value for value in PRIMARY_CONTENT_CLASSES if value in classes), "")
+            if matched_class:
+                self._content_depth = 1
+                self.content_scope = f"class:{matched_class}"
 
         if tag in {"script", "style", "noscript"}:
             self._skip_depth += 1
@@ -208,6 +228,8 @@ class PageParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         tag = tag.lower()
+        if self._content_depth and tag not in VOID_HTML_TAGS:
+            self._content_depth -= 1
         if tag in {"script", "style", "noscript"} and self._skip_depth:
             self._skip_depth -= 1
         elif tag == "title":
@@ -221,13 +243,21 @@ class PageParser(HTMLParser):
             return
         if self._in_title and not self.title:
             self.title = text
-        elif self._in_h1 and not self.h1:
+            return
+        if self._in_h1 and not self.h1:
             self.h1 = text
-        elif self._skip_depth == 0:
+        if self._skip_depth == 0:
             self.text_parts.append(text)
+            if self._content_depth:
+                self.content_text_parts.append(text)
 
     def record(self) -> dict[str, object]:
-        words = re.findall(r"\w+", " ".join(self.text_parts), flags=re.UNICODE)
+        document_text = clean_space(" ".join(self.text_parts))
+        primary_content_text = clean_space(" ".join(self.content_text_parts))
+        content_text = primary_content_text or document_text
+        content_scope = self.content_scope if primary_content_text else "document_text_fallback"
+        words = re.findall(r"\w+", document_text, flags=re.UNICODE)
+        content_words = re.findall(r"\w+", content_text, flags=re.UNICODE)
         internal_links = sorted(self.internal_links)
         return {
             "title": self.title,
@@ -243,6 +273,10 @@ class PageParser(HTMLParser):
             "internal_links": "|".join(internal_links[:MAX_INTERNAL_LINKS]),
             "open_graph": json.dumps(self.open_graph, ensure_ascii=False, sort_keys=True),
             "schema_present": self.schema_present,
+            "content_scope": content_scope,
+            "content_word_count": len(content_words),
+            "content_sha256": hashlib.sha256(content_text.encode("utf-8")).hexdigest() if content_text else "",
+            "content_text": content_text,
         }
 
 

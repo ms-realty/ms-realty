@@ -434,6 +434,7 @@ test("HTTP app serves listing, search, fallback, and lead JSON contracts", async
         panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
         accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
         reviewer: "media_editor",
+        reviewConfirmed: true,
       },
     }),
     listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),
@@ -1184,7 +1185,12 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
   const translationLedgerPath = tempTranslations();
   const auditLogPath = tempAuditLog();
   const liveServiceProvisioningReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-live-provisioning-`)}/mounted-live-service-provisioning-report.json`;
+  const payloadRuntimeReportPath = `${fs.mkdtempSync(`${os.tmpdir()}/ms-realty-payload-runtime-`)}/mounted-payload-runtime-report.json`;
   fs.copyFileSync(fromRoot("production", "data", "live-service-provisioning-report.json"), liveServiceProvisioningReportPath);
+  fs.writeFileSync(
+    payloadRuntimeReportPath,
+    `${JSON.stringify(await buildPayloadRuntimeReport({ env: {}, generatedAt: "2026-07-05T00:00:00Z" }), null, 2)}\n`,
+  );
   const routeMap = JSON.parse(fs.readFileSync(fromRoot("production", "data", "legacy-route-map.json"), "utf8")).routes;
   const listing = routeMap.find((route) => route.url_type === "listing" && route.target_locale === "bg" && route.target_path);
   const importListing = routeMap.find(
@@ -1204,6 +1210,7 @@ test("HTTP admin can append reviewed redirect approvals without broad homepage m
     translationLedgerPath,
     auditLogPath,
     liveServiceProvisioningReportPath,
+    payloadRuntimeReportPath,
     reviewedAt: "2026-07-05T00:00:00Z",
     editedAt: "2026-07-05T00:03:00Z",
     listingQualityGeneratedAt: "2026-07-05T00:09:00Z",
@@ -2244,7 +2251,7 @@ test("HTTP launch readiness stays tied to the deployed redirect artifact until e
   assert.equal(redirectGate.evidence.unresolved_legacy_urls, 292);
 });
 
-test("HTTP sitemap honors mounted listing edit ledger", async () => {
+test("HTTP sitemap does not turn an editor location label into a new landing page", async () => {
   const listingEditLedgerPath = tempListingEdits();
   fs.appendFileSync(
     listingEditLedgerPath,
@@ -2259,7 +2266,8 @@ test("HTTP sitemap honors mounted listing edit ledger", async () => {
   const sitemap = await dispatchHttp(createHttpApp({ listingEditLedgerPath }), { url: "/sitemap.xml" });
 
   assert.equal(sitemap.status, 200);
-  assert.match(sitemap.body, /\/he\/locations\/runtime-only-city/);
+  assert.doesNotMatch(sitemap.body, /\/he\/locations\/runtime-only-city/);
+  assert.match(sitemap.body, /\/he\/locations\/sandanski/);
 });
 
 test("HTTP app rejects unknown buyer listing references", async () => {
@@ -2565,6 +2573,107 @@ test("HTTP credentialed seller outcomes cannot spoof the workflow actor", async 
     assert.equal(readSellerPipelineOutcomes(sellerPipelineOutcomeLedgerPath)[0].actor, "broker_bg");
     assert.equal(readAuditLog(auditLogPath).at(-1).actor, "broker_bg");
     assert.equal(inbox.body.workspace.operator_id, "broker_bg");
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
+
+test("HTTP public approval handlers bind reviewers and require confirmation", async () => {
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.MS_REALTY_ADMIN_TOKEN;
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "media_editor", token: "media-editor-production-token-0123456789", roles: ["admin"] },
+    ]);
+
+    const auditLogPath = tempAuditLog();
+    const app = createHttpApp({
+      auditLogPath,
+      brokerContactLedgerPath: tempBrokerContacts(),
+      tourApprovalLedgerPath: tempTourApprovals(),
+      reviewedAt: "2026-07-29T10:05:00Z",
+    });
+    const headers = { authorization: "Bearer media-editor-production-token-0123456789" };
+    const contact = {
+      id: "credentialed-broker-contact",
+      listingId: "MS-CRAWL-0001",
+      broker: "broker_bg",
+      phone: "+359880000000",
+      approved: true,
+    };
+    const spoofedContact = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/broker-contacts",
+      headers,
+      body: { ...contact, reviewer: "someone_else" },
+    });
+    const unconfirmedContact = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/broker-contacts",
+      headers,
+      body: { ...contact, approved: false },
+    });
+    const savedContact = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/broker-contacts",
+      headers,
+      body: contact,
+    });
+    const tour = {
+      id: "credentialed-tour-approval",
+      listingId: "MS-CRAWL-0001",
+      panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      reviewConfirmed: true,
+    };
+    const spoofedTour = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/tours/approve",
+      headers,
+      body: { ...tour, reviewer: "someone_else" },
+    });
+    const unconfirmedTour = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/tours/approve",
+      headers,
+      body: { ...tour, reviewConfirmed: false },
+    });
+    const savedTour = await dispatchHttp(app, {
+      method: "POST",
+      url: "/api/admin/tours/approve",
+      headers,
+      body: tour,
+    });
+
+    assert.equal(spoofedContact.status, 400);
+    assert.match(spoofedContact.body.message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedContact.status, 400);
+    assert.match(unconfirmedContact.body.message, /explicitly approved/);
+    assert.equal(savedContact.status, 201);
+    assert.equal(savedContact.body.reviewer, "media_editor");
+    assert.equal(spoofedTour.status, 400);
+    assert.match(spoofedTour.body.message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedTour.status, 400);
+    assert.match(unconfirmedTour.body.message, /explicit human confirmation/);
+    assert.equal(savedTour.status, 201);
+    assert.equal(savedTour.body.reviewer, "media_editor");
+    assert.deepEqual(
+      readAuditLog(auditLogPath).map((row) => [row.action, row.actor]),
+      [
+        ["broker_contact_approved", "media_editor"],
+        ["tour_approved", "media_editor"],
+      ],
+    );
   } finally {
     for (const [key, value] of Object.entries(previous)) {
       if (value === undefined) delete process.env[key];

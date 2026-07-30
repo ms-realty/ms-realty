@@ -68,6 +68,7 @@ test("360 tour approval rows are tied to known listings and latest public review
       panoramaUrl: "https://cdn.example.test/panorama-first.jpg",
       accessibilityCaption: "First reviewed 360 panorama.",
       reviewer: "media_editor",
+      reviewConfirmed: true,
     },
     "2026-07-05T00:00:00Z",
   );
@@ -79,12 +80,23 @@ test("360 tour approval rows are tied to known listings and latest public review
       panoramaUrl: "https://cdn.example.test/panorama-second.jpg",
       accessibilityCaption: "Second reviewed 360 panorama.",
       reviewer: "media_editor",
+      reviewConfirmed: true,
     },
     "2026-07-05T00:01:00Z",
   );
 
   assert.equal(assertTourApprovals([first, second]), true);
   assert.equal(latestTourForListing([first, second], "MS-CRAWL-0001").panorama_url, "https://cdn.example.test/panorama-second.jpg");
+  assert.throws(
+    () =>
+      createTourApproval(seed, {
+        listingId: "MS-CRAWL-0001",
+        panoramaUrl: "https://cdn.example.test/panorama.jpg",
+        accessibilityCaption: "Reviewed 360 panorama.",
+        reviewer: "media_editor",
+      }),
+    /explicit human confirmation/,
+  );
   assert.throws(
     () =>
       createTourApproval(seed, {

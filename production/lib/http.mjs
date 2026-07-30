@@ -7,6 +7,7 @@ import { DEFAULT_TRANSLATION_LEDGER_PATH } from "./translation-ledger.mjs";
 import { hermesBackendStatus, setHermesBackend } from "./hermes-backend.mjs";
 import { renderAdminHermesPage } from "./admin-hermes-page.mjs";
 import { readThroughCached } from "./file-cache.mjs";
+import { renderMcpResponse } from "./mcp-server.mjs";
 import { clientIpFromHeaders, createRateLimiter } from "./rate-limit.mjs";
 import { CONTENT_SECURITY_POLICY, securityHeaders } from "./security-headers.mjs";
 import { crossOriginWriteRejection, readHeader, requestHost } from "./request-guard.mjs";
@@ -934,6 +935,25 @@ export function createHttpApp({
       : null;
   return async function handle(request) {
     const url = new URL(request.url, "http://localhost");
+    if (url.pathname === "/mcp") {
+      const headers = new Headers();
+      for (const [name, value] of Object.entries(request.headers || {})) {
+        if (value !== undefined) headers.set(name, Array.isArray(value) ? value.join(", ") : String(value));
+      }
+      const method = String(request.method || "GET").toUpperCase();
+      const mcpResponse = await renderMcpResponse(
+        new Request(`http://ms-realty.local${url.pathname}${url.search}`, {
+          method,
+          headers,
+          ...(!["GET", "HEAD"].includes(method) && request.body ? { body: request.body } : {}),
+        }),
+      );
+      return {
+        status: mcpResponse.status,
+        headers: Object.fromEntries(mcpResponse.headers.entries()),
+        body: await mcpResponse.text(),
+      };
+    }
     const auth = request.headers?.authorization || request.headers?.Authorization || "";
     const crossOrigin = crossOriginWriteRejection(request.method, request.headers);
     if (crossOrigin) {
@@ -2645,7 +2665,8 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/broker-contacts") {
       if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
-        const contact = createBrokerContact(parseJsonBody(request), { reviewedAt });
+        const input = bindAuthenticatedOperator(parseJsonBody(request), principal, ["reviewer"]);
+        const contact = createBrokerContact(input, { reviewedAt });
         const persisted = appendBrokerContact(contact, { filePath: brokerContactLedgerPath || undefined });
         recordAudit({
           action: "broker_contact_approved",
@@ -2663,7 +2684,8 @@ export function createHttpApp({
     if (request.method === "POST" && url.pathname === "/api/admin/tours/approve") {
       if (!resolveAdminPrincipal(auth, process.env, readHeader(request.headers, "cookie"))) return adminUnauthorized();
       try {
-        const tour = appendTourApproval(createTourApproval(seed, parseBody(request), reviewedAt), {
+        const input = bindAuthenticatedOperator(parseBody(request), principal, ["reviewer"]);
+        const tour = appendTourApproval(createTourApproval(seed, input, reviewedAt), {
           filePath: tourApprovalLedgerPath || undefined,
         });
         recordAudit({

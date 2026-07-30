@@ -467,24 +467,84 @@ function typesenseLiteral(value) {
   return `\`${String(value).replace(/\\/g, "\\\\").replace(/`/g, "\\`")}\``;
 }
 
-function typesensePublicFilter(localeCodes) {
+function publicSearchFilterValues(filters = {}) {
+  const text = (value) => String(value || "").trim();
+  const number = (value) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+  return {
+    municipality: text(filters.municipality),
+    property_type: text(filters.property_type),
+    offer_type: text(filters.offer_type),
+    price_min: number(filters.price_min),
+    price_max: number(filters.price_max),
+    bedrooms_min: number(filters.bedrooms_min),
+    area_min: number(filters.area_min),
+    area_max: number(filters.area_max),
+  };
+}
+
+function typesensePublicFilter(localeCodes, filters) {
   const localeFilter = localeCodes.map((locale) => `locale:=${typesenseLiteral(locale)}`).join(" || ");
-  return [
+  const values = publicSearchFilterValues(filters);
+  const clauses = [
     "translation_indexable:=true",
     "translation_human_approved:=true",
     "locale_is_indexable:=true",
     localeCodes.length === 1 ? localeFilter : `(${localeFilter})`,
-  ].join(" && ");
+  ];
+  if (values.municipality) {
+    clauses.push(
+      `municipality:=${typesenseLiteral(values.municipality)}`,
+      "country_code:=`BG`",
+      "location_review_status:=`confirmed_settlement`",
+    );
+  }
+  for (const field of ["property_type", "offer_type"]) {
+    if (values[field]) clauses.push(`${field}:=${typesenseLiteral(values[field])}`);
+  }
+  for (const [field, operator] of [
+    ["price_min", "price_eur:>="],
+    ["price_max", "price_eur:<="],
+    ["bedrooms_min", "bedrooms:>="],
+    ["area_min", "area_sqm:>="],
+    ["area_max", "area_sqm:<="],
+  ]) {
+    if (values[field] !== null) clauses.push(`${operator}${values[field]}`);
+  }
+  return clauses.join(" && ");
 }
 
-function meilisearchPublicFilter(localeCodes) {
+function meilisearchPublicFilter(localeCodes, filters) {
   const localeFilter = localeCodes.map((locale) => `locale = ${JSON.stringify(locale)}`).join(" OR ");
-  return [
+  const values = publicSearchFilterValues(filters);
+  const clauses = [
     "translation_indexable = true",
     "translation_human_approved = true",
     "locale_is_indexable = true",
     localeCodes.length === 1 ? localeFilter : `(${localeFilter})`,
-  ].join(" AND ");
+  ];
+  if (values.municipality) {
+    clauses.push(
+      `municipality = ${JSON.stringify(values.municipality)}`,
+      'country_code = "BG"',
+      'location_review_status = "confirmed_settlement"',
+    );
+  }
+  for (const field of ["property_type", "offer_type"]) {
+    if (values[field]) clauses.push(`${field} = ${JSON.stringify(values[field])}`);
+  }
+  for (const [field, operator] of [
+    ["price_min", "price_eur >="],
+    ["price_max", "price_eur <="],
+    ["bedrooms_min", "bedrooms >="],
+    ["area_min", "area_sqm >="],
+    ["area_max", "area_sqm <="],
+  ]) {
+    if (values[field] !== null) clauses.push(`${operator} ${values[field]}`);
+  }
+  return clauses.join(" AND ");
 }
 
 export async function queryPublicSearch({
@@ -492,6 +552,7 @@ export async function queryPublicSearch({
   meilisearch = {},
   q = "",
   localeCodes,
+  filters = {},
   perPage = 250,
   fetchImpl = globalThis.fetch,
 } = {}) {
@@ -505,7 +566,7 @@ export async function queryPublicSearch({
       const result = await queryTypesense({
         ...typesense,
         q,
-        filterBy: typesensePublicFilter(normalizedLocales),
+        filterBy: typesensePublicFilter(normalizedLocales, filters),
         perPage,
         fetchImpl,
       });
@@ -529,7 +590,7 @@ export async function queryPublicSearch({
       const result = await queryMeilisearch({
         ...meilisearch,
         q,
-        filter: meilisearchPublicFilter(normalizedLocales),
+        filter: meilisearchPublicFilter(normalizedLocales, filters),
         limit: perPage,
         fetchImpl,
       });

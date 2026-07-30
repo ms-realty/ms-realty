@@ -229,6 +229,7 @@ const smoke = {
       panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
       accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
       reviewer: "media_editor",
+      reviewConfirmed: true,
     },
   }),
   listingAfterTourApproval: await dispatchHttp(app, { url: "/he/properties/MS-CRAWL-0001" }),

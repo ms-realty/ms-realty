@@ -24,6 +24,7 @@ DEFAULT_ARTIFACT = ROOT / "migration" / "artifacts" / "20260704-211155"
 OUT_DIR = ROOT / "search" / "data"
 LOCALE_REGISTRY = ROOT / "locales" / "registry.json"
 LISTING_EDITS_LEDGER = ROOT / "production" / "data" / "listing-edits.jsonl"
+LOCATION_REVIEWS = ROOT / "production" / "data" / "location-reviews.json"
 
 
 LOCATION_PATTERNS = [
@@ -144,6 +145,41 @@ def load_listing_edits(path: Path = LISTING_EDITS_LEDGER) -> list[dict[str, obje
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+
+
+def load_location_reviews(path: Path = LOCATION_REVIEWS) -> dict[str, object]:
+    with path.open(encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def reviewed_location_fields(listing_id: str, legacy_location: str, reviews: dict[str, object]) -> dict[str, object]:
+    statuses = reviews.get("listing_statuses", {})
+    status_row = statuses.get(listing_id, {}) if isinstance(statuses, dict) else {}
+    overrides = reviews.get("listing_overrides", {})
+    defaults = reviews.get("legacy_defaults", {})
+    place_key = status_row.get("place") or (overrides.get(listing_id) if isinstance(overrides, dict) else None)
+    if not place_key and isinstance(defaults, dict):
+        place_key = defaults.get(legacy_location)
+    places = reviews.get("places", {})
+    place = places.get(place_key, {}) if isinstance(places, dict) else {}
+    if place_key and not place:
+        raise ValueError(f"Unknown reviewed location place: {place_key}")
+
+    municipality = place.get("municipality", {}) if isinstance(place, dict) else {}
+    settlement = place.get("settlement", {}) if isinstance(place, dict) else {}
+    status = status_row.get("status") if isinstance(status_row, dict) else None
+    if not status:
+        status = "confirmed_settlement" if settlement and place.get("country_code") == "BG" else "confirmed_foreign_settlement" if settlement else "legacy_area_only"
+    return {
+        "location": textish(place.get("location_name")) or legacy_location,
+        "location_native": textish(place.get("location_native")),
+        "location_legacy": legacy_location,
+        "municipality": textish(municipality.get("name")),
+        "municipality_code": textish(municipality.get("code")),
+        "country_code": textish(place.get("country_code")),
+        "settlement_ekatte": textish(settlement.get("ekatte")),
+        "location_review_status": str(status),
+    }
 
 
 def path_from_env(name: str, default: Path) -> Path:
@@ -296,11 +332,18 @@ def apply_listing_edits(docs: list[dict[str, object]], edits: list[dict[str, obj
         ):
             if field in patch:
                 doc[field] = patch[field]
-        doc["search_text"] = search_text(doc.get("title"), doc.get("description"), doc.get("h1"))
+        doc["search_text"] = search_text(
+            doc.get("title"),
+            doc.get("description"),
+            doc.get("h1"),
+            doc.get("location"),
+            doc.get("location_native"),
+            doc.get("municipality"),
+        )
     return docs
 
 
-def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[dict[str, object]]:
+def load_listing_docs(artifact_dir: Path, registry: dict[str, object], reviews: dict[str, object]) -> list[dict[str, object]]:
     metadata_path = artifact_dir / "metadata-inventory.csv"
     if not metadata_path.exists():
         raise FileNotFoundError(f"Missing metadata export: {metadata_path}")
@@ -332,8 +375,7 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
             locale_is_indexable = locale in indexable_locales
             thumbnail = thumbnails.get(url, {})
 
-            docs.append(
-                {
+            document = {
                     "id": extract_reference(url, len(docs) + 1),
                     "url": url,
                     "canonical": textish(row.get("canonical")),
@@ -361,8 +403,17 @@ def load_listing_docs(artifact_dir: Path, registry: dict[str, object]) -> list[d
                     "schema_present": row.get("schema_present") == "true",
                     "source_sitemap": textish(row.get("sitemap_source")),
                     "search_text": search_text(title, description, h1),
-                }
+            }
+            document.update(reviewed_location_fields(str(document["id"]), textish(document["location"]), reviews))
+            document["search_text"] = search_text(
+                title,
+                description,
+                h1,
+                document["location"],
+                document["location_native"],
+                document["municipality"],
             )
+            docs.append(document)
 
     return docs
 
@@ -398,6 +449,13 @@ def write_typesense_schema(path: Path) -> None:
             {"name": "title", "type": "string"},
             {"name": "description", "type": "string", "optional": True},
             {"name": "location", "type": "string", "facet": True, "optional": True},
+            {"name": "location_native", "type": "string", "optional": True},
+            {"name": "location_legacy", "type": "string", "optional": True},
+            {"name": "municipality", "type": "string", "facet": True, "optional": True},
+            {"name": "municipality_code", "type": "string", "facet": True, "optional": True},
+            {"name": "country_code", "type": "string", "facet": True, "optional": True},
+            {"name": "settlement_ekatte", "type": "string", "facet": True, "optional": True},
+            {"name": "location_review_status", "type": "string", "facet": True},
             {"name": "property_type", "type": "string", "facet": True},
             {"name": "offer_type", "type": "string", "facet": True},
             {"name": "bedrooms", "type": "int32", "facet": True, "optional": True},
@@ -418,7 +476,7 @@ def write_typesense_schema(path: Path) -> None:
 
 def write_meili_settings(path: Path) -> None:
     settings = {
-        "searchableAttributes": ["title", "description", "h1", "search_text", "location"],
+        "searchableAttributes": ["title", "description", "h1", "search_text", "location", "location_native", "municipality"],
         "filterableAttributes": [
             "source_listing_id",
             "search_document_type",
@@ -433,6 +491,11 @@ def write_meili_settings(path: Path) -> None:
             "translation_human_approved",
             "translation_indexable",
             "location",
+            "municipality",
+            "municipality_code",
+            "country_code",
+            "settlement_ekatte",
+            "location_review_status",
             "property_type",
             "offer_type",
             "bedrooms",
@@ -456,9 +519,11 @@ def main() -> int:
 
     locale_registry_path = path_from_env("MS_REALTY_LOCALE_REGISTRY_PATH", LOCALE_REGISTRY)
     listing_edits_path = path_from_env("MS_REALTY_LISTING_EDIT_LEDGER_PATH", LISTING_EDITS_LEDGER)
+    location_reviews_path = path_from_env("MS_REALTY_LOCATION_REVIEWS_PATH", LOCATION_REVIEWS)
     registry = load_locale_registry(locale_registry_path)
     listing_edits = load_listing_edits(listing_edits_path)
-    source_docs = apply_listing_edits(load_listing_docs(args.artifact_dir, registry), listing_edits)
+    location_reviews = load_location_reviews(location_reviews_path)
+    source_docs = apply_listing_edits(load_listing_docs(args.artifact_dir, registry, location_reviews), listing_edits)
     if not source_docs:
         raise SystemExit(f"No listing records found in {args.artifact_dir}")
     index_docs = build_index_docs(source_docs, registry)
@@ -475,6 +540,7 @@ def main() -> int:
         "artifact_dir": str(args.artifact_dir),
         "locale_registry_path": str(locale_registry_path),
         "listing_edits_path": str(listing_edits_path),
+        "location_reviews_path": str(location_reviews_path),
         "source_listing_count": len(source_docs),
         "index_document_count": len(index_docs),
         "domains": sorted({str(doc["domain"]) for doc in source_docs}),

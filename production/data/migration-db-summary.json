@@ -1,6 +1,6 @@
 {
   "artifact_id": "20260704-211155",
-  "db_path": "/Users/ivan/Code/MS-Realty/production/data/migration.sqlite",
+  "db_path": "/Users/ivan/Code/MS-Realty-content-audit/production/data/migration.sqlite",
   "tables": {
     "url_inventory": 457,
     "metadata_inventory": 457,

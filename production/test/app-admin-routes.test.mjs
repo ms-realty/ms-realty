@@ -2338,3 +2338,118 @@ test("Next admin replies bind the named production operator before queueing", as
     }
   }
 });
+
+test("Next admin public approvals bind reviewers and require confirmation", async () => {
+  const auditLogPath = tempJsonl("app-admin-public-approval-audit");
+  const previous = {
+    NODE_ENV: process.env.NODE_ENV,
+    MS_REALTY_ADMIN_TOKEN: process.env.MS_REALTY_ADMIN_TOKEN,
+    MS_REALTY_ADMIN_ACTOR: process.env.MS_REALTY_ADMIN_ACTOR,
+    MS_REALTY_ADMIN_CREDENTIALS_JSON: process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON,
+  };
+  try {
+    process.env.NODE_ENV = "production";
+    delete process.env.MS_REALTY_ADMIN_TOKEN;
+    delete process.env.MS_REALTY_ADMIN_ACTOR;
+    process.env.MS_REALTY_ADMIN_CREDENTIALS_JSON = JSON.stringify([
+      { id: "media_editor", token: "next-media-editor-token-0123456789", roles: ["admin"] },
+    ]);
+    const config = appAdminConfigFromEnv({
+      MS_REALTY_AUDIT_LOG_PATH: auditLogPath,
+      MS_REALTY_BROKER_CONTACT_LEDGER_PATH: tempJsonl("app-admin-public-approval-brokers"),
+      MS_REALTY_TOUR_APPROVAL_LEDGER_PATH: tempJsonl("app-admin-public-approval-tours"),
+      MS_REALTY_REVIEWED_AT: "2026-07-29T10:05:00Z",
+    });
+    const headers = {
+      authorization: "Bearer next-media-editor-token-0123456789",
+      "content-type": "application/json",
+    };
+    const contact = {
+      id: "next-credentialed-broker-contact",
+      listingId: "MS-CRAWL-0001",
+      broker: "broker_bg",
+      phone: "+359880000000",
+      approved: true,
+    };
+    const spoofedContact = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/broker-contacts", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...contact, reviewer: "someone_else" }),
+      }),
+      { config },
+    );
+    const unconfirmedContact = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/broker-contacts", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...contact, approved: false }),
+      }),
+      { config },
+    );
+    const savedContact = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/broker-contacts", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(contact),
+      }),
+      { config },
+    );
+    const tour = {
+      id: "next-credentialed-tour-approval",
+      listingId: "MS-CRAWL-0001",
+      panoramaUrl: "https://cdn.example.test/tours/MS-CRAWL-0001.jpg",
+      accessibilityCaption: "Reviewed 360 panorama for MS-CRAWL-0001.",
+      reviewConfirmed: true,
+    };
+    const spoofedTour = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/tours/approve", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...tour, reviewer: "someone_else" }),
+      }),
+      { config },
+    );
+    const unconfirmedTour = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/tours/approve", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ ...tour, reviewConfirmed: false }),
+      }),
+      { config },
+    );
+    const savedTour = await renderAppAdminResponse(
+      new Request("https://example.test/api/admin/tours/approve", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(tour),
+      }),
+      { config },
+    );
+
+    assert.equal(spoofedContact.status, 400);
+    assert.match((await spoofedContact.json()).message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedContact.status, 400);
+    assert.match((await unconfirmedContact.json()).message, /explicitly approved/);
+    assert.equal(savedContact.status, 201);
+    assert.equal((await savedContact.json()).reviewer, "media_editor");
+    assert.equal(spoofedTour.status, 400);
+    assert.match((await spoofedTour.json()).message, /Submitted reviewer must match the authenticated operator/);
+    assert.equal(unconfirmedTour.status, 400);
+    assert.match((await unconfirmedTour.json()).message, /explicit human confirmation/);
+    assert.equal(savedTour.status, 201);
+    assert.equal((await savedTour.json()).reviewer, "media_editor");
+    assert.deepEqual(
+      readAuditLog(auditLogPath).map((row) => [row.action, row.actor]),
+      [
+        ["broker_contact_approved", "media_editor"],
+        ["tour_approved", "media_editor"],
+      ],
+    );
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});

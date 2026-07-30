@@ -4329,8 +4329,8 @@
       "target_locale": "he",
       "target_direction": "rtl",
       "status": "hermes_drafted",
-      "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "77c4047057479ed7f67d11d8c6f7698be1a36e57bfd50e00fc75d7f7e3707709",
+      "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
+      "draft_hash": "b65003967242e46103d3898783b271bac88575705ae1563d26f622f83089314c",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_he",
       "public_indexable": false,
@@ -4340,7 +4340,7 @@
           "role": "translation_draft",
           "sourceLocale": "bg",
           "targetLocale": "he",
-          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nUpdated approved source description.",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
@@ -4394,7 +4394,7 @@
             "object_type": "listing",
             "object_id": "MS-CRAWL-0001",
             "source_locale": "bg",
-            "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+            "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
           }
         },
@@ -4402,7 +4402,7 @@
           "object_type": "listing",
           "object_id": "MS-CRAWL-0001",
           "source_locale": "bg",
-          "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+          "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
         },
         "can_publish": false,
@@ -4417,8 +4417,8 @@
       "target_locale": "he",
       "target_direction": "rtl",
       "status": "approved",
-      "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "77c4047057479ed7f67d11d8c6f7698be1a36e57bfd50e00fc75d7f7e3707709",
+      "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
+      "draft_hash": "b65003967242e46103d3898783b271bac88575705ae1563d26f622f83089314c",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_he",
       "public_indexable": true,
@@ -4428,7 +4428,7 @@
           "role": "translation_draft",
           "sourceLocale": "bg",
           "targetLocale": "he",
-          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nUpdated approved source description.",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
@@ -4482,7 +4482,7 @@
             "object_type": "listing",
             "object_id": "MS-CRAWL-0001",
             "source_locale": "bg",
-            "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+            "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
           }
         },
@@ -4490,7 +4490,7 @@
           "object_type": "listing",
           "object_id": "MS-CRAWL-0001",
           "source_locale": "bg",
-          "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+          "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
         },
         "can_publish": false,
@@ -4508,8 +4508,8 @@
       "target_locale": "el",
       "target_direction": "ltr",
       "status": "hermes_drafted",
-      "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "c3dc0e9cf44f613b1a5cdb33c89857fd6c04a3ce250d8fbbc8fc61fcf05b336f",
+      "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
+      "draft_hash": "a985f39518d2bbadcc01025452a09e18bb9435dd77cd2e6402fd8c1a36ba01dd",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_el",
       "public_indexable": false,
@@ -4519,7 +4519,7 @@
           "role": "translation_draft",
           "sourceLocale": "bg",
           "targetLocale": "el",
-          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nUpdated approved source description.",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
@@ -4573,7 +4573,7 @@
             "object_type": "listing",
             "object_id": "MS-CRAWL-0001",
             "source_locale": "bg",
-            "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+            "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
           }
         },
@@ -4581,7 +4581,7 @@
           "object_type": "listing",
           "object_id": "MS-CRAWL-0001",
           "source_locale": "bg",
-          "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+          "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
         },
         "can_publish": false,
@@ -4596,8 +4596,8 @@
       "target_locale": "el",
       "target_direction": "ltr",
       "status": "published",
-      "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
-      "draft_hash": "c3dc0e9cf44f613b1a5cdb33c89857fd6c04a3ce250d8fbbc8fc61fcf05b336f",
+      "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
+      "draft_hash": "a985f39518d2bbadcc01025452a09e18bb9435dd77cd2e6402fd8c1a36ba01dd",
       "provider_mode": "hermes_draft",
       "reviewer_role": "translator_el",
       "public_indexable": true,
@@ -4607,7 +4607,7 @@
           "role": "translation_draft",
           "sourceLocale": "bg",
           "targetLocale": "el",
-          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nUpdated approved source description.",
+          "sourceText": "Авторемонтна работилница, мотел и ведомствена бензиностанция – дългосрочен наем!\nКомплекс за дългосрочен наем на магистрала София - Кулата, на около 8 км от Сандански, с обособени вход и изход. Имотът е върху парцел от 20 дка и включва мотел с ресторант, офисни помещения, ремонтно хале, бензиностанция и възможност за ТИР паркинг. Мотелът е с разгъната застроена площ 794 кв.м. на два етажа, с ресторант и кухня на първия етаж и 9 стаи със собствени бани на втория. Халето е 600 кв.м. с височина 8-11 м и е оборудвано за ремонт и обслужване на леки и товарни автомобили. Мотелът и ресторантът не работят от няколко години и се нуждаят от освежаване и частична подмяна на мебели. Възможен е наем на отделни части или на целия комплекс.",
           "propertyFacts": {
             "id": "MS-CRAWL-0001",
             "location": "Sandanski",
@@ -4661,7 +4661,7 @@
             "object_type": "listing",
             "object_id": "MS-CRAWL-0001",
             "source_locale": "bg",
-            "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+            "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
             "approved_legal_content": false
           }
         },
@@ -4669,7 +4669,7 @@
           "object_type": "listing",
           "object_id": "MS-CRAWL-0001",
           "source_locale": "bg",
-          "source_hash": "81e1ead4559bde32469f64b3a339b3b6ad67e234adf65bbf7c6677a84ecea048",
+          "source_hash": "75451da6e53051fd5557512df9f78553755d4f968f42a33494b574a37cc06c53",
           "approved_legal_content": false
         },
         "can_publish": false,

@@ -81,6 +81,10 @@ export function normalizeMigrationRecords(artifact = loadCrawlArtifact()) {
       canonical: meta.canonical || "",
       robots_meta: meta.robots_meta || "",
       hreflang: meta.hreflang || "",
+      source_seo: {
+        meta_description: meta.meta_description || "",
+        open_graph: meta.open_graph || "",
+      },
       word_count: Number(meta.word_count || 0),
       image_count: Number(meta.image_count || 0),
       internal_link_count: Number(meta.internal_link_count || 0),

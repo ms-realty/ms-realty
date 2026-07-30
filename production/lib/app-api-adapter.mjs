@@ -249,6 +249,10 @@ function withSearchBackend(result, engineResult) {
   };
 }
 
+function engineResultIsComplete(engineResult) {
+  return !Number.isFinite(engineResult.total) || engineResult.total <= engineResult.hits.length;
+}
+
 async function routeSearch(requestUrl, registry, seed, config) {
   const localeCode = requestUrl.searchParams.get("locale") || "bg";
   const query = requestUrl.searchParams.get("q") || "";
@@ -268,9 +272,10 @@ async function routeSearch(requestUrl, registry, seed, config) {
     ...(config.search || {}),
     q: query,
     localeCodes: engineLocaleCodes(seed, registry, localResult),
+    filters,
   });
   const result =
-    engineResult.engine === "seed_fallback"
+    engineResult.engine === "seed_fallback" || !engineResultIsComplete(engineResult)
       ? localResult
       : searchRuntimeListings(registry, seedForSearchHits(seed, engineResult.hits), {
           localeCode,

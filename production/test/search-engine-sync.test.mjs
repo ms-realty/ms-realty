@@ -86,6 +86,7 @@ test("public search queries Typesense first with only reviewed locale documents"
       meilisearch: { baseUrl, apiKey: "meili-key" },
       q: "Sandanski",
       localeCodes: ["bg"],
+      filters: { municipality: "Sandanski", property_type: "apartment", price_min: "100000", bedrooms_min: "2" },
     });
 
     assert.equal(result.engine, "typesense");
@@ -100,6 +101,12 @@ test("public search queries Typesense first with only reviewed locale documents"
     assert.match(request.searchParams.get("filter_by"), /translation_indexable:=true/);
     assert.match(request.searchParams.get("filter_by"), /translation_human_approved:=true/);
     assert.match(request.searchParams.get("filter_by"), /locale:=`bg`/);
+    assert.match(request.searchParams.get("filter_by"), /municipality:=`Sandanski`/);
+    assert.match(request.searchParams.get("filter_by"), /country_code:=`BG`/);
+    assert.match(request.searchParams.get("filter_by"), /location_review_status:=`confirmed_settlement`/);
+    assert.match(request.searchParams.get("filter_by"), /property_type:=`apartment`/);
+    assert.match(request.searchParams.get("filter_by"), /price_eur:>=100000/);
+    assert.match(request.searchParams.get("filter_by"), /bedrooms:>=2/);
   });
 });
 
@@ -111,6 +118,7 @@ test("public search uses Meilisearch only when Typesense is unavailable", async 
         meilisearch: { baseUrl, apiKey: "meili-key" },
         q: "Sandanski",
         localeCodes: ["bg", "ru"],
+        filters: { municipality: "Sandanski", offer_type: "sale", area_max: "120" },
       });
 
       assert.equal(result.engine, "meilisearch");
@@ -122,6 +130,11 @@ test("public search uses Meilisearch only when Typesense is unavailable", async 
       assert.equal(payload.limit, 250);
       assert.match(payload.filter, /translation_indexable = true/);
       assert.match(payload.filter, /locale = "bg" OR locale = "ru"/);
+      assert.match(payload.filter, /municipality = "Sandanski"/);
+      assert.match(payload.filter, /country_code = "BG"/);
+      assert.match(payload.filter, /location_review_status = "confirmed_settlement"/);
+      assert.match(payload.filter, /offer_type = "sale"/);
+      assert.match(payload.filter, /area_sqm <= 120/);
     },
     { typesenseStatus: 503 },
   );

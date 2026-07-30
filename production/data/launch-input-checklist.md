@@ -70,11 +70,11 @@ Blockers: redirect_reviews, locale_content_parity, media_migration, external_seo
 ## Live Service Provisioning
 
 - Current report evidence:
-- typesense_meilisearch_sync: missing_report (path /Users/ivan/Code/MS-Realty/production/data/search-engine-sync-report.json)
-- typesense_meilisearch_query: missing_report (path /Users/ivan/Code/MS-Realty/production/data/search-engine-query-report.json)
-- hermes_draft_worker: missing_report (path /Users/ivan/Code/MS-Realty/production/data/hermes-draft-worker-report.json)
+- typesense_meilisearch_sync: missing_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-sync-report.json)
+- typesense_meilisearch_query: missing_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/search-engine-query-report.json)
+- hermes_draft_worker: missing_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/hermes-draft-worker-report.json)
 - Current provisioning evidence:
-- blocked_report (path /Users/ivan/Code/MS-Realty/production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
+- blocked_report (path /Users/ivan/Code/MS-Realty-content-audit/production/data/live-service-provisioning-report.json; missing TYPESENSE_URL, TYPESENSE_API_KEY, MEILI_URL, MEILI_API_KEY, HERMES_CHAT_COMPLETIONS_URL, HERMES_API_KEY)
 - Search engines: set `TYPESENSE_URL`, `TYPESENSE_API_KEY`, `MEILI_URL`, and `MEILI_API_KEY`.
 - Hermes Agent: set `HERMES_CHAT_COMPLETIONS_URL` to its internal `/v1/chat/completions` API and set `HERMES_API_KEY`; production Hermes evidence must be authenticated.
 - Hermes runtime: `npm run hermes:runtime` verifies its `/health` endpoint and authenticated `/v1/capabilities` response before any draft-worker evidence is accepted.
@@ -126,7 +126,7 @@ Blockers: redirect_reviews, locale_content_parity, media_migration, external_seo
 ## Production Recovery
 
 - Current gate: blocked
-- Current evidence: missing_report (/Users/ivan/Code/MS-Realty/production/data/production-recovery-report.json)
+- Current evidence: missing_report (/Users/ivan/Code/MS-Realty-content-audit/production/data/production-recovery-report.json)
 - Private report: `production/data/production-recovery-report.json` (ignored)
 - Report example: `production/data/production-recovery-report.json.example`
 - Admin template endpoint: `GET /api/admin/production-recovery-template`
@@ -140,7 +140,7 @@ Blockers: redirect_reviews, locale_content_parity, media_migration, external_seo
 ## Content Quality Warnings
 
 - Current review evidence:
-- missing_review (path /Users/ivan/Code/MS-Realty/migration/reviews/listing-quality.csv; expected 165; reviewed 0; missing 165)
+- missing_review (path /Users/ivan/Code/MS-Realty-content-audit/migration/reviews/listing-quality.csv; expected 165; reviewed 0; missing 165)
 - Pending review sample:
 - MS-CRAWL-0001: area_sqm (missing_area) /admin/listings/edit?listingId=MS-CRAWL-0001
 - MS-CRAWL-0002: area_sqm|public_gallery (missing_area|thin_public_gallery) /admin/listings/edit?listingId=MS-CRAWL-0002
@@ -172,7 +172,7 @@ Blockers: redirect_reviews, locale_content_parity, media_migration, external_seo
 - Admin editor endpoint: `POST /api/admin/listings/edit`
 - Review pack command: `npm run listing:review-pack`.
 - Launch rule: the review CSV must include one valid row for every workbook row; partial CSVs are only for iterative admin imports.
-- structured_data.missing_area: 167
+- structured_data.missing_area: 166
 - structured_data.missing_public_images: 4
 - listing_quality.missing_area: 165
 - listing_quality.thin_public_gallery: 18

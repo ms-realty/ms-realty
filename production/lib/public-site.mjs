@@ -17,10 +17,17 @@ import {
   isTranslationIndexable,
   listingPath,
   locationPath,
+  matchesPublicLocationScope,
+  publicLocationNames,
   sellerPath,
 } from "./seo.mjs";
 import { approvedTranslationRecordsForListing, listingToPublicViewModel } from "./content.mjs";
-import { approvedContentGuideGroups, readApprovedCmsContent } from "./approved-content.mjs";
+import {
+  approvedContentDocumentsForLocation,
+  approvedContentGuideGroups,
+  isPublishableGuide,
+  readApprovedCmsContent,
+} from "./approved-content.mjs";
 import { publicMediaLibrary } from "./media.mjs";
 import { buildListingSchema } from "./structured-data.mjs";
 import { publicTour } from "./tours.mjs";
@@ -51,6 +58,7 @@ const ACTION_LABELS = {
     photo: "снимка",
     photos: "снимки",
     location: "Локация",
+    municipality: "Община",
     propertyType: "Тип",
     area: "Площ (m²)",
     areaMin: "Мин. площ (m²)",
@@ -134,6 +142,7 @@ const ACTION_LABELS = {
     photo: "photo",
     photos: "photos",
     location: "Location",
+    municipality: "Municipality",
     propertyType: "Type",
     area: "Area (m²)",
     areaMin: "Min. area (m²)",
@@ -217,6 +226,7 @@ const ACTION_LABELS = {
     photo: "Foto",
     photos: "Fotos",
     location: "Ort",
+    municipality: "Gemeinde",
     propertyType: "Typ",
     area: "Fläche (m²)",
     areaMin: "Mindestfläche (m²)",
@@ -300,6 +310,7 @@ const ACTION_LABELS = {
     photo: "foto",
     photos: "foto's",
     location: "Locatie",
+    municipality: "Gemeente",
     propertyType: "Type",
     area: "Oppervlakte (m²)",
     areaMin: "Min. oppervlakte (m²)",
@@ -383,6 +394,7 @@ const ACTION_LABELS = {
     photo: "фото",
     photos: "фото",
     location: "Локация",
+    municipality: "Муниципалитет",
     propertyType: "Тип",
     area: "Площадь (м²)",
     areaMin: "Мин. площадь (м²)",
@@ -466,6 +478,7 @@ const ACTION_LABELS = {
     photo: "φωτογραφία",
     photos: "φωτογραφίες",
     location: "Τοποθεσία",
+    municipality: "Δήμος",
     propertyType: "Τύπος",
     area: "Εμβαδόν (m²)",
     areaMin: "Ελάχ. εμβαδόν (m²)",
@@ -549,6 +562,7 @@ const ACTION_LABELS = {
     photo: "תמונה",
     photos: "תמונות",
     location: "מיקום",
+    municipality: "רשות מקומית",
     propertyType: "סוג",
     area: "שטח (מ״ר)",
     areaMin: "שטח מינימלי (מ״ר)",
@@ -762,9 +776,13 @@ export function localizedLocationValue(localeCode, value) {
   return LOCATION_NAMES[localeCode]?.[value] || String(value || "");
 }
 
+function localizedLocationForView(localeCode, view) {
+  return localeCode === "bg" && view.location_native ? view.location_native : localizedLocationValue(localeCode, view.location);
+}
+
 export function localizedSearchFilterValue(localeCode, key, value) {
   if (key === "property_type" || key === "offer_type") return localizedListingValue(localeCode, key, value);
-  if (key === "location") return localizedLocationValue(localeCode, value);
+  if (key === "location" || key === "municipality") return localizedLocationValue(localeCode, value);
   return humanizeIdentifier(value);
 }
 
@@ -875,7 +893,7 @@ const CONTACT_COPY = {
   bg: {
     title: "Свържете се с MS Realty",
     h1: "Свържете се с брокер",
-    description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty.",
+    description: "Изпратете запитване или заявка за обратно обаждане към екипа на MS Realty. За обратно обаждане посочете име, телефон и предпочитано време.",
   },
   en: {
     title: "Contact MS Realty",
@@ -917,6 +935,7 @@ const CHROME_COPY = {
     navRent: "Под наем",
     navSell: "Продайте",
     navContact: "Контакти",
+    buyerGuides: "Ръководства за купувачи",
     explore: "Разгледайте",
     getInTouch: "Свържете се",
     tagline:
@@ -1128,7 +1147,7 @@ function localizedCopy(localeCode, view) {
       description: view.description && view.description !== view.title ? view.description : sourceTitle,
     };
   }
-  const localizedView = { ...view, location: localizedLocationValue(localeCode, view.location) };
+  const localizedView = { ...view, location: localizedLocationForView(localeCode, view) };
   const title = template.title(localizedView);
   return {
     title,
@@ -1138,10 +1157,9 @@ function localizedCopy(localeCode, view) {
 }
 
 function guideDescription(documents) {
-  return documents
-    .flatMap((doc) => doc.facts || [])
-    .join(" ")
-    .slice(0, 240);
+  const facts = documents.flatMap((doc) => doc.facts || []);
+  const description = facts.join(" ");
+  return documents.length === 1 && description.length > 240 ? facts[0] : description.slice(0, 240);
 }
 
 function approvedGuideLinksFor(localeCode, currentPath = null) {
@@ -1243,7 +1261,7 @@ function listingCard(registry, listing, locale) {
     translation_human_approved: state.translation?.human_approved === true,
     source_locale: listing.locale,
     content_locale: copyLocale,
-    location: localizedLocationValue(locale.code, view.location),
+    location: localizedLocationForView(locale.code, view),
     property_type: view.property_type,
     property_type_label: localizedListingValue(locale.code, "property_type", view.property_type),
     offer_type: view.offer_type,
@@ -1324,10 +1342,6 @@ function indexableListingForLocale(registry, listing, locale) {
   return searchTranslationState(registry, listing, locale).indexable;
 }
 
-function locationNamesFromListings(listings) {
-  return [...new Set(listings.map((listing) => listingToPublicViewModel(listing).location).filter(Boolean))].sort();
-}
-
 const CYRILLIC_TO_LATIN = Object.freeze({
   а: "a", б: "b", в: "v", г: "g", д: "d", е: "e", ё: "yo", ж: "zh", з: "z", и: "i", й: "y", к: "k", л: "l", м: "m",
   н: "n", о: "o", п: "p", р: "r", с: "s", т: "t", у: "u", ф: "f", х: "h", ц: "ts", ч: "ch", ш: "sh", щ: "sht",
@@ -1374,7 +1388,18 @@ function queryTokens(query) {
 }
 
 function searchableText(view) {
-  const source = [view.id, view.title, view.h1, view.description, view.location, view.property_type, view.offer_type].join(" ");
+  const source = [
+    view.id,
+    view.title,
+    view.h1,
+    view.description,
+    view.location,
+    view.location_native,
+    view.municipality,
+    view.country_code,
+    view.property_type,
+    view.offer_type,
+  ].join(" ");
   return searchVariants(source).join(" ");
 }
 
@@ -1396,7 +1421,13 @@ function numberFilter(value, min, max) {
 function matchesSearch(view, query, filters = {}) {
   const text = searchableText(view);
   if (!queryTokens(query).every((variants) => variants.some((token) => text.includes(token)))) return false;
-  if (filters.location && !includesSearchValue(view.location, filters.location)) return false;
+  if (filters.location && !includesSearchValue([view.location, view.location_native, view.country_code].join(" "), filters.location)) return false;
+  if (
+    filters.municipality &&
+    (view.country_code !== "BG" || view.location_review_status !== "confirmed_settlement" || norm(view.municipality) !== norm(filters.municipality))
+  ) {
+    return false;
+  }
   if (filters.property_type && norm(view.property_type) !== norm(filters.property_type)) return false;
   if (filters.offer_type && norm(view.offer_type) !== norm(filters.offer_type)) return false;
   if (filters.status && norm(view.listing_status) !== norm(filters.status)) return false;
@@ -1608,7 +1639,7 @@ export function renderListingPage({ registry, listing, localeCode, translations,
       description: copy.description,
       facts: {
         id: view.id,
-        location: localizedLocationValue(locale.code, view.location),
+        location: localizedLocationForView(locale.code, view),
         property_type: view.property_type,
         offer_type: view.offer_type,
         bedrooms: view.bedrooms,
@@ -1684,6 +1715,14 @@ export function renderSearchPage({
   const filterViews = searchableListings.map((listing) => listingToPublicViewModel(listing));
   const filterOptions = {
     locations: [...new Set(filterViews.map((listing) => listing.location).filter(Boolean))].sort(),
+    municipalities: [
+      ...new Set(
+        filterViews
+          .filter((listing) => listing.country_code === "BG" && listing.location_review_status === "confirmed_settlement")
+          .map((listing) => listing.municipality)
+          .filter(Boolean),
+      ),
+    ].sort((left, right) => localizedLocationValue(locale.code, left).localeCompare(localizedLocationValue(locale.code, right))),
     property_types: [...new Set(filterViews.map((listing) => listing.property_type).filter(Boolean))].sort(),
     offer_types: [...new Set(filterViews.map((listing) => listing.offer_type).filter(Boolean))].sort(),
     bedrooms: [...new Set(filterViews.map((listing) => listing.bedrooms).filter((value) => Number.isInteger(value) && value >= 0))].sort((left, right) => left - right),
@@ -1703,7 +1742,7 @@ export function renderSearchPage({
   const cards = sortedListings
     .slice(offset, offset + normalizedPageSize)
     .map((listing) => listingCard(registry, listing, locale));
-  const activeFilterChips = ["location", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
+  const activeFilterChips = ["location", "municipality", "property_type", "offer_type", "price_min", "price_max", "bedrooms_min", "area_min", "area_max", "status"]
     .map((key) => ({ key, value: filters[key] || "", active: Boolean(filters[key]) }))
     .filter((chip) => chip.active);
 
@@ -1790,10 +1829,10 @@ export function renderHomePage({ registry, localeCode, listings }) {
   const path = homePath(registry, locale.code);
   const copy = homeCopy(locale.code);
   const search = renderSearchPage({ registry, localeCode: locale.code, listings, query: "" });
-  const locations = locationNamesFromListings(listings)
+  const locations = publicLocationNames(listings)
     .map((location) => {
       const page = renderLocationPage({ registry, localeCode: locale.code, location, listings });
-      return page.indexable
+      return page.status === 200
         ? {
             location: localizedLocationValue(locale.code, location),
             path: page.path,
@@ -1909,7 +1948,7 @@ export function renderContactPage({ registry, localeCode }) {
 export function renderGuidePage({ registry, localeCode, path, documents }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
-  const docs = documents.filter((doc) => doc.status === "approved" && doc.locale === locale.code);
+  const docs = documents.filter((doc) => isPublishableGuide(doc) && doc.locale === locale.code);
   const first = docs[0];
   if (!first) return { kind: "not_found", status: 404, path, indexable: false };
   const indexable = resolved.available && locale.public_enabled && locale.indexable;
@@ -1946,6 +1985,8 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
         title: doc.title,
         facts: doc.facts,
         reviewer: doc.reviewer,
+        sources_label: doc.sources_label || "",
+        sources: doc.sources || [],
       })),
       ctas: {
         search: { path: `/${locale.code}/${locale.route_segments.search}` },
@@ -1957,10 +1998,15 @@ export function renderGuidePage({ registry, localeCode, path, documents }) {
 }
 
 function locationPageCopy(localeCode, location) {
+  const bgDescriptions = {
+    Сандански: "Проверени обяви на MS Realty в Сандански и официални източници за кадастър, Имотен регистър и удостоверения.",
+    Хотово: "Проверени обяви на MS Realty в Хотово. Община Сандански посочва, че селото е в западното подножие на Среден Пирин.",
+    Петрич: "Проверени обяви на MS Realty в Петрич. Община Петрич посочва, че територията ѝ е в южната част на Санданско-Петричката котловина.",
+  };
   const copy = {
     bg: {
       title: `Имоти в ${location} | MS Realty`,
-      description: `Проверени обяви на MS Realty за имоти в ${location}.`,
+      description: bgDescriptions[location] || `Проверени обяви на MS Realty за имоти в ${location}.`,
       heading: `Имоти в ${location}`,
     },
     en: {
@@ -2000,25 +2046,46 @@ function locationPageCopy(localeCode, location) {
 export function renderLocationPage({ registry, localeCode, location, listings }) {
   const resolved = resolvePublicLocale(registry, localeCode);
   const locale = resolved.locale;
-  const matchedListings = listings.filter((listing) => {
+  const localizedMatches = listings.filter((listing) => {
     const view = listingToPublicViewModel(listing);
-    return norm(view.location) === norm(location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, locale);
+    return matchesPublicLocationScope(view, location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, locale);
   });
+  const fallbackLocale = locale.fallback_locale || registry.source_locale;
+  const fallbackMatches = listings.filter((listing) => {
+    const view = listingToPublicViewModel(listing);
+    return (
+      matchesPublicLocationScope(view, location) &&
+      isActiveListing(listing) &&
+      (listing.locale === fallbackLocale || listing.locale === registry.source_locale)
+    );
+  });
+  const matchedListings = localizedMatches.length ? localizedMatches : fallbackMatches;
   const path = locationPath(registry, locale.code, location);
-  const indexable = resolved.available && matchedListings.length > 0;
+  const indexable = resolved.available && localizedMatches.length > 0;
+  const hasInventory = matchedListings.length > 0;
   const copy = locationPageCopy(locale.code, localizedLocationValue(locale.code, location));
+  const contextGuide = indexable
+    ? approvedContentDocumentsForLocation(readApprovedCmsContent(), location, locale.code)[0]
+    : null;
+  const context = contextGuide?.facts?.[0]
+    ? {
+        href: contextGuide.path,
+        title: contextGuide.title,
+        summary: contextGuide.facts[0],
+      }
+    : null;
   const locales = publicIndexableLocales(registry)
     .filter((candidate) =>
       listings.some((listing) => {
         const view = listingToPublicViewModel(listing);
-        return norm(view.location) === norm(location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, candidate);
+        return matchesPublicLocationScope(view, location) && isActiveListing(listing) && indexableListingForLocale(registry, listing, candidate);
       }),
     )
     .map((candidate) => candidate.code);
 
   return {
     kind: "location",
-    status: indexable ? 200 : 404,
+    status: hasInventory ? 200 : 404,
     requested_locale: localeCode,
     locale: locale.code,
     lang: locale.code,
@@ -2037,6 +2104,7 @@ export function renderLocationPage({ registry, localeCode, location, listings })
       h1: copy.heading,
       location,
       listing_count: matchedListings.length,
+      ...(context ? { context } : {}),
     },
     cards: matchedListings.slice(0, 12).map((listing) => listingCard(registry, listing, locale)),
   };

@@ -88,6 +88,34 @@
               "type": "text"
             },
             {
+              "name": "location_native",
+              "type": "text"
+            },
+            {
+              "name": "location_legacy",
+              "type": "text"
+            },
+            {
+              "name": "municipality",
+              "type": "text"
+            },
+            {
+              "name": "municipality_code",
+              "type": "text"
+            },
+            {
+              "name": "country_code",
+              "type": "text"
+            },
+            {
+              "name": "settlement_ekatte",
+              "type": "text"
+            },
+            {
+              "name": "location_review_status",
+              "type": "text"
+            },
+            {
               "name": "property_type",
               "type": "text"
             },
